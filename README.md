@@ -1,11 +1,5 @@
-# outputs/
+# frontend/
 
-The JSON files the frontend reads. Written by the engines each run (via core/outputs.py).
-In static-first v0 these are committed to the repo and served by GitHub Pages.
-Same shapes become live API responses in Phase 2.
-
-- `macro.json` — regime, confidence, stat boxes
-- `industries.json` — ranked industries
-- `stocks.json` — scored universe
-- `gex.json` — net GEX, flip, walls, greeks
-- `meta.json` — freshness, source flags, warnings (always present)
+The dashboard. Reads outputs/*.json and renders — NO calculation here.
+Migration: the current MacroFlow_Command_Dashboard.html moves here and is
+modified to fetch() the JSON instead of having data baked in (Stage C).
