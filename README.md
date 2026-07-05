@@ -1,27 +1,11 @@
-# Project Phoenix — Trading Operating System
+# outputs/
 
-MacroFlow's evolution from an AI-refreshed dashboard into a self-running trading OS.
-Claude is the final intelligence layer (PM / Risk / Research / Coach), never the plumbing.
+The JSON files the frontend reads. Written by the engines each run (via core/outputs.py).
+In static-first v0 these are committed to the repo and served by GitHub Pages.
+Same shapes become live API responses in Phase 2.
 
-## Architecture (four layers)
-- **Data Collection** (`data/`) — dumb pipes. IBKR / FRED / yfinance. Source-abstracted, degrades gracefully.
-- **Decision Engines** (`engines/`) — pure functions, no AI, no I/O. Input data → output scores.
-- **Backend** (`core/`) — scheduler, database, JSON output writer.
-- **Frontend** (`frontend/`) — reads JSON, renders. No calculation.
-
-## How v0 runs (static-first, free)
-```
-6am → GitHub Actions → run.py --full → engines → outputs/*.json → commit → GitHub Pages serves it
-```
-No server, no monthly cost. See `docs/ARCHITECTURE.md` for the full blueprint.
-
-## Quick start (local)
-```bash
-pip install -r requirements.txt
-python run.py --full        # run the whole pipeline
-python run.py --engine gex  # run one engine
-python -m pytest tests/     # run tests
-```
-
-## Status
-Scaffold stage. Building: Stock Engine (Track 1) + GEX vertical slice (Track 2).
+- `macro.json` — regime, confidence, stat boxes
+- `industries.json` — ranked industries
+- `stocks.json` — scored universe
+- `gex.json` — net GEX, flip, walls, greeks
+- `meta.json` — freshness, source flags, warnings (always present)
