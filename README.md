@@ -15,4 +15,5 @@ layout later (via Working Copy or a computer).
 - `outputs/`         — the JSON the dashboard reads (created on first run)
 - `.github/workflows/daily.yml` — the 6am scheduled run
 
-Status: scaffold runs clean. Next: port GEX (Track 2) + Stock engine (Track 1).
+Status: scaffold runs clean. Next: port GEX (Track 2) + Stock engine (Track 1). 
+ 
