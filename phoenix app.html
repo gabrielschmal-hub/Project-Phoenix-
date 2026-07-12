@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+<meta name="theme-color" content="#14120C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Phoenix">
+<title>Phoenix</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+  :root{
+    --bg:#F4EFE6; --card:#FAF7F2; --card2:#F0EBE0; --line:#DDD5C0; --line2:#C8BFA8;
+    --ink:#1C1912; --inkMed:#3D3828; --inkLight:#6B6347; --inkFade:#9A9178; --inkGhost:#C0B89A;
+    --gold:#A67C00; --green:#1A5C38; --greenSoft:#2D8A55; --greenBg:#EBF5EF;
+    --red:#7A1E1E; --redSoft:#B03030; --redBg:#F5EBEB; --amber:#7A4E00; --amberBg:#F5F0E0;
+    --rail:#14120C; --railHi:#211E14; --railLine:#2E2A1C; --railInk:#B8AE90; --railInkDim:#6E664F;
+    --railActive:#D9A521;
+    --serif:Georgia,'Times New Roman',serif;
+    --mono:'Courier New',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{background:var(--bg);color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased;overflow:hidden;}
+  .app{display:grid;grid-template-columns:200px 1fr;height:100vh;height:100dvh;}
+
+  .rail{background:var(--rail);border-right:1px solid var(--railLine);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);overflow:hidden;}
+  .rail-brand{padding:16px 18px 12px;border-bottom:1px solid var(--railLine);}
+  .rail-brand .mark{font-family:var(--serif);font-size:18px;font-weight:700;color:#F4EFE6;letter-spacing:.3px;}
+  .rail-brand .mark .dot{color:var(--railActive);}
+  .rail-brand .sub{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--railInkDim);text-transform:uppercase;margin-top:2px;}
+  .rail-nav{flex:1;overflow-y:auto;padding:6px 0;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 18px;cursor:pointer;font-family:var(--mono);font-size:11.5px;letter-spacing:.5px;color:var(--railInk);border-left:2px solid transparent;user-select:none;transition:background .12s,color .12s;}
+  .nav-item .ico{width:14px;text-align:center;font-size:12px;opacity:.85;}
+  .nav-item:hover{background:var(--railHi);color:#EDE7D4;}
+  .nav-item.active{background:var(--railHi);color:#F4EFE6;border-left-color:var(--railActive);}
+  .nav-item.soon{color:var(--railInkDim);cursor:default;}
+  .nav-item.soon:hover{background:transparent;color:var(--railInkDim);}
+  .nav-item.soon .tag{margin-left:auto;font-size:7px;letter-spacing:1px;color:var(--railInkDim);border:1px solid var(--railLine);border-radius:3px;padding:1px 4px;}
+  .rail-foot{border-top:1px solid var(--railLine);padding:10px 18px;font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--railInkDim);}
+
+  .main{display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+  .topbar{display:flex;align-items:center;gap:14px;background:var(--card);border-bottom:1px solid var(--line2);padding:0 20px;padding-top:env(safe-area-inset-top);min-height:48px;flex-shrink:0;}
+  .regime-strip{display:flex;align-items:center;gap:9px;}
+  .regime-dot{width:8px;height:8px;border-radius:50%;background:var(--inkLight);flex-shrink:0;}
+  .regime-strip .lbl{font-family:var(--mono);font-size:8.5px;letter-spacing:1.5px;color:var(--inkFade);text-transform:uppercase;}
+  .regime-strip .val{font-family:var(--serif);font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.3px;}
+  .regime-strip .conf{font-family:var(--mono);font-size:9.5px;color:var(--inkLight);}
+  .topbar .spacer{flex:1;}
+  .topbar .asof{font-family:var(--mono);font-size:9px;color:var(--inkFade);letter-spacing:.5px;}
+  .topbar .acct{font-family:var(--mono);font-size:10.5px;color:var(--ink);background:var(--card2);border:1px solid var(--line2);border-radius:4px;padding:4px 8px;}
+
+  .page-host{flex:1;overflow:hidden;min-height:0;}
+  .page{display:none;height:100%;}
+  .page.active{display:block;}
+  .page.pad{padding:18px 20px;overflow-y:auto;}
+
+  .mkt-grid{display:grid;height:100%;gap:10px;padding:12px;grid-template-columns:1.6fr 1fr 1fr;
+    grid-template-areas:"assets assets assets" "spx regime gex" "spx vix vix" "sector sector top" "cal cal cal";
+    grid-template-rows:auto minmax(0,1.3fr) minmax(0,0.95fr) minmax(0,1.1fr) minmax(0,0.5fr);overflow:hidden;}
+  .a-assets{grid-area:assets;}
+  /* asset band: compact value+change cells */
+  .asset-band{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+  .asset-cell{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:8px 11px;
+              display:flex;flex-direction:column;gap:2px;position:relative;overflow:hidden;}
+  .asset-cell .an{font-family:var(--mono);font-size:8.5px;letter-spacing:1px;color:var(--inkFade);text-transform:uppercase;}
+  .asset-cell .av{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--ink);line-height:1.1;}
+  .asset-cell .ac{font-family:var(--mono);font-size:10px;font-weight:700;}
+  .asset-cell .accent{position:absolute;left:0;top:0;bottom:0;width:3px;}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:11px 13px;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+  .tile > .thead{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;flex-shrink:0;}
+  .tile .ttl{font-family:var(--mono);font-size:9.5px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;}
+  .tile .tnote{margin-left:auto;font-family:var(--mono);font-size:8.5px;color:var(--inkFade);letter-spacing:.5px;}
+  .tile .tbody{flex:1;min-height:0;position:relative;}
+  .a-spx{grid-area:spx;} .a-regime{grid-area:regime;} .a-gex{grid-area:gex;}
+  .a-vix{grid-area:vix;} .a-sector{grid-area:sector;} .a-top{grid-area:top;} .a-cal{grid-area:cal;}
+  .plot{position:absolute;inset:0;}
+
+  .rg-name{font-family:var(--serif);font-size:23px;font-weight:700;line-height:1.05;margin-bottom:5px;}
+  .rg-desc{font-family:var(--serif);font-size:11.5px;color:var(--inkMed);line-height:1.45;}
+  .rg-conf{font-family:var(--mono);font-size:9px;color:var(--inkLight);margin-top:7px;}
+  .rg-inputs{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;padding-top:8px;}
+  .rg-inp{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;}
+  .rg-inp .k{color:var(--inkFade);} .rg-inp .v{font-weight:700;}
+
+  .gex-hero{display:flex;align-items:baseline;gap:8px;margin-bottom:2px;}
+  .gex-net{font-family:var(--mono);font-size:22px;font-weight:700;}
+  .gex-reg{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:3px;}
+  .gex-rows{margin-top:8px;display:flex;flex-direction:column;gap:5px;}
+  .gex-row{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10.5px;padding-bottom:4px;border-bottom:1px solid var(--line);}
+  .gex-row .k{color:var(--inkLight);} .gex-row .v{font-weight:700;color:var(--ink);}
+  .gex-row .sub{color:var(--inkFade);font-size:9px;margin-left:5px;}
+
+  .seg{display:inline-flex;border:1px solid var(--line2);border-radius:5px;overflow:hidden;margin-left:auto;}
+  .seg button{font-family:var(--mono);font-size:9px;letter-spacing:.5px;padding:3px 9px;border:none;background:var(--card);color:var(--inkLight);cursor:pointer;}
+  .seg button.on{background:var(--gold);color:#fff;}
+  .sec-list{overflow-y:auto;height:100%;}
+  .sec-row{display:grid;grid-template-columns:34px 92px 1fr 48px;align-items:center;gap:8px;padding:2.5px 0;font-family:var(--mono);font-size:10px;}
+  .sec-row .tk{font-weight:700;color:var(--ink);}
+  .sec-row .nm{color:var(--inkLight);font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sec-bar-wrap{position:relative;height:12px;background:var(--card2);border-radius:2px;overflow:hidden;}
+  .sec-bar{position:absolute;top:0;bottom:0;}
+  .sec-val{text-align:right;font-weight:700;}
+
+  .top-list{overflow-y:auto;height:100%;}
+  .top-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10.5px;}
+  .top-row .tk{font-weight:700;color:var(--ink);}
+  .top-row .ind{color:var(--inkFade);font-size:8.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
+  .top-row .sc{font-weight:700;text-align:right;}
+  .chip{font-family:var(--mono);font-size:8px;padding:1px 5px;border-radius:3px;letter-spacing:.5px;}
+
+  .cal-strip{display:flex;gap:8px;overflow-x:auto;height:100%;align-items:stretch;padding-bottom:2px;}
+  .cal-card{flex:0 0 auto;min-width:118px;background:var(--card2);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:5px;padding:7px 10px;display:flex;flex-direction:column;gap:2px;}
+  .cal-card.hi{border-left-color:var(--red);}
+  .cal-card.med{border-left-color:var(--amber);}
+  .cal-date{font-family:var(--mono);font-size:9px;color:var(--inkLight);letter-spacing:.5px;}
+  .cal-evt{font-family:var(--serif);font-size:12px;font-weight:700;color:var(--ink);line-height:1.2;}
+  .cal-in{font-family:var(--mono);font-size:8.5px;color:var(--inkFade);margin-top:auto;}
+
+  .loading{font-family:var(--serif);font-size:12px;color:var(--inkLight);padding:14px 2px;text-align:center;}
+  .err{font-family:var(--serif);font-size:11.5px;color:var(--red);line-height:1.5;padding:10px 2px;}
+  .err .fix{color:var(--inkMed);font-size:10px;margin-top:4px;}
+
+  .page-head{margin-bottom:18px;}
+  .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;}
+  .page-title{font-family:var(--serif);font-size:28px;font-weight:700;color:var(--ink);margin:0 0 5px;}
+  .soon-panel{font-family:var(--serif);font-size:14px;color:var(--inkLight);line-height:1.65;background:var(--amberBg);border:1px solid var(--line2);border-left:3px solid var(--amber);border-radius:6px;padding:20px 22px;max-width:64ch;}
+  .soon-panel h3{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--amber);text-transform:uppercase;margin:0 0 10px;}
+  .soon-panel .need{font-family:var(--mono);font-size:11px;color:var(--inkLight);margin-top:12px;padding-top:12px;border-top:1px solid var(--line);}
+
+  .rail-toggle{display:none;}
+  .scrim{display:none;}
+  @media (max-width:900px){
+    .app{grid-template-columns:1fr;}
+    .rail{position:fixed;left:0;top:0;bottom:0;width:200px;z-index:200;transform:translateX(-100%);transition:transform .2s ease;}
+    .rail.open{transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,.3);}
+    .rail-toggle{display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:var(--card2);border:1px solid var(--line2);border-radius:6px;font-size:16px;color:var(--ink);cursor:pointer;}
+    .scrim.show{display:block;position:fixed;inset:0;background:rgba(20,18,12,.4);z-index:150;}
+    .mkt-grid{grid-template-columns:1fr;grid-template-areas:"assets" "spx" "regime" "gex" "vix" "sector" "top" "cal";grid-template-rows:none;grid-auto-rows:minmax(190px,auto);overflow-y:auto;height:100%;}
+    .asset-band{grid-template-columns:repeat(2,1fr);}
+    .a-assets{grid-row:auto;min-height:0 !important;height:auto !important;}
+    .mkt-grid .asset-band{min-height:0;}
+    .topbar .asof{display:none;}
+    .page-title{font-size:24px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="rail" id="rail">
+    <div class="rail-brand"><div class="mark">Phoenix<span class="dot">.</span></div><div class="sub">Investment OS</div></div>
+    <div class="rail-nav" id="railNav"></div>
+    <div class="rail-foot">LAYER 1&ndash;3 &middot; LIVE</div>
+  </nav>
+  <div class="scrim" id="scrim"></div>
+  <div class="main">
+    <div class="topbar">
+      <div class="rail-toggle" id="railToggle">&#9776;</div>
+      <div class="regime-strip">
+        <span class="regime-dot" id="stripDot"></span>
+        <span class="lbl">Regime</span>
+        <span class="val" id="stripRegime">&mdash;</span>
+        <span class="conf" id="stripConf"></span>
+      </div>
+      <div class="spacer"></div>
+      <div class="asof" id="stripAsof"></div>
+      <div class="acct">gabriel</div>
+    </div>
+    <div class="page-host" id="pageHost"></div>
+  </div>
+</div>
+<script>
+(function(){
+  "use strict";
+  var BASE = "https://gabrielschmal-hub.github.io/Project-Phoenix-/outputs/";
+  function url(name){ return (BASE||"") + name + ".json?t=" + Date.now(); }
+  function getJSON(name){ return fetch(url(name)).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); }); }
+
+  var NAV = [
+    {id:"home",     ico:"\u25C7", label:"Home",      live:true},
+    {id:"markets",  ico:"\u25C8", label:"Markets",   live:true},
+    {id:"research", ico:"\u25A7", label:"Research",  live:false, need:"Per-ticker fundamentals + news pipeline"},
+    {id:"screeners",ico:"\u25A6", label:"Screeners", live:false, need:"Folds in the existing Selection engine"},
+    {id:"portfolio",ico:"\u25A4", label:"Portfolio", live:false, need:"IBKR live positions (read-only) \u2014 wireable next"},
+    {id:"trades",   ico:"\u21C4", label:"Trades",    live:false, need:"Trade journal + execution log"},
+    {id:"news",     ico:"\u25B0", label:"News",      live:false, need:"News + institutional-flow APIs"},
+    {id:"cio",      ico:"\u2726", label:"CIO",       live:false, need:"Briefing engine over all modules"},
+    {id:"settings", ico:"\u2699", label:"Settings",  live:false, need:"Preferences + data-source config"}
+  ];
+
+  var REGIME_INFO = {
+    GOLDILOCKS:{c:"var(--green)",bg:"var(--greenBg)",d:"Low vol, steady equity gains, contained inflation. Risk-on backdrop."},
+    ENERGY_GRIND:{c:"var(--amber)",bg:"var(--amberBg)",d:"Sustained oil strength feeding into inflation. Favors energy / real assets."},
+    ENERGY_SPIKE:{c:"var(--red)",bg:"var(--redBg)",d:"Sharp oil + vol surge with hot inflation. Defensive, commodity-tilted."},
+    POLICY_TIGHTENING:{c:"var(--amber)",bg:"var(--amberBg)",d:"Rising real rates / front-end yields with markets still near highs."},
+    CRISIS_PEAK:{c:"var(--red)",bg:"var(--redBg)",d:"Deep drawdown with extreme volatility. Capital preservation first."},
+    RECOVERY_EARLY:{c:"var(--greenSoft)",bg:"var(--greenBg)",d:"Bouncing off lows as volatility rolls over. Early risk re-entry."},
+    RECOVERY_LATE:{c:"var(--green)",bg:"var(--greenBg)",d:"Uptrend resuming below prior highs, calm vol, tight credit."},
+    NO_CLEAR:{c:"var(--inkLight)",bg:"var(--card2)",d:"No regime's conditions are currently met. Macro gives no clear edge \u2014 rotation (Layer 2) and selection (Layer 3) carry the weight."}
+  };
+
+  // shared caches
+  var C = {macro:null,series:null,spx:null,sector:null,stocks:null,gex:null,events:null};
+  var built = {}, drawn = {};
+
+  // ---------- nav ----------
+  var railNav = document.getElementById("railNav");
+  NAV.forEach(function(n){
+    var el=document.createElement("div");
+    el.className="nav-item"+(n.live?"":" soon"); el.dataset.page=n.id;
+    el.innerHTML='<span class="ico">'+n.ico+'</span>'+n.label+(n.live?'':'<span class="tag">SOON</span>');
+    el.addEventListener("click",function(){ if(n.live) go(n.id); });
+    railNav.appendChild(el);
+  });
+
+  var host=document.getElementById("pageHost");
+  function go(id){
+    if(!built[id]){ buildPage(id); built[id]=true; }
+    Array.prototype.forEach.call(document.querySelectorAll(".page"),function(p){p.classList.toggle("active",p.id==="page-"+id);});
+    Array.prototype.forEach.call(document.querySelectorAll(".nav-item"),function(it){it.classList.toggle("active",it.dataset.page===id);});
+    if(id==="markets") initMarkets();
+    if(id==="home") initHome();
+    closeRail();
+    try{location.hash=id;}catch(e){}
+  }
+
+  function buildPage(id){
+    var p=document.createElement("div"); p.id="page-"+id;
+    if(id==="markets"){ p.className="page"; p.innerHTML=MARKETS_HTML; }
+    else if(id==="home"){ p.className="page pad"; p.innerHTML='<div class="page-head"><div class="eyebrow">Phoenix \u00B7 Mission Control</div><h1 class="page-title">Home</h1></div><div class="loading">Coming next \u2014 a recap of every module.</div>'; }
+    else { p.className="page pad"; p.innerHTML=soonHTML(id); }
+    host.appendChild(p);
+  }
+  function soonHTML(id){
+    var n=NAV.filter(function(x){return x.id===id;})[0]||{};
+    return '<div class="page-head"><div class="eyebrow">Phoenix \u00B7 '+(n.label||id)+'</div><h1 class="page-title">'+(n.label||id)+'</h1></div>'+
+      '<div class="soon-panel"><h3>Not wired yet</h3>This module is part of the Phoenix vision but isn\'t live yet because the data behind it isn\'t flowing. Building it now would mean showing placeholder numbers \u2014 which the system is designed to avoid.<div class="need">Needs: '+(n.need||"a live data source")+'</div></div>';
+  }
+
+  // ---------- topbar regime strip ----------
+  function paintStrip(d){
+    var info=REGIME_INFO[d.regime]||REGIME_INFO.NO_CLEAR;
+    document.getElementById("stripDot").style.background=info.c;
+    document.getElementById("stripRegime").textContent=(d.regime||"\u2014").replace(/_/g," ");
+    document.getElementById("stripConf").textContent=(d.confidence>0?"\u00B7 conf "+d.confidence:"");
+    document.getElementById("stripAsof").textContent=d.asof?("data as of "+d.asof):"";
+  }
+
+  // ================= MARKETS =================
+  var MARKETS_HTML =
+    '<div class="mkt-grid">'+
+      '<div class="a-assets"><div class="asset-band" id="assetBand"><div class="loading" style="grid-column:1/-1">\u2026</div></div></div>'+
+      '<div class="tile a-spx"><div class="thead"><span class="ttl">S&P 500 \u00B7 Daily</span><span class="tnote" id="spxNote"></span></div><div class="tbody"><div class="plot" id="spxPlot"></div></div></div>'+
+      '<div class="tile a-regime"><div class="thead"><span class="ttl">Regime</span><span class="tnote" id="rgNote"></span></div><div class="tbody" id="rgBody"><div class="loading">\u2026</div></div></div>'+
+      '<div class="tile a-gex"><div class="thead"><span class="ttl">GEX \u00B7 SPX</span><span class="tnote" id="gexNote"></span></div><div class="tbody" id="gexBody"><div class="loading">\u2026</div></div></div>'+
+      '<div class="tile a-vix"><div class="thead"><span class="ttl">VIX Term Structure</span><span class="tnote" id="vixNote"></span></div><div class="tbody"><div class="plot" id="vixPlot"></div></div></div>'+
+      '<div class="tile a-sector"><div class="thead"><span class="ttl">Sector Performance</span><div class="seg" id="secSeg"><button data-k="m1" class="on">1M</button><button data-k="m3">3M</button><button data-k="y">1Y</button></div></div><div class="tbody"><div class="sec-list" id="secList"><div class="loading">\u2026</div></div></div></div>'+
+      '<div class="tile a-top"><div class="thead"><span class="ttl">Top Performers</span><span class="tnote">from selection</span></div><div class="tbody"><div class="top-list" id="topList"><div class="loading">\u2026</div></div></div></div>'+
+      '<div class="tile a-cal"><div class="thead"><span class="ttl">Market Calendar</span><span class="tnote" id="calNote"></span></div><div class="tbody"><div class="cal-strip" id="calStrip"><div class="loading">\u2026</div></div></div></div>'+
+    '</div>';
+
+  function initMarkets(){
+    // regime (also powers strip) — always fetch fresh once
+    if(!C.macro){
+      getJSON("macro").then(function(d){ C.macro=d; paintStrip(d); renderRegime(d); })
+        .catch(function(e){ document.getElementById("rgBody").innerHTML=errHTML("macro.json",e.message); });
+    } else { renderRegime(C.macro); }
+
+    drawSPX();
+    drawVIX();
+    loadAssets();
+    loadSectors();
+    loadTop();
+    loadGEX();
+    loadCalendar();
+  }
+
+  function errHTML(file,msg){ return '<div class="err">Couldn\'t load '+file+' \u2014 '+msg+'.<div class="fix">Check it\'s live in outputs/ on GitHub Pages.</div></div>'; }
+
+  // ----- regime tile -----
+  function renderRegime(d){
+    var info=REGIME_INFO[d.regime]||REGIME_INFO.NO_CLEAR, i=d.inputs||{};
+    document.getElementById("rgNote").textContent=d.asof||"";
+    function row(k,label,v,unit){
+      var val = (v===null||v===undefined||(typeof v==="number"&&isNaN(v)))?"\u2014":
+        (unit==="%"?( (v>0?"+":"")+(+v).toFixed(1)+"%"):
+         unit==="bp"?((v>0?"+":"")+Math.round(v)+"bp"):
+         (+v).toFixed(2));
+      return '<div class="rg-inp"><span class="k">'+label+'</span><span class="v">'+val+'</span></div>';
+    }
+    var html='<div class="rg-name" style="color:'+info.c+'">'+(d.regime||"\u2014").replace(/_/g," ")+'</div>'+
+      '<div class="rg-desc">'+info.d+'</div>'+
+      (d.confidence>0?'<div class="rg-conf">confidence '+d.confidence+' / 100'+(d.secondary_tag?" \u00B7 "+d.secondary_tag:"")+'</div>':'')+
+      '<div class="rg-inputs">'+
+        row("vix","VIX",i.vix,"")+row("cpi_yoy","CPI y/y",i.cpi_yoy,"%")+
+        row("spx_3m","SPX 3m",i.spx_3m,"%")+row("hy","HY",i.hy,"bp")+
+        row("wti_3m","WTI 3m",i.wti_3m,"%")+row("us02_3m","2Y 3m",i.us02_3m,"bp")+
+      '</div>';
+    document.getElementById("rgBody").innerHTML=html;
+  }
+
+  // ----- SPX candlestick + volume -----
+  function drawSPX(){
+    if(drawn.spx) return;
+    getJSON("spx_daily").then(function(d){
+      var bars=(d&&d.bars)||[]; if(!bars.length){ document.getElementById("spxPlot").innerHTML='<div class="err">No SPX daily data yet. It populates on the next engine run.</div>'; return; }
+      var dates=bars.map(function(b){return b.date;});
+      var volColors=bars.map(function(b){return (b.c>=b.o)?"rgba(45,138,85,.45)":"rgba(176,48,48,.45)";});
+      var candle={type:"candlestick",x:dates,open:bars.map(function(b){return b.o;}),high:bars.map(function(b){return b.h;}),low:bars.map(function(b){return b.l;}),close:bars.map(function(b){return b.c;}),
+        increasing:{line:{color:"#2D8A55"},fillcolor:"rgba(45,138,85,.55)"},decreasing:{line:{color:"#B03030"},fillcolor:"rgba(176,48,48,.55)"},yaxis:"y",name:"SPX",showlegend:false};
+      var vol={type:"bar",x:dates,y:bars.map(function(b){return b.v;}),marker:{color:volColors},yaxis:"y2",name:"Vol",showlegend:false};
+      var last=bars[bars.length-1], prev=bars.length>1?bars[bars.length-2]:last;
+      var chg=((last.c-prev.c)/prev.c*100);
+      document.getElementById("spxNote").innerHTML=last.c.toLocaleString()+' <span style="color:'+(chg>=0?"var(--green)":"var(--red)")+'">'+(chg>=0?"+":"")+chg.toFixed(2)+'%</span>';
+      var layout=baseLayout();
+      layout.grid={rows:2,columns:1,roworder:"top to bottom"};
+      layout.yaxis={domain:[0.26,1],side:"right",gridcolor:"rgba(0,0,0,.05)",tickfont:tf(),fixedrange:false};
+      layout.yaxis2={domain:[0,0.2],side:"right",gridcolor:"rgba(0,0,0,.04)",tickfont:tf(8),fixedrange:true,showticklabels:false};
+      layout.xaxis={rangeslider:{visible:false},gridcolor:"rgba(0,0,0,.04)",tickfont:tf(),rangebreaks:[{bounds:["sat","mon"]}]};
+      Plotly.newPlot("spxPlot",[candle,vol],layout,cfg());
+      drawn.spx=true;
+    }).catch(function(e){ document.getElementById("spxPlot").innerHTML=errHTML("spx_daily.json",e.message); });
+  }
+
+  // ----- VIX term structure (proxy from weekly series tail) -----
+  function drawVIX(){
+    if(drawn.vix) return;
+    getJSON("macro_series").then(function(d){
+      var s=(d&&d.series)||[]; var vix=s.map(function(r){return r.vix;}).filter(function(v){return v!==null&&v!==undefined;});
+      if(!vix.length){ document.getElementById("vixPlot").innerHTML='<div class="err">No VIX series yet.</div>'; return; }
+      // show last ~26 weeks of spot VIX as the available term proxy
+      var tail=s.slice(-26);
+      var x=tail.map(function(r){return r.date;}), y=tail.map(function(r){return r.vix;});
+      var spot=y[y.length-1];
+      document.getElementById("vixNote").innerHTML='spot '+ (spot!=null?spot.toFixed(1):"\u2014");
+      var line={type:"scatter",mode:"lines",x:x,y:y,line:{color:"#1A5C38",width:2},fill:"tozeroy",fillcolor:"rgba(26,92,56,.06)",showlegend:false};
+      var layout=baseLayout();
+      layout.xaxis={gridcolor:"rgba(0,0,0,.04)",tickfont:tf()};
+      layout.yaxis={gridcolor:"rgba(0,0,0,.05)",tickfont:tf(),side:"right"};
+      Plotly.newPlot("vixPlot",[line],layout,cfg());
+      drawn.vix=true;
+    }).catch(function(e){ document.getElementById("vixPlot").innerHTML=errHTML("macro_series.json",e.message); });
+  }
+
+  // ----- sector performance with 1M/3M/1Y toggle -----
+  var secSort="m1";
+  function loadSectors(){
+    var render=function(){
+      var obj=C.sector; if(!obj) return;
+      var arr=Object.keys(obj).map(function(k){var o=obj[k];o.__tk=k;return o;});
+      arr.sort(function(a,b){return (b[secSort]||0)-(a[secSort]||0);});
+      var max=Math.max.apply(null,arr.map(function(o){return Math.abs(o[secSort]||0);}))||1;
+      var html=arr.map(function(o){
+        var v=o[secSort]||0, w=Math.min(Math.abs(v)/max*50,50);
+        var pos=v>=0, color=pos?"var(--greenSoft)":"var(--redSoft)";
+        var bar='<div class="sec-bar-wrap"><div class="sec-bar" style="'+(pos?"left:50%":"right:50%")+';width:'+w+'%;background:'+color+'"></div><div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--line2)"></div></div>';
+        return '<div class="sec-row"><span class="tk">'+o.__tk+'</span><span class="nm">'+(o.sector||"")+'</span>'+bar+'<span class="sec-val" style="color:'+(pos?"var(--green)":"var(--red)")+'">'+(pos?"+":"")+v.toFixed(1)+'%</span></div>';
+      }).join("");
+      document.getElementById("secList").innerHTML=html;
+    };
+    if(C.sector){ render(); }
+    else getJSON("sector").then(function(d){ C.sector=d; render(); })
+      .catch(function(e){ document.getElementById("secList").innerHTML=errHTML("sector.json",e.message); });
+    document.getElementById("secSeg").addEventListener("click",function(ev){
+      var b=ev.target.closest("button"); if(!b) return;
+      secSort=b.dataset.k;
+      Array.prototype.forEach.call(this.querySelectorAll("button"),function(x){x.classList.toggle("on",x===b);});
+      render();
+    });
+  }
+
+  // ----- top performers from stocks.json -----
+  function loadTop(){
+    getJSON("stocks").then(function(d){
+      var arr=(d&&d.stocks)||[];
+      arr=arr.slice().sort(function(a,b){return (b.surge||0)-(a.surge||0);}).slice(0,12);
+      if(!arr.length){ document.getElementById("topList").innerHTML='<div class="loading">No gate-passers.</div>'; return; }
+      var html=arr.map(function(s){
+        var lbl=s.label||"", chipbg=lbl==="BOTH"?"var(--greenBg)":lbl==="TRADE"?"var(--amberBg)":lbl==="INVEST"?"var(--greenBg)":"var(--card2)";
+        var chipc=lbl==="TRADE"?"var(--amber)":lbl==="BOTH"||lbl==="INVEST"?"var(--green)":"var(--inkLight)";
+        var sc=(s.surge>=0?"+":"")+(s.surge||0).toFixed(1)+"%";
+        return '<div class="top-row"><span><span class="tk">'+s.ticker+'</span><br><span class="ind">'+(s.industry||"")+'</span></span>'+
+          '<span class="chip" style="background:'+chipbg+';color:'+chipc+'">'+lbl+'</span>'+
+          '<span class="sc" style="color:'+(s.surge>=0?"var(--green)":"var(--red)")+'">'+sc+'</span></div>';
+      }).join("");
+      document.getElementById("topList").innerHTML=html;
+    }).catch(function(e){ document.getElementById("topList").innerHTML=errHTML("stocks.json",e.message); });
+  }
+
+  // ----- GEX (manual upload) -----
+  // ----- multi-asset band (levels + % change from macro_series) -----
+  function loadAssets(){
+    var DEFS=[["spx","S&P 500",0],["vix","VIX",1],["wti","WTI Oil",1],["gold","Gold",0],["dxy","Dollar (DXY)",2]];
+    getJSON("macro_series").then(function(d){
+      var s=(d&&d.series)||[];
+      if(s.length<2){ document.getElementById("assetBand").innerHTML='<div class="loading" style="grid-column:1/-1">No series data yet.</div>'; return; }
+      var last=s[s.length-1], prev=s[s.length-2];
+      var html=DEFS.map(function(def){
+        var k=def[0], name=def[1], dp=def[2];
+        var cur=last[k], pr=prev[k];
+        if(cur===null||cur===undefined){ return cell(name,"\u2014","",""); }
+        var chg=(pr!==null&&pr!==undefined&&pr!==0)?((cur-pr)/pr*100):null;
+        // VIX up = risk up (red); everything else up = green. DXY neutral-ish but treat up=green.
+        var invert=(k==="vix");
+        var pos = chg===null?null:(invert? chg<0 : chg>=0);
+        var color = pos===null?"var(--inkLight)":(pos?"var(--green)":"var(--red)");
+        var accent = pos===null?"var(--inkFade)":(pos?"var(--greenSoft)":"var(--redSoft)");
+        var val=Number(cur).toLocaleString(undefined,{minimumFractionDigits:dp,maximumFractionDigits:dp});
+        var chgstr=chg===null?"":((chg>0?"+":"")+chg.toFixed(2)+"%");
+        return cell(name,val,chgstr,color,accent);
+      }).join("");
+      document.getElementById("assetBand").innerHTML=html;
+    }).catch(function(e){ document.getElementById("assetBand").innerHTML='<div class="err" style="grid-column:1/-1">Assets: couldn\'t load macro_series.json.</div>'; });
+
+    function cell(name,val,chg,color,accent){
+      return '<div class="asset-cell">'+(accent?'<div class="accent" style="background:'+accent+'"></div>':'')+
+        '<span class="an">'+name+'</span>'+
+        '<span class="av">'+val+'</span>'+
+        '<span class="ac" style="color:'+(color||"var(--inkLight)")+'">'+chg+'</span>'+
+      '</div>';
+    }
+  }
+
+  function loadGEX(){
+    getJSON("gex").then(function(d){
+      var o=d.overview||{}, L=d.levels||{};
+      document.getElementById("gexNote").textContent=d.asof||"";
+      var neg=(o.net_gex_B||0)<0;
+      var regColor=neg?"var(--red)":"var(--green)", regBg=neg?"var(--redBg)":"var(--greenBg)";
+      function lvl(o2){ if(!o2) return "\u2014"; return (o2.strike!=null?o2.strike.toLocaleString():"\u2014"); }
+      var html='<div class="gex-hero"><span class="gex-net" style="color:'+regColor+'">'+(o.net_gex_B!=null?(o.net_gex_B>0?"+":"")+o.net_gex_B+"B":"\u2014")+'</span>'+
+        '<span class="gex-reg" style="background:'+regBg+';color:'+regColor+'">'+(o.regime||"")+'</span></div>'+
+        '<div class="gex-rows">'+
+          '<div class="gex-row"><span class="k">Gamma flip</span><span class="v">'+(o.gamma_flip!=null?o.gamma_flip.toLocaleString():"\u2014")+'<span class="sub">'+(o.dist_to_flip_pct!=null?(o.dist_to_flip_pct>0?"+":"")+o.dist_to_flip_pct+"%":"")+'</span></span></div>'+
+          '<div class="gex-row"><span class="k">Call wall</span><span class="v">'+lvl(L.call_wall)+'</span></div>'+
+          '<div class="gex-row"><span class="k">Put wall</span><span class="v">'+lvl(L.put_wall)+'</span></div>'+
+          '<div class="gex-row"><span class="k">Pin / magnet</span><span class="v">'+lvl(L.pin)+'</span></div>'+
+          '<div class="gex-row"><span class="k">Vanna / Charm</span><span class="v">'+(o.net_vanna_B_per_volpt!=null?o.net_vanna_B_per_volpt+"B":"\u2014")+' <span class="sub">'+(o.net_charm_B_per_day!=null?o.net_charm_B_per_day+"B/d":"")+'</span></span></div>'+
+        '</div>';
+      document.getElementById("gexBody").innerHTML=html;
+    }).catch(function(e){ document.getElementById("gexBody").innerHTML='<div class="err">No GEX loaded yet.<div class="fix">Upload gex.json to outputs/ (your manual step).</div></div>'; });
+  }
+
+  // ----- calendar (manual events.json) -----
+  function loadCalendar(){
+    getJSON("events").then(function(d){
+      var evts=(d&&d.events)||[];
+      var today=new Date().toISOString().slice(0,10);
+      evts=evts.filter(function(e){return e.date>=today;}).sort(function(a,b){return a.date<b.date?-1:1;}).slice(0,14);
+      if(!evts.length){ document.getElementById("calStrip").innerHTML='<div class="loading">No upcoming events. Add them to events.json.</div>'; return; }
+      var html=evts.map(function(e){
+        var imp=(e.impact||"").toLowerCase(), cls=imp==="high"?"hi":imp==="med"?"med":"";
+        var dt=new Date(e.date+"T00:00:00"); var ds=dt.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+        return '<div class="cal-card '+cls+'"><div class="cal-date">'+ds+'</div><div class="cal-evt">'+(e.title||"")+'</div>'+(e.note?'<div class="cal-in">'+e.note+'</div>':'')+'</div>';
+      }).join("");
+      document.getElementById("calStrip").innerHTML=html;
+    }).catch(function(e){ document.getElementById("calStrip").innerHTML='<div class="loading">No calendar yet. Add events.json to outputs/.</div>'; });
+  }
+
+  // ----- Plotly helpers -----
+  function tf(sz){ return {family:"'Courier New',monospace",size:sz||9,color:"#6B6347"}; }
+  function baseLayout(){ return {paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",margin:{l:4,r:38,t:6,b:20},font:tf(),showlegend:false,dragmode:false}; }
+  function cfg(){ return {displayModeBar:false,responsive:true,staticPlot:false}; }
+
+  // ================= HOME (stub for next session) =================
+  function initHome(){ /* built next */ }
+
+  // ---------- mobile rail ----------
+  var rail=document.getElementById("rail"), scrim=document.getElementById("scrim");
+  function openRail(){ rail.classList.add("open"); scrim.classList.add("show"); }
+  function closeRail(){ rail.classList.remove("open"); scrim.classList.remove("show"); }
+  document.getElementById("railToggle").addEventListener("click",openRail);
+  scrim.addEventListener("click",closeRail);
+
+  // ---------- boot ----------
+  var start=(location.hash||"").replace("#","");
+  if(!NAV.some(function(n){return n.id===start&&n.live;})) start="markets";
+  go(start);
+})();
+</script>
+
+</body>
+</html>
