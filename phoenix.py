@@ -445,8 +445,14 @@ def stock_engine(stock_data, universe, fundamentals=None, daily_ret=None):
         near_high = -8 <= pos_vs_high <= -1
         g5 = at_high or near_high          # near or at 104wk high
         # g4 (market cap) already applied above
-        if not (g1 and g2 and g3 and g5 and g6):
+        # Count gates passed. Full passers clear all 5; near-misses clear exactly 4.
+        gate_flags = {"trend200": g1, "trend50": g2, "industry": g3, "near_high": g5, "stage2": g6}
+        gates_passed = sum(1 for v in gate_flags.values() if v)
+        is_passer = gates_passed == 5
+        is_near = gates_passed == 4
+        if not (is_passer or is_near):
             continue
+        missing_gate = None if is_passer else [k for k, v in gate_flags.items() if not v][0]
 
         # volume state
         rv = _sma(vols, 3)
@@ -461,7 +467,7 @@ def stock_engine(stock_data, universe, fundamentals=None, daily_ret=None):
             vstate = "DISTRIB"
         else:
             vstate = "NEUTRAL"
-        breakout = (at_high and surge >= STOCK["breakout_vol_surge_pct"]
+        breakout = (is_passer and at_high and surge >= STOCK["breakout_vol_surge_pct"]
                     and vstate == "ACCUM" and ma10_rising and surge <= 1000)
 
         # return features for scoring
@@ -478,8 +484,10 @@ def stock_engine(stock_data, universe, fundamentals=None, daily_ret=None):
                 break
 
         candidates.append({
-            "ticker": tk, "industry": ind, "mcap_B": round(mc / 1e9, 2),
+            "ticker": tk, "name": universe[tk].get("name", ""),
+            "industry": ind, "mcap_B": round(mc / 1e9, 2),
             "surge": round(surge), "vol_state": vstate, "breakout": breakout,
+            "passer": is_passer, "gates_passed": gates_passed, "missing_gate": missing_gate,
             "pos_vs_high": round(pos_vs_high, 1), "industry_mom_3m": ind_scores.get(ind, {}).get("momentum_3m", 0),
             "_ret4": ret4, "_ret12": ret12, "_ret52": ret52, "_ext": ext, "_weeks_in": weeks_in,
             "_fund": fundamentals.get(tk),
@@ -542,6 +550,9 @@ def stock_engine(stock_data, universe, fundamentals=None, daily_ret=None):
 
         t, i = c["trade_score"], c["invest_score"]
         c["label"] = "BOTH" if (t >= 70 and i >= 70) else ("TRADE" if t >= 70 else ("INVEST" if i >= 70 else "WATCH"))
+        # opportunity score: blend of trade + invest (rebalanced after your call).
+        # full passers get a small edge over near-misses so they rank first when scores tie.
+        c["opp_score"] = round((t * 0.5 + i * 0.5) + (2 if c.get("passer") else 0), 1)
         # daily % change (from the 2-day daily pull); null if unavailable
         c["daily_pct"] = daily_ret.get(c["ticker"])
         # clean up internal fields
@@ -549,15 +560,24 @@ def stock_engine(stock_data, universe, fundamentals=None, daily_ret=None):
             if k.startswith("_"):
                 del c[k]
 
+    # rank by opportunity score (best = rank 1)
+    ranked = sorted(candidates, key=lambda c: -c["opp_score"])
+    for idx, c in enumerate(ranked):
+        c["rank"] = idx + 1
+
     breakouts = [c for c in candidates if c["breakout"]]
+    passers = [c for c in candidates if c.get("passer")]
+    near = [c for c in candidates if not c.get("passer")]
     return {
         "asof": _now(),
         "meta": {
-            "gate_passers": len(candidates),
+            "gate_passers": len(passers),
+            "near_misses": len(near),
+            "total": len(candidates),
             "breakouts": len(breakouts),
             "industries_passing": len(passing),
         },
-        "stocks": sorted(candidates, key=lambda c: -c["invest_score"]),
+        "stocks": ranked,
     }
 
 
@@ -1026,6 +1046,7 @@ def load_universe_from_csv(path="universe.csv"):
                     "sector": row.get("sector", ""),
                     "industry": row.get("industry", ""),
                     "market_cap": float(row.get("market_cap") or 0),
+                    "name": row.get("name", "") or row.get("longName", ""),
                 }
             except Exception:
                 continue
