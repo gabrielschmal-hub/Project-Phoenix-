@@ -1,0 +1,28 @@
+name: Phoenix GEX Calibration Backfill
+
+on:
+  workflow_dispatch:
+
+jobs:
+  calibrate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # CRITICAL: full history — the engine's daily gex.json readings
+          # live in past commits; a shallow checkout finds zero of them.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Backfill calibration pairs from git history
+        run: python phoenix.py --calib-backfill
+      - name: Commit calibration log
+        run: |
+          git config user.name  "phoenix-bot"
+          git config user.email "phoenix-bot@users.noreply.github.com"
+          git add calibration_log.json || true
+          git commit -m "Calibration backfill $(date -u +%Y-%m-%d)" || echo "No changes"
+          git push || echo "Nothing to push"
