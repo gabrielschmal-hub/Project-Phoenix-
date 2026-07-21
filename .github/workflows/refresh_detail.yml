@@ -1,0 +1,42 @@
+name: Phoenix Detail Data Refresh
+
+# Refreshes the universe-wide detail data that powers EVERY ticker's detail page:
+#   financials_all.json - financials + estimated earnings for all ~2,139 tickers
+#                         (from the committed CSV, no network - always populates)
+#   ratings_all.json    - analyst ratings from Yahoo, largest caps first, so
+#                         partial/throttled runs still cover the most-viewed names
+#
+# financials_all is cheap (no network); ratings_all is paced and accumulates
+# across weekly runs. Separate from the heavy daily pipeline so detail data
+# refreshes even if that has an issue - and so you can trigger just THIS.
+
+on:
+  schedule:
+    - cron: '0 11 * * 1'   # Mondays 11:00 UTC
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: pip install yfinance pandas
+      - name: Rebuild financials_all (from CSV, no network)
+        run: python phoenix.py --engine financialsall
+      - name: Refresh ratings_all (Yahoo, largest caps first)
+        run: python phoenix.py --engine ratingsall
+        continue-on-error: true
+      - name: Commit
+        run: |
+          git config user.name  "phoenix-bot"
+          git config user.email "phoenix-bot@users.noreply.github.com"
+          git add outputs/financials_all.json outputs/ratings_all.json || true
+          git commit -m "Detail data refresh $(date -u +%Y-%m-%d)" || echo "No changes"
+          git push || echo "Nothing to push"
