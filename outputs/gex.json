@@ -1,0 +1,187 @@
+{
+ "asof": "2026-07-21 15:35 UTC",
+ "source": "Market Maker Edge briefing (real SPX chains) \u2014 2026-07-21",
+ "overview": {
+  "spx_spot": 7443.28,
+  "net_gex_B": -25.82,
+  "regime": "Negative Gamma",
+  "gamma_flip": 7490.09,
+  "dist_to_flip_pct": 0.63,
+  "net_vanna_B_per_volpt": 49.5,
+  "net_charm_B_per_day": 20.1,
+  "vix": 17.6
+ },
+ "raw": {
+  "net_gex_B": -25.82,
+  "net_vanna_B": 49.5,
+  "net_charm_B": 20.1,
+  "calibrated": true
+ },
+ "levels": {
+  "pin": {
+   "strike": 7450.0,
+   "net_gex_B": 0.0,
+   "coi": 94000,
+   "poi": 103000
+  },
+  "call_wall": {
+   "strike": 7500.0,
+   "net_gex_B": -1.55,
+   "coi": 420414,
+   "poi": 0
+  },
+  "put_wall": {
+   "strike": 7400.0,
+   "net_gex_B": -2.85,
+   "coi": 0,
+   "poi": 234862
+  },
+  "gamma_flip": 7490.09,
+  "supports": [
+   {
+    "strike": 7400.0,
+    "net_gex_B": -2.85,
+    "coi": 0,
+    "poi": 234862
+   },
+   {
+    "strike": 7350.0,
+    "net_gex_B": -1.94,
+    "coi": 0,
+    "poi": 109519
+   },
+   {
+    "strike": 7300.0,
+    "net_gex_B": -4.57,
+    "coi": 0,
+    "poi": 257021
+   },
+   {
+    "strike": 7200.0,
+    "net_gex_B": -2.83,
+    "coi": 0,
+    "poi": 234609
+   },
+   {
+    "strike": 7100.0,
+    "net_gex_B": -1.42,
+    "coi": 0,
+    "poi": 151026
+   }
+  ],
+  "resistances": [
+   {
+    "strike": 7500.0,
+    "net_gex_B": -1.55,
+    "coi": 420414,
+    "poi": 0
+   },
+   {
+    "strike": 7550.0,
+    "net_gex_B": 2.24,
+    "coi": 208829,
+    "poi": 0
+   },
+   {
+    "strike": 7600.0,
+    "net_gex_B": 4.48,
+    "coi": 340391,
+    "poi": 0
+   },
+   {
+    "strike": 7700.0,
+    "net_gex_B": 3.55,
+    "coi": 147406,
+    "poi": 0
+   },
+   {
+    "strike": 7800.0,
+    "net_gex_B": 3.4,
+    "coi": 157452,
+    "poi": 0
+   }
+  ],
+  "magnets": {
+   "put": {
+    "strike": 7300.0,
+    "net_gex_B": -4.57,
+    "coi": 0,
+    "poi": 257021
+   },
+   "call": {
+    "strike": 7500.0,
+    "net_gex_B": -1.55,
+    "coi": 420414,
+    "poi": 0
+   }
+  },
+  "wall_threshold": 0.3
+ },
+ "profile": [
+  {
+   "strike": 7100.0,
+   "net_gex_B": -1.42,
+   "coi": 0,
+   "poi": 151026
+  },
+  {
+   "strike": 7200.0,
+   "net_gex_B": -2.83,
+   "coi": 0,
+   "poi": 234609
+  },
+  {
+   "strike": 7300.0,
+   "net_gex_B": -4.57,
+   "coi": 0,
+   "poi": 257021
+  },
+  {
+   "strike": 7350.0,
+   "net_gex_B": -1.94,
+   "coi": 0,
+   "poi": 109519
+  },
+  {
+   "strike": 7400.0,
+   "net_gex_B": -2.85,
+   "coi": 0,
+   "poi": 234862
+  },
+  {
+   "strike": 7500.0,
+   "net_gex_B": -1.55,
+   "coi": 420414,
+   "poi": 0
+  },
+  {
+   "strike": 7550.0,
+   "net_gex_B": 2.24,
+   "coi": 208829,
+   "poi": 0
+  },
+  {
+   "strike": 7600.0,
+   "net_gex_B": 4.48,
+   "coi": 340391,
+   "poi": 0
+  },
+  {
+   "strike": 7700.0,
+   "net_gex_B": 3.55,
+   "coi": 147406,
+   "poi": 0
+  },
+  {
+   "strike": 7800.0,
+   "net_gex_B": 3.4,
+   "coi": 157452,
+   "poi": 0
+  }
+ ],
+ "confidence": {
+  "levels": "high",
+  "regime_sign": "high",
+  "note": "Sourced from professional briefing built on REAL SPX chains (not the SPY proxy). Flip, net-GEX sign, and walls are ground truth."
+ }
+}
