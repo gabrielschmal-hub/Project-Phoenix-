@@ -1,0 +1,42 @@
+name: Phoenix Smart Money Refresh
+
+# Refreshes the two disclosure datasets that power the Smart Money screener tab
+# and the ticker-page deep-dive:
+#   congress_trades.json        - STOCK Act PTR trades (House + Senate), by ticker
+#   institutional_holdings.json - Form 13F-HR quarter-over-quarter deltas, by ticker
+#
+# Congress data updates frequently (new PTRs filed daily); 13F updates quarterly
+# (~45 days after each quarter-end). Weekly cadence catches both. Separate from
+# the heavy daily pipeline so it can be triggered on its own.
+
+on:
+  schedule:
+    - cron: '0 12 * * 1'   # Mondays 12:00 UTC
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: pip install requests edgartools pandas
+      - name: Congress PTR trades
+        run: python phoenix.py --engine congress
+        continue-on-error: true
+      - name: Institutional 13F holdings
+        run: python phoenix.py --engine institutional
+        continue-on-error: true
+      - name: Commit
+        run: |
+          git config user.name  "phoenix-bot"
+          git config user.email "phoenix-bot@users.noreply.github.com"
+          git add outputs/congress_trades.json outputs/institutional_holdings.json || true
+          git commit -m "Smart money refresh $(date -u +%Y-%m-%d)" || echo "No changes"
+          git push || echo "Nothing to push"
