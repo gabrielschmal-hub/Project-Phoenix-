@@ -1,0 +1,39 @@
+name: Phoenix SPX GEX from Briefing
+
+# Parses a Market Maker Edge GEX Daily Briefing into outputs/gex.json with the
+# REAL SPX numbers (flip, net-GEX sign, walls). The SPY x10 proxy structurally
+# underweights institutional put hedging and computes the flip on the wrong side
+# of spot; the briefing is built on real SPX chains, so it is ground truth.
+#
+# USAGE: drop the day's briefing PDF into the repo's briefings/ folder (any
+# filename), commit, and this runs on push. It parses the NEWEST briefing,
+# writes gex.json, and can be triggered manually too. Only the small gex.json
+# is what the dashboard reads.
+
+on:
+  push:
+    paths:
+      - 'briefings/**'
+  workflow_dispatch:
+
+jobs:
+  parse:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install poppler (pdftotext)
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: Parse newest briefing into gex.json
+        run: python phoenix.py --engine gexbriefing
+      - name: Commit gex.json
+        run: |
+          git config user.name  "phoenix-bot"
+          git config user.email "phoenix-bot@users.noreply.github.com"
+          git add outputs/gex.json || true
+          git commit -m "SPX GEX from briefing $(date -u +%Y-%m-%d)" || echo "No changes"
+          git push || echo "Nothing to push"
