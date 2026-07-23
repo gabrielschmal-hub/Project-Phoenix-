@@ -1,0 +1,55 @@
+name: Phoenix Daily Run
+
+# ONE run does everything. Folds in what used to be separate workflows:
+#   - GEX (uses a committed briefings/*.pdf if present, else the SPY proxy)
+#   - financials_all + ratings_all  (was: Detail Data Refresh)
+#   - congress PTR + institutional 13F  (was: Smart Money Refresh)
+# Every step in the engine is non-fatal, so a flaky feed (Yahoo, SEC) never
+# breaks the run — it just skips that piece and commits the rest.
+#
+# You can now delete refresh_detail.yml and smart_money.yml. Keep briefing_gex.yml
+# only if you want gex.json to update the INSTANT you push a briefing (this daily
+# run already picks up a committed briefing on its own).
+
+on:
+  schedule:
+    - cron: '0 5 * * 1-5'   # weekdays 05:00 UTC
+  workflow_dispatch:
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: System deps (pdftotext for briefing GEX)
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+      - name: Python deps
+        run: |
+          pip install -r requirements.txt
+          pip install edgartools    # SEC 13F (institutional holdings)
+      # C2 gate: a broken engine can never publish. Tests are synthetic-data
+      # only (no network) and take seconds.
+      - name: Engine tests
+        run: python test_phoenix_v2.py
+      - name: Run Phoenix (full pipeline + smart money + ratings)
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          # SEC fair-access: set this to your email so the 13F fetch identifies
+          # itself. Optional but recommended (SEC may throttle a generic UA).
+          SEC_IDENTITY: ${{ secrets.SEC_IDENTITY }}
+        run: python phoenix.py --full
+      - name: Commit outputs
+        run: |
+          git config user.name  "phoenix-bot"
+          git config user.email "phoenix-bot@users.noreply.github.com"
+          git add outputs/ || true
+          git commit -m "Daily run $(date -u +%Y-%m-%d)" || echo "No changes"
+          git push || echo "Nothing to push"
