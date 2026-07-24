@@ -1,0 +1,21 @@
+# OGE 278-T / 278e filings to pull automatically.
+#
+# WHERE THIS FILE GOES:  outputs/oge_sources.txt
+# (that folder already exists — you never need to create one)
+#
+# One URL per line. Lines starting with # are ignored.
+# Every daily run downloads anything here it doesn't already have, then parses
+# it into Smart Money. Already-downloaded filings are never refetched, so this
+# list only grows. Downloads land in outputs/oge/ automatically.
+#
+# YOU CAN ALSO SKIP URLS ENTIRELY: just upload a filing PDF straight into
+# outputs/ from GitHub (Add file -> Upload files) and the next run parses it.
+#
+# WHERE TO FIND FILINGS:
+#   President  -> whitehouse.gov (search "Periodic Transaction Report")
+#   Cabinet / senior appointees -> the agency's ethics office page, or a
+#                                  public disclosure request via oge.gov
+#   Congress   -> already automatic via the PTR feed; no URLs needed here
+#
+# Seed: President Trump's Nov 2025 Periodic Transaction Report
+https://www.whitehouse.gov/wp-content/uploads/2025/11/President-Donald-J.-Trump-Periodic-Transaction-Report-11.14.25.pdf
