@@ -66,7 +66,11 @@ jobs:
         run: |
           git config user.name  "phoenix-bot"
           git config user.email "phoenix-bot@users.noreply.github.com"
-          git add outputs/ || true   # includes any OGE filings the run downloaded
+          # outputs/ AND the fundamentals CSV: the earnings updater appends new
+          # quarters to macroflow_fundamentals_quarterly.csv at the repo root.
+          # Without it here, every quarter fetched is thrown away when the
+          # runner is destroyed - which is why reported earnings never appeared.
+          git add outputs/ macroflow_fundamentals_quarterly.csv || true
           git commit -m "Daily run $(date -u +%Y-%m-%d)" || echo "No changes"
           git pull --rebase --autostash || true
           git push || echo "Nothing to push"
