@@ -1,0 +1,72 @@
+name: Phoenix Daily Run
+
+# ONE job. Delete every other workflow file in .github/workflows/ —
+# smart money, ratings and earnings all run inside phoenix.py --full.
+
+on:
+  schedule:
+    - cron: '0 5 * * 1-5'          # 05:00 UTC, weekdays
+  workflow_dispatch:
+
+concurrency:                        # never let two runs fight over the commit
+  group: phoenix-daily
+  cancel-in-progress: false
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330            # fail visibly instead of hanging
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Phoenix
+        env:
+          FRED_API_KEY:      ${{ secrets.FRED_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NTFY_TOPIC:        ${{ secrets.NTFY_TOPIC }}
+          # SEC fair-access policy wants a real contact. Without this the 13F
+          # fetch gets throttled or refused.
+          SEC_IDENTITY:      ${{ secrets.SEC_IDENTITY }}
+          # Optional steps stop starting once this much wall clock is used, so
+          # the job always reaches the end and always writes meta.json.
+          PHOENIX_BUDGET_MIN: '240'
+        run: python phoenix.py --full
+
+      - name: Commit outputs
+        if: always()                # commit whatever completed, even on failure
+        run: |
+          git config user.name  "phoenix-bot"
+          git config user.email "phoenix-bot@users.noreply.github.com"
+          git add outputs/ macroflow.db || true
+          git commit -m "Daily run $(date -u +%Y-%m-%d)" || echo "No changes"
+          git pull --rebase --autostash || true
+          git push || echo "Nothing to push"
+
+      - name: Step report
+        if: always()
+        run: |
+          echo "--- meta.json progress ---"
+          python - <<'EOF'
+          import json, pathlib
+          p = pathlib.Path("outputs/meta.json")
+          if not p.exists():
+              print("meta.json missing — the run did not reach its first step")
+              raise SystemExit(0)
+          m = json.loads(p.read_text())
+          print("last_run:", m.get("last_run"))
+          for s in m.get("progress", []):
+              print(f"  {s.get('status','?'):16} {s.get('seconds','-'):>7}s  {s.get('step')}"
+                    + (f"  <- {s.get('error')}" if s.get("error") else ""))
+          for w in m.get("warnings", []):
+              print("  WARN:", w)
+          EOF
