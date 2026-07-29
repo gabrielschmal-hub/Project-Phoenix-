@@ -10,16 +10,26 @@ name: Phoenix Daily Run
 # You can now delete refresh_detail.yml and smart_money.yml. Keep briefing_gex.yml
 # only if you want gex.json to update the INSTANT you push a briefing (this daily
 # run already picks up a committed briefing on its own).
+#
+# 2026-07-29 changes:
+#   - timeout raised to 120m and PHOENIX_BUDGET_MIN set below it, so the engine
+#     stops starting optional steps instead of being killed mid-run
+#   - commit step runs even when the engine fails, so partial output is kept
+#   - a Step report prints meta.json's per-step status at the end of every run
 
 on:
   schedule:
     - cron: '0 5 * * 1-5'   # weekdays 05:00 UTC
   workflow_dispatch:
 
+concurrency:                 # never let two runs race for the same commit
+  group: phoenix-daily
+  cancel-in-progress: false
+
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     permissions:
       contents: write
     steps:
@@ -27,6 +37,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: pip
       - name: System deps - pdftotext for GEX briefings and OGE filings
         run: sudo apt-get update && sudo apt-get install -y poppler-utils
       - name: Python deps
@@ -45,11 +56,39 @@ jobs:
           # SEC fair-access: set this to your email so the 13F fetch identifies
           # itself. Optional but recommended (SEC may throttle a generic UA).
           SEC_IDENTITY: ${{ secrets.SEC_IDENTITY }}
+          # Optional steps stop STARTING once this much wall clock is used, so
+          # the run always reaches the end and always writes meta.json. Keep it
+          # comfortably below timeout-minutes above.
+          PHOENIX_BUDGET_MIN: '95'
         run: python phoenix.py --full
       - name: Commit outputs
+        if: always()               # keep whatever completed, even if the engine failed
         run: |
           git config user.name  "phoenix-bot"
           git config user.email "phoenix-bot@users.noreply.github.com"
           git add outputs/ || true   # includes any OGE filings the run downloaded
           git commit -m "Daily run $(date -u +%Y-%m-%d)" || echo "No changes"
+          git pull --rebase --autostash || true
           git push || echo "Nothing to push"
+      - name: Step report
+        if: always()
+        run: |
+          python - <<'EOF'
+          import json, pathlib
+          p = pathlib.Path("outputs/meta.json")
+          if not p.exists():
+              print("meta.json missing - the run did not reach its first step")
+              raise SystemExit(0)
+          m = json.loads(p.read_text())
+          print("last_run:", m.get("last_run"))
+          rows = m.get("progress", [])
+          if not rows:
+              print("no per-step progress - phoenix.py is not the updated build")
+          for s in rows:
+              line = f"  {s.get('status','?'):16} {str(s.get('seconds','-')):>8}s  {s.get('step')}"
+              if s.get("error"):
+                  line += f"   <- {s['error']}"
+              print(line)
+          for w in m.get("warnings", []):
+              print("  WARN:", w)
+          EOF
