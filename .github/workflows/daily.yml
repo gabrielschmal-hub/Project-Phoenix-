@@ -34,6 +34,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # rebase needs real history
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -62,18 +64,51 @@ jobs:
           PHOENIX_BUDGET_MIN: '95'
         run: python phoenix.py --full
       - name: Commit outputs
-        if: always()               # keep whatever completed, even if the engine failed
+        if: always()
         run: |
+          set -e
           git config user.name  "phoenix-bot"
           git config user.email "phoenix-bot@users.noreply.github.com"
-          # outputs/ AND the fundamentals CSV: the earnings updater appends new
-          # quarters to macroflow_fundamentals_quarterly.csv at the repo root.
-          # Without it here, every quarter fetched is thrown away when the
-          # runner is destroyed - which is why reported earnings never appeared.
-          git add outputs/ macroflow_fundamentals_quarterly.csv || true
-          git commit -m "Daily run $(date -u +%Y-%m-%d)" || echo "No changes"
-          git pull --rebase --autostash || true
-          git push || echo "Nothing to push"
+          git add -A outputs/ macroflow_fundamentals_quarterly.csv 2>/dev/null || true
+          echo "--- staged ---"
+          git status --short | head -30
+          if git diff --cached --quiet; then
+            echo "NOTHING STAGED. The engine produced no file changes this run."
+            exit 0
+          fi
+          git commit -m "Daily run $(date -u +%Y-%m-%dT%H:%M)"
+          git fetch origin "$GITHUB_REF_NAME"
+          if ! git rebase "origin/$GITHUB_REF_NAME"; then
+            git rebase --abort || true
+            echo "REBASE FAILED - branch has diverged, resolve manually"
+            exit 1
+          fi
+          # no '|| true' here on purpose: a failed push MUST fail the step,
+          # otherwise the run goes green while nothing reaches Pages
+          git push origin "HEAD:$GITHUB_REF_NAME"
+          echo "PUSHED $(git rev-parse --short HEAD) to $GITHUB_REF_NAME"
+
+      - name: What was written
+        if: always()
+        run: |
+          echo "--- outputs/ freshness ---"
+          ls -l --time-style=+%Y-%m-%dT%H:%M outputs/*.json 2>/dev/null | \
+            awk '{print "  " $6 "  " $7}' | head -25
+          python - <<'EOF'
+          import json, pathlib
+          for f in ("spx_daily", "macro", "stocks", "financials_all",
+                    "congress_trades", "institutional_holdings"):
+              p = pathlib.Path("outputs") / (f + ".json")
+              if not p.exists():
+                  print(f"  {f:24} MISSING")
+                  continue
+              try:
+                  d = json.loads(p.read_text())
+                  print(f"  {f:24} asof={d.get('asof') or d.get('last_run') or '?'}")
+              except Exception as e:
+                  print(f"  {f:24} unreadable: {e}")
+          EOF
+
       - name: Step report
         if: always()
         run: |
