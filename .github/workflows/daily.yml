@@ -72,12 +72,21 @@ jobs:
           echo "--- is anything ignored? ---"
           git check-ignore -v outputs/macro.json outputs/stocks.json \
             macroflow_fundamentals_quarterly.csv || echo "  nothing ignored"
-          # -f forces past .gitignore: a stray 'outputs/' rule there makes the
-          # add a no-op, the commit say "No changes", and Pages never rebuild -
-          # which looks exactly like a green run that changes nothing.
-          git add -A -f outputs/ macroflow_fundamentals_quarterly.csv 2>/dev/null || true
-          echo "--- staged ---"
-          git status --short | head -30
+          # Add each pathspec SEPARATELY. git add aborts the whole operation if
+          # any one pathspec matches nothing - and macroflow_fundamentals_quarterly.csv
+          # is not in the repo yet, so a combined add staged NOTHING while
+          # git status still listed every modified file. That was the bug.
+          # -f forces past any .gitignore rule.
+          git add -A -f outputs/
+          if [ -f macroflow_fundamentals_quarterly.csv ]; then
+            git add -f macroflow_fundamentals_quarterly.csv
+          else
+            echo "NOTE: macroflow_fundamentals_quarterly.csv is not in the repo -"
+            echo "      commit it, or financials_all.json can never be built."
+          fi
+          echo "--- staged for commit ---"
+          git diff --cached --name-only | head -30
+          echo "--- staged file count: $(git diff --cached --name-only | wc -l) ---"
           if git diff --cached --quiet; then
             echo "NOTHING STAGED. The engine produced no file changes this run."
             exit 0
