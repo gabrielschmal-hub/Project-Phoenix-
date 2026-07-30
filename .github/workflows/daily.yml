@@ -69,7 +69,13 @@ jobs:
           set -e
           git config user.name  "phoenix-bot"
           git config user.email "phoenix-bot@users.noreply.github.com"
-          git add -A outputs/ macroflow_fundamentals_quarterly.csv 2>/dev/null || true
+          echo "--- is anything ignored? ---"
+          git check-ignore -v outputs/macro.json outputs/stocks.json \
+            macroflow_fundamentals_quarterly.csv || echo "  nothing ignored"
+          # -f forces past .gitignore: a stray 'outputs/' rule there makes the
+          # add a no-op, the commit say "No changes", and Pages never rebuild -
+          # which looks exactly like a green run that changes nothing.
+          git add -A -f outputs/ macroflow_fundamentals_quarterly.csv 2>/dev/null || true
           echo "--- staged ---"
           git status --short | head -30
           if git diff --cached --quiet; then
