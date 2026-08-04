@@ -1277,6 +1277,26 @@ html:not(.light) .sm-chip.on{color:#141210!important}
 .gexh-key i{width:13px;height:4px;border-radius:2px;display:inline-block;flex:0 0 auto}
 .gexh-key b{font-weight:700;letter-spacing:.02em}
 
+/* ===== histogram key: the legend now carries everything the chart used to ===== */
+.gexh-key{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;
+  padding:14px 4px 4px;margin-top:2px;border-top:1px solid var(--line)}
+.gexh-key .lv{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.gexh-key .lv i{width:26px;height:4px;border-radius:2px;display:inline-block;flex:0 0 auto}
+.gexh-key .lv em{font-style:normal;font-size:12.5px;color:var(--inkLight);letter-spacing:.01em}
+.gexh-key .lv b{font-size:14px;font-weight:700;font-family:var(--mono);letter-spacing:.02em}
+.gexh-key .lv.off{opacity:.55}
+.gexh-key .lv s{text-decoration:none;font-size:10.5px;font-style:italic;color:var(--inkFade)}
+.gexh-key .k-note{flex-basis:100%;font-size:12px;font-style:italic;color:var(--inkLight);
+  padding-top:4px}
+.gexh-key .k-swatch{display:inline-flex;align-items:center;gap:7px}
+.gexh-key .k-swatch i{width:14px;height:12px;border-radius:2px;display:inline-block}
+@media(max-width:1000px){
+  .gexh-key{gap:8px 14px}
+  .gexh-key .lv i{width:20px}
+  .gexh-key .lv em{font-size:11.5px}
+  .gexh-key .lv b{font-size:13px}
+}
+
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
   --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
@@ -2174,24 +2194,34 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       {v:magP, c:C.mag,  t:"Deep magnet \u2193", w:1.8, d:"longdash"},
       {v:magC, c:C.mag,  t:"Deep magnet \u2191", w:1.8, d:"longdash"}
     ];
-    var shapes=[], annos=[], legend=[], seen={}, row=0;
+    // Lines only inside the plot. Labels collided into an unreadable pile when
+    // several levels sat within a few points of each other, so every value now
+    // lives in the key below the chart instead.
+    var shapes=[], annos=[], legend=[], seen={};
     marks.forEach(function(m){
       if(m.v==null) return;
-      legend.push('<span><i style="background:'+m.c+'"></i>'+m.t+' <b>'+fmt(m.v)+'</b></span>');
-      if(xr&&(m.v<xr[0]||m.v>xr[1])) return;        // off-window: key only
+      var off = xr && (m.v<xr[0]||m.v>xr[1]);
+      legend.push('<span class="lv'+(off?' off':'')+'">'+
+        '<i style="background:'+m.c+';'+
+          (m.d==="dash"?'background:repeating-linear-gradient(90deg,'+m.c+' 0 5px,transparent 5px 9px);':'')+
+          (m.d==="dot"?'background:repeating-linear-gradient(90deg,'+m.c+' 0 3px,transparent 3px 6px);':'')+
+          (m.d==="longdash"?'background:repeating-linear-gradient(90deg,'+m.c+' 0 8px,transparent 8px 12px);':'')+
+          'height:'+Math.max(3,Math.round(m.w))+'px">' +
+        '</i><em>'+m.t+'</em><b>'+fmt(m.v)+'</b>'+(off?'<s>off-chart</s>':'')+'</span>');
+      if(off) return;
       if(seen[Math.round(m.v)]) return;             // don't stack identical lines
       seen[Math.round(m.v)]=1;
       shapes.push({type:"line",x0:m.v,x1:m.v,yref:"paper",y0:0,y1:1,
         line:{color:m.c,width:m.w,dash:m.d}});
-      annos.push({x:m.v,y:1,yref:"paper",yanchor:"bottom",xanchor:"center",
-        text:"<b>"+m.t+"</b><br>"+fmt(m.v),showarrow:false,align:"center",
-        font:{size:11,color:m.c},yshift:(row++%2)?26:2});
     });
 
     var key=document.getElementById("gexHKey");
-    if(key) key.innerHTML=legend.join("")+
-      '<span class="k-note">Green = call gamma (dealers sell into strength). '+
-      'Red = put gamma (dealers buy weakness).</span>';
+    if(key) key.innerHTML=
+      '<span class="k-swatch"><i style="background:'+C.call+'"></i>Call gamma</span>'+
+      '<span class="k-swatch"><i style="background:'+C.put+'"></i>Put gamma</span>'+
+      legend.join("")+
+      '<span class="k-note">Bars above zero = call gamma, dealers sell into strength. '+
+      'Below zero = put gamma, dealers buy weakness.</span>';
     var hn=document.getElementById("gexHNote");
     if(hn) hn.textContent=vis.length+" bars \u00b7 "+step+"pt buckets \u00b7 "+unit+
       " \u00b7 "+((ov.net_gex_B||0)>=0?"positive":"negative")+" gamma";
@@ -2201,7 +2231,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     host.style.minWidth=Math.max(940, vis.length*30)+"px";
     var ink=PXC().ink, dim=PXC().dim, grid=PXC().grid;
     Plotly.newPlot("mGexPlot",traces,{
-      height:340,margin:{l:64,r:16,t:46,b:44},
+      height:340,margin:{l:64,r:16,t:18,b:46},
       paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",
       font:{family:"monospace",size:11,color:dim},
       xaxis:{range:xr||undefined,title:{text:"Strike price",font:{size:11,color:dim}},
@@ -2212,7 +2242,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         gridcolor:grid,zeroline:true,zerolinecolor:dim,zerolinewidth:1.6,
         tickformat:useB?",.1f":",.0f",tickfont:{size:11,color:ink}},
       shapes:shapes,annotations:annos,barmode:"overlay",bargap:0.28,
-      showlegend:split,legend:{orientation:"h",y:1.14,x:0,font:{size:11,color:ink}},
+      showlegend:false,
       hovermode:"closest"
     },{displayModeBar:false,responsive:true});
 
