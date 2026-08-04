@@ -2113,7 +2113,22 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       var lo=spot*0.955, hi=spot*1.045;
       if(prof.filter(function(p){return p.strike>=lo&&p.strike<=hi;}).length>=8) xr=[lo,hi];
     }
-    var vis=prof.filter(function(p){return !xr||(p.strike>=xr[0]&&p.strike<=xr[1]);});
+    var raw=prof.filter(function(p){return !xr||(p.strike>=xr[0]&&p.strike<=xr[1]);});
+
+    // SPX quotes 5-point strikes, so 137 hair-thin bars is unreadable and each
+    // one holds a fraction of the real cluster. The briefing plots 50-point
+    // buckets. Bucket to whatever keeps roughly 25-35 bars on screen.
+    var span=(xr?xr[1]-xr[0]:(raw.length?raw[raw.length-1].strike-raw[0].strike:1))||1;
+    var step=[5,10,25,50,100,250].filter(function(w){return span/w<=34;})[0]||100;
+    var bkt={};
+    raw.forEach(function(p){
+      var b=Math.round(p.strike/step)*step;
+      var d=bkt[b]||(bkt[b]={strike:b,call_gex_B:0,put_gex_B:0,net_gex_B:0,coi:0,poi:0});
+      d.call_gex_B+=(p.call_gex_B||0); d.put_gex_B+=(p.put_gex_B||0);
+      d.net_gex_B+=(p.net_gex_B||0);   d.coi+=(p.coi||0); d.poi+=(p.poi||0);
+    });
+    var vis=Object.keys(bkt).map(function(k){return bkt[k];})
+              .sort(function(a,b){return a.strike-b.strike;});
 
     // scale: $B like the briefing when the numbers justify it, else $M
     var peakB=Math.max.apply(null,vis.map(function(p){
@@ -2178,18 +2193,19 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       '<span class="k-note">Green = call gamma (dealers sell into strength). '+
       'Red = put gamma (dealers buy weakness).</span>';
     var hn=document.getElementById("gexHNote");
-    if(hn) hn.textContent=vis.length+" of "+prof.length+" strikes \u00b7 "+unit+
+    if(hn) hn.textContent=vis.length+" bars \u00b7 "+step+"pt buckets \u00b7 "+unit+
       " \u00b7 "+((ov.net_gex_B||0)>=0?"positive":"negative")+" gamma";
 
     // one readable bar per strike; scroll for the rest
-    host.style.minWidth=Math.max(940, vis.length*34)+"px";
+    // fits the visible window without needing a scroll in the common case
+    host.style.minWidth=Math.max(940, vis.length*30)+"px";
     var ink=PXC().ink, dim=PXC().dim, grid=PXC().grid;
     Plotly.newPlot("mGexPlot",traces,{
       height:340,margin:{l:64,r:16,t:46,b:44},
       paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",
       font:{family:"monospace",size:11,color:dim},
       xaxis:{range:xr||undefined,title:{text:"Strike price",font:{size:11,color:dim}},
-        gridcolor:grid,tickformat:",.0f",dtick:(vis.length>40?100:50),
+        gridcolor:grid,tickformat:",.0f",dtick:step*(vis.length>22?2:1),
         tickfont:{size:11,color:ink}},
       yaxis:{range:[-yMax,yMax],
         title:{text:"Gamma exposure ("+unit+")",font:{size:11,color:dim}},
@@ -2199,6 +2215,19 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       showlegend:split,legend:{orientation:"h",y:1.14,x:0,font:{size:11,color:ink}},
       hovermode:"closest"
     },{displayModeBar:false,responsive:true});
+
+    // start the scroll centred on spot, not pinned to the far-left strike -
+    // that is why the chart opened on 7,300 with spot at 7,601 off-screen
+    var sc=host.parentNode;
+    if(sc&&sc.classList&&sc.classList.contains("gexh-scroll")){
+      requestAnimationFrame(function(){
+        var over=sc.scrollWidth-sc.clientWidth;
+        if(over>0&&xr&&spot){
+          var frac=(spot-xr[0])/(xr[1]-xr[0]);
+          sc.scrollLeft=Math.max(0,Math.min(over, sc.scrollWidth*frac-sc.clientWidth/2));
+        }
+      });
+    }
   }
 
 

@@ -59,6 +59,8 @@ GEX = {
     # tactical walls are searched within +/-5% of spot. Beyond that a strike is
     # a magnet, not a level dealers defend intraday.
     "wall_band": 0.05,
+    # a wall must be a real cluster, not just any strike clearing a relative bar
+    "wall_min_oi": 25000,
     # per-greek calibration (SPY proxy reads low by different amounts per greek).
     # These get FIT from paired engine-vs-source readings. 1.0 = uncalibrated (raw).
     "calib_net_gex": 1.0,
@@ -196,14 +198,19 @@ def gex_engine(chain, spot, scale=1.0):
         T = max(row.get("T_years", 0), 1e-6)
         g, vn, cm = compute_greeks(spot, K, T, r, q, iv)
         sign = 1.0 if row["kind"] == "call" else -1.0  # dealers long calls, short puts
-        d = agg.setdefault(round(K), {"gex": 0.0, "vex": 0.0, "cex": 0.0, "coi": 0.0, "poi": 0.0})
-        d["gex"] += g * oi * 100 * (spot ** 2) * 0.01 * sign / scale
+        d = agg.setdefault(round(K), {"gex": 0.0, "vex": 0.0, "cex": 0.0,
+                                      "coi": 0.0, "poi": 0.0,
+                                      "cgex": 0.0, "pgex": 0.0})
+        _dg = g * oi * 100 * (spot ** 2) * 0.01 / scale     # unsigned dollar gamma
+        d["gex"] += _dg * sign
         d["vex"] += vn * oi * 100 * spot * 0.01 * sign / scale
         d["cex"] += (cm * oi * 100 * spot * sign / scale) / 365.0
         if row["kind"] == "call":
             d["coi"] += oi
+            d["cgex"] += _dg
         else:
             d["poi"] += oi
+            d["pgex"] += _dg
 
     strikes = sorted(agg)
     if not strikes:
@@ -246,6 +253,8 @@ def gex_engine(chain, spot, scale=1.0):
         profile.append({
             "strike": K,
             "net_gex_B": round(v["gex"] / 1e9, 3),
+            "call_gex_B": round(v.get("cgex", 0.0) / 1e9, 3),
+            "put_gex_B": round(v.get("pgex", 0.0) / 1e9, 3),
             "coi": 0 if v["coi"] != v["coi"] else int(v["coi"]),
             "poi": 0 if v["poi"] != v["poi"] else int(v["poi"]),
         })
@@ -285,10 +294,17 @@ def gex_engine(chain, spot, scale=1.0):
     near_below = [p for p in below if p["strike"] >= spot * (1 - wb)] or below
     max_coi = max((p["coi"] for p in near_above), default=0)
     max_poi = max((p["poi"] for p in near_below), default=0)
-    resistances = sorted([p for p in near_above if max_coi and p["coi"] >= thr * max_coi],
-                         key=lambda p: p["strike"])           # nearest-above first
-    supports = sorted([p for p in near_below if max_poi and p["poi"] >= thr * max_poi],
-                      key=lambda p: -p["strike"])             # nearest-below first
+    # "Nearest strike clearing 30% of the local max" breaks when the chain is
+    # fine-grained: with 5-point SPX strikes the strike ADJACENT to spot can
+    # clear the bar, giving support 7,600 / resistance 7,610 against spot 7,601
+    # - true, useless, and not what the briefing means. The briefing states it
+    # plainly: "the largest single-strike dealer position above spot". So take
+    # the LARGEST OI inside the tactical band, and require a real cluster.
+    min_oi = GEX.get("wall_min_oi", 0.0)
+    cand_r = [p for p in near_above if p["coi"] >= max(min_oi, thr * max_coi)]
+    cand_s = [p for p in near_below if p["poi"] >= max(min_oi, thr * max_poi)]
+    resistances = sorted(cand_r, key=lambda p: -p["coi"])      # biggest cluster first
+    supports = sorted(cand_s, key=lambda p: -p["poi"])
     call_wall = resistances[0] if resistances else (max(above, key=lambda p: p["coi"]) if above else None)
     put_wall = supports[0] if supports else (max(below, key=lambda p: p["poi"]) if below else None)
     call_magnet = max(above, key=lambda p: p["coi"]) if above else None
