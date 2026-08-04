@@ -4593,7 +4593,8 @@ def run_gex_ticker(sym, out_dir=None):
         return None, note
     rows, _ = _cboe_rows(chain, spot,
                          band=float(os.environ.get("GEX_STOCK_BAND", "0.20")),
-                         max_dte=int(os.environ.get("GEX_STOCK_DTE", "90")))
+                         max_dte=int(os.environ.get("GEX_STOCK_DTE", "90")),
+                         min_dte=int(os.environ.get("GEX_MIN_DTE", "1")))
     if len(rows) < 12:
         return None, f"thin chain ({len(rows)} contracts)"
     res = gex_engine(rows, spot, scale=1.0)
@@ -4674,7 +4675,7 @@ def run_gex_stocks_cboe(tickers=None, limit=None):
 _OSI = __import__("re").compile(r"([A-Z^_]+)(\d{6})([CP])(\d{8})$")
 
 
-def _cboe_rows(chain, spot, band=0.15, max_dte=180):
+def _cboe_rows(chain, spot, band=0.15, max_dte=180, min_dte=1):
     """CBOE contracts -> the row shape gex_engine wants. Returns (rows, skipped)."""
     from datetime import datetime, date
     today = date.today()
@@ -4692,7 +4693,11 @@ def _cboe_rows(chain, spot, band=0.15, max_dte=180):
             dte = (datetime.strptime(m.group(2), "%y%m%d").date() - today).days
         except Exception:
             continue
-        if dte < 0 or dte > max_dte:
+        # Same-day expiries carry enormous at-the-money gamma and none at all
+        # a hundred points away. Including them spikes the chart at spot,
+        # flattens every other strike, and pins the flip to wherever spot is.
+        # Structural dealer positioning is what we want, so skip 0DTE.
+        if dte < min_dte or dte > max_dte:
             continue
         try:
             oi = float(c.get("open_interest") or 0)
@@ -4710,6 +4715,57 @@ def _cboe_rows(chain, spot, band=0.15, max_dte=180):
                      "kind": "call" if m.group(3) == "C" else "put",
                      "open_interest": oi, "iv": iv})
     return rows, skipped
+
+
+def _gex_freeze_levels(res):
+    """
+    Hold the day's levels steady.
+
+    Gamma is a function of live spot and live IV, so recomputing intraday moves
+    the flip and the walls on every run. Open interest - the thing that defines
+    where dealers are positioned - only changes overnight. So: the first run of
+    a new trading day sets the levels; later runs the same day refresh the live
+    numbers (spot, net gamma, the profile) but keep the levels frozen.
+
+    Set GEX_FORCE_LEVELS=1 to override.
+    """
+    import os, json
+    from datetime import datetime, timezone
+
+    if os.environ.get("GEX_FORCE_LEVELS") == "1":
+        return res
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    path = os.path.join(OUTPUTS_DIR, "gex.json")
+    try:
+        prev = json.load(open(path))
+    except Exception:
+        prev = None
+    if not prev:
+        res["levels_date"] = today
+        return res
+    if (prev.get("levels_date") or "")[:10] != today:
+        res["levels_date"] = today
+        print(f"[gexlock] new session - levels set for {today}")
+        return res
+
+    keep_lv = prev.get("levels")
+    keep_ov = prev.get("overview") or {}
+    if not keep_lv:
+        res["levels_date"] = today
+        return res
+    res["levels"] = keep_lv
+    ov = res.setdefault("overview", {})
+    for k in ("gamma_flip",):
+        if keep_ov.get(k) is not None:
+            ov[k] = keep_ov[k]
+    spot = ov.get("spx_spot") or ov.get("spot")
+    if spot and ov.get("gamma_flip"):
+        ov["dist_to_flip_pct"] = round((ov["gamma_flip"] / spot - 1) * 100, 2)
+    res["levels_date"] = today
+    res["levels_locked"] = True
+    print(f"[gexlock] levels held from this morning ({today}); "
+          f"spot/profile refreshed")
+    return res
 
 
 def run_gex_cboe(symbol="_SPX", label="SPX"):
@@ -4742,10 +4798,11 @@ def run_gex_cboe(symbol="_SPX", label="SPX"):
     print(f"[gexcboe] {len(chain)} contracts, spot {spot:,.2f}")
 
     band = float(os.environ.get("GEX_BAND", "0.10"))
+    min_dte = int(os.environ.get("GEX_MIN_DTE", "1"))
     # Coach rule 3: aggregate OI across the NEAR 3-MONTH chain (90 calendar
     # days). 180d swept in LEAP open interest that does not hedge intraday.
     max_dte = int(os.environ.get("GEX_MAX_DTE", "90"))
-    rows, skipped = _cboe_rows(chain, spot, band, max_dte)
+    rows, skipped = _cboe_rows(chain, spot, band, max_dte, min_dte)
     if len(rows) < 40:
         print(f"[gexcboe] only {len(rows)} usable contracts "
               f"({skipped} unparsed) - keeping previous file")
@@ -4765,6 +4822,12 @@ def run_gex_cboe(symbol="_SPX", label="SPX"):
         v = lv.get(k)
         return v.get("strike") if isinstance(v, dict) else v
 
+    # Open interest only updates overnight, so the LEVELS should too. Without
+    # this the flip and walls move on every run purely because spot and IV
+    # moved - unusable for a level you are meant to trade against all day.
+    res = _gex_freeze_levels(res)
+    ov = res.get("overview") or {}
+    lv = res.get("levels") or {}
     write_json("gex", res)
     print(f"[gexcboe] net {ov.get('net_gex_B')}B ({ov.get('regime')}), "
           f"flip {ov.get('gamma_flip')}, call wall {_lv('call_wall')}, "
