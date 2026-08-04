@@ -2111,10 +2111,21 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
 
   // ---- what YOUR positions did over the same two windows -------------------
   // A market recap that ignores the book is only half a brief.
+  // test hook: the app is inside an IIFE, so a harness cannot otherwise reach
+  // these to verify the brief renders against the engine's real encoding
+  window.__PXT = window.__PXT || {};
   function brfBook(host, S){
     if(!host) return;
-    var open=(trLog||[]).filter(function(t){return t.status==="open"&&t.ticker;});
+    // AUDIT: my first pass guessed the chart file shape (bars[].c). The engine
+    // writes a compact parallel-array encoding under d.chart[timeframe], so
+    // every lookup silently returned nothing and the block never rendered.
+    var acct=(window.PHOENIX_PROFILE==="A")?"aldemar":"gabriel";
+    var open=(trLog||[]).filter(function(t){
+      return t.status==="open" && t.ticker &&
+             (!t.account || String(t.account).toLowerCase()===acct);
+    });
     if(!open.length) return;
+
     var lastWk=(function(){
       if(!S||!S.length) return null;
       var latest=new Date((S[S.length-1].date||"")+"T00:00:00");
@@ -2128,51 +2139,80 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     })();
 
     Promise.all(open.map(function(t){
-      return getJSON("charts/"+String(t.ticker).replace(/[\/.]/g,"-"))
+      return getJSON(dpChartName(t.ticker))
              .then(function(c){ return {t:t,c:c}; })
              .catch(function(){ return {t:t,c:null}; });
     })).then(function(rows){
       var d1=[], d5=[], inds={};
       rows.forEach(function(r){
-        var bars=(r.c&&(r.c.bars||r.c.d))||[];
-        if(bars.length<2) return;
-        function close(b){ return (b&&(b.c!=null?b.c:b.close)); }
-        function dateOf(b){ return (b&&(b.d||b.date||"")).slice(0,10); }
-        var lastC=close(bars[bars.length-1]), prevC=close(bars[bars.length-2]);
-        if(lastC&&prevC) d1.push({tk:r.t.ticker,pc:(lastC/prevC-1)*100});
+        if(!r.c) return;
+        var bars=dpExpand(r.c.chart&&(r.c.chart.daily||r.c.chart.d||r.c.chart["1d"]));
+        if(!bars||bars.length<2) return;
+        var lastC=bars[bars.length-1].c, prevC=bars[bars.length-2].c;
+        var qty=+(r.t.qty||0), entry=+(r.t.entry||0);
+        if(lastC&&prevC){
+          d1.push({tk:r.t.ticker, pc:(lastC/prevC-1)*100,
+                   usd:(qty&&entry)?((lastC-prevC)*qty):null});
+        }
         if(lastWk){
           for(var i=bars.length-1;i>=0;i--){
-            if(dateOf(bars[i])<=lastWk){
-              var wc=close(bars[i]);
-              if(wc&&lastC) d5.push({tk:r.t.ticker,pc:(lastC/wc-1)*100});
+            if(String(bars[i].date).slice(0,10)<=lastWk){
+              if(bars[i].c&&lastC) d5.push({tk:r.t.ticker,
+                pc:(lastC/bars[i].c-1)*100,
+                usd:(qty&&entry)?((lastC-bars[i].c)*qty):null});
               break;
             }
           }
         }
-        var ind=r.t.industry||(r.c&&r.c.industry);
-        if(ind) inds[ind]=1;
+        var ind=r.t.industry||r.c.industry||(r.c.profile&&r.c.profile.industry);
+        if(ind) inds[ind]=(inds[ind]||0)+1;
       });
       if(!d1.length&&!d5.length) return;
+
+      // hl() lives inside mktBrief, not in this scope - that ReferenceError is
+      // why the block silently never rendered
+      function pct(v,d){
+        var c=(v>=0)?"var(--green)":"var(--red)";
+        return '<span class="hl" style="color:'+c+'">'+(v>=0?"+":"\u2212")+
+               Math.abs(v).toFixed(d==null?1:d)+'%</span>';
+      }
+      function money(v){
+        if(v==null) return "";
+        var s2=(v>=0?"+$":"\u2212$")+Math.abs(v).toFixed(0);
+        return ' <b class="'+(v>=0?"up":"dn")+'">'+s2+'</b>';
+      }
       function line(arr,label){
         if(!arr.length) return "";
         arr.sort(function(a,b){return b.pc-a.pc;});
-        var avg=arr.reduce(function(s2,x){return s2+x.pc;},0)/arr.length;
-        var best=arr[0], worst=arr[arr.length-1];
-        return "<b>"+label+"</b> your "+arr.length+" open "+
-          (arr.length===1?"position is ":"positions are ")+hl(avg,null,1)+
-          " on average"+(arr.length>1?
-            ", led by <b>"+best.tk+"</b> "+hl(best.pc,null,1)+
-            " and lagged by <b>"+worst.tk+"</b> "+hl(worst.pc,null,1):"")+". ";
+        var avg=arr.reduce(function(x,y){return x+y.pc;},0)/arr.length;
+        var tot=arr.reduce(function(x,y){return x+(y.usd||0);},0);
+        var txt="<b>"+label+"</b> "+arr.length+" open "+
+          (arr.length===1?"position, ":"positions, ")+pct(avg)+" on average";
+        if(tot) txt+=" ("+money(tot).replace(/<[^>]+>/g,"").trim()+" on the book)";
+        if(arr.length>1) txt+=" \u2014 <b>"+arr[0].tk+"</b> "+pct(arr[0].pc)+
+          " best, <b>"+arr[arr.length-1].tk+"</b> "+pct(arr[arr.length-1].pc)+" worst";
+        return txt+". ";
       }
-      var txt=line(d1,"Since yesterday:")+line(d5,"Since last Friday:");
+      var txt=line(d1,"Yesterday:")+line(d5,"Week to date:");
       var ks=Object.keys(inds);
-      if(ks.length) txt+="Exposure sits in "+ks.slice(0,3).join(", ")+
-        (ks.length>3?" and "+(ks.length-3)+" more":"")+".";
+      if(ks.length) txt+="Exposure: "+ks.slice(0,3).join(", ")+
+        (ks.length>3?" +"+(ks.length-3)+" more":"")+".";
       if(txt) host.insertAdjacentHTML("beforeend",
         '<div class="brf-block bk"><div class="brf-k">Your book</div>'+
         '<div class="brf-p">'+txt+'</div></div>');
-    }).catch(function(){});
+    }).catch(function(e){ console.warn("[brief] book block", e); });
   }
+  window.__PXT.brfBook=brfBook;
+  window.__PXT.setGetJSON=function(f){ getJSON=f; };
+  window.__PXT.getJSON=function(){ return getJSON; };
+  window.__PXT.trLoad=function(cb){ trLoad(cb); };
+  window.__PXT.resetTrades=function(){ trLog=null; trLoadedFor=null; };
+  window.__PXT.dbgTrLog=function(){
+    return (trLog||[]).length+" rows, open="+
+      (trLog||[]).filter(function(t){return t.status==="open";}).length+
+      ", profile="+(window.PHOENIX_PROFILE||"?");
+  };
+
 
   // ---- SPX GEX HISTOGRAM -------------------------------------------------
   // exposed so the render path can be exercised without a live gex.json

@@ -2428,7 +2428,7 @@ def run_macro_series_daily():
 
     SYMS = {"spx": "^GSPC", "ndx": "^IXIC", "dow": "^DJI", "rut": "^RUT",
             "vix": "^VIX", "wti": "CL=F", "gold": "GC=F", "dxy": "DX-Y.NYB",
-            "tnx": "^TNX"}
+            "tnx": "^TNX", "btc": "BTC-USD"}   # the asset board plots btc too
     period = os.environ.get("MACRO_DAILY_PERIOD", "1y")
     cols = {}
     for key, sym in SYMS.items():
@@ -2450,16 +2450,24 @@ def run_macro_series_daily():
 
     # carry the weekly-only fields forward onto each trading day
     weekly = {}
-    try:
-        prev = json.load(open(os.path.join(OUTPUTS_DIR, "macro_series_weekly.json")))
-        for r in (prev.get("series") or prev if isinstance(prev, list) else []):
-            if r.get("date"):
+    for fname in ("macro_series_weekly.json", "macro_series.json"):
+        try:
+            prev = json.load(open(os.path.join(OUTPUTS_DIR, fname)))
+        except Exception:
+            continue
+        rows = prev if isinstance(prev, list) else (prev.get("series") or [])
+        # skip a file that is already the daily one we are about to replace
+        if (prev if isinstance(prev, dict) else {}).get("cadence") == "daily":
+            continue
+        for r in rows:
+            if isinstance(r, dict) and r.get("date"):
                 weekly[r["date"][:10]] = r
-    except Exception:
-        pass
+        if weekly:
+            break
     carry_keys = ("us02", "real10", "hy", "cpi_yoy")
 
     dates = sorted(cols["spx"])
+    wkeys = sorted(weekly)
     out, carry = [], {}
     for d in dates:
         row = {"date": d}
@@ -2469,8 +2477,12 @@ def run_macro_series_daily():
                 row[k] = round(v, 4)
         if "tnx" in row:
             row["us10"] = round(row["tnx"] / 10.0, 3)
-        w = weekly.get(d)
-        if w:
+        # weekly rows are dated Mondays; a trading day rarely matches exactly,
+        # so take the most recent weekly row on or before this date
+        for wd in wkeys:
+            if wd > d:
+                break
+            w = weekly[wd]
             for k in carry_keys:
                 if w.get(k) is not None:
                     carry[k] = w[k]
