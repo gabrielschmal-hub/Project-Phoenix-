@@ -315,15 +315,33 @@ def gex_engine(chain, spot, scale=1.0):
         cand_r = [p for p in near_above if p["coi"] >= thr * max_coi] or near_above
     if not cand_s:
         cand_s = [p for p in near_below if p["poi"] >= thr * max_poi] or near_below
-    resistances = sorted(cand_r, key=lambda p: -abs(p.get("call_gex_B", 0.0)))
-    supports = sorted(cand_s, key=lambda p: -abs(p.get("put_gex_B", 0.0)))
+    # Rank by gamma to find what COUNTS as a wall, then take the NEAREST one to
+    # spot - which is the rule as originally specified. Taking the largest hands
+    # every wall to whichever round strike (7000, 7500, 8000) sits inside the
+    # band: on 2026-08-04 the 8,000 strike was simultaneously call wall, pin and
+    # deep magnet, which tells you nothing. The biggest stays available as the
+    # magnet; the tactical wall is the first real cluster price meets.
+    def _pick(cands, key):
+        if not cands:
+            return []
+        top = max(abs(p.get(key, 0.0)) for p in cands) or 0.0
+        qual = [p for p in cands if abs(p.get(key, 0.0)) >= thr * top] or cands
+        return sorted(qual, key=lambda p: abs(p["strike"] - spot))   # nearest first
+
+    resistances = _pick(cand_r, "call_gex_B")
+    supports = _pick(cand_s, "put_gex_B")
     call_wall = resistances[0] if resistances else (max(above, key=lambda p: p["coi"]) if above else None)
     put_wall = supports[0] if supports else (max(below, key=lambda p: p["poi"]) if below else None)
     call_magnet = max(above, key=lambda p: p["coi"]) if above else None
+    # (magnet computed over the FULL window, so it may sit outside the band)
     put_magnet = max(below, key=lambda p: p["poi"]) if below else None
     # pin is a magnet price gravitates to, so it only means anything near spot
     near_all = [p for p in profile if abs(p["strike"] - spot) <= spot * wb] or profile
-    pin = max(near_all, key=lambda p: p["coi"] + p["poi"]) if near_all else None
+    # exclude the deep magnets: a pin that is also the magnet carries no extra
+    # information, and the round strike would win every time
+    mag_strikes = {p["strike"] for p in (call_magnet, put_magnet) if p}
+    pin_pool = [p for p in near_all if p["strike"] not in mag_strikes] or near_all
+    pin = max(pin_pool, key=lambda p: p["coi"] + p["poi"]) if pin_pool else None
 
     return {
         "asof": _now(),
