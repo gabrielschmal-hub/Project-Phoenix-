@@ -1948,7 +1948,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     Array.prototype.forEach.call(document.querySelectorAll(".page"),function(p){p.classList.toggle("active",p.id==="page-"+id);});
     Array.prototype.forEach.call(document.querySelectorAll(".nav-item"),function(it){it.classList.toggle("active",it.dataset.page===id);});
     var n=NAV.filter(function(x){return x.id===id;})[0];
-    document.getElementById("tbSection").textContent=(n?n.label:id);
+    (document.getElementById("tbSection")||{textContent:""}).textContent=(n?n.label:id);
     if(id==="markets") initMarkets();
     if(id==="screeners"){
       initScreener();
@@ -2396,7 +2396,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     if(C.sector){ render(); }
     else getJSON("sector").then(function(d){ C.sector=d; render(); })
       .catch(function(e){ (document.getElementById("secList")||{}).innerHTML=errHTML("sector.json",e.message); });
-    document.getElementById("secSeg").addEventListener("click",function(ev){
+    (document.getElementById("secSeg")||{addEventListener:function(){}}).addEventListener("click",function(ev){
       var b=ev.target.closest("button"); if(!b) return;
       secSort=b.dataset.k;
       Array.prototype.forEach.call(this.querySelectorAll("button"),function(x){x.classList.toggle("on",x===b);});
@@ -4495,8 +4495,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     });
     var si=document.getElementById("scrSearch");
     si.addEventListener("input",function(){ scrSearch=this.value.toLowerCase().trim(); renderScreener(); });
-    document.getElementById("scrMcap").addEventListener("change",function(){ scrMcap=this.value; renderScreener(); });
-    document.getElementById("scrChg").addEventListener("change",function(){ scrChg=this.value; renderScreener(); });
+    (document.getElementById("scrMcap")||{addEventListener:function(){}}).addEventListener("change",function(){ scrMcap=this.value; renderScreener(); });
+    (document.getElementById("scrChg")||{addEventListener:function(){}}).addEventListener("change",function(){ scrChg=this.value; renderScreener(); });
     // preset chips: each sets a filter + sort in one tap
     document.querySelectorAll(".scr-preset").forEach(function(btn){
       btn.addEventListener("click",function(){
@@ -4897,6 +4897,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       '</div>';
     }).join("");
     var ps=document.getElementById("picksScroll");
+    if(!ps) return;   // the Breakout Picks tile was removed from the screener
     ps.querySelectorAll(".thesis-btn").forEach(function(btn){
       btn.addEventListener("click",function(){
         var idx=+this.dataset.idx, s=byTk[this.dataset.tk];
