@@ -1,5 +1,5 @@
 {
- "asof": "2026-08-05 08:38 UTC",
+ "asof": "2026-08-05 11:05 UTC",
  "regime": "POLICY_TIGHTENING",
  "confidence": 37.3,
  "confidence_note": "regime score, not a calibrated probability (A4)",
@@ -8,9 +8,9 @@
  },
  "secondary_tag": "INFLATIONARY",
  "inputs": {
-  "wti_12m": 18.96,
-  "wti_3m": -20.36,
-  "wti_vs_2yr": 6.7,
+  "wti_12m": 19.74,
+  "wti_3m": -19.84,
+  "wti_vs_2yr": 7.4,
   "cpi_yoy": 3.46,
   "cpi_chg_3m": -0.71,
   "spx_3m": 4.56,
@@ -21,8 +21,91 @@
   "fresh_high": true,
   "us02_3m": 40.0,
   "real_3m": 50.0,
-  "vix": 16.0,
-  "vix_3m_chg": -6.92,
+  "vix": 16.57,
+  "vix_3m_chg": -3.61,
   "hy": 284.0
+ },
+ "explain": {
+  "regime": "POLICY_TIGHTENING",
+  "held_weeks": 4,
+  "since": "2026-07-13",
+  "drivers": [
+   {
+    "key": "us02_3m",
+    "label": "2Y yield 3m change (bp)",
+    "value": 40.0,
+    "op": ">",
+    "threshold": 40,
+    "clear_by": -0.0,
+    "ok": false
+   },
+   {
+    "key": "cpi_yoy",
+    "label": "CPI y/y",
+    "value": 3.46,
+    "op": ">",
+    "threshold": 2.5,
+    "clear_by": 0.96,
+    "ok": true
+   },
+   {
+    "key": "dd",
+    "label": "Drawdown",
+    "value": 0.0,
+    "op": ">",
+    "threshold": -12,
+    "clear_by": 12.0,
+    "ok": true
+   },
+   {
+    "key": "real_3m",
+    "label": "Real 10Y 3m change (bp)",
+    "value": 50.0,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 25.0,
+    "ok": true
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI y/y falls below 2.5",
+    "now": 3.46,
+    "threshold": 2.5,
+    "distance": 0.96,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   },
+   {
+    "if": "Drawdown falls below -12",
+    "now": 0.0,
+    "threshold": -12,
+    "distance": 12.0,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   },
+   {
+    "if": "Real 10Y 3m change (bp) falls below 25",
+    "now": 50.0,
+    "threshold": 25,
+    "distance": 25.0,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   }
+  ],
+  "runner_up": {
+   "regime": "ENERGY_GRIND",
+   "score": null,
+   "gates_missing": 2,
+   "needs": [
+    {
+     "label": "WTI 12m",
+     "need": "> 25",
+     "now": 19.740132412033407
+    },
+    {
+     "label": "CPI 3m change",
+     "need": "> 0.3",
+     "now": -0.71
+    }
+   ]
+  }
  }
 }
