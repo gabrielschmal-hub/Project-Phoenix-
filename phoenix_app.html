@@ -1300,6 +1300,15 @@ html:not(.light) .sm-chip.on{color:#141210!important}
   color:var(--inkFade);margin-left:2px}
 .gexh-key .k-note b{font-weight:700;font-style:normal;color:var(--ink)}
 
+/* VIX term structure: cap the plot width in the full-width Markets tile so the
+   curve keeps a readable aspect ratio instead of being stretched flat. */
+#page-markets .a-vix .tbody{display:flex;justify-content:center}
+#page-markets .a-vix .plot,#page-markets .a-vix [id^="vixPlot"]{
+  max-width:720px;width:100%;margin:0 auto}
+@media(max-width:1000px){
+  #page-markets .a-vix .plot,#page-markets .a-vix [id^="vixPlot"]{max-width:none}
+}
+
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
   --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
@@ -1992,8 +2001,23 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       layout.margin={l:6,r:34,t:8,b:24};
       layout.shapes=shapes;
       layout.xaxis={gridcolor:PXC().grid,tickfont:tf(9),fixedrange:true};
+      // In the wide Markets tile the same curve gets stretched horizontally and
+      // the slope flattens to a near-straight line; in the narrow Mission
+      // Control tile it reads fine. Same data, different aspect. Pad the y-axis
+      // to a fraction of the curve's own range instead of letting Plotly
+      // auto-range, so the shape fills the box at any width.
+      var _vv=[];
+      data.forEach(function(tr){ (tr.y||[]).forEach(function(v){
+        if(v!=null&&isFinite(v)) _vv.push(+v); }); });
+      if(spot!=null&&isFinite(spot)) _vv.push(+spot);
+      var _yr;
+      if(_vv.length>1){
+        var lo=Math.min.apply(null,_vv), hi=Math.max.apply(null,_vv);
+        var pad=Math.max((hi-lo)*0.18, 0.25);
+        _yr=[lo-pad, hi+pad];
+      }
       layout.yaxis={gridcolor:PXC().grid,tickfont:tf(9),side:"right",fixedrange:true,
-        title:{text:"",font:tf(8)}};
+        range:_yr,title:{text:"",font:tf(8)}};
       if(spot!=null){
         layout.annotations=[{xref:"paper",x:0,y:spot,yref:"y",xanchor:"left",yanchor:"bottom",
           text:"spot "+spot.toFixed(2),showarrow:false,font:{family:"'Courier New',monospace",size:11,color:(getComputedStyle(document.documentElement).getPropertyValue("--ink").trim()||"#E7EEF6")},bgcolor:(getComputedStyle(document.documentElement).getPropertyValue("--card2").trim()||"rgba(13,28,46,.92)"),bordercolor:(getComputedStyle(document.documentElement).getPropertyValue("--gold").trim()||"#E08A46"),borderwidth:1,borderpad:4}];
