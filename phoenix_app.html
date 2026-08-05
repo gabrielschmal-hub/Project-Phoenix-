@@ -1516,6 +1516,9 @@ html:not(.light) .ed-chartk{color:#E8EDF2;font-size:11.5px}
 .ed-vix{border:1px solid var(--line);border-radius:3px;background:var(--card);
   height:250px;position:relative;padding:8px;margin-bottom:14px}
 .ed-vix .plot{position:absolute;inset:8px}
+.ed-note{font-size:13px;line-height:1.6;color:var(--inkFade);border-left:2px solid var(--line2);
+  padding:8px 0 8px 12px;margin:10px 0 4px;font-style:italic}
+html:not(.light) .ed-note{color:#E8EDF2;font-size:13.5px}
 
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
@@ -2562,7 +2565,21 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   });
 
   // jump links: close the edition, then switch page
-  function edGo(id){ edClose(); setTimeout(function(){ try{ go(id); }catch(e){} }, 60); }
+  function edGo(id){
+    // Phoenix is a single scrolling document - every page is already active, so
+    // go(id) only sets a hash and nothing moves. Scroll to the section instead,
+    // which is what the top nav does.
+    edClose();
+    setTimeout(function(){
+      try{
+        var t=(id==="mission")?document.getElementById("px-hero")
+                              :document.getElementById("page-"+id);
+        if(!t){ try{ go(id); }catch(e){} return; }
+        var y=(id==="mission")?0:(t.getBoundingClientRect().top+window.pageYOffset-8);
+        window.scrollTo({top:y,behavior:"smooth"});
+      }catch(e){ console.warn("[ed] jump",e); }
+    },120);
+  }
   window.PX_ED_GO=edGo;
   // bind after the markup exists; inline onclick with escaped quotes was being
   // mangled by the build and the links did nothing
@@ -2819,7 +2836,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     var dir=top.pc>=0?"jumps":"drops";
     var hl;
     if(top.sig>=2) hl=top.label+" "+dir+" "+Math.abs(top.pc).toFixed(1)+
-      "% \u2014 a "+top.sig.toFixed(1)+"\u03c3 move and the story of the session";
+      "% \u2014 its biggest move in months, and the story of the session";
     else if(Math.abs(items.filter(function(i){return i.k==="spx";})[0]?
       items.filter(function(i){return i.k==="spx";})[0].pc:0)>1)
       hl="A broad session \u2014 nothing unusual, but the index moved with conviction";
@@ -6343,6 +6360,13 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   }
 
   // ---------- init ----------
+  window.PX_EDITION_RESET=function(){
+    // the edition is built once and cached; a profile switch changes the book,
+    // the verdict, the heat and the smart-money section, so it must rebuild
+    ED_BUILT=false; ED_CACHE=null;
+    if(document.body.classList.contains("px-edition")){ edBuild(); ED_BUILT=true; }
+    try{ initMC(); }catch(e){}
+  };
   window.PHOENIX_REINIT_TR=function(){
     try{ trLog=null; trLoadedFor=null; trDetailTk=null; trDetailId=null; initTrades(); }catch(e){}
   };
@@ -7744,6 +7768,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     setTheme(THEMES[p]||"dark");
     applyOrder();
     if(window.PHOENIX_REINIT_TR) window.PHOENIX_REINIT_TR();
+    if(window.PX_EDITION_RESET) window.PX_EDITION_RESET();
     if(window.PHOENIX_REINIT_PF) window.PHOENIX_REINIT_PF();
     document.getElementById("pxG").className="pxacct"+(p==="G"?" on":"");
     document.getElementById("pxA").className="pxacct"+(p==="A"?" on":"");
@@ -7897,6 +7922,11 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
 
   <div class="ed-sec"><div class="ed-k"><span>The tape</span>
       <span class="ed-n">ranked by how unusual</span></div>
+    <div class="ed-note">Sigma (σ) measures a move against that instrument’s own
+      recent behaviour, not against zero. One sigma is a normal day. Two sigma is a move
+      bigger than roughly 95% of its last twenty sessions — rare enough to be
+      information rather than noise. A 1.8% day on the S&amp;P is ordinary in a volatile
+      month and remarkable in a calm one; sigma is what tells the difference.</div>
     <h2 class="ed-hl" id="edTapeHl">…</h2>
     <div class="ed-tape" id="edTapeCards"></div><div id="edTapeBody"></div></div>
 
