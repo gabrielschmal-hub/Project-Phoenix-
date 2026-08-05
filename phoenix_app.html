@@ -1486,6 +1486,37 @@ html.light .ed-w .w-tag{color:#FFFDF9}
   .ed-btn.big span{font-size:21px}
 }
 
+/* the edition is a full-width read; the ch caps were leaving half the column
+   empty on a wide screen */
+.ed-body,.ed-vwhy{max-width:none}
+.ed-page{max-width:1180px}
+
+/* dark theme: every small text white and a step larger */
+html:not(.light) .ed-body,html:not(.light) .ed-vwhy{color:#FFFFFF;font-size:16px;line-height:1.72}
+html:not(.light) .ed-sm .sm-l,html:not(.light) .ed-w,html:not(.light) .ed-rr{color:#FFFFFF;font-size:14.5px}
+html:not(.light) .ed-pos .nt,html:not(.light) .ed-su .nt{color:#E8EDF2;font-size:13.5px}
+html:not(.light) .ed-k,html:not(.light) .ed-sm .sm-t{color:#E8EDF2;font-size:11.5px}
+html:not(.light) .ed-n{color:#FFFFFF;font-size:13.5px}
+html:not(.light) .ed-hello,html:not(.light) .ed-meta{color:#E8EDF2;font-size:11.5px}
+html:not(.light) .ed-ins .i-k{color:#E8EDF2;font-size:11px}
+html:not(.light) .ed-w .w-when{color:#E8EDF2;font-size:12.5px}
+html:not(.light) .ed-colophon{color:#E8EDF2}
+html:not(.light) .ed-sub{color:#F2F5F8}
+
+/* Mission Control: one button, no dead space */
+#page-mission{min-height:0}
+#page-mission .mc-launch{padding:10px 14px 0}
+
+/* edition chart blocks */
+.ed-chartk{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--inkFade);display:flex;justify-content:space-between;align-items:baseline;
+  gap:14px;margin:6px 0}
+html:not(.light) .ed-chartk{color:#E8EDF2;font-size:11.5px}
+.ed-gexh .ed-map{height:auto;padding:8px}
+.ed-vix{border:1px solid var(--line);border-radius:3px;background:var(--card);
+  height:250px;position:relative;padding:8px;margin-bottom:14px}
+.ed-vix .plot{position:absolute;inset:8px}
+
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
   --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
@@ -1745,7 +1776,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
 
   // ================= MARKETS =================
   var MARKETS_HTML =
-    '<div class="ed-strip"><button class="ed-btn" onclick="PX_OPEN_EDITION()"><span>Daily Brief</span><i>your ten-minute read →</i></button></div><div class="mkt-grid">'+
+    '<div class="mkt-grid">'+
       // ── asset marquee (unchanged) ──
       '<div class="a-assets"><div class="asset-band" id="assetBand"><div class="loading">\u2026</div></div></div>'+
 
@@ -2684,6 +2715,32 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
           '<span>'+(rr?rr.toFixed(1)+"R":"\u2014")+'</span>'+
           '<span>'+edPct(pl)+'</span><span>'+edMoney(plUsd)+'</span></div>';
       });
+      // where each name sits against its OWN gamma levels - the question a
+      // position report should answer and the old one did not
+      var gexNotes=[];
+      Promise.all(open.map(function(t){
+        return getJSON("gex_stocks/"+String(t.ticker).replace(/[\/.]/g,"-"))
+          .then(function(d){ return {tk:t.ticker,d:d}; })
+          .catch(function(){ return {tk:t.ticker,d:null}; });
+      })).then(function(gx){
+        gx.forEach(function(x){
+          if(!x.d||x.d.stock_validity==="INVALID_THIN_CHAIN") return;
+          var sp=x.d.spot, cw=x.d.call_wall, pw=x.d.put_wall, fl=x.d.gamma_flip;
+          if(!sp) return;
+          var bits=[];
+          if(cw) bits.push('resistance at '+edNum(cw,2)+' ('+
+            edNum(Math.abs((cw/sp-1)*100),1)+'% away)');
+          if(pw) bits.push('support at '+edNum(pw,2));
+          if(fl) bits.push('flip at '+edNum(fl,2)+', spot '+
+            edNum(Math.abs((sp/fl-1)*100),1)+'% '+(sp>=fl?'above':'below'));
+          if(bits.length) gexNotes.push('<b>'+x.tk+'</b> \u2014 '+bits.join(", ")+
+            (x.d.regime?'. '+x.d.regime+'.':'.'));
+        });
+        if(gexNotes.length) edSet("edBookGex",
+          '<p class="ed-body"><b>Where they sit.</b> '+gexNotes.join(' ')+
+          ' Buying into a call wall is buying into where dealer supply concentrates; '+
+          'a position already through one has that headwind behind it.</p>');
+      }).catch(function(){});
       var avg1=n1?tot1/n1:null, avgW=nW?totW/nW:null;
       edSet("edBookN",(avg1!=null?edPct(avg1)+" today":"")+
         (usd1?" \u00b7 "+edMoney(usd1)+" on the day":""));
@@ -2797,17 +2854,30 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     p+='</p><p class="ed-body">';
     var vix=items.filter(function(i){return i.k==="vix";})[0];
     if(vix){
-      p+='The VIX sits at '+edNum(vix.v,2)+' after '+edPct(vix.pc,2)+
+      p+='<b>The VIX</b> sits at '+edNum(vix.v,2)+' after '+edPct(vix.pc,2)+
         (vix.v<16?' \u2014 complacent territory, where the market is pricing very little risk into the next month. '
          :vix.v<22?' \u2014 an ordinary level, neither fear nor complacency. '
          :' \u2014 elevated, and worth respecting when sizing anything new. ');
     }
     var wti=items.filter(function(i){return i.k==="wti";})[0];
     var gold=items.filter(function(i){return i.k==="gold";})[0];
-    if(wti) p+='Crude at '+edNum(wti.v,2)+' is '+edPct(wti.pc,2)+
-      (Math.abs(wti.pc)>3?', a genuine move that feeds straight into the inflation path and therefore into the regime call. ':'. ');
+    if(wti){
+      p+='<b>Crude</b> sits at '+edNum(wti.v,2)+' after '+edPct(wti.pc,2)+
+        (Math.abs(wti.pc)>=4
+          ? ' \u2014 a move of that size feeds straight into the inflation path and therefore into the regime call itself. Cheaper energy is disinflationary and normally reads as equity-positive; the risk is that a headline-driven drop reverses on the next headline. '
+          : Math.abs(wti.pc)>=2
+            ? ' \u2014 enough to matter for energy names and for the CPI path, not enough to change the regime. '
+            : ' \u2014 quiet, so oil is not driving anything today. ');
+    }
     if(gold&&spx&&gold.pc>0.5&&spx.pc>0.5)
-      p+='Gold rose alongside equities, which is an unusual pairing \u2014 it often means the bid is liquidity-driven rather than a clean risk-on rotation. ';
+      p+='<b>Gold rose alongside equities</b>, which is an unusual pairing \u2014 it often means the bid is liquidity-driven rather than a clean risk-on rotation, and it argues for less conviction in the move than the index prints suggest. ';
+    p+='</p><p class="ed-body"><b>What to watch on the tape.</b> ';
+    p+='The number that would change the read is '+
+      (top.sig>=2
+        ? top.label+' reversing \u2014 a '+top.sig.toFixed(1)+'-sigma move that unwinds tells you it was a headline, not a repricing. '
+        : 'any single instrument clearing two sigma; nothing has today, which is why none of this changes the stance. ');
+    if(vix&&vix.v<16) p+='A VIX back above 18 would end the complacency read and argue for smaller size. ';
+    else if(vix&&vix.v>=22) p+='A VIX back under 20 would be the first sign the stress is draining. ';
     p+='</p>';
     edSet("edTapeBody",p);
   }
@@ -2993,25 +3063,44 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       (flip?", "+Math.abs((spot/flip-1)*100).toFixed(1)+"% "+(spot>flip?"above":"below")+" the flip":"");
     else hl="Spot at "+edNum(spot)+(flip?", flip at "+edNum(flip):"");
     edSet("edMapHl",hl);
-    var p='<p class="ed-body">The index sits at <b>'+edNum(spot)+'</b>';
-    if(cw) p+=', '+edNum(Math.abs(cw-spot))+' points '+(cw>spot?'under':'over')+
-      ' the call wall at '+edNum(cw);
-    if(pw) p+=' and '+edNum(Math.abs(spot-pw))+' points '+(spot>pw?'above':'below')+
-      ' the put wall at '+edNum(pw);
-    p+='. ';
+    var dist=flip?((spot/flip-1)*100):null;
+    var toCw=cw?((cw/spot-1)*100):null, toPw=pw?((spot/pw-1)*100):null;
+    var p='<p class="ed-body"><b>What happened.</b> The index closed at <b>'+edNum(spot)+'</b>';
+    if(cw) p+=', '+edNum(Math.abs(cw-spot))+' points ('+edNum(Math.abs(toCw),2)+'%) '+
+      (cw>spot?'under':'over')+' the call wall at <b>'+edNum(cw)+'</b>';
+    if(pw) p+=' and '+edNum(Math.abs(spot-pw))+' points ('+edNum(Math.abs(toPw),2)+'%) '+
+      (spot>pw?'above':'below')+' the put wall at <b>'+edNum(pw)+'</b>';
+    p+='. Net dealer gamma is <b>'+(ov.net_gex_B>=0?'+':'')+edNum(ov.net_gex_B,1)+'B</b>'+
+       (pin?', with the heaviest combined open interest sitting at '+edNum(pin):'')+'.</p>';
+
+    p+='<p class="ed-body"><b>What it means now.</b> ';
     if(ov.net_gex_B!=null){
       p+=(ov.net_gex_B>=0
-        ? 'In positive gamma dealers hedge against the move \u2014 they sell into pushes higher and buy dips, which compresses realised volatility below what options imply. That is the mechanical reason this tape grinds rather than trends. '
-        : 'In negative gamma dealers hedge with the move \u2014 they sell weakness and buy strength, which amplifies both directions. Ranges widen and stops get tested more often than the news justifies. ');
+        ? 'Positive gamma means dealers are hedging <i>against</i> price: they sell into pushes higher and buy dips, which mechanically compresses realised volatility below what options are pricing. In practice the index tends to mean-revert inside the band rather than trend through it, breakouts fail more often than they carry, and holding through a push into the call wall is usually worse than trimming into it. '
+        : 'Negative gamma means dealers hedge <i>with</i> price: they sell weakness and buy strength, which amplifies moves in both directions. Ranges widen, intraday reversals are sharper, and any stop sitting inside the ordinary daily range is far more likely to be taken. Size down until this changes. ');
     }
-    if(flip) p+='The level that matters is <b>'+edNum(flip)+'</b>: below it the hedging flips '+
-      'and every stop distance in your book becomes a live risk rather than a theoretical one. '+
-      'Spot is '+Math.abs((spot/flip-1)*100).toFixed(1)+'% '+(spot>flip?'above':'below')+
-      ' it. That is the single number to watch tomorrow.';
+    if(cw&&pw) p+='The practical band today is <b>'+edNum(pw)+' to '+edNum(cw)+
+      '</b> \u2014 roughly '+edNum(((cw-pw)/spot*100),1)+'% wide. That is the range where dealer '+
+      'hedging is the dominant flow rather than fundamentals. ';
+    p+='</p>';
+
+    p+='<p class="ed-body"><b>What to watch.</b> ';
+    if(flip){
+      p+='The level that matters is <b>'+edNum(flip)+'</b>, and spot is '+
+        edNum(Math.abs(dist),2)+'% '+(dist>=0?'above':'below')+' it. '+
+        (dist>=0
+          ? 'Lose it and the hedging flips from dampening to amplifying: ranges widen overnight, every stop distance in your book becomes a live risk rather than a theoretical one, and position sizes that were comfortable stop being comfortable. '
+          : 'Reclaim it and the hedging flips from amplifying to dampening: volatility compresses, the tape starts grinding again, and dips become buyable rather than dangerous. ');
+    }
+    if(cw) p+='On the upside, <b>'+edNum(cw)+'</b> is where dealer supply concentrates \u2014 '+
+      'rallies into it usually stall, and a close decisively above it removes the cap. ';
+    if(pw) p+='On the downside, <b>'+edNum(pw)+'</b> is the largest block of supportive hedging '+
+      'below spot; losing it removes that support. ';
     p+='</p>';
     edSet("edMapBody",p);
     // reuse the Markets renderer into the edition's own host
-    try{ if(typeof drawSPX==="function") drawSPX("ED"); }catch(e){}
+    try{ if(typeof drawMktGex==="function") drawMktGex(g,"ED"); }catch(e){ console.warn("[ed] histogram",e); }
+    try{ if(typeof drawVIX==="function"){ drawn.vixED=false; drawVIX("ED"); } }catch(e){ console.warn("[ed] vix",e); }
   }
 
   // ---------------- what would change this -----------------------------------
@@ -3052,10 +3141,11 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   // ---- SPX GEX HISTOGRAM -------------------------------------------------
   // exposed so the render path can be exercised without a live gex.json
   window.__drawMktGex = drawMktGex;
-  function drawMktGex(g){
-    var host=document.getElementById("mGexPlot");
-    var htile=document.querySelector(".a-gexh");
-    var hrow=document.getElementById("gexhRow");
+  function drawMktGex(g,sfx){
+    sfx=sfx||"";
+    var host=document.getElementById("mGexPlot"+sfx);
+    var htile=document.querySelector(sfx?".ed-gexh":".a-gexh");
+    var hrow=document.getElementById("gexhRow"+sfx);
     var prof=(g&&g.profile)||[];
     if(!host||typeof Plotly==="undefined"||!prof.length){
       if(hrow) hrow.style.display="none";
@@ -3172,7 +3262,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         line:{color:m.c,width:m.w,dash:m.d}});
     });
 
-    var key=document.getElementById("gexHKey");
+    var key=document.getElementById("gexHKey"+sfx);
     if(key) key.innerHTML=
       '<span class="k-swatch"><i style="background:'+C.call+'"></i>Call gamma</span>'+
       '<span class="k-swatch"><i style="background:'+C.put+'"></i>Put gamma</span>'+
@@ -3180,7 +3270,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       '<span class="k-note">Bars show <b>gamma in dollars</b>; walls are chosen on '+
       '<b>open interest</b>, so the widest bar and the wall need not be the same strike. '+
       'Above zero = call gamma, dealers sell into strength; below = put gamma, dealers buy weakness.</span>';
-    var hn=document.getElementById("gexHNote");
+    var hn=document.getElementById("gexHNote"+sfx);
     if(hn) hn.textContent=vis.length+" bars \u00b7 "+step+"pt buckets \u00b7 "+unit+
       " \u00b7 "+((ov.net_gex_B||0)>=0?"positive":"negative")+" gamma";
 
@@ -3188,7 +3278,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     // fits the visible window without needing a scroll in the common case
     host.style.minWidth=Math.max(940, vis.length*30)+"px";
     var ink=PXC().ink, dim=PXC().dim, grid=PXC().grid;
-    Plotly.newPlot("mGexPlot",traces,{
+    Plotly.newPlot("mGexPlot"+sfx,traces,{
       height:340,margin:{l:64,r:16,t:18,b:46},
       paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",
       font:{family:"monospace",size:11,color:dim},
@@ -7803,7 +7893,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   <div class="ed-sec"><div class="ed-k"><span>Your book</span>
       <span class="ed-n" id="edBookN"></span></div>
     <h2 class="ed-hl" id="edBookHl">…</h2>
-    <div id="edBookRows"></div><div id="edBookBody"></div></div>
+    <div id="edBookRows"></div><div id="edBookBody"></div><div id="edBookGex"></div></div>
 
   <div class="ed-sec"><div class="ed-k"><span>The tape</span>
       <span class="ed-n">ranked by how unusual</span></div>
@@ -7828,16 +7918,15 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   <div class="ed-sec"><div class="ed-k"><span>The map</span>
       <span class="ed-n" id="edMapN"></span></div>
     <h2 class="ed-hl sm" id="edMapHl">…</h2>
-    <div class="ed-maphead">
-      <span class="mh-px" id="spxPxED">—</span><span class="mh-chg" id="spxChgED"></span>
-      <span class="mh-asof" id="spxAsofED"></span>
-      <span class="mh-hover" id="spxHoverED"></span>
+    <div id="gexhRowED" class="ed-gexh">
+      <div class="ed-chartk"><span>SPX strike histogram</span>
+        <span class="ed-n" id="gexHNoteED"></span></div>
+      <div class="ed-map"><div class="gexh-scroll"><div class="gex-histo" id="mGexPlotED"></div></div>
+        <div class="gexh-key" id="gexHKeyED"></div></div>
     </div>
-    <div class="ed-map"><div class="plot" id="spxPlotED"></div>
-      <div class="spx-zoom">
-        <button id="spxZoomInED">+</button><button id="spxZoomOutED">−</button>
-        <button id="spxZoomResetED">↺</button>
-      </div></div>
+    <div class="ed-chartk" style="margin-top:18px"><span>VIX term structure</span>
+      <span class="ed-n" id="vixNoteED"></span></div>
+    <div class="ed-vix"><div class="plot" id="vixPlotED"></div></div>
     <div id="edMapBody"></div></div>
 
   <div class="ed-sec"><div class="ed-k"><span>What would change this</span>
