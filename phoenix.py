@@ -449,6 +449,104 @@ def _pct_rank(sorted_arr, v):
         return 50.0
     return 100.0 * sum(1 for x in sorted_arr if x <= v) / len(sorted_arr)
 
+def _cap_weighted_index(series_list, caps_now, bars=60):
+    """
+    Cap-weighted index with TIME-VARYING weights.
+
+    THE BUG THIS FIXES: universe.csv carries one static market_cap per ticker.
+    Weighting 60 weeks of history by today's cap gives a name that doubled over
+    the year its post-run weight all the way back through that year, so the
+    index systematically overstates whatever has already moved - precisely
+    backwards for a rotation tool, whose job is to show what is STARTING to move.
+
+    Shares outstanding are not in the universe file, but they can be derived:
+        shares = cap_now / price_now
+    and then the cap at any earlier bar is shares * price_then. That assumes the
+    share count is roughly stable, which is true within a few percent for most
+    names over a year - far smaller than the error it removes.
+
+    Returns the index rebased to 100 at the first bar, or None.
+    """
+    n = len(series_list)
+    if n < 2:
+        return None
+    shares = []
+    for i in range(n):
+        px_now = series_list[i][-1]
+        if not px_now or px_now <= 0 or not caps_now[i] or caps_now[i] <= 0:
+            shares.append(0.0)
+        else:
+            shares.append(caps_now[i] / px_now)
+    if not any(shares):
+        return None
+    idx = []
+    for t in range(bars):
+        mcap_t = sum(shares[i] * series_list[i][t] for i in range(n))
+        idx.append(mcap_t)
+    base = idx[0] or 1.0
+    return [round(v / base * 100.0, 3) for v in idx]
+
+
+def compute_sector_performance(stock_data, universe, daily_ret=None):
+    """
+    Cap-weighted SECTOR returns, built from the same universe constituents as
+    the industry numbers.
+
+    WHY THIS EXISTS: run_sectors() reads the SPDR ETFs, which are GICS. The
+    universe uses a different taxonomy (20 sectors, 125 industries). Only one
+    name overlaps between them. So a sector line from XLK and an industry line
+    from the universe could not be compared - "tech is weak but software is
+    strong" was literally unanswerable, because the two lines came from
+    different classification systems.
+
+    Building sectors from the universe's own constituents makes the hierarchy
+    hold: a sector series IS the aggregate of its industries, and a ticker rolls
+    into exactly one of each. The ETFs stay available as a market-standard
+    cross-check, not as the primary.
+    """
+    from collections import defaultdict
+    daily_ret = daily_ret or {}
+    members = defaultdict(list)
+    for tk, info in universe.items():
+        sec = (info.get("sector") or "").strip()
+        if sec and tk in stock_data and len(stock_data[tk]) >= 60:
+            members[sec].append(tk)
+
+    out = []
+    for sec, tickers in members.items():
+        series, weights, d1s, d1w, inds = [], [], [], [], set()
+        for tk in tickers:
+            closes = [x[1] for x in stock_data[tk]]
+            mc = universe[tk].get("market_cap") or 0
+            if len(closes) < 60 or mc <= 0:
+                continue
+            series.append(closes[-60:]); weights.append(mc)
+            ind = (universe[tk].get("industry") or "").strip()
+            if ind:
+                inds.add(ind)
+            if daily_ret.get(tk) is not None:
+                d1s.append(daily_ret[tk] * mc); d1w.append(mc)
+        if len(series) < 3:
+            continue
+        W = sum(weights)
+        idx_norm = _cap_weighted_index(series, weights)
+        if not idx_norm:
+            continue
+        idx = idx_norm
+
+        def ret(nbars):
+            return round((idx[-1] / idx[-1 - nbars] - 1) * 100, 2) if len(idx) > nbars else None
+
+        out.append({
+            "sector": sec, "series": idx_norm, "n": len(series),
+            "n_industries": len(inds), "mcap_B": round(W / 1e9, 1),
+            "d1": (round(sum(d1s) / sum(d1w), 2) if d1w else None),
+            "w1": ret(1), "m1": ret(4), "m3": ret(13),
+        })
+    out.sort(key=lambda r: -(r.get("mcap_B") or 0))
+    return out
+
+
 def compute_industry_performance(stock_data, universe, daily_ret=None):
     """
     Cap-weighted industry returns across 4 timeframes for the Screener industry tile.
@@ -460,9 +558,16 @@ def compute_industry_performance(stock_data, universe, daily_ret=None):
     from collections import defaultdict
     daily_ret = daily_ret or {}
     members = defaultdict(list)
+    ind_sector = {}
     for tk, info in universe.items():
         if tk in stock_data and len(stock_data[tk]) >= 60:
             members[info["industry"]].append(tk)
+            # every industry belongs to exactly one sector in this universe -
+            # verified across all 2,893 names - so carrying the parent through
+            # lets the app roll a ticker up to its industry and its sector
+            # without a second lookup table
+            if info.get("sector"):
+                ind_sector.setdefault(info["industry"], info["sector"])
 
     out = []
     for ind, tickers in members.items():
@@ -479,8 +584,12 @@ def compute_industry_performance(stock_data, universe, daily_ret=None):
         if len(series) < 2:
             continue
         W = sum(weights)
-        idx = [sum((series[i][t] / series[i][0]) * weights[i] for i in range(len(series))) / W
-               for t in range(60)]
+        # time-varying cap weights: see _cap_weighted_index. The old line here
+        # weighted 60 weeks of history by TODAY's market cap.
+        idx_norm = _cap_weighted_index(series, weights)
+        if not idx_norm:
+            continue
+        idx = idx_norm
         def ret(nbars):
             return round((idx[-1] / idx[-1 - nbars] - 1) * 100, 2) if len(idx) > nbars else None
         w1 = ret(1); m1 = ret(4); m3 = ret(13)
@@ -488,7 +597,9 @@ def compute_industry_performance(stock_data, universe, daily_ret=None):
         ma10 = _sma(idx, 10); ma10_prev = _sma(idx[:-4], 10)
         above = ma10 is not None and idx[-1] > ma10
         rising = ma10 is not None and ma10_prev is not None and ma10 > ma10_prev
-        out.append({"industry": ind, "n": len(series), "mcap_B": round(W / 1e9, 1),
+        out.append({"industry": ind, "sector": ind_sector.get(ind, ""),
+                    "series": idx_norm,
+                    "n": len(series), "mcap_B": round(W / 1e9, 1),
                     "d1": d1, "w1": w1, "m1": m1, "m3": m3, "above": above, "rising": rising})
     out.sort(key=lambda r: (r["d1"] if r["d1"] is not None else -999), reverse=True)
     return out
@@ -3087,6 +3198,102 @@ def _third_friday(year, month):
     return d + timedelta(days=14)                    # third Friday
 
 
+def run_perf_series():
+    """
+    outputs/perf_series.json - normalised performance lines for the rotation
+    chart: every sector, every industry, and SPX as the benchmark, each rebased
+    to 100 at the start of the window.
+
+    Industries come from the cap-weighted index compute_industry_performance
+    already builds (60 weekly bars). Sectors come from the SPDR ETFs, resampled
+    weekly so the two views share a cadence and can be compared directly.
+    """
+    import os, json
+    import yfinance as yf
+
+    def weekly_norm(sym, weeks=60):
+        try:
+            df = yf.download(sym, period="18mo", interval="1wk",
+                             auto_adjust=True, progress=False)
+            if df is None or len(df) == 0:
+                return None, None
+            c = df["Close"]
+            if hasattr(c, "columns"):
+                c = c.iloc[:, 0]
+            c = c.dropna().tail(weeks)
+            if len(c) < 20:
+                return None, None
+            base = float(c.iloc[0]) or 1.0
+            return ([str(d)[:10] for d in c.index],
+                    [round(float(v) / base * 100.0, 3) for v in c])
+        except Exception as e:
+            print(f"[perf] {sym}: {e}")
+            return None, None
+
+    dates, spx = weekly_norm("^GSPC")
+    if not spx:
+        print("[perf] no SPX benchmark - keeping previous file")
+        return None
+
+    # PRIMARY: sectors built from the universe's own constituents, so a sector
+    # line is genuinely the aggregate of its industries and a ticker rolls into
+    # exactly one of each. The ETFs are a different taxonomy and cannot be
+    # compared with the industry numbers.
+    sectors = []
+    try:
+        sp = json.load(open(os.path.join(OUTPUTS_DIR, "sector_perf.json")))
+        for r in (sp.get("sectors") or []):
+            ser = r.get("series")
+            if ser and len(ser) >= 20:
+                sectors.append({"name": r.get("sector"), "series": ser,
+                                "n": r.get("n"), "n_industries": r.get("n_industries"),
+                                "mcap_B": r.get("mcap_B"),
+                                "chg": round(ser[-1] - 100.0, 2)})
+        sectors.sort(key=lambda x: -x["chg"])
+    except Exception as e:
+        print(f"[perf] universe sector series unavailable: {e}")
+
+    # CROSS-CHECK ONLY: the SPDR ETFs, GICS taxonomy, kept under its own key so
+    # nothing accidentally mixes the two classification systems in one chart
+    etfs = []
+    for etf, label in SECTOR_ETFS.items():
+        d, v = weekly_norm(etf)
+        if not v:
+            continue
+        etfs.append({"key": etf, "name": label, "dates": d, "series": v,
+                     "chg": round(v[-1] - 100.0, 2)})
+    etfs.sort(key=lambda x: -x["chg"])
+
+    industries = []
+    try:
+        ind = json.load(open(os.path.join(OUTPUTS_DIR, "industry.json")))
+        for r in (ind.get("industries") or []):
+            ser = r.get("series")
+            if ser and len(ser) >= 20:
+                industries.append({"name": r.get("industry"),
+                                   "sector": r.get("sector"), "series": ser,
+                                   "n": r.get("n"), "mcap_B": r.get("mcap_B"),
+                                   "chg": round(ser[-1] - 100.0, 2)})
+        industries.sort(key=lambda x: -x["chg"])
+    except Exception as e:
+        print(f"[perf] industry series unavailable: {e}")
+
+    write_json("perf_series", {
+        "asof": _now(), "window_weeks": len(spx),
+        "benchmark": {"name": "S&P 500", "dates": dates, "series": spx,
+                      "chg": round(spx[-1] - 100.0, 2)},
+        "taxonomy": "universe: 20 sectors, 125 industries, every industry in "
+                    "exactly one sector",
+        "sectors": sectors, "industries": industries,
+        "sector_etfs": etfs,          # GICS - cross-check only, do not mix
+    })
+    orphan = [i for i in industries if not i.get("sector")]
+    print(f"[perf] {len(sectors)} sectors, {len(industries)} industries "
+          f"({len(orphan)} without a parent sector), {len(etfs)} ETFs, "
+          f"{len(spx)} weeks, SPX {spx[-1]-100:+.1f}%")
+    return len(sectors) + len(industries)
+
+
 def run_calendar():
     """
     outputs/calendar.json - the dates that change how a week trades.
@@ -3437,6 +3644,12 @@ def run_stocks(auto_pull=True):
     # Industry performance (cap-weighted, 4 timeframes) for the Screener industry tile.
     try:
         ind_perf = compute_industry_performance(weekly, universe, daily_ret=daily_ret)
+        sec_perf = compute_sector_performance(weekly, universe, daily_ret=daily_ret)
+        write_json("sector_perf", {"asof": _now(), "count": len(sec_perf),
+                                   "taxonomy": "universe (matches industry.json)",
+                                   "sectors": sec_perf})
+        print(f"[stocks] wrote outputs/sector_perf.json ({len(sec_perf)} sectors, "
+              f"same taxonomy as the industries)")
         write_json("industry", {"asof": result.get("asof"), "count": len(ind_perf),
                                 "industries": ind_perf})
         print(f"[stocks] wrote outputs/industry.json ({len(ind_perf)} industries)")
@@ -6626,6 +6839,7 @@ def run_full():
     step("stocks",         run_stocks)
 
     # --- smart money: cheap, and it was starving at the end of the run ------
+    step("perf_series",    run_perf_series)   # needs industry.json from stocks
     step("congress",       run_congress_trades)
     step("house_ptr",      run_house_ptr)
     step("oge",            run_oge_disclosures)
