@@ -1519,6 +1519,12 @@ html:not(.light) .ed-chartk{color:#E8EDF2;font-size:11.5px}
 .ed-note{font-size:13px;line-height:1.6;color:var(--inkFade);border-left:2px solid var(--line2);
   padding:8px 0 8px 12px;margin:10px 0 4px;font-style:italic}
 html:not(.light) .ed-note{color:#E8EDF2;font-size:13.5px}
+/* the epigraph earns a mark when it is being driven by dealer positioning
+   rather than the macro regime - that is the condition worth noticing */
+.ed-sub-gamma{position:relative}
+.ed-sub-gamma::after{content:"\00b7 gamma";font-family:var(--mono);font-style:normal;
+  font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+  margin-left:9px;vertical-align:middle}
 
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
@@ -2494,6 +2500,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     }).catch(function(e){ console.warn("[brief] book block", e); });
   }
   window.__PXT.brfBook=brfBook;
+  window.__PXT.epi=function(m,g){ return edEpigraph(m,g); };
   window.__PXT.setGetJSON=function(f){ getJSON=f; };
   window.__PXT.getJSON=function(){ return getJSON; };
   window.__PXT.trLoad=function(cb){ trLoad(cb); };
@@ -2625,8 +2632,123 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   }
 
 
+
+  // ---------------- the epigraph -------------------------------------------
+  // One line under the wordmark, chosen for the conditions rather than
+  // decoration. Rule for every line in these pools: it must imply an action -
+  // size, patience, stops, or waiting. Anything that is only wisdom was cut.
+  //
+  // Priority is gamma first, regime second. Dealer positioning changes how the
+  // tape behaves today regardless of what the macro regime has been doing for
+  // the last two years, and it is the condition most likely to hurt you.
+  var EPIGRAPHS = {
+    // --- SPX gamma states: these override the regime ---
+    NEG_GAMMA: [
+      "Dealers amplify today. Halve it.",
+      "Negative gamma: the move you see is the move getting bigger.",
+      "Stops inside the daily range are not stops today.",
+      "Amplifying tape. Fewer trades, smaller size, wider patience.",
+      "When hedging runs with price, respect the range \u2014 do not fade it."
+    ],
+    NEAR_FLIP: [
+      "Sitting on the flip. The least predictable place on the chart.",
+      "A point either side changes the whole mechanic. Wait for the side.",
+      "At the flip, conviction is expensive and patience is free.",
+      "The regime boundary is not a level to trade. It is a level to watch."
+    ],
+    AT_CALL_WALL: [
+      "Into the wall is into dealer supply. Trim, do not add.",
+      "Rallies die where the hedging concentrates. You are there.",
+      "A close above the wall is a signal. A push into it is not."
+    ],
+    AT_PUT_WALL: [
+      "Support is dealer hedging, not conviction. It holds until it doesn't.",
+      "Sitting on the put wall: the floor is mechanical, so is its failure.",
+      "Below this level the supportive bid disappears. Know your stop."
+    ],
+    // --- macro regimes ---
+    POLICY_TIGHTENING: [
+      "Survival first. Measure, don't debate.",
+      "Tight money, tight stops.",
+      "Rising rates punish conviction held too long.",
+      "The cost of being wrong rises with the front end.",
+      "In a tightening cycle, patience compounds faster than positions.",
+      "Liquidity is leaving. Do not be the last one sized."
+    ],
+    GOLDILOCKS: [
+      "Calm tape. Take the trade, not the whole account.",
+      "The market is cooperating. Don't mistake that for skill.",
+      "Good conditions are for building, not for proving.",
+      "Easy money makes bad habits. Keep the same 1R.",
+      "Low volatility is borrowed, not earned. Spend it carefully."
+    ],
+    CRISIS_PEAK: [
+      "Capital preserved is capital deployed later.",
+      "The only edge in a crisis is still being here.",
+      "Cash is a position. Today it may be the best one.",
+      "Nobody catches the bottom. Everybody survives it or doesn't.",
+      "Size down until you can be wrong twice."
+    ],
+    RECOVERY_EARLY: [
+      "Buy the base, not the bounce.",
+      "Bottoms are processes, not prices.",
+      "Early is indistinguishable from wrong until it isn't. Size for that.",
+      "The first leg is for scouts. Bring a small position."
+    ],
+    RECOVERY_LATE: [
+      "The easy part is over. The rewarding part isn't.",
+      "Let winners run. Cut the arguments short.",
+      "Late cycle: raise stops, not size.",
+      "Trends end quietly. Trail accordingly."
+    ],
+    ENERGY_GRIND: [
+      "When oil leads, correlations change. Recheck the book.",
+      "Input costs are somebody's margin. Know whose.",
+      "Energy grinds move slowly and matter enormously. Hold the thesis, not the entry."
+    ],
+    ENERGY_SPIKE: [
+      "Oil shocks reprice everything. Reprice your stops first.",
+      "A spike is a shock, and shocks unwind. Do not chase either direction.",
+      "Energy leads, equities follow. Watch the input, trade the output."
+    ],
+    NO_CLEAR: [
+      "No regime, no thesis.",
+      "When the model is silent, so are you.",
+      "An unclear tape is a reason to wait, not a reason to guess.",
+      "Nothing qualifies today. That is information, not an obstacle."
+    ]
+  };
+
+  function edEpigraph(m,g){
+    var ov=(g&&g.overview)||{}, L=(g&&g.levels)||{};
+    function lv(x){ return (x&&x.strike!=null)?x.strike:(typeof x==="number"?x:null); }
+    var spot=ov.spx_spot||ov.spot, flip=ov.gamma_flip,
+        cw=lv(L.call_wall), pw=lv(L.put_wall);
+    var pool=null, why=null;
+    // gamma outranks the regime: it describes how the tape behaves TODAY
+    if(ov.net_gex_B!=null && ov.net_gex_B<0){ pool="NEG_GAMMA"; why="dealers are short gamma"; }
+    else if(spot&&flip&&Math.abs(spot/flip-1)<=0.005){ pool="NEAR_FLIP"; why="spot is on the gamma flip"; }
+    else if(spot&&cw&&Math.abs(cw/spot-1)<=0.004){ pool="AT_CALL_WALL"; why="spot is at the call wall"; }
+    else if(spot&&pw&&Math.abs(spot/pw-1)<=0.004){ pool="AT_PUT_WALL"; why="spot is at the put wall"; }
+    else { pool=(m&&m.regime)||"NO_CLEAR"; why=null; }
+    var lines=EPIGRAPHS[pool]||EPIGRAPHS.NO_CLEAR;
+    // day of year: stable through the session, different tomorrow, cycles
+    var now=new Date();
+    var doy=Math.floor((now-new Date(now.getFullYear(),0,0))/864e5);
+    var line=lines[doy%lines.length];
+    return {line:line, why:why, pool:pool};
+  }
+
   // ---------------- masthead + verdict --------------------------------------
   function edMast(m,g){
+    var ep=edEpigraph(m,g);
+    var sub=document.getElementById("edSub");
+    if(sub){
+      sub.textContent=ep.line;
+      sub.title=ep.why?("chosen because "+ep.why):("chosen for the "+
+        String(ep.pool).replace(/_/g," ").toLowerCase()+" regime");
+      sub.className="ed-sub"+(ep.why?" ed-sub-gamma":"");
+    }
     var d=new Date();
     try{ if(m&&m.asof) d=new Date(String(m.asof).slice(0,10)+"T00:00:00"); }catch(e){}
     var long=d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
@@ -7906,7 +8028,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         <path fill="var(--gold)" fill-rule="evenodd" d="M3.90 3.70 L5.00 9.40 L9.20 17.70 L23.60 27.30 L22.60 27.80 L11.50 22.00 L10.90 23.10 L14.20 30.80 L17.10 33.70 L28.70 40.30 L30.60 42.70 L29.60 42.80 L22.60 38.10 L21.00 38.50 L22.20 41.80 L25.10 45.70 L35.80 51.60 L36.10 54.60 L38.80 55.30 L39.00 57.40 L43.40 64.70 L44.70 63.80 L45.10 61.50 L48.70 56.80 L49.30 54.10 L51.60 53.80 L52.60 51.10 L61.80 46.70 L64.70 43.80 L67.00 39.10 L65.30 37.60 L65.50 37.00 L71.70 32.80 L74.90 27.40 L76.00 22.70 L75.00 22.30 L70.70 25.60 L65.10 28.20 L60.70 31.60 L57.10 33.20 L53.20 36.60 L54.30 33.20 L60.50 28.10 L63.80 27.70 L75.80 19.70 L79.70 15.80 L84.00 5.10 L84.00 3.70 L83.20 3.20 L77.70 7.60 L64.10 16.20 L61.30 19.80 L57.10 21.20 L53.10 24.20 L47.20 30.10 L44.90 34.80 L45.80 39.40 L43.40 41.50 L41.30 38.50 L42.00 34.80 L40.90 31.50 L34.80 24.20 L27.90 19.30 L26.00 19.40 L24.70 17.20 L10.20 7.60 L6.80 4.20 L4.70 3.20 Z M49.70 42.30 L47.60 47.70 L45.90 49.70 L47.60 52.30 L46.90 52.90 L43.30 50.80 L43.00 49.90 L45.30 46.20 Z M24.30 28.30 L26.40 28.10 L29.70 30.30 L33.60 34.20 L33.80 35.50 Z M64.60 38.20 L63.70 39.60 L54.70 45.60 L53.30 45.70 L59.20 40.30 Z"/></svg>
       <span class="ed-name">Phoenix</span>
     </div>
-    <div class="ed-sub">Survival first. Measure, don’t debate.</div>
+    <div class="ed-sub" id="edSub">Survival first. Measure, don’t debate.</div>
     <div class="ed-hello" id="edDate"></div>
   </div>
 
