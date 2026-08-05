@@ -1651,6 +1651,23 @@ html:not(.light) .rp-selbar{color:#E8EDF2;font-size:13px}
 .rp-plot{touch-action:pan-y;position:relative}
 .rp-cross{position:absolute;left:0;top:0;width:0;border-left:1.5px dashed var(--gold);
   pointer-events:none;opacity:0;transition:opacity .12s ease;z-index:3}
+/* screener: pattern column with levels and the selected stop */
+.scr-pat{width:132px;height:38px;display:block}
+.scr-pat .px{fill:none;stroke-width:1.5}
+.scr-pat .ma{fill:none;stroke:var(--gold);stroke-width:1.1;opacity:.85}
+.scr-pat .lvl{stroke-width:1;stroke-dasharray:3 3}
+.scr-pat .res{stroke:var(--red);opacity:.7}
+.scr-pat .sup{stroke:var(--green);opacity:.7}
+.scr-pat .stop{stroke:var(--gold);stroke-dasharray:5 3;stroke-width:1.6;opacity:1}
+.patcell{display:flex;align-items:center;min-width:132px}
+.scr-nopat{font-family:var(--mono);font-size:11px;color:var(--inkFade)}
+/* the pattern column needs its own track in the screener grid */
+.scr-tr,.scr-th{grid-template-columns:34px 1.7fr 140px 78px 62px 50px 50px 66px 74px!important}
+@media(max-width:900px){
+  .scr-tr,.scr-th{grid-template-columns:28px 1.4fr 110px 66px 54px 44px 44px 56px 62px!important}
+  .scr-pat{width:104px;height:32px}
+  .patcell{min-width:104px}
+}
 
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
@@ -1879,7 +1896,16 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     var n=NAV.filter(function(x){return x.id===id;})[0];
     document.getElementById("tbSection").textContent=(n?n.label:id);
     if(id==="markets") initMarkets();
-    if(id==="screeners") initScreener();
+    if(id==="screeners"){
+      initScreener();
+      setTimeout(function(){
+        var ss=document.getElementById("scrStop");
+        if(ss&&!ss._wired){
+          ss._wired=true;
+          ss.addEventListener("change",function(){ SCR_STOP=ss.value; scrFillPatterns(); });
+        }
+      },200);
+    }
     if(id==="trades") initTrades();
     if(id==="portfolio") initPortfolio();
     if(id==="mission") initMC();
@@ -4375,6 +4401,13 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         '<div class="scr-controls">'+
           '<input class="scr-search" id="scrSearch" placeholder="Search ticker, company, or industry\u2026" autocomplete="off">'+
           '<select class="scr-sel" id="scrMcap"><option value="">Any cap</option><option value="1000">&gt; $1T</option><option value="200">&gt; $200B</option><option value="50">&gt; $50B</option><option value="10">&gt; $10B</option><option value="1">&gt; $1B</option></select>'+
+          '<select class="scr-sel" id="scrStop" title="drawn on every pattern">'+
+            '<option value="ma50">Stop: 50-day average</option>'+
+            '<option value="ma200">Stop: 200-day average</option>'+
+            '<option value="swing">Stop: recent swing low</option>'+
+            '<option value="putwall">Stop: gamma put wall</option>'+
+            '<option value="atr">Stop: 2 x ATR</option>'+
+          '</select>'+
           '<select class="scr-sel" id="scrChg"><option value="">Any day move</option><option value="0">Up today</option><option value="2">&gt; +2%</option><option value="5">&gt; +5%</option></select>'+
         '</div>'+
         '<div class="tbody"><div class="scr-table" id="scrTable"><div class="loading">\u2026</div></div></div></div>'+
@@ -4521,6 +4554,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       cEl.style.color = (fresh===false) ? "var(--red)" : (cov!=null&&cov<90) ? "var(--amber)" : "var(--inkFade)";
     }
     var head='<div class="scr-th"><span data-s="rank">#</span><span data-s="ticker">Stock</span>'+
+      '<span>Pattern</span>'+
       '<span data-s="daily_pct" class="num">Day</span><span data-s="opp_score" class="num">Score</span>'+
       '<span data-s="trade_score" class="num">Trade</span><span data-s="invest_score" class="num">Invest</span>'+
       '<span data-s="mcap_B" class="num">Cap</span><span class="num">Add</span></div>';
@@ -4537,6 +4571,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       return '<div class="scr-tr'+(s.passer===false?' nearmiss':'')+'" data-row-tk="'+s.ticker+'">'+
         '<span class="rk">'+(s.rank||"\u2014")+'</span>'+
         '<span class="nmcell"><span class="tk">'+s.ticker+(s.breakout?' \u25B2':'')+'<span class="tk-arrow">\u203A</span></span><span class="nm">'+nm+'</span></span>'+
+        '<span class="patcell" data-pat="'+s.ticker+'"></span>'+
         '<span class="num" style="color:'+dpc+';font-weight:700">'+dps+'</span>'+
         '<span class="num">'+pill+'</span>'+
         '<span class="num">'+(s.trade_score!=null?s.trade_score:"\u2014")+'</span>'+
@@ -4571,13 +4606,13 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         tkEl.style.cursor="pointer";
         tkEl.addEventListener("click",function(ev){
           ev.stopPropagation();
-          if(scrExpanded===tk){ scrOpenTicker(tk); }   // 2nd tap -> full page
-          else { scrToggleExpand(tk, row); }            // 1st tap -> preview
+          scrOpenTicker(tk);   // straight to the ticker page - no interstitial
         });
       }
       // rest of the row still toggles the preview (never navigates)
       row.addEventListener("click",function(){ scrToggleExpand(this.dataset.rowTk, this); });
     });
+    scrFillPatterns();
     // re-open whichever row was expanded before the re-render
     if(scrExpanded){
       var r=el.querySelector('.scr-tr[data-row-tk="'+scrExpanded+'"]');
@@ -4792,6 +4827,81 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     exp.innerHTML=scoresHTML+metricsHTML+foot;
     var link=exp.querySelector(".scr-full-link");
     if(link) link.addEventListener("click",function(ev){ ev.stopPropagation(); scrOpenTicker(tk); });
+  }
+
+
+  // ---- pattern sparkline: price, its moving average, the levels it trades
+  //      between, and whichever stop basis is selected in the header ---------
+  var SCR_STOP="ma50";
+  var SCR_STOPS={ma50:"50-day average",ma200:"200-day average",
+                 swing:"Recent swing low",putwall:"Gamma put wall",atr:"2 x ATR"};
+
+  function scrStopLine(bars, tk){
+    if(!bars||bars.length<25) return null;
+    var c=bars.map(function(b){return b.c;});
+    function sma(n){
+      if(c.length<n) return null;
+      var w=c.slice(-n);
+      return w.reduce(function(a,b){return a+b;},0)/n;
+    }
+    if(SCR_STOP==="ma50")  return sma(50)||sma(c.length);
+    if(SCR_STOP==="ma200") return sma(200)||sma(c.length);
+    if(SCR_STOP==="swing"){
+      var w=c.slice(-40); return Math.min.apply(null,w);
+    }
+    if(SCR_STOP==="atr"){
+      var tr=[];
+      for(var i=Math.max(1,bars.length-14);i<bars.length;i++){
+        var b=bars[i],p=bars[i-1];
+        tr.push(Math.max(b.h-b.l, Math.abs(b.h-p.c), Math.abs(b.l-p.c)));
+      }
+      var atr=tr.reduce(function(a,b){return a+b;},0)/(tr.length||1);
+      return c[c.length-1]-2*atr;
+    }
+    if(SCR_STOP==="putwall"){
+      var g=(window.__scrGex||{})[tk];
+      return (g&&g.put_wall)||null;
+    }
+    return null;
+  }
+
+  function scrPatSVG(bars, tk){
+    if(!bars||bars.length<10) return "";
+    var b=bars.slice(-60), c=b.map(function(x){return x.c;});
+    var ma=c.map(function(_,i){
+      var w=c.slice(Math.max(0,i-19),i+1);
+      return w.reduce(function(p,q){return p+q;},0)/w.length;
+    });
+    var recent=c.slice(-30);
+    var res=Math.max.apply(null,recent)*0.995;
+    var sup=Math.min.apply(null,recent)*1.005;
+    var stop=scrStopLine(bars, tk);
+    var all=c.concat(ma).concat([res,sup]).concat(stop?[stop]:[]);
+    var lo=Math.min.apply(null,all), hi=Math.max.apply(null,all), rng=(hi-lo)||1;
+    var W=132,H=38;
+    function Y(v){ return (H-(v-lo)/rng*(H-6)-3).toFixed(1); }
+    function P(a){ return a.map(function(v,i){return (i/(a.length-1)*W).toFixed(1)+","+Y(v);}).join(" L"); }
+    var col=c[c.length-1]>=c[0]?"var(--green)":"var(--red)";
+    return '<svg class="scr-pat" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+
+      '<line class="lvl res" x1="0" y1="'+Y(res)+'" x2="'+W+'" y2="'+Y(res)+'"/>'+
+      '<line class="lvl sup" x1="0" y1="'+Y(sup)+'" x2="'+W+'" y2="'+Y(sup)+'"/>'+
+      (stop?'<line class="lvl stop" x1="0" y1="'+Y(stop)+'" x2="'+W+'" y2="'+Y(stop)+'"/>':'')+
+      '<path class="ma" d="M'+P(ma)+'"/>'+
+      '<path class="px" stroke="'+col+'" d="M'+P(c)+'"/></svg>';
+  }
+
+  // fill the pattern cells lazily, once bars arrive
+  function scrFillPatterns(){
+    var cells=document.querySelectorAll(".patcell[data-pat]");
+    Array.prototype.forEach.call(cells,function(cell){
+      var tk=cell.getAttribute("data-pat");
+      if(!tk) return;
+      try{
+        dpFetchBars(tk,"daily",function(bars){
+          cell.innerHTML=scrPatSVG(bars,tk)||'<span class="scr-nopat">\u2014</span>';
+        });
+      }catch(e){}
+    });
   }
 
   // ---- open the full ticker detail page from the screener ----
