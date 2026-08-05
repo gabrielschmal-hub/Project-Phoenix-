@@ -1646,6 +1646,11 @@ html:not(.light) .rp-selbar{color:#E8EDF2;font-size:13px}
   max-width:100%;overflow-wrap:anywhere;line-height:1.55;padding-top:6px}
 .gexh-key{max-width:100%}
 .tile.a-gexh .tbody{overflow:hidden}
+/* rotation chart: horizontal drag scrubs the series, vertical drag still
+   scrolls the page. Without pan-y the chart swallowed the page scroll. */
+.rp-plot{touch-action:pan-y;position:relative}
+.rp-cross{position:absolute;left:0;top:0;width:0;border-left:1.5px dashed var(--gold);
+  pointer-events:none;opacity:0;transition:opacity .12s ease;z-index:3}
 
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
@@ -3750,16 +3755,68 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         var box=document.getElementById("rpRead");
         if(box) box.innerHTML=h;
       }
-      // paint the latest close first, so the panel is never empty even if the
-      // hover binding is unavailable
       paint(dates.length-1);
-      if(el&&el.on){
-        el.on("plotly_hover",function(ev){
-          var p=ev.points&&ev.points[0];
-          if(p&&p.pointIndex!=null) paint(p.pointIndex);
-        });
-        el.on("plotly_unhover",function(){ paint(dates.length-1); });
+
+      // TOUCH SCRUBBING.
+      // plotly_hover only fires on discrete taps, so on iPad the readout jumped
+      // between points instead of following a drag. Track pointer position
+      // directly and map it to an index using the axis geometry Plotly exposes.
+      // touch-action:pan-y means a vertical drag still scrolls the page while a
+      // horizontal drag scrubs the chart.
+      function idxFromX(clientX){
+        var fl=el._fullLayout;
+        if(!fl||!fl.xaxis) return null;
+        var ax=fl.xaxis, r=el.getBoundingClientRect();
+        var off=(ax._offset!=null)?ax._offset:0;
+        var len=(ax._length!=null)?ax._length:r.width;
+        if(!len) return null;
+        var frac=(clientX-r.left-off)/len;
+        frac=Math.max(0,Math.min(1,frac));
+        return Math.round(frac*(dates.length-1));
       }
+      var cross=el.querySelector(".rp-cross");
+      if(!cross){
+        cross=document.createElement("div");
+        cross.className="rp-cross";
+        el.appendChild(cross);
+      }
+      function moveCross(i){
+        var fl=el._fullLayout;
+        if(!fl||!fl.xaxis){ cross.style.opacity=0; return; }
+        var ax=fl.xaxis;
+        var off=(ax._offset!=null)?ax._offset:0;
+        var len=(ax._length!=null)?ax._length:el.getBoundingClientRect().width;
+        var top=(fl.yaxis&&fl.yaxis._offset!=null)?fl.yaxis._offset:0;
+        var h=(fl.yaxis&&fl.yaxis._length!=null)?fl.yaxis._length:el.getBoundingClientRect().height;
+        cross.style.transform="translateX("+(off+(i/(dates.length-1))*len)+"px)";
+        cross.style.top=top+"px";
+        cross.style.height=h+"px";
+        cross.style.opacity=1;
+      }
+      var scrubbing=false;
+      function scrub(ev){
+        var cx=(ev.touches&&ev.touches[0])?ev.touches[0].clientX:ev.clientX;
+        if(cx==null) return;
+        var i=idxFromX(cx);
+        if(i==null) return;
+        paint(i); moveCross(i);
+      }
+      el.addEventListener("pointerdown",function(ev){
+        scrubbing=true; scrub(ev);
+        if(el.setPointerCapture&&ev.pointerId!=null){
+          try{ el.setPointerCapture(ev.pointerId); }catch(e){}
+        }
+      });
+      el.addEventListener("pointermove",function(ev){
+        if(ev.pointerType==="mouse"||scrubbing) scrub(ev);
+      });
+      ["pointerup","pointercancel","pointerleave"].forEach(function(t){
+        el.addEventListener(t,function(){ scrubbing=false; });
+      });
+      el.addEventListener("mouseleave",function(){
+        paint(dates.length-1); cross.style.opacity=0;
+      });
+      moveCross(dates.length-1);
     })();
 
     // the ranked list underneath
