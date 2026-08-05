@@ -1327,7 +1327,7 @@ html:not(.light) .sm-chip.on{color:#141210!important}
 }
 
 /* ===================== PHOENIX DAILY EDITION ===================== */
-.mc-launch{padding:26px 22px}
+.mc-launch{padding:14px 14px 0}
 .ed-open{display:grid;grid-template-columns:1fr auto;align-items:center;gap:18px;width:100%;
   background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gold);
   border-radius:4px;padding:22px 26px;cursor:pointer;text-align:left;font:inherit;color:inherit}
@@ -1349,7 +1349,7 @@ html.light .ed-scrim{background:rgba(60,44,28,.42)}
 .ed-wrap.on{display:block}
 body.px-edition{overflow:hidden}
 .ed-page{max-width:1080px;margin:0 auto;padding:30px 30px 60px;position:relative}
-.ed-x{position:sticky;top:6px;float:right;z-index:5;background:var(--card);
+.ed-x{position:absolute;top:18px;right:26px;z-index:5;background:var(--card);
   border:1px solid var(--line2);border-radius:99px;padding:7px 15px;cursor:pointer;
   font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--inkLight)}
 .ed-x:hover{color:var(--gold);border-color:var(--gold)}
@@ -1461,6 +1461,30 @@ html.light .ed-w .w-tag{color:#FFFDF9}
 .ed-btn span{font-family:var(--serif);font-size:20px}
 .ed-btn i{font-family:var(--mono);font-size:11.5px;font-style:normal;letter-spacing:.14em;
   text-transform:uppercase;color:var(--gold);white-space:nowrap}
+
+/* masthead: mark beside the wordmark, and a meta row that clears the close pill */
+.ed-brand{display:flex;align-items:center;justify-content:center;gap:14px;margin:10px 0 4px}
+.ed-mark{width:52px;height:40px;flex:0 0 auto;display:block}
+.ed-brand .ed-name{font-family:var(--serif);font-size:56px;line-height:1;letter-spacing:-.02em}
+.ed-meta{padding-right:130px}
+.ed-meta span:last-child{text-align:right}
+/* SPX header row above the map */
+.ed-maphead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:4px 0 2px;
+  font-family:var(--mono)}
+.ed-maphead .mh-px{font-size:22px;font-weight:700}
+.ed-maphead .mh-chg{font-size:13px}
+.ed-maphead .mh-asof{font-size:11px;color:var(--inkFade);margin-left:auto}
+.ed-maphead .mh-hover{font-size:11px;color:var(--inkFade);flex-basis:100%}
+.ed-map .spx-zoom{position:absolute;right:12px;bottom:12px;display:flex;gap:4px;z-index:4}
+.ed-map .spx-zoom button{width:26px;height:26px;border-radius:6px;border:1px solid var(--line2);
+  background:var(--card2);color:var(--ink);font-family:var(--mono);font-size:14px;cursor:pointer}
+.ed-btn.big{padding:20px 24px}
+.ed-btn.big span{font-size:26px}
+@media(max-width:820px){
+  .ed-brand .ed-name{font-size:36px}.ed-mark{width:38px;height:29px}
+  .ed-meta{padding-right:96px}
+  .ed-btn.big span{font-size:21px}
+}
 
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
@@ -2452,7 +2476,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   // Full-screen newspaper edition. Opens over whatever page you are on, the
   // same focused-overlay pattern the ticker page uses. Everything below is
   // computed from files already on disk - no new engine work.
-  var ED_BUILT=false, ED_CACHE=null;
+  var ED_BUILT=false, ED_CACHE=null, ED_IND={};
 
   function edMine(t){
     var acct=(window.PHOENIX_PROFILE==="A")?"aldemar":"gabriel";
@@ -2509,6 +2533,14 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   // jump links: close the edition, then switch page
   function edGo(id){ edClose(); setTimeout(function(){ try{ go(id); }catch(e){} }, 60); }
   window.PX_ED_GO=edGo;
+  // bind after the markup exists; inline onclick with escaped quotes was being
+  // mangled by the build and the links did nothing
+  document.addEventListener("click",function(e){
+    var a=e.target&&e.target.closest&&e.target.closest(".ed-jump a[data-go]");
+    if(!a) return;
+    e.preventDefault();
+    edGo(a.getAttribute("data-go"));
+  });
 
   function edSet(id,html){ var el=document.getElementById(id); if(el) el.innerHTML=html; }
 
@@ -2524,6 +2556,12 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     ]).then(function(r){
       var m=r[0]||{}, g=r[1]||{}, ser=((r[2]&&r[2].series)||r[2]||[]),
           ind=r[3]||{}, st=r[4]||{}, con=r[5]||{}, inst=r[6]||{};
+      // ticker -> industry, so positions and rotation can be matched. dpCache
+      // meta does not carry it; stocks.json does.
+      ED_IND={};
+      ((st&&(st.stocks||st.rows))||[]).forEach(function(r){
+        if(r&&r.ticker) ED_IND[r.ticker]={industry:r.industry||"",sector:r.sector||""};
+      });
       ED_CACHE={m:m,g:g,ser:ser,ind:ind,st:st,con:con,inst:inst};
       edMast(m,g);
       edVerdict(m,g);
@@ -2551,25 +2589,41 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   }
 
   function edVerdict(m,g){
-    var v=edVerdictLine(m,g), X=(m&&m.explain)||{}, ov=(g&&g.overview)||{};
+    var v=edVerdictLine(m,g), X=(m&&m.explain)||{}, ov=(g&&g.overview)||{}, L=(g&&g.levels)||{};
     edSet("edCall",v.head+'<em>'+v.em+'</em>');
-    var bits=[];
+    var p=[];
     if(m&&m.regime){
-      bits.push((m.regime.replace(/_/g," ").toLowerCase())+" has held for "+
-        (X.held_weeks||"\u2014")+" week"+(X.held_weeks===1?"":"s")+
-        (X.since?", since "+X.since:"")+".");
+      var nm=m.regime.replace(/_/g," ");
+      var wk=X.held_weeks;
+      p.push('<b>'+nm.charAt(0)+nm.slice(1).toLowerCase()+'</b>'+
+        (wk?' has held for '+wk+' week'+(wk===1?'':'s')+(X.since?', since '+X.since:''):
+            ' is the current call')+
+        (m.confidence!=null?' at a score of '+(+m.confidence).toFixed(0)+
+          (m.secondary_tag?' and tagged '+m.secondary_tag.toLowerCase():'')+'.':'.'));
+    }
+    var dv=(X.drivers||[]).filter(function(d){return d.ok;});
+    if(dv.length){
+      var tight=dv[0];
+      p.push('Four conditions keep it alive and the tightest is <b>'+tight.label+'</b> at '+
+        edNum(tight.value,2)+' against a threshold of '+edNum(tight.threshold,2)+
+        ' \u2014 clearing by only '+edNum(tight.clear_by,2)+
+        '. The rest have room: '+dv.slice(1,3).map(function(d){
+          return d.label+' clears by '+edNum(d.clear_by,1); }).join(' and ')+'.');
+    }
+    if(ov.net_gex_B!=null){
+      var pos=ov.net_gex_B>=0;
+      p.push('Dealers are '+(pos?'long':'short')+' <b>$'+Math.abs(ov.net_gex_B).toFixed(1)+
+        'B</b> of gamma. '+(pos
+          ? 'That means they hedge against the move \u2014 selling into strength, buying dips \u2014 which compresses realised volatility below what options imply. Practically: fade extensions, do not chase them, and expect the tape to grind rather than trend.'
+          : 'That means they hedge with the move \u2014 selling weakness, buying strength \u2014 which amplifies both directions. Practically: cut size, widen nothing, and expect stops to be tested more often than the news justifies.'));
     }
     var w=(X.watch||[])[0];
-    if(w) bits.push("The closest gate to breaking is "+w["if"].toLowerCase()+
-      " \u2014 it sits "+edNum(w.distance,2)+" away.");
-    if(ov.net_gex_B!=null){
-      bits.push("Dealers are "+(ov.net_gex_B>=0?"long":"short")+" $"+
-        Math.abs(ov.net_gex_B).toFixed(1)+"B of gamma, so "+
-        (ov.net_gex_B>=0?"strength gets sold into and dips get bought \u2014 a tape that rewards patience over chasing."
-                       :"moves get amplified in both directions \u2014 ranges widen and stops get tested."));
-    }
-    edSet("edWhy",bits.join(" "));
+    if(w) p.push('The thing that would change all of this is <b>'+w["if"]+'</b>. It sits '+
+      edNum(w.distance,2)+' away. If it breaks, this stance is void and the whole edition '+
+      'reads differently tomorrow.');
+    edSet("edWhy",p.join(" "));
   }
+
 
   // ---------------- your book -----------------------------------------------
   function edLastFri(ser){
@@ -2619,8 +2673,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         var pl=(last&&entry)?(last/entry-1)*100:null;
         var plUsd=(last&&entry&&qty)?(last-entry)*qty:null;
         var rr=(entry&&stop&&t.target)?((+t.target-entry)/Math.max(.0001,entry-stop)):null;
-        var meta=(dpCache[t.ticker]||{}).meta||{};
-        var industry=t.industry||meta.industry||"";
+        var industry=t.industry||(ED_IND[t.ticker]||{}).industry||"";
         if(industry) inds[industry]=1;
         var stopDist=(last&&stop)?((last/stop-1)*100):null;
         html+='<div class="ed-pos"><span class="tk">'+t.ticker+'</span>'+
@@ -2728,15 +2781,33 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     });
     edSet("edTapeCards",cards);
     var p='<p class="ed-body">';
-    p+=top.label+' moved '+edPct(top.pc,2)+' to '+edNum(top.v,top.dp)+
-       (top.sig>=2?', a '+top.sig.toFixed(1)+'-sigma move against its own recent range \u2014 which is why it leads this edition rather than the indices.'
-                 :'. Nothing on the board moved far beyond its ordinary daily range.')+' ';
+    p+='<b>'+top.label+'</b> moved '+edPct(top.pc,2)+' to '+edNum(top.v,top.dp)+
+       (top.sig>=2?', a '+top.sig.toFixed(1)+'-sigma move measured against its own twenty-day range. That is why it leads this edition rather than the indices \u2014 a big index number that is normal for the index tells you less than a mid-sized move in something that never moves. '
+                 :'. Nothing on the board travelled far beyond its ordinary daily range, so read today as noise rather than information. ');
     var spx=items.filter(function(i){return i.k==="spx";})[0];
     var ndx=items.filter(function(i){return i.k==="ndx";})[0];
-    if(spx&&ndx) p+='The S&P closed '+edPct(spx.pc,2)+' and the Nasdaq '+edPct(ndx.pc,2)+
-      (Math.abs(ndx.pc)>Math.abs(spx.pc)?' \u2014 tech led.':' \u2014 the move was broad rather than tech-led.')+' ';
+    if(spx&&ndx){
+      p+='The S&P closed '+edPct(spx.pc,2)+' and the Nasdaq '+edPct(ndx.pc,2)+
+        (Math.abs(ndx.pc)>Math.abs(spx.pc)+0.3
+          ? ' \u2014 tech carried the move, so breadth is narrower than the headline suggests. '
+          : (Math.abs(spx.pc)>Math.abs(ndx.pc)+0.3
+             ? ' \u2014 the broad index beat tech, which usually means the bid is in value and cyclicals rather than growth. '
+             : ' \u2014 both moved together, so this was a broad tape rather than a sector story. '));
+    }
+    p+='</p><p class="ed-body">';
     var vix=items.filter(function(i){return i.k==="vix";})[0];
-    if(vix) p+='The VIX sits at '+edNum(vix.v,2)+' after '+edPct(vix.pc,2)+'. ';
+    if(vix){
+      p+='The VIX sits at '+edNum(vix.v,2)+' after '+edPct(vix.pc,2)+
+        (vix.v<16?' \u2014 complacent territory, where the market is pricing very little risk into the next month. '
+         :vix.v<22?' \u2014 an ordinary level, neither fear nor complacency. '
+         :' \u2014 elevated, and worth respecting when sizing anything new. ');
+    }
+    var wti=items.filter(function(i){return i.k==="wti";})[0];
+    var gold=items.filter(function(i){return i.k==="gold";})[0];
+    if(wti) p+='Crude at '+edNum(wti.v,2)+' is '+edPct(wti.pc,2)+
+      (Math.abs(wti.pc)>3?', a genuine move that feeds straight into the inflation path and therefore into the regime call. ':'. ');
+    if(gold&&spx&&gold.pc>0.5&&spx.pc>0.5)
+      p+='Gold rose alongside equities, which is an unusual pairing \u2014 it often means the bid is liquidity-driven rather than a clean risk-on rotation. ';
     p+='</p>';
     edSet("edTapeBody",p);
   }
@@ -2748,8 +2819,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     var mine={};
     (trLog||[]).forEach(function(t){
       if(t.status!=="open"||!edMine(t)) return;
-      var meta=(dpCache[t.ticker]||{}).meta||{};
-      var i=t.industry||meta.industry; if(i) mine[i]=t.ticker;
+      var i=t.industry||(ED_IND[t.ticker]||{}).industry; if(i) mine[i]=t.ticker;
     });
     var key=rows[0].d1!=null?"d1":(rows[0].chg1d!=null?"chg1d":"pc");
     var sorted=rows.slice().filter(function(r){return r[key]!=null;})
@@ -2779,20 +2849,39 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       ", "+(bot.industry||bot.name)+" lags";
     edSet("edRotHl",hl);
     var p='<p class="ed-body">';
+    var winners=sorted.slice(0,3), losers=sorted.slice(-3).reverse();
+    var spread=(sorted[0][key]-sorted[sorted.length-1][key]);
+    p+='<b>'+(sorted[0].industry||sorted[0].name)+'</b> led at '+
+       edPct(sorted[0][key])+' while <b>'+(losers[0].industry||losers[0].name)+
+       '</b> lost '+edPct(losers[0][key])+' \u2014 a spread of '+edNum(spread,1)+
+       ' points across the board. ';
+    if(spread>=8) p+='That is a wide dispersion: money is not lifting everything, it is '+
+      'moving decisively from one place to another. ';
+    else if(spread<=3) p+='That is a narrow spread \u2014 the tape moved as a block rather '+
+      'than rotating. ';
+    var down=sorted.filter(function(r){return r[key]<0;});
+    if(down.length) p+='<b>'+down.length+' industr'+(down.length===1?'y':'ies')+' closed red</b>, '+
+      'led lower by '+down.slice(-2).reverse().map(function(r){
+        return (r.industry||r.name)+' '+edPct(r[key]); }).join(' and ')+'. ';
+    else p+='Nothing closed red \u2014 a broad bid rather than a rotation. ';
+    p+='</p><p class="ed-body">';
     if(mineNames.length){
       var lag=[],lead=[];
       mineNames.forEach(function(nm){
         var row=sorted.filter(function(r){return (r.industry||r.name)===nm;})[0];
         if(!row) return;
-        (row[key]>=top[key]*0.5?lead:lag).push(nm+" at "+edPct(row[key]).replace(/<[^>]+>/g,""));
+        var rank=sorted.indexOf(row)+1;
+        (rank<=Math.ceil(sorted.length/3)?lead:lag).push(
+          '<b>'+nm+'</b> ('+mine[nm]+') at '+edPct(row[key])+', ranked '+rank+' of '+sorted.length);
       });
-      if(lead.length) p+='Your exposure is in a leading group: '+lead.join(", ")+'. ';
-      if(lag.length) p+='Your industries lagged today \u2014 '+lag.join(", ")+
-        ' against the leader\u2019s '+edPct(top[key]).replace(/<[^>]+>/g,"")+
-        '. Gains in your names are therefore stock-specific rather than a sector wave carrying you. ';
+      if(lead.length) p+='Your exposure is in a leading group: '+lead.join('; ')+
+        '. The sector wave is working for you rather than against you. ';
+      if(lag.length) p+='Your industries lagged: '+lag.join('; ')+
+        '. Whatever your names did today came from the stock itself, not from a rising tide \u2014 '+
+        'which is a cleaner signal but also a lonelier one. ';
     } else {
-      p+='You hold nothing right now, so rotation is a watching brief: '+
-         (top.industry||top.name)+' is where the money went today. ';
+      p+='You hold nothing, so this is a watching brief: '+
+         (sorted[0].industry||sorted[0].name)+' is where the money went. ';
     }
     p+='</p>';
     edSet("edRotBody",p);
@@ -4035,36 +4124,31 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   // Mission Control IS the Daily Brief. The old tile grid is gone: the ten
   // minutes of information it was trying to convey now live in the edition,
   // which opens full-screen over whatever page you were on.
+  // Mission Control IS the Daily Brief. One button, nothing else - the ten
+  // minutes of information the old tile grid tried to convey now live in the
+  // edition, which opens full-screen over whatever page you are on.
   var MC_HTML =
     '<div class="mc-launch">'+
-      '<button class="ed-open" onclick="PX_OPEN_EDITION()">'+
-        '<span class="eo-k" id="eoK">Phoenix Daily \u00b7 loading\u2026</span>'+
-        '<span class="eo-h" id="eoH">Your ten-minute read</span>'+
-        '<span class="eo-m" id="eoM">Positions, the tape, rotation, smart money, setups and the map</span>'+
-        '<span class="eo-go">Open \u2192</span>'+
+      '<button class="ed-btn big" onclick="PX_OPEN_EDITION()">'+
+        '<span>Daily Brief</span><i id="eoM">your ten-minute read \u2192</i>'+
       '</button>'+
     '</div>' 
 
   function initMC(){
-    // the launcher shows the day's headline so the button is informative
-    // before you open it
-    Promise.all([getJSON("macro").catch(function(){return null;}),
-                 getJSON("gex").catch(function(){return null;})])
-      .then(function(r){
-        var m=r[0]||{}, g=r[1]||{}, ov=(g.overview)||{};
-        var k=document.getElementById("eoK");
-        if(k) k.textContent="Phoenix Daily \u00b7 "+(m.asof||"").slice(0,10);
-        var h=document.getElementById("eoH");
-        if(h && m.regime) h.textContent=edVerdictLine(m,g).plain;
-        var mm=document.getElementById("eoM");
-        if(mm) trLoad(function(){
-          var n=(trLog||[]).filter(function(t){return t.status==="open"&&edMine(t);}).length;
-          mm.textContent=n+" open position"+(n===1?"":"s")+
-            (ov.net_gex_B!=null?" \u00b7 "+(ov.net_gex_B>=0?"positive":"negative")+" gamma":"")+
-            (ov.gamma_flip?" \u00b7 flip "+Math.round(ov.gamma_flip).toLocaleString():"");
-        });
-      }).catch(function(){});
+    Promise.all([getJSON("gex").catch(function(){return null;})]).then(function(r){
+      var ov=((r[0]||{}).overview)||{};
+      var mm=document.getElementById("eoM");
+      if(!mm) return;
+      trLoad(function(){
+        var n=(trLog||[]).filter(function(t){return t.status==="open"&&edMine(t);}).length;
+        mm.textContent=n+" open position"+(n===1?"":"s")+
+          (ov.net_gex_B!=null?" \u00b7 "+(ov.net_gex_B>=0?"positive":"negative")+" gamma":"")+
+          (ov.gamma_flip?" \u00b7 flip "+Math.round(ov.gamma_flip).toLocaleString():"")+
+          "  \u2192";
+      });
+    }).catch(function(){});
   }
+
 
 
   function mcRender(){
@@ -7702,7 +7786,11 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   <button class="ed-x" onclick="PX_CLOSE_EDITION()">CLOSE ✕</button>
   <div class="ed-mast">
     <div class="ed-meta"><span>Phoenix Daily</span><span id="edEdType"></span></div>
-    <div class="ed-name">Phoenix</div>
+    <div class="ed-brand">
+      <svg class="ed-mark" viewBox="0 0 89 69" aria-hidden="true">
+        <path fill="var(--gold)" fill-rule="evenodd" d="M3.90 3.70 L5.00 9.40 L9.20 17.70 L23.60 27.30 L22.60 27.80 L11.50 22.00 L10.90 23.10 L14.20 30.80 L17.10 33.70 L28.70 40.30 L30.60 42.70 L29.60 42.80 L22.60 38.10 L21.00 38.50 L22.20 41.80 L25.10 45.70 L35.80 51.60 L36.10 54.60 L38.80 55.30 L39.00 57.40 L43.40 64.70 L44.70 63.80 L45.10 61.50 L48.70 56.80 L49.30 54.10 L51.60 53.80 L52.60 51.10 L61.80 46.70 L64.70 43.80 L67.00 39.10 L65.30 37.60 L65.50 37.00 L71.70 32.80 L74.90 27.40 L76.00 22.70 L75.00 22.30 L70.70 25.60 L65.10 28.20 L60.70 31.60 L57.10 33.20 L53.20 36.60 L54.30 33.20 L60.50 28.10 L63.80 27.70 L75.80 19.70 L79.70 15.80 L84.00 5.10 L84.00 3.70 L83.20 3.20 L77.70 7.60 L64.10 16.20 L61.30 19.80 L57.10 21.20 L53.10 24.20 L47.20 30.10 L44.90 34.80 L45.80 39.40 L43.40 41.50 L41.30 38.50 L42.00 34.80 L40.90 31.50 L34.80 24.20 L27.90 19.30 L26.00 19.40 L24.70 17.20 L10.20 7.60 L6.80 4.20 L4.70 3.20 Z M49.70 42.30 L47.60 47.70 L45.90 49.70 L47.60 52.30 L46.90 52.90 L43.30 50.80 L43.00 49.90 L45.30 46.20 Z M24.30 28.30 L26.40 28.10 L29.70 30.30 L33.60 34.20 L33.80 35.50 Z M64.60 38.20 L63.70 39.60 L54.70 45.60 L53.30 45.70 L59.20 40.30 Z"/></svg>
+      <span class="ed-name">Phoenix</span>
+    </div>
     <div class="ed-sub">Survival first. Measure, don’t debate.</div>
     <div class="ed-hello" id="edDate"></div>
   </div>
@@ -7740,19 +7828,23 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   <div class="ed-sec"><div class="ed-k"><span>The map</span>
       <span class="ed-n" id="edMapN"></span></div>
     <h2 class="ed-hl sm" id="edMapHl">…</h2>
-    <div class="ed-map"><div class="plot" id="spxPlotED"></div></div>
+    <div class="ed-maphead">
+      <span class="mh-px" id="spxPxED">—</span><span class="mh-chg" id="spxChgED"></span>
+      <span class="mh-asof" id="spxAsofED"></span>
+      <span class="mh-hover" id="spxHoverED"></span>
+    </div>
+    <div class="ed-map"><div class="plot" id="spxPlotED"></div>
+      <div class="spx-zoom">
+        <button id="spxZoomInED">+</button><button id="spxZoomOutED">−</button>
+        <button id="spxZoomResetED">↺</button>
+      </div></div>
     <div id="edMapBody"></div></div>
 
   <div class="ed-sec"><div class="ed-k"><span>What would change this</span>
       <span class="ed-n" id="edWatchN"></span></div>
     <div id="edWatchRows"></div></div>
 
-  <div class="ed-jump">
-    <a onclick="PX_ED_GO(\'portfolio\')">Portfolio</a>
-    <a onclick="PX_ED_GO(\'trades\')">Trades</a>
-    <a onclick="PX_ED_GO(\'screeners\')">Top picks</a>
-    <a onclick="PX_ED_GO(\'markets\')">Markets</a>
-  </div>
+  <div class="ed-jump"><a data-go="markets">Markets</a><a data-go="screeners">Screeners</a><a data-go="trades">Trade</a><a data-go="portfolio">Portfolio</a></div>
   <div class="ed-colophon">Phoenix OS v1.0 · not investment advice</div>
 </div></div>
 </body>
