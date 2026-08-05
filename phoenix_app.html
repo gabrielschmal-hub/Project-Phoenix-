@@ -1722,6 +1722,14 @@ html:not(.light) .scorecell em,html:not(.light) .gatecell em,html:not(.light) .p
   .scr-tr,.scr-th,.scr-tf{grid-template-columns:26px 1.3fr 108px 76px 92px 84px 68px 1fr 60px 108px!important;gap:7px}
   .scr-pat{width:104px;height:32px}
 }
+.stopcell{display:flex;flex-direction:column;gap:2px}
+.stopcell b{font-family:var(--mono);font-size:13px}
+.stopcell em{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--inkFade);
+  display:flex;align-items:center;gap:5px}
+.sbadge{font-size:9px;padding:1px 5px;border-radius:2px}
+.sbadge.ok{background:rgba(63,191,119,.16);color:var(--green)}
+.sbadge.no{background:rgba(217,83,79,.16);color:var(--red)}
+html:not(.light) .stopcell em{color:#E8EDF2}
 
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
@@ -2586,6 +2594,11 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     }).catch(function(e){ console.warn("[brief] book block", e); });
   }
   window.__PXT.brfBook=brfBook;
+  window.__PXT.stopTest=function(tk,bars,mode){
+    dpCache[tk]={bars:{daily:bars},meta:{last:bars[bars.length-1].c}};
+    if(mode) SCR_STOP=mode;
+    scrFillPatterns();
+  };
   window.__PXT.scrTest=function(rows,gexu){
     scrData=rows; scrMeta={}; window.__scrGexU=gexu||{};
     renderScreener();
@@ -4494,7 +4507,9 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       (document.getElementById("picksScroll")||{}).innerHTML=errHTML("stocks.json",e.message);
     });
     var si=document.getElementById("scrSearch");
-    si.addEventListener("input",function(){ scrSearch=this.value.toLowerCase().trim(); renderScreener(); });
+    if(si) si.addEventListener("input",function(){
+      scrSearch=this.value.toLowerCase().trim(); renderScreener();
+    });
     (document.getElementById("scrMcap")||{addEventListener:function(){}}).addEventListener("change",function(){ scrMcap=this.value; renderScreener(); });
     (document.getElementById("scrChg")||{addEventListener:function(){}}).addEventListener("change",function(){ scrChg=this.value; renderScreener(); });
     // preset chips: each sets a filter + sort in one tap
@@ -4838,6 +4853,21 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       try{
         dpFetchBars(tk,"daily",function(bars){
           cell.innerHTML=scrPatSVG(bars,tk)||'<span class="scr-nopat">\u2014</span>';
+          // the stop column shares the same bars, so fill it here rather than
+          // fetching twice
+          var sc=document.querySelector('.stopcell[data-stop="'+tk+'"]');
+          if(sc){
+            var st=scrStopLine(bars,tk);
+            var last=(bars&&bars.length)?bars[bars.length-1].c:null;
+            if(st==null||!last){ sc.innerHTML='<span class="scr-nopat">\u2014</span>'; }
+            else{
+              var above=last>st, d=(last/st-1)*100;
+              sc.innerHTML='<b>$'+st.toFixed(2)+'</b>'+
+                '<em><span class="sbadge '+(above?"ok":"no")+'">'+
+                (above?"Above":"Below")+'</span> '+
+                (d>=0?"+":"\u2212")+Math.abs(d).toFixed(1)+'%</em>';
+            }
+          }
         });
       }catch(e){}
     });
