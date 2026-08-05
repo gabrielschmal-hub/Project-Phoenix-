@@ -809,7 +809,6 @@
       "spx     vix     earn"
       "ind     picks   lesson";
     grid-template-rows:auto minmax(0,1fr) minmax(0,0.85fr) minmax(0,1.05fr);overflow:hidden;}
-  .mc-verdict{grid-area:verdict;} .m-spx{grid-area:spx;} .m-gex{grid-area:gex;}
   .m-vix{grid-area:vix;} .m-pos{grid-area:pos;} .m-earn{grid-area:earn;}
   .m-ind{grid-area:ind;} .m-picks{grid-area:picks;} .m-lesson{grid-area:lesson;}
   /* the verdict banner */
@@ -876,7 +875,6 @@
     .mc-grid{grid-template-columns:1fr;
              grid-template-areas:"verdict" "pos" "spx" "gex" "vix" "ind" "picks" "earn" "lesson";
              grid-template-rows:none;grid-auto-rows:minmax(180px,auto);overflow-y:auto;height:100%;}
-    .m-spx{min-height:280px;}
     .mc-verdict{min-height:0 !important;height:auto !important;}
     .mc-v{flex-direction:column;align-items:stretch;gap:10px;}
     .mcv-r{justify-content:space-between;}
@@ -1307,6 +1305,163 @@ html:not(.light) .sm-chip.on{color:#141210!important}
 #page-markets .mkt-row.r-vix{grid-template-columns:1fr 1fr}
 @media(max-width:1000px){ #page-markets .mkt-row.r-vix{grid-template-columns:1fr} }
 
+/* ===== regime: why, how long, what breaks it ===== */
+.rg-explain{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.rg-held{font-size:12.5px;color:var(--inkLight);margin-bottom:10px}
+.rg-sec{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--inkFade);margin:10px 0 6px}
+.rg-gates{display:flex;flex-direction:column;gap:4px}
+.rg-gate{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:baseline;
+  font-size:12px;padding:3px 0;border-bottom:1px solid var(--line)}
+.rg-gate:last-child{border-bottom:0}
+.rg-gate .g-l{color:var(--inkLight)}
+.rg-gate .g-v{font-family:var(--mono);font-weight:700;font-size:12.5px}
+.rg-gate .g-t{font-family:var(--mono);font-size:11px;color:var(--inkFade);white-space:nowrap}
+.rg-gate .g-m{font-family:var(--mono);font-size:11px;color:var(--green);white-space:nowrap}
+.rg-watch{font-size:12.5px;line-height:1.55;color:var(--ink);
+  border-left:3px solid var(--gold);padding:8px 10px;background:var(--card2);border-radius:0 6px 6px 0}
+.rg-next{margin-top:10px;font-size:12px;color:var(--inkLight);line-height:1.5}
+@media(max-width:1000px){
+  .rg-gate{grid-template-columns:1fr auto;gap:4px 10px}
+  .rg-gate .g-t,.rg-gate .g-m{grid-column:span 2;font-size:10.5px}
+}
+
+/* ===================== PHOENIX DAILY EDITION ===================== */
+.mc-launch{padding:26px 22px}
+.ed-open{display:grid;grid-template-columns:1fr auto;align-items:center;gap:18px;width:100%;
+  background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gold);
+  border-radius:4px;padding:22px 26px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.ed-open:hover{border-color:var(--line2)}
+.ed-open>span{display:block}
+.eo-k{grid-column:1;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--inkFade)}
+.eo-h{grid-column:1;font-family:var(--serif);font-size:29px;line-height:1.15;margin-top:6px}
+.eo-m{grid-column:1;font-family:var(--mono);font-size:12px;color:var(--inkLight);margin-top:7px}
+.eo-go{grid-column:2;grid-row:1/4;font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold);white-space:nowrap}
+
+.ed-scrim{position:fixed;inset:0;z-index:600;display:none;
+  background:rgba(2,10,20,.62);backdrop-filter:blur(11px);-webkit-backdrop-filter:blur(11px)}
+html.light .ed-scrim{background:rgba(60,44,28,.42)}
+.ed-scrim.on{display:block}
+.ed-wrap{position:fixed;inset:0;z-index:610;display:none;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;background:var(--bg)}
+.ed-wrap.on{display:block}
+body.px-edition{overflow:hidden}
+.ed-page{max-width:1080px;margin:0 auto;padding:30px 30px 60px;position:relative}
+.ed-x{position:sticky;top:6px;float:right;z-index:5;background:var(--card);
+  border:1px solid var(--line2);border-radius:99px;padding:7px 15px;cursor:pointer;
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--inkLight)}
+.ed-x:hover{color:var(--gold);border-color:var(--gold)}
+
+.ed-mast{text-align:center;border-bottom:2px solid var(--line2);padding-bottom:15px}
+.ed-meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--inkFade)}
+.ed-name{font-family:var(--serif);font-size:56px;line-height:1;letter-spacing:-.02em;margin:12px 0 5px}
+.ed-sub{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--inkLight)}
+.ed-hello{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--inkFade);margin-top:11px}
+
+.ed-verdict{border-bottom:1px solid var(--line);padding:20px 0 18px}
+.ed-call{font-family:var(--serif);font-size:33px;line-height:1.12}
+.ed-call em{font-style:normal;color:var(--gold)}
+.ed-vwhy{font-size:14.5px;color:var(--inkLight);margin-top:9px;line-height:1.6;max-width:74ch}
+
+.ed-sec{border-bottom:1px solid var(--line);padding:24px 0}
+.ed-sec:last-of-type{border-bottom:0}
+.ed-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--inkFade);display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.ed-n{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--inkLight);text-transform:none;letter-spacing:0}
+.ed-hl{font-family:var(--serif);font-size:30px;line-height:1.16;margin:9px 0 13px;letter-spacing:-.01em}
+.ed-hl.sm{font-size:25px}
+.ed-body{font-size:15px;line-height:1.68;color:var(--inkMed);margin:0 0 12px;max-width:80ch}
+
+.ed-pos{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px 16px;align-items:baseline;
+  font-family:var(--mono);font-size:13px;padding:10px 0;border-bottom:1px solid var(--line)}
+.ed-pos .tk{font-family:var(--serif);font-size:18px;font-weight:700}
+.ed-pos .nt{font-family:var(--sans);font-size:12.5px;color:var(--inkFade)}
+
+.ed-tape{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.ed-ins{border:1px solid var(--line);border-radius:3px;padding:11px 12px 6px;background:var(--card);overflow:hidden}
+.ed-ins.lead{border-color:var(--gold);border-left-width:3px}
+.ed-ins .i-k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--inkFade);display:flex;justify-content:space-between}
+.ed-ins .i-sig{color:var(--gold)}
+.ed-ins .i-v{font-family:var(--mono);font-size:19px;font-weight:700;margin-top:4px}
+.ed-ins .i-c{font-family:var(--mono);font-size:12px}
+.ed-sk{width:100%;height:44px;display:block;margin-top:5px}
+.ed-sk .ar{fill:currentColor;opacity:.12;stroke:none}
+.ed-sk .ln{fill:none;stroke:currentColor;stroke-width:1.6}
+.ed-sk.g{color:var(--green)}.ed-sk.r{color:var(--red)}
+
+.ed-rot{margin:8px 0 12px}
+.ed-rr{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:baseline;
+  padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ed-rr:last-child{border-bottom:0}
+.ed-rr .bar{width:110px;height:5px;background:var(--line);border-radius:3px;overflow:hidden;justify-self:end}
+.ed-rr .bar b{display:block;height:100%}
+.ed-rr .pc{font-family:var(--mono);font-size:13px;min-width:70px;text-align:right}
+.ed-rr .yours{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--gold);
+  border:1px solid var(--gold);border-radius:2px;padding:1px 5px;margin-left:7px}
+
+.ed-smart{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;margin:8px 0 12px}
+.ed-sm{padding:11px 0;border-bottom:1px solid var(--line)}
+.ed-sm .sm-t{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--inkFade);margin-bottom:5px}
+.ed-sm .sm-l{font-size:13.5px;line-height:1.55;color:var(--inkMed)}
+
+.ed-setups{margin:10px 0 14px}
+.ed-su{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px 16px;align-items:baseline;
+  padding:11px 0;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:13px}
+.ed-su:last-child{border-bottom:0}
+.ed-su .tk{font-family:var(--serif);font-size:17px;font-weight:700}
+.ed-su .nt{font-family:var(--sans);font-size:12.5px;color:var(--inkFade)}
+.ed-su .badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:2px 7px;
+  border:1px solid var(--line2);border-radius:2px;color:var(--inkLight)}
+.ed-su .badge.hot{border-color:var(--gold);color:var(--gold)}
+
+.ed-map{border:1px solid var(--line);border-radius:3px;background:var(--card);padding:8px;
+  margin:8px 0 14px;height:300px;position:relative}
+.ed-map .plot{position:absolute;inset:8px}
+
+.ed-w{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;
+  font-size:13.5px;padding:9px 0;border-bottom:1px solid var(--line)}
+.ed-w:last-child{border-bottom:0}
+.ed-w .w-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;padding:2px 7px;
+  border-radius:2px;background:var(--gold);color:#0A1622}
+html.light .ed-w .w-tag{color:#FFFDF9}
+.ed-w .w-tag.low{background:var(--line2);color:var(--ink)}
+.ed-w .w-when{font-family:var(--mono);font-size:11.5px;color:var(--inkFade);white-space:nowrap}
+
+.ed-jump{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:26px}
+.ed-jump a{display:block;text-align:center;padding:14px 8px;border:1px solid var(--line2);
+  border-radius:3px;color:var(--ink);font-family:var(--mono);font-size:11.5px;
+  letter-spacing:.14em;text-transform:uppercase;background:var(--card);cursor:pointer}
+.ed-jump a:hover{border-color:var(--gold);color:var(--gold)}
+.ed-colophon{margin-top:20px;text-align:center;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--inkFade)}
+
+@media(max-width:820px){
+  .ed-page{padding:20px 16px 50px}
+  .ed-name{font-size:38px}.ed-call{font-size:25px}
+  .ed-hl{font-size:23px}.ed-hl.sm{font-size:20px}
+  .ed-tape{grid-template-columns:1fr 1fr}.ed-jump{grid-template-columns:1fr 1fr}
+  .ed-smart{grid-template-columns:1fr;gap:0}
+  .ed-pos,.ed-su{grid-template-columns:auto 1fr;gap:3px 12px}
+  .eo-h{font-size:22px}.eo-go{grid-column:1;grid-row:auto;margin-top:8px}
+  .ed-map{height:240px}
+}
+
+/* Daily Brief launcher above the Markets page */
+.ed-strip{padding:14px 14px 0}
+.ed-btn{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;
+  background:var(--card);border:1px solid var(--line);border-left:3px solid var(--gold);
+  border-radius:4px;padding:14px 18px;cursor:pointer;font:inherit;color:inherit;text-align:left}
+.ed-btn:hover{border-color:var(--line2)}
+.ed-btn span{font-family:var(--serif);font-size:20px}
+.ed-btn i{font-family:var(--mono);font-size:11.5px;font-style:normal;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold);white-space:nowrap}
+
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
   --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
@@ -1566,7 +1721,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
 
   // ================= MARKETS =================
   var MARKETS_HTML =
-    '<div class="mkt-grid">'+
+    '<div class="ed-strip"><button class="ed-btn" onclick="PX_OPEN_EDITION()"><span>Daily Brief</span><i>your ten-minute read →</i></button></div><div class="mkt-grid">'+
       // ── asset marquee (unchanged) ──
       '<div class="a-assets"><div class="asset-band" id="assetBand"><div class="loading">\u2026</div></div></div>'+
 
@@ -1816,8 +1971,51 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         row("spx_3m","SPX 3m",i.spx_3m,"%")+row("hy","HY",i.hy,"bp")+
         row("wti_3m","WTI 3m",i.wti_3m,"%")+row("us02_3m","2Y 3m",i.us02_3m,"bp")+
       '</div>';
+    // ---- why this regime, how long, and what breaks it --------------------
+    // Everything below comes from macro.json's explain block, which the engine
+    // derives from the same gates detect_regime() uses. Nothing is written by
+    // hand here, so the explanation cannot disagree with the call.
+    var X=(d&&d.explain)||null;
+    if(X){
+      function num(v){ return (v==null)?"\u2014":(+v).toLocaleString(undefined,{maximumFractionDigits:2}); }
+      var h="";
+      if(X.held_weeks){
+        var wk=X.held_weeks;
+        h+='<div class="rg-held">Held for <b>'+wk+' week'+(wk===1?'':'s')+'</b>'+
+           (X.since?' \u00b7 since '+X.since:'')+'</div>';
+      }
+      var dv=(X.drivers||[]).filter(function(d){return d.ok;});
+      if(dv.length){
+        h+='<div class="rg-sec">Why</div><div class="rg-gates">';
+        dv.slice().reverse().forEach(function(d){
+          h+='<div class="rg-gate"><span class="g-l">'+d.label+'</span>'+
+             '<span class="g-v">'+num(d.value)+'</span>'+
+             '<span class="g-t">needs '+d.op+' '+num(d.threshold)+'</span>'+
+             '<span class="g-m">'+num(d.clear_by)+' clear</span></div>';
+        });
+        h+='</div>';
+      }
+      var w=(X.watch||[])[0];
+      if(w){
+        h+='<div class="rg-sec">Watch-out</div>'+
+           '<div class="rg-watch"><b>'+w["if"]+'</b> \u2014 now '+num(w.now)+
+           ', <b>'+num(w.distance)+'</b> away. Closest gate to breaking; '+
+           'if it goes, <b>'+X.regime.replace(/_/g," ")+'</b> no longer qualifies.</div>';
+      }
+      var ru=X.runner_up;
+      if(ru){
+        h+='<div class="rg-next">Next most likely: <b>'+String(ru.regime).replace(/_/g," ")+'</b>'+
+           (ru.score!=null?' (score '+num(ru.score)+', '+num(ru.behind_by)+' behind)'
+                          :' \u2014 needs '+(ru.needs||[]).map(function(n){
+                              return n.label+' '+n.need+' (now '+num(n.now)+')'; }).join(", "))+
+           '</div>';
+      }
+      if(h) html+='<div class="rg-explain">'+h+'</div>';
+    }
     document.getElementById("rgBody").innerHTML=html;
   }
+  window.__PXT = window.__PXT || {};
+  window.__PXT.renderRegime = renderRegime;
 
   // ----- SPX candlestick + volume, with hover detail, zoom, and GEX levels -----
   function drawSPX(sfx){
@@ -2248,6 +2446,519 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       ", profile="+(window.PHOENIX_PROFILE||"?");
   };
 
+
+
+  // ======================= PHOENIX DAILY EDITION ============================
+  // Full-screen newspaper edition. Opens over whatever page you are on, the
+  // same focused-overlay pattern the ticker page uses. Everything below is
+  // computed from files already on disk - no new engine work.
+  var ED_BUILT=false, ED_CACHE=null;
+
+  function edMine(t){
+    var acct=(window.PHOENIX_PROFILE==="A")?"aldemar":"gabriel";
+    return !t.account || String(t.account).toLowerCase()===acct;
+  }
+  function edPct(v,d){
+    if(v==null||isNaN(v)) return '\u2014';
+    var c=(v>=0)?"var(--green)":"var(--red)";
+    return '<span style="color:'+c+';font-weight:700">'+(v>=0?"+":"\u2212")+
+           Math.abs(v).toFixed(d==null?1:d)+'%</span>';
+  }
+  function edNum(v,d){ return (v==null||isNaN(v))?'\u2014':
+    (+v).toLocaleString(undefined,{maximumFractionDigits:(d==null?0:d)}); }
+  function edMoney(v){
+    if(v==null||isNaN(v)) return '\u2014';
+    var c=(v>=0)?"var(--green)":"var(--red)";
+    return '<span style="color:'+c+';font-weight:700">'+(v>=0?"+$":"\u2212$")+
+           Math.abs(v).toFixed(0)+'</span>';
+  }
+
+  // the verdict: derived from regime gates + gamma + how much risk is deployed
+  function edVerdictLine(m,g){
+    var ov=(g&&g.overview)||{}, X=(m&&m.explain)||{};
+    var pos=(ov.net_gex_B==null)?null:(ov.net_gex_B>=0);
+    var tight=(X.watch&&X.watch[0]);
+    var head, em;
+    if(pos===false){ head="Trade carefully \u2014 "; em="dealers are amplifying"; }
+    else if(tight && tight.distance!=null && tight.distance<1){
+      head="Clear to trade \u2014 "; em="but one gate is close to breaking"; }
+    else { head="Clear to trade \u2014 "; em="but size stays small"; }
+    return {head:head, em:em, plain:head.replace(/\u2014\s*$/,"").trim()+" \u2014 "+em};
+  }
+
+  function edOpen(){
+    var sc=document.getElementById("edScrim"), ed=document.getElementById("edWrap");
+    if(!sc||!ed) return;
+    sc.classList.add("on"); ed.classList.add("on");
+    document.body.classList.add("px-edition");
+    if(!ED_BUILT){ edBuild(); ED_BUILT=true; }
+    ed.scrollTop=0;
+  }
+  function edClose(){
+    var sc=document.getElementById("edScrim"), ed=document.getElementById("edWrap");
+    if(sc) sc.classList.remove("on");
+    if(ed) ed.classList.remove("on");
+    document.body.classList.remove("px-edition");
+  }
+  window.PX_OPEN_EDITION=edOpen;
+  window.PX_CLOSE_EDITION=edClose;
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape" && document.body.classList.contains("px-edition")) edClose();
+  });
+
+  // jump links: close the edition, then switch page
+  function edGo(id){ edClose(); setTimeout(function(){ try{ go(id); }catch(e){} }, 60); }
+  window.PX_ED_GO=edGo;
+
+  function edSet(id,html){ var el=document.getElementById(id); if(el) el.innerHTML=html; }
+
+  function edBuild(){
+    Promise.all([
+      getJSON("macro").catch(function(){return null;}),
+      getJSON("gex").catch(function(){return null;}),
+      getJSON("macro_series").catch(function(){return null;}),
+      getJSON("industry").catch(function(){return null;}),
+      getJSON("stocks").catch(function(){return null;}),
+      getJSON("congress_trades").catch(function(){return null;}),
+      getJSON("institutional_holdings").catch(function(){return null;})
+    ]).then(function(r){
+      var m=r[0]||{}, g=r[1]||{}, ser=((r[2]&&r[2].series)||r[2]||[]),
+          ind=r[3]||{}, st=r[4]||{}, con=r[5]||{}, inst=r[6]||{};
+      ED_CACHE={m:m,g:g,ser:ser,ind:ind,st:st,con:con,inst:inst};
+      edMast(m,g);
+      edVerdict(m,g);
+      edTape(ser,ind);
+      edRotation(ind);
+      edMap(g);
+      edWatch(m,g);
+      trLoad(function(){ edBook(ser,ind); edSmart(con,inst); edSetups(st,g); });
+    }).catch(function(e){
+      edSet("edBody",'<div class="err" style="padding:30px">The edition could not be built: '+
+        ((e&&e.message)||e)+'</div>');
+    });
+  }
+
+
+  // ---------------- masthead + verdict --------------------------------------
+  function edMast(m,g){
+    var d=new Date();
+    try{ if(m&&m.asof) d=new Date(String(m.asof).slice(0,10)+"T00:00:00"); }catch(e){}
+    var long=d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    var hour=new Date().getHours();
+    edSet("edEdType",(hour<14?"Morning edition":"Evening edition")+" \u00b7 Rome");
+    edSet("edDate","Good "+(hour<12?"morning":hour<18?"afternoon":"evening")+" "+
+      ((window.PHOENIX_PROFILE==="A")?"Aldemar":"Gabriel")+" \u00b7 "+long);
+  }
+
+  function edVerdict(m,g){
+    var v=edVerdictLine(m,g), X=(m&&m.explain)||{}, ov=(g&&g.overview)||{};
+    edSet("edCall",v.head+'<em>'+v.em+'</em>');
+    var bits=[];
+    if(m&&m.regime){
+      bits.push((m.regime.replace(/_/g," ").toLowerCase())+" has held for "+
+        (X.held_weeks||"\u2014")+" week"+(X.held_weeks===1?"":"s")+
+        (X.since?", since "+X.since:"")+".");
+    }
+    var w=(X.watch||[])[0];
+    if(w) bits.push("The closest gate to breaking is "+w["if"].toLowerCase()+
+      " \u2014 it sits "+edNum(w.distance,2)+" away.");
+    if(ov.net_gex_B!=null){
+      bits.push("Dealers are "+(ov.net_gex_B>=0?"long":"short")+" $"+
+        Math.abs(ov.net_gex_B).toFixed(1)+"B of gamma, so "+
+        (ov.net_gex_B>=0?"strength gets sold into and dips get bought \u2014 a tape that rewards patience over chasing."
+                       :"moves get amplified in both directions \u2014 ranges widen and stops get tested."));
+    }
+    edSet("edWhy",bits.join(" "));
+  }
+
+  // ---------------- your book -----------------------------------------------
+  function edLastFri(ser){
+    if(!ser||!ser.length) return null;
+    var last=new Date((ser[ser.length-1].date||"")+"T00:00:00");
+    if(isNaN(last)) return null;
+    var mon=new Date(last); mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
+    for(var i=ser.length-1;i>=0;i--){
+      var d=new Date((ser[i].date||"")+"T00:00:00");
+      if(!isNaN(d)&&d<mon) return ser[i].date;
+    }
+    return null;
+  }
+
+  function edBook(ser,ind){
+    var open=(trLog||[]).filter(function(t){return t.status==="open"&&t.ticker&&edMine(t);});
+    if(!open.length){
+      edSet("edBookN","no open positions");
+      edSet("edBookHl","Nothing open \u2014 the book is flat");
+      edSet("edBookRows","");
+      edSet("edBookBody",'<p class="ed-body">You are not carrying risk today. '+
+        'That is a position too: in a regime this old, waiting for a setup that clears every '+
+        'gate costs nothing but patience. The setups section below lists what is closest.</p>');
+      return;
+    }
+    var wk=edLastFri(ser);
+    Promise.all(open.map(function(t){
+      return new Promise(function(res){
+        try{ dpFetchBars(t.ticker,"daily",function(b){ res({t:t,bars:b||[]}); }); }
+        catch(e){ res({t:t,bars:[]}); }
+      });
+    })).then(function(rows){
+      var tot1=0,totW=0,usd1=0,n1=0,nW=0,html="",worst=null,best=null,inds={};
+      rows.forEach(function(r){
+        var t=r.t, b=r.bars, qty=+(t.qty||0), entry=+(t.entry||0), stop=+(t.stop||0);
+        var last=b.length?b[b.length-1].c:null, prev=b.length>1?b[b.length-2].c:null;
+        var d1=(last&&prev)?(last/prev-1)*100:null;
+        var wkc=null;
+        if(wk) for(var i=b.length-1;i>=0;i--){
+          if(String(b[i].date).slice(0,10)<=wk){ wkc=b[i].c; break; }
+        }
+        var dW=(last&&wkc)?(last/wkc-1)*100:null;
+        if(d1!=null){ tot1+=d1; n1++; usd1+=(last-prev)*qty;
+          if(!best||d1>best.pc) best={tk:t.ticker,pc:d1};
+          if(!worst||d1<worst.pc) worst={tk:t.ticker,pc:d1}; }
+        if(dW!=null){ totW+=dW; nW++; }
+        var pl=(last&&entry)?(last/entry-1)*100:null;
+        var plUsd=(last&&entry&&qty)?(last-entry)*qty:null;
+        var rr=(entry&&stop&&t.target)?((+t.target-entry)/Math.max(.0001,entry-stop)):null;
+        var meta=(dpCache[t.ticker]||{}).meta||{};
+        var industry=t.industry||meta.industry||"";
+        if(industry) inds[industry]=1;
+        var stopDist=(last&&stop)?((last/stop-1)*100):null;
+        html+='<div class="ed-pos"><span class="tk">'+t.ticker+'</span>'+
+          '<span class="nt">'+(industry?industry+" \u00b7 ":"")+
+          (t.entry_date?"entered "+t.entry_date+" at "+entry.toFixed(2):"entry "+entry.toFixed(2))+
+          (stop?" \u00b7 stop "+stop.toFixed(2):"")+
+          (t.target?" \u00b7 target "+(+t.target).toFixed(2):"")+'</span>'+
+          '<span>'+(rr?rr.toFixed(1)+"R":"\u2014")+'</span>'+
+          '<span>'+edPct(pl)+'</span><span>'+edMoney(plUsd)+'</span></div>';
+      });
+      var avg1=n1?tot1/n1:null, avgW=nW?totW/nW:null;
+      edSet("edBookN",(avg1!=null?edPct(avg1)+" today":"")+
+        (usd1?" \u00b7 "+edMoney(usd1)+" on the day":""));
+      edSet("edBookRows",html);
+      var hl;
+      if(avg1==null) hl="Positions open, prices not in yet";
+      else if(avg1>1.5) hl=(open.length===1?open[0].ticker+" extends":"Both names extend")+
+        " \u2014 the book is doing the work today";
+      else if(avg1<-1.5) hl="A red day for the book \u2014 check the stops before adding anything";
+      else hl="A quiet session for the book \u2014 nothing moved enough to act on";
+      edSet("edBookHl",hl);
+      var p='<p class="ed-body">';
+      if(avgW!=null){
+        var sp=null;
+        if(ser&&ser.length&&wk){
+          var lastS=ser[ser.length-1], wkS=null;
+          for(var j=ser.length-1;j>=0;j--) if(ser[j].date===wk){ wkS=ser[j]; break; }
+          if(lastS&&wkS&&lastS.spx&&wkS.spx) sp=(lastS.spx/wkS.spx-1)*100;
+        }
+        p+='Against last Friday\u2019s close ('+(wk||"\u2014")+') the book is '+edPct(avgW)+
+           (sp!=null?' while the S&P managed '+edPct(sp)+
+             (avgW>sp?' \u2014 you are ahead of the index.':' \u2014 you are behind the index.'):'.')+' ';
+      }
+      if(best&&worst&&best.tk!==worst.tk)
+        p+='<b>'+best.tk+'</b> led at '+edPct(best.pc)+' and <b>'+worst.tk+'</b> lagged at '+
+           edPct(worst.pc)+'. ';
+      var ks=Object.keys(inds);
+      if(ks.length) p+='Exposure sits in '+ks.slice(0,3).join(", ")+
+        (ks.length>3?' and '+(ks.length-3)+' more':'')+'.';
+      p+='</p>';
+      edSet("edBookBody",p);
+    });
+  }
+
+
+  // ---------------- the tape: ranked by how unusual --------------------------
+  function edSigma(ser,key,n){
+    n=n||20; var v=[];
+    for(var i=Math.max(1,ser.length-n); i<ser.length; i++){
+      var a=ser[i-1][key], b=ser[i][key];
+      if(a&&b) v.push((b/a-1)*100);
+    }
+    if(v.length<5) return null;
+    var mu=v.reduce(function(x,y){return x+y;},0)/v.length;
+    var sd=Math.sqrt(v.reduce(function(x,y){return x+(y-mu)*(y-mu);},0)/v.length);
+    return sd||null;
+  }
+  function edSpark(ser,key,w,h){
+    var v=[];
+    for(var i=Math.max(0,ser.length-40); i<ser.length; i++) if(ser[i][key]!=null) v.push(+ser[i][key]);
+    if(v.length<3) return "";
+    var lo=Math.min.apply(null,v), hi=Math.max.apply(null,v), rng=(hi-lo)||1, p=[];
+    v.forEach(function(x,i){
+      p.push((i/(v.length-1)*w).toFixed(1)+","+(h-(x-lo)/rng*(h-6)-3).toFixed(1));
+    });
+    var line="M"+p.join(" L");
+    return '<path d="'+line+' L'+w+','+h+' L0,'+h+' Z" class="ar"/><path d="'+line+'" class="ln"/>';
+  }
+
+  function edTape(ser,ind){
+    if(!ser||ser.length<2){ edSet("edTapeHl","Market data not available yet"); return; }
+    var last=ser[ser.length-1], prev=ser[ser.length-2];
+    var SP=[["wti","WTI crude",2],["spx","S&P 500",0],["ndx","Nasdaq",0],["vix","VIX",2],
+            ["gold","Gold",0],["dxy","Dollar",2]];
+    var items=[];
+    SP.forEach(function(x){
+      var k=x[0]; if(last[k]==null||prev[k]==null) return;
+      var pc=(last[k]/prev[k]-1)*100, sd=edSigma(ser,k);
+      items.push({k:k,label:x[1],dp:x[2],v:last[k],pc:pc,
+                  sig:(sd?Math.abs(pc)/sd:0)});
+    });
+    if(!items.length) return;
+    items.sort(function(a,b){return b.sig-a.sig;});
+    var top=items[0], show=items.slice(0,4);
+    // headline written from what actually moved, not a fixed template
+    var dir=top.pc>=0?"jumps":"drops";
+    var hl;
+    if(top.sig>=2) hl=top.label+" "+dir+" "+Math.abs(top.pc).toFixed(1)+
+      "% \u2014 a "+top.sig.toFixed(1)+"\u03c3 move and the story of the session";
+    else if(Math.abs(items.filter(function(i){return i.k==="spx";})[0]?
+      items.filter(function(i){return i.k==="spx";})[0].pc:0)>1)
+      hl="A broad session \u2014 nothing unusual, but the index moved with conviction";
+    else hl="A quiet tape \u2014 nothing moved beyond its ordinary range";
+    edSet("edTapeHl",hl);
+    var cards="";
+    show.forEach(function(it,i){
+      var cls=(it.pc>=0)?"g":"r";
+      cards+='<div class="ed-ins'+(i===0&&it.sig>=2?" lead":"")+'">'+
+        '<div class="i-k"><span>'+it.label+'</span><span class="i-sig">'+
+          (it.sig?it.sig.toFixed(1)+"\u03c3":"")+'</span></div>'+
+        '<div class="i-v">'+edNum(it.v,it.dp)+'</div>'+
+        '<div class="i-c">'+edPct(it.pc,2)+'</div>'+
+        '<svg class="ed-sk '+cls+'" viewBox="0 0 190 44" preserveAspectRatio="none">'+
+          edSpark(ser,it.k,190,44)+'</svg></div>';
+    });
+    edSet("edTapeCards",cards);
+    var p='<p class="ed-body">';
+    p+=top.label+' moved '+edPct(top.pc,2)+' to '+edNum(top.v,top.dp)+
+       (top.sig>=2?', a '+top.sig.toFixed(1)+'-sigma move against its own recent range \u2014 which is why it leads this edition rather than the indices.'
+                 :'. Nothing on the board moved far beyond its ordinary daily range.')+' ';
+    var spx=items.filter(function(i){return i.k==="spx";})[0];
+    var ndx=items.filter(function(i){return i.k==="ndx";})[0];
+    if(spx&&ndx) p+='The S&P closed '+edPct(spx.pc,2)+' and the Nasdaq '+edPct(ndx.pc,2)+
+      (Math.abs(ndx.pc)>Math.abs(spx.pc)?' \u2014 tech led.':' \u2014 the move was broad rather than tech-led.')+' ';
+    var vix=items.filter(function(i){return i.k==="vix";})[0];
+    if(vix) p+='The VIX sits at '+edNum(vix.v,2)+' after '+edPct(vix.pc,2)+'. ';
+    p+='</p>';
+    edSet("edTapeBody",p);
+  }
+
+  // ---------------- rotation, with your industries flagged -------------------
+  function edRotation(ind){
+    var rows=(ind&&(ind.industries||ind.rows||ind.list))||[];
+    if(!rows.length){ edSet("edRotHl","Industry data not available yet"); return; }
+    var mine={};
+    (trLog||[]).forEach(function(t){
+      if(t.status!=="open"||!edMine(t)) return;
+      var meta=(dpCache[t.ticker]||{}).meta||{};
+      var i=t.industry||meta.industry; if(i) mine[i]=t.ticker;
+    });
+    var key=rows[0].d1!=null?"d1":(rows[0].chg1d!=null?"chg1d":"pc");
+    var sorted=rows.slice().filter(function(r){return r[key]!=null;})
+      .sort(function(a,b){return b[key]-a[key];});
+    if(!sorted.length){ edSet("edRotHl","Industry data not available yet"); return; }
+    var top=sorted[0], bot=sorted[sorted.length-1];
+    var pick=sorted.slice(0,3);
+    Object.keys(mine).forEach(function(nm){
+      var row=sorted.filter(function(r){return (r.industry||r.name)===nm;})[0];
+      if(row&&pick.indexOf(row)<0) pick.push(row);
+    });
+    if(pick.indexOf(bot)<0) pick.push(bot);
+    var mx=Math.max.apply(null,pick.map(function(r){return Math.abs(r[key]);}))||1;
+    var html="";
+    pick.forEach(function(r){
+      var nm=r.industry||r.name||"\u2014", v=r[key];
+      var yours=mine[nm];
+      html+='<div class="ed-rr"><span>'+nm+
+        (yours?' <span class="yours">'+yours+'</span>':'')+'</span>'+
+        '<span class="pc">'+edPct(v)+'</span>'+
+        '<span class="bar"><b style="width:'+(Math.abs(v)/mx*100).toFixed(0)+
+          '%;background:'+(v>=0?"var(--green)":"var(--red)")+'"></b></span></div>';
+    });
+    edSet("edRotRows",html);
+    var mineNames=Object.keys(mine);
+    var hl=(top.industry||top.name)+" leads at "+edPct(top[key]).replace(/<[^>]+>/g,"")+
+      ", "+(bot.industry||bot.name)+" lags";
+    edSet("edRotHl",hl);
+    var p='<p class="ed-body">';
+    if(mineNames.length){
+      var lag=[],lead=[];
+      mineNames.forEach(function(nm){
+        var row=sorted.filter(function(r){return (r.industry||r.name)===nm;})[0];
+        if(!row) return;
+        (row[key]>=top[key]*0.5?lead:lag).push(nm+" at "+edPct(row[key]).replace(/<[^>]+>/g,""));
+      });
+      if(lead.length) p+='Your exposure is in a leading group: '+lead.join(", ")+'. ';
+      if(lag.length) p+='Your industries lagged today \u2014 '+lag.join(", ")+
+        ' against the leader\u2019s '+edPct(top[key]).replace(/<[^>]+>/g,"")+
+        '. Gains in your names are therefore stock-specific rather than a sector wave carrying you. ';
+    } else {
+      p+='You hold nothing right now, so rotation is a watching brief: '+
+         (top.industry||top.name)+' is where the money went today. ';
+    }
+    p+='</p>';
+    edSet("edRotBody",p);
+  }
+
+
+  // ---------------- smart money on the names you hold ------------------------
+  function edSmart(con,inst){
+    var open=(trLog||[]).filter(function(t){return t.status==="open"&&t.ticker&&edMine(t);});
+    if(!open.length){ edSet("edSmartHl","No positions \u2014 nothing to check"); 
+      edSet("edSmartGrid",""); edSet("edSmartBody",""); return; }
+    var ct=(con&&con.tickers)||{}, it=(inst&&(inst.tickers||inst.holdings))||{};
+    var cells="", quiet=0, active=0;
+    open.forEach(function(t){
+      var tk=t.ticker;
+      var cr=(ct[tk]||[]).slice().sort(function(a,b){
+        return String(b.date||"").localeCompare(String(a.date||""));});
+      var recent=cr.filter(function(x){
+        try{ return (Date.now()-new Date(x.date+"T00:00:00"))/864e5 <= 90; }catch(e){ return false; }});
+      var cTxt;
+      if(recent.length){
+        active++;
+        var buys=recent.filter(function(x){return x.side==="buy";}).length;
+        var sells=recent.length-buys;
+        cTxt='<b>'+recent.length+' trade'+(recent.length===1?'':'s')+' in 90 days.</b> '+
+             buys+' buy'+(buys===1?'':'s')+', '+sells+' sell'+(sells===1?'':'s')+
+             '. Most recent: '+recent[0].member+' '+recent[0].side+' on '+recent[0].date+
+             (recent[0].amount?', '+recent[0].amount:'')+'.';
+      } else {
+        quiet++;
+        cTxt='<b>Nothing in 90 days.</b> '+
+          (cr.length?'Last disclosed activity was '+cr[0].member+' '+cr[0].side+' on '+cr[0].date+'.'
+                   :'No congressional trades on record for this name.');
+      }
+      cells+='<div class="ed-sm"><div class="sm-t">'+tk+' \u00b7 congressional</div>'+
+             '<div class="sm-l">'+cTxt+'</div></div>';
+      var ih=it[tk]||[];
+      var iTxt;
+      if(ih.length){
+        var add=ih.filter(function(x){return (x.change||x.delta||0)>0;}).length;
+        var cut=ih.filter(function(x){return (x.change||x.delta||0)<0;}).length;
+        iTxt='<b>'+add+' added, '+cut+' trimmed.</b> Across the funds tracked in the last '+
+             'quarterly filing.';
+      } else {
+        iTxt='<b>Not held by the funds we track.</b> None of the tracked managers reported a '+
+             'position in the last filing.';
+      }
+      cells+='<div class="ed-sm"><div class="sm-t">'+tk+' \u00b7 institutional</div>'+
+             '<div class="sm-l">'+iTxt+'</div></div>';
+    });
+    edSet("edSmartGrid",cells);
+    edSet("edSmartHl", quiet===open.length
+      ? "Nobody has touched your names \u2014 no congressional activity in 90 days"
+      : (active+" of your "+open.length+" name"+(open.length===1?"":"s")+
+         " saw congressional activity this quarter"));
+    edSet("edSmartBody",'<p class="ed-body">Institutional data is quarter-end and filed up to '+
+      '45 days late, so it reflects positioning as of the last filing date rather than today. '+
+      'Congressional trades carry the same 45-day lag under the STOCK Act. Neither is a timing '+
+      'signal; both are context. Silence is not bearish \u2014 it is just silence.</p>');
+  }
+
+  // ---------------- setups ---------------------------------------------------
+  function edSetups(st,g){
+    var rows=(st&&(st.stocks||st.rows))||[];
+    var pass=rows.filter(function(r){
+      return r.gates_passed===r.gates_total || r.passes===true || (r.trade_score||0)>=70;
+    }).sort(function(a,b){return (b.trade_score||0)-(a.trade_score||0);}).slice(0,5);
+    if(!pass.length){
+      edSet("edSetHl","Nothing clears the gates today");
+      edSet("edSetRows","");
+      edSet("edSetBody",'<p class="ed-body">No name passed every gate. In a regime this old '+
+        'that is common and it is not a problem \u2014 the screener is doing its job by '+
+        'declining to hand you something marginal.</p>');
+      edSet("edSetN","0 passed");
+      return;
+    }
+    var html="";
+    pass.forEach(function(r){
+      html+='<div class="ed-su"><span class="tk">'+r.ticker+'</span>'+
+        '<span class="nt">'+[r.industry||r.sector||"", r.setup||r.pattern||""]
+          .filter(Boolean).join(" \u00b7 ")+'</span>'+
+        '<span class="badge'+((r.trade_score||0)>=80?" hot":"")+'">Score '+
+          edNum(r.trade_score,0)+'</span>'+
+        '<span>'+(r.chg_1d!=null?edPct(r.chg_1d):"")+'</span></div>';
+    });
+    edSet("edSetRows",html);
+    edSet("edSetN",pass.length+" passed all gates");
+    edSet("edSetHl",pass.length+" name"+(pass.length===1?"":"s")+" clear the gates \u2014 "+
+      pass[0].ticker+" scores highest at "+edNum(pass[0].trade_score,0));
+    var openN=(trLog||[]).filter(function(t){return t.status==="open"&&edMine(t);}).length;
+    edSet("edSetBody",'<p class="ed-body"><b>'+pass[0].ticker+'</b> tops the list. Before acting '+
+      'on any of these, check where each sits against its own gamma levels on the ticker page \u2014 '+
+      'buying directly into a call wall is buying into where dealer supply concentrates. '+
+      'You currently hold '+openN+' position'+(openN===1?'':'s')+', so size the next one to the '+
+      'same 1R as every other trade.</p>');
+  }
+
+  // ---------------- the map --------------------------------------------------
+  function edMap(g){
+    var ov=(g&&g.overview)||{}, L=(g&&g.levels)||{};
+    function lv(x){ return (x&&x.strike!=null)?x.strike:(typeof x==="number"?x:null); }
+    var spot=ov.spx_spot||ov.spot, flip=ov.gamma_flip,
+        cw=lv(L.call_wall), pw=lv(L.put_wall), pin=lv(L.pin);
+    edSet("edMapN","SPX \u00b7 "+(ov.regime||"\u2014")+
+      (ov.net_gex_B!=null?" \u00b7 "+(ov.net_gex_B>=0?"+":"")+ov.net_gex_B.toFixed(1)+"B":""));
+    if(!spot){ edSet("edMapHl","Gamma data not available yet"); return; }
+    var hl;
+    if(cw&&pw) hl="Spot is boxed between "+edNum(pw)+" and "+edNum(cw)+
+      (flip?", "+Math.abs((spot/flip-1)*100).toFixed(1)+"% "+(spot>flip?"above":"below")+" the flip":"");
+    else hl="Spot at "+edNum(spot)+(flip?", flip at "+edNum(flip):"");
+    edSet("edMapHl",hl);
+    var p='<p class="ed-body">The index sits at <b>'+edNum(spot)+'</b>';
+    if(cw) p+=', '+edNum(Math.abs(cw-spot))+' points '+(cw>spot?'under':'over')+
+      ' the call wall at '+edNum(cw);
+    if(pw) p+=' and '+edNum(Math.abs(spot-pw))+' points '+(spot>pw?'above':'below')+
+      ' the put wall at '+edNum(pw);
+    p+='. ';
+    if(ov.net_gex_B!=null){
+      p+=(ov.net_gex_B>=0
+        ? 'In positive gamma dealers hedge against the move \u2014 they sell into pushes higher and buy dips, which compresses realised volatility below what options imply. That is the mechanical reason this tape grinds rather than trends. '
+        : 'In negative gamma dealers hedge with the move \u2014 they sell weakness and buy strength, which amplifies both directions. Ranges widen and stops get tested more often than the news justifies. ');
+    }
+    if(flip) p+='The level that matters is <b>'+edNum(flip)+'</b>: below it the hedging flips '+
+      'and every stop distance in your book becomes a live risk rather than a theoretical one. '+
+      'Spot is '+Math.abs((spot/flip-1)*100).toFixed(1)+'% '+(spot>flip?'above':'below')+
+      ' it. That is the single number to watch tomorrow.';
+    p+='</p>';
+    edSet("edMapBody",p);
+    // reuse the Markets renderer into the edition's own host
+    try{ if(typeof drawSPX==="function") drawSPX("ED"); }catch(e){}
+  }
+
+  // ---------------- what would change this -----------------------------------
+  function edWatch(m,g){
+    var X=(m&&m.explain)||{}, ov=(g&&g.overview)||{}, L=(g&&g.levels)||{};
+    function lv(x){ return (x&&x.strike!=null)?x.strike:(typeof x==="number"?x:null); }
+    var out="", n=0;
+    (X.watch||[]).slice(0,2).forEach(function(w){
+      n++;
+      out+='<div class="ed-w"><span class="w-tag">High</span><span><b>'+w["if"]+'</b> \u2014 now '+
+        edNum(w.now,2)+', '+edNum(w.distance,2)+' away. It is the closest gate keeping '+
+        (m.regime||"").replace(/_/g," ").toLowerCase()+' alive; if it breaks the stance changes.'+
+        '</span><span class="w-when">next print</span></div>';
+    });
+    if(ov.gamma_flip){
+      n++;
+      out+='<div class="ed-w"><span class="w-tag">High</span><span><b>SPX '+
+        ((ov.spx_spot||0)>ov.gamma_flip?'loses ':'reclaims ')+edNum(ov.gamma_flip)+
+        '</b> \u2014 dealers flip from '+((ov.net_gex_B||0)>=0?'dampening to amplifying':'amplifying to dampening')+
+        '. Ranges change character and so does the right position size.</span>'+
+        '<span class="w-when">intraday</span></div>';
+    }
+    var cw=lv(L.call_wall);
+    if(cw){ n++;
+      out+='<div class="ed-w"><span class="w-tag low">Med</span><span>Rallies into <b>'+
+        edNum(cw)+'</b> meet the call wall, where dealer selling usually caps the move</span>'+
+        '<span class="w-when">intraday</span></div>'; }
+    var open=(trLog||[]).filter(function(t){return t.status==="open"&&edMine(t);});
+    if(open.length){ n++;
+      var big=open.slice().sort(function(a,b){return (+b.qty*+b.entry)-(+a.qty*+a.entry);})[0];
+      out+='<div class="ed-w"><span class="w-tag low">Med</span><span><b>'+big.ticker+
+        '</b> is your largest position \u2014 check its earnings date before adding elsewhere</span>'+
+        '<span class="w-when">see ticker</span></div>'; }
+    edSet("edWatchRows",out);
+    edSet("edWatchN",n+" item"+(n===1?"":"s"));
+  }
 
   // ---- SPX GEX HISTOGRAM -------------------------------------------------
   // exposed so the render path can be exercised without a live gex.json
@@ -3321,57 +4032,40 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   //
   // Everything computes from data already loaded. No new engine work.
 
+  // Mission Control IS the Daily Brief. The old tile grid is gone: the ten
+  // minutes of information it was trying to convey now live in the edition,
+  // which opens full-screen over whatever page you were on.
   var MC_HTML =
-    '<div class="mc-grid">'+
-      '<div class="mc-verdict" id="mcVerdict"><div class="loading">\u2026</div></div>'+
-      // SPX candles with gamma levels drawn on — the same renderer Markets uses,
-      // with an id suffix because both pages live in the DOM at once.
-      '<div class="tile m-spx"><div class="thead"><span class="ttl">S&P 500 \u00b7 Daily</span>'+
-        '<span class="tnote"><span id="spxPxMC"></span> <span id="spxChgMC"></span></span></div>'+
-        '<div class="tbody"><div class="spx-hover" id="spxHoverMC"></div>'+
-          '<div class="plot" id="spxPlotMC"></div></div></div>'+
-      '<div class="tile m-gex"><div class="thead"><span class="ttl">GEX \u00b7 SPX</span>'+
-        '<span class="tnote" id="gexNoteMC"></span></div>'+
-        '<div class="tbody" id="gexBodyMC"><div class="loading">\u2026</div></div></div>'+
-      '<div class="tile m-vix"><div class="thead"><span class="ttl">VIX Term</span>'+
-        '<span class="tnote" id="vixNoteMC"></span></div>'+
-        '<div class="tbody"><div class="plot" id="vixPlotMC"></div></div></div>'+
-      '<div class="tile m-pos"><div class="thead"><span class="ttl">Positions</span>'+
-        '<span class="tnote" id="mcPosNote"></span></div>'+
-        '<div class="tbody" style="overflow-y:auto" id="mcPos"><div class="loading">\u2026</div></div></div>'+
-      '<div class="tile m-earn"><div class="thead"><span class="ttl">Earnings</span>'+
-        '<span class="tnote" id="mcEarnNote"></span></div>'+
-        '<div class="tbody" style="overflow-y:auto" id="mcEarn"><div class="loading">\u2026</div></div></div>'+
-      // Industry, not sector ETFs: Layer 2 is industry-level, and when the
-      // regime is NO_CLEAR industry rotation is what carries the trade.
-      '<div class="tile m-ind"><div class="thead"><span class="ttl">Industry \u00b7 Today</span>'+
-        '<span class="tnote" id="mcIndNote">cap-weighted 1d</span></div>'+
-        '<div class="tbody" style="overflow-y:auto" id="mcInd"><div class="loading">\u2026</div></div></div>'+
-      '<div class="tile m-picks"><div class="thead"><span class="ttl">Setups</span>'+
-        '<span class="tnote" id="mcPickNote"></span></div>'+
-        '<div class="tbody" style="overflow-y:auto" id="mcPicks"><div class="loading">\u2026</div></div></div>'+
-      '<div class="tile m-lesson"><div class="thead"><span class="ttl">\u2726 Edge Leak</span>'+
-        '<span class="tnote" id="mcLessNote"></span></div>'+
-        '<div class="tbody" id="mcLesson"><div class="loading">\u2026</div></div></div>'+
-    '</div>';
+    '<div class="mc-launch">'+
+      '<button class="ed-open" onclick="PX_OPEN_EDITION()">'+
+        '<span class="eo-k" id="eoK">Phoenix Daily \u00b7 loading\u2026</span>'+
+        '<span class="eo-h" id="eoH">Your ten-minute read</span>'+
+        '<span class="eo-m" id="eoM">Positions, the tape, rotation, smart money, setups and the map</span>'+
+        '<span class="eo-go">Open \u2192</span>'+
+      '</button>'+
+    '</div>' 
 
   function initMC(){
-    trLoad(function(){
-      pfLoadCfg();
-      var opens=(trLog||[]).filter(function(t){ return t.status==="open"; });
-      trFetchAll(opens, function(){ mcRender(); });
-      trPreloadFin(opens.concat(trByStatus("plan")), function(){ mcRender(); });
-      if(!C.macro) getJSON("macro").then(function(d){ C.macro=d; mcRender(); }).catch(function(){ mcRender(); });
-      if(!scrData) getJSON("stocks").then(function(d){ scrData=(d&&d.stocks)||[]; scrMeta=(d&&d.meta)||{}; mcRender(); }).catch(function(){});
-      if(!indData) getJSON("industry").then(function(d){ indData=(d&&d.industries)||[]; mcRender(); })
-        .catch(function(){ indData=[]; mcRender(); });
-      mcRender();
-      // charts render into MC-suffixed ids so they can't collide with Markets
-      drawSPX("MC");
-      drawVIX("MC");
-      loadGEX("MC");
-    });
+    // the launcher shows the day's headline so the button is informative
+    // before you open it
+    Promise.all([getJSON("macro").catch(function(){return null;}),
+                 getJSON("gex").catch(function(){return null;})])
+      .then(function(r){
+        var m=r[0]||{}, g=r[1]||{}, ov=(g.overview)||{};
+        var k=document.getElementById("eoK");
+        if(k) k.textContent="Phoenix Daily \u00b7 "+(m.asof||"").slice(0,10);
+        var h=document.getElementById("eoH");
+        if(h && m.regime) h.textContent=edVerdictLine(m,g).plain;
+        var mm=document.getElementById("eoM");
+        if(mm) trLoad(function(){
+          var n=(trLog||[]).filter(function(t){return t.status==="open"&&edMine(t);}).length;
+          mm.textContent=n+" open position"+(n===1?"":"s")+
+            (ov.net_gex_B!=null?" \u00b7 "+(ov.net_gex_B>=0?"positive":"negative")+" gamma":"")+
+            (ov.gamma_flip?" \u00b7 flip "+Math.round(ov.gamma_flip).toLocaleString():"");
+        });
+      }).catch(function(){});
   }
+
 
   function mcRender(){
     if(!document.getElementById("mcVerdict")) return;
@@ -7002,5 +7696,64 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
 })();
 </script>
 
+
+<div class="ed-scrim" id="edScrim" onclick="PX_CLOSE_EDITION()"></div>
+<div class="ed-wrap" id="edWrap"><div class="ed-page" id="edBody">
+  <button class="ed-x" onclick="PX_CLOSE_EDITION()">CLOSE ✕</button>
+  <div class="ed-mast">
+    <div class="ed-meta"><span>Phoenix Daily</span><span id="edEdType"></span></div>
+    <div class="ed-name">Phoenix</div>
+    <div class="ed-sub">Survival first. Measure, don’t debate.</div>
+    <div class="ed-hello" id="edDate"></div>
+  </div>
+
+  <div class="ed-verdict">
+    <div><div class="ed-call" id="edCall">…</div>
+      <div class="ed-vwhy" id="edWhy"></div></div>
+  </div>
+
+  <div class="ed-sec"><div class="ed-k"><span>Your book</span>
+      <span class="ed-n" id="edBookN"></span></div>
+    <h2 class="ed-hl" id="edBookHl">…</h2>
+    <div id="edBookRows"></div><div id="edBookBody"></div></div>
+
+  <div class="ed-sec"><div class="ed-k"><span>The tape</span>
+      <span class="ed-n">ranked by how unusual</span></div>
+    <h2 class="ed-hl" id="edTapeHl">…</h2>
+    <div class="ed-tape" id="edTapeCards"></div><div id="edTapeBody"></div></div>
+
+  <div class="ed-sec"><div class="ed-k"><span>Rotation</span>
+      <span class="ed-n">1-day · your industries flagged</span></div>
+    <h2 class="ed-hl sm" id="edRotHl">…</h2>
+    <div class="ed-rot" id="edRotRows"></div><div id="edRotBody"></div></div>
+
+  <div class="ed-sec"><div class="ed-k"><span>Smart money</span>
+      <span class="ed-n">on the names you hold</span></div>
+    <h2 class="ed-hl sm" id="edSmartHl">…</h2>
+    <div class="ed-smart" id="edSmartGrid"></div><div id="edSmartBody"></div></div>
+
+  <div class="ed-sec"><div class="ed-k"><span>Setups</span>
+      <span class="ed-n" id="edSetN"></span></div>
+    <h2 class="ed-hl sm" id="edSetHl">…</h2>
+    <div class="ed-setups" id="edSetRows"></div><div id="edSetBody"></div></div>
+
+  <div class="ed-sec"><div class="ed-k"><span>The map</span>
+      <span class="ed-n" id="edMapN"></span></div>
+    <h2 class="ed-hl sm" id="edMapHl">…</h2>
+    <div class="ed-map"><div class="plot" id="spxPlotED"></div></div>
+    <div id="edMapBody"></div></div>
+
+  <div class="ed-sec"><div class="ed-k"><span>What would change this</span>
+      <span class="ed-n" id="edWatchN"></span></div>
+    <div id="edWatchRows"></div></div>
+
+  <div class="ed-jump">
+    <a onclick="PX_ED_GO(\'portfolio\')">Portfolio</a>
+    <a onclick="PX_ED_GO(\'trades\')">Trades</a>
+    <a onclick="PX_ED_GO(\'screeners\')">Top picks</a>
+    <a onclick="PX_ED_GO(\'markets\')">Markets</a>
+  </div>
+  <div class="ed-colophon">Phoenix OS v1.0 · not investment advice</div>
+</div></div>
 </body>
 </html>
