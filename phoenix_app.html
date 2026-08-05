@@ -1669,6 +1669,60 @@ html:not(.light) .rp-selbar{color:#E8EDF2;font-size:13px}
   .patcell{min-width:104px}
 }
 
+/* ===== screener: Heartbeat layout, full width ===== */
+.scr-grid.full{display:block;padding:12px}
+.scr-grid.full .a-screener{width:100%}
+.scr-tr,.scr-th,.scr-tf{
+  display:grid;
+  grid-template-columns:32px 1.5fr 138px 92px 116px 104px 84px 1.15fr 72px 132px!important;
+  align-items:center;gap:10px}
+.scr-th span{position:relative;cursor:pointer;white-space:nowrap}
+.scr-th span.on{color:var(--gold)}
+.scr-th .ar{font-style:normal;opacity:.35;margin-left:4px;font-size:9px}
+.scr-th span.on .ar{opacity:1}
+.scr-tf{padding:6px 0 10px;border-bottom:1px solid var(--line);background:var(--card2)}
+.scr-tf input,.scr-tf select{width:100%;font-family:var(--mono);font-size:11px;
+  padding:5px 7px;border:1px solid var(--line2);border-radius:4px;background:var(--bg);color:var(--ink)}
+.scr-tf .stopsel{border-color:var(--gold);color:var(--gold);background:transparent}
+.scr-tr{padding:11px 0;border-bottom:1px solid var(--line)}
+.nmcell{display:flex;flex-direction:column;gap:2px;min-width:0}
+.nmcell .tk{font-family:var(--serif);font-size:18px;font-weight:700;line-height:1.05;
+  display:flex;align-items:center;gap:6px}
+.nmcell .co{font-family:var(--sans);font-size:11.5px;color:var(--inkFade);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gexb{font-style:normal;font-family:var(--mono);font-size:8px;letter-spacing:.1em;
+  padding:1px 4px;border:1px solid var(--gold);color:var(--gold);border-radius:2px}
+.scr-setup{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;padding:2px 8px;
+  border-radius:99px;border:1px solid var(--line2);color:var(--inkLight);white-space:nowrap}
+.scr-setup.brk{border-color:var(--gold);color:var(--gold)}
+.scr-setup.srg{border-color:var(--green);color:var(--green)}
+.scorecell{display:flex;flex-direction:column;gap:3px}
+.scorecell b{font-family:var(--mono);font-size:15px}
+.scorecell .sbar{display:block;width:64px;height:4px;background:var(--line);border-radius:3px;overflow:hidden}
+.scorecell .sbar u{display:block;height:100%;background:var(--gold);text-decoration:none}
+.scorecell em,.gatecell em,.pxcell em{font-style:normal;font-family:var(--mono);
+  font-size:10px;color:var(--inkFade)}
+.gatecell{display:flex;flex-direction:column;gap:4px}
+.gdots{display:flex;gap:3px}
+.gdots i{width:6px;height:6px;border-radius:50%;background:var(--line2);display:block}
+.gdots i.ok{background:var(--green)}
+.pxcell{display:flex;flex-direction:column;gap:2px}
+.pxcell b{font-family:var(--mono);font-size:14px}
+.indcell{display:flex;flex-direction:column;gap:2px;min-width:0}
+.indmom{font-family:var(--mono);font-size:11px;font-weight:700}
+.indnm{font-size:11.5px;color:var(--inkLight);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.capcell{font-family:var(--mono);font-size:12.5px}
+.stopcell{font-family:var(--mono);font-size:12.5px}
+.scr-foot{padding:12px 14px;border-top:1px solid var(--line);display:flex;
+  justify-content:space-between;gap:10px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:11px;color:var(--inkFade)}
+html:not(.light) .nmcell .co,html:not(.light) .indnm,html:not(.light) .scr-foot{color:#E8EDF2}
+html:not(.light) .scorecell em,html:not(.light) .gatecell em,html:not(.light) .pxcell em{color:#E8EDF2}
+@media(max-width:1000px){
+  .scr-tr,.scr-th,.scr-tf{grid-template-columns:26px 1.3fr 108px 76px 92px 84px 68px 1fr 60px 108px!important;gap:7px}
+  .scr-pat{width:104px;height:32px}
+}
+
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
   --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
@@ -2532,6 +2586,10 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     }).catch(function(e){ console.warn("[brief] book block", e); });
   }
   window.__PXT.brfBook=brfBook;
+  window.__PXT.scrTest=function(rows,gexu){
+    scrData=rows; scrMeta={}; window.__scrGexU=gexu||{};
+    renderScreener();
+  };
   window.__PXT.setRP=function(d){ RP_DATA=d; rpDraw(); };
   window.__PXT.epi=function(m,g){ return edEpigraph(m,g); };
   window.__PXT.setGetJSON=function(f){ getJSON=f; };
@@ -4379,9 +4437,11 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
 
   // ================= SCREENER =================
   var SCREENER_HTML =
-    '<div class="scr-grid">'+
-      '<div class="tile a-screener"><div class="thead"><span class="ttl">Screener</span><span class="tnote" id="scrCount"></span></div>'+
-        // v2 two-book toggle: v1 blend / Trade book / Investment book
+    '<div class="scr-grid full">'+
+      '<div class="tile a-screener"><div class="thead">'+
+        '<span class="ttl">Screener</span><span class="tnote" id="scrCount"></span>'+
+      '</div>'+
+        // book + preset chips, one row
         '<div class="scr-books" id="scrBooks">'+
           '<button class="scr-book on" data-b="v1">Blend v1</button>'+
           '<button class="scr-book" data-b="trade">Trade Book</button>'+
@@ -4389,7 +4449,6 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
           '<button class="scr-book" data-b="gexu">GEX Universe</button>'+
           '<button class="scr-book" data-b="smart">Smart Money</button>'+
         '</div>'+
-        // preset chips — one tap to a curated view
         '<div class="scr-presets" id="scrPresets">'+
           '<button class="scr-preset" data-p="top"><span class="ic">\u2605</span>Highest Rated</button>'+
           '<button class="scr-preset" data-p="breakout"><span class="ic">\u25B2</span>Breakouts</button>'+
@@ -4398,26 +4457,17 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
           '<button class="scr-preset" data-p="trade"><span class="ic">\u2197</span>Trade Setups</button>'+
           '<button class="scr-preset" data-p="invest"><span class="ic">\u25B0</span>Investments</button>'+
         '</div>'+
-        '<div class="scr-controls">'+
-          '<input class="scr-search" id="scrSearch" placeholder="Search ticker, company, or industry\u2026" autocomplete="off">'+
-          '<select class="scr-sel" id="scrMcap"><option value="">Any cap</option><option value="1000">&gt; $1T</option><option value="200">&gt; $200B</option><option value="50">&gt; $50B</option><option value="10">&gt; $10B</option><option value="1">&gt; $1B</option></select>'+
-          '<select class="scr-sel" id="scrStop" title="drawn on every pattern">'+
-            '<option value="ma50">Stop: 50-day average</option>'+
-            '<option value="ma200">Stop: 200-day average</option>'+
-            '<option value="swing">Stop: recent swing low</option>'+
-            '<option value="putwall">Stop: gamma put wall</option>'+
-            '<option value="atr">Stop: 2 x ATR</option>'+
-          '</select>'+
-          '<select class="scr-sel" id="scrChg"><option value="">Any day move</option><option value="0">Up today</option><option value="2">&gt; +2%</option><option value="5">&gt; +5%</option></select>'+
+        '<div class="tbody"><div class="scr-table" id="scrTable"><div class="loading">\u2026</div></div></div>'+
+        '<div class="scr-foot">'+
+          '<span>Tap a ticker for its page. Gates are the six inclusion rules \u2014 '+
+          'a name must clear all six to be a pick.</span>'+
+          '<span>The stop line is drawn on every pattern; change it in the header.</span>'+
         '</div>'+
-        '<div class="tbody"><div class="scr-table" id="scrTable"><div class="loading">\u2026</div></div></div></div>'+
-      '<div class="tile a-picks"><div class="thead"><span class="ttl">Breakout Picks</span><span class="tnote" id="picksNote">CIO view</span></div>'+
-        '<div class="tbody"><div class="picks-scroll" id="picksScroll"><div class="loading">\u2026</div></div>'+
-        '<div class="promo-head"><span class="ttl2">Promotion Watch</span><span class="n" id="promoN"></span></div>'+
-        '<div id="promoList"><div class="promo-empty">\u2026</div></div></div></div>'+
+      '</div>'+
     '</div>';
 
   var scrData=null, scrMeta=null, scrFilter=null, scrSearch="", scrSort="rank", scrPreset=null;
+  var scrGates="", scrExpanded=null;
   var scrMcap="", scrChg="";
   // v2 two-book state (PHOENIX_REVIEW Part 3). scrData stays the v1 list —
   // other pages (Mission Control, Markets, planner price fallback) depend on
@@ -4441,7 +4491,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       renderPicks();
     }).catch(function(e){
       document.getElementById("scrTable").innerHTML=errHTML("stocks.json",e.message);
-      document.getElementById("picksScroll").innerHTML=errHTML("stocks.json",e.message);
+      (document.getElementById("picksScroll")||{}).innerHTML=errHTML("stocks.json",e.message);
     });
     var si=document.getElementById("scrSearch");
     si.addEventListener("input",function(){ scrSearch=this.value.toLowerCase().trim(); renderScreener(); });
@@ -4527,6 +4577,10 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     // dropdown filters
     if(scrMcap) arr=arr.filter(function(s){return (s.mcap_B||0)>=+scrMcap;});
     if(scrChg) arr=arr.filter(function(s){return s.daily_pct!=null && s.daily_pct>=+scrChg;});
+    if(scrGates) arr=arr.filter(function(s){
+      var g=(s.gates_passed!=null)?s.gates_passed:(s.passer?6:5);
+      return g >= +scrGates;
+    });
     // search: ticker OR name OR industry
     if(scrSearch) arr=arr.filter(function(s){
       return (s.ticker||"").toLowerCase().indexOf(scrSearch)>=0
@@ -4553,11 +4607,37 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       cEl.textContent=txt;
       cEl.style.color = (fresh===false) ? "var(--red)" : (cov!=null&&cov<90) ? "var(--amber)" : "var(--inkFade)";
     }
-    var head='<div class="scr-th"><span data-s="rank">#</span><span data-s="ticker">Stock</span>'+
-      '<span>Pattern</span>'+
-      '<span data-s="daily_pct" class="num">Day</span><span data-s="opp_score" class="num">Score</span>'+
-      '<span data-s="trade_score" class="num">Trade</span><span data-s="invest_score" class="num">Invest</span>'+
-      '<span data-s="mcap_B" class="num">Cap</span><span class="num">Add</span></div>';
+    function th(lbl,key){
+      var on=(scrSort===key);
+      return '<span'+(key?' data-s="'+key+'"':'')+(on?' class="on"':'')+'>'+lbl+
+        (key?'<i class="ar">'+(on?"\u25bc":"\u25b2\u25bc")+'</i>':'')+'</span>';
+    }
+    var head='<div class="scr-th">'+th("#","rank")+th("Ticker","ticker")+
+      '<span>Pattern</span><span>Setup</span>'+th("Score","opp_score")+
+      '<span>Gates</span>'+th("Day","daily_pct")+'<span>Industry</span>'+
+      th("Cap","mcap_B")+'<span>Your stop</span></div>'+
+      // filters live inside the table, the way Heartbeat does it
+      '<div class="scr-tf"><span></span>'+
+        '<span><input id="fTk" placeholder="Filter" value="'+(scrSearch||"")+'"></span>'+
+        '<span></span><span></span><span></span>'+
+        '<span><select id="fGates"><option value="">All gates</option>'+
+          '<option value="6"'+(scrGates==="6"?" selected":"")+'>6 of 6</option>'+
+          '<option value="5"'+(scrGates==="5"?" selected":"")+'>5 or more</option></select></span>'+
+        '<span><select id="fChg"><option value="">Any move</option>'+
+          '<option value="0"'+(scrChg==="0"?" selected":"")+'>Up today</option>'+
+          '<option value="2"'+(scrChg==="2"?" selected":"")+'>&gt; +2%</option>'+
+          '<option value="5"'+(scrChg==="5"?" selected":"")+'>&gt; +5%</option></select></span>'+
+        '<span></span>'+
+        '<span><select id="fMcap"><option value="">Any cap</option>'+
+          '<option value="200"'+(scrMcap==="200"?" selected":"")+'>&gt; $200B</option>'+
+          '<option value="50"'+(scrMcap==="50"?" selected":"")+'>&gt; $50B</option>'+
+          '<option value="10"'+(scrMcap==="10"?" selected":"")+'>&gt; $10B</option>'+
+          '<option value="1"'+(scrMcap==="1"?" selected":"")+'>&gt; $1B</option></select></span>'+
+        '<span><select id="scrStop" class="stopsel">'+
+          Object.keys(SCR_STOPS).map(function(k){
+            return '<option value="'+k+'"'+(SCR_STOP===k?" selected":"")+'>'+SCR_STOPS[k]+'</option>';
+          }).join("")+'</select></span>'+
+      '</div>';
     var rows=arr.slice(0,200).map(function(s){
       var dp=s.daily_pct, dps=(dp==null)?"\u2014":((dp>=0?"+":"")+dp.toFixed(1)+"%");
       var dpc=dp==null?"var(--inkFade)":(dp>=0?"var(--green)":"var(--red)");
@@ -4567,22 +4647,55 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       var sc=scrBook==="trade"?s.trade_score:scrBook==="invest"?s.invest_score:
              (s.opp_score!=null?Math.round(s.opp_score):(s.invest_score!=null?Math.max(s.trade_score||0,s.invest_score||0):null));
       var pillCls=sc==null?"s-lo":sc>=75?"s-hi":sc>=55?"s-mid":"s-lo";
+      var gp=(s.gates_passed!=null)?s.gates_passed:(s.passer?6:5);
+      var dots=""; for(var g=0;g<6;g++) dots+='<i class="'+(g<gp?"ok":"")+'"></i>';
+      var setup=s.setup||(s.breakout?"Breakout":s.surge?"Surge":s.near_high?"Near high":"\u2014");
+      var setCls=setup==="Breakout"?"brk":setup==="Surge"?"srg":"";
+      var im=s.industry_mom_3m;
+      var gexIn=!!(window.__scrGexU&&window.__scrGexU[s.ticker]);
       var pill=sc==null?"\u2014":'<span class="scr-pill '+pillCls+'">'+sc+'</span>';
       return '<div class="scr-tr'+(s.passer===false?' nearmiss':'')+'" data-row-tk="'+s.ticker+'">'+
         '<span class="rk">'+(s.rank||"\u2014")+'</span>'+
-        '<span class="nmcell"><span class="tk">'+s.ticker+(s.breakout?' \u25B2':'')+'<span class="tk-arrow">\u203A</span></span><span class="nm">'+nm+'</span></span>'+
+        '<span class="nmcell"><span class="tk">'+s.ticker+
+          (gexIn?'<i class="gexb">GEX</i>':'')+'</span>'+
+          '<span class="co">'+(nm||"")+'</span></span>'+
         '<span class="patcell" data-pat="'+s.ticker+'"></span>'+
-        '<span class="num" style="color:'+dpc+';font-weight:700">'+dps+'</span>'+
-        '<span class="num">'+pill+'</span>'+
-        '<span class="num">'+(s.trade_score!=null?s.trade_score:"\u2014")+'</span>'+
-        '<span class="num">'+(s.invest_score!=null?s.invest_score:"\u2014")+'</span>'+
-        '<span class="num">'+capFmt(s.mcap_B)+'</span>'+
-        '<span class="scr-acts"><button data-w="research" data-tk="'+s.ticker+'" class="'+(inR?"added":"")+'">R</button>'+
-        '<button data-w="trades" data-tk="'+s.ticker+'" class="'+(inT?"added":"")+'">T</button>'+
-        '<button data-w="pick" data-tk="'+s.ticker+'" title="add to picks">\u2605</button></span></div>';
+        '<span><span class="scr-setup '+setCls+'">'+setup+'</span></span>'+
+        '<span class="scorecell"><b>'+(sc==null?"\u2014":sc)+'</b>'+
+          '<i class="sbar"><u style="width:'+(sc||0)+'%"></u></i>'+
+          '<em>trade '+(s.trade_score!=null?s.trade_score:"\u2014")+
+          ' \u00b7 invest '+(s.invest_score!=null?s.invest_score:"\u2014")+'</em></span>'+
+        '<span class="gatecell"><span class="gdots">'+dots+'</span>'+
+          '<em>'+gp+'/6'+(s.missing_gate?' \u00b7 '+s.missing_gate:'')+'</em></span>'+
+        '<span class="pxcell"><b style="color:'+dpc+'">'+dps+'</b>'+
+          '<em>'+(s.price!=null?"$"+(+s.price).toFixed(2):"")+'</em></span>'+
+        '<span class="indcell">'+
+          (im!=null?'<span class="indmom '+(im>=0?"up":"dn")+'">'+
+            (im>=0?"\u25b2 +":"\u25bc \u2212")+Math.abs(im).toFixed(1)+'%</span>':'')+
+          '<span class="indnm">'+(s.industry||"\u2014")+'</span></span>'+
+        '<span class="capcell">'+capFmt(s.mcap_B)+'</span>'+
+        '<span class="stopcell" data-stop="'+s.ticker+'">\u2026</span></div>';
     }).join("");
     var el=document.getElementById("scrTable");
     el.innerHTML=head+rows;
+    // inline filters live inside the table now
+    var fTk=el.querySelector("#fTk");
+    if(fTk) fTk.addEventListener("input",function(){
+      scrSearch=this.value.trim().toLowerCase(); var v=this.value;
+      renderScreener();
+      var n=document.querySelector("#fTk"); if(n){ n.focus(); n.value=v;
+        n.setSelectionRange(v.length,v.length); }
+    });
+    [["fGates","scrGates"],["fChg","scrChg"],["fMcap","scrMcap"]].forEach(function(p){
+      var e=el.querySelector("#"+p[0]);
+      if(e) e.addEventListener("change",function(){ window[p[1]]=this.value;
+        if(p[1]==="scrGates") scrGates=this.value;
+        if(p[1]==="scrChg") scrChg=this.value;
+        if(p[1]==="scrMcap") scrMcap=this.value;
+        renderScreener(); });
+    });
+    var ss=el.querySelector("#scrStop");
+    if(ss) ss.addEventListener("change",function(){ SCR_STOP=this.value; scrFillPatterns(); });
     el.querySelectorAll(".scr-th span[data-s]").forEach(function(h){
       h.addEventListener("click",function(){ scrSort=this.dataset.s; renderScreener(); });
     });
@@ -4618,180 +4731,6 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       var r=el.querySelector('.scr-tr[data-row-tk="'+scrExpanded+'"]');
       if(r){ var tk=scrExpanded; scrExpanded=null; scrToggleExpand(tk,r); }
     }
-  }
-
-  // ---- Smart Money screener: rank the universe by disclosed institutional +
-  // congressional activity. Aggregates computed from the two loaded files. ----
-  var scrSmSort="instbuy";   // instbuy | congress | net
-  // Midpoint of a filed dollar range. Handles both the long form
-  // ("$1,000,001 - $5,000,000") and the shorthand ("$1M - $5M", "$250K - $500K").
-  function _amtOne(tok){
-    if(!tok) return null;
-    var m=String(tok).replace(/[$,\s]/g,"").match(/^([\d.]+)([KMB])?$/i);
-    if(!m) return null;
-    var v=parseFloat(m[1]); if(isNaN(v)) return null;
-    var u=(m[2]||"").toUpperCase();
-    return v*(u==="B"?1e9:u==="M"?1e6:u==="K"?1e3:1);
-  }
-  function _amtMid(s){
-    var str=String(s||"");
-    var parts=str.split(/\s*[-\u2013]\s*/);
-    if(parts.length>=2){
-      var a=_amtOne(parts[0]), b=_amtOne(parts[1]);
-      if(a!=null&&b!=null) return (a+b)/2;
-      if(a!=null) return a;
-      if(b!=null) return b;
-    }
-    var one=_amtOne(str);
-    return one!=null?one:0;
-  }
-  function _smAgg(tk){
-    var inst=(dpInstit&&dpInstit[tk])||[], cg=(dpCongress&&dpCongress[tk])||[];
-    var instBuyVal=0,instSellVal=0,instBuy=0,instSell=0;
-    inst.forEach(function(h){
-      if(h.action==="NEW"||h.action==="ADD"){ instBuy++; instBuyVal+=h.value_usd||0; }
-      else if(h.action==="TRIM"||h.action==="EXIT"){ instSell++; instSellVal+=h.value_usd||0; }
-    });
-    var cgBuy=0,cgSell=0,cgBuyN=0,cgSellN=0,latest="";
-    cg.forEach(function(t){
-      var mid=_amtMid(t.amount);
-      if(t.side==="buy"){ cgBuy++; cgBuyN+=mid; } else if(t.side==="sell"){ cgSell++; cgSellN+=mid; }
-      if(t.date>latest) latest=t.date;
-    });
-    inst.forEach(function(h){ /* institutions have no per-row date in 13F deltas */ });
-    return {tk:tk,inst:inst,cg:cg,instBuyVal:instBuyVal,instSellVal:instSellVal,
-            instBuy:instBuy,instSell:instSell,cgBuy:cgBuy,cgSell:cgSell,
-            cgBuyN:cgBuyN,cgSellN:cgSellN,latest:latest,
-            netFlow:(instBuyVal-instSellVal)+(cgBuyN-cgSellN),
-            activity:instBuy+instSell+cgBuy+cgSell};
-  }
-  function _usd(v){ return v>=1e9?"$"+(v/1e9).toFixed(1)+"B":v>=1e6?"$"+(v/1e6).toFixed(0)+"M":v>=1e3?"$"+Math.round(v/1e3)+"K":"$"+Math.round(v); }
-  function renderSmartMoney(){
-    var el=document.getElementById("scrTable"), cEl=document.getElementById("scrCount");
-    if(dpCongress===null||dpInstit===null){ el.innerHTML='<div class="loading">\u2026</div>'; dpEnsureSmart(function(){renderSmartMoney();}); return; }
-    var tks={};
-    Object.keys(dpInstit||{}).forEach(function(t){tks[t]=1;});
-    Object.keys(dpCongress||{}).forEach(function(t){tks[t]=1;});
-    var rows=Object.keys(tks).map(_smAgg);
-    if(scrSearch) rows=rows.filter(function(r){return r.tk.toLowerCase().indexOf(scrSearch)>=0;});
-    if(scrSmSort==="instbuy") rows.sort(function(a,b){return b.instBuyVal-a.instBuyVal;});
-    else if(scrSmSort==="congress") rows.sort(function(a,b){return (b.cgBuy-b.cgSell)-(a.cgBuy-a.cgSell)||b.cgBuyN-a.cgBuyN;});
-    else rows.sort(function(a,b){return b.netFlow-a.netFlow;});
-    rows.forEach(function(r,i){r.rank=i+1;});
-    if(cEl){ cEl.innerHTML=rows.length+' tickers with disclosed activity \u00b7 '+
-      '<span class="sm-sort" data-s="instbuy">Biggest inst. buys</span> '+
-      '<span class="sm-sort" data-s="congress">Congress buying</span> '+
-      '<span class="sm-sort" data-s="net">Net flow</span>'; cEl.style.color="var(--inkFade)"; }
-    if(!rows.length){
-      el.innerHTML='<div class="promo-empty" style="padding:14px 4px">No smart-money data yet. congress_trades.json is seeded; institutional_holdings.json populates on the first run of the smart_money workflow (SEC 13F fetch).</div>';
-    } else {
-      var head='<div class="scr-th sm-th"><span>#</span><span>Stock</span>'+
-        '<span class="num">Inst. buy $</span><span class="num">Inst +/\u2212</span>'+
-        '<span class="num">Congress</span><span class="num">Net flow</span></div>';
-      el.innerHTML=head+rows.slice(0,120).map(function(r){
-        var known=scrData&&scrData.some(function(s){return s.ticker===r.tk;});
-        var instNet=(r.instBuy-r.instSell);
-        var cgTxt=(r.cgBuy?'<span style="color:var(--green)">'+r.cgBuy+'B</span>':'')+(r.cgSell?' <span style="color:var(--red)">'+r.cgSell+'S</span>':'')||'\u2014';
-        var netCol=r.netFlow>=0?"var(--green)":"var(--red)";
-        return '<div class="scr-tr sm-tr" data-row-tk="'+r.tk+'">'+
-          '<span class="rk">'+r.rank+'</span>'+
-          '<span class="nmcell"><span class="tk">'+r.tk+'<span class="tk-arrow">\u203a</span></span>'+
-            '<span class="nm">'+(r.inst.length?r.inst[0].manager.replace(/\s*\(.*\)/,""):(r.cg.length?r.cg[0].member:""))+'</span></span>'+
-          '<span class="num" style="font-weight:700">'+(r.instBuyVal?_usd(r.instBuyVal):"\u2014")+'</span>'+
-          '<span class="num">'+(instNet>0?'<span style="color:var(--green)">+'+instNet+'</span>':instNet<0?'<span style="color:var(--red)">'+instNet+'</span>':"\u2014")+'</span>'+
-          '<span class="num">'+cgTxt+'</span>'+
-          '<span class="num" style="color:'+netCol+';font-weight:700">'+(r.netFlow?(r.netFlow>=0?"+":"\u2212")+_usd(Math.abs(r.netFlow)).replace("$","$"):"\u2014")+'</span>'+
-        '</div>';
-      }).join("")+'<div class="promo-empty" style="margin-top:10px">Inst. buy $ = 13F value added (NEW+ADD) last quarter. Congress = # buy/sell PTRs. Net flow = institutional $ delta + congressional notional (range midpoints). All disclosures are lagged.</div>';
-      el.querySelectorAll(".sm-tr").forEach(function(row){ row.style.cursor="pointer"; row.addEventListener("click",function(){ scrOpenTicker(row.dataset.rowTk); }); });
-    }
-    // sort chips
-    document.querySelectorAll(".sm-sort").forEach(function(c){
-      c.classList.toggle("on",c.dataset.s===scrSmSort);
-      c.addEventListener("click",function(){ scrSmSort=c.dataset.s; renderSmartMoney(); });
-    });
-  }
-
-  // ---- E3b Stage 0: GEX-eligible universe (reads outputs/gex_universe.json) ----
-  function renderGexUniverse(){
-    var el=document.getElementById("scrTable");
-    var cEl=document.getElementById("scrCount");
-    if(scrGexu===null){ el.innerHTML='<div class="loading">\u2026</div>'; return; }
-    if(!scrGexu.length){
-      if(cEl) cEl.textContent="";
-      el.innerHTML='<div class="promo-empty" style="padding:14px 4px">gex_universe.json not published yet \u2014 appears after the next Action run (or upload the seeded file to outputs/).</div>';
-      return;
-    }
-    var arr=scrGexu.slice();
-    if(scrSearch) arr=arr.filter(function(r){ return (r.ticker||"").toLowerCase().indexOf(scrSearch)>=0; });
-    var elig=scrGexu.filter(function(r){return r.eligible_provisional;}).length;
-    if(cEl){
-      cEl.textContent=elig+" of "+scrGexu.length+" GEX-eligible (provisional) \u00B7 "+(scrGexuAsof||"");
-      cEl.style.color="var(--inkFade)";
-    }
-    var inTrade={}, inInvest={};
-    (scrV2.trade||[]).forEach(function(s){inTrade[s.ticker]=1;});
-    (scrV2.invest||[]).forEach(function(s){inInvest[s.ticker]=1;});
-    function chip(ok,label){ return '<span class="promo-chk '+(ok?"y":"x")+'">'+label+'</span>'; }
-    var head='<div class="scr-th"><span>#</span><span>Stock</span>'+
-      '<span class="num">Opt/day</span><span class="num">Ratio</span>'+
-      '<span class="num">Rules</span><span class="num">Depth</span>'+
-      '<span class="num">Books</span><span class="num">Status</span></div>';
-    var rows=arr.map(function(r){
-      var known=true;   // every GEX row opens a detail page (stub if not in screener data)
-      var vol=r.avg_opt_contracts_day!=null?(r.avg_opt_contracts_day>=1e6?(r.avg_opt_contracts_day/1e6).toFixed(2)+"M":Math.round(r.avg_opt_contracts_day/1e3)+"k"):"\u2014";
-      var ratio=r.opt_to_shares_ratio_pct!=null?r.opt_to_shares_ratio_pct+"%":"\u2014";
-      var books=(inTrade[r.ticker]?'<span class="promo-chk y">T</span>':'')+(inInvest[r.ticker]?'<span class="promo-chk y">I</span>':'')||'<span style="color:var(--inkGhost)">\u2014</span>';
-      var badge=r.eligible_provisional?'<span class="promo-badge ok">ELIGIBLE</span>':'<span class="promo-badge no">fail</span>';
-      return '<div class="scr-tr" data-row-tk="'+(known?r.ticker:"")+'">'+
-        '<span class="rk">'+(r.rank||"\u2014")+'</span>'+
-        '<span class="nmcell"><span class="tk">'+r.ticker+(known?'<span class="tk-arrow">\u203A</span>':'')+'</span>'+
-          '<span class="nm">'+(r.source||"")+'</span></span>'+
-        '<span class="num">'+vol+'</span>'+
-        '<span class="num" style="font-weight:700">'+ratio+'</span>'+
-        '<span class="num">'+chip(r.rule1_ratio,"R1")+chip(r.rule2_abs_volume,"R2")+'</span>'+
-        '<span class="num" style="font-size:11px;color:var(--inkFade)">'+(r.data_depth||"")+'</span>'+
-        '<span class="num">'+books+'</span>'+
-        '<span class="num">'+badge+'</span>'+
-      '</div>';
-    }).join("");
-    el.innerHTML=head+rows+
-      '<div class="promo-empty" style="margin-top:10px">Rules 3 (aggregate OI), 4 (0DTE split) and 5 (weeklies) pending \u2014 ELIGIBLE means Rules 1+2 only. T/I = also in Trade/Invest book: the intersection is where GEX walls become tradeable. Wall maps (Stage 1) via Claude in-chat for eligible names.</div>';
-    el.querySelectorAll(".scr-tr").forEach(function(row){
-      var tk=row.dataset.rowTk;
-      if(!tk) return;
-      row.style.cursor="pointer";
-      row.addEventListener("click",function(){ scrOpenTicker(tk); });
-    });
-  }
-
-  // ---- expandable preview: real metrics + Phoenix's 3 real scores ----
-  var scrExpanded=null;
-  function scrToggleExpand(tk, rowEl){
-    // collapse if already open
-    var existing=document.querySelector(".scr-exp");
-    var wasOpen=(scrExpanded===tk);
-    if(existing) existing.remove();
-    document.querySelectorAll(".scr-tr.exp").forEach(function(r){r.classList.remove("exp");});
-    if(wasOpen){ scrExpanded=null; return; }
-    scrExpanded=tk;
-    rowEl.classList.add("exp");
-    var stock=scrLookup(tk);
-    var exp=document.createElement("div");
-    exp.className="scr-exp";
-    exp.innerHTML='<div class="scr-exp-loading">Loading '+tk+' fundamentals\u2026</div>';
-    rowEl.parentNode.insertBefore(exp, rowEl.nextSibling);
-    // fetch financials (cached after first load)
-    dpLoadFin(tk, function(){ scrFillExpand(tk, exp, stock); });
-    // if already cached, dpLoadFin calls back synchronously-ish; ensure fill
-    if(dpFinCache[tk]) scrFillExpand(tk, exp, stock);
-  }
-
-  function scrBar(label, val, max, col){
-    var pct=val==null?0:Math.max(0,Math.min(100,(val/max)*100));
-    return '<div class="scr-bar-row"><span class="bl">'+label+'</span>'+
-      '<div class="scr-bar-track"><div class="scr-bar-fill" style="width:'+pct+'%;background:'+col+'"></div></div>'+
-      '<span class="bv">'+(val==null?"\u2014":val)+'</span></div>';
   }
 
   function scrFillExpand(tk, exp, stock){
@@ -4933,10 +4872,10 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   }
   function renderPicks(){
     if(!scrData) return;
-    document.getElementById("picksNote").textContent=pickList.length+" picks";
-    if(!pickList.length){ document.getElementById("picksScroll").innerHTML='<div class="loading">No picks. Add stocks with the \u2605 button in the screener.</div>'; return; }
+    (document.getElementById("picksNote")||{}).textContent=pickList.length+" picks";
+    if(!pickList.length){ (document.getElementById("picksScroll")||{}).innerHTML='<div class="loading">No picks. Add stocks with the \u2605 button in the screener.</div>'; return; }
     var byTk={}; scrData.forEach(function(s){byTk[s.ticker]=s;});
-    document.getElementById("picksScroll").innerHTML=pickList.map(function(tk,idx){
+    (document.getElementById("picksScroll")||{}).innerHTML=pickList.map(function(tk,idx){
       var s=byTk[tk]; if(!s) return "";
       var L=s.levels;
       var levelsHtml = L ?
