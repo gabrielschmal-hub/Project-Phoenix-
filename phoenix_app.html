@@ -2139,14 +2139,14 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     })();
 
     Promise.all(open.map(function(t){
-      return getJSON(dpChartName(t.ticker))
-             .then(function(c){ return {t:t,c:c}; })
-             .catch(function(){ return {t:t,c:null}; });
+      return new Promise(function(res){
+        try{ dpFetchBars(t.ticker,"daily",function(bars){ res({t:t,bars:bars||[]}); }); }
+        catch(e){ res({t:t,bars:[]}); }
+      });
     })).then(function(rows){
       var d1=[], d5=[], inds={};
       rows.forEach(function(r){
-        if(!r.c) return;
-        var bars=dpExpand(r.c.chart&&(r.c.chart.daily||r.c.chart.d||r.c.chart["1d"]));
+        var bars=r.bars;
         if(!bars||bars.length<2) return;
         var lastC=bars[bars.length-1].c, prevC=bars[bars.length-2].c;
         var qty=+(r.t.qty||0), entry=+(r.t.entry||0);
@@ -2164,10 +2164,22 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
             }
           }
         }
-        var ind=r.t.industry||r.c.industry||(r.c.profile&&r.c.profile.industry);
+        var meta=(dpCache[r.t.ticker]||{}).meta||{};
+        var ind=r.t.industry||meta.industry;
         if(ind) inds[ind]=(inds[ind]||0)+1;
       });
-      if(!d1.length&&!d5.length) return;
+      if(!d1.length&&!d5.length){
+        // say WHY rather than rendering nothing: no chart file, or a chain too
+        // short to compare, both look identical from the outside
+        host.insertAdjacentHTML("beforeend",
+          '<div class="brf-block bk"><div class="brf-k">Your book</div>'+
+          '<div class="brf-p">'+open.length+' open position'+(open.length>1?'s':'')+
+          ' ('+open.map(function(t){return t.ticker;}).join(", ")+
+          ') \u2014 no price history available yet for these tickers, so the '+
+          'move cannot be computed. charts/TICKER.json is written by the daily run.'+
+          '</div></div>');
+        return;
+      }
 
       // hl() lives inside mktBrief, not in this scope - that ReferenceError is
       // why the block silently never rendered
@@ -2197,6 +2209,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       var ks=Object.keys(inds);
       if(ks.length) txt+="Exposure: "+ks.slice(0,3).join(", ")+
         (ks.length>3?" +"+(ks.length-3)+" more":"")+".";
+      var old=host.querySelector(".brf-block.bk");
+      if(old) old.remove();
       if(txt) host.insertAdjacentHTML("beforeend",
         '<div class="brf-block bk"><div class="brf-k">Your book</div>'+
         '<div class="brf-p">'+txt+'</div></div>');

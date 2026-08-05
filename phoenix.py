@@ -259,16 +259,41 @@ def gex_engine(chain, spot, scale=1.0):
             "poi": 0 if v["poi"] != v["poi"] else int(v["poi"]),
         })
 
-    # gamma flip: net-GEX sign change nearest spot
-    flip = None
-    for i in range(1, len(profile)):
-        a, b = profile[i - 1], profile[i]
-        if (a["net_gex_B"] <= 0 <= b["net_gex_B"]) or (a["net_gex_B"] >= 0 >= b["net_gex_B"]):
-            mid = (a["strike"] + b["strike"]) / 2
-            if flip is None or abs(mid - spot) < abs(flip - spot):
-                flip = mid
+    # GAMMA FLIP.
+    # This scanned PER-STRIKE sign changes, which flip many times across a chain
+    # - every bucket where puts out-gamma calls - so it returned whichever
+    # bucket boundary happened to sit nearest spot. On 2026-08-05 that produced
+    # a flip 1.63% ABOVE spot while net gamma was +75B, which is a contradiction:
+    # positive net gamma means spot is above the flip, by definition.
+    #
+    # The flip is where the CUMULATIVE net gamma crosses zero - the level that
+    # separates negative-gamma territory below from positive above.
+    _cum, _run = [], 0.0
+    for p in profile:
+        _run += p["net_gex_B"]
+        _cum.append(_run)
+    total_net = _cum[-1] if _cum else 0.0
+
+    crossings = []
+    for i in range(1, len(_cum)):
+        if (_cum[i - 1] < 0 <= _cum[i]) or (_cum[i - 1] > 0 >= _cum[i]):
+            lo, hi = profile[i - 1], profile[i]
+            a, b = _cum[i - 1], _cum[i]
+            frac = 0.5 if (b - a) == 0 else (-a) / (b - a)
+            frac = min(max(frac, 0.0), 1.0)
+            crossings.append(lo["strike"] + frac * (hi["strike"] - lo["strike"]))
+
+    # keep only crossings consistent with the regime the totals imply
+    if total_net >= 0:
+        consistent = [c for c in crossings if c <= spot]
+    else:
+        consistent = [c for c in crossings if c >= spot]
+    pool = consistent or crossings
+    flip = min(pool, key=lambda c: abs(c - spot)) if pool else None
     if flip is None:
-        flip = spot
+        # never crosses: the whole chain sits on one side, so the boundary is
+        # beyond the window. Report the nearest edge rather than pretending.
+        flip = profile[0]["strike"] if total_net >= 0 else profile[-1]["strike"]
 
     above = [p for p in profile if p["strike"] > spot]
     below = [p for p in profile if p["strike"] < spot]
@@ -282,6 +307,9 @@ def gex_engine(chain, spot, scale=1.0):
     # nearest-above -> highest), NOT by GEX magnitude. The largest-OI strike
     # per side is kept separately as the "magnet" (deep support / deep target),
     # never as the tactical level. Selection only — the GEX math is untouched.
+    call_magnet = max(above, key=lambda p: p["coi"]) if above else None
+    # (magnet computed over the FULL window, so it may sit outside the band)
+    put_magnet = max(below, key=lambda p: p["poi"]) if below else None
     thr = GEX.get("wall_threshold", 0.30)
     # The ordering rule below was already right, but the THRESHOLD was computed
     # against the whole search window. Round strikes (7000, 8000) carry huge
@@ -309,8 +337,13 @@ def gex_engine(chain, spot, scale=1.0):
     # walls land on the tall bars in the histogram, which is what a reader
     # expects when a line is drawn on a chart.
     min_oi = GEX.get("wall_min_oi", 0.0)
-    cand_r = [p for p in near_above if p["coi"] >= min_oi]
-    cand_s = [p for p in near_below if p["poi"] >= min_oi]
+    # The magnet strike must be excluded from wall candidacy, not merely
+    # out-ranked. Leaving it in makes thr * max unreachable for every other
+    # strike, so it becomes the ONLY qualifier and therefore also the "nearest"
+    # one - which is how 8,000 kept taking the call wall.
+    _mag = {p["strike"] for p in (call_magnet, put_magnet) if p}
+    cand_r = [p for p in near_above if p["coi"] >= min_oi and p["strike"] not in _mag]
+    cand_s = [p for p in near_below if p["poi"] >= min_oi and p["strike"] not in _mag]
     if not cand_r:
         cand_r = [p for p in near_above if p["coi"] >= thr * max_coi] or near_above
     if not cand_s:
@@ -332,9 +365,6 @@ def gex_engine(chain, spot, scale=1.0):
     supports = _pick(cand_s, "put_gex_B")
     call_wall = resistances[0] if resistances else (max(above, key=lambda p: p["coi"]) if above else None)
     put_wall = supports[0] if supports else (max(below, key=lambda p: p["poi"]) if below else None)
-    call_magnet = max(above, key=lambda p: p["coi"]) if above else None
-    # (magnet computed over the FULL window, so it may sit outside the band)
-    put_magnet = max(below, key=lambda p: p["poi"]) if below else None
     # pin is a magnet price gravitates to, so it only means anything near spot
     near_all = [p for p in profile if abs(p["strike"] - spot) <= spot * wb] or profile
     # exclude the deep magnets: a pin that is also the magnet carries no extra
