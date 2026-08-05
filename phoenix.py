@@ -61,6 +61,10 @@ GEX = {
     "wall_band": 0.05,
     # a wall must still be a real cluster; gamma decides WHICH cluster
     "wall_min_oi": 15000,
+    # bump whenever the LEVEL math changes: the session lock invalidates on a
+    # version change, so a fix takes effect on the next run instead of waiting
+    # for tomorrow
+    "levels_engine": "2026-08-05.flip-cumulative+magnet-excluded",
     # per-greek calibration (SPY proxy reads low by different amounts per greek).
     # These get FIT from paired engine-vs-source readings. 1.0 = uncalibrated (raw).
     "calib_net_gex": 1.0,
@@ -4884,9 +4888,17 @@ def _gex_freeze_levels(res):
     if not prev:
         res["levels_date"] = today
         return res
+    ver = GEX.get("levels_engine", "")
     if (prev.get("levels_date") or "")[:10] != today:
         res["levels_date"] = today
+        res["levels_engine"] = ver
         print(f"[gexlock] new session - levels set for {today}")
+        return res
+    if (prev.get("levels_engine") or "") != ver:
+        res["levels_date"] = today
+        res["levels_engine"] = ver
+        print(f"[gexlock] level math changed ({prev.get('levels_engine') or 'unversioned'}"
+              f" -> {ver}) - recomputing rather than holding stale levels")
         return res
 
     keep_lv = prev.get("levels")
@@ -4903,6 +4915,7 @@ def _gex_freeze_levels(res):
     if spot and ov.get("gamma_flip"):
         ov["dist_to_flip_pct"] = round((ov["gamma_flip"] / spot - 1) * 100, 2)
     res["levels_date"] = today
+    res["levels_engine"] = ver
     res["levels_locked"] = True
     print(f"[gexlock] levels held from this morning ({today}); "
           f"spot/profile refreshed")

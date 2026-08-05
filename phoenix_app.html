@@ -1300,14 +1300,12 @@ html:not(.light) .sm-chip.on{color:#141210!important}
   color:var(--inkFade);margin-left:2px}
 .gexh-key .k-note b{font-weight:700;font-style:normal;color:var(--ink)}
 
-/* VIX term structure: cap the plot width in the full-width Markets tile so the
-   curve keeps a readable aspect ratio instead of being stretched flat. */
-#page-markets .a-vix .tbody{display:flex;justify-content:center}
-#page-markets .a-vix .plot,#page-markets .a-vix [id^="vixPlot"]{
-  max-width:720px;width:100%;margin:0 auto}
-@media(max-width:1000px){
-  #page-markets .a-vix .plot,#page-markets .a-vix [id^="vixPlot"]{max-width:none}
-}
+
+/* VIX term structure sits in a full-width row on Markets, which stretches the
+   curve flat. Give the row two columns so the tile is half width - the shape
+   reads at the same aspect the Mission Control tile already gets right. */
+#page-markets .mkt-row.r-vix{grid-template-columns:1fr 1fr}
+@media(max-width:1000px){ #page-markets .mkt-row.r-vix{grid-template-columns:1fr} }
 
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
@@ -1610,7 +1608,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         '<div class="gexh-key" id="gexHKey"></div></div></div></div>'+
 
       // ── VIX term: full width so the curve reads ──
-      '<div class="mkt-row r-1"><div class="tile tall a-vix">'+
+      '<div class="mkt-row r-1 r-vix"><div class="tile tall a-vix">'+
         '<div class="thead"><span class="ttl">VIX Term Structure</span><span class="tnote" id="vixNote"></span></div>'+
         '<div class="tbody"><div class="plot" id="vixPlot"></div></div></div></div>'+
 
@@ -2124,7 +2122,6 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         });
       });
       el.innerHTML=html;
-    try{ trLoad(function(){ brfBook(el, S); }); }catch(e){}
       mktBrief();
     }).catch(function(){
       var el=document.getElementById("boardBody");
@@ -2611,6 +2608,10 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     var nEl=document.getElementById("briefNote");
     if(nEl) nEl.textContent=(m&&m.regime)?("regime "+m.regime):"";
     el.innerHTML=html;
+    // book block appended after the brief HTML is in the DOM. The previous
+    // hook was attached to loadBoard (the asset board), not to the brief - so
+    // it was rendering into the wrong host and vanishing.
+    try{ trLoad(function(){ brfBook(el, S); }); }catch(e){ console.warn("[brief] book", e); }
   }
 
   function loadAssets(){
