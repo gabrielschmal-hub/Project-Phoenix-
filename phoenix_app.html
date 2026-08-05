@@ -1639,6 +1639,14 @@ html:not(.light) .rp-w{color:#FFFFFF;font-size:12px}
   border-radius:99px;cursor:pointer}
 html:not(.light) .rp-selbar{color:#E8EDF2;font-size:13px}
 
+/* The explanatory line under the GEX histogram inherited white-space:nowrap
+   from .gexh-key span, so it ran off the right edge instead of wrapping and
+   stretched the page. It is a paragraph, not a legend chip. */
+.gexh-key .k-note{flex-basis:100%;white-space:normal;display:block;
+  max-width:100%;overflow-wrap:anywhere;line-height:1.55;padding-top:6px}
+.gexh-key{max-width:100%}
+.tile.a-gexh .tbody{overflow:hidden}
+
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
   --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
@@ -3675,7 +3683,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       return {type:"scatter",mode:"lines",name:r.name,
         x:x.slice(x.length-n),y:r.series.slice(r.series.length-n),
         line:{color:col,width:wid||1.8,dash:dash||"solid",shape:"spline",smoothing:.3},
-        hovertemplate:"<b>"+r.name+"</b><br>%{x|%d %b %Y}<br>%{y:.1f} (base 100)<extra></extra>"};
+        hoverinfo:"none"};   // event still fires; no label drawn
     }
     // greens for the leaders, reds for the laggards, and SPX heavy and neutral
     var GRN=["#2D8A55","#3FBF77","#5FD08F","#8AE0B0"];
@@ -3695,7 +3703,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     traces.push({type:"scatter",mode:"lines",name:bm.name||"S&P 500",
       x:dates,y:bm.series||[],
       line:{color:C.ink,width:3,dash:"dot"},
-      hovertemplate:"<b>Benchmark</b><br>%{x|%d %b %Y}<br>%{y:.1f}<extra></extra>"});
+      hoverinfo:"none"});
 
     Plotly.newPlot("rpPlot",traces,{
       height:330,margin:{l:56,r:14,t:10,b:34},
@@ -3708,8 +3716,14 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       shapes:[{type:"line",x0:dates[0],x1:dates[dates.length-1],y0:100,y1:100,
         line:{color:C.grid,width:1,dash:"dot"}}],
       showlegend:true,legend:{orientation:"h",y:-0.18,font:{size:10.5,color:C.ink}},
-      hovermode:"x unified"
-    },{displayModeBar:false,responsive:true});
+      // "x unified" drew a box listing every series, which with eight lines
+      // covered most of the chart. The readout panel on the right already does
+      // that job, so suppress the label and keep only the hover EVENT.
+      hovermode:"closest",
+      // dragmode false lets a touch drag scroll the page instead of panning
+      // the plot, which was trapping the scroll on iPad
+      dragmode:false
+    },{displayModeBar:false,responsive:true,scrollZoom:false,doubleClick:false});
 
     // live readout: every series' performance at the hovered date, re-ranked
     (function(){
