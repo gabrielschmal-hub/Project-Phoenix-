@@ -1525,6 +1525,24 @@ html:not(.light) .ed-note{color:#E8EDF2;font-size:13.5px}
 .ed-sub-gamma::after{content:"\00b7 gamma";font-family:var(--mono);font-style:normal;
   font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
   margin-left:9px;vertical-align:middle}
+/* the calendar: FOMC / CPI / OPEX */
+.ed-cals{margin:10px 0 14px}
+.ed-cal{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px 14px;align-items:baseline;
+  padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ed-cal:last-child{border-bottom:0}
+.ed-cal.hot{border-left:3px solid var(--gold);padding-left:11px;margin-left:-14px}
+.ed-cal .c-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:2px 7px;
+  border-radius:2px;border:1px solid var(--line2);color:var(--inkLight)}
+.ed-cal .c-fomc{border-color:var(--red);color:var(--red)}
+.ed-cal .c-cpi{border-color:var(--gold);color:var(--gold)}
+.ed-cal .c-opex{border-color:var(--amber);color:var(--amber)}
+.ed-cal .c-w{font-family:var(--mono);font-size:12px;color:var(--inkLight);white-space:nowrap}
+.ed-cal .c-w.hot{color:var(--gold);font-weight:700}
+.ed-cal .c-d{font-family:var(--mono);font-size:11px;color:var(--inkFade);white-space:nowrap}
+html:not(.light) .ed-cal{color:#FFFFFF;font-size:14.5px}
+html:not(.light) .ed-cal .c-d,html:not(.light) .ed-cal .c-w{color:#E8EDF2;font-size:12.5px}
+@media(max-width:820px){ .ed-cal{grid-template-columns:auto 1fr;gap:3px 10px}
+  .ed-cal .c-w,.ed-cal .c-d{grid-column:span 2;font-size:11.5px} }
 
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
@@ -1794,32 +1812,33 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         '<div class="thead"><span class="ttl">The Board</span><span class="tnote" id="boardNote"></span></div>'+
         '<div class="tbody" id="boardBody"><div class="loading">\u2026</div></div></div></div>'+
 
-      // ── THE BRIEF: written from the data, sits above the chart ──
-      '<div class="mkt-row r-1"><div class="tile a-brief">'+
-        '<div class="thead"><span class="ttl">What just happened</span><span class="tnote" id="briefNote"></span></div>'+
-        '<div class="tbody" id="briefBody"><div class="loading">\u2026</div></div></div></div>'+
+      // ── the macro calendar strip ──
+      '<div class="mkt-row r-1"><div class="tile a-cal">'+
+        '<div class="thead"><span class="ttl">Calendar</span>'+
+          '<span class="tnote" id="calNote"></span></div>'+
+        '<div class="tbody"><div id="calStrip"><div class="loading">\u2026</div></div></div></div></div>'+
 
-      // ── SPX: the feature block, full width, big price ──
-      '<div class="mkt-row r-1"><div class="tile feature a-spx">'+
-        '<div class="thead"><span class="ttl">S&P 500 \u00B7 Daily</span><span class="tnote" id="spxAsof"></span></div>'+
-        '<div class="mkt-hero"><span class="hn" id="spxPx">\u2014</span><span class="hc" id="spxChg"></span>'+
-          '<span class="spx-hover" id="spxHover"></span></div>'+
+      // ── SPX candles with the gamma levels drawn on ──
+      '<div class="mkt-row r-1"><div class="tile tall a-spx">'+
+        '<div class="thead"><span class="ttl">S&P 500 \u00B7 Daily</span>'+
+          '<span class="tnote" id="spxAsof"></span></div>'+
+        '<div class="mkt-hero"><span class="hn" id="spxPx">\u2014</span>'+
+          '<span class="hc" id="spxChg"></span><span class="hh" id="spxHover"></span></div>'+
         '<div class="tbody"><div class="plot" id="spxPlot"></div>'+
-          '<div class="spx-zoom"><button id="spxZoomIn">+</button><button id="spxZoomOut">\u2212</button><button id="spxZoomReset">\u21BA</button></div>'+
-        '</div></div></div>'+
+          '<div class="spx-zoom"><button id="spxZoomIn">+</button>'+
+          '<button id="spxZoomOut">\u2212</button>'+
+          '<button id="spxZoomReset">\u21ba</button></div></div></div></div>'+
 
-      // ── Regime + GEX side by side, each with room ──
-      '<div class="mkt-row r-2e">'+
-        '<div class="tile tall a-regime"><div class="thead"><span class="ttl">Regime</span><span class="tnote" id="rgNote"></span></div>'+
+      // ── regime + GEX side by side ──
+      '<div class="mkt-row r-2">'+
+        '<div class="tile tall a-regime"><div class="thead"><span class="ttl">Regime</span>'+
+          '<span class="tnote" id="rgNote"></span></div>'+
           '<div class="tbody" id="rgBody"><div class="loading">\u2026</div></div></div>'+
-        '<div class="tile tall a-gex"><div class="thead"><span class="ttl">GEX \u00B7 SPX</span><span class="tnote" id="gexNote"></span></div>'+
+        '<div class="tile tall a-gex"><div class="thead"><span class="ttl">GEX \u00B7 SPX</span>'+
+          '<span class="tnote" id="gexNote"></span></div>'+
           '<div class="tbody"><div id="gexBody"><div class="loading">\u2026</div></div></div></div>'+
       '</div>'+
 
-      // Histogram gets its own full-width row under Regime + GEX, like the SPX
-      // chart. Inside the tile it scrolls horizontally so every strike is
-      // reachable instead of being crushed to fit.
-      '<div class="mkt-row r-1" id="gexhRow" style="display:none">'+
         '<div class="tile tall a-gexh">'+
         '<div class="thead"><span class="ttl">SPX strike histogram</span>'+
           '<span class="tnote" id="gexHNote"></span></div>'+
@@ -1884,7 +1903,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
           '<span class="chg" style="color:var(--green);font-family:var(--mono);font-size:11.5px">'+tag+'</span></div>';
       }).join("");
       list.querySelectorAll(".sm-mkt-row").forEach(function(r){ r.addEventListener("click",function(){ scrOpenTicker(r.dataset.tk); }); });
-      try{ mktBrief(); }catch(e){}
+      // the brief moved into the Daily Brief edition; nothing to render here
     });
   }
 
@@ -2607,10 +2626,11 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       getJSON("industry").catch(function(){return null;}),
       getJSON("stocks").catch(function(){return null;}),
       getJSON("congress_trades").catch(function(){return null;}),
-      getJSON("institutional_holdings").catch(function(){return null;})
+      getJSON("institutional_holdings").catch(function(){return null;}),
+      getJSON("calendar").catch(function(){return null;})
     ]).then(function(r){
       var m=r[0]||{}, g=r[1]||{}, ser=((r[2]&&r[2].series)||r[2]||[]),
-          ind=r[3]||{}, st=r[4]||{}, con=r[5]||{}, inst=r[6]||{};
+          ind=r[3]||{}, st=r[4]||{}, con=r[5]||{}, inst=r[6]||{}, cal=r[7]||{};
       // ticker -> industry, so positions and rotation can be matched. dpCache
       // meta does not carry it; stocks.json does.
       ED_IND={};
@@ -2623,7 +2643,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       edTape(ser,ind);
       edRotation(ind);
       edMap(g);
-      edWatch(m,g);
+      edCalendar(cal);
+      edWatch(m,g,cal);
       trLoad(function(){ edBook(ser,ind); edSmart(con,inst); edSetups(st,g); });
     }).catch(function(e){
       edSet("edBody",'<div class="err" style="padding:30px">The edition could not be built: '+
@@ -3242,8 +3263,88 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     try{ if(typeof drawVIX==="function"){ drawn.vixED=false; drawVIX("ED"); } }catch(e){ console.warn("[ed] vix",e); }
   }
 
+
+  // ---------------- the calendar --------------------------------------------
+  // FOMC, CPI and OPEX change how a week trades. The edition should say so
+  // before the week starts, not after.
+  function edDaysTo(d){
+    try{
+      var t=new Date(d+"T00:00:00"), n=new Date();
+      n=new Date(n.getFullYear(),n.getMonth(),n.getDate());
+      return Math.round((t-n)/864e5);
+    }catch(e){ return null; }
+  }
+  function edWhen(n){
+    if(n==null) return "";
+    if(n<0) return Math.abs(n)+" day"+(Math.abs(n)===1?"":"s")+" ago";
+    if(n===0) return "TODAY";
+    if(n===1) return "tomorrow";
+    if(n<=7) return "in "+n+" days";
+    return "in "+n+" days";
+  }
+
+  function edCalendar(cal){
+    var ev=((cal&&cal.events)||[]).map(function(e){
+      return Object.assign({},e,{days:edDaysTo(e.date)});
+    }).filter(function(e){ return e.days!=null && e.days>=0 && e.days<=45; });
+    if(!ev.length){
+      edSet("edCalHl","No scheduled events in the next six weeks");
+      edSet("edCalRows","");
+      edSet("edCalBody",'<p class="ed-body">Nothing on the calendar. Run the engine to '+
+        'rebuild calendar.json if you expected FOMC, CPI or OPEX dates here.</p>');
+      return;
+    }
+    var soon=ev.filter(function(e){return e.days<=7;});
+    var nxt=ev[0];
+    edSet("edCalN", soon.length? soon.length+" inside a week" : "next in "+nxt.days+" days");
+    edSet("edCalHl", soon.length
+      ? (soon.length===1
+          ? soon[0].label+" "+edWhen(soon[0].days).toLowerCase()+" \u2014 plan around it"
+          : soon.length+" scheduled events this week \u2014 size accordingly")
+      : "Clear runway \u2014 the next scheduled event is "+nxt.label+" "+edWhen(nxt.days));
+    var rows="";
+    ev.slice(0,6).forEach(function(e){
+      var hot=e.days<=3;
+      rows+='<div class="ed-cal'+(hot?' hot':'')+'">'+
+        '<span class="c-tag c-'+e.type.toLowerCase()+'">'+e.type+'</span>'+
+        '<span class="c-l"><b>'+e.label+'</b> \u2014 '+e.detail+'</span>'+
+        '<span class="c-w'+(hot?' hot':'')+'">'+edWhen(e.days)+'</span>'+
+        '<span class="c-d">'+e.date+'</span></div>';
+    });
+    edSet("edCalRows",rows);
+
+    var p='<p class="ed-body">';
+    if(soon.length){
+      var s0=soon[0];
+      if(s0.type==="CPI") p+='<b>CPI lands '+edWhen(s0.days).toLowerCase()+'.</b> This is the '+
+        'print the current regime hangs on \u2014 its tightest gate is CPI year-on-year against '+
+        'the 2.5% floor. A soft number does not just move the tape, it can change the regime '+
+        'call and therefore the whole stance of this edition. Do not add size into it. ';
+      else if(s0.type==="FOMC") p+='<b>The Fed decides '+edWhen(s0.days).toLowerCase()+'.</b> '+
+        'Decision at 14:00 ET, press conference at 14:30. Expect implied volatility to be bid '+
+        'into it and to collapse afterwards, which punishes anything held for the move rather '+
+        'than through it. Positions opened the day before carry event risk you are not paid for. ';
+      else if(s0.type==="OPEX") p+='<b>'+s0.label+' '+edWhen(s0.days).toLowerCase()+'.</b> '+
+        'A large block of dealer gamma expires, which means the walls and the flip drawn on '+
+        'the map lose their anchor and reset the following Monday. Pinning into expiry is '+
+        'common; the days after are where the range usually breaks. ';
+      if(soon.length>1) p+='After that: '+soon.slice(1).map(function(e){
+        return e.label+' '+edWhen(e.days); }).join(', ')+'. ';
+    } else {
+      p+='Nothing scheduled inside a week. The next event is <b>'+nxt.label+'</b> on '+
+         nxt.date+', '+edWhen(nxt.days)+' \u2014 far enough away that today can be traded on '+
+         'its own merits rather than positioned around a print. ';
+    }
+    var opex=ev.filter(function(e){return e.type==="OPEX";})[0];
+    if(opex && opex.days>7 && opex.days<=21)
+      p+='Monthly expiry is '+edWhen(opex.days)+'; gamma levels tend to firm up as it '+
+         'approaches and reset immediately after. ';
+    p+='</p>';
+    edSet("edCalBody",p);
+  }
+
   // ---------------- what would change this -----------------------------------
-  function edWatch(m,g){
+  function edWatch(m,g,cal){
     var X=(m&&m.explain)||{}, ov=(g&&g.overview)||{}, L=(g&&g.levels)||{};
     function lv(x){ return (x&&x.strike!=null)?x.strike:(typeof x==="number"?x:null); }
     var out="", n=0;
@@ -3267,6 +3368,15 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       out+='<div class="ed-w"><span class="w-tag low">Med</span><span>Rallies into <b>'+
         edNum(cw)+'</b> meet the call wall, where dealer selling usually caps the move</span>'+
         '<span class="w-when">intraday</span></div>'; }
+    var ce=((cal&&cal.events)||[]).map(function(e){
+      return Object.assign({},e,{days:edDaysTo(e.date)}); })
+      .filter(function(e){return e.days!=null&&e.days>=0&&e.days<=5;});
+    ce.slice(0,2).forEach(function(e){
+      n++;
+      out+='<div class="ed-w"><span class="w-tag">'+(e.days<=2?"High":"Med")+'</span>'+
+        '<span><b>'+e.label+'</b> '+edWhen(e.days).toLowerCase()+' \u2014 '+e.detail+'</span>'+
+        '<span class="w-when">'+e.date+'</span></div>';
+    });
     var open=(trLog||[]).filter(function(t){return t.status==="open"&&edMine(t);});
     if(open.length){ n++;
       var big=open.slice().sort(function(a,b){return (+b.qty*+b.entry)-(+a.qty*+a.entry);})[0];
@@ -8080,6 +8190,11 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       <span class="ed-n" id="vixNoteED"></span></div>
     <div class="ed-vix"><div class="plot" id="vixPlotED"></div></div>
     <div id="edMapBody"></div></div>
+
+  <div class="ed-sec"><div class="ed-k"><span>The calendar</span>
+      <span class="ed-n" id="edCalN"></span></div>
+    <h2 class="ed-hl sm" id="edCalHl">…</h2>
+    <div class="ed-cals" id="edCalRows"></div><div id="edCalBody"></div></div>
 
   <div class="ed-sec"><div class="ed-k"><span>What would change this</span>
       <span class="ed-n" id="edWatchN"></span></div>

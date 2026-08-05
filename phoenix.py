@@ -1422,6 +1422,131 @@ def detect_regime(R):
         "secondary_tag": tag if regime == "POLICY_TIGHTENING" else None,
     }
 
+# Every gate in detect_regime(), as data. Keeping this next to the rules means
+# the explanation can never drift from the logic that produced the call.
+REGIME_GATES = {
+    "ENERGY_GRIND": [("wti_12m", ">", 25, "WTI 12m"),
+                     ("wti_vs_2yr", ">", 0, "WTI vs 2yr"),
+                     ("cpi_chg_3m", ">", 0.3, "CPI 3m change")],
+    "ENERGY_SPIKE": [("wti_3m", ">", 25, "WTI 3m"),
+                     ("vix_3m_chg", ">", 15, "VIX 3m change"),
+                     ("cpi_yoy", ">", 3, "CPI y/y"),
+                     ("wti_vs_2yr", ">", 0, "WTI vs 2yr")],
+    "POLICY_TIGHTENING": [("dd", ">", -12, "Drawdown"),
+                          ("us02_3m", ">", 40, "2Y yield 3m change (bp)"),
+                          ("real_3m", ">", 25, "Real 10Y 3m change (bp)"),
+                          ("cpi_yoy", ">", 2.5, "CPI y/y")],
+    "CRISIS_PEAK": [("dd", "<", -15, "Drawdown"), ("vix", ">", 35, "VIX")],
+    "RECOVERY_EARLY": [("spx_off_low", ">", 5, "SPX off the low"),
+                       ("dd", "<", -12, "Drawdown"),
+                       ("vix", ">", 22, "VIX"),
+                       ("vix_3m_chg", "<", 0, "VIX 3m change")],
+    "RECOVERY_LATE": [("spx_3m", ">", 5, "SPX 3m"),
+                      ("trail_dd", ">", -12, "Trailing drawdown"),
+                      ("trail_dd", "<", -2, "Trailing drawdown"),
+                      ("vix", "<", 22, "VIX"),
+                      ("hy", "<", 450, "HY spread (bp)")],
+    "GOLDILOCKS": [("vix", "<", 16, "VIX"), ("dd", ">", -5, "Drawdown"),
+                   ("spx_3m", ">", 2, "SPX 3m"), ("spx_1m", ">", -2, "SPX 1m"),
+                   ("cpi_yoy", "<", 3, "CPI y/y"),
+                   ("wti_3m", "<", 20, "WTI 3m"), ("hy", "<", 400, "HY spread (bp)")],
+}
+
+
+def explain_regime(macro_weekly, det, R):
+    """
+    Why this regime, how long it has held, and what would break it.
+
+    Everything here is derived from REGIME_GATES and a replay of
+    detect_regime() over the weekly history - no hand-written narrative, so it
+    cannot disagree with the call it is explaining.
+    """
+    regime = det.get("regime")
+
+    def val(k):
+        v = R.get(k)
+        return None if v is None else float(v)
+
+    def passes(k, op, thr):
+        v = val(k)
+        if v is None:
+            return None
+        return (v > thr) if op == ">" else (v < thr)
+
+    # ---- why: the gates the winning regime had to clear ---------------------
+    drivers = []
+    for k, op, thr, label in REGIME_GATES.get(regime, []):
+        v = val(k)
+        if v is None:
+            continue
+        margin = (v - thr) if op == ">" else (thr - v)
+        drivers.append({"key": k, "label": label, "value": round(v, 2),
+                        "op": op, "threshold": thr,
+                        "clear_by": round(margin, 2), "ok": margin > 0})
+    drivers.sort(key=lambda d: abs(d["clear_by"]))
+
+    # ---- how long: replay the engine week by week ---------------------------
+    weeks = 0
+    since = None
+    try:
+        n = len(macro_weekly)
+        for i in range(n, 13, -1):
+            past = detect_regime(compute_regime_inputs(macro_weekly[:i]))
+            if past.get("regime") != regime:
+                break
+            weeks += 1
+            since = macro_weekly[i - 1].get("date")
+    except Exception as e:
+        print(f"[regime] history replay failed: {e}")
+
+    # ---- watch-out: the gate closest to breaking, and where we would land ---
+    watch = []
+    for d in drivers:
+        if not d["ok"]:
+            continue
+        watch.append({
+            "if": f"{d['label']} {'falls below' if d['op']=='>' else 'rises above'} "
+                  f"{d['threshold']}",
+            "now": d["value"], "threshold": d["threshold"],
+            "distance": abs(d["clear_by"]),
+            "then": f"{regime} no longer qualifies",
+        })
+    watch = watch[:3]
+
+    # which regime is nearest to qualifying instead
+    scores = det.get("scores") or {}
+    others = {k: v for k, v in scores.items() if k != regime}
+    runner_up = None
+    if others:
+        rk = max(others, key=others.get)
+        runner_up = {"regime": rk, "score": others[rk],
+                     "behind_by": round(scores.get(regime, 0) - others[rk], 1)}
+    else:
+        # nothing else scored: report the non-qualifying regime with the fewest
+        # broken gates, since that is what we would flip to first
+        best, best_missing = None, 99
+        for rk, gates in REGIME_GATES.items():
+            if rk == regime:
+                continue
+            missing = [g for g in gates if passes(g[0], g[1], g[2]) is False]
+            if 0 < len(missing) < best_missing:
+                best, best_missing = rk, len(missing)
+                near = [{"label": g[3], "need": f"{g[1]} {g[2]}",
+                         "now": val(g[0])} for g in missing]
+        if best:
+            runner_up = {"regime": best, "score": None,
+                         "gates_missing": best_missing, "needs": near}
+
+    return {
+        "regime": regime,
+        "held_weeks": weeks,
+        "since": since,
+        "drivers": drivers,
+        "watch": watch,
+        "runner_up": runner_up,
+    }
+
+
 def macro_engine(macro_weekly):
     """
     PURE FUNCTION. The Layer-1 regime engine. Input weekly macro history -> regime call.
@@ -1443,6 +1568,7 @@ def macro_engine(macro_weekly):
         "scores": det["scores"],
         "secondary_tag": det["secondary_tag"],
         "inputs": {k: (round(v, 2) if isinstance(v, float) else v) for k, v in R.items()},
+        "explain": explain_regime(macro_weekly, det, R),
     }
 
 
@@ -2942,6 +3068,74 @@ SECTOR_ETFS = {
     "XLE": "Energy", "XLI": "Industrials", "XLB": "Materials",
     "XLU": "Utilities", "XLRE": "Real Estate", "XLC": "Communication Svcs",
 }
+
+
+# FOMC decision dates. Two-day meetings; the date below is the DECISION day.
+FOMC_2026 = ["2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17",
+             "2026-07-29", "2026-09-16", "2026-10-28", "2026-12-09"]
+# BLS CPI release dates, 08:30 ET. Published a year ahead; correct these against
+# bls.gov/schedule/news_release/cpi.htm rather than trusting an estimate.
+CPI_2026 = ["2026-01-13", "2026-02-11", "2026-03-11", "2026-04-10",
+            "2026-05-12", "2026-06-10", "2026-07-14", "2026-08-12",
+            "2026-09-11", "2026-10-13", "2026-11-10", "2026-12-10"]
+
+
+def _third_friday(year, month):
+    from datetime import date, timedelta
+    d = date(year, month, 1)
+    d += timedelta(days=(4 - d.weekday()) % 7)      # first Friday
+    return d + timedelta(days=14)                    # third Friday
+
+
+def run_calendar():
+    """
+    outputs/calendar.json - the dates that change how a week trades.
+
+    Three kinds, and they are not equal:
+      FOMC  - a decision that can reprice the whole curve in one afternoon
+      CPI   - the print the current regime literally hangs on (its tightest
+              gate is CPI y/y against 2.5%)
+      OPEX  - monthly expiry. Dealer gamma rolls off and positioning resets,
+              so the gamma levels the app draws all month lose their anchor.
+              Third Friday, computed rather than listed. Quarterly expiries
+              (Mar/Jun/Sep/Dec) are triple witching and matter more.
+    """
+    from datetime import date, datetime, timedelta
+    today = date.today()
+    out = []
+
+    for d in FOMC_2026:
+        out.append({"date": d, "type": "FOMC", "label": "FOMC decision",
+                    "detail": "Rate decision 14:00 ET, press conference 14:30",
+                    "importance": "high"})
+    for d in CPI_2026:
+        out.append({"date": d, "type": "CPI", "label": "CPI release",
+                    "detail": "08:30 ET. The regime's tightest gate is CPI y/y.",
+                    "importance": "high"})
+
+    for yr in (today.year, today.year + 1):
+        for mo in range(1, 13):
+            f = _third_friday(yr, mo)
+            if f < today - timedelta(days=40):
+                continue
+            triple = mo in (3, 6, 9, 12)
+            out.append({
+                "date": f.isoformat(), "type": "OPEX",
+                "label": "Triple witching" if triple else "Monthly OPEX",
+                "detail": ("Index, options and futures expire together; the "
+                           "largest positioning reset of the quarter."
+                           if triple else
+                           "Monthly expiry. Dealer gamma rolls off and the "
+                           "levels reset on Monday."),
+                "importance": "high" if triple else "medium"})
+
+    out = [e for e in out if e["date"] >= (today - timedelta(days=2)).isoformat()]
+    out.sort(key=lambda e: e["date"])
+    write_json("calendar", {"asof": _now(), "count": len(out), "events": out})
+    nxt = out[0] if out else None
+    print(f"[calendar] {len(out)} upcoming events" +
+          (f"; next is {nxt['label']} on {nxt['date']}" if nxt else ""))
+    return len(out)
 
 
 def run_sectors():
@@ -6423,6 +6617,7 @@ def run_full():
     step("macro_series",   run_macro_series_daily)   # daily, for the brief
     step("vix_term",       run_vix_term)
     step("gex",            run_gex_best)
+    step("calendar",       run_calendar)
     step("sectors",        run_sectors)          # yfinance: keep it next to the
                                                  # other Yahoo pulls, before the
                                                  # heavy CBOE loop
