@@ -1730,6 +1730,40 @@ html:not(.light) .scorecell em,html:not(.light) .gatecell em,html:not(.light) .p
 .sbadge.ok{background:rgba(63,191,119,.16);color:var(--green)}
 .sbadge.no{background:rgba(217,83,79,.16);color:var(--red)}
 html:not(.light) .stopcell em{color:#E8EDF2}
+/* portfolio: projection fan + goal tracker */
+.pf-tf{display:flex;gap:4px;margin-bottom:8px}
+.pf-tf button{font-family:var(--mono);font-size:10px;letter-spacing:.1em;padding:4px 11px;
+  border:1px solid var(--line2);background:transparent;color:var(--inkLight);
+  border-radius:99px;cursor:pointer}
+.pf-tf button.on{background:var(--gold);border-color:var(--gold);color:#0A1622}
+html.light .pf-tf button.on{color:#FFFDF9}
+.pf-proj{width:100%;height:210px;display:block}
+.pf-proj .pband{fill:var(--gold);opacity:.14;stroke:none}
+.pf-proj .pmid{fill:none;stroke:var(--gold);stroke-width:2}
+.pf-proj .pgl{stroke:var(--line);stroke-width:1}
+.pf-proj .pax{font-family:var(--mono);font-size:10px;fill:var(--inkFade)}
+.pf-note{border-left:3px solid var(--gold);background:var(--card2);padding:11px 13px;
+  border-radius:0 6px 6px 0;font-size:13px;line-height:1.6;margin-top:10px;color:var(--inkMed)}
+.pf-note b{color:var(--ink)}
+.pf-goalbar{height:14px;background:var(--line);border-radius:8px;overflow:hidden;margin:4px 0 6px}
+.pf-goalbar b{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--gold))}
+.pf-goalsub{font-family:var(--mono);font-size:11px;color:var(--inkFade)}
+.pf-sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--inkFade);margin:14px 0 4px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.pf-goalrow{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:baseline;
+  padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.pf-goalrow:last-of-type{border-bottom:0}
+.pf-goalrow .yr{font-family:var(--mono);font-size:15px;font-weight:700;text-align:right}
+.pf-goalrow .mo{font-family:var(--mono);font-size:11px;color:var(--inkFade);text-align:right;min-width:78px}
+html:not(.light) .pf-note{color:#FFFFFF;font-size:13.5px}
+html:not(.light) .pf-goalsub,html:not(.light) .pf-goalrow .mo{color:#E8EDF2}
+.pf-per{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:5px;overflow:hidden;margin:0 0 12px}
+.pf-per>div{background:var(--card);padding:11px 13px}
+.pf-per .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--inkFade)}
+.pf-per .v{font-family:var(--mono);font-size:22px;font-weight:700;margin-top:4px}
+.pf-per .s{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);margin-top:3px}
+html:not(.light) .pf-per .s,html:not(.light) .pf-per .k{color:#E8EDF2}
 
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
@@ -2594,6 +2628,20 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     }).catch(function(e){ console.warn("[brief] book block", e); });
   }
   window.__PXT.brfBook=brfBook;
+  window.__PXT.pfRender=function(){ try{ pfRender(); }catch(e){ return "pfRender threw: "+e.message; } return "ok"; };
+  window.__PXT.seedBars=function(map){
+    Object.keys(map).forEach(function(tk){
+      dpCache[tk]={bars:{daily:map[tk]},meta:{last:map[tk][map[tk].length-1].c}};
+    });
+  };
+  window.__PXT.pfExitFollow=function(){ try{ pfExitFollow(); }catch(e){ return e.message; } return "ok"; };
+  window.__PXT.pfDbg=function(){
+    var all=(trLog||[]);
+    var closed=all.filter(function(t){return t.status==="closed";});
+    return {total:all.length, closed:closed.length,
+            mine:closed.filter(edMine).length,
+            sample:closed[0]||null, usable:pfClosedR().length};
+  };
   window.__PXT.stopTest=function(tk,bars,mode){
     dpCache[tk]={bars:{daily:bars},meta:{last:bars[bars.length-1].c}};
     if(mode) SCR_STOP=mode;
@@ -5469,6 +5517,272 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     });
   }
 
+
+  // ================= PROJECTION + GOAL =====================================
+  // Both are arithmetic on the closed record, nothing forecast. The projection
+  // resamples the user's OWN R-multiples rather than assuming a distribution,
+  // so the band widens the way a small sample really does.
+  var PF_GOAL = 10000, PF_HORIZON = 12;
+  function pfEquityNow(){
+    try{
+      var s=pfCompute();
+      if(s && s.equity!=null) return s.equity;
+      if(s && s.balance!=null) return s.balance;
+      var start=(typeof RULES!=="undefined" && RULES.startBalance)?RULES.startBalance:2000;
+      var realised=(s&&s.netPnl!=null)?s.netPnl:0;
+      var open=(trLog||[]).filter(function(t){return t.status==="open"&&edMine(t);})
+        .reduce(function(a,t){
+          var m=(dpCache[t.ticker]||{}).meta||{};
+          var last=m.last||+t.entry;
+          return a+((last-(+t.entry))*(+t.qty||0));
+        },0);
+      return start+realised+open;
+    }catch(e){ return null; }
+  }
+
+  function pfClosedR(){
+    var out=[];
+    (trLog||[]).forEach(function(t){
+      if(t.status!=="closed"||!edMine(t)) return;
+      var e=+t.entry, x=+(t.exit_price!=null?t.exit_price:t.exit),
+          st=+(t.stop!=null?t.stop:t.sl), q=+(t.qty||1);
+      if(!e||!x||!st||e===st) return;
+      out.push({r:(x-e)/Math.abs(e-st), pnl:(x-e)*q});
+    });
+    return out;
+  }
+
+  function pfProjRender(){
+    var host=document.getElementById("pfProjBody");
+    if(!host) return;
+    var rs=pfClosedR();
+    if(rs.length<5){
+      host.innerHTML='<div class="pf-note">Not enough closed trades yet. '+
+        'A projection needs a record to resample \u2014 come back after ten or so.</div>';
+      return;
+    }
+    var val=(typeof pfEquityNow==="function")?pfEquityNow():null;
+    if(!val) val=2000;
+    var riskPct=0.01, tpm=4;
+    var Rs=rs.map(function(x){return x.r;});
+    var mu=Rs.reduce(function(a,b){return a+b;},0)/Rs.length;
+
+    // 400 resampled futures; report the median and the middle 80%
+    var band=[];
+    var paths=[];
+    for(var p=0;p<400;p++){
+      var v=val, row=[v];
+      for(var m=0;m<PF_HORIZON;m++){
+        for(var t=0;t<tpm;t++) v += v*riskPct*Rs[Math.floor(Math.random()*Rs.length)];
+        row.push(v);
+      }
+      paths.push(row);
+    }
+    for(var m2=0;m2<=PF_HORIZON;m2++){
+      var col=paths.map(function(r){return r[m2];}).sort(function(a,b){return a-b;});
+      band.push({p10:col[Math.floor(.10*col.length)],p50:col[Math.floor(.50*col.length)],
+                 p90:col[Math.floor(.90*col.length)]});
+    }
+    var last=band[band.length-1];
+    var note=document.getElementById("pfProjNote");
+    if(note) note.textContent="median $"+Math.round(last.p50).toLocaleString();
+
+    var W=760,H=210,PL=58,PR=14,PT=12,PB=26;
+    var all=[]; band.forEach(function(b){ all.push(b.p10,b.p90); });
+    var lo=Math.min.apply(null,all), hi=Math.max.apply(null,all);
+    var pad=(hi-lo)*0.10; lo-=pad; hi+=pad;
+    function X(i){ return PL+i/(band.length-1)*(W-PL-PR); }
+    function Y(v){ return PT+(hi-v)/(hi-lo)*(H-PT-PB); }
+    var g="";
+    for(var k=0;k<4;k++){
+      var gv=lo+(hi-lo)*k/3, y=Y(gv);
+      g+='<line class="pgl" x1="'+PL+'" y1="'+y.toFixed(1)+'" x2="'+(W-PR)+'" y2="'+y.toFixed(1)+'"/>'+
+         '<text class="pax" x="'+(PL-7)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="end">$'+
+         Math.round(gv).toLocaleString()+'</text>';
+    }
+    var up=band.map(function(b,i){return X(i).toFixed(1)+","+Y(b.p90).toFixed(1);}).join(" L");
+    var dn=band.slice().reverse().map(function(b,i){
+      return X(band.length-1-i).toFixed(1)+","+Y(b.p10).toFixed(1);}).join(" L");
+    g+='<path class="pband" d="M'+up+' L'+dn+' Z"/>';
+    g+='<path class="pmid" d="M'+band.map(function(b,i){
+      return X(i).toFixed(1)+","+Y(b.p50).toFixed(1);}).join(" L")+'"/>';
+    var st=Math.max(1,Math.round(band.length/6));
+    for(var i2=0;i2<band.length;i2+=st)
+      g+='<text class="pax" x="'+X(i2).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+
+         (i2===0?"now":"+"+i2+"m")+'</text>';
+
+    // what actually happened over the SAME window, so the two halves compare
+    var cut=new Date(); cut.setMonth(cut.getMonth()-PF_HORIZON);
+    var iso=cut.toISOString().slice(0,10);
+    var back=(trLog||[]).filter(function(t){
+      return t.status==="closed" && edMine(t) &&
+             String(t.exit_date||t.closed_date||"")>=iso;
+    });
+    var bp=0, bw=0;
+    back.forEach(function(t){
+      var e=+t.entry, x=+(t.exit_price!=null?t.exit_price:t.exit), q=+(t.qty||1);
+      if(!e||!x) return;
+      var p=(x-e)*q; bp+=p; if(p>0) bw++;
+    });
+    var gain=last.p50-band[0].p50;
+    var lab=(PF_HORIZON===1?"month":PF_HORIZON+" months");
+    host.innerHTML=
+      '<div class="pf-tf">'+[1,3,6,12].map(function(n){
+        return '<button data-h="'+n+'"'+(PF_HORIZON===n?' class="on"':'')+'>'+n+'M</button>';
+      }).join("")+'</div>'+
+      '<div class="pf-per">'+
+        '<div><div class="k">Last '+lab+'</div>'+
+          '<div class="v '+(bp>=0?"up":"dn")+'">'+(bp>=0?"+$":"\u2212$")+
+            Math.abs(bp).toFixed(0)+'</div>'+
+          '<div class="s">'+back.length+' closed'+
+            (back.length?' \u00b7 '+Math.round(bw/back.length*100)+'% win':'')+'</div></div>'+
+        '<div><div class="k">Next '+lab+'</div>'+
+          '<div class="v '+(gain>=0?"up":"dn")+'">'+(gain>=0?"+$":"\u2212$")+
+            Math.abs(gain).toFixed(0)+'</div>'+
+          '<div class="s">median \u00b7 range '+
+            ((last.p10-band[0].p50)>=0?"+":"\u2212")+"$"+Math.abs(last.p10-band[0].p50).toFixed(0)+
+            ' to '+((last.p90-band[0].p50)>=0?"+":"\u2212")+"$"+
+            Math.abs(last.p90-band[0].p50).toFixed(0)+'</div></div>'+
+      '</div>'+
+      '<svg class="pf-proj" viewBox="0 0 760 210">'+g+'</svg>'+
+      '<div class="pf-note">The band is the middle 80% of 400 simulated futures, each one '+
+      'drawing trades at random from your own '+rs.length+' closed results, sized at 1% of '+
+      'the account. The line is the median. It widens because variance compounds faster '+
+      'than edge does \u2014 the honest shape of a small sample. In twelve months: median '+
+      '<b>$'+Math.round(last.p50).toLocaleString()+'</b>, range $'+
+      Math.round(last.p10).toLocaleString()+' to $'+Math.round(last.p90).toLocaleString()+'.</div>';
+    host.querySelectorAll(".pf-tf button").forEach(function(b){
+      b.addEventListener("click",function(ev){
+        ev.stopPropagation();
+        PF_HORIZON=+this.getAttribute("data-h"); pfProjRender();
+      });
+    });
+  }
+
+  function pfGoalRender(){
+    var host=document.getElementById("pfGoalBody");
+    if(!host) return;
+    var rs=pfClosedR();
+    var val=(typeof pfEquityNow==="function")?pfEquityNow():null;
+    if(!val) val=2000;
+    if(rs.length<5){
+      host.innerHTML='<div class="pf-note">The goal maths needs a closed record to work '+
+        'from. Come back once there are ten or so trades.</div>';
+      return;
+    }
+    var Rs=rs.map(function(x){return x.r;});
+    var expR=Rs.reduce(function(a,b){return a+b;},0)/Rs.length;
+    var expUsd=rs.reduce(function(a,x){return a+x.pnl;},0)/rs.length;
+    var tpm=4, pct=val/PF_GOAL*100, need=PF_GOAL-val;
+    var note=document.getElementById("pfGoalNote");
+    if(note) note.textContent=Math.round(pct)+"% of $"+PF_GOAL.toLocaleString();
+
+    function yrs(permo){
+      if(permo<=0) return null;
+      return Math.log(PF_GOAL/val)/Math.log(1+permo)/12;
+    }
+    var oneR = rs.length? Math.abs(rs[0].pnl/(rs[0].r||1)) : val*0.01;
+    var rows=[
+      ["Fixed $"+oneR.toFixed(0)+" risk", (expUsd>0)? need/(expUsd*tpm)/12 : null],
+      ["1% of account", yrs(expR*tpm*0.01)],
+      ["2% of account", yrs(expR*tpm*0.02)],
+      ["2% and expectancy doubled", yrs(expR*2*tpm*0.02)]
+    ];
+    host.innerHTML=
+      '<div class="pf-goalbar"><b style="width:'+Math.min(100,pct).toFixed(1)+'%"></b></div>'+
+      '<div class="pf-goalsub">$'+Math.round(val).toLocaleString()+' of $'+
+        PF_GOAL.toLocaleString()+' \u00b7 $'+Math.round(need).toLocaleString()+' to go</div>'+
+      '<div class="pf-sub">How long, four ways</div>'+
+      rows.map(function(r){
+        return '<div class="pf-goalrow"><span>'+r[0]+'</span>'+
+          '<span class="yr">'+(r[1]==null?"\u2014":(r[1]>=100?"a lifetime":r[1].toFixed(1)+" yrs"))+'</span>'+
+          '<span class="mo">'+(r[1]==null?"":Math.round(r[1]*12)+" months")+'</span></div>';
+      }).join("")+
+      '<div class="pf-note"><b>This is the number that matters.</b> At a fixed dollar risk '+
+      'the account grows in a straight line. Risking a fixed <b>percentage</b> makes it '+
+      'compound, and doubling expectancy halves the time again. The route to the goal runs '+
+      'through <b>position sizing and better selection</b>, not through trading more often.</div>';
+  }
+
+
+  // ---- POST-EXIT FOLLOW-UP ------------------------------------------------
+  // Did the exit leave money behind? Each closed name is followed for a month
+  // after the sale. This is a PAIRED comparison - every trade is its own
+  // control - so it becomes meaningful at ~20 exits, unlike slicing the record
+  // by day or hour which would need hundreds.
+  function pfExitFollow(){
+    var host=document.getElementById("pfHeatBody");
+    if(!host) return;
+    var closed=(trLog||[]).filter(function(t){
+      return t.status==="closed" && edMine(t) && t.ticker &&
+             (t.exit_date||t.closed_date) &&
+             (t.exit_price!=null||t.exit!=null);
+    });
+    if(closed.length<5) return;
+
+    Promise.all(closed.map(function(t){
+      return new Promise(function(res){
+        try{ dpFetchBars(t.ticker,"daily",function(b){ res({t:t,bars:b||[]}); }); }
+        catch(e){ res({t:t,bars:[]}); }
+      });
+    })).then(function(rows){
+      var win=[], loss=[], all=[], effs=[];
+      rows.forEach(function(r){
+        var bars=r.bars; if(!bars||bars.length<5) return;
+        var xd=String(r.t.exit_date||r.t.closed_date).slice(0,10);
+        var i=-1;
+        for(var k=0;k<bars.length;k++){
+          if(String(bars[k].date).slice(0,10)>=xd){ i=k; break; }
+        }
+        if(i<0||i+5>=bars.length) return;      // not enough history after the exit
+        var x=+(r.t.exit_price!=null?r.t.exit_price:r.t.exit);
+        var e=+r.t.entry;
+        var a1w=bars[Math.min(i+5,bars.length-1)].c;
+        var end=Math.min(i+21,bars.length-1);
+        var peak=x;
+        for(var j=i;j<=end;j++) if(bars[j].h>peak) peak=bars[j].h;
+        var d1=(a1w/x-1)*100;
+        all.push(d1);
+        var isWin=(x-e)*(+r.t.qty||1)>0;
+        (isWin?win:loss).push(d1);
+        if(isWin && peak>e) effs.push((x-e)/(peak-e)*100);
+      });
+      if(!all.length) return;
+      function avg(a){ return a.length? a.reduce(function(x,y){return x+y;},0)/a.length : null; }
+      var aw=avg(win), al=avg(loss), aa=avg(all);
+      var ran=win.filter(function(v){return v>0;}).length;
+      var rev=loss.filter(function(v){return v>0;}).length;
+      var eff=avg(effs);
+      function pc(v){ return (v>=0?"+":"\u2212")+Math.abs(v).toFixed(2)+"%"; }
+
+      var h='<div class="pf-sub">After the exit</div>';
+      if(eff!=null && win.length)
+        h+='<div class="pf-note" style="border-left-color:var(--amber)">'+
+          '<b>You are capturing about '+Math.round(eff)+'% of the move that was there.</b> '+
+          'Across '+win.length+' winner'+(win.length===1?'':'s')+', the average name was <b>'+
+          pc(aw)+'</b> a week after you sold and '+ran+' kept going. Exiting into strength is '+
+          'the point \u2014 but if that share stays high, the targets are close enough that a '+
+          'trend has room to run without you.</div>';
+      if(loss.length)
+        h+='<div class="pf-note" style="border-left-color:'+
+          ((rev/loss.length>0.5)?'var(--red)':'var(--line2)')+'">'+
+          '<b>'+rev+' of your '+loss.length+' stop-out'+(loss.length===1?'':'s')+
+          ' '+(rev===1?'was':'were')+' higher a week later</b>'+
+          (al!=null?', by '+pc(al)+' on average':'')+'. '+
+          (rev/loss.length>0.5
+            ? 'Above half means the stop is tighter than the stock\u2019s ordinary noise \u2014 '+
+              'you are paying for volatility rather than being wrong. A wider stop with '+
+              'smaller size keeps the same 1R and gives the trade room to breathe.'
+            : 'Below half is healthy: the stops are catching real breakdowns rather than '+
+              'ordinary noise.')+'</div>';
+      h+='<div class="pf-note">Every closed name is followed for a month after the exit. '+
+        'Across all '+all.length+' the average was <b>'+pc(aa)+'</b> a week later. Near zero '+
+        'means the exits are well timed; consistently positive means money is being left '+
+        'behind. This is a paired comparison, so it means something at twenty exits.</div>';
+      host.insertAdjacentHTML("beforeend", h);
+    }).catch(function(e){ console.warn("[pf] exit follow", e); });
+  }
+
   function pfCorrOf(a,b){
     var A=pfRet[a]||{}, B=pfRet[b]||{}, xs=[], ys=[], d;
     for(d in A){ if(B[d]!=null){ xs.push(A[d]); ys.push(B[d]); } }
@@ -5872,6 +6186,18 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
           '<div class="w-card-b" data-sec-body="streak" id="pfStreakBody"><div class="loading">\u2026</div></div>'+
         '</div>'+
       '</div>'+
+      // ---- projection + goal: what the record implies, and how far to the target
+      '<div class="w-card">'+
+        '<div class="w-card-h pf-tog" data-sec="proj"><span class="w-card-t">If you continue like this</span>'+
+          '<span><span class="w-card-n" id="pfProjNote"></span> <span class="sec-car">\u25be</span></span></div>'+
+        '<div class="w-card-b" data-sec-body="proj" id="pfProjBody"><div class="loading">\u2026</div></div>'+
+      '</div>'+
+      '<div class="w-card">'+
+        '<div class="w-card-h pf-tog" data-sec="goal"><span class="w-card-t">Goal</span>'+
+          '<span><span class="w-card-n" id="pfGoalNote"></span> <span class="sec-car">\u25be</span></span></div>'+
+        '<div class="w-card-b" data-sec-body="goal" id="pfGoalBody"><div class="loading">\u2026</div></div>'+
+      '</div>'+
+
       // expectancy
       '<div class="w-card">'+
         '<div class="w-card-h pf-tog" data-sec="metrics"><span class="w-card-t">Expectancy</span>'+
@@ -5921,6 +6247,9 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     document.getElementById("pfCouncilBody").innerHTML=pfCouncilTile(s);
     document.getElementById("pfChairBody").innerHTML=pfChairTile(s);
     pfCorrRender();
+    try{ pfProjRender(); }catch(e){ console.warn("[pf] projection", e); }
+    try{ pfGoalRender(); }catch(e){ console.warn("[pf] goal", e); }
+    try{ pfExitFollow(); }catch(e){ console.warn("[pf] exit follow", e); }
     var mn=document.getElementById("pfMetNote");
     if(mn) mn.textContent = s.n ? s.n+" closed \u00b7 "+s.W.length+"W/"+s.L.length+"L" : "no closed trades";
     var en=document.getElementById("pfEqNote");
