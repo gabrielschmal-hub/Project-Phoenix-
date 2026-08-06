@@ -3043,7 +3043,15 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       })).then(function(gx){
         gx.forEach(function(x){
           if(!x.d||x.d.stock_validity==="INVALID_THIN_CHAIN") return;
-          var sp=x.d.spot, cw=x.d.call_wall, pw=x.d.put_wall, fl=x.d.gamma_flip;
+          // the per-ticker file uses the SAME envelope as the SPX one -
+          // {overview,levels,profile} - not flat keys. Reading it flat made
+          // every name look like it had no chain.
+          var ov=(x.d.overview)||{}, L=(x.d.levels)||{};
+          function lv(v){ return (v&&v.strike!=null)?v.strike:(typeof v==="number"?v:null); }
+          var sp=ov.spx_spot||ov.spot||x.d.spot;
+          var cw=lv(L.call_wall)||x.d.call_wall;
+          var pw=lv(L.put_wall)||x.d.put_wall;
+          var fl=ov.gamma_flip||x.d.gamma_flip;
           if(!sp) return;
           var bits=[];
           if(cw) bits.push('resistance at '+edNum(cw,2)+' ('+
@@ -3052,7 +3060,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
           if(fl) bits.push('flip at '+edNum(fl,2)+', spot '+
             edNum(Math.abs((sp/fl-1)*100),1)+'% '+(sp>=fl?'above':'below'));
           if(bits.length) gexNotes.push('<b>'+x.tk+'</b> \u2014 '+bits.join(", ")+
-            (x.d.regime?'. '+x.d.regime+'.':'.'));
+            (ov.regime?'. '+ov.regime+'.':'.'));
         });
         if(gexNotes.length) edSet("edBookGex",
           '<p class="ed-body"><b>Where they sit.</b> '+gexNotes.join(' ')+'</p>');
@@ -3098,6 +3106,19 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   // No single rule decides this, so state the situation precisely and give the
   // conditions rather than a verdict. The levels come from the name's own GEX,
   // the context from the industry and the index.
+
+  // 1R is fixed at ENTRY and never moves. Measuring against the CURRENT stop
+  // means trailing a stop shrinks your R, which is nonsense: SNOW at 316 on a
+  // 253.57 entry is 3.1R whether the stop sits at 233 or 294.
+  function trRiskUnit(t){
+    var e=+t.entry;
+    var s0=(t.initial_stop!=null)?+t.initial_stop:
+           (t.stop0!=null)?+t.stop0:
+           (t.plan_stop!=null)?+t.plan_stop:+t.stop;
+    var u=Math.abs(e-s0);
+    return u>0?u:null;
+  }
+
   function edPositionRead(gx, open, ind){
     var m=(ED_CACHE&&ED_CACHE.m)||{}, g=(ED_CACHE&&ED_CACHE.g)||{};
     var ov=(g.overview)||{};
@@ -3114,7 +3135,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       var meta=(dpCache[t.ticker]||{}).meta||{};
       var last=meta.last!=null?meta.last:+t.entry;
       var entry=+t.entry, stop=+t.stop, tgt=+t.target;
-      var R=(entry&&stop&&entry!==stop)?(last-entry)/Math.abs(entry-stop):null;
+      var unit=trRiskUnit(t);
+      var R=(entry&&unit)?(last-entry)/unit:null;
       var industry=t.industry||(ED_IND[t.ticker]||{}).industry||"";
       var irow=sorted.filter(function(r){return (r.industry||r.name)===industry;})[0];
       var irank=irow?sorted.indexOf(irow)+1:null;
@@ -3126,14 +3148,31 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         (tgt?', target '+edNum(tgt,2):'')+'. ';
 
       // the name's own levels
-      if(d && d.spot){
-        var cw=d.call_wall, pw=d.put_wall, fl=d.gamma_flip;
-        if(cw) p+='Resistance sits at <b>'+edNum(cw,2)+'</b>, '+
-          edNum(Math.abs((cw/last-1)*100),1)+'% '+(cw>last?'above':'below')+'. ';
-        if(pw) p+='Support at <b>'+edNum(pw,2)+'</b>. ';
-        if(fl) p+='Its own gamma flip is '+edNum(fl,2)+', '+
-          (last>=fl?'below spot \u2014 dealers dampen moves here'
-                   :'above spot \u2014 dealers amplify here')+'. ';
+      var dov=(d&&d.overview)||{}, dL=(d&&d.levels)||{};
+      function dlv(v){ return (v&&v.strike!=null)?v.strike:(typeof v==="number"?v:null); }
+      var dSpot=dov.spx_spot||dov.spot||(d&&d.spot);
+      if(d && dSpot){
+        var cw=dlv(dL.call_wall)||d.call_wall,
+            pw=dlv(dL.put_wall)||d.put_wall,
+            fl=dov.gamma_flip||d.gamma_flip;
+        // These are not chart levels - they are strikes where dealers are
+        // OBLIGED to trade to stay hedged. The flow decelerates a move; it does
+        // not stop one. Enough real supply still goes through, just slowly.
+        if(cw) p+= (cw>last)
+          ? 'At <b>'+edNum(cw,2)+'</b> ('+edNum((cw/last-1)*100,1)+'% up) dealers are '+
+            'forced sellers, so upside slows there rather than stopping. '
+          : 'It is already through <b>'+edNum(cw,2)+'</b>, and past a call wall that '+
+            'hedging inverts \u2014 the ceiling becomes a floor. ';
+        if(pw) p+= (pw<last)
+          ? 'At <b>'+edNum(pw,2)+'</b> ('+edNum(Math.abs((pw/last-1)*100),1)+'% down) they are '+
+            'forced buyers, which cushions a fall without preventing it. '
+          : 'It is below <b>'+edNum(pw,2)+'</b>, so that support is behind it. ';
+        if(fl) p+= (last>=fl)
+          ? 'Its gamma flip is <b>'+edNum(fl,2)+'</b>, '+
+            edNum((last/fl-1)*100,1)+'% below \u2014 <b>deep positive gamma</b>: dealers buy '+
+            'dips and sell rallies, so moves decelerate in both directions. '
+          : 'It has crossed below its gamma flip at <b>'+edNum(fl,2)+'</b> \u2014 that hedging '+
+            'has inverted, and dealers now sell weakness rather than buying it. ';
       } else {
         p+='No gamma levels: the option chain is too thin for dealer positioning to '+
            'mean anything on this name. ';
@@ -3148,14 +3187,22 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
 
       // conditions, not a verdict
       var c='<p class="ed-body ed-cond">';
-      if(stop) c+='<b>Below '+edNum(stop,2)+'</b>, leave \u2014 holding past the stop is what '+
-        'turns a 1R loss into the kind that ruins expectancy. ';
-      if(d&&d.call_wall&&d.call_wall>last)
-        c+='<b>Into '+edNum(d.call_wall,2)+'</b>, expect the move to stall: that is where '+
-           'dealer supply concentrates. Trimming there is defensible; adding is not. ';
-      else if(d&&d.call_wall)
-        c+='<b>Already through '+edNum(d.call_wall,2)+'</b>, the overhead supply is behind it '+
-           '\u2014 the level that was resistance now acts as support. ';
+      if(stop){
+        var lockedIn = (stop>=entry);
+        c+= lockedIn
+          ? '<b>Your stop at '+edNum(stop,2)+' sits above entry</b>, so the worst case here '+
+            'is a '+(unit?((stop-entry)/unit).toFixed(2):"?")+
+            'R win and this position carries no heat. '
+          : '<b>Below '+edNum(stop,2)+'</b>, leave \u2014 holding past the stop is what turns '+
+            'a 1R loss into the kind that ruins expectancy. ';
+      }
+      var cwv=dlv(dL.call_wall)||(d&&d.call_wall);
+      if(cwv&&cwv>last)
+        c+='<b>Into '+edNum(cwv,2)+'</b>, forced selling caps the velocity \u2014 not the '+
+           'direction. Trimming there is defensible; adding into it is paying up. ';
+      else if(cwv)
+        c+='<b>Above '+edNum(cwv,2)+'</b>, that hedging has flipped and the strike now '+
+           'supports rather than caps. ';
       if(R!=null&&R<2) c+='<b>Under 2R</b>, there is no case for trimming on the numbers alone. ';
       else if(R!=null&&R>=2) c+='<b>Past '+R.toFixed(1)+'R</b>, a partial trim protects the '+
         'trade without closing the thesis. ';
@@ -3600,7 +3647,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     if(ov.gamma_flip){
       n++;
       out+='<div class="ed-w"><span class="w-tag">High</span><span><b>SPX '+
-        ((ov.spx_spot||0)>ov.gamma_flip?'loses ':'reclaims ')+edNum(ov.gamma_flip)+
+        ((ov.spx_spot||0)>ov.gamma_flip!=null?'loses ':'reclaims ')+edNum(ov.gamma_flip)+
         '</b> \u2014 dealers flip from '+((ov.net_gex_B||0)>=0?'dampening to amplifying':'amplifying to dampening')+
         '. Ranges change character and so does the right position size.</span>'+
         '<span class="w-when">intraday</span></div>';
@@ -4209,7 +4256,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     function fmt(v){ return v==null?null:Math.round(v).toLocaleString(); }
     var marks=[
       {v:spot, c:C.spot, t:"SPX Spot",      w:3.4, d:"solid"},
-      {v:flip, c:C.flip, t:"G-Flip",        w:3.2, d:"dash"},
+      {v:flip, c:C.flip, t:"G-Flip",        w:3.2, d:"dash"},   // null = none in range
       {v:putW, c:C.put,  t:"OI Support",    w:2.6, d:"dot",
        oi:oiOf(L.put_wall,"put")},
       {v:callW,c:C.call, t:"OI Resistance", w:2.6, d:"dot",
@@ -4372,7 +4419,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
            (ov.net_gex_B!=null?' ('+(ov.net_gex_B>=0?"+":"")+ov.net_gex_B.toFixed(1)+'B)':'')+', '+
            (neg?'so hedging runs <b>with</b> the move and ranges widen'
                :'so hedging runs <b>against</b> the move and price gets pinned')+
-           (ov.gamma_flip?'; the flip sits at <b>'+ov.gamma_flip.toLocaleString()+'</b>':'')+'. ';
+           (ov.gamma_flip!=null?'; the flip sits at <b>'+ov.gamma_flip.toLocaleString()+'</b>':'')+'. ';
       }
       if(m&&m.regime) p+='Regime holds <b>'+m.regime+'</b>.';
       html+='<div class="brf-block"><div class="brf-k">Since yesterday</div><div class="brf-p">'+p+'</div></div>';
@@ -5194,7 +5241,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         var n=(trLog||[]).filter(function(t){return t.status==="open"&&edMine(t);}).length;
         mm.textContent=n+" open position"+(n===1?"":"s")+
           (ov.net_gex_B!=null?" \u00b7 "+(ov.net_gex_B>=0?"positive":"negative")+" gamma":"")+
-          (ov.gamma_flip?" \u00b7 flip "+Math.round(ov.gamma_flip).toLocaleString():"")+
+          (ov.gamma_flip!=null?" \u00b7 flip "+Math.round(ov.gamma_flip).toLocaleString():"")+
           "  \u2192";
       });
     }).catch(function(){});
@@ -6702,6 +6749,22 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
                    .sort(function(a,b){return b.pct-a.pct;});
     var over=conc.filter(function(c){return c.pct>RULES.maxPosPct;});
     if(!s.open.length) return '<div class="pf-empty-t">No open positions.<br>Zero heat.</div>';
+    // A stop ABOVE entry cannot lose money - the worst case is a smaller win.
+    // Counting it as heat overstates risk and hides real capacity.
+    var locked=(s.open||[]).filter(function(t){
+      var e=+t.entry, st=+t.stop;
+      if(!e||!st) return false;
+      var long=!(t.side==="short"||t.direction==="short");
+      return long ? (st>=e) : (st<=e);
+    });
+    var lockNote = locked.length
+      ? '<div class="pf-note" style="border-left-color:var(--green)"><b>'+
+        locked.map(function(t){return t.ticker;}).join(", ")+
+        (locked.length===1?' has':' have')+' a stop above entry, so '+
+        (locked.length===1?'it carries':'they carry')+' no heat</b> \u2014 the worst case '+
+        'is a smaller win. The room below it is real capacity, not nominal.</div>'
+      : '';
+
     return '<div class="pf-gauge-v">'+
       '<div class="gnum" style="color:'+col+'">'+s.openRiskR.toFixed(2)+'R <span class="go">/ '+RULES.maxHeatR+'R</span></div>'+
       '<div class="gbar"><div class="gfill" style="width:'+heatPct+'%;background:'+col+'"></div></div>'+
