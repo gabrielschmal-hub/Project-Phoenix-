@@ -1,5 +1,5 @@
 {
- "asof": "2026-08-05 15:24 UTC",
+ "asof": "2026-08-06 07:42 UTC",
  "regime": "POLICY_TIGHTENING",
  "confidence": 37.3,
  "confidence_note": "regime score, not a calibrated probability (A4)",
@@ -8,21 +8,21 @@
  },
  "secondary_tag": "INFLATIONARY",
  "inputs": {
-  "wti_12m": 17.92,
-  "wti_3m": -21.05,
-  "wti_vs_2yr": 5.79,
+  "wti_12m": 17.72,
+  "wti_3m": -21.19,
+  "wti_vs_2yr": 5.6,
   "cpi_yoy": 3.46,
   "cpi_chg_3m": -0.71,
-  "spx_3m": 4.69,
-  "spx_1m": 2.25,
+  "spx_3m": 4.39,
+  "spx_1m": 1.96,
   "dd": 0.0,
   "trail_dd": 0.0,
-  "spx_off_low": 4.51,
+  "spx_off_low": 4.2,
   "fresh_high": true,
   "us02_3m": 40.0,
   "real_3m": 50.0,
-  "vix": 16.32,
-  "vix_3m_chg": -5.06,
+  "vix": 15.85,
+  "vix_3m_chg": -7.8,
   "hy": 284.0
  },
  "explain": {
@@ -91,19 +91,14 @@
    }
   ],
   "runner_up": {
-   "regime": "ENERGY_GRIND",
+   "regime": "GOLDILOCKS",
    "score": null,
-   "gates_missing": 2,
+   "gates_missing": 1,
    "needs": [
     {
-     "label": "WTI 12m",
-     "need": "> 25",
-     "now": 17.924233831383816
-    },
-    {
-     "label": "CPI 3m change",
-     "need": "> 0.3",
-     "now": -0.71
+     "label": "CPI y/y",
+     "need": "< 3",
+     "now": 3.46
     }
    ]
   }
