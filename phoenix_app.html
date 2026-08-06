@@ -1764,6 +1764,23 @@ html:not(.light) .pf-goalsub,html:not(.light) .pf-goalrow .mo{color:#E8EDF2}
 .pf-per .v{font-family:var(--mono);font-size:22px;font-weight:700;margin-top:4px}
 .pf-per .s{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);margin-top:3px}
 html:not(.light) .pf-per .s,html:not(.light) .pf-per .k{color:#E8EDF2}
+.pf-levers{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:5px;overflow:hidden;margin:4px 0 10px}
+.pf-levers>div{background:var(--card);padding:11px 13px}
+.pf-levers .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--inkFade)}
+.pf-levers .v{font-family:var(--mono);font-size:21px;font-weight:700;margin-top:4px}
+.pf-levers .s{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);margin-top:3px}
+html:not(.light) .pf-levers .k,html:not(.light) .pf-levers .s{color:#E8EDF2}
+@media(max-width:820px){ .pf-levers{grid-template-columns:1fr} }
+.pf-windows{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:5px;overflow:hidden;margin:8px 0 4px}
+.pf-windows>div{background:var(--card);padding:10px 12px}
+.pf-windows .k{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--inkFade)}
+.pf-windows .v{font-family:var(--mono);font-size:18px;font-weight:700;margin-top:3px}
+html:not(.light) .pf-windows .k{color:#E8EDF2}
+@media(max-width:820px){ .pf-windows{grid-template-columns:1fr 1fr} }
+.ed-cond{border-left:3px solid var(--gold);padding-left:12px;margin-top:-4px}
+html:not(.light) .ed-cond{color:#FFFFFF}
 
 /* ===== light theme : colours only, toggled by html.light ===== */
 html.light{
@@ -2635,6 +2652,14 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     });
   };
   window.__PXT.pfExitFollow=function(){ try{ pfExitFollow(); }catch(e){ return e.message; } return "ok"; };
+  window.__PXT.posRead=function(gx,open,ind){
+    var host=document.getElementById("edBookGex");
+    if(host) host.innerHTML="";
+    try{ edPositionRead(gx,open,ind); }catch(e){ return e.message; }
+    return "ok";
+  };
+  window.__PXT.setEdCache=function(c){ ED_CACHE=c; };
+  window.__PXT.setMeta=function(tk,meta){ dpCache[tk]={bars:{},meta:meta}; };
   window.__PXT.pfDbg=function(){
     var all=(trLog||[]);
     var closed=all.filter(function(t){return t.status==="closed";});
@@ -3030,9 +3055,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
             (x.d.regime?'. '+x.d.regime+'.':'.'));
         });
         if(gexNotes.length) edSet("edBookGex",
-          '<p class="ed-body"><b>Where they sit.</b> '+gexNotes.join(' ')+
-          ' Buying into a call wall is buying into where dealer supply concentrates; '+
-          'a position already through one has that headwind behind it.</p>');
+          '<p class="ed-body"><b>Where they sit.</b> '+gexNotes.join(' ')+'</p>');
+        edPositionRead(gx, open, ind);
       }).catch(function(){});
       var avg1=n1?tot1/n1:null, avgW=nW?totW/nW:null;
       edSet("edBookN",(avg1!=null?edPct(avg1)+" today":"")+
@@ -3068,6 +3092,91 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     });
   }
 
+
+
+  // ---- the standing question: hold, trim or add ---------------------------
+  // No single rule decides this, so state the situation precisely and give the
+  // conditions rather than a verdict. The levels come from the name's own GEX,
+  // the context from the industry and the index.
+  function edPositionRead(gx, open, ind){
+    var m=(ED_CACHE&&ED_CACHE.m)||{}, g=(ED_CACHE&&ED_CACHE.g)||{};
+    var ov=(g.overview)||{};
+    var spxPos=(ov.net_gex_B!=null)?(ov.net_gex_B>=0):null;
+    var spot=ov.spx_spot||ov.spot, flip=ov.gamma_flip;
+    var rows=(ind&&(ind.industries||ind.rows||ind.list))||[];
+    var key=rows.length?(rows[0].d1!=null?"d1":(rows[0].chg1d!=null?"chg1d":"pc")):null;
+    var sorted=key?rows.slice().filter(function(r){return r[key]!=null;})
+      .sort(function(a,b){return b[key]-a[key];}):[];
+
+    var out=[];
+    open.forEach(function(t){
+      var d=(gx.filter(function(x){return x.tk===t.ticker;})[0]||{}).d;
+      var meta=(dpCache[t.ticker]||{}).meta||{};
+      var last=meta.last!=null?meta.last:+t.entry;
+      var entry=+t.entry, stop=+t.stop, tgt=+t.target;
+      var R=(entry&&stop&&entry!==stop)?(last-entry)/Math.abs(entry-stop):null;
+      var industry=t.industry||(ED_IND[t.ticker]||{}).industry||"";
+      var irow=sorted.filter(function(r){return (r.industry||r.name)===industry;})[0];
+      var irank=irow?sorted.indexOf(irow)+1:null;
+      var imom=irow?irow[key]:null;
+
+      var p='<p class="ed-body"><b>'+t.ticker+'</b> at '+edNum(last,2)+
+        (R!=null?', <b>'+R.toFixed(1)+'R</b> open':'')+
+        (stop?', stop '+edNum(stop,2)+' ('+edNum(Math.abs((last/stop-1)*100),1)+'% away)':'')+
+        (tgt?', target '+edNum(tgt,2):'')+'. ';
+
+      // the name's own levels
+      if(d && d.spot){
+        var cw=d.call_wall, pw=d.put_wall, fl=d.gamma_flip;
+        if(cw) p+='Resistance sits at <b>'+edNum(cw,2)+'</b>, '+
+          edNum(Math.abs((cw/last-1)*100),1)+'% '+(cw>last?'above':'below')+'. ';
+        if(pw) p+='Support at <b>'+edNum(pw,2)+'</b>. ';
+        if(fl) p+='Its own gamma flip is '+edNum(fl,2)+', '+
+          (last>=fl?'below spot \u2014 dealers dampen moves here'
+                   :'above spot \u2014 dealers amplify here')+'. ';
+      } else {
+        p+='No gamma levels: the option chain is too thin for dealer positioning to '+
+           'mean anything on this name. ';
+      }
+
+      // industry and index
+      if(imom!=null) p+='<b>'+industry+'</b> is '+edPct(imom)+' today'+
+        (irank?', ranked '+irank+' of '+sorted.length:'')+'. ';
+      if(spxPos!=null) p+='The index is in '+(spxPos?'positive':'negative')+' gamma'+
+        (spot&&flip?' with its flip at '+edNum(flip):'')+'. ';
+      p+='</p>';
+
+      // conditions, not a verdict
+      var c='<p class="ed-body ed-cond">';
+      if(stop) c+='<b>Below '+edNum(stop,2)+'</b>, leave \u2014 holding past the stop is what '+
+        'turns a 1R loss into the kind that ruins expectancy. ';
+      if(d&&d.call_wall&&d.call_wall>last)
+        c+='<b>Into '+edNum(d.call_wall,2)+'</b>, expect the move to stall: that is where '+
+           'dealer supply concentrates. Trimming there is defensible; adding is not. ';
+      else if(d&&d.call_wall)
+        c+='<b>Already through '+edNum(d.call_wall,2)+'</b>, the overhead supply is behind it '+
+           '\u2014 the level that was resistance now acts as support. ';
+      if(R!=null&&R<2) c+='<b>Under 2R</b>, there is no case for trimming on the numbers alone. ';
+      else if(R!=null&&R>=2) c+='<b>Past '+R.toFixed(1)+'R</b>, a partial trim protects the '+
+        'trade without closing the thesis. ';
+      if(imom!=null&&imom<0&&spxPos)
+        c+='The industry is falling while the index holds \u2014 that is name-specific weakness '+
+           'and it is the combination worth watching. ';
+      else if(imom!=null&&imom>0)
+        c+='The industry is rising, so the thesis is intact; the question is timing, not whether. ';
+      c+='</p>';
+      out.push(p+c);
+    });
+    if(out.length){
+      var host=document.getElementById("edBookGex");
+      if(host) host.insertAdjacentHTML("beforeend",
+        '<div class="ed-k" style="margin-top:14px"><span>Hold, trim or add</span></div>'+
+        out.join("")+
+        '<p class="ed-body" style="font-style:italic;opacity:.85">These are conditions, not '+
+        'instructions. There is no single rule that decides a hold \u2014 the levels and the '+
+        'context are stated so the decision is made against something rather than a feeling.</p>');
+    }
+  }
 
   // ---------------- the tape: ranked by how unusual --------------------------
   function edSigma(ser,key,n){
@@ -5682,6 +5791,26 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       return Math.log(PF_GOAL/val)/Math.log(1+permo)/12;
     }
     var oneR = rs.length? Math.abs(rs[0].pnl/(rs[0].r||1)) : val*0.01;
+    // A negative expectancy makes every path meaningless - the account shrinks,
+    // so "how long to $10k" has no answer. Say what is actually true and what
+    // would have to change, rather than printing four dashes.
+    if(expR<=0){
+      host.innerHTML=
+        '<div class="pf-goalbar"><b style="width:'+Math.min(100,pct).toFixed(1)+'%"></b></div>'+
+        '<div class="pf-goalsub">$'+Math.round(val).toLocaleString()+' of $'+
+          PF_GOAL.toLocaleString()+' \u00b7 $'+Math.round(need).toLocaleString()+' to go</div>'+
+        '<div class="pf-note" style="border-left-color:var(--red);margin-top:14px">'+
+        '<b>Expectancy is negative at '+expR.toFixed(2)+'R per trade.</b> There is no honest '+
+        'answer to \u201chow long to $'+PF_GOAL.toLocaleString()+'\u201d, because on this '+
+        'record the account shrinks rather than grows. Position sizing cannot fix a negative '+
+        'edge \u2014 it only changes how fast you arrive at zero.</div>'+
+        '<div class="pf-note">Across '+rs.length+' closed trades the average is <b>'+
+        (expUsd>=0?"+$":"\u2212$")+Math.abs(expUsd).toFixed(2)+'</b>. To reach the goal in '+
+        'ten years at 2% risk you would need about <b>+0.28R</b> per trade. The gap is '+
+        (0.28-expR).toFixed(2)+'R, and it closes through <b>selection and exits</b>, not '+
+        'through size or frequency.</div>';
+      return;
+    }
     var rows=[
       ["Fixed $"+oneR.toFixed(0)+" risk", (expUsd>0)? need/(expUsd*tpm)/12 : null],
       ["1% of account", yrs(expR*tpm*0.01)],
@@ -5710,6 +5839,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   // after the sale. This is a PAIRED comparison - every trade is its own
   // control - so it becomes meaningful at ~20 exits, unlike slicing the record
   // by day or hour which would need hundreds.
+  var PF_EXIT=null;   // measured post-exit drift; the Council defers to this
   function pfExitFollow(){
     var host=document.getElementById("pfHeatBody");
     if(!host) return;
@@ -5720,13 +5850,27 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     });
     if(closed.length<5) return;
 
+    // "+22% after you left" means nothing without knowing what the market did
+    // over the same days. Pull SPX once and difference every exit against it.
+    getJSON("spx_daily").then(function(sd){
+      var sp=(sd&&(sd.bars||sd.d))||[];
+      var spx={};
+      if(Array.isArray(sp)) sp.forEach(function(b){
+        var d=String(b.date||b.d||"").slice(0,10);
+        var c=(b.c!=null)?b.c:b.close;
+        if(d&&c) spx[d]=c;
+      });
+      window.__pfSPX=spx;
+    }).catch(function(){ window.__pfSPX={}; });
+
     Promise.all(closed.map(function(t){
       return new Promise(function(res){
         try{ dpFetchBars(t.ticker,"daily",function(b){ res({t:t,bars:b||[]}); }); }
         catch(e){ res({t:t,bars:[]}); }
       });
     })).then(function(rows){
-      var win=[], loss=[], all=[], effs=[];
+      var win=[], loss=[], all=[], effs=[], all2=[], all1m=[], peaks=[], bigRuns=[],
+          spxMoves=[], skipped=0;
       rows.forEach(function(r){
         var bars=r.bars; if(!bars||bars.length<5) return;
         var xd=String(r.t.exit_date||r.t.closed_date).slice(0,10);
@@ -5734,15 +5878,40 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         for(var k=0;k<bars.length;k++){
           if(String(bars[k].date).slice(0,10)>=xd){ i=k; break; }
         }
-        if(i<0||i+5>=bars.length) return;      // not enough history after the exit
+        // BUG THIS FIXES: when the exit predates the chart file (older trades,
+        // charts only carry recent history) the loop matched index 0 and then
+        // compared a bar from months later against the exit price. Require the
+        // matched bar to sit within a week of the exit, or skip the trade.
+        if(i<0){ skipped++; return; }
+        var gap=Math.abs(new Date(String(bars[i].date).slice(0,10)) - new Date(xd))/864e5;
+        if(!isFinite(gap) || gap>7){ skipped++; return; }
+        if(i+5>=bars.length){ skipped++; return; }   // not enough history after
+
         var x=+(r.t.exit_price!=null?r.t.exit_price:r.t.exit);
         var e=+r.t.entry;
-        var a1w=bars[Math.min(i+5,bars.length-1)].c;
+        function at(n){ return (i+n<bars.length)? bars[i+n].c : null; }
+        var a1w=at(5), a2w=at(10), a1m=at(21);
         var end=Math.min(i+21,bars.length-1);
         var peak=x;
         for(var j=i;j<=end;j++) if(bars[j].h>peak) peak=bars[j].h;
         var d1=(a1w/x-1)*100;
+        var d2=(a2w!=null)?(a2w/x-1)*100:null;
+        var dm=(a1m!=null)?(a1m/x-1)*100:null;
+        var dp=(peak/x-1)*100;
         all.push(d1);
+        if(d2!=null) all2.push(d2);
+        if(dm!=null) all1m.push(dm);
+        peaks.push(dp);
+        // the same window on the index, so the run can be split into market
+        // beta and something that actually belonged to the name
+        var bm=null;
+        var SPX=window.__pfSPX||{};
+        var d0=String(bars[i].date).slice(0,10);
+        var dEnd=String(bars[end].date).slice(0,10);
+        if(SPX[d0]&&SPX[dEnd]) bm=(SPX[dEnd]/SPX[d0]-1)*100;
+        if(bm!=null) spxMoves.push(bm);
+        if(dp>=10) bigRuns.push({tk:r.t.ticker, pc:dp, bm:bm,
+          ind:(ED_IND[r.t.ticker]||{}).industry||r.t.industry||""});
         var isWin=(x-e)*(+r.t.qty||1)>0;
         (isWin?win:loss).push(d1);
         if(isWin && peak>e) effs.push((x-e)/(peak-e)*100);
@@ -5753,34 +5922,210 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       var ran=win.filter(function(v){return v>0;}).length;
       var rev=loss.filter(function(v){return v>0;}).length;
       var eff=avg(effs);
+      // the Council reads trade NOTES; this reads prices. When they disagree the
+      // measurement wins, so publish it.
+      PF_EXIT={aw:aw, al:al, aa:aa, ran:ran, rev:rev,
+               nWin:win.length, nLoss:loss.length, eff:eff, n:all.length};
+      try{ pfCouncilRefresh(); }catch(e){}
+      try{ pfFixTile(); }catch(e){}
       function pc(v){ return (v>=0?"+":"\u2212")+Math.abs(v).toFixed(2)+"%"; }
 
-      var h='<div class="pf-sub">After the exit</div>';
-      if(eff!=null && win.length)
-        h+='<div class="pf-note" style="border-left-color:var(--amber)">'+
+      // remove any previous block first - insertAdjacentHTML appends, so a
+      // second render (profile switch, re-render) was stacking a duplicate
+      var old=host.querySelector(".pf-exitwrap");
+      if(old) old.remove();
+      var h='<div class="pf-exitwrap"><div class="pf-sub">After the exit</div>';
+      if(eff!=null && win.length){
+        var wellTimed = (aw!=null && aw<0);
+        h+='<div class="pf-note" style="border-left-color:'+
+            (wellTimed?'var(--green)':'var(--amber)')+'">'+
           '<b>You are capturing about '+Math.round(eff)+'% of the move that was there.</b> '+
           'Across '+win.length+' winner'+(win.length===1?'':'s')+', the average name was <b>'+
-          pc(aw)+'</b> a week after you sold and '+ran+' kept going. Exiting into strength is '+
-          'the point \u2014 but if that share stays high, the targets are close enough that a '+
-          'trend has room to run without you.</div>';
+          pc(aw)+'</b> a week after you sold'+
+          (ran?' and '+ran+' kept going':', and none kept going')+'. '+
+          (wellTimed
+            ? 'The names fell after you sold, so these exits were <b>well timed</b> \u2014 '+
+              'you took the money before it came back. The capture figure is low because the '+
+              'peak came and went inside the trade, not after it.'
+            : 'Exiting into strength is the point, but with the average still rising a week '+
+              'later the targets are close enough that a trend has room to run without you.')+
+          '</div>';
+      }
       if(loss.length)
         h+='<div class="pf-note" style="border-left-color:'+
           ((rev/loss.length>0.5)?'var(--red)':'var(--line2)')+'">'+
           '<b>'+rev+' of your '+loss.length+' stop-out'+(loss.length===1?'':'s')+
-          ' '+(rev===1?'was':'were')+' higher a week later</b>'+
-          (al!=null?', by '+pc(al)+' on average':'')+'. '+
+          ' '+(rev===1?'was':'were')+' higher a week later.</b>'+
+          (al!=null?' Across all '+loss.length+', the average was '+pc(al)+
+            (al<0?' \u2014 they kept falling, so the stops did their job.':'.'):'')+' '+
           (rev/loss.length>0.5
             ? 'Above half means the stop is tighter than the stock\u2019s ordinary noise \u2014 '+
               'you are paying for volatility rather than being wrong. A wider stop with '+
               'smaller size keeps the same 1R and gives the trade room to breathe.'
             : 'Below half is healthy: the stops are catching real breakdowns rather than '+
               'ordinary noise.')+'</div>';
-      h+='<div class="pf-note">Every closed name is followed for a month after the exit. '+
-        'Across all '+all.length+' the average was <b>'+pc(aa)+'</b> a week later. Near zero '+
-        'means the exits are well timed; consistently positive means money is being left '+
-        'behind. This is a paired comparison, so it means something at twenty exits.</div>';
-      host.insertAdjacentHTML("beforeend", h);
+      var a2=avg(all2), a1m=avg(all1m), apk=avg(peaks);
+      h+='<div class="pf-windows">'+
+        '<div><div class="k">+1 week</div><div class="v '+((aa||0)>=0?"up":"dn")+'">'+pc(aa)+'</div></div>'+
+        '<div><div class="k">+2 weeks</div><div class="v '+((a2||0)>=0?"up":"dn")+'">'+
+          (a2==null?"\u2014":pc(a2))+'</div></div>'+
+        '<div><div class="k">+1 month</div><div class="v '+((a1m||0)>=0?"up":"dn")+'">'+
+          (a1m==null?"\u2014":pc(a1m))+'</div></div>'+
+        '<div><div class="k">Best it reached</div><div class="v up">'+
+          (apk==null?"\u2014":pc(apk))+'</div></div>'+
+      '</div>';
+      h+='<div class="pf-note">Every closed name is followed for a month. <b>One week is too '+
+        'short a window for a system that holds for weeks</b> \u2014 a name can sit still for '+
+        'five days and then run, so the month and the peak matter more than the week. '+
+        'Across '+all.length+' trades the average was '+pc(aa)+' at a week, '+
+        (a1m==null?"\u2014":pc(a1m))+' at a month, and the average name touched '+
+        (apk==null?"\u2014":pc(apk))+' above the exit at some point in that month.'+
+        (spxMoves.length
+          ? ' Over the same windows the index averaged '+pc(avg(spxMoves))+', so the exits '+
+            (avg(peaks)>avg(spxMoves)+2
+              ? 'left roughly '+pc(avg(peaks)-avg(spxMoves))+' of name-specific move behind.'
+              : 'are broadly tracking the market rather than missing something specific.')
+          : '')+'</div>';
+      if(bigRuns.length){
+        bigRuns.sort(function(a,b){return b.pc-a.pc;});
+        h+='<div class="pf-note" style="border-left-color:var(--amber)">'+
+          '<b>'+bigRuns.length+' name'+(bigRuns.length===1?'':'s')+' ran 10% or more after you '+
+          'left.</b> '+bigRuns.slice(0,5).map(function(b){
+            return b.tk+' '+pc(b.pc)+
+              (b.bm!=null? ' <i>(SPX '+pc(b.bm)+', so '+pc(b.pc-b.bm)+' was the name)</i>' : '')+
+              (b.ind? ' \u2014 '+b.ind : '');
+          }).join('<br>')+
+          (bigRuns.length>5?'<br>and '+(bigRuns.length-5)+' more':'')+
+          '<br><br>Split against the index the question becomes answerable: if most of the run '+
+          'was market beta you missed little, but if it belonged to the name you exited into a '+
+          'live move. These are the trades worth opening individually.</div>';
+      }
+      if(skipped) h+='<div class="pf-note" style="border-left-color:var(--line2)">'+
+        '<b>'+skipped+' of '+rows.length+' closed trades could not be measured</b> \u2014 the '+
+        'chart file does not reach back to the exit date. Those are excluded rather than '+
+        'guessed at, so treat the figures above as covering '+all.length+' trades, not all of '+
+        'them.</div>';
+      host.insertAdjacentHTML("beforeend", h+'</div>');
     }).catch(function(e){ console.warn("[pf] exit follow", e); });
+  }
+
+
+  // ---- reconcile the Council with the measured exit data ------------------
+  // The lenses infer "trail pulled too tight" from words in your notes. Once
+  // real post-exit prices exist, a claim that contradicts them has to go.
+  function pfCouncilRefresh(){
+    if(!PF_EXIT || PF_EXIT.n<5) return;
+    var host=document.getElementById("pfChairBody");
+    if(!host) return;
+    var wellTimed = (PF_EXIT.aa!=null && PF_EXIT.aa < 0.5);
+    var note=document.querySelector(".pf-chair-measured");
+    if(note) note.remove();
+    var txt;
+    if(wellTimed){
+      txt='<b>Measured, the exits are not the problem.</b> Across '+PF_EXIT.n+
+        ' closed names the average was '+(PF_EXIT.aa>=0?"+":"\u2212")+
+        Math.abs(PF_EXIT.aa).toFixed(2)+'% a week after the sale'+
+        (PF_EXIT.rev!=null&&PF_EXIT.nLoss? ', and only '+PF_EXIT.rev+' of '+PF_EXIT.nLoss+
+          ' stop-outs recovered':'')+
+        '. Where the council reads the notes and infers an early exit, the prices say '+
+        'otherwise \u2014 the deficit is coming from <b>selection and payoff</b>, not from '+
+        'letting go too soon.';
+    } else {
+      txt='<b>The measurement agrees.</b> Across '+PF_EXIT.n+' closed names the average was +'+
+        Math.abs(PF_EXIT.aa).toFixed(2)+'% a week after the sale, so the exits really are '+
+        'leaving money behind \u2014 the council\u2019s read of the notes is supported by the prices.';
+    }
+    host.insertAdjacentHTML("beforeend",
+      '<div class="pf-note pf-chair-measured" style="border-left-color:'+
+      (wellTimed?'var(--green)':'var(--amber)')+'">'+txt+'</div>');
+  }
+
+
+  // ---- how to fix a negative expectancy, in book terms --------------------
+  // Expectancy in R = win% x payoff - (1 - win%). Only two levers exist, so
+  // compute both and say which is closer, rather than offering encouragement.
+  function pfFixTile(){
+    var host=document.getElementById("pfMetBody");
+    if(!host) return;
+    var rs=pfClosedR();
+    if(rs.length<5) return;
+    var old=host.querySelector(".pf-fixwrap"); if(old) old.remove();
+
+    var Rs=rs.map(function(x){return x.r;});
+    var wins=Rs.filter(function(r){return r>0;});
+    var losses=Rs.filter(function(r){return r<=0;});
+    if(!wins.length||!losses.length) return;
+    var winPct=wins.length/Rs.length;
+    var avgWin=wins.reduce(function(a,b){return a+b;},0)/wins.length;
+    var avgLoss=Math.abs(losses.reduce(function(a,b){return a+b;},0)/losses.length);
+    var payoff=avgLoss?avgWin/avgLoss:0;
+    var expR=Rs.reduce(function(a,b){return a+b;},0)/Rs.length;
+    if(expR>0.05) return;   // only shown when the book is not making money
+
+    var beWin = payoff? 1/(1+payoff) : null;          // win rate needed at this payoff
+    var bePay = winPct? (1-winPct)/winPct : null;     // payoff needed at this win rate
+    var winGap = beWin!=null ? (beWin-winPct)*100 : null;
+    var payGap = bePay!=null ? bePay-payoff : null;
+    // which lever is nearer in proportional terms
+    var winMove = beWin!=null ? (beWin/winPct-1) : 9;
+    var payMove = bePay!=null ? (bePay/payoff-1) : 9;
+    var lever = (winMove<=payMove) ? "win rate" : "payoff";
+
+    function pct(v){ return (v*100).toFixed(0)+"%"; }
+    var h='<div class="pf-fixwrap"><div class="pf-sub">How to fix this</div>'+
+      '<div class="pf-levers">'+
+        '<div><div class="k">Win rate</div><div class="v">'+pct(winPct)+'</div>'+
+          '<div class="s">need '+pct(beWin)+' at this payoff</div></div>'+
+        '<div><div class="k">Payoff</div><div class="v">'+payoff.toFixed(2)+'\u00d7</div>'+
+          '<div class="s">need '+bePay.toFixed(2)+'\u00d7 at this win rate</div></div>'+
+        '<div><div class="k">Average loss</div><div class="v">\u2212'+avgLoss.toFixed(2)+'R</div>'+
+          '<div class="s">'+(avgLoss>1.05?'stops are slipping past 1R':'stops are holding at 1R')+'</div></div>'+
+      '</div>';
+
+    h+='<div class="pf-note" style="border-left-color:var(--red)">'+
+      '<b>Expectancy is '+expR.toFixed(2)+'R.</b> Only two levers move it: how often you win, '+
+      'and how much you win when you do. At a '+payoff.toFixed(2)+'\u00d7 payoff you need <b>'+
+      pct(beWin)+'</b> of trades to work \u2014 you are at '+pct(winPct)+', a gap of '+
+      Math.abs(winGap).toFixed(0)+' points. At a '+pct(winPct)+' win rate you need a <b>'+
+      bePay.toFixed(2)+'\u00d7</b> payoff \u2014 you are at '+payoff.toFixed(2)+
+      '\u00d7. The nearer lever is <b>'+lever+'</b>.</div>';
+
+    if(avgLoss>1.05){
+      h+='<div class="pf-note" style="border-left-color:var(--amber)">'+
+        '<b>Fix the losses first.</b> Your average loss is '+avgLoss.toFixed(2)+
+        'R, not 1R \u2014 stops are being passed rather than honoured. Bringing that back to '+
+        '1.00R alone lifts expectancy to '+
+        (winPct*avgWin-(1-winPct)*1).toFixed(2)+'R without changing a single entry. '+
+        'That is the cheapest fix on the list and it needs no new edge.</div>';
+    }
+
+    // route the prescription to the lever, using what the rest of the app knows
+    if(lever==="payoff"){
+      h+='<div class="pf-note">'+
+        '<b>Raising the payoff.</b> '+
+        (PF_EXIT && PF_EXIT.aa!=null && PF_EXIT.aa<0.5
+          ? 'The post-exit data says you are not selling too early \u2014 the names fall after '+
+            'you leave. So the payoff problem is upstream: the setups are not producing large '+
+            'enough winners. That is a <b>selection</b> question, and it belongs in the screener '+
+            'rules rather than the exit plan.'
+          : 'The post-exit data shows names still rising a week after you sell, so the targets '+
+            'are the constraint. Widening them, or trailing rather than fixing them, is the '+
+            'direct route.')+'</div>';
+    } else {
+      h+='<div class="pf-note">'+
+        '<b>Raising the win rate.</b> You need '+Math.abs(winGap).toFixed(0)+' more points of '+
+        'accuracy. That comes from taking fewer, better setups \u2014 the gates exist for this. '+
+        'Trading only names clearing all six, in a leading industry, is the lever with the '+
+        'shortest path.</div>';
+    }
+
+    h+='<div class="pf-note" style="border-left-color:var(--line2)">'+
+      '<b>Until then, protect the book.</b> With a negative edge, size is the only variable '+
+      'that matters: it does not fix the maths, it just buys time to fix it. Halving risk per '+
+      'trade halves the bleed. On '+rs.length+' trades this is still a small sample \u2014 the '+
+      'edge may be real and simply unproven \u2014 but the honest position is to trade smaller '+
+      'until the record says otherwise.</div></div>';
+    host.insertAdjacentHTML("beforeend", h);
   }
 
   function pfCorrOf(a,b){
@@ -6250,6 +6595,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     try{ pfProjRender(); }catch(e){ console.warn("[pf] projection", e); }
     try{ pfGoalRender(); }catch(e){ console.warn("[pf] goal", e); }
     try{ pfExitFollow(); }catch(e){ console.warn("[pf] exit follow", e); }
+    try{ pfFixTile(); }catch(e){ console.warn("[pf] fix", e); }
     var mn=document.getElementById("pfMetNote");
     if(mn) mn.textContent = s.n ? s.n+" closed \u00b7 "+s.W.length+"W/"+s.L.length+"L" : "no closed trades";
     var en=document.getElementById("pfEqNote");
