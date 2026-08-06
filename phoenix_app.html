@@ -2114,40 +2114,6 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
 
 
   var indData=null;  // shared industry data
-  function initMarkets(){
-    // regime (also powers strip) — always fetch fresh once
-    if(!C.macro){
-      getJSON("macro").then(function(d){ C.macro=d; paintStrip(d); renderRegime(d); try{mktBrief();}catch(e){} })
-        .catch(function(e){ document.getElementById("rgBody").innerHTML=errHTML("macro.json",e.message); });
-    } else { renderRegime(C.macro); }
-
-    drawSPX("");
-    drawVIX("");
-    try{ rpInit(); }catch(e){ console.warn("[rp]",e); }
-    loadAssets();
-    loadBoard();
-    loadSectors();
-    loadTop();
-    loadSmartMoneyMarket();
-    var sseg=document.getElementById("smMktSeg");
-    if(sseg) sseg.onclick=function(ev){ var b=ev.target.closest("button"); if(!b)return; smMktMode=b.dataset.k; Array.prototype.forEach.call(this.querySelectorAll("button"),function(x){x.classList.toggle("on",x===b);}); loadSmartMoneyMarket(); };
-    loadGEX("");
-    // industry rotation (ported to Markets)
-    if(!scrData){
-      getJSON("stocks").then(function(d){ scrData=(d&&d.stocks)||[]; renderMktIndustry(); }).catch(function(){});
-    }
-    if(!indData){
-      getJSON("industry").then(function(d){ indData=(d&&d.industries)||[]; renderMktIndustry(); try{mktBrief();}catch(e){} })
-        .catch(function(){ indData=[]; renderMktIndustry(); });
-    } else { renderMktIndustry(); }
-    var seg=document.getElementById("mSecIndSeg");
-    if(seg) seg.querySelectorAll("button").forEach(function(b){
-      b.onclick=function(){
-        seg.querySelectorAll("button").forEach(function(x){x.classList.remove("on");});
-        this.classList.add("on"); mIndSort=this.getAttribute("data-k"); renderMktIndustry();
-      };
-    });
-  }
 
   // Industry rotation on Markets — bigger, with a standout leader/laggard line.
   // Reuses indData (same source the screener uses). Own sort state so the two
@@ -2159,210 +2125,12 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   var mktIndExpanded=null;
 
 
-  function errHTML(file,msg){ return '<div class="err">Couldn\'t load '+file+' \u2014 '+msg+'.<div class="fix">Check it\'s live in outputs/ on GitHub Pages.</div></div>'; }
 
   // ----- regime tile -----
-  function renderRegime(d){
-    var info=REGIME_INFO[d.regime]||REGIME_INFO.NO_CLEAR, i=d.inputs||{};
-    document.getElementById("rgNote").textContent=d.asof||"";
-    function row(k,label,v,unit){
-      var val = (v===null||v===undefined||(typeof v==="number"&&isNaN(v)))?"\u2014":
-        (unit==="%"?( (v>0?"+":"")+(+v).toFixed(1)+"%"):
-         unit==="bp"?((v>0?"+":"")+Math.round(v)+"bp"):
-         (+v).toFixed(2));
-      return '<div class="rg-inp"><span class="k">'+label+'</span><span class="v">'+val+'</span></div>';
-    }
-    var html='<div class="rg-name" style="color:'+info.c+'">'+(d.regime||"\u2014").replace(/_/g," ")+'</div>'+
-      '<div class="rg-desc">'+info.d+'</div>'+
-      (d.confidence>0?'<div class="rg-conf">confidence '+d.confidence+' / 100'+(d.secondary_tag?" \u00B7 "+d.secondary_tag:"")+'</div>':'')+
-      '<div class="rg-inputs">'+
-        row("vix","VIX",i.vix,"")+row("cpi_yoy","CPI y/y",i.cpi_yoy,"%")+
-        row("spx_3m","SPX 3m",i.spx_3m,"%")+row("hy","HY",i.hy,"bp")+
-        row("wti_3m","WTI 3m",i.wti_3m,"%")+row("us02_3m","2Y 3m",i.us02_3m,"bp")+
-      '</div>';
-    // ---- why this regime, how long, and what breaks it --------------------
-    // Everything below comes from macro.json's explain block, which the engine
-    // derives from the same gates detect_regime() uses. Nothing is written by
-    // hand here, so the explanation cannot disagree with the call.
-    var X=(d&&d.explain)||null;
-    if(X){
-      function num(v){ return (v==null)?"\u2014":(+v).toLocaleString(undefined,{maximumFractionDigits:2}); }
-      var h="";
-      if(X.held_weeks){
-        var wk=X.held_weeks;
-        h+='<div class="rg-held">Held for <b>'+wk+' week'+(wk===1?'':'s')+'</b>'+
-           (X.since?' \u00b7 since '+X.since:'')+'</div>';
-      }
-      var dv=(X.drivers||[]).filter(function(d){return d.ok;});
-      if(dv.length){
-        h+='<div class="rg-sec">Why</div><div class="rg-gates">';
-        dv.slice().reverse().forEach(function(d){
-          h+='<div class="rg-gate"><span class="g-l">'+d.label+'</span>'+
-             '<span class="g-v">'+num(d.value)+'</span>'+
-             '<span class="g-t">needs '+d.op+' '+num(d.threshold)+'</span>'+
-             '<span class="g-m">'+num(d.clear_by)+' clear</span></div>';
-        });
-        h+='</div>';
-      }
-      var w=(X.watch||[])[0];
-      if(w){
-        h+='<div class="rg-sec">Watch-out</div>'+
-           '<div class="rg-watch"><b>'+w["if"]+'</b> \u2014 now '+num(w.now)+
-           ', <b>'+num(w.distance)+'</b> away. Closest gate to breaking; '+
-           'if it goes, <b>'+X.regime.replace(/_/g," ")+'</b> no longer qualifies.</div>';
-      }
-      var ru=X.runner_up;
-      if(ru){
-        h+='<div class="rg-next">Next most likely: <b>'+String(ru.regime).replace(/_/g," ")+'</b>'+
-           (ru.score!=null?' (score '+num(ru.score)+', '+num(ru.behind_by)+' behind)'
-                          :' \u2014 needs '+(ru.needs||[]).map(function(n){
-                              return n.label+' '+n.need+' (now '+num(n.now)+')'; }).join(", "))+
-           '</div>';
-      }
-      if(h) html+='<div class="rg-explain">'+h+'</div>';
-    }
-    document.getElementById("rgBody").innerHTML=html;
-  }
   window.__PXT = window.__PXT || {};
   window.__PXT.renderRegime = renderRegime;
 
   // ----- SPX candlestick + volume, with hover detail, zoom, and GEX levels -----
-  function drawSPX(sfx){
-    sfx=sfx||"";
-    if(!sfx && drawn.spx) return;
-    if(sfx && drawn["spx"+sfx]) return;
-    var _spxHost=document.getElementById("spxPlot"+sfx);
-    Promise.all([getJSON("spx_daily"), getJSON("gex").catch(function(){return null;})]).then(function(res){
-      var d=res[0], gex=res[1];
-      var bars=(d&&d.bars)||[]; if(!bars.length){ document.getElementById("spxPlot"+sfx).innerHTML='<div class="err">No SPX daily data yet. It populates on the next engine run.</div>'; return; }
-      var dates=bars.map(function(b){return b.date;});
-      var last=bars[bars.length-1], prev=bars.length>1?bars[bars.length-2]:last;
-      var chg=((last.c-prev.c)/prev.c*100), chgpts=(last.c-prev.c);
-      // big header
-      document.getElementById("spxPx"+sfx).textContent=last.c.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-      var cc=chg>=0?"var(--green)":"var(--red)";
-      document.getElementById("spxChg"+sfx).innerHTML='<span style="color:'+cc+'">'+(chg>=0?"+":"")+chgpts.toFixed(2)+' ('+(chg>=0?"+":"")+chg.toFixed(2)+'%)</span>';
-      var _sa=document.getElementById("spxAsof"+sfx); if(_sa) _sa.textContent=last.date;
-
-      // per-bar % change for hover
-      var pct=bars.map(function(b,i){ if(i===0)return 0; var p=bars[i-1].c; return p?((b.c-p)/p*100):0; });
-      var hovertext=bars.map(function(b,i){
-        return "O "+b.o.toLocaleString()+"  H "+b.h.toLocaleString()+"<br>L "+b.l.toLocaleString()+"  C "+b.c.toLocaleString()+
-               "<br>Vol "+(b.v?(b.v/1e9).toFixed(2)+"B":"\u2014")+"  "+(pct[i]>=0?"+":"")+pct[i].toFixed(2)+"%";
-      });
-      var volColors=bars.map(function(b){return (b.c>=b.o)?"rgba(45,138,85,.45)":"rgba(176,48,48,.45)";});
-      var candle={type:"candlestick",x:dates,open:bars.map(function(b){return b.o;}),high:bars.map(function(b){return b.h;}),low:bars.map(function(b){return b.l;}),close:bars.map(function(b){return b.c;}),
-        text:hovertext,hoverinfo:"text+x",
-        increasing:{line:{color:"#2D8A55"},fillcolor:"rgba(45,138,85,.6)"},decreasing:{line:{color:"#B03030"},fillcolor:"rgba(176,48,48,.6)"},yaxis:"y",name:"",showlegend:false};
-      var vol={type:"bar",x:dates,y:bars.map(function(b){return b.v;}),marker:{color:volColors},yaxis:"y2",name:"Vol",hoverinfo:"skip",showlegend:false};
-
-      var layout=baseLayout();
-      layout.dragmode="pan";
-      layout.hovermode="x";
-      layout.hoverlabel={bgcolor:"#FAF7F2",bordercolor:"#C8BFA8",font:{family:"'Courier New',monospace",size:11,color:PXC().ink}};
-      layout.grid={rows:2,columns:1,roworder:"top to bottom"};
-      layout.yaxis={domain:[0.24,1],side:"right",gridcolor:PXC().grid,tickfont:tf(),fixedrange:false,autorange:true};
-      layout.yaxis2={domain:[0,0.18],side:"right",gridcolor:PXC().grid,tickfont:tf(8),fixedrange:true,showticklabels:false};
-      layout.xaxis={rangeslider:{visible:false},gridcolor:PXC().grid,tickfont:tf(),rangebreaks:[{bounds:["sat","mon"]}]};
-      // default view: last ~60 sessions (still pannable/zoomable to full history)
-      if(dates.length>60){ layout.xaxis.range=[dates[dates.length-60], dates[dates.length-1]]; }
-
-      // GEX levels as horizontal lines (gamma flip, call wall, put wall)
-      var shapes=[], anns=[];
-      if(gex){
-        var ov=gex.overview||{}, L=gex.levels||{};
-        function lvlLine(val,color,label){
-          if(val==null) return;
-          shapes.push({type:"line",xref:"paper",x0:0,x1:1,yref:"y",y0:val,y1:val,
-            line:{color:color,width:1,dash:"dot"}});
-          anns.push({xref:"paper",x:1,y:val,yref:"y",xanchor:"right",yanchor:"bottom",
-            text:label+" "+val.toLocaleString(),showarrow:false,
-            font:{family:"'Courier New',monospace",size:11,color:color},bgcolor:"rgba(250,247,242,.7)"});
-        }
-        lvlLine(ov.gamma_flip,"#A67C00","Flip");
-        lvlLine(L.call_wall&&L.call_wall.strike,"#1A5C38","Call wall");
-        lvlLine(L.put_wall&&L.put_wall.strike,"#7A1E1E","Put wall");
-      }
-      layout.shapes=shapes; layout.annotations=anns;
-
-      var conf={displayModeBar:false,responsive:true,scrollZoom:true,doubleClick:"reset"};
-      Plotly.newPlot("spxPlot"+sfx,[candle,vol],layout,conf);
-
-      var plotEl=document.getElementById("spxPlot"+sfx);
-
-      // shared: update the corner readout for a given bar index
-      function showBar(i){
-        if(i==null||i<0||i>=bars.length||!bars[i])return;
-        var b=bars[i];
-        document.getElementById("spxHover"+sfx).innerHTML=
-          '<span class="hk">'+b.date+'</span> O '+b.o.toLocaleString()+' H '+b.h.toLocaleString()+
-          ' L '+b.l.toLocaleString()+' C '+b.c.toLocaleString()+' \u00B7 Vol '+(b.v?(b.v/1e9).toFixed(2)+'B':'\u2014')+
-          ' \u00B7 <span style="color:'+(pct[i]>=0?"var(--green)":"var(--red)")+'">'+(pct[i]>=0?"+":"")+pct[i].toFixed(2)+'%</span>';
-      }
-      // desktop hover
-      plotEl.on("plotly_hover",function(ev){
-        var pt=ev.points&&ev.points[0]; if(!pt)return; showBar(pt.pointIndex);
-      });
-      // touch scrub: map finger x-position to nearest bar, update readout live.
-      // Works on iPad where there's no hover. Does not block Plotly's pan.
-      function scrubFromTouch(clientX){
-        try{
-          var gd=plotEl; var xa=gd._fullLayout.xaxis;
-          var rect=gd.getBoundingClientRect();
-          var xInData=xa.p2d(clientX-rect.left);
-          // xInData is a date-ish value; find nearest bar by index along visible range
-          // Plotly gives category/linear index for date axis; match to closest date
-          var target=xInData;
-          var lo=0,hi=bars.length-1,best=0,bestDiff=Infinity;
-          for(var k=0;k<bars.length;k++){
-            var t=new Date(bars[k].date).getTime();
-            var diff=Math.abs(t-new Date(_fromAxis(target)).getTime());
-            if(diff<bestDiff){bestDiff=diff;best=k;}
-          }
-          showBar(best);
-        }catch(e){}
-      }
-      function _fromAxis(v){
-        // xaxis.p2d on a date axis returns ms or date string depending on version
-        if(typeof v==="number"){ return v; }
-        return v;
-      }
-      var scrubbing=false;
-      plotEl.addEventListener("touchstart",function(e){ scrubbing=true; if(e.touches[0])scrubFromTouch(e.touches[0].clientX); },{passive:true});
-      plotEl.addEventListener("touchmove",function(e){ if(scrubbing&&e.touches[0])scrubFromTouch(e.touches[0].clientX); },{passive:true});
-      plotEl.addEventListener("touchend",function(){ scrubbing=false; },{passive:true});
-
-      // zoom buttons — operate on the x-axis range, keep drag as pan
-      function curRange(){
-        var xa=plotEl._fullLayout.xaxis;
-        return [xa.range[0], xa.range[1]];
-      }
-      function setXRange(r){ Plotly.relayout(plotEl,{"xaxis.range":r}); }
-      function zoomBy(factor){
-        var r=curRange();
-        var a=new Date(r[0]).getTime(), b=new Date(r[1]).getTime();
-        if(isNaN(a)||isNaN(b)){ a=r[0]; b=r[1]; }
-        var mid=(a+b)/2, half=(b-a)/2*factor;
-        setXRange([new Date(mid-half).toISOString().slice(0,10), new Date(mid+half).toISOString().slice(0,10)]);
-      }
-      // Zoom controls only exist on the Markets page — Mission Control hosts the
-      // same chart without them. These must be suffix-aware AND null-safe, or
-      // drawSPX("MC") would wire Markets' buttons to Mission Control's chart.
-      var zi=document.getElementById("spxZoomIn"+sfx),
-          zo=document.getElementById("spxZoomOut"+sfx),
-          zr=document.getElementById("spxZoomReset"+sfx);
-      if(zi) zi.addEventListener("click",function(){ zoomBy(0.6); });
-      if(zo) zo.addEventListener("click",function(){ zoomBy(1.6); });
-      if(zr) zr.addEventListener("click",function(){
-        var r=(dates.length>60)?[dates[dates.length-60],dates[dates.length-1]]:[dates[0],dates[dates.length-1]];
-        setXRange(r);
-      });
-      drawn[("spx")+sfx]=true;
-    }).catch(function(e){
-      if(_spxHost) _spxHost.innerHTML=errHTML("spx_daily.json", (e&&e.message)||String(e));
-      console.error("[spx]", e);      // stack goes to the console for diagnosis
-    });
-  }
 
   // ----- VIX term structure: real futures curve (manual vix_term.json, paste like GEX) -----
   function drawVIX(sfx){
@@ -5049,33 +4817,89 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   }
 
   // fill the pattern cells lazily, once bars arrive
-  function scrFillPatterns(){
-    var cells=document.querySelectorAll(".patcell[data-pat]");
-    Array.prototype.forEach.call(cells,function(cell){
-      var tk=cell.getAttribute("data-pat");
-      if(!tk) return;
+  // PERFORMANCE. This used to fire one chart fetch per row the moment the table
+  // rendered - up to 200 at once, and again on every filter, sort, chip and
+  // stop-basis change. That is megabytes of JSON per interaction and it was
+  // making the page unusable.
+  //
+  // Now: rows load only when they scroll into view, at most SCR_MAX_INFLIGHT at
+  // a time, and a re-render cancels whatever the previous one had queued.
+  var SCR_MAX_INFLIGHT = 6;
+  var scrQueue = [], scrInflight = 0, scrObserver = null, scrGen = 0;
+
+  function scrPump(gen){
+    while(scrInflight < SCR_MAX_INFLIGHT && scrQueue.length){
+      var job = scrQueue.shift();
+      if(job.gen !== scrGen) continue;          // stale, from a previous render
+      scrInflight++;
+      (function(job){
+        var done = false;
+        function finish(){
+          if(done) return; done = true;
+          scrInflight--; scrPump(job.gen);
+        }
+        // A fetch that fails or hangs never calls back, which would deadlock the
+        // queue at MAX_INFLIGHT forever. Release the slot regardless after 8s.
+        var t = setTimeout(function(){
+          if(!done){ job.cell.innerHTML='<span class="scr-nopat">\u2014</span>'; finish(); }
+        }, 8000);
+        try{
+          scrFillOne(job.cell, job.tk, function(){ clearTimeout(t); finish(); });
+        }catch(e){ clearTimeout(t); finish(); }
+      })(job);
+    }
+  }
+
+  function scrFillOne(cell, tk, done){
+    dpFetchBars(tk,"daily",function(bars){
       try{
-        dpFetchBars(tk,"daily",function(bars){
-          cell.innerHTML=scrPatSVG(bars,tk)||'<span class="scr-nopat">\u2014</span>';
-          // the stop column shares the same bars, so fill it here rather than
-          // fetching twice
-          var sc=document.querySelector('.stopcell[data-stop="'+tk+'"]');
-          if(sc){
-            var st=scrStopLine(bars,tk);
-            var last=(bars&&bars.length)?bars[bars.length-1].c:null;
-            if(st==null||!last){ sc.innerHTML='<span class="scr-nopat">\u2014</span>'; }
-            else{
-              var above=last>st, d=(last/st-1)*100;
-              sc.innerHTML='<b>$'+st.toFixed(2)+'</b>'+
-                '<em><span class="sbadge '+(above?"ok":"no")+'">'+
-                (above?"Above":"Below")+'</span> '+
-                (d>=0?"+":"\u2212")+Math.abs(d).toFixed(1)+'%</em>';
-            }
+        cell.innerHTML=scrPatSVG(bars,tk)||'<span class="scr-nopat">\u2014</span>';
+        var sc=document.querySelector('.stopcell[data-stop="'+tk+'"]');
+        if(sc){
+          var st=scrStopLine(bars,tk);
+          var last=(bars&&bars.length)?bars[bars.length-1].c:null;
+          if(st==null||!last){ sc.innerHTML='<span class="scr-nopat">\u2014</span>'; }
+          else{
+            var above=last>st, dd=(last/st-1)*100;
+            sc.innerHTML='<b>$'+st.toFixed(2)+'</b>'+
+              '<em><span class="sbadge '+(above?"ok":"no")+'">'+
+              (above?"Above":"Below")+'</span> '+
+              (dd>=0?"+":"\u2212")+Math.abs(dd).toFixed(1)+'%</em>';
           }
-        });
+        }
       }catch(e){}
+      if(done) done();
     });
   }
+
+  function scrFillPatterns(){
+    scrGen++;                                    // invalidate anything queued
+    scrQueue = [];
+    var gen = scrGen;
+    if(scrObserver){ try{ scrObserver.disconnect(); }catch(e){} scrObserver = null; }
+    var cells = document.querySelectorAll(".patcell[data-pat]");
+    if(!cells.length) return;
+
+    function enqueue(cell){
+      if(cell.getAttribute("data-loaded")) return;
+      cell.setAttribute("data-loaded","1");
+      scrQueue.push({cell:cell, tk:cell.getAttribute("data-pat"), gen:gen});
+      scrPump(gen);
+    }
+
+    if(typeof IntersectionObserver === "function"){
+      scrObserver = new IntersectionObserver(function(entries){
+        entries.forEach(function(en){
+          if(en.isIntersecting){ enqueue(en.target); scrObserver.unobserve(en.target); }
+        });
+      }, {rootMargin:"300px 0px"});           // start just before it scrolls in
+      Array.prototype.forEach.call(cells, function(c){ scrObserver.observe(c); });
+    } else {
+      // no observer available: load the first screenful only
+      Array.prototype.slice.call(cells, 0, 20).forEach(enqueue);
+    }
+  }
+
 
   // ---- open the full ticker detail page from the screener ----
   function scrOpenTicker(tk){
