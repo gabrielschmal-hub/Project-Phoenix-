@@ -4904,15 +4904,39 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
 
 
   // ---- open the full ticker detail page from the screener ----
+  // LOOKING AT A TICKER IS NOT A TRADE. This used to call trAddIdea(), which
+  // wrote a phantom "plan" row into the book for every name you merely opened.
+  // Under localStorage that pollution was invisible; with trades.json as the
+  // committed source of truth it raised an unsaved-changes banner and wanted to
+  // go into the file. Browsing history does not belong in a trade log.
+  //
+  // Now: if a real trade or plan exists for the ticker we open that. Otherwise
+  // we build an EPHEMERAL study record — never pushed to trLog, never saved,
+  // never exported. The page renders identically; only the trade-specific
+  // panels change, and there is a button to turn it into a real plan.
   function scrOpenTicker(tk){
     dpReturnTo="screeners";   // back button returns HERE (book tab persists via scrBook)
-    var stock=scrLookup(tk);
-    if(!stock.ticker) stock={ticker:tk,name:"",industry:""};   // GEX-universe names outside the screener
-    // find an existing plan/trade for this ticker, else create a study idea
-    var t=(trLog||[]).filter(function(x){return x.ticker===tk;})[0];
-    if(!t){ trAddIdea(stock); t=(trLog||[]).filter(function(x){return x.ticker===tk;})[0]; }
     go("trades");
-    if(t) setTimeout(function(){ trOpenDetail(t.id); }, 60);
+    setTimeout(function(){ trOpenTicker(tk); }, 60);
+  }
+
+  var dpStudy=null;           // the ephemeral record, if we are studying
+  function trStudyId(tk){ return "study:"+tk; }
+
+  function trOpenTicker(tk){
+    var real=(trLog||[]).filter(function(x){return x.ticker===tk;})[0];
+    if(real){ dpStudy=null; trOpenDetail(real.id); return; }
+    var s=scrLookup(tk)||{};
+    dpStudy=trNormalise({
+      id:trStudyId(tk), status:"study", ticker:tk,
+      name:s.name||"", industry:s.industry||"", sector:s.sector||"",
+      setup:"", entry:null, initial_stop:null, current_stop:null, stop_history:[],
+      target:null, qty:null, thesis:"", account:pfActiveAcct(),
+      trade_score:(s.trade_score!=null?s.trade_score:null),
+      invest_score:(s.invest_score!=null?s.invest_score:null),
+      _ephemeral:true
+    });
+    trOpenDetail(dpStudy.id);
   }
 
   // ----- editable breakout picks with Claude-written thesis -----
@@ -6866,6 +6890,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       .then(function(d){
         trMeta = d || null;
         trLog  = (d && Array.isArray(d.trades)) ? d.trades : [];
+        trLog.forEach(trNormalise);
         trLoadedFor = "shared";
         trFixIds(); trDirty = 0; trBanner();
         console.log("[trades] "+trLog.length+" rows from trades.json");
@@ -6881,12 +6906,38 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       });
   }
 
+  // trades.json is the source of truth and uses initial_stop / current_stop.
+  // The UI has always read t.stop, so derive it — and derive it from the
+  // CURRENT stop, which is what heat, worst case and the stop display should
+  // have been using all along. initial_stop stays untouched: it is what 1R is
+  // measured against and it must never move.
+  function trNormalise(t){
+    if(!t) return t;
+    if(t.initial_stop===undefined && t.stop!==undefined) t.initial_stop=t.stop;
+    var cur=(t.current_stop!=null)?t.current_stop:t.initial_stop;
+    t.stop=(cur!=null)?cur:null;
+    if(!Array.isArray(t.stop_history)) t.stop_history=[];
+    return t;
+  }
+  // Strip the derived field before the file is written, or `stop` creeps back
+  // into trades.json and we are maintaining two names for one thing again.
+  function trDenormalise(t){
+    var o={}, skip={stop:1};
+    for(var k in t){ if(!skip[k]) o[k]=t[k]; }
+    return o;
+  }
+
   function trFixIds(){ (trLog||[]).forEach(function(t,i){ if(!t.id) t.id=trNewId()+"_"+i; }); }
   function trNewId(){ return "tr_"+Date.now()+"_"+Math.floor(Math.random()*9999); }
 
   // trSave() no longer writes anywhere. Every existing call site still works;
   // it now marks the book dirty and updates the banner.
-  function trSave(){ trDirty++; trBanner(); }
+  function trSave(){
+    // A study record is not in trLog, so nothing to mark dirty — and marking it
+    // would raise the unsaved banner just for opening a ticker page.
+    if(dpStudy && trDetailId===dpStudy.id) return;
+    trDirty++; trBanner();
+  }
 
   // ---------- the unsaved-changes banner ----------
   function trBanner(err){
@@ -6923,11 +6974,12 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
                      : (trLog||[]).filter(function(t){ return (t.account||PF_DEFAULT_ACCT)===me; });
     var payload = owner
       ? JSON.stringify(Object.assign({}, trMeta||{}, {
-          generated_at: new Date().toISOString().slice(0,10), trades: rows }), null, 1)
+          generated_at: new Date().toISOString().slice(0,10),
+          trades: rows.map(trDenormalise) }), null, 1)
       : JSON.stringify({ _note: "Aldemar's rows only — merge into trades.json, "+
                                 "do not replace the file", account: me,
                          generated_at: new Date().toISOString().slice(0,10),
-                         trades: rows }, null, 1);
+                         trades: rows.map(trDenormalise) }, null, 1);
     function done(ok){
       var msg = owner
         ? (ok ? "Copied "+rows.length+" rows. Paste into outputs/trades.json on GitHub."
@@ -6961,7 +7013,13 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   });
 
   // ---------- queries ----------
-  function trGet(id){ return (trLog||[]).filter(function(t){return t.id===id;})[0]; }
+  function trGet(id){
+    var t=(trLog||[]).filter(function(x){return x.id===id;})[0];
+    if(t) return t;
+    // the ephemeral study record: a ticker being looked at, not a position
+    if(dpStudy && dpStudy.id===id) return dpStudy;
+    return undefined;
+  }
   function pfActiveAcct(){
     return (typeof pfCfg!=="undefined" && pfCfg && pfCfg.active) || PF_DEFAULT_ACCT;
   }
@@ -6983,6 +7041,26 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
 
   // ---------- screener entry points ----------
   // R button: drop it in Plan as an idea (no levels needed) — the old "Research" action
+  // Turn the ticker you are looking at into a real plan. This is the ONLY way a
+  // row enters the book from the ticker page — deliberately, and by your click.
+  function trPromoteStudy(){
+    if(!dpStudy) return;
+    var s=dpStudy, tk=s.ticker;
+    dpStudy=null;
+    trLog.push(trNormalise({
+      id:trNewId(), status:"plan", ticker:tk, name:s.name||"", industry:s.industry||"",
+      setup:"", entry:null, initial_stop:null, current_stop:null, stop_history:[],
+      target:null, qty:null, thesis:s.thesis||"",
+      plan_date:new Date().toISOString().slice(0,10),
+      account:pfActiveAcct(),
+      account_size:(typeof pfAcct==="function"?pfAcct().startingBalance:2000),
+      trade_score:s.trade_score, invest_score:s.invest_score
+    }));
+    trSave();
+    var t=(trLog||[]).filter(function(x){return x.ticker===tk;})[0];
+    if(t) trOpenDetail(t.id);
+  }
+
   function trAddIdea(stock){
     trLoad(function(){
       if(trHas(stock.ticker)) return;   // already tracked
@@ -7562,7 +7640,19 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       '<div class="tr-modal-actions"><button class="ok">Save</button><button class="cancel">Cancel</button></div>';
     trModal(html,function(bg){
       function num(sel){ var x=parseFloat(bg.querySelector(sel).value); return isNaN(x)?null:x; }
-      t.entry=num("#mEntry"); t.qty=num("#mQty"); t.stop=num("#mStop"); t.target=num("#mTgt");
+      t.entry=num("#mEntry"); t.qty=num("#mQty"); t.target=num("#mTgt");
+      var _ns=num("#mStop");
+      if(_ns!==t.stop){
+        // First stop set on a plan becomes initial_stop. Any LATER move is a
+        // trail: it changes current_stop and is dated in stop_history, and it
+        // must not touch initial_stop or every R silently shrinks.
+        if(t.initial_stop==null) t.initial_stop=_ns;
+        t.current_stop=_ns;
+        if(!Array.isArray(t.stop_history)) t.stop_history=[];
+        t.stop_history.push({date:new Date().toISOString().slice(0,10),
+                             stop:_ns, note:(t.stop_history.length?"moved":"initial")});
+      }
+      trNormalise(t);
       t.exit_price=num("#mExit");
       t.exit_date=bg.querySelector("#mExitD").value||null;
       t.entry_date=bg.querySelector("#mEntryD").value||null;
@@ -8296,8 +8386,20 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
             '</div>'+
             '<div class="w-hero-r" id="dpScoreBox"></div>'+
           '</div>'+
-          // PLAN — collapsible, at the top
-          '<div class="w-plan" id="dpPlanWrap">'+
+          // PLAN — collapsible, at the top. A STUDY record has no plan: it is a
+          // ticker you are looking at, not a position, so it offers to become one.
+          (t.status==="study"
+            ? '<div class="w-plan"><div class="w-plan-h" style="cursor:default">'+
+                '<span class="w-plan-t">Not in the book</span>'+
+                '<span class="w-plan-sum">viewing only \u00b7 nothing saved</span>'+
+              '</div><div class="w-plan-b" style="padding:12px 14px">'+
+                '<div style="font-family:var(--serif);font-size:13px;color:var(--inkFade);'+
+                'line-height:1.6;margin-bottom:10px">Opening a ticker does not add it to your '+
+                'trades. Every chart, financial and gamma level below still loads.</div>'+
+                '<button class="tr-add-btn" id="dpPromote">Add '+t.ticker+' as a plan \u2192</button>'+
+              '</div></div>'
+            : '')+
+          '<div class="w-plan" id="dpPlanWrap"'+(t.status==="study"?' style="display:none"':'')+'>'+
             '<div class="w-plan-h" id="dpPlanTog">'+
               '<span class="w-plan-t">Trade plan</span>'+
               '<span><span class="w-plan-sum" id="dpPlanSum"></span> <span class="w-plan-car">\u25be</span></span>'+
@@ -8381,6 +8483,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     };
     var thBtn=document.getElementById("dpThBtn");
     if(thBtn) thBtn.onclick=function(){ dpGenThesis(id,this); };
+    var promoBtn=document.getElementById("dpPromote");
+    if(promoBtn) promoBtn.onclick=function(){ trPromoteStudy(); };
     page.querySelectorAll("[data-dp]").forEach(function(b){
       b.onclick=function(){
         var a=this.dataset.dp;
