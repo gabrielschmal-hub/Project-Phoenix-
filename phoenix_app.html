@@ -2450,6 +2450,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   window.__PXT.getJSON=function(){ return getJSON; };
   window.__PXT.trLoad=function(cb){ trLoad(cb); };
   window.__PXT.resetTrades=function(){ trLog=null; trLoadedFor=null; };
+  window.__PXT.trDirty=function(){ return trDirty; };
+  window.__PXT.trBump=function(){ trSave(); };
   window.__PXT.dbgTrLog=function(){
     return (trLog||[]).length+" rows, open="+
       (trLog||[]).filter(function(t){return t.status==="open";}).length+
@@ -4519,7 +4521,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       var evals=(d&&d.evaluations)||[];
       if(nEl) nEl.textContent=(d&&d.asof?d.asof.slice(0,10)+" \u00B7 ":"")+evals.length+" open";
       if(!evals.length){
-        el.innerHTML='<div class="promo-empty">No open trades to evaluate. Promotion checks (P1\u2013P5) run daily on trades_log.json \u2014 trades need entry, stop and entry_date.</div>';
+        el.innerHTML='<div class="promo-empty">No open trades to evaluate. Promotion checks (P1\u2013P5) run daily on trades.json \u2014 trades need entry, initial_stop and entry_date.</div>';
         return;
       }
       var LBL={P1_plus_1R:"+1R",P2_fundamental_confirm:"NEW Q",P3_score_streak:"SCORE 4W",P4_industry:"INDUSTRY",P5_stage2_age:"STAGE2"};
@@ -4537,7 +4539,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       }).join("");
     }).catch(function(){
       if(nEl) nEl.textContent="";
-      el.innerHTML='<div class="promo-empty">promotions.json not published yet \u2014 appears after the first Action run with an outputs/trades_log.json in place.</div>';
+      el.innerHTML='<div class="promo-empty">promotions.json not published yet \u2014 appears after the first Action run with an outputs/trades.json in place.</div>';
     });
   }
 
@@ -6824,7 +6826,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   // Charts fetch LIVE from Yahoo on click — no engine dependency, no research.json,
   // no waiting for a cron run. research_data.json only enriches (summary/financials/
   // ratings/earnings) when present.
-  // Persisted to localStorage so plans survive reloads. Export writes trades_log.json.
+  // Read from outputs/trades.json (shared, in git). Edits are in-memory until
+  // exported and committed \u2014 the banner says how many are pending.
 
   var TRADES_HTML =
     '<div class="trades-wrap">'+
@@ -6843,195 +6846,119 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   var trModalOpen = false;
   var trPrices = {};           // {ticker: last} live prices this session
   var trCoach = {};            // {id: html} coaching generated this session
-  function TR_KEY_FN(){ return "phoenix_trades_v1_"+(window.PHOENIX_PROFILE||"G"); }
-  var TR_KEY = TR_KEY_FN();
-
-  // ---------- persistence ----------
-  // MERGE localStorage with the committed file — don't pick one.
+  // ---------- persistence: trades.json is the SOURCE OF TRUTH ----------
+  // Trades used to live in localStorage, which meant Gabriel and Aldemar saw
+  // DIFFERENT books off the same URL, Safari's ITP could evict the lot after 7
+  // idle days, and a profile guard silently dropped saves. All of that is gone.
   //
-  // The old version returned early the moment localStorage had anything, so
-  // trades_log.json was only ever read on a virgin browser. Create one trade and
-  // the seed file became permanently unreachable: 31 imported trades invisible,
-  // forever, with no error.
-  //
-  // Now: the committed file seeds anything you don't already have, and your own
-  // edits always win (an imported row you corrected stays corrected). Merge by
-  // id first, then by content signature so a re-import can't duplicate a trade
-  // whose id changed.
-  // ---- one-time repair of books crossed by the old profile-cache bug -------
-  // Every trade carries an `account` tag, so misfiled rows can be put back
-  // deterministically: a row tagged "gabriel" sitting in Aldemar's storage was
-  // written there by the bug and belongs in Gabriel's book. Rows are MOVED,
-  // never deleted, and duplicates are skipped.
-  function trRepairBooks(){
-    var FLAG = "phoenix_repair_v2";
-    try{ if(localStorage.getItem(FLAG)) return; }catch(e){ return; }
-    var MAP = {G:"gabriel", A:"aldemar"}, INV = {gabriel:"G", aldemar:"A"};
-    var books = {}, before = {};
-    ["G","A"].forEach(function(p){
-      try{ books[p] = JSON.parse(localStorage.getItem("phoenix_trades_v1_"+p)||"[]")||[]; }
-      catch(e){ books[p] = []; }
-      before[p] = books[p].length;
-    });
-    function same(a,b){
-      return a.id===b.id || (a.ticker===b.ticker &&
-        (a.entry_date||"")===(b.entry_date||"") && String(a.entry||"")===String(b.entry||""));
-    }
-    var moved = 0;
-    ["G","A"].forEach(function(p){
-      var mine = MAP[p], keep = [];
-      books[p].forEach(function(t){
-        var acct = String(t.account||"").toLowerCase();
-        var owner = INV[acct];
-        if(!acct || !owner || owner===p){ keep.push(t); return; }   // untagged stays put
-        if(!books[owner].some(function(x){ return same(x,t); })) books[owner].push(t);
-        moved++;
-      });
-      books[p] = keep;
-    });
-    if(!moved) { try{ localStorage.setItem(FLAG,"1"); }catch(e){} return; }
-    ["G","A"].forEach(function(p){
-      try{ localStorage.setItem("phoenix_trades_v1_"+p, JSON.stringify(books[p])); }catch(e){}
-      // a book emptied by the repair should be allowed to re-import the server
-      // starter book, otherwise a wiped account stays wiped
-      if(before[p] && !books[p].length){
-        try{ localStorage.removeItem("phoenix_seeded_v1_"+p); }catch(e){}
-      }
-    });
-    try{ localStorage.setItem(FLAG,"1"); }catch(e){}
-    console.log("[trades] repair: moved "+moved+" misfiled rows  G:"+
-                before.G+"->"+books.G.length+"  A:"+before.A+"->"+books.A.length);
-  }
-  // exposed so it can be re-run by hand if a book ever crosses again
-  window.PHOENIX_REPAIR = function(){
-    try{ localStorage.removeItem("phoenix_repair_v2"); }catch(e){}
-    trRepairBooks();
-    if(window.PHOENIX_REINIT_TR) window.PHOENIX_REINIT_TR();
-  };
-  try{ trRepairBooks(); }catch(e){}
-
-  function TR_TOMB_KEY(){ return "phoenix_trash_v1_"+(window.PHOENIX_PROFILE||"G"); }
-  function trTombs(){
-    try{ return JSON.parse(localStorage.getItem(TR_TOMB_KEY())||"[]")||[]; }
-    catch(e){ return []; }
-  }
-  function trTomb(t){
-    if(!t) return;
-    var l=trTombs();
-    // record BOTH keys: the id pins this exact row, ticker|account pins the
-    // position so a re-seeded copy with different numbers cannot slip through
-    l.push("id:"+(t.id||""));
-    l.push("pos:"+(t.ticker||"")+"|"+(t.account||""));
-    try{ localStorage.setItem(TR_TOMB_KEY(), JSON.stringify(l.slice(-400))); }catch(e){}
-  }
-
-  function trSig(t){
-    return [t.ticker,t.account||"",t.entry_date||"",t.entry||"",t.qty||""].join("|");
-  }
-  function trSeedMerge(local, seed){
-    if(!seed||!seed.trades||!seed.trades.length) return local;
-    var have={};
-    (local||[]).forEach(function(t){ have[t.account||PF_DEFAULT_ACCT]=1; });
-    var byAcc={};
-    seed.trades.forEach(function(t){ (byAcc[t.account||"imported"]=byAcc[t.account||"imported"]||[]).push(t); });
-    var added=0;
-    Object.keys(byAcc).forEach(function(a){
-      if(have[a]) return;                 // already present locally: never overwrite
-      byAcc[a].forEach(function(t){ local.push(t); added++; });
-    });
-    if(added){
-      // register the account config that came with the seed
-      try{
-        if(seed.accounts && typeof pfCfg!=="undefined" && pfCfg && pfCfg.accounts){
-          Object.keys(seed.accounts).forEach(function(k){
-            if(!pfCfg.accounts[k]) pfCfg.accounts[k]=seed.accounts[k];
-          });
-          if(typeof pfSaveCfg==="function") pfSaveCfg();
-        }
-      }catch(e){}
-      try{ localStorage.setItem(TR_KEY_FN(), JSON.stringify(local)); }catch(e){}
-      console.log("[phoenix] imported "+added+" seeded positions");
-    }
-    return local;
-  }
-
-  var trLoadedFor = null;   // which profile the in-memory trLog belongs to
+  // Now: outputs/trades.json is fetched like gex.json — one file, in git,
+  // identical for everyone. Edits change the in-memory book and raise a banner;
+  // nothing persists until Gabriel commits the file. That is deliberate. A
+  // static page cannot write to GitHub, so the honest design is to make the
+  // unsaved state LOUD rather than fake a save that silently disappears.
+  var trLoadedFor = null;      // set once the shared book is in memory
+  var trDirty = 0;             // unsaved edits this session
+  var trMeta  = null;          // schema/accounts envelope from trades.json
 
   function trLoad(cb){
-    // trLog is cached in memory. It MUST be invalidated when the profile
-    // changes, or Gabriel's book stays on screen under Aldemar - and worse,
-    // the next trSave() writes it into Aldemar's storage key.
-    var _p = window.PHOENIX_PROFILE || "G";
-    if(trLog!==null && trLoadedFor===_p){ cb(); return; }
-    if(trLoadedFor!==_p) trLog=null;
-    var local=[];
-    try{
-      var s=localStorage.getItem(TR_KEY_FN());
-      if(s) local=JSON.parse(s)||[];
-    }catch(e){ local=[]; }
-    // one-time import of any account shipped in outputs/trades_seed.json
-    getJSON("trades_seed").then(function(sd){
-      try{ local=trSeedMerge(local, sd); }catch(e){}
-      trLoadRest(local, cb);
-    }).catch(function(){ trLoadRest(local, cb); });
-    return;
-  }
-
-  function trLoadRest(local, cb){
-
-    getJSON("trades_log")
-      .then(function(d){ return (d&&Array.isArray(d.trades))?d.trades:[]; })
-      .catch(function(){ return []; })
-      .then(function(seed){
-        // trades_log.json is a STARTER book, not a source of truth. Merging it
-        // on every load resurrected anything you closed or deleted, because a
-        // closed row no longer matched the seed's signature. Import it once per
-        // profile, then never again.
-        var _p = window.PHOENIX_PROFILE || "G";
-        var _seedKey = "phoenix_seeded_v1_" + _p;
-        var _done = false;
-        try{ _done = !!localStorage.getItem(_seedKey); }catch(e){}
-        if(_done) seed = [];
-        var byId={}, bySig={}, byPos={};
-        local.forEach(function(t){
-          byId[t.id]=t; bySig[trSig(t)]=t;
-          byPos[(t.ticker||"")+"|"+(t.account||"")]=t;   // any status
-        });
-        var tombs={}; trTombs().forEach(function(k){ tombs[k]=1; });
-        var added=0;
-        seed.forEach(function(t){
-          var pos=(t.ticker||"")+"|"+(t.account||"");
-          if(byId[t.id] || bySig[trSig(t)] || byPos[pos]) return;   // yours wins
-          if(tombs["id:"+(t.id||"")] || tombs["pos:"+pos]) return;  // you removed it
-          local.push(t); byId[t.id]=t; bySig[trSig(t)]=t; byPos[pos]=t; added++;
-        });
-        if(!_done){ try{ localStorage.setItem(_seedKey,"1"); }catch(e){} }
-        trLog=local;
-        trLoadedFor=window.PHOENIX_PROFILE||"G";
-        trFixIds();
-        if(added){ trSave(); console.log("[trades] seeded "+added+" from trades_log.json"); }
+    if(trLog!==null){ cb(); return; }          // one book, no per-profile cache
+    getJSON("trades")
+      .then(function(d){
+        trMeta = d || null;
+        trLog  = (d && Array.isArray(d.trades)) ? d.trades : [];
+        trLoadedFor = "shared";
+        trFixIds(); trDirty = 0; trBanner();
+        console.log("[trades] "+trLog.length+" rows from trades.json");
+        cb();
+      })
+      .catch(function(e){
+        // No silent empty book: an unreachable file must look like a failure,
+        // not like "you have no trades".
+        trLog = []; trLoadedFor = "shared"; trDirty = 0;
+        console.error("[trades] trades.json unreachable:", e);
+        trBanner("trades.json could not be loaded — this book is EMPTY, not zero.");
         cb();
       });
   }
+
   function trFixIds(){ (trLog||[]).forEach(function(t,i){ if(!t.id) t.id=trNewId()+"_"+i; }); }
-  function trSave(){
-    var _p = window.PHOENIX_PROFILE || "G";
-    // hard guard: never write one person's trades into another's key. If the
-    // profile moved while this book was in memory, drop the write and reload.
-    if(trLoadedFor && trLoadedFor!==_p){
-      console.warn("[trades] save blocked: book belongs to "+trLoadedFor+
-                   ", active profile is "+_p);
-      return;
-    }
-    try{ localStorage.setItem(TR_KEY_FN(), JSON.stringify(trLog)); }catch(e){}
-  }
   function trNewId(){ return "tr_"+Date.now()+"_"+Math.floor(Math.random()*9999); }
+
+  // trSave() no longer writes anywhere. Every existing call site still works;
+  // it now marks the book dirty and updates the banner.
+  function trSave(){ trDirty++; trBanner(); }
+
+  // ---------- the unsaved-changes banner ----------
+  function trBanner(err){
+    var el=document.getElementById("trBanner");
+    if(!el){
+      el=document.createElement("div"); el.id="trBanner";
+      el.style.cssText="position:fixed;left:0;right:0;bottom:0;z-index:9999;"+
+        "display:none;align-items:center;gap:10px;padding:10px 14px;"+
+        "font:600 13px/1.3 'Courier New',monospace;color:#020F1F;"+
+        "background:#D37736;box-shadow:0 -2px 14px rgba(0,0,0,.35)";
+      document.body.appendChild(el);
+    }
+    if(err){
+      el.style.background="#B03030"; el.style.color="#fff";
+      el.innerHTML='<span>'+err+'</span>'; el.style.display="flex"; return;
+    }
+    if(!trDirty){ el.style.display="none"; return; }
+    el.style.background="#D37736"; el.style.color="#020F1F";
+    el.innerHTML='<span style="flex:1">'+trDirty+' unsaved change'+(trDirty===1?'':'s')+
+      ' — not in trades.json yet</span>'+
+      '<button id="trCopyBtn" style="border:0;border-radius:4px;padding:7px 12px;'+
+      'font:inherit;background:#020F1F;color:#D37736">Copy JSON</button>';
+    el.style.display="flex";
+    document.getElementById("trCopyBtn").onclick=trExport;
+  }
+
+  // ---------- export ----------
+  // Gabriel owns the file, so he copies the WHOLE book. Aldemar copies only his
+  // own rows — if he handed over the whole file it would overwrite any edit
+  // Gabriel had made in the meantime, silently.
   function trExport(){
-    var blob=new Blob([JSON.stringify({trades:trLog||[]},null,1)],{type:"application/json"});
+    var me = pfActiveAcct(), owner = (me === "gabriel");
+    var rows = owner ? (trLog||[])
+                     : (trLog||[]).filter(function(t){ return (t.account||PF_DEFAULT_ACCT)===me; });
+    var payload = owner
+      ? JSON.stringify(Object.assign({}, trMeta||{}, {
+          generated_at: new Date().toISOString().slice(0,10), trades: rows }), null, 1)
+      : JSON.stringify({ _note: "Aldemar's rows only — merge into trades.json, "+
+                                "do not replace the file", account: me,
+                         generated_at: new Date().toISOString().slice(0,10),
+                         trades: rows }, null, 1);
+    function done(ok){
+      var msg = owner
+        ? (ok ? "Copied "+rows.length+" rows. Paste into outputs/trades.json on GitHub."
+              : "Copy failed — the file downloaded instead.")
+        : (ok ? "Copied your "+rows.length+" rows. Send them to Gabriel."
+              : "Copy failed — the file downloaded instead.");
+      alert(msg);
+      if(ok){ trDirty=0; trBanner(); }
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(payload).then(function(){ done(true); })
+        .catch(function(){ trDownload(payload, owner); done(false); });
+    } else { trDownload(payload, owner); done(false); }
+  }
+
+  function trDownload(payload, owner){
+    var blob=new Blob([payload],{type:"application/json"});
     var u=URL.createObjectURL(blob);
-    var a=document.createElement("a"); a.href=u; a.download="trades_log.json"; a.click();
+    var a=document.createElement("a"); a.href=u;
+    a.download = owner ? "trades.json" : "trades_aldemar.json"; a.click();
     setTimeout(function(){URL.revokeObjectURL(u);},1200);
   }
+
+  // Deleting a row is now just a splice — tombstones existed only to stop a
+  // localStorage seed from resurrecting deleted trades. There is no seed now.
+  function trTomb(){}
+
+  // Warn before the tab closes on unsaved work.
+  window.addEventListener("beforeunload", function(e){
+    if(trDirty){ e.preventDefault(); e.returnValue=""; }
+  });
 
   // ---------- queries ----------
   function trGet(id){ return (trLog||[]).filter(function(t){return t.id===id;})[0]; }
@@ -8523,10 +8450,9 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
             'engine because the browser can\'t fetch Yahoo directly (CORS).</div>';
       } else {
         msg=tk+' isn\'t in the current screener universe.<div class="fix">The engine only charts '+
-            'stocks that pass the gates. <b>Your trades live in this browser, so the engine can\'t '+
-            'see them.</b> Hit <b>Export</b> on the Trades tab and commit <code>trades_log.json</code> '+
-            'to <code>outputs/</code> \u2014 pinned tickers always get charted, even if they stop '+
-            'passing the gates.</div>';
+            'stocks that pass the gates, plus every ticker in <code>outputs/trades.json</code> \u2014 '+
+            'pinned names always get charted, even after they stop passing the gates. If '+tk+' '+
+            'is in your book, the next engine run will write its chart.</div>';
       }
       el.innerHTML='<div class="err" style="padding:14px;line-height:1.6">'+msg+'</div>';
       return;
