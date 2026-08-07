@@ -264,6 +264,148 @@ def run_trades():
     return len(rows or [])
 
 
+# ============================================================
+# GEX DIAGNOSTIC — the DTE sweep. READ-ONLY: writes nothing, changes nothing.
+#
+# WHY: Phoenix captures ~63% of the open interest Elliott's briefing reports,
+# uniformly across strikes (59-73% at 11 of 12 published strikes). That
+# uniformity says a SLICE of the chain is missing, not that the feed is broken.
+# The prime suspect is the expiry window — GEX_MAX_DTE caps at 90 days.
+#
+# This fetches the chain ONCE and re-counts it at several cutoffs. Three
+# outcomes, all useful:
+#   - OI matches the briefing at some cutoff  -> the window was the bug
+#   - it overshoots between two cutoffs       -> the real window sits between
+#   - it never reaches the briefing at any    -> something ELSE is filtering
+#                                                (strike band, missing series,
+#                                                 a parse dropping rows)
+#
+# It also prints BOTH flip candidates at every cutoff, so one run answers the
+# second question too: does the cumulative crossing or the per-strike crossing
+# converge on the briefing's flip as coverage improves?
+#
+# THE SHIPPED FLIP IS NOT TOUCHED. Per the handover rule, the calculation does
+# not change until it is measured — this is the measurement.
+# ============================================================
+
+# Reference OI from Elliott's briefing, 7 Aug 2026. Override with a JSON dict
+# in GEX_SWEEP_REF to compare against any other session.
+GEX_SWEEP_REF = {
+    7400: 324472, 7450: 231443, 7500: 470909, 7550: 246839, 7600: 364076,
+    7700: 195000, 7750: 106141, 7800: 202030, 7850: 73875, 7900: 183402,
+    8000: 1661050,
+}
+GEX_SWEEP_REF_FLIP = 7580.49
+GEX_SWEEP_REF_NET_B = 66.63
+
+
+def _flip_candidates(profile):
+    """Both crossing methods from one profile. Returns (cumulative, per_strike_25pt)."""
+    import collections
+    prof = sorted(profile, key=lambda p: p["strike"])
+
+    def cross(pairs):
+        out = []
+        for i in range(1, len(pairs)):
+            (s0, v0), (s1, v1) = pairs[i - 1], pairs[i]
+            if v0 == 0 or (v0 < 0) != (v1 < 0):
+                out.append(s0 + (s1 - s0) * (-v0) / (v1 - v0) if v1 != v0 else s0)
+        return out
+
+    cum, pairs = 0.0, []
+    for p in prof:
+        cum += p["net_gex_B"]
+        pairs.append((p["strike"], cum))
+    cumulative = cross(pairs)
+
+    # Raw per-strike crossings are far too noisy to be a rule (27 of them on the
+    # 7 Aug chain). Bucketing to 25pt — the granularity the histogram already
+    # draws — collapses that to one.
+    buck = collections.defaultdict(float)
+    for p in prof:
+        buck[int(p["strike"] // 25 * 25)] += p["net_gex_B"]
+    per_strike = cross(sorted(buck.items()))
+    return cumulative, per_strike
+
+
+def run_gex_sweep(symbol="_SPX"):
+    """Sweep GEX_MAX_DTE against the briefing's published OI. Prints only."""
+    import os, json
+    ref = GEX_SWEEP_REF
+    try:
+        env = os.environ.get("GEX_SWEEP_REF")
+        if env:
+            ref = {int(k): int(v) for k, v in json.loads(env).items()}
+    except Exception as e:
+        print(f"[sweep] GEX_SWEEP_REF unusable ({e}) — using the built-in 7 Aug table")
+
+    try:
+        spot, chain, note = _cboe_chain(symbol)
+    except Exception as e:
+        print(f"[sweep] fetch failed: {e}")
+        return None
+    if not spot or not chain:
+        print(f"[sweep] {note}")
+        return None
+
+    band = float(os.environ.get("GEX_BAND", "0.10"))
+    cuts = [int(x) for x in os.environ.get("GEX_SWEEP_CUTS", "30,60,90,120,180,365,3650").split(",")]
+    print(f"[sweep] {len(chain)} contracts, spot {spot:,.2f}, band +/-{band*100:.0f}%")
+    print(f"[sweep] reference: {len(ref)} strikes, flip {GEX_SWEEP_REF_FLIP}, "
+          f"net {GEX_SWEEP_REF_NET_B}B")
+    print()
+    hdr = "  ".join(f"{k:>9,}" for k in sorted(ref))
+    print(f"{'DTE':>5}  {'rows':>6}  {'capt%':>6}  {'netB':>8}  {'cum flip':>9}  {'25pt flip':>9}")
+    print("-" * 60)
+
+    best = None
+    for dte in cuts:
+        rows, _ = _cboe_rows(chain, spot, band, dte, int(os.environ.get("GEX_MIN_DTE", "1")))
+        if len(rows) < 40:
+            print(f"{dte:>5}  {len(rows):>6}  (too thin)")
+            continue
+        res = gex_engine(rows, spot, scale=1.0)
+        if res.get("error"):
+            print(f"{dte:>5}  {len(rows):>6}  engine: {res['error']}")
+            continue
+        prof = res.get("profile") or []
+        oi = {}
+        for p in prof:
+            oi[p["strike"]] = oi.get(p["strike"], 0) + p.get("coi", 0) + p.get("poi", 0)
+        got = sum(oi.get(k, 0) for k in ref)
+        want = sum(ref.values())
+        capt = 100.0 * got / want if want else 0.0
+        netb = (res.get("overview") or {}).get("net_gex_B")
+        cum, per = _flip_candidates(prof)
+        near = lambda xs: min(xs, key=lambda x: abs(x - spot)) if xs else None
+        c, p25 = near(cum), near(per)
+        print(f"{dte:>5}  {len(rows):>6}  {capt:>5.0f}%  {netb:>8}  "
+              f"{(f'{c:,.2f}' if c else '-'):>9}  {(f'{p25:,.2f}' if p25 else '-'):>9}")
+        if best is None or abs(capt - 100) < abs(best[1] - 100):
+            best = (dte, capt, netb, c, p25, oi)
+
+    if not best:
+        print("[sweep] no usable cutoff — the problem is not the expiry window")
+        return None
+
+    dte, capt, netb, c, p25, oi = best
+    print()
+    print(f"[sweep] closest coverage at DTE<={dte}: {capt:.0f}% of the reference OI")
+    print(f"{'strike':>7}  {'reference':>11}  {'phoenix':>11}  {'capt':>6}")
+    for k in sorted(ref):
+        g = oi.get(k, 0)
+        print(f"{k:>7}  {ref[k]:>11,}  {g:>11,}  {100.0*g/ref[k]:>5.0f}%")
+    print()
+    print(f"[sweep] net gamma  {netb}B  vs reference {GEX_SWEEP_REF_NET_B}B")
+    for label, v in (("cumulative", c), ("per-strike 25pt", p25)):
+        if v:
+            print(f"[sweep] flip {label:<16} {v:>9,.2f}  vs {GEX_SWEEP_REF_FLIP} "
+                  f"({v - GEX_SWEEP_REF_FLIP:+.2f}, "
+                  f"{'below' if v < spot else 'ABOVE'} spot)")
+    print("[sweep] nothing written — this is a diagnostic")
+    return best
+
+
 def _validate_stocks(result):
     p = []
     n = len((result or {}).get("stocks") or [])
@@ -7025,6 +7167,8 @@ def run_engine(name):
         run_gex()
     elif name == "trades":
         run_trades()
+    elif name == "gexsweep":
+        run_gex_sweep()
     elif name == "macro":
         run_macro()
     elif name == "spx_daily":
