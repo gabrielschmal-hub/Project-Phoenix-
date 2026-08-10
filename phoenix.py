@@ -64,7 +64,13 @@ GEX = {
     # bump whenever the LEVEL math changes: the session lock invalidates on a
     # version change, so a fix takes effect on the next run instead of waiting
     # for tomorrow
-    "levels_engine": "2026-08-05.flip-cumulative+magnet-excluded",
+    # Bump this tag on ANY change to how levels are computed — the freeze
+    # compares it and recomputes rather than serving the old method's numbers.
+    # On 10 Aug the MME spec shipped WITHOUT a bump, so the first run held the
+    # morning's legacy walls (7,775 — not even a multiple of 50, ineligible
+    # under the spec) over the fresh spec walls all day. Exactly the failure
+    # this tag exists to prevent.
+    "levels_engine": "2026-08-10.mme-spec.bs-resolve-flip+closest-wall",
     # per-greek calibration. Left at 1.0 and uncalibrated: on the real CBOE
     # chain net gamma reads ~20% above the coach's figure, but until the flip
     # method is settled a fudge factor would only hide the discrepancy.
@@ -5108,13 +5114,29 @@ def run_vix_term():
         print(f"[vixterm] insufficient pull ({list(vals)}) — keeping previous file")
         return None
     futures = [{"label": lb, "value": vals[lb]} for _s, lb in series if lb in vals]
+    # "spot" must agree with the regime tile, which reads the completed daily
+    # close series. Ticker.history's last row can be a PARTIAL pre-open bar
+    # (the 14.90-vs-15.46 split Gabriel caught on 10 Aug): prefer the macro
+    # series' last close, fall back to the pulled 30D value, and say which.
+    spot_v, spot_src = vals["30D"], "vix_30d_pull"
+    try:
+        import json as _j
+        _ms = _j.load(open(os.path.join(OUTPUTS_DIR, "macro_series.json")))
+        _rows = _ms.get("series") or []            # a LIST of daily row dicts
+        _last = next((r.get("vix") for r in reversed(_rows)
+                      if r.get("vix") is not None), None)
+        if _last:
+            spot_v, spot_src = round(float(_last), 2), "macro_daily_close"
+    except Exception:
+        pass
     payload = {
         "asof": _now(),
         "source": "yahoo_vix_indices",
         "note": "4-point index term structure (9D/30D/3M/6M), auto-generated. "
                 "A manually uploaded VX futures ladder can overwrite this file "
                 "and survives failed pulls (guarded writes).",
-        "spot": vals["30D"],
+        "spot": spot_v,
+        "spot_source": spot_src,
         "futures": futures,
     }
     def _validate(pl):
@@ -6293,6 +6315,8 @@ def run_gex_verify():
     print(f"[gexverify] source {src} · spot {spot:,.2f} · skipped {skipped}")
     print(f"  contracts after filter : {len(contracts)}")
     print(f"  expiries               : {meta['expiries']}")
+    print(f"  iv<=0 rows skipped     : {meta.get('iv_skipped', 0)}   "
+          f"(if this is large pre-open, run again after the close)")
     print(f"  Net GEX at spot (BS)   : {net_B:+.2f} B")
     print(f"  gamma flip             : {flip:,.2f}" if flip else "  gamma flip             : none in 0.8-1.2x")
     print(f"  call wall (top-1)      : {walls['call_wall']}"
@@ -6434,6 +6458,7 @@ def run_gex_cboe(symbol="_SPX", label="SPX"):
                       "gamma, strike%50, floor 25% of side max",
             "spot_source": spot_source,
             "contracts": len(_contracts), "expiries": _meta["expiries"],
+            "iv_skipped": _meta.get("iv_skipped", 0),
             "call_tiered": _walls["call_tiered"], "put_tiered": _walls["put_tiered"],
             "magnets": _walls["magnets"],
             "call_wall_pin": _walls["call_wall_pin"],
@@ -6455,8 +6480,8 @@ def run_gex_cboe(symbol="_SPX", label="SPX"):
             pass
         print(f"[gexcboe] MME spec: flip {ov.get('gamma_flip')}, net {_net_B:+.2f}B, "
               f"walls {_walls['call_wall']}/{_walls['put_wall']}, "
-              f"{len(_contracts)} contracts / {_meta['expiries']} expiries "
-              f"(spot: {spot_source})")
+              f"{len(_contracts)} contracts / {_meta['expiries']} expiries, "
+              f"iv-skipped {_meta.get('iv_skipped', 0)} (spot: {spot_source})")
     except Exception as e:
         if legacy:
             print(f"[gexcboe] MME spec FAILED ({e}) — legacy numbers stand for today")
