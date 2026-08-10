@@ -65,7 +65,9 @@ GEX = {
     # version change, so a fix takes effect on the next run instead of waiting
     # for tomorrow
     "levels_engine": "2026-08-05.flip-cumulative+magnet-excluded",
-    # per-greek calibration (SPY proxy reads low by different amounts per greek).
+    # per-greek calibration. Left at 1.0 and uncalibrated: on the real CBOE
+    # chain net gamma reads ~20% above the coach's figure, but until the flip
+    # method is settled a fudge factor would only hide the discrepancy.
     # These get FIT from paired engine-vs-source readings. 1.0 = uncalibrated (raw).
     "calib_net_gex": 1.0,
     "calib_vanna": 1.0,
@@ -233,7 +235,15 @@ def validate_trades(path=None):
                 warns.append(f"{tag}: closed trade carries current_stop")
         else:                                        # open
             if t.get("current_stop") is None:
-                errs.append(f"{tag}: open trade missing current_stop")
+                # A MANAGED position (bank/mandate account) cannot carry a stop
+                # order — flagging it as an error would force fake data into the
+                # file. It must say so explicitly via managed:true, and it still
+                # needs initial_stop as the reference for R.
+                if t.get("managed"):
+                    warns.append(f"{tag}: managed position, no live stop — "
+                                 f"excluded from stop-based heat")
+                else:
+                    errs.append(f"{tag}: open trade missing current_stop")
             if t.get("exit_price") is not None:
                 errs.append(f"{tag}: open trade has an exit_price")
 
@@ -404,6 +414,346 @@ def run_gex_sweep(symbol="_SPX"):
                   f"{'below' if v < spot else 'ABOVE'} spot)")
     print("[sweep] nothing written — this is a diagnostic")
     return best
+
+
+# ============================================================
+# SIGNAL LOG — the experiment. APPEND-ONLY, NEVER OVERWRITTEN.
+#
+# WHY THIS EXISTS: the screener shows today's list and forgets it. So when a
+# name we passed on runs 40%, or one we took stalls, there is no record it was
+# ever on the list. Without that record there is no backtest, and without a
+# backtest there is no answer to the only question that matters — do the six
+# gates beat buying MTUM, net of costs?
+#
+# The mechanical 20-day-high breakout proxy used in phoenix_backtest.py is NOT
+# equivalent to a real Phoenix signal. This file is what makes
+# `--entry-source screener` possible.
+#
+# ONE FILE PER TRADING DAY, written by the FIRST run of that day and never
+# rewritten. Two runs a day would otherwise give two different snapshots of
+# "the signal" and we would not know which one we would have acted on. The
+# 05:00 UTC run is pre-market, which is the decision point, so it wins.
+# Set PHOENIX_SIGNALS_FORCE=1 to overwrite deliberately.
+#
+# Its value is a function of how long ago it started. A day not logged is gone.
+# ============================================================
+
+SIGNALS_DIR = "outputs/history"
+
+# Recorded per candidate. Kept deliberately WIDE: adding a field later cannot
+# retro-fill days already written, so anything plausibly useful goes in now.
+SIGNAL_FIELDS = [
+    "ticker", "name", "sector", "industry", "rank",
+    "passer", "gates_passed", "missing_gate", "breakout",
+    "trade_score", "invest_score",
+    "price", "pos_vs_high", "surge", "dollar_vol_M", "atr14_pct", "mcap_B",
+    "industry_mom_3m", "entry", "stop", "target", "rr",
+    # profitability: recorded from day one so the gate-or-not decision can be
+    # made on evidence in three months instead of on instinct today
+    "profitability", "profitability_why", "net_margin", "gross_margin",
+    "op_margin", "roe_ttm", "ocf_ttm_B", "fcf_ttm_B", "capex_ttm_B",
+    "capex_pct_of_ocf", "debt_equity", "current_ratio", "pe_ttm",
+    # persistence: builds forward, cannot be backfilled
+    "first_seen", "days_on_list", "appearances", "continuous",
+]
+
+
+def _signal_row(c, book):
+    row = {"book": book}
+    for k in SIGNAL_FIELDS:
+        if k in c:
+            row[k] = c[k]
+    lv = c.get("levels") or {}
+    for k in ("support", "resistance"):
+        if lv.get(k) is not None:
+            row[k] = lv[k]
+    return row
+
+
+def write_signal_log(v2, regime=None, spx=None):
+    """
+    Append today's ranked screener output to outputs/history/signals_<date>.json.
+
+    Returns the path written, or None if today is already logged.
+    """
+    import os, json
+    from datetime import datetime, timezone
+
+    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    os.makedirs(SIGNALS_DIR, exist_ok=True)
+    path = os.path.join(SIGNALS_DIR, f"signals_{day}.json")
+
+    if os.path.exists(path) and os.environ.get("PHOENIX_SIGNALS_FORCE") != "1":
+        print(f"[signals] {day} already logged — not overwriting "
+              f"(PHOENIX_SIGNALS_FORCE=1 to replace)")
+        return None
+
+    trade = [_signal_row(c, "trade") for c in (v2.get("trade_ranked") or [])]
+    invest = [_signal_row(c, "invest") for c in (v2.get("invest_ranked") or [])]
+    meta = v2.get("meta") or {}
+
+    doc = {
+        "schema": "phoenix.signals/1",
+        "date": day,
+        "asof": _now(),
+        # The market state the signal was generated in. Without this a future
+        # backtest cannot ask "does the screener work better in some regimes?"
+        "context": {
+            "regime": (regime or {}).get("regime") if isinstance(regime, dict) else regime,
+            "spx_close": spx,
+            "gates": {k: meta.get(k) for k in
+                      ("trade_candidates", "trade_near_misses", "trade_breakouts",
+                       "ext_hard_capped", "invest_candidates")},
+            "industries_passing": meta.get("industries_passing_v2"),
+        },
+        # The gate definitions AS THEY WERE TODAY, in full — thresholds AND the
+        # scoring weights. If the rules are ever tuned, a backtest over old
+        # signals must know which ruleset produced each day, or it silently
+        # mixes two different strategies and reports the average as one edge.
+        # Deep-copied via json round-trip so a later mutation of the module
+        # constants cannot reach back into a file already written.
+        "ruleset": {
+            "stock": json.loads(json.dumps(STOCK)),
+            "stock_v2": json.loads(json.dumps(STOCK_V2)),
+            "validated": meta.get("validated"),
+        },
+        "counts": {"trade": len(trade), "invest": len(invest)},
+        "trade": trade,
+        "invest": invest,
+    }
+
+    with open(path, "w") as f:
+        json.dump(doc, f, separators=(",", ":"))
+    kb = os.path.getsize(path) / 1024
+    print(f"[signals] {day}: {len(trade)} trade + {len(invest)} invest rows "
+          f"-> {path} ({kb:.0f}KB)")
+    return path
+
+
+def run_signals_index():
+    """
+    Rebuild outputs/history/signals_index.json — one line per logged day.
+
+    Cheap, and it means the app or a backtest can see the span of the record
+    without reading every file.
+    """
+    import os, json, glob
+    os.makedirs(SIGNALS_DIR, exist_ok=True)
+    days = []
+    for p in sorted(glob.glob(os.path.join(SIGNALS_DIR, "signals_*.json"))):
+        try:
+            d = json.load(open(p))
+        except Exception as e:
+            print(f"[signals] {os.path.basename(p)} unreadable: {e}")
+            continue
+        days.append({"date": d.get("date"), "file": os.path.basename(p),
+                     "trade": (d.get("counts") or {}).get("trade"),
+                     "invest": (d.get("counts") or {}).get("invest"),
+                     "regime": (d.get("context") or {}).get("regime")})
+    out = {"schema": "phoenix.signals.index/1", "asof": _now(),
+           "days": len(days), "first": days[0]["date"] if days else None,
+           "last": days[-1]["date"] if days else None, "log": days}
+    with open(os.path.join(SIGNALS_DIR, "signals_index.json"), "w") as f:
+        json.dump(out, f, indent=1)
+    if days:
+        print(f"[signals] index: {len(days)} days, {days[0]['date']} -> {days[-1]['date']}")
+    else:
+        print("[signals] index: no days logged yet")
+    return len(days)
+
+
+# ============================================================
+# PROFITABILITY FLAG — DISPLAYED AND LOGGED, NEVER GATED.
+#
+# The six trade gates contain no financial data at all: `tradability` checks
+# market cap and dollar volume, which is LIQUIDITY, not quality. A company
+# burning cash with no revenue passes all six if the chart is right.
+#
+# That is defensible — momentum arguably works BECAUSE it ignores fundamentals
+# — but it was never visible. So: compute it, show it, log it, gate on nothing.
+# In three months the signal log can answer whether profitable names actually
+# outperformed IN THIS SCREENER, and the decision to gate gets made on evidence
+# instead of instinct.
+#
+# "unknown" is a real answer and is never silently treated as either pass or
+# fail: fundamentals_min_cap is $2B while the trade gate is $1B, so a slice of
+# trade candidates genuinely has no financial data.
+# ============================================================
+
+def profitability_flag(qs):
+    """
+    Returns {"state": ..., ...evidence}. DISPLAYED AND LOGGED, NEVER GATED.
+
+    THE TEST IS OPERATING CASH FLOW, NOT FREE CASH FLOW.
+
+    FCF = operating cash flow - capex. A hyperscaler putting $50B into AI data
+    centres prints negative FCF while being hugely profitable, and that spending
+    is growth investment, not distress. Judging on FCF would rank META or MSFT
+    mid-buildout below a company with no ambitions, which is the opposite of the
+    truth. Only OCF separates the two cases:
+
+        OCF positive, FCF negative  -> INVESTING. Earning cash, choosing to
+                                       spend more than it earns on capacity.
+        OCF negative                -> BURNING. No choice in the matter.
+
+    States (descriptive, not a ranking):
+      profitable  earning on the income statement, generating operating cash
+      investing   same, but capex exceeds OCF - a capex cycle, NOT a downgrade
+      marginal    thin, inconsistent, or profit WITHOUT operating cash (the
+                  earnings-quality red flag: accounting profit, no cash behind it)
+      lossmaking  negative margins and negative operating cash
+      unknown     no data - a real third answer, never silently pass or fail
+    """
+    qs = qs or []
+    if not qs:
+        return {"state": "unknown", "why": "no quarterly data"}
+
+    def tail(key, n=4):
+        return [q.get(key) for q in qs[-n:] if q.get(key) is not None]
+
+    margins = tail("net_margin")
+    op_margins = tail("op_margin")
+    ocf = tail("ocf_B")
+    fcf = tail("fcf_B")
+    roe_q = tail("roe")
+
+    # ROE in the CSV is QUARTERLY; the invest gates annualise before comparing
+    # to an annual floor, and so must we or the number means nothing.
+    if len(roe_q) >= 4:
+        roe_ttm = sum(roe_q[-4:])
+    elif len(roe_q) >= 2:
+        roe_ttm = sum(roe_q) / len(roe_q) * 4
+    else:
+        roe_ttm = None
+
+    ocf_ttm = sum(ocf) if len(ocf) >= 2 else None
+    fcf_ttm = sum(fcf) if len(fcf) >= 2 else None
+    latest_margin = margins[-1] if margins else None
+    pos_margin_q = sum(1 for v in margins if v > 0)
+
+    # implied capex, and how much of operating cash it consumes
+    capex_ttm = (ocf_ttm - fcf_ttm) if (ocf_ttm is not None and fcf_ttm is not None) else None
+    capex_intensity = (round(100.0 * capex_ttm / ocf_ttm, 0)
+                       if (capex_ttm is not None and ocf_ttm and ocf_ttm > 0) else None)
+
+    gross_margins = tail("gross_margin")
+    ni = tail("net_income_B")
+    ni_ttm = sum(ni) if len(ni) >= 4 else None
+    de = [q.get("debt_equity") for q in qs[-2:] if q.get("debt_equity") is not None]
+    cr = [q.get("current_ratio") for q in qs[-2:] if q.get("current_ratio") is not None]
+
+    ev = {
+        "net_margin": latest_margin,
+        "gross_margin": gross_margins[-1] if gross_margins else None,
+        "op_margin": op_margins[-1] if op_margins else None,
+        "net_income_ttm_B": round(ni_ttm, 2) if ni_ttm is not None else None,
+        "debt_equity": de[-1] if de else None,
+        "current_ratio": cr[-1] if cr else None,
+        "margin_pos_quarters": pos_margin_q if margins else None,
+        "margin_quarters_known": len(margins),
+        "roe_ttm": round(roe_ttm, 1) if roe_ttm is not None else None,
+        "ocf_ttm_B": round(ocf_ttm, 2) if ocf_ttm is not None else None,
+        "fcf_ttm_B": round(fcf_ttm, 2) if fcf_ttm is not None else None,
+        "capex_ttm_B": round(capex_ttm, 2) if capex_ttm is not None else None,
+        "capex_pct_of_ocf": capex_intensity,
+    }
+
+    if latest_margin is None and ocf_ttm is None:
+        return dict(ev, state="unknown", why="no margin or cash-flow data")
+
+    earning = (latest_margin is not None and latest_margin > 0
+               and pos_margin_q >= max(1, len(margins) - 1))
+    cash_positive = ocf_ttm is not None and ocf_ttm > 0
+    cash_negative = ocf_ttm is not None and ocf_ttm <= 0
+
+    if earning and cash_positive:
+        if fcf_ttm is not None and fcf_ttm < 0:
+            state = "investing"
+            why = (f"profitable, OCF {ocf_ttm:+.1f}B, but capex {capex_ttm:.1f}B "
+                   f"({capex_intensity:.0f}% of OCF) takes FCF negative "
+                   f"- spending, not struggling")
+        else:
+            state = "profitable"
+            why = f"positive margin, OCF {ocf_ttm:+.1f}B"
+            if capex_intensity is not None and capex_intensity >= 50:
+                why += f", heavy capex ({capex_intensity:.0f}% of OCF)"
+    elif earning and cash_negative:
+        # Accounting profit with no operating cash behind it. This one IS a
+        # warning: it is an earnings-quality problem, not a capex cycle.
+        state = "marginal"
+        why = f"positive margin but OCF {ocf_ttm:+.1f}B - profit without cash"
+    elif earning:
+        state, why = "profitable", "positive margin; no cash-flow data"
+    elif latest_margin is not None and latest_margin <= 0 and pos_margin_q == 0:
+        state = "lossmaking"
+        why = f"negative net margin in all {len(margins)} known quarters"
+        if cash_positive:
+            state = "marginal"
+            why += f", though OCF is {ocf_ttm:+.1f}B"
+    elif latest_margin is None and ocf_ttm is not None:
+        state = "marginal" if ocf_ttm > 0 else "lossmaking"
+        why = f"no margin data; TTM operating cash {ocf_ttm:+.1f}B"
+    else:
+        state, why = "marginal", "profitability inconsistent across quarters"
+    return dict(ev, state=state, why=why)
+
+
+# ============================================================
+# DAYS ON LIST — how long has this name been saying the same thing?
+#
+# Every gate is slow by construction (40-week MA, 30-week MA, 104-week high,
+# 3-month industry momentum) and the screener scores weekly bars, so the same
+# names persist for months. That is what a trend screen SHOULD do. The problem
+# is that a name in its twelfth week renders identically to one that appeared
+# this morning, so "still valid" and "stale" look the same.
+#
+# Read from the signal log. It is empty today, so every name reads day 1 and
+# the history builds forward — there is no way to backfill it.
+# ============================================================
+
+def _signal_history_appearances(lookback_days=180):
+    """{ticker: [dates it passed all six gates]}, oldest first."""
+    import os, json, glob
+    out = {}
+    files = sorted(glob.glob(os.path.join(SIGNALS_DIR, "signals_*.json")))[-lookback_days:]
+    for p in files:
+        try:
+            d = json.load(open(p))
+        except Exception:
+            continue
+        day = d.get("date")
+        for r in (d.get("trade") or []):
+            if r.get("passer") and r.get("ticker"):
+                out.setdefault(r["ticker"], []).append(day)
+    return out
+
+
+def annotate_persistence(trade_ranked):
+    """Add first_seen / days_on_list / appearances / continuous to each row."""
+    from datetime import datetime, timezone
+    hist = _signal_history_appearances()
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    for c in trade_ranked:
+        days = hist.get(c.get("ticker")) or []
+        if not days:
+            c["first_seen"] = today if c.get("passer") else None
+            c["days_on_list"] = 1 if c.get("passer") else 0
+            c["appearances"] = 1 if c.get("passer") else 0
+            c["continuous"] = True
+            continue
+        first = days[0]
+        try:
+            span = (datetime.strptime(today, "%Y-%m-%d")
+                    - datetime.strptime(first, "%Y-%m-%d")).days + 1
+        except Exception:
+            span = len(days)
+        c["first_seen"] = first
+        c["days_on_list"] = span
+        c["appearances"] = len(days) + (1 if c.get("passer") else 0)
+        # A name that dropped off and came back is a NEW signal, not an old one
+        # still running. Without this they would be indistinguishable.
+        c["continuous"] = (len(days) >= span - 1)
+    return trade_ranked
 
 
 def _validate_stocks(result):
@@ -713,8 +1063,9 @@ def gex_engine(chain, spot, scale=1.0):
         "profile": profile,
         "confidence": {
             "levels": "high",
-            "regime_sign": "low_on_proxy" if GEX["source"].startswith("SPY") else "high",
-            "note": "SPY proxy: flip/walls reliable, net-GEX sign approximate. True SPX (IBKR) fixes sign.",
+            "regime_sign": "high",
+            "note": "Real SPX chain (CBOE delayed). Open interest matches the coach's "
+                    "published figures; the gamma flip METHOD is still under review.",
         },
     }
 
@@ -1435,6 +1786,19 @@ def stock_engine_v2(stock_data, universe, quarterly=None, daily_ret=None,
                 "_trig": (max(0.0, (levels["resistance"] / last - 1) * 100)
                           if levels and levels.get("resistance") and last else 0.0),
             })
+            # Shown and logged. NOT a gate - see profitability_flag().
+            pf = profitability_flag(quarterly.get(tk) if quarterly else None)
+            e["profitability"] = pf["state"]
+            e["profitability_why"] = pf.get("why")
+            for _k in ("net_margin", "gross_margin", "op_margin", "roe_ttm",
+                       "ocf_ttm_B", "fcf_ttm_B", "capex_ttm_B",
+                       "capex_pct_of_ocf", "debt_equity", "current_ratio"):
+                e[_k] = pf.get(_k)
+            # Trailing P/E. Negative earnings give None, not a negative P/E —
+            # a "P/E under 20" filter must never quietly admit lossmakers.
+            _ni = pf.get("net_income_ttm_B")
+            e["pe_ttm"] = (round((mc / 1e9) / _ni, 1)
+                           if (_ni and _ni > 0 and mc) else None)
             trade_pool.append(e)
 
         # ---------------- INVESTMENT BOOK ----------------
@@ -1480,6 +1844,10 @@ def stock_engine_v2(stock_data, universe, quarterly=None, daily_ret=None,
             for k in list(c.keys()):
                 if k.startswith("_"):
                     del c[k]
+    try:
+        annotate_persistence(trade_pool)
+    except Exception as e:
+        print(f"[persist] FAILED (non-fatal): {e}")
     trade_ranked = sorted(trade_pool,
                           key=lambda c: (-int(c["passer"]), -c["trade_score"]))
     for i, c in enumerate(trade_ranked):
@@ -3107,55 +3475,13 @@ def run_spx_daily(period="1y"):
 
 
 # ============================================================
-# GEX DATA FETCH — the swappable source (SPY proxy now, IBKR later)
+# GEX DATA FETCH — CBOE delayed SPX chain (briefing PDF takes precedence)
 # Kept SEPARATE from gex_engine so we can change the source without touching the math.
 # ============================================================
-def fetch_gex_chain_yfinance():
-    """Fetch SPX options chain via SPY x10 proxy. Returns (normalized_chain, spot, scale)."""
-    import yfinance as yf
-    from datetime import datetime
-    scale = 10.0
-    tk = yf.Ticker("SPY")
-    spot = float(tk.history(period="1d")["Close"].iloc[-1]) * scale
-    exps = tk.options[:GEX["max_expiries"]]
-    now = datetime.now()
-    chain = []
-    for exp in exps:
-        T = max((datetime.strptime(exp, "%Y-%m-%d") - now).days, 1) / 365.0
-        try:
-            oc = tk.option_chain(exp)
-        except Exception:
-            continue
-        for df, kind in [(oc.calls, "call"), (oc.puts, "put")]:
-            for _, row in df.iterrows():
-                chain.append({
-                    "strike": float(row["strike"]) * scale,
-                    "T_years": T,
-                    "kind": kind,
-                    "open_interest": row.get("openInterest"),
-                    "iv": row.get("impliedVolatility"),
-                })
-    return chain, spot, scale
-
-
-def run_gex():
-    """Fetch + compute + write gex.json. The full GEX vertical slice."""
-    print("[gex] fetching chain (SPY proxy)...")
-    chain, spot, scale = fetch_gex_chain_yfinance()
-    print(f"[gex] {len(chain)} contracts, spot {spot:.2f}")
-    result = gex_engine(chain, spot, scale)
-    write_json("gex", result)
-    if result.get("error") == "degenerate_chain":
-        d = result.get("diagnostics", {})
-        print(f"[gex] BAD PULL: only {d.get('n_strikes')} strikes, {d.get('total_oi')} OI "
-              f"— Yahoo throttled the options chain. Flagged INVALID in gex.json.")
-    elif result.get("error"):
-        print(f"[gex] ERROR: {result['error']}")
-    else:
-        ov = result.get("overview", {})
-        print(f"[gex] Net {ov.get('net_gex_B')}B {ov.get('regime')}, flip {ov.get('gamma_flip')}")
-    print("[gex] wrote outputs/gex.json")
-    return result
+# SPY x10 proxy REMOVED 7 Aug 2026. fetch_gex_chain_yfinance() and run_gex()
+# lived here. They were deleted rather than deprecated because a dead code path
+# that still runs on failure is how the wrong number reaches the screen.
+# Sources are now: committed briefing PDF, then CBOE. Nothing else.
 
 
 
@@ -3835,6 +4161,14 @@ def run_stocks(auto_pull=True):
             evaluate_promotions(v2, weekly, universe, quarterly)
         except Exception as e:
             print(f"[promo] FAILED (non-fatal): {e}")
+        # The signal log. Non-fatal: a screener that scored fine must still
+        # publish even if the log write fails.
+        try:
+            write_signal_log(v2, regime=result.get("regime"),
+                             spx=result.get("spx_close"))
+            run_signals_index()
+        except Exception as e:
+            print(f"[signals] FAILED (non-fatal): {e}")
     except Exception as e:
         result["v2_meta"] = {"error": str(e)}
         print(f"[v2] FAILED (non-fatal): {e}")
@@ -5620,6 +5954,363 @@ def _gex_freeze_levels(res):
     return res
 
 
+
+# ============================================================
+# MME SPEC — Elliott's exact computation, received 10 Aug 2026.
+#
+# The re-solve hypothesis was CONFIRMED. His flip is not a crossing in the
+# strike profile: it is the level L at which total dealer gamma, RECOMPUTED at
+# L (Black-Scholes from each row's own IV, dollar term using L², sticky-strike
+# — IV fixed per row, no smile re-anchor), first changes sign on a 120-point
+# grid spanning 0.8-1.2x spot, linearly interpolated.
+#
+# TWO GAMMA SOURCES BY DESIGN — do not unify them:
+#   PATH 1  flip + headline net GEX : pure BS, recomputed per contract
+#   PATH 2  walls + magnet/pin     : the vendor gamma columns, scaled at spot
+#
+# Other spec points that differ from what Phoenix did before:
+#   - expiry filter: keep expirations strictly AFTER the scrape date. Nothing
+#     else. No DTE cap — the fixture uses 55 expiries.
+#   - T in BUSINESS days / 262, floored at 1/262. r = 0, q = 0.
+#   - spot is the real SPX cash close passed in, NEVER the header "Last".
+#   - walls: the CLOSEST significant strike, not the heaviest. Strikes must be
+#     multiples of 50. Floor = 0.25 x the side's max |gex| inside the band.
+#     (This is exactly why Phoenix used to pick 7,725 while he published 7,800.)
+#
+# Verification fixture (his, from the Aug 10 2026 CSV at spot 7757.64):
+#   contracts 15,497 · expiries 55 · net +84.72B · flip 7,647.01
+#   call wall 7,800 · put wall 7,700          -> run:  --engine gexverify
+# ============================================================
+
+_MME_INV_SQRT2PI = 0.3989422804014327
+
+
+def _mme_busdays(d0, d1):
+    """Business days in [d0, d1) — numpy busday_count parity, weekends only."""
+    if d1 <= d0:
+        return 0
+    days = (d1 - d0).days
+    full, rem = divmod(days, 7)
+    n = full * 5
+    w = d0.weekday()
+    for i in range(rem):
+        if (w + i) % 7 < 5:
+            n += 1
+    return n
+
+
+def _mme_T(scrape_date, expiry):
+    return max(_mme_busdays(scrape_date, expiry), 1) / 262.0
+
+
+def _mme_contracts_from_chain(chain, scrape_date):
+    """CBOE JSON options -> per-contract rows for both paths."""
+    from datetime import datetime
+    out, skipped = [], 0
+    for c in chain:
+        m = _OSI.search((c.get("option") or c.get("symbol") or "").replace(" ", ""))
+        if not m:
+            skipped += 1
+            continue
+        try:
+            expiry = datetime.strptime(m.group(2), "%y%m%d").date()
+        except Exception:
+            skipped += 1
+            continue
+        if expiry <= scrape_date:          # strictly AFTER the scrape date
+            continue
+        try:
+            oi = float(c.get("open_interest") or 0)
+        except Exception:
+            oi = 0.0
+        if oi <= 0:
+            continue
+        def _f(k):
+            try:
+                v = float(c.get(k))
+                return v if v == v else 0.0
+            except Exception:
+                return 0.0
+        out.append({"K": int(m.group(4)) / 1000.0,
+                    "cp": "C" if m.group(3) == "C" else "P",
+                    "iv": _f("iv"), "gamma_vendor": _f("gamma"),
+                    "oi": oi, "expiry": expiry})
+    return out, skipped
+
+
+def mme_flip_net(contracts, spot, scrape_date):
+    """
+    PATH 1. Sweep L over linspace(0.8*spot, 1.2*spot, 120); at each L recompute
+    every contract's BS gamma from its own IV (sticky-strike) and dollar terms
+    with L^2. curve(L) = calls - puts. Flip = first sign change, interpolated.
+    Net = the same sum at L = spot, in $B.
+    """
+    import math
+    pre = []
+    tcache = {}
+    iv_skipped = 0
+    for c in contracts:
+        sig = c["iv"]
+        if sig <= 0:
+            iv_skipped += 1
+            continue
+        T = tcache.get(c["expiry"])
+        if T is None:
+            T = tcache[c["expiry"]] = _mme_T(scrape_date, c["expiry"])
+        st = sig * math.sqrt(T)
+        a = 1.0 / st
+        c2 = a * (-math.log(c["K"]) + 0.5 * sig * sig * T)
+        w = (c["oi"] if c["cp"] == "C" else -c["oi"]) * a
+        pre.append((a, c2, w))
+
+    if not pre:
+        return None, 0.0, {"grid": 0, "iv_skipped": iv_skipped, "expiries": 0}
+
+    def curve(L):
+        lnL = math.log(L)
+        s = 0.0
+        for a, c2, w in pre:
+            d1 = lnL * a + c2
+            s += w * math.exp(-0.5 * d1 * d1)
+        return s * L * _MME_INV_SQRT2PI      # OI*100*L^2*0.01*gamma folds to this
+
+    lo, hi, n = 0.8 * spot, 1.2 * spot, 120
+    step = (hi - lo) / (n - 1)
+    flip, prevL, prevG = None, None, None
+    for i in range(n):
+        L = lo + i * step
+        g = curve(L)
+        if prevG is not None and (prevG == 0 or (prevG < 0) != (g < 0)):
+            K_neg, g_neg = (prevL, prevG) if prevG < 0 else (L, g)
+            K_pos, g_pos = (L, g) if g > 0 else (prevL, prevG)
+            flip = K_pos - (K_pos - K_neg) * g_pos / (g_pos - g_neg)
+            break
+        prevL, prevG = L, g
+    net_B = curve(spot) / 1e9
+    return flip, round(net_B, 2), {"grid": n, "iv_skipped": iv_skipped,
+                                   "expiries": len(tcache)}
+
+
+def mme_walls(contracts, spot):
+    """
+    PATH 2. Vendor gamma, scaled at spot only. Per-strike aggregation across
+    all surviving expiries; bands off spot; strike%50==0; the TOP-1 wall is
+    the CLOSEST qualifying strike (floor = 0.25 * side max |gex|), NOT the
+    heaviest. Magnets inside the margin; PIN when opposite OI >= 0.5 * primary.
+    """
+    agg = {}
+    for c in contracts:
+        k = c["K"]
+        a = agg.setdefault(k, {"call_gex": 0.0, "put_gex": 0.0,
+                               "call_oi": 0.0, "put_oi": 0.0})
+        d = c["gamma_vendor"] * c["oi"] * 100.0 * spot * spot * 0.01
+        if c["cp"] == "C":
+            a["call_gex"] += d
+            a["call_oi"] += c["oi"]
+        else:
+            a["put_gex"] += -d               # explicit -1: negative by construction
+            a["put_oi"] += c["oi"]
+
+    margin, prox = spot * 0.0025, spot * 0.05
+
+    def is50(k):
+        return abs(k - round(k / 50.0) * 50.0) < 1e-6
+
+    def side(kind):
+        if kind == "put":
+            band = [k for k in agg if spot - prox <= k <= spot - margin
+                    and is50(k) and agg[k]["put_gex"] < 0]
+            tiered = sorted(band, key=lambda k: agg[k]["put_gex"])        # most negative first
+            val = lambda k: agg[k]["put_gex"]
+        else:
+            band = [k for k in agg if spot + margin <= k <= spot + prox
+                    and is50(k) and agg[k]["call_gex"] > 0]
+            tiered = sorted(band, key=lambda k: -agg[k]["call_gex"])      # most positive first
+            val = lambda k: agg[k]["call_gex"]
+        if not tiered:
+            return None, [], 0.0
+        floor = 0.25 * max(abs(val(k)) for k in tiered)
+        qual = [k for k in tiered if abs(val(k)) >= floor]
+        top1 = (min(qual, key=lambda k: abs(k - spot)) if qual else tiered[0])
+        rows = [{"strike": k, "gex_B": round(val(k) / 1e9, 3),
+                 "call_oi": int(agg[k]["call_oi"]), "put_oi": int(agg[k]["put_oi"])}
+                for k in tiered]
+        return top1, rows, floor
+
+    call_top, call_tiered, _ = side("call")
+    put_top, put_tiered, _ = side("put")
+
+    cw_oi = agg.get(call_top, {}).get("call_oi", 0) if call_top else 0
+    pw_oi = agg.get(put_top, {}).get("put_oi", 0) if put_top else 0
+    magnets = []
+    for k in agg:
+        if not (spot - margin < k < spot + margin) or not is50(k):
+            continue
+        toi = agg[k]["call_oi"] + agg[k]["put_oi"]
+        if toi <= 0:
+            continue
+        if toi >= 100000 or toi >= 0.5 * max(cw_oi, pw_oi, 1):
+            magnets.append({"strike": k, "total_oi": int(toi)})
+    magnets.sort(key=lambda m: -m["total_oi"])
+
+    def pin(k, primary):
+        if k is None:
+            return False
+        a = agg[k]
+        p, o = (a["call_oi"], a["put_oi"]) if primary == "C" else (a["put_oi"], a["call_oi"])
+        return p > 0 and o >= 0.5 * p
+
+    # per-strike rows for the histogram (display band, default +/-10%)
+    import os
+    band = float(os.environ.get("GEX_BAND", "0.10"))
+    prof = []
+    for k in sorted(agg):
+        if abs(k / spot - 1) > band:
+            continue
+        a = agg[k]
+        prof.append({"strike": k,
+                     "call_gex_B": round(a["call_gex"] / 1e9, 4),
+                     "put_gex_B": round(a["put_gex"] / 1e9, 4),
+                     "net_gex_B": round((a["call_gex"] + a["put_gex"]) / 1e9, 4),
+                     "coi": int(a["call_oi"]), "poi": int(a["put_oi"])})
+
+    return {"call_wall": call_top, "put_wall": put_top,
+            "call_tiered": call_tiered[:8], "put_tiered": put_tiered[:8],
+            "magnets": magnets[:5], "profile": prof,
+            "call_wall_pin": pin(call_top, "C"), "put_wall_pin": pin(put_top, "P")}
+
+
+def _mme_read_csv(path):
+    """
+    Replay a CBOE delayed_quotes SPX CSV exactly as the spec parses it:
+    skip leading blanks, then 3 header rows, 22 columns; scrape date from
+    header line 2 ("Date: ..."). Each row yields a call and a put contract.
+    """
+    import csv, re, os
+    from datetime import datetime
+    with open(path, newline="") as f:
+        raw = [ln for ln in f]
+    i = 0
+    while i < len(raw) and not raw[i].strip():
+        i += 1
+    header = raw[i:i + 3]
+    body = raw[i + 3:]
+    scrape = None
+    m = re.search(r"Date:\s*([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})", " ".join(header))
+    if m:
+        try:
+            scrape = datetime.strptime(f"{m.group(1)[:3]} {m.group(2)} {m.group(3)}",
+                                       "%b %d %Y").date()
+        except Exception:
+            scrape = None
+    if scrape is None:
+        env = os.environ.get("GEX_SCRAPE_DATE")
+        if env:
+            scrape = datetime.strptime(env, "%Y-%m-%d").date()
+    if scrape is None:
+        raise ValueError("cannot parse scrape date from CSV header; set GEX_SCRAPE_DATE=YYYY-MM-DD")
+
+    def fdate(s):
+        s = s.strip()
+        for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%a %b %d %Y", "%b %d %Y"):
+            try:
+                return datetime.strptime(s, fmt).date()
+            except Exception:
+                pass
+        return None
+
+    out, skipped = [], 0
+    for row in csv.reader(body):
+        if len(row) < 22:
+            if any(x.strip() for x in row):
+                skipped += 1
+            continue
+        exp = fdate(row[0])
+        if exp is None:
+            skipped += 1
+            continue
+        if exp <= scrape:                    # strictly AFTER
+            continue
+        def num(idx):
+            try:
+                v = float(row[idx])
+                return v if v == v else 0.0
+            except Exception:
+                return 0.0
+        K = num(11)
+        if K <= 0:
+            skipped += 1
+            continue
+        coi, poi = num(10), num(21)
+        if coi > 0:
+            out.append({"K": K, "cp": "C", "iv": num(7),
+                        "gamma_vendor": num(9), "oi": coi, "expiry": exp})
+        if poi > 0:
+            # 22-col order: ...17 PutVol, 18 PutIV, 19 PutDelta, 20 PutGamma,
+            # 21 PutOpenInt. Index 19 is DELTA — reading it as gamma flipped
+            # the put sign and emptied the put wall band. Caught by the
+            # synthetic-fixture test.
+            out.append({"K": K, "cp": "P", "iv": num(18),
+                        "gamma_vendor": num(20), "oi": poi, "expiry": exp})
+    return out, scrape, skipped
+
+
+def run_gex_verify():
+    """
+    --engine gexverify : print the six fixture numbers for reconciliation.
+
+    Source: GEX_CSV=<path> replays a committed CSV exactly as the coach's
+    script reads it (spot from GEX_SPOT, defaulting to the fixture's 7757.64
+    with a note). Without GEX_CSV it fetches the live JSON chain (spot from
+    GEX_SPOT, else the payload close, with a warning — the spec wants the
+    real cash close passed in).
+    Fixture (Aug 10 2026 file @ 7757.64): contracts 15,497 · expiries 55 ·
+    net +84.72B · flip 7,647.01 · call wall 7,800 · put wall 7,700.
+    """
+    import os
+    from datetime import datetime, timezone
+    csvp = os.environ.get("GEX_CSV")
+    if csvp:
+        contracts, scrape, skipped = _mme_read_csv(csvp)
+        spot = float(os.environ.get("GEX_SPOT") or 7757.64)
+        src = f"CSV {os.path.basename(csvp)} (scrape {scrape})"
+        if not os.environ.get("GEX_SPOT"):
+            print("[gexverify] GEX_SPOT not set — using the fixture's 7757.64")
+    else:
+        spot0, chain, note = _cboe_chain("_SPX")
+        if not chain:
+            print(f"[gexverify] no chain: {note}")
+            return None
+        scrape = datetime.now(timezone.utc).date()
+        contracts, skipped = _mme_contracts_from_chain(chain, scrape)
+        spot = float(os.environ.get("GEX_SPOT") or spot0)
+        src = "live CBOE JSON"
+        if not os.environ.get("GEX_SPOT"):
+            print(f"[gexverify] WARNING: spot {spot} is the payload value, not the "
+                  f"official cash close — set GEX_SPOT for a clean comparison")
+    flip, net_B, meta = mme_flip_net(contracts, spot, scrape)
+    walls = mme_walls(contracts, spot)
+    print(f"[gexverify] source {src} · spot {spot:,.2f} · skipped {skipped}")
+    print(f"  contracts after filter : {len(contracts)}")
+    print(f"  expiries               : {meta['expiries']}")
+    print(f"  Net GEX at spot (BS)   : {net_B:+.2f} B")
+    print(f"  gamma flip             : {flip:,.2f}" if flip else "  gamma flip             : none in 0.8-1.2x")
+    print(f"  call wall (top-1)      : {walls['call_wall']}"
+          + ("  PIN" if walls["call_wall_pin"] else ""))
+    print(f"  put wall (top-1)       : {walls['put_wall']}"
+          + ("  PIN" if walls["put_wall_pin"] else ""))
+    if walls["call_tiered"]:
+        print("  call tiered:", ", ".join(f"{r['strike']:.0f} ({r['gex_B']:+.2f}B)"
+                                          for r in walls["call_tiered"][:5]))
+    if walls["put_tiered"]:
+        print("  put tiered: ", ", ".join(f"{r['strike']:.0f} ({r['gex_B']:+.2f}B)"
+                                          for r in walls["put_tiered"][:5]))
+    if walls["magnets"]:
+        print("  magnets:    ", ", ".join(f"{m['strike']:.0f} ({m['total_oi']:,})"
+                                          for m in walls["magnets"]))
+    return {"flip": flip, "net_B": net_B, "walls": walls,
+            "contracts": len(contracts), "expiries": meta["expiries"]}
+
 def run_gex_cboe(symbol="_SPX", label="SPX"):
     """
     Real SPX gamma from CBOE's free delayed chain, scored by the SAME
@@ -5649,23 +6340,54 @@ def run_gex_cboe(symbol="_SPX", label="SPX"):
         return None
     print(f"[gexcboe] {len(chain)} contracts, spot {spot:,.2f}")
 
+    # Spot: the spec wants the REAL cash close passed in — never the header
+    # "Last". Order: GEX_SPOT override, then the engine's own spx_daily close,
+    # then the payload value with a warning.
+    spot_source = "payload"
+    env_spot = os.environ.get("GEX_SPOT")
+    if env_spot:
+        spot, spot_source = float(env_spot), "GEX_SPOT override"
+    else:
+        try:
+            import json as _j
+            _sd = _j.load(open(os.path.join(OUTPUTS_DIR, "spx_daily.json")))
+            _bars = _sd.get("bars") or []
+            _c = _bars[-1].get("c") if _bars else None
+            if _c:
+                spot, spot_source = float(_c), "spx_daily close"
+        except Exception:
+            pass
+    if spot_source == "payload":
+        print("[gexcboe] WARNING: using payload spot — set GEX_SPOT or ensure "
+              "spx_daily.json for the official cash close")
+
     band = float(os.environ.get("GEX_BAND", "0.10"))
     min_dte = int(os.environ.get("GEX_MIN_DTE", "1"))
-    # Coach rule 3: aggregate OI across the NEAR 3-MONTH chain (90 calendar
-    # days). 180d swept in LEAP open interest that does not hedge intraday.
-    max_dte = int(os.environ.get("GEX_MAX_DTE", "90"))
-    rows, skipped = _cboe_rows(chain, spot, band, max_dte, min_dte)
-    if len(rows) < 40:
-        print(f"[gexcboe] only {len(rows)} usable contracts "
-              f"({skipped} unparsed) - keeping previous file")
-        return None
+    # Was 90 ("near 3-month chain"). The coach's own spec (10 Aug) filters by
+    # expiry > scrape date and NOTHING else — his fixture carries 55 expiries.
+    # Full chain is the rule now; the env stays for experiments.
+    max_dte = int(os.environ.get("GEX_MAX_DTE", "3650"))
+    # The legacy engine is BEST-EFFORT now. It garnishes vanna, charm and the
+    # deep magnets; the decision numbers come from the MME spec below, and a
+    # legacy failure must never block them.
+    legacy = None
+    try:
+        rows, skipped = _cboe_rows(chain, spot, band, max_dte, min_dte)
+        if len(rows) >= 40:
+            _eng = gex_engine(rows, spot, scale=1.0)
+            if not _eng.get("error"):
+                legacy = _eng
+            else:
+                print(f"[gexcboe] legacy engine: {_eng['error']} "
+                      f"(vanna/charm unavailable today)")
+        else:
+            print(f"[gexcboe] legacy rows thin ({len(rows)}) - vanna/charm skipped")
+    except Exception as e:
+        print(f"[gexcboe] legacy engine failed: {e}")
 
-    res = gex_engine(rows, spot, scale=1.0)
-    if res.get("error"):
-        print(f"[gexcboe] engine: {res['error']} - keeping previous file")
-        return None
+    res = legacy if legacy else {"overview": {}, "levels": {}, "profile": []}
     res["asof"] = _now()
-    res["source"] = f"CBOE delayed chain (free) - real {label} OI, <={max_dte}d"
+    res["source"] = f"CBOE delayed chain (free) - real {label} OI, full chain (MME spec)"
     res["symbol"] = label
     ov = res.get("overview") or {}
     lv = res.get("levels") or {}
@@ -5673,6 +6395,75 @@ def run_gex_cboe(symbol="_SPX", label="SPX"):
     def _lv(k):
         v = lv.get(k)
         return v.get("strike") if isinstance(v, dict) else v
+
+    # ---- MME SPEC OVERRIDE (10 Aug 2026) ----------------------------------
+    # The legacy engine still runs above for vanna/charm and the deep magnets,
+    # but the numbers that gate decisions — flip, headline net, walls, pin —
+    # now come from the coach's exact computation. Two gamma sources by
+    # design: BS re-solve for flip/net, vendor gamma for walls. Do not unify.
+    try:
+        from datetime import timezone as _tz
+        _scrape = datetime.now(_tz.utc).date()
+        _contracts, _skip2 = _mme_contracts_from_chain(chain, _scrape)
+        if len(_contracts) < 50:
+            raise ValueError(f"only {len(_contracts)} contracts after the expiry filter")
+        _flip, _net_B, _meta = mme_flip_net(_contracts, spot, _scrape)
+        _walls = mme_walls(_contracts, spot)
+        ov = res.setdefault("overview", {})
+        lv = res.setdefault("levels", {})
+        ov["spx_spot"] = round(spot, 2)
+        ov["net_gex_B"] = _net_B
+        ov["regime"] = "positive" if _net_B > 0 else "negative"
+        if _flip:
+            ov["gamma_flip"] = round(_flip, 2)
+        lv["call_wall"] = _walls["call_wall"]
+        lv["put_wall"] = _walls["put_wall"]
+        if _walls["magnets"]:
+            lv["pin"] = _walls["magnets"][0]["strike"]
+        if _walls.get("profile"):
+            res["profile"] = _walls["profile"]
+        res["confidence"] = {
+            "levels": "high", "regime_sign": "high",
+            "note": "Coach's exact spec (10 Aug 2026). Flip/net: BS re-solve. "
+                    "Walls: vendor gamma, closest significant.",
+        }
+        res["mme"] = {
+            "method": "MME spec (coach, 10 Aug 2026): BS re-solve flip on a "
+                      "120-pt 0.8-1.2x grid, sticky-strike IV, business-day T, "
+                      "L^2 dollar term; walls = closest significant on vendor "
+                      "gamma, strike%50, floor 25% of side max",
+            "spot_source": spot_source,
+            "contracts": len(_contracts), "expiries": _meta["expiries"],
+            "call_tiered": _walls["call_tiered"], "put_tiered": _walls["put_tiered"],
+            "magnets": _walls["magnets"],
+            "call_wall_pin": _walls["call_wall_pin"],
+            "put_wall_pin": _walls["put_wall_pin"],
+        }
+        # the running acceptance record: one line per day, spec vs briefing
+        try:
+            import json as _j2
+            os.makedirs(os.path.join(OUTPUTS_DIR, "history"), exist_ok=True)
+            with open(os.path.join(OUTPUTS_DIR, "history",
+                                   "gex_spec_daily.jsonl"), "a") as _f:
+                _f.write(_j2.dumps({"date": str(_scrape), "spot": round(spot, 2),
+                                    "flip": ov.get("gamma_flip"),
+                                    "net_B": _net_B,
+                                    "call_wall": _walls["call_wall"],
+                                    "put_wall": _walls["put_wall"],
+                                    "contracts": len(_contracts)}) + "\n")
+        except Exception:
+            pass
+        print(f"[gexcboe] MME spec: flip {ov.get('gamma_flip')}, net {_net_B:+.2f}B, "
+              f"walls {_walls['call_wall']}/{_walls['put_wall']}, "
+              f"{len(_contracts)} contracts / {_meta['expiries']} expiries "
+              f"(spot: {spot_source})")
+    except Exception as e:
+        if legacy:
+            print(f"[gexcboe] MME spec FAILED ({e}) — legacy numbers stand for today")
+        else:
+            print(f"[gexcboe] MME spec FAILED ({e}) and no legacy fallback - "
+                  f"keeping previous gex.json")
+            return None
 
     # Open interest only updates overnight, so the LEVELS should too. Without
     # this the flip and walls move on every run purely because spot and IV
@@ -5693,12 +6484,25 @@ def run_gex_best():
     GEX source of record, in order of trust:
       1. a committed briefing PDF (ground truth when present)
       2. CBOE's real SPX chain
-      3. the SPY x10 proxy - fallback only, and it is structurally biased
+      3. nothing. There is no third source.
+
+    The SPY x10 proxy was REMOVED on 7 Aug 2026. It was not a calibration
+    problem: an ETF chain underweights institutional put hedging, so the proxy
+    structurally reads positive gamma when SPX is in negative gamma. A fallback
+    that produces a confidently WRONG regime is worse than no data, because the
+    app renders it identically to a real reading. CBOE now matches the coach's
+    published open interest to within a handful of contracts across every
+    strike tested, so the proxy has no remaining purpose.
     """
     try:
         import glob as _g
         cand = sorted(_g.glob("briefings/*.pdf"))
-        if cand and _briefing_is_readable(cand[-1]) and run_gex_from_briefing():
+        # run_gex_from_briefing does its own newest-by-filename-date selection
+        # and returns falsy on a failed parse, so no pre-check is needed here.
+        # (A phantom _briefing_is_readable() guard used to sit on this line; it
+        # was never defined, so the NameError silently skipped the briefing
+        # EVERY day and CBOE ran instead of ground truth.)
+        if cand and run_gex_from_briefing():
             print("[gex] source: briefing PDF")
             return True
     except Exception as e:
@@ -5709,23 +6513,25 @@ def run_gex_best():
             return True
     except Exception as e:
         print(f"[gex] CBOE failed ({e})")
-    print("[gex] FALLING BACK TO THE SPY PROXY - treat the flip with suspicion")
-    return run_gex()
+    # No fallback by design. gex.json keeps yesterday's file, which the app
+    # renders with a stale badge — an honest "we don't know today" beats a
+    # confident wrong regime.
+    print("[gex] NO SOURCE: no briefing and CBOE failed. gex.json NOT rewritten.")
+    raise RuntimeError("no GEX source available (briefing absent, CBOE failed)")
 
 
 def run_gex_from_briefing(path=None):
     """
-    Write gex.json from a briefing PDF instead of the SPY proxy. If no path is
-    given, use the newest PDF in ./briefings/. This is the SPX GEX source of
-    record; the SPY proxy (run_gex) is a fallback only.
+    Write gex.json from a briefing PDF. If no path is given, use the newest PDF
+    in ./briefings/. This is the SPX GEX source of record; CBOE is second.
     """
     import os, glob, re
     from datetime import datetime
     if path is None:
         cands = glob.glob("briefings/*.pdf") + glob.glob("briefings/*.PDF")
         if not cands:
-            print("[gexbrief] no briefing in ./briefings/ — falling back to proxy")
-            return run_gex()
+            print("[gexbrief] no briefing in ./briefings/")
+            return False
         # pick the LATEST by date parsed from the filename (mtime is unreliable
         # after actions/checkout resets it). Handles "..July_21_2026.pdf" and
         # ISO "..2026-07-21.pdf"; falls back to mtime if neither parses.
@@ -7164,11 +7970,15 @@ def run_full():
 def run_engine(name):
     print(f"=== Phoenix engine: {name} ===")
     if name == "gex":
-        run_gex()
+        run_gex_best()
     elif name == "trades":
         run_trades()
     elif name == "gexsweep":
         run_gex_sweep()
+    elif name == "gexverify":
+        run_gex_verify()
+    elif name == "signals":
+        run_signals_index()
     elif name == "macro":
         run_macro()
     elif name == "spx_daily":
