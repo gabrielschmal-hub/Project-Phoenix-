@@ -1,5 +1,5 @@
 {
- "asof": "2026-08-10 13:40 UTC",
+ "asof": "2026-08-11 05:55 UTC",
  "regime": "POLICY_TIGHTENING",
  "confidence": 37.3,
  "confidence_note": "regime score, not a calibrated probability (A4)",
@@ -8,22 +8,22 @@
  },
  "secondary_tag": "INFLATIONARY",
  "inputs": {
-  "wti_12m": 26.99,
-  "wti_3m": -24.35,
-  "wti_vs_2yr": 11.9,
+  "wti_12m": 30.96,
+  "wti_3m": -21.99,
+  "wti_vs_2yr": 15.36,
   "cpi_yoy": 3.46,
   "cpi_chg_3m": -0.71,
-  "spx_3m": 4.62,
-  "spx_1m": 3.93,
-  "dd": -0.09,
-  "trail_dd": -0.09,
-  "spx_off_low": 4.57,
+  "spx_3m": 4.65,
+  "spx_1m": 3.96,
+  "dd": -0.06,
+  "trail_dd": -0.06,
+  "spx_off_low": 4.6,
   "fresh_high": true,
-  "us02_3m": 31.0,
-  "real_3m": 47.0,
-  "vix": 15.44,
-  "vix_3m_chg": -16.22,
-  "hy": 274.0
+  "us02_3m": 30.0,
+  "real_3m": 46.0,
+  "vix": 15.46,
+  "vix_3m_chg": -16.12,
+  "hy": 273.0
  },
  "explain": {
   "regime": "POLICY_TIGHTENING",
@@ -42,28 +42,28 @@
    {
     "key": "us02_3m",
     "label": "2Y yield 3m change (bp)",
-    "value": 31.0,
+    "value": 30.0,
     "op": ">",
     "threshold": 40,
-    "clear_by": -9.0,
+    "clear_by": -10.0,
     "ok": false
    },
    {
     "key": "dd",
     "label": "Drawdown",
-    "value": -0.09,
+    "value": -0.06,
     "op": ">",
     "threshold": -12,
-    "clear_by": 11.91,
+    "clear_by": 11.94,
     "ok": true
    },
    {
     "key": "real_3m",
     "label": "Real 10Y 3m change (bp)",
-    "value": 47.0,
+    "value": 46.0,
     "op": ">",
     "threshold": 25,
-    "clear_by": 22.0,
+    "clear_by": 21.0,
     "ok": true
    }
   ],
@@ -77,16 +77,16 @@
    },
    {
     "if": "Drawdown falls below -12",
-    "now": -0.09,
+    "now": -0.06,
     "threshold": -12,
-    "distance": 11.91,
+    "distance": 11.94,
     "then": "POLICY_TIGHTENING no longer qualifies"
    },
    {
     "if": "Real 10Y 3m change (bp) falls below 25",
-    "now": 47.0,
+    "now": 46.0,
     "threshold": 25,
-    "distance": 22.0,
+    "distance": 21.0,
     "then": "POLICY_TIGHTENING no longer qualifies"
    }
   ],
