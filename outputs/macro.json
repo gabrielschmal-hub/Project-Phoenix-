@@ -1,5 +1,5 @@
 {
- "asof": "2026-08-11 16:06 UTC",
+ "asof": "2026-08-11 20:04 UTC",
  "regime": "POLICY_TIGHTENING",
  "confidence": 37.3,
  "confidence_note": "regime score, not a calibrated probability (A4)",
@@ -8,21 +8,21 @@
  },
  "secondary_tag": "INFLATIONARY",
  "inputs": {
-  "wti_12m": 32.52,
-  "wti_3m": -21.06,
-  "wti_vs_2yr": 16.72,
+  "wti_12m": 32.87,
+  "wti_3m": -20.85,
+  "wti_vs_2yr": 17.02,
   "cpi_yoy": 3.46,
   "cpi_chg_3m": -0.71,
-  "spx_3m": 4.57,
-  "spx_1m": 3.88,
-  "dd": -0.14,
-  "trail_dd": -0.14,
-  "spx_off_low": 4.52,
+  "spx_3m": 4.31,
+  "spx_1m": 3.63,
+  "dd": -0.38,
+  "trail_dd": -0.38,
+  "spx_off_low": 4.27,
   "fresh_high": true,
   "us02_3m": 30.0,
   "real_3m": 46.0,
-  "vix": 15.34,
-  "vix_3m_chg": -16.77,
+  "vix": 15.3,
+  "vix_3m_chg": -16.98,
   "hy": 273.0
  },
  "explain": {
@@ -51,10 +51,10 @@
    {
     "key": "dd",
     "label": "Drawdown",
-    "value": -0.14,
+    "value": -0.38,
     "op": ">",
     "threshold": -12,
-    "clear_by": 11.86,
+    "clear_by": 11.62,
     "ok": true
    },
    {
@@ -77,9 +77,9 @@
    },
    {
     "if": "Drawdown falls below -12",
-    "now": -0.14,
+    "now": -0.38,
     "threshold": -12,
-    "distance": 11.86,
+    "distance": 11.62,
     "then": "POLICY_TIGHTENING no longer qualifies"
    },
    {
