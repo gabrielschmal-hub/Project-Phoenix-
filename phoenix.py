@@ -536,6 +536,333 @@ def write_signal_log(v2, regime=None, spx=None):
     return path
 
 
+
+# ============================================================
+# THE WIRE — the 7am news briefing, committed like Elliott's PDF
+#
+# The morning chat writes one HTML file per account into wire/
+# (phoenix-wire-<account>-YYYY-MM-DD.html). This step turns the newest
+# file per account into outputs/wire.json for the Edition's two news
+# sections. ADDITIVE by design: the wire never replaces an engine
+# section — the tape, the map (GEX histogram + VIX term), the calendar
+# all stay engine-owned.
+#
+# Parse order: (1) an embedded <script type="application/json"
+# id="wire-data"> payload if the morning chat provides one — the robust
+# contract; (2) best-effort HTML parsing of the known wire markup;
+# (3) if nothing parses, the publish gate KEEPS the previous wire.json
+# rather than shipping an empty one. A wire from a previous day still
+# publishes with its own date — the app renders the stale badge.
+# ============================================================
+WIRE_DIR = "wire"
+
+
+def _wire_strip(s):
+    """Tags out, entities resolved. PURE."""
+    import re as _re
+    from html import unescape
+    return unescape(_re.sub(r"<[^>]+>", "", s or "")).strip()
+
+
+def _wire_keep_b(s):
+    """Reduce inner HTML to text plus <b>/<i>/<em> only. PURE."""
+    import re as _re
+    from html import unescape
+    s = _re.sub(r"<(?!/?(?:b|i|em)\b)[^>]+>", "", s or "")
+    return unescape(s).strip()
+
+
+def _wire_from_embedded_json(raw):
+    """The preferred contract: a JSON payload inside the wire HTML."""
+    import re as _re, json as _json
+    m = _re.search(r'<script type="application/json" id="wire-data">(.*?)</script>',
+                   raw, _re.S)
+    if not m:
+        return None
+    try:
+        d = _json.loads(m.group(1))
+        return d if isinstance(d, dict) else None
+    except Exception as e:
+        print(f"[wire] embedded JSON present but unreadable ({e}) — "
+              f"falling back to HTML parse")
+        return None
+
+
+def _wire_parse_html(raw):
+    """Best-effort parse of the known phoenix-wire markup. PURE."""
+    import re as _re
+    out = {"headline": None, "standfirst": None, "positions": None,
+           "themes": [], "world": None, "ondeck": None}
+    m = _re.search(r'class="ed-call"[^>]*>(.*?)</div>', raw, _re.S)
+    if m:
+        out["headline"] = _wire_strip(m.group(1))
+    m = _re.search(r'class="ed-vwhy"[^>]*>(.*?)</div>', raw, _re.S)
+    if m:
+        out["standfirst"] = _wire_strip(m.group(1))
+    m = _re.search(r'<p class="ed-body">\s*<b>On deck\.?</b>(.*?)</p>', raw, _re.S)
+    if m:
+        out["ondeck"] = _wire_keep_b(m.group(1))
+    for ch in _re.split(r'<div class="ed-sec">', raw)[1:]:
+        k = _re.search(r'<div class="ed-k"><span>(.*?)</span>'
+                       r'<span class="ed-n">(.*?)</span>', ch, _re.S)
+        kicker = _wire_strip(k.group(1)) if k else ""
+        right = _wire_strip(k.group(2)) if k else ""
+        t = _re.search(r'<h2 class="ed-hl[^"]*">(.*?)</h2>', ch, _re.S)
+        title = _wire_strip(t.group(1)) if t else ""
+        items = []
+        for im in _re.finditer(
+                r'<div class="ed-w"><span class="w-tag ?([a-z\- ]*)">(.*?)</span>'
+                r'<span>(.*?)</span><span class="w-when">(.*?)</span></div>',
+                ch, _re.S):
+            it = {"tone": im.group(1).strip(), "tag": _wire_strip(im.group(2)),
+                  "html": _wire_keep_b(im.group(3)), "when": _wire_strip(im.group(4))}
+            tk = _re.match(r'<b>([A-Z][A-Z0-9.\-]{0,6})</b>', im.group(3).strip())
+            if tk:
+                it["ticker"] = tk.group(1)
+            items.append(it)
+        note = None
+        n = _re.search(r'<p class="ed-body">(?!\s*<b>On deck)(.*?)</p>', ch, _re.S)
+        if n:
+            note = _wire_keep_b(n.group(1))
+        low = kicker.lower()
+        if low.startswith("your positions"):
+            body = None
+            if not items:
+                b = _re.search(r'</h2>\s*<p[^>]*>(.*?)</p>', ch, _re.S)
+                body = _wire_keep_b(b.group(1)) if b else note
+            out["positions"] = {"right": right, "title": title,
+                                "items": items, "note": note if items else body}
+        elif low.startswith("the world"):
+            out["world"] = {"kicker": kicker, "right": right, "title": title,
+                            "items": items, "note": note}
+        elif (not kicker) or low.startswith("the tape"):
+            continue
+        else:
+            out["themes"].append({"kicker": kicker, "right": right,
+                                  "title": title, "items": items, "note": note})
+    return out
+
+
+def run_wire():
+    """Publish outputs/wire.json from the newest committed wire file per account."""
+    import glob as _g, re as _re, os as _os
+    files = _g.glob(_os.path.join(WIRE_DIR, "phoenix-wire-*.html"))
+    if not files:
+        print(f"[wire] no files under {WIRE_DIR}/ — nothing to publish. "
+              f"Commit phoenix-wire-<account>-YYYY-MM-DD.html to feed the Edition.")
+        return
+    best = {}
+    for p in sorted(files):
+        m = _re.search(r"phoenix-wire-([a-z0-9_]+)-(\d{4}-\d{2}-\d{2})\.html$", p)
+        if not m:
+            print(f"[wire] skipping {p} — name must be "
+                  f"phoenix-wire-<account>-YYYY-MM-DD.html")
+            continue
+        acct, d = m.group(1), m.group(2)
+        if acct not in best or d > best[acct][0]:
+            best[acct] = (d, p)
+    accounts = {}
+    for acct, (d, p) in sorted(best.items()):
+        try:
+            raw = open(p, encoding="utf-8", errors="ignore").read()
+        except Exception as e:
+            print(f"[wire] {acct}: cannot read {p}: {e}")
+            continue
+        payload = _wire_from_embedded_json(raw)
+        parser = "embedded-json"
+        if payload is None:
+            payload = _wire_parse_html(raw)
+            parser = "html-parse"
+        n_items = (len((payload.get("positions") or {}).get("items") or [])
+                   + sum(len(t.get("items") or []) for t in payload.get("themes") or [])
+                   + len((payload.get("world") or {}).get("items") or []))
+        payload.update({"date": d, "file": p, "parser": parser})
+        accounts[acct] = payload
+        print(f"[wire] {acct}: {d} via {parser} — "
+              f"headline {'ok' if payload.get('headline') else 'MISSING'}, "
+              f"{len(payload.get('themes') or [])} themes, {n_items} items")
+    data = {"asof": _now(),
+            "date": max((v["date"] for v in accounts.values()), default=None),
+            "accounts": accounts}
+
+    def _validate_wire(pl):
+        probs = []
+        if not pl.get("accounts"):
+            probs.append("no accounts parsed from wire/")
+        for a, v in (pl.get("accounts") or {}).items():
+            n = (len((v.get("positions") or {}).get("items") or [])
+                 + sum(len(t.get("items") or []) for t in (v.get("themes") or []))
+                 + len((v.get("world") or {}).get("items") or []))
+            if not v.get("headline") and n == 0:
+                probs.append(f"{a}: no headline and no items — the parser found "
+                             f"nothing it recognises in {v.get('file')}")
+        return probs
+
+    write_json_guarded("wire", data, _validate_wire)
+
+
+# ============================================================
+# THE DAY SCORE — the coach's #1 ask, built under two non-negotiables:
+#   1. AUDITABLE BY CONSTRUCTION. The score never renders without its
+#      components. A composite that hides its inputs is the black box this
+#      system was praised for not being.
+#   2. LOGGED FROM DAY ONE. Weights are provisional; the daily log is the
+#      asset — in three months it can be tested against what the days
+#      actually did. Same start-the-clock property as the signal log.
+#
+# It reads only committed outputs (macro, gex, vix_term, trades), so it can
+# never disagree with what the tiles show. If the gamma data is stale, the
+# score is CAPPED, not silently computed on yesterday's structure — that
+# exact failure produced a bad SNOW call on 6 Aug.
+# ============================================================
+
+def run_dayscore():
+    import os, json
+    from datetime import datetime, timezone
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    def _read(name):
+        try:
+            return json.load(open(os.path.join(OUTPUTS_DIR, name + ".json")))
+        except Exception:
+            return {}
+
+    macro, gex, vix, trades = _read("macro"), _read("gex"), _read("vix_term"), _read("trades")
+    comps, flags = [], []
+
+    def comp(name, pts, mx, why):
+        pts = max(0.0, min(float(pts), mx))
+        comps.append({"name": name, "pts": round(pts, 1), "max": mx, "why": why})
+        return pts
+
+    total = 0.0
+
+    # ---- 1. Regime (0-25): a named regime plus its confidence ----------------
+    regime = macro.get("regime")
+    conf = float(macro.get("confidence") or 0)
+    if regime and regime != "UNKNOWN":
+        total += comp("Regime", 10 + conf / 100.0 * 15, 25,
+                      f"{regime}, confidence {conf:.0f}/100")
+    else:
+        total += comp("Regime", 0, 25, "no named regime")
+        flags.append("regime unknown")
+
+    # ---- 2. Gamma structure (0-30): sign, room to the flip, corridor ---------
+    ov = gex.get("overview") or {}
+    lv = gex.get("levels") or {}
+    net = ov.get("net_gex_B")
+    spot = ov.get("spx_spot")
+    flip = ov.get("gamma_flip")
+    cw, pw = lv.get("call_wall"), lv.get("put_wall")
+    if net is not None and net > 0 and spot:
+        pts, why = 14.0, [f"positive gamma {net:+.1f}B"]
+        if flip:
+            dist = abs(spot / flip - 1) * 100
+            pts += min(dist, 1.5) / 1.5 * 10
+            why.append(f"{dist:.1f}% above the flip")
+        if cw and pw and cw > pw:
+            corridor = (cw - pw) / spot * 100
+            pts += min(corridor, 1.0) / 1.0 * 6
+            why.append(f"corridor {pw:.0f}-{cw:.0f} ({corridor:.1f}%)")
+        total += comp("Gamma", pts, 30, ", ".join(why))
+    elif net is not None and spot:
+        total += comp("Gamma", 3, 30, f"NEGATIVE gamma {net:+.1f}B — moves extend")
+        flags.append("negative gamma")
+    else:
+        total += comp("Gamma", 0, 30, "no gamma data")
+        flags.append("gamma missing")
+
+    # ---- 3. Volatility (0-20): level and term shape --------------------------
+    vspot = vix.get("spot")
+    fut = vix.get("futures") or []
+    if vspot:
+        lvl = 10 if vspot < 16 else 7 if vspot < 20 else 3 if vspot < 25 else 0
+        shape, spts = "term shape unknown", 5
+        if len(fut) >= 2:
+            front, back = fut[0]["value"], fut[-1]["value"]
+            if front < back:
+                shape, spts = f"contango {front:.1f}->{back:.1f}", 10
+            else:
+                shape, spts = f"BACKWARDATION {front:.1f}->{back:.1f}", 0
+                flags.append("vix backwardation")
+        total += comp("Volatility", lvl + spts, 20, f"VIX {vspot:.1f}, {shape}")
+    else:
+        total += comp("Volatility", 5, 20, "no vix data — neutral")
+
+    # ---- 4. Book state (0-25): heat headroom and the loss streak -------------
+    rows = (trades.get("trades") or [])
+    open_risk_R = 0.0
+    for t in rows:
+        if t.get("status") != "open" or t.get("managed"):
+            continue
+        if (t.get("account") or "gabriel") != "gabriel":
+            continue
+        e, s0 = t.get("entry"), t.get("current_stop") or t.get("initial_stop")
+        q = t.get("qty") or 0
+        rd = ((t.get("account_size") or 2000) * 0.01) or 20
+        if e and s0 and q:
+            open_risk_R += max(0.0, (e - s0) * q) / rd
+    head = max(0.0, (3.0 - open_risk_R) / 3.0) * 15
+    closed = sorted([t for t in rows if t.get("status") == "closed"
+                     and (t.get("account") or "gabriel") == "gabriel"],
+                    key=lambda t: t.get("exit_date") or "")
+    streak = 0
+    for t in reversed(closed):
+        e, s0, x = t.get("entry"), t.get("initial_stop"), t.get("exit_price")
+        if not (e and s0 and x and e > s0):
+            break
+        if (x - e) / (e - s0) < 0:
+            streak += 1
+        else:
+            break
+    spts = 10 if streak < 3 else 0
+    if streak >= 3:
+        flags.append(f"{streak}-loss streak — cool-off")
+    total += comp("Book", head + spts,
+                  25, f"heat {open_risk_R:.2f}R of 3R, loss streak {streak}")
+
+    # ---- staleness cap -------------------------------------------------------
+    capped = None
+    gex_day = (gex.get("asof") or "")[:10]
+    if gex_day and gex_day != today:
+        if total > 45:
+            capped = f"gamma data is from {gex_day} — score capped at 45"
+            total = 45.0
+            flags.append("stale gamma")
+
+    verdict = ("CLEAR" if total >= 70 else
+               "TRADE CAREFULLY" if total >= 45 else "STAND DOWN")
+    out = {"asof": _now(), "date": today, "score": round(total, 1),
+           "verdict": verdict, "capped": capped, "flags": flags,
+           "components": comps,
+           "weights_note": "provisional weights — the daily log exists so they "
+                           "can be validated against outcomes, not defended"}
+    write_json("dayscore", out)
+
+    # one line per day, first run wins (PHOENIX_DAYSCORE_FORCE=1 to replace)
+    try:
+        os.makedirs(os.path.join(OUTPUTS_DIR, "history"), exist_ok=True)
+        lp = os.path.join(OUTPUTS_DIR, "history", "dayscore_log.jsonl")
+        seen = False
+        if os.path.exists(lp) and os.environ.get("PHOENIX_DAYSCORE_FORCE") != "1":
+            with open(lp) as f:
+                seen = any(json.loads(l).get("date") == today
+                           for l in f if l.strip())
+        if not seen:
+            with open(lp, "a") as f:
+                f.write(json.dumps({"date": today, "score": out["score"],
+                                    "verdict": verdict,
+                                    "c": {c["name"]: c["pts"] for c in comps},
+                                    "flags": flags}) + "\n")
+    except Exception as e:
+        print(f"[dayscore] log append failed: {e}")
+
+    print(f"[dayscore] {out['score']:.0f}/100 {verdict}"
+          + (f" (CAPPED: {capped})" if capped else "")
+          + (f" · flags: {', '.join(flags)}" if flags else ""))
+    return out
+
+
 def run_signals_index():
     """
     Rebuild outputs/history/signals_index.json — one line per logged day.
@@ -760,6 +1087,8 @@ def annotate_persistence(trade_ranked):
         # still running. Without this they would be indistinguishable.
         c["continuous"] = (len(days) >= span - 1)
     return trade_ranked
+
+
 
 
 def _validate_stocks(result):
@@ -7955,6 +8284,10 @@ def run_full():
     step("macro_series",   run_macro_series_daily)   # daily, for the brief
     step("vix_term",       run_vix_term)
     step("gex",            run_gex_best)
+    # AFTER gex on purpose: the score reads gex.json, and running before it
+    # would grade every morning on yesterday's gamma and self-cap at 45.
+    step("dayscore",       run_dayscore,      optional=True)
+    step("wire",           run_wire,          optional=True)
     step("calendar",       run_calendar)
     step("sectors",        run_sectors)          # yfinance: keep it next to the
                                                  # other Yahoo pulls, before the
@@ -8002,6 +8335,10 @@ def run_engine(name):
         run_gex_sweep()
     elif name == "gexverify":
         run_gex_verify()
+    elif name == "wire":
+        run_wire()
+    elif name == "dayscore":
+        run_dayscore()
     elif name == "signals":
         run_signals_index()
     elif name == "macro":

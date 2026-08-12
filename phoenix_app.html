@@ -1437,6 +1437,11 @@ body.px-edition{overflow:hidden}
 html.light .ed-w .w-tag{color:#FFFDF9}
 .ed-w .w-tag.low{background:var(--line2);color:var(--ink)}
 .ed-w .w-when{font-family:var(--mono);font-size:11.5px;color:var(--inkFade);white-space:nowrap}
+.ed-w .w-tag.war-talks{background:var(--green);color:#FFFDF9}
+.ed-w .w-tag.war-strike{background:var(--red);color:#FFFDF9}
+.ed-w .w-tag.war-oil{background:var(--amber);color:#FFFDF9}
+.ed-w .w-tag.war-politics,.ed-w .w-tag.war-military{background:var(--line2);color:var(--ink)}
+.ed-wsub{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
 
 .ed-jump{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:26px}
 .ed-jump a{display:block;text-align:center;padding:14px 8px;border:1px solid var(--line2);
@@ -1882,6 +1887,29 @@ html.light .seg button.on,html.light .pf-seg.on,html.light .pf-seg.on .sn,
 html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   border-color:#8F3F17!important;font-weight:600}
 
+</style>
+<style id="px-additions">
+  /* staleness: data from a previous day must LOOK different */
+  .px-stale{display:inline-block;margin-left:7px;padding:1px 7px;border-radius:3px;
+    font:700 9.5px/1.5 'Courier New',monospace;letter-spacing:1px;vertical-align:1px;
+    color:#fff;background:var(--red);}
+  .px-stale.aging{background:var(--amber);color:#1B1305;}
+  /* the Day Score strip inside the verdict tile */
+  .mcds{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px;
+    padding:9px 12px;border:1px solid var(--line);border-radius:5px;background:var(--card2);}
+  .mcds .n{font:700 24px/1 'Courier New',monospace;}
+  .mcds .v{font:700 10.5px/1.3 'Courier New',monospace;letter-spacing:1.4px;text-transform:uppercase;}
+  .mcds .chips{display:flex;gap:6px;flex-wrap:wrap;flex:1;}
+  .mcds .c{font:11px/1.4 'Courier New',monospace;color:var(--inkLight);
+    border:1px solid var(--line2);border-radius:3px;padding:2px 7px;cursor:help;}
+  .mcds .c b{color:var(--inkMed);font-weight:700;}
+  .mcds .cap{flex-basis:100%;font:italic 12px/1.5 Georgia,serif;color:var(--amber);}
+  .mcds .wn{flex-basis:100%;font:italic 11px/1.4 Georgia,serif;color:var(--inkGhost);}
+  /* the position policy line — the SNOW rules, where the trade lives */
+  .w-policy{margin:8px 0 10px;padding:8px 12px;border-left:3px solid var(--gold);
+    background:var(--card2);font:12.5px/1.6 Georgia,serif;color:var(--inkMed);}
+  .w-policy b{font-family:'Courier New',monospace;font-size:11px;letter-spacing:1px;
+    color:var(--gold);text-transform:uppercase;}
 </style>
 </head>
 <body>
@@ -2546,6 +2574,73 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
 
   function edSet(id,html){ var el=document.getElementById(id); if(el) el.innerHTML=html; }
 
+  // ---------------- the wire (morning news, committed daily) -----------------
+  // ADDITIVE by design: two sections carry the 7am wire and touch nothing else
+  // in the edition — the tape, the map, the calendar stay engine-owned. An
+  // absent file renders a loud one-liner, never a silent gap; a wire from a
+  // previous day carries the stale badge. Item bodies arrive from run_wire
+  // already reduced to text plus <b>/<i>/<em>.
+  function escW(s){ return String(s==null?"":s).replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function edWireItems(items){
+    return (items||[]).map(function(it){
+      var tone=String(it.tone||"").replace(/[^a-z\- ]/g,"");
+      return '<div class="ed-w"><span class="w-tag'+(tone?' '+tone:'')+'">'+
+        escW(it.tag||"")+'</span><span>'+(it.html||"")+'</span>'+
+        '<span class="w-when">'+escW(it.when||"")+'</span></div>';
+    }).join("");
+  }
+  function edWire(w){
+    var acct=(window.PHOENIX_PROFILE==="A")?"aldemar":"gabriel";
+    var pos=document.getElementById("edWirePos"),
+        wor=document.getElementById("edWireWorld");
+    if(!pos||!wor) return;
+    var p=w&&w.accounts&&w.accounts[acct];
+    if(!p){
+      var today=new Date().toISOString().slice(0,10);
+      pos.style.display=""; wor.style.display="none"; wor.innerHTML="";
+      pos.innerHTML='<div class="ed-k"><span>The wire</span>'+
+        '<span class="ed-n">not committed</span></div>'+
+        '<div class="ed-note">No wire for '+escW(acct)+' today. Drop '+
+        '<b>wire/phoenix-wire-'+escW(acct)+'-'+today+'.html</b> into the repo '+
+        'and the next run publishes it here.</div>';
+      return;
+    }
+    pos.style.display=""; wor.style.display="";
+    var st=pxStaleTag(p.date);
+    var P=p.positions||{};
+    var inner=(P.items&&P.items.length)
+      ? '<div>'+edWireItems(P.items)+'</div>'+
+        (P.note?'<p class="ed-body">'+P.note+'</p>':'')
+      : '<div class="ed-note">'+(P.note||"Nothing open — nothing to track.")+'</div>';
+    pos.innerHTML='<div class="ed-k"><span>The wire \u00b7 your positions</span>'+
+      '<span class="ed-n">'+escW(P.right||"signal vs noise")+' \u00b7 '+
+      escW(p.date||"")+st+'</span></div>'+
+      (P.title?'<h2 class="ed-hl sm">'+escW(P.title)+'</h2>':'')+inner;
+    var hx='<div class="ed-k"><span>The wire \u00b7 the world</span>'+
+      '<span class="ed-n">morning edition \u00b7 '+escW(p.date||"")+st+'</span></div>';
+    if(p.headline) hx+='<h2 class="ed-hl sm">'+escW(p.headline)+'</h2>';
+    if(p.standfirst) hx+='<p class="ed-body">'+escW(p.standfirst)+'</p>';
+    (p.themes||[]).forEach(function(t){
+      hx+='<div class="ed-wsub"><div class="ed-k"><span>'+escW(t.kicker||"")+
+        '</span><span class="ed-n">'+escW(t.right||"")+'</span></div>'+
+        (t.title?'<h2 class="ed-hl sm">'+escW(t.title)+'</h2>':'')+
+        '<div>'+edWireItems(t.items)+'</div>'+
+        (t.note?'<p class="ed-body">'+t.note+'</p>':'')+'</div>';
+    });
+    if(p.world){
+      hx+='<div class="ed-wsub"><div class="ed-k"><span>'+
+        escW(p.world.kicker||"The world & the market")+'</span>'+
+        '<span class="ed-n">'+escW(p.world.right||"")+'</span></div>'+
+        (p.world.title?'<h2 class="ed-hl sm">'+escW(p.world.title)+'</h2>':'')+
+        '<div>'+edWireItems(p.world.items)+'</div>'+
+        (p.world.note?'<p class="ed-body">'+p.world.note+'</p>':'')+'</div>';
+    }
+    if(p.ondeck) hx+='<p class="ed-body" style="margin-top:16px"><b>On deck.</b> '+
+      p.ondeck+'</p>';
+    wor.innerHTML=hx;
+  }
+
   function edBuild(){
     Promise.all([
       getJSON("macro").catch(function(){return null;}),
@@ -2555,7 +2650,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       getJSON("stocks").catch(function(){return null;}),
       getJSON("congress_trades").catch(function(){return null;}),
       getJSON("institutional_holdings").catch(function(){return null;}),
-      getJSON("calendar").catch(function(){return null;})
+      getJSON("calendar").catch(function(){return null;}),
+      getJSON("wire").catch(function(){return null;})
     ]).then(function(r){
       var m=r[0]||{}, g=r[1]||{}, ser=((r[2]&&r[2].series)||r[2]||[]),
           ind=r[3]||{}, st=r[4]||{}, con=r[5]||{}, inst=r[6]||{}, cal=r[7]||{};
@@ -2573,6 +2669,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       edMap(g);
       edCalendar(cal);
       edWatch(m,g,cal);
+      edWire(r[8]||null);
       trLoad(function(){ edBook(ser,ind); edSmart(con,inst); edSetups(st,g); });
     }).catch(function(e){
       edSet("edBody",'<div class="err" style="padding:30px">The edition could not be built: '+
@@ -2707,6 +2804,22 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       ((window.PHOENIX_PROFILE==="A")?"Aldemar":"Gabriel")+" \u00b7 "+long);
   }
 
+  function pxDayScoreHTML(ds){
+    if(!ds || ds.score==null) return "";
+    var col = ds.score>=70 ? "var(--green)" : ds.score>=45 ? "var(--amber)" : "var(--red)";
+    var chips=(ds.components||[]).map(function(c){
+      return '<span class="c" title="'+String(c.why||"").replace(/"/g,"&quot;")+'">'+
+             c.name+' <b>'+c.pts+'</b>/'+c.max+'</span>';
+    }).join("");
+    return '<div class="mcds">'+
+      '<span class="n" style="color:'+col+'">'+Math.round(ds.score)+'</span>'+
+      '<span class="v" style="color:'+col+'">'+(ds.verdict||"")+pxStaleTag(ds.asof)+'</span>'+
+      '<span class="chips">'+chips+'</span>'+
+      (ds.capped?'<span class="cap">\u26a0 '+ds.capped+'</span>':'')+
+      '<span class="wn">'+(ds.weights_note||"")+'</span>'+
+    '</div>';
+  }
+
   function edVerdict(m,g){
     var v=edVerdictLine(m,g), X=(m&&m.explain)||{}, ov=(g&&g.overview)||{}, L=(g&&g.levels)||{};
     edSet("edCall",v.head+'<em>'+v.em+'</em>');
@@ -2741,6 +2854,15 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       edNum(w.distance,2)+' away. If it breaks, this stance is void and the whole edition '+
       'reads differently tomorrow.');
     edSet("edWhy",p.join(" "));
+    // The Day Score lives where the day starts: inside the Edition's verdict,
+    // one number that never renders without its components.
+    getJSON("dayscore").then(function(ds){
+      var host=document.getElementById("edWhy");
+      if(!host) return;
+      var old=host.parentNode.querySelector(".mcds");
+      if(old) old.remove();
+      host.insertAdjacentHTML("afterend", pxDayScoreHTML(ds));
+    }).catch(function(){});
   }
 
 
@@ -3451,7 +3573,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
 
   function renderRegime(d){
     var info=REGIME_INFO[d.regime]||REGIME_INFO.NO_CLEAR, i=d.inputs||{};
-    document.getElementById("rgNote").textContent=d.asof||"";
+    pxNoteStale(document.getElementById("rgNote"), d.asof);
     function row(k,label,v,unit){
       var val = (v===null||v===undefined||(typeof v==="number"&&isNaN(v)))?"\u2014":
         (unit==="%"?( (v>0?"+":"")+(+v).toFixed(1)+"%"):
@@ -4352,7 +4474,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       try{ drawMktGex(d); }catch(e){}
       try{ mktBrief(); }catch(e){}
       var o=d.overview||{}, L=d.levels||{};
-      document.getElementById("gexNote"+sfx).textContent=d.asof||"";
+      pxNoteStale(document.getElementById("gexNote"+sfx), d.asof);
       var neg=(o.net_gex_B||0)<0;
       var regColor=neg?"var(--red)":"var(--green)", regBg=neg?"var(--redBg)":"var(--greenBg)";
       function lvl(o2){ if(!o2) return "\u2014"; return (o2.strike!=null?o2.strike.toLocaleString():"\u2014"); }
@@ -5083,13 +5205,16 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     '</div>' 
 
   function initMC(){
-    Promise.all([getJSON("gex").catch(function(){return null;})]).then(function(r){
+    Promise.all([getJSON("gex").catch(function(){return null;}),
+                 getJSON("dayscore").catch(function(){return null;})]).then(function(r){
       var ov=((r[0]||{}).overview)||{};
+      var ds=r[1]||{};
       var mm=document.getElementById("eoM");
       if(!mm) return;
       trLoad(function(){
         var n=(trLog||[]).filter(function(t){return t.status==="open"&&edMine(t);}).length;
-        mm.textContent=n+" open position"+(n===1?"":"s")+
+        mm.textContent=(ds.score!=null?"Day Score "+Math.round(ds.score)+" \u00b7 "+(ds.verdict||"")+" \u00b7 ":"")+
+          n+" open position"+(n===1?"":"s")+
           (ov.net_gex_B!=null?" \u00b7 "+(ov.net_gex_B>=0?"positive":"negative")+" gamma":"")+
           (ov.gamma_flip!=null?" \u00b7 flip "+Math.round(ov.gamma_flip).toLocaleString():"")+
           "  \u2192";
@@ -5181,7 +5306,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       act="Screener first \u2014 build a plan before the open.";
     } else {
       v="CLEAR TO TRADE"; c="var(--green)"; bg="var(--greenBg)";
-      line="Heat "+s.openRiskR.toFixed(2)+"R of "+RULES.maxHeatR+"R \u00b7 room for "+room.toFixed(2)+"R \u00b7 1R = "+pfUsd(s.R$,0)+".";
+      line="Heat "+s.openRiskR.toFixed(2)+"R of "+RULES.maxHeatR+"R \u00b7 room for "+room.toFixed(2)+"R \u00b7 1R = "+pfUsd(s.R$,0)+"."+
+        (s.managedExp$>0?" Plus "+pfUsd(s.managedExp$,0)+" managed (no stop \u2014 outside heat).":"");
       act=s.wr<s.beWR && s.n>=5
         ? "Your win rate needs "+pfXN(s.reqPayoff)+" payoff \u2014 don't take anything below it."
         : "Rules are clear. Take only setups that meet the bar.";
@@ -5832,6 +5958,51 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       var old=host.querySelector(".pf-exitwrap");
       if(old) old.remove();
       var h='<div class="pf-exitwrap"><div class="pf-sub">After the exit</div>';
+
+      // ---- WHAT CHANGED since the last close --------------------------------
+      // The block below re-averages EVERY closed trade, so one new close barely
+      // moves 20-trade means and the prose reads identically — which correctly
+      // felt canned. This strip is about the LATEST exit only: its own numbers,
+      // and what it did to the book. New trade in, new words out.
+      try{
+        var latest=closed.slice().sort(function(a,b){
+          return String(b.exit_date||"").localeCompare(String(a.exit_date||"")); })[0];
+        if(latest){
+          var Le=+latest.entry, Lx=+(latest.exit_price!=null?latest.exit_price:latest.exit),
+              Lq=+latest.qty||1,
+              Ls=(latest.initial_stop!=null?+latest.initial_stop:+latest.stop),
+              LR=(Le>Ls)?((Lx-Le)/(Le-Ls)):null,
+              Lp=(Lx-Le)*Lq;
+          var hold=null;
+          if(latest.entry_date&&latest.exit_date)
+            hold=Math.round((new Date(latest.exit_date)-new Date(latest.entry_date))/864e5);
+          // book expectancy with and without this close — the marginal effect
+          var Rs=[],RsPrev=[];
+          closed.forEach(function(t){
+            var e=+t.entry,q=+t.qty||1,
+                s0=(t.initial_stop!=null?+t.initial_stop:+t.stop),
+                x=+(t.exit_price!=null?t.exit_price:t.exit);
+            if(!(e>s0)) return;
+            var r=(x-e)/(e-s0); Rs.push(r);
+            if(t!==latest) RsPrev.push(r);
+          });
+          function _avg(a){return a.length?a.reduce(function(x,y){return x+y;},0)/a.length:null;}
+          var eNow=_avg(Rs), ePrev=_avg(RsPrev);
+          if(LR!=null){
+            var up=Lp>=0;
+            h+='<div class="pf-note" style="border-left-color:'+(up?'var(--green)':'var(--red)')+'">'+
+              '<b>Latest close: '+latest.ticker+' '+(LR>=0?'+':'')+LR.toFixed(2)+'R'+
+              (hold!=null?' over '+hold+' days':'')+'.</b> '+
+              (eNow!=null&&ePrev!=null
+                ? 'It moved book expectancy from '+(ePrev>=0?'+':'')+ePrev.toFixed(3)+'R to '+
+                  '<b>'+(eNow>=0?'+':'')+eNow.toFixed(3)+'R</b>'+
+                  ((ePrev<0&&eNow>=0)?' \u2014 this single trade flipped the book positive.':'.')
+                : '')+
+              (latest.exit_reason?' Recorded reason: <i>'+latest.exit_reason+'</i>.':'')+
+              '</div>';
+          }
+        }
+      }catch(e){}
       if(eff!=null && win.length){
         var wellTimed = (aw!=null && aw<0);
         h+='<div class="pf-note" style="border-left-color:'+
@@ -5871,6 +6042,25 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         '<div><div class="k">Best it reached</div><div class="v up">'+
           (apk==null?"\u2014":pc(apk))+'</div></div>'+
       '</div>';
+      // ---- the lessons lens -------------------------------------------------
+      // trades.json now carries a lessons[] block written by Gabriel and
+      // Aldemar on exit day. The Council's job here is to quote THEM back to
+      // themselves — their words, dated, not generated prose.
+      try{
+        var LES=(trMeta&&trMeta.lessons)||[];
+        if(LES.length){
+          var last=LES[LES.length-1];
+          var rules=(last.rules_going_forward||[]).slice(0,3);
+          if(rules.length){
+            h+='<div class="pf-note" style="border-left-color:var(--gold)">'+
+              '<b>Your own rules \u2014 '+(last.title||last.id)+':</b><br>'+
+              rules.map(function(r,i){return (i+1)+'. '+r;}).join('<br>')+
+              (last.policy_resolution?'<br><i>'+last.policy_resolution+'</i>':'')+
+              '</div>';
+          }
+        }
+      }catch(e){}
+
       h+='<div class="pf-note">Every closed name is followed for a month. <b>One week is too '+
         'short a window for a system that holds for weeks</b> \u2014 a name can sit still for '+
         'five days and then run, so the month and the peak matter more than the week. '+
@@ -6374,7 +6564,15 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     var medPos=pfMed(recs.map(function(r){return r.val;}));
     var bigPos=recs.slice().sort(function(a,b){return b.val-a.val;}).slice(0,2);
     var R$=curRiskPct()*balance;
-    var openRisk$=open.reduce(function(a,r){return a+Math.max(0,(r.entry-r.stop)*r.qty);},0);
+    // Managed positions (bank/mandate, managed:true) carry NO live stop — the
+    // stop-based heat formula would either invent protection that doesn't exist
+    // or, with stop=null, silently contribute 0. Both lie. They are excluded
+    // here and surfaced separately as unstopped exposure.
+    var openRisk$=open.reduce(function(a,r){
+      if(r.managed) return a;
+      return a+Math.max(0,(r.entry-r.stop)*r.qty);},0);
+    var managedExp$=open.reduce(function(a,r){
+      return a+(r.managed?(+r.entry||0)*(+r.qty||0):0);},0);
     var openRiskR=R$?openRisk$/R$:0;
     var reqRR; if(n===0)reqRR=RULES.fallbackRR; else if(W.length===0)reqRR=Infinity; else reqRR=lr/wr;
     var lastClosedExit=ord.length?ord[ord.length-1].exitDate:null;
@@ -6386,7 +6584,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       balance:balance,totalReturn:totalReturn,W:W,L:L,n:n,wr:wr,lr:lr,gp:gp,gl:gl,aw:aw,al:al,
       payoff:payoff,pf:pf,beWR:beWR,reqPayoff:reqPayoff,reqRR:reqRR,expD:expD,awR:awR,alR:alR,expR:expR,
       medW:medW,medL:medL,lw:lw,ll:ll,losersBeyond1R:losersBeyond1R,seq:seq,pk:pk,peak:peak,maxdd:maxdd,
-      maxstrk:maxstrk,curStreak:curStreak,medPos:medPos,bigPos:bigPos,R$:R$,openRisk$:openRisk$,openRiskR:openRiskR,
+      maxstrk:maxstrk,curStreak:curStreak,medPos:medPos,bigPos:bigPos,R$:R$,openRisk$:openRisk$,openRiskR:openRiskR,managedExp$:managedExp$,
       lastClosedExit:lastClosedExit,daysSinceLast:daysSinceLast,coolActive:coolActive,coolServed:coolServed,
       coolRemaining:coolRemaining,riskPct:curRiskPct()};
   }
@@ -6894,7 +7092,6 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         trLoadedFor = "shared";
         trFixIds(); trDirty = 0; trBanner();
         console.log("[trades] "+trLog.length+" rows from trades.json");
-        cb();
       })
       .catch(function(e){
         // No silent empty book: an unreachable file must look like a failure,
@@ -6902,7 +7099,15 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         trLog = []; trLoadedFor = "shared"; trDirty = 0;
         console.error("[trades] trades.json unreachable:", e);
         trBanner("trades.json could not be loaded — this book is EMPTY, not zero.");
-        cb();
+      })
+      // cb runs OUTSIDE the data chain. It used to run inside .then(), so any
+      // exception thrown by the CALLER'S render fell into .catch(), which wiped
+      // a perfectly loaded book to [] and raised the red EMPTY banner — a chart
+      // bug masquerading as a data failure. Data errors and render errors are
+      // different failures and must never share a handler.
+      .then(function(){
+        try{ cb(); }
+        catch(e){ console.error("[trades] render after load failed:", e); }
       });
   }
 
@@ -7152,6 +7357,45 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   }
 
   // ---------- formatters ----------
+  // Data from a previous UTC day gets a loud badge; same-day gets nothing.
+  // Born from the 6 Aug incident: Friday levels rendered as if current and
+  // informed a wrong SNOW read.
+  function pxStaleTag(asof){
+    if(!asof) return "";
+    var d=String(asof).slice(0,10);
+    var today=new Date().toISOString().slice(0,10);
+    if(d===today) return "";
+    return '<span class="px-stale" title="data is from '+d+', not today">STALE \u00b7 '+d.slice(5)+'</span>';
+  }
+  function pxNoteStale(el, asof){
+    if(!el) return;
+    el.innerHTML=(asof||"")+pxStaleTag(asof);
+  }
+
+  // The SNOW-derived position policy, price-free: staged off where the stop
+  // SITS relative to entry, so it needs no live quote and can never lie.
+  function pxPolicyLine(t){
+    if(!t || t.status!=="open") return "";
+    if(t.managed)
+      return '<div class="w-policy"><b>Managed</b> \u2014 bank mandate, no stop possible. '+
+             'Watch the gamma levels below; structure is the only protection here.</div>';
+    var e=+t.entry, cs=(t.current_stop!=null?+t.current_stop:+t.initial_stop);
+    if(!e || !cs) return "";
+    var tol=e*0.002;
+    if(cs < e-tol)
+      return '<div class="w-policy"><b>Policy</b> \u2014 at <b>+1R</b>: move the stop to '+
+             'breakeven ('+trPx(e)+') and then leave it alone. If the urge to sell hits '+
+             'first, the move is RAISE THE STOP, not exit.</div>';
+    if(cs <= e+tol)
+      return '<div class="w-policy"><b>Breakeven locked</b> \u2014 leave it alone. From '+
+             '<b>+2R</b>: trail to structure (gamma flip / OI support), never to a formula. '+
+             'Exit into strength, not into fear. <i>(The SNOW bounce-off-breakeven is why '+
+             'this rule exists.)</i></div>';
+    return '<div class="w-policy"><b>Trailing</b> \u2014 stop is above entry: zero heat. '+
+           'Keep trailing to structure on the way up and exit into strength at OI '+
+           'resistance or on a regime break.</div>';
+  }
+
   function trPx(v){ return v==null?"\u2014":Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
   function trPnl(v){ if(v==null)return"\u2014"; return (v>=0?"+":"-")+"$"+Math.abs(v).toLocaleString(undefined,{maximumFractionDigits:0}); }
   function trPct(v,d){ if(v==null)return"\u2014"; return (v>=0?"+":"")+v.toFixed(d!=null?d:1)+"%"; }
@@ -7576,13 +7820,16 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       var _ex=bg.querySelector("#mExitPx");
       if(_st==="closed" && !(parseFloat(_ex&&_ex.value)>0)){ alert("A closed trade needs an exit price."); return; }
       if(_st!=="plan" && !(parseFloat(bg.querySelector("#mEntry").value)>0)){ alert("Entry price is required once the trade is live."); return; }
-      var rec={
+      // Build ON TOP of the existing row — a fresh object here used to drop
+      // initial_stop, current_stop and stop_history from every trade edited
+      // through this modal, silently breaking 1R.
+      var _stopIn=parseFloat(bg.querySelector("#mStop").value)||null;
+      var rec=Object.assign({}, pre, {
         id:pre.id||trNewId(), status:pre.status||"plan", ticker:tk,
         name:pre.name||"", industry:pre.industry||"",
         setup:bg.querySelector("#mSetup").value||"",
         entry:parseFloat(bg.querySelector("#mEntry").value)||null,
         qty:parseFloat(bg.querySelector("#mQty").value)||null,
-        stop:parseFloat(bg.querySelector("#mStop").value)||null,
         target:parseFloat(bg.querySelector("#mTgt").value)||null,
         thesis:bg.querySelector("#mTh").value||"",
         plan_date:bg.querySelector("#mDate").value||today,
@@ -7596,12 +7843,80 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         exit_date:(bg.querySelector("#mExitDate")&&bg.querySelector("#mExitDate").value)||pre.exit_date||null,
         exit_reason:(bg.querySelector("#mExitWhy")&&bg.querySelector("#mExitWhy").value)||pre.exit_reason||null,
         exit_notes:pre.exit_notes||null,
-      };
+      });
+      // stop routing: first stop ever set becomes initial_stop; later changes
+      // are trails — current_stop moves and the change is dated in history.
+      if(_stopIn!=null && _stopIn!==rec.stop){
+        if(rec.initial_stop==null) rec.initial_stop=_stopIn;
+        else{
+          if(!Array.isArray(rec.stop_history)) rec.stop_history=[];
+          rec.stop_history.push({date:new Date().toISOString().slice(0,10),
+                                 stop:_stopIn,note:"moved"});
+        }
+        rec.current_stop=_stopIn;
+      }
+      trNormalise(rec);
       var i=(trLog||[]).findIndex(function(x){return x.id===rec.id;});
       if(i>=0) trLog[i]=rec; else trLog.push(rec);
       trSave(); trModalClose();
+      // A trade that just BECAME closed gets the debrief while the feeling is
+      // real — the SNOW questions, before the outcome rewrites the memory.
+      if(rec.status==="closed" && pre.status!=="closed"){
+        setTimeout(function(){ trDebrief(rec.id); }, 150);
+        return;
+      }
       if(trDetailTk===rec.ticker) trRenderDetail(rec.id); else trRender();
     });
+  }
+
+  // ---- the exit debrief -----------------------------------------------------
+  // Born from the SNOW +3.72R close (7 Aug 2026). The questions that produced
+  // the real lessons, asked at the only moment they can be answered honestly:
+  // now, before the outcome rewrites the memory. Five, short, skippable —
+  // but skipping is recorded too.
+  function trDebrief(id){
+    var t=trGet(id); if(!t) return;
+    var R=null;
+    if(t.entry&&t.initial_stop&&t.exit_price&&t.entry>t.initial_stop)
+      R=((t.exit_price-t.entry)/(t.entry-t.initial_stop)).toFixed(2);
+    var Q=[
+      ["dbUrge","When did you first seriously want to exit, and what triggered it?",
+       "e.g. red premarket on day 39 / never / immediately at +1R"],
+      ["dbHeld","What actually kept you in until now?",
+       "e.g. GEX support levels, stop at breakeven, holding together"],
+      ["dbWhy","Honestly \u2014 how much of this exit was analysis vs relief or comfort?",
+       "e.g. mostly the 320 OI resistance / mostly Friday-before-the-weekend"],
+      ["dbStop","What did the stop do during the trade \u2014 and did it ever nearly get hit?",
+       "e.g. breakeven from +1R, price came within cents once and bounced"],
+      ["dbNext","Complete: next time I\u2019m up +1R and want to sell, I will \u2026",
+       "the one instruction future-you should read"]];
+    var html='<div class="tr-modal-title">Debrief \u2014 '+t.ticker+
+      (R!=null?' ('+(R>=0?'+':'')+R+'R)':'')+'</div>'+
+      '<div class="tr-modal-sub">Two minutes, while it\u2019s real. These answers are what the '+
+        'Council quotes back to you next time \u2014 your words, not generated ones.</div>'+
+      Q.map(function(q){return '<div class="tr-field"><label>'+q[1]+'</label>'+
+        '<input id="'+q[0]+'" placeholder="'+q[2]+'"></div>';}).join("")+
+      '<div class="tr-modal-actions"><button class="ok">Save debrief</button>'+
+      '<button class="cancel">Skip</button></div>';
+    trModal(html,function(bg){
+      var a=Q.map(function(q){
+        var v=(bg.querySelector("#"+q[0])||{}).value||"";
+        return v.trim()? "Q: "+q[1]+"\nA: "+v.trim() : null;
+      }).filter(Boolean);
+      var stamp="[debrief "+new Date().toISOString().slice(0,10)+"]";
+      t.exit_notes=((t.exit_notes||"")+"\n\n"+stamp+"\n"+
+        (a.length? a.join("\n"): "(skipped — no answers given)")).trim();
+      trSave(); trModalClose();
+      if(trDetailTk===t.ticker) trRenderDetail(t.id); else trRender();
+    });
+    // Skip must still record that it was skipped — an empty debrief is data.
+    var cancel=document.querySelector(".tr-modal .cancel");
+    if(cancel){ var orig=cancel.onclick;
+      cancel.addEventListener("click",function(){
+        var stamp="[debrief "+new Date().toISOString().slice(0,10)+"]";
+        t.exit_notes=((t.exit_notes||"")+"\n\n"+stamp+" (skipped)").trim();
+        trSave();
+      });}
   }
   // Closed trades need their OWN editor: trPromptPlan has no exit fields, so
   // using it here would leave a wrong exit uncorrectable AND blank the
@@ -7776,7 +8091,9 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   var dpInstit=null;           // institutional_holdings.json — 13F deltas by ticker
   function dpEnsureSmart(cb){
     var need=2, fired=false;
-    function tick(){ if(--need<=0 && !fired){ fired=true; cb&&cb(); } }
+    function tick(){ if(--need<=0 && !fired){ fired=true;
+      try{ cb&&cb(); }catch(e){ console.error("[enrich] render failed:", e); }
+    } }
     if(dpCongress!==null) tick();
     else getJSON("congress_trades").then(function(d){ dpCongress=(d&&d.tickers)||{}; tick(); }).catch(function(){ dpCongress={}; tick(); });
     if(dpInstit!==null) tick();
@@ -7786,7 +8103,9 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   // financials + earnings available for ANY ticker (not just GEX names).
   function dpEnsureAll(cb){
     var need=2, fired=false;
-    function tick(){ if(--need<=0 && !fired){ fired=true; cb&&cb(); } }
+    function tick(){ if(--need<=0 && !fired){ fired=true;
+      try{ cb&&cb(); }catch(e){ console.error("[enrich] render failed:", e); }
+    } }
     if(dpAllFin!==null) tick();
     else getJSON("financials_all").then(function(d){ dpAllFin=(d&&d.tickers)||{}; tick(); })
            .catch(function(){ dpAllFin={}; tick(); });
@@ -7798,7 +8117,9 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
 
   function dpEnsureEnrich(cb){
     var need=4, fired=false;
-    function tick(){ if(--need<=0 && !fired){ fired=true; cb(); } }
+    function tick(){ if(--need<=0 && !fired){ fired=true;
+      try{ cb&&cb(); }catch(e){ console.error("[enrich] render failed:", e); }
+    } }
     if(dpEnrich!==null) tick();
     else getJSON("research_data").then(function(d){ dpEnrich=(d&&d.tickers)||{}; tick(); })
            .catch(function(){ dpEnrich={}; tick(); });
@@ -7832,7 +8153,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       var ov=g.overview||{}, L=g.levels||{};
       function lv(o){ return o&&o.strike!=null?o.strike:"\u2014"; }
       var pos=(ov.net_gex_B||0)>=0;
-      document.getElementById("dpGexMeta").textContent=" \u00B7 "+(g.asof||"");
+      var _gm=document.getElementById("dpGexMeta");
+      if(_gm) _gm.innerHTML=" \u00B7 "+(g.asof||"")+pxStaleTag(g.asof);
       document.getElementById("dpGexStats").innerHTML=
         '<span class="st">Regime<span class="sv" style="color:'+(pos?"var(--green)":"var(--red)")+'">'+(ov.regime||"\u2014")+'</span></span>'+
         '<span class="st">Net GEX<span class="sv">'+(ov.net_gex_B!=null?(ov.net_gex_B>=0?"+":"")+ov.net_gex_B+"B":"\u2014")+'</span></span>'+
@@ -8406,6 +8728,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
             '</div>'+
             '<div class="w-plan-b">'+planPanel+'</div>'+
           '</div>'+
+          // THE POLICY LINE — the SNOW rules, staged off the stop state
+          pxPolicyLine(t)+
           // THESIS callout
           '<div id="dpThesisWrap">'+thesisPanel+'</div>'+
           // PRICE
@@ -9299,6 +9623,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     <h2 class="ed-hl" id="edBookHl">…</h2>
     <div id="edBookRows"></div><div id="edBookBody"></div><div id="edBookGex"></div></div>
 
+  <div class="ed-sec" id="edWirePos"></div>
+
   <div class="ed-sec"><div class="ed-k"><span>The tape</span>
       <span class="ed-n">ranked by how unusual</span></div>
     <div class="ed-note">Sigma (σ) measures a move against that instrument’s own
@@ -9308,6 +9634,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       month and remarkable in a calm one; sigma is what tells the difference.</div>
     <h2 class="ed-hl" id="edTapeHl">…</h2>
     <div class="ed-tape" id="edTapeCards"></div><div id="edTapeBody"></div></div>
+
+  <div class="ed-sec" id="edWireWorld"></div>
 
   <div class="ed-sec"><div class="ed-k"><span>Rotation</span>
       <span class="ed-n">1-day · your industries flagged</span></div>
