@@ -2879,7 +2879,13 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     return null;
   }
 
+  var EDBOOK_SEQ=0;
   function edBook(ser,ind){
+    // clear the async-built block FIRST: it belongs to whatever profile built
+    // it last, and the flat-book branch below returns without touching it —
+    // that ghost showed Gabriel's GOOG read on Aldemar's edition (12 Aug)
+    EDBOOK_SEQ++; var edbSeq=EDBOOK_SEQ;
+    edSet("edBookGex","");
     var open=(trLog||[]).filter(function(t){return t.status==="open"&&t.ticker&&edMine(t);});
     if(!open.length){
       edSet("edBookN","no open positions");
@@ -2897,6 +2903,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         catch(e){ res({t:t,bars:[]}); }
       });
     })).then(function(rows){
+      if(edbSeq!==EDBOOK_SEQ) return; // a newer build owns the DOM now
       var tot1=0,totW=0,usd1=0,n1=0,nW=0,html="",worst=null,best=null,inds={};
       rows.forEach(function(r){
         var t=r.t, b=r.bars, qty=+(t.qty||0), entry=+(t.entry||0), stop=+(t.stop||0);
@@ -2933,6 +2940,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
           .then(function(d){ return {tk:t.ticker,d:d}; })
           .catch(function(){ return {tk:t.ticker,d:null}; });
       })).then(function(gx){
+        if(edbSeq!==EDBOOK_SEQ) return; // stale fetch from a previous profile
         gx.forEach(function(x){
           if(!x.d||x.d.stock_validity==="INVALID_THIN_CHAIN") return;
           // the per-ticker file uses the SAME envelope as the SPX one -
