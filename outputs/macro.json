@@ -1,28 +1,28 @@
 {
- "asof": "2026-08-12 09:24 UTC",
+ "asof": "2026-08-12 14:52 UTC",
  "regime": "POLICY_TIGHTENING",
- "confidence": 37.3,
+ "confidence": 36.5,
  "confidence_note": "regime score, not a calibrated probability (A4)",
  "scores": {
-  "POLICY_TIGHTENING": 37.3
+  "POLICY_TIGHTENING": 36.5
  },
  "secondary_tag": "INFLATIONARY",
  "inputs": {
-  "wti_12m": 33.01,
-  "wti_3m": -20.76,
-  "wti_vs_2yr": 17.15,
-  "cpi_yoy": 3.46,
-  "cpi_chg_3m": -0.71,
-  "spx_3m": 4.32,
-  "spx_1m": 3.63,
-  "dd": -0.38,
-  "trail_dd": -0.38,
-  "spx_off_low": 4.27,
+  "wti_12m": 31.99,
+  "wti_3m": -21.37,
+  "wti_vs_2yr": 16.26,
+  "cpi_yoy": 3.3,
+  "cpi_chg_3m": -0.87,
+  "spx_3m": 4.56,
+  "spx_1m": 3.87,
+  "dd": -0.15,
+  "trail_dd": -0.15,
+  "spx_off_low": 4.51,
   "fresh_high": true,
   "us02_3m": 30.0,
   "real_3m": 46.0,
-  "vix": 15.32,
-  "vix_3m_chg": -16.87,
+  "vix": 14.87,
+  "vix_3m_chg": -19.32,
   "hy": 273.0
  },
  "explain": {
@@ -33,10 +33,10 @@
    {
     "key": "cpi_yoy",
     "label": "CPI y/y",
-    "value": 3.46,
+    "value": 3.3,
     "op": ">",
     "threshold": 2.5,
-    "clear_by": 0.96,
+    "clear_by": 0.8,
     "ok": true
    },
    {
@@ -51,10 +51,10 @@
    {
     "key": "dd",
     "label": "Drawdown",
-    "value": -0.38,
+    "value": -0.15,
     "op": ">",
     "threshold": -12,
-    "clear_by": 11.62,
+    "clear_by": 11.85,
     "ok": true
    },
    {
@@ -70,16 +70,16 @@
   "watch": [
    {
     "if": "CPI y/y falls below 2.5",
-    "now": 3.46,
+    "now": 3.3,
     "threshold": 2.5,
-    "distance": 0.96,
+    "distance": 0.8,
     "then": "POLICY_TIGHTENING no longer qualifies"
    },
    {
     "if": "Drawdown falls below -12",
-    "now": -0.38,
+    "now": -0.15,
     "threshold": -12,
-    "distance": 11.62,
+    "distance": 11.85,
     "then": "POLICY_TIGHTENING no longer qualifies"
    },
    {
@@ -98,7 +98,7 @@
     {
      "label": "CPI 3m change",
      "need": "> 0.3",
-     "now": -0.71
+     "now": -0.8700000000000001
     }
    ]
   }
