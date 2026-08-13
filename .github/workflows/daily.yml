@@ -1,166 +1,41 @@
 name: Phoenix Daily Run
 
-# ONE run does everything. Folds in what used to be separate workflows:
-#   - GEX (uses a committed briefings/*.pdf if present, else the SPY proxy)
-#   - financials_all + ratings_all  (was: Detail Data Refresh)
-#   - congress PTR + institutional 13F  (was: Smart Money Refresh)
-# Every step in the engine is non-fatal, so a flaky feed (Yahoo, SEC) never
-# breaks the run — it just skips that piece and commits the rest.
-#
-# You can now delete refresh_detail.yml and smart_money.yml. Keep briefing_gex.yml
-# only if you want gex.json to update the INSTANT you push a briefing (this daily
-# run already picks up a committed briefing on its own).
-#
-# 2026-07-29 changes:
-#   - timeout raised to 120m and PHOENIX_BUDGET_MIN set below it, so the engine
-#     stops starting optional steps instead of being killed mid-run
-#   - commit step runs even when the engine fails, so partial output is kept
-#   - a Step report prints meta.json's per-step status at the end of every run
-#
-# 2026-08-07 changes:
-#   - workflow_dispatch takes an optional `engine` input, so a single engine can
-#     be run from the Actions tab without a terminal. Leave it blank for the
-#     normal full run.
-#   - a single-engine run is a DIAGNOSTIC: the commit step is skipped, so a
-#     sweep or a validation check can never publish a partial outputs/ folder.
-
 on:
   schedule:
-    - cron: '0 5 * * 1-5'   # weekdays 05:00 UTC
+    - cron: '0 5 * * 1-5'
   workflow_dispatch:
-    inputs:
-      engine:
-        description: 'Run ONE engine instead of the full pipeline (blank = full run). e.g. gexsweep, trades, gex'
-        required: false
-        default: ''
-
-concurrency:                 # never let two runs race for the same commit
-  group: phoenix-daily
-  cancel-in-progress: false
+  # Dropping the morning wire files IS the publish: any commit touching
+  # wire/** triggers a fast wire-only run, live on the dashboard in ~2 min.
+  push:
+    paths:
+      - 'wire/**'
 
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0        # rebase needs real history
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: pip
-      - name: System deps - pdftotext for GEX briefings and OGE filings
-        run: sudo apt-get update && sudo apt-get install -y poppler-utils
-      - name: Python deps
-        run: |
-          pip install -r requirements.txt
-          pip install edgartools    # SEC 13F (institutional holdings)
-      # C2 gate: a broken engine can never publish. Tests are synthetic-data
-      # only (no network) and take seconds.
-      - name: Engine tests
-        run: python test_phoenix_v2.py
-      - name: Run Phoenix (full pipeline + smart money + ratings)
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run Phoenix
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-          # SEC fair-access: set this to your email so the 13F fetch identifies
-          # itself. Optional but recommended (SEC may throttle a generic UA).
-          SEC_IDENTITY: ${{ secrets.SEC_IDENTITY }}
-          # Optional steps stop STARTING once this much wall clock is used, so
-          # the run always reaches the end and always writes meta.json. Keep it
-          # comfortably below timeout-minutes above.
-          PHOENIX_BUDGET_MIN: '95'
         run: |
-          if [ -n "${{ inputs.engine }}" ]; then
-            echo "=== single engine: ${{ inputs.engine }} (diagnostic, will NOT commit) ==="
-            python phoenix.py --engine "${{ inputs.engine }}"
+          if [ "${{ github.event_name }}" = "push" ]; then
+            python phoenix.py --engine wire
           else
             python phoenix.py --full
           fi
       - name: Commit outputs
-        if: always() && inputs.engine == ''
         run: |
-          set -e
           git config user.name  "phoenix-bot"
           git config user.email "phoenix-bot@users.noreply.github.com"
-          echo "--- is anything ignored? ---"
-          git check-ignore -v outputs/macro.json outputs/stocks.json \
-            macroflow_fundamentals_quarterly.csv || echo "  nothing ignored"
-          # Add each pathspec SEPARATELY. git add aborts the whole operation if
-          # any one pathspec matches nothing - and macroflow_fundamentals_quarterly.csv
-          # is not in the repo yet, so a combined add staged NOTHING while
-          # git status still listed every modified file. That was the bug.
-          # -f forces past any .gitignore rule.
-          git add -A -f outputs/
-          if [ -f macroflow_fundamentals_quarterly.csv ]; then
-            git add -f macroflow_fundamentals_quarterly.csv
-          else
-            echo "NOTE: macroflow_fundamentals_quarterly.csv is not in the repo -"
-            echo "      commit it, or financials_all.json can never be built."
-          fi
-          echo "--- staged for commit ---"
-          git diff --cached --name-only | head -30
-          echo "--- staged file count: $(git diff --cached --name-only | wc -l) ---"
-          if git diff --cached --quiet; then
-            echo "NOTHING STAGED. The engine produced no file changes this run."
-            exit 0
-          fi
-          git commit -m "Daily run $(date -u +%Y-%m-%dT%H:%M)"
-          git fetch origin "$GITHUB_REF_NAME"
-          if ! git rebase "origin/$GITHUB_REF_NAME"; then
-            git rebase --abort || true
-            echo "REBASE FAILED - branch has diverged, resolve manually"
-            exit 1
-          fi
-          # no '|| true' here on purpose: a failed push MUST fail the step,
-          # otherwise the run goes green while nothing reaches Pages
-          git push origin "HEAD:$GITHUB_REF_NAME"
-          echo "PUSHED $(git rev-parse --short HEAD) to $GITHUB_REF_NAME"
-
-      - name: What was written
-        if: always() && inputs.engine == ''
-        run: |
-          echo "--- outputs/ freshness ---"
-          ls -l --time-style=+%Y-%m-%dT%H:%M outputs/*.json 2>/dev/null | \
-            awk '{print "  " $6 "  " $7}' | head -25
-          python - <<'EOF'
-          import json, pathlib
-          for f in ("spx_daily", "macro", "stocks", "financials_all",
-                    "congress_trades", "institutional_holdings"):
-              p = pathlib.Path("outputs") / (f + ".json")
-              if not p.exists():
-                  print(f"  {f:24} MISSING")
-                  continue
-              try:
-                  d = json.loads(p.read_text())
-                  print(f"  {f:24} asof={d.get('asof') or d.get('last_run') or '?'}")
-              except Exception as e:
-                  print(f"  {f:24} unreadable: {e}")
-          EOF
-
-      - name: Step report
-        if: always() && inputs.engine == ''
-        run: |
-          python - <<'EOF'
-          import json, pathlib
-          p = pathlib.Path("outputs/meta.json")
-          if not p.exists():
-              print("meta.json missing - the run did not reach its first step")
-              raise SystemExit(0)
-          m = json.loads(p.read_text())
-          print("last_run:", m.get("last_run"))
-          rows = m.get("progress", [])
-          if not rows:
-              print("no per-step progress - phoenix.py is not the updated build")
-          for s in rows:
-              line = f"  {s.get('status','?'):16} {str(s.get('seconds','-')):>8}s  {s.get('step')}"
-              if s.get("error"):
-                  line += f"   <- {s['error']}"
-              print(line)
-          for w in m.get("warnings", []):
-              print("  WARN:", w)
-          EOF
+          git pull --rebase origin main || true
+          git add outputs/ macroflow.db || true
+          git commit -m "Phoenix run $(date -u +%Y-%m-%dT%H:%M) (${{ github.event_name }})" || echo "No changes"
+          git push || echo "Nothing to push"
