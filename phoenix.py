@@ -538,6 +538,256 @@ def write_signal_log(v2, regime=None, spx=None):
 
 
 # ============================================================
+# TIER 0 CHARTS — a weekly chart for EVERY universe name
+#
+# The 2-year weekly history for the whole universe already sits committed in
+# stock_weekly.csv. This step cuts it into one tiny JSON per ticker
+# (outputs/charts_w/<TK>.json) so a ticker page can render a real chart for
+# ANY name — including ones the daily-coverage tiers never touch. Hash-gated:
+# the ~2,900 files are written only when the CSV actually changes (weekly),
+# so the daily run normally skips in milliseconds.
+# ============================================================
+CHARTS_W_DIR = os.path.join("outputs", "charts_w")
+
+
+def run_universe_charts():
+    """Cut stock_weekly.csv into per-ticker weekly chart JSONs (hash-gated)."""
+    import hashlib, json as _json, os as _os
+    src = "stock_weekly.csv"
+    if not _os.path.exists(src):
+        print("[chartsw] stock_weekly.csv not in repo — skipped")
+        return
+    h = hashlib.sha256(open(src, "rb").read()).hexdigest()[:16]
+    _os.makedirs(CHARTS_W_DIR, exist_ok=True)
+    man_path = _os.path.join(CHARTS_W_DIR, "_manifest.json")
+    try:
+        man = _json.load(open(man_path))
+    except Exception:
+        man = {}
+    if man.get("csv_sha") == h and man.get("files"):
+        print(f"[chartsw] unchanged (sha {h}) — {man['files']} files stand")
+        return
+    weekly = load_weekly_from_csv(src)
+    n = 0
+    n_fail = 0
+    for tk, bars in weekly.items():
+        try:
+            safe = tk.replace("/", "-").replace(".", "-")   # same rule as charts/
+            t = [b[0] for b in bars]
+            c = [b[1] for b in bars]
+            _json.dump({"tk": tk, "w": {"t": t, "c": c}},
+                       open(_os.path.join(CHARTS_W_DIR, f"{safe}.json"), "w"),
+                       separators=(",", ":"))
+            n += 1
+        except Exception as e:
+            n_fail += 1
+            if n_fail == 1:
+                print(f"[chartsw] first write failure ({tk}): {e}")
+            continue
+    if n_fail:
+        print(f"[chartsw] {n_fail} tickers failed to write")
+    _json.dump({"csv_sha": h, "files": n, "asof": _now()}, open(man_path, "w"))
+    print(f"[chartsw] wrote {n} weekly chart files (csv sha {h})")
+
+
+# ============================================================
+# SENATE eFD — the official source, at last
+#
+# The community mirrors froze years ago (12 commits, total); every "Senate"
+# row they can still serve dies on the lookback cutoff, and the merge's
+# keep-on-zero defence then politely preserves the seed forever. This step
+# goes to efdsearch.senate.gov itself: session cookie -> agreement POST ->
+# the DataTables search endpoint -> each ELECTRONIC PTR parsed from its HTML
+# table. Paper-scanned filings are counted as coverage gaps, loudly, never
+# silently skipped. Results merge into congress_trades.json through the same
+# dedupe as the House Clerk step; a cursor file stops re-parsing old PTRs.
+#
+# UNTESTED IN THE BUILD SANDBOX (no outbound POST here) — instrumented so its
+# first Actions run tells the whole story in the log.
+# ============================================================
+SENATE_EFD = {
+    "base": "https://efdsearch.senate.gov",
+    "lookback_days": 120,        # PTRs to sweep per run (45-day filing lag + slack)
+    "max_reports_per_run": 60,   # politeness cap; cursor carries the rest forward
+    "timeout": 30,
+}
+
+
+def run_senate_efd():
+    """Official Senate PTRs from efdsearch.senate.gov into congress_trades.json."""
+    import json as _json, os as _os, re as _re, requests
+    from datetime import datetime, timedelta
+
+    cfg = SENATE_EFD
+    s = requests.Session()
+    s.headers.update({"User-Agent": "phoenix-smartmoney/1.0 (personal research)"})
+    base = cfg["base"]
+
+    # -- 1) session + agreement ------------------------------------------------
+    try:
+        r0 = s.get(f"{base}/search/home/", timeout=cfg["timeout"])
+        csrf = s.cookies.get("csrftoken") or ""
+        m = _re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', r0.text)
+        tok = m.group(1) if m else csrf
+        r1 = s.post(f"{base}/search/home/",
+                    data={"prohibition_agreement": "1",
+                          "csrfmiddlewaretoken": tok},
+                    headers={"Referer": f"{base}/search/home/"},
+                    timeout=cfg["timeout"])
+        if r1.status_code not in (200, 302):
+            print(f"[senate] agreement POST returned HTTP {r1.status_code} — aborting")
+            return
+        print("[senate] session established, agreement accepted")
+    except Exception as e:
+        print(f"[senate] cannot reach efdsearch ({e}) — keeping existing file")
+        return
+
+    # -- 2) search: electronic PTRs in the lookback window ----------------------
+    start = (datetime.now() - timedelta(days=cfg["lookback_days"])).strftime("%m/%d/%Y")
+    csrf = s.cookies.get("csrftoken") or ""
+    rows = []
+    try:
+        for offset in (0, 100, 200):
+            rq = s.post(f"{base}/search/report/data/",
+                        data={"start": str(offset), "length": "100",
+                              "report_types": "[11]", "filer_types": "[1]",
+                              "submitted_start_date": f"{start} 00:00:00",
+                              "submitted_end_date": "", "candidate_state": "",
+                              "senator_state": "", "office_id": "",
+                              "first_name": "", "last_name": ""},
+                        headers={"Referer": f"{base}/search/",
+                                 "X-CSRFToken": csrf},
+                        timeout=cfg["timeout"])
+            if rq.status_code != 200:
+                print(f"[senate] search HTTP {rq.status_code} at offset {offset}")
+                break
+            batch = (rq.json() or {}).get("data") or []
+            rows.extend(batch)
+            if len(batch) < 100:
+                break
+        print(f"[senate] search window {start} -> today: {len(rows)} filings listed")
+    except Exception as e:
+        print(f"[senate] search failed ({e}) — keeping existing file")
+        return
+    if not rows:
+        print("[senate] zero filings listed — nothing to do")
+        return
+
+    # -- 3) parse each ELECTRONIC ptr; count paper as gaps ----------------------
+    seen_path = _os.path.join(OUTPUTS_DIR, "senate_efd_seen.json")
+    try:
+        seen = set(_json.load(open(seen_path)))
+    except Exception:
+        seen = set()
+    by_ticker, n_new, n_paper, n_parsed = {}, 0, 0, 0
+    _names = _sec_name_ticker_map()
+
+    def _clean(x):
+        return _re.sub(r"<[^>]+>", "", x or "").strip()
+
+    for row in rows:
+        try:
+            first, last = _clean(row[0]), _clean(row[1])
+            link_html, filed = row[3], _clean(row[4])
+        except Exception:
+            continue
+        m = _re.search(r'href="([^"]+)"', link_html or "")
+        if not m:
+            continue
+        href = m.group(1)
+        if "/paper/" in href:
+            n_paper += 1
+            continue
+        rid = href.rstrip("/").split("/")[-1]
+        if rid in seen:
+            continue
+        if n_parsed >= cfg["max_reports_per_run"]:
+            break
+        member = f"{first} {last}".strip()
+        try:
+            rp = s.get(base + href, timeout=cfg["timeout"])
+            if rp.status_code != 200:
+                print(f"[senate] PTR {rid}: HTTP {rp.status_code}")
+                continue
+            n_parsed += 1
+            trs = _re.findall(r"<tr[^>]*>(.*?)</tr>", rp.text, _re.S)
+            got = 0
+            for tr in trs:
+                tds = [_clean(td) for td in
+                       _re.findall(r"<td[^>]*>(.*?)</td>", tr, _re.S)]
+                if len(tds) < 8:
+                    continue
+                # eFD PTR table: #, date, owner, ticker, asset, type, amount, comment
+                _n, tdate, owner, tk, asset, ttype, amount = tds[:7]
+                tk = (tk or "").strip().upper()
+                if tk in ("--", "N/A", ""):
+                    m2 = _re.search(r"\(([A-Z][A-Z0-9.\-]{0,5})\)", asset or "")
+                    tk = m2.group(1) if m2 else \
+                        (_cusip_ticker_from_universe(asset, _names) or "")
+                if not tk:
+                    continue
+                side = ("buy" if "purchase" in ttype.lower() else
+                        "sell" if "sale" in ttype.lower() else None)
+                if not side:
+                    continue
+                td = None
+                for fmt in ("%m/%d/%Y", "%Y-%m-%d"):
+                    try:
+                        td = datetime.strptime(tdate.strip(), fmt); break
+                    except Exception:
+                        continue
+                by_ticker.setdefault(tk, []).append({
+                    "member": member, "chamber": "Senate",
+                    "date": td.strftime("%Y-%m-%d") if td else tdate,
+                    "reported": filed, "side": side, "amount": amount,
+                    "owner": owner, "asset_type": "Stock",
+                    "ptr": rid})
+                got += 1; n_new += 1
+            seen.add(rid)
+            print(f"[senate] {member}: PTR {rid} -> {got} transactions")
+        except Exception as e:
+            print(f"[senate] PTR {rid} failed ({e})")
+            continue
+
+    print(f"[senate] parsed {n_parsed} electronic PTRs, {n_paper} paper filings "
+          f"(coverage gaps), {n_new} transactions extracted")
+    if n_new == 0:
+        _json.dump(sorted(seen), open(seen_path, "w"))
+        print("[senate] no new transactions — congress_trades.json untouched")
+        return
+
+    # -- 4) merge into congress_trades.json (same dedupe as house_ptr) ----------
+    ep = _os.path.join(OUTPUTS_DIR, "congress_trades.json")
+    try:
+        existing = _json.load(open(ep)).get("tickers", {})
+    except Exception:
+        existing = {}
+    merged = {tk: list(rw) for tk, rw in existing.items()}
+    added = 0
+    for tk, rws in by_ticker.items():
+        have = {(r.get("member"), r.get("date"), r.get("side"), r.get("amount"))
+                for r in merged.get(tk, [])}
+        for r in rws:
+            k = (r["member"], r["date"], r["side"], r["amount"])
+            if k not in have:
+                merged.setdefault(tk, []).append(r); have.add(k); added += 1
+    for tk in merged:
+        merged[tk].sort(key=lambda x: x.get("date", ""), reverse=True)
+    write_json("congress_trades", {
+        "asof": _now(),
+        "source": "House Clerk PTR (official) + Senate eFD (official) + committed history",
+        "note": "45-day disclosure lag; amounts are ranges as filed. Display and "
+                "backtests scope to large caps; collection keeps every ticker a "
+                "filing yields.",
+        "ticker_count": len(merged),
+        "trade_count": sum(len(v) for v in merged.values()),
+        "tickers": merged})
+    _json.dump(sorted(seen), open(seen_path, "w"))
+    print(f"[senate] merged {added} new Senate trades "
+          f"({sum(len(v) for v in merged.values())} total on file)")
+
+
+# ============================================================
 # THE WIRE — the 7am news briefing, committed like Elliott's PDF
 #
 # The morning chat writes one HTML file per account into wire/
@@ -2042,6 +2292,7 @@ def stock_engine_v2(stock_data, universe, quarterly=None, daily_ret=None,
 
     trade_pool, invest_pool = [], []
     ext_capped = 0
+    ledger = {}   # EVERY evaluated ticker, not just candidates (universe ledger)
 
     for tk, bars in stock_data.items():
         if tk not in universe or len(bars) < 40:
@@ -2100,6 +2351,34 @@ def stock_engine_v2(stock_data, universe, quarterly=None, daily_ret=None,
         }
         n_pass = sum(1 for v in gates.values() if v)
         over_ext = ext > tg["ext_hard_cap"]
+        # ---- universe ledger row: the gates verdict for THIS name today ----
+        # Compact by design (~2,900 rows ship in one file). "miss" carries the
+        # by-how-much for the distance-bearing gates so a dropped name's page
+        # can say "near_high -28.6% vs -8% band" instead of just "failed".
+        _miss = []
+        if not gates["trend_long"]:
+            _miss.append({"g": "trend200", "by": round((last/ma40-1)*100, 1)})
+        if not gates["trend_med"]:
+            _miss.append({"g": "trend50",
+                          "by": round((last/ma10-1)*100, 1) if last <= ma10 else 0,
+                          "note": None if last <= ma10 else "10w not rising"})
+        if not gates["industry"]:
+            _miss.append({"g": "industry", "by": None})
+        if not gates["near_high"]:
+            _miss.append({"g": "near_high", "by": round(pos_vs_high, 1)})
+        if not gates["stage2"]:
+            _miss.append({"g": "stage2", "by": None})
+        if not gates["tradability"]:
+            _miss.append({"g": "tradability", "by": None})
+        ledger[tk] = {
+            "st": ("passer" if n_pass == 6 else
+                   "near_miss" if n_pass == 5 and not over_ext else "dropped"),
+            "gp": n_pass, "miss": _miss,
+            "last": round(last, 2), "pvh": round(pos_vs_high, 1),
+            "ext": round(ext, 1), "sec": universe[tk].get("sector", ""),
+            "ind": ind, "mc": round(mc / 1e9, 2),
+            "brk": bool(n_pass == 6 and pos_vs_high > -1.0),
+        }
         if n_pass == 6 and over_ext:
             ext_capped += 1   # would have qualified; blocked from chasing
         if n_pass >= 5 and not over_ext:
@@ -2223,6 +2502,7 @@ def stock_engine_v2(stock_data, universe, quarterly=None, daily_ret=None,
         c["rank"] = i + 1
 
     return {
+        "ledger": ledger,
         "trade_ranked": trade_ranked,
         "invest_ranked": invest_ranked,
         "meta": {
@@ -4485,6 +4765,30 @@ def run_stocks(auto_pull=True):
         result["trade_ranked"] = v2["trade_ranked"]
         result["invest_ranked"] = v2["invest_ranked"]
         result["v2_meta"] = v2["meta"]
+        # ---- THE UNIVERSE LEDGER (Tier 0): every name, every run ----------
+        # The screener's default view stays passers + near-misses; this file
+        # is the search-anything surface behind it. Names the engine could not
+        # evaluate (too little history / not in universe CSV) are listed as
+        # no_data rather than silently absent — the universe is COMPLETE.
+        try:
+            _led = dict(v2.get("ledger") or {})
+            for _tk in universe:
+                if _tk not in _led:
+                    _led[_tk] = {"st": "no_data", "gp": 0, "miss": [],
+                                 "sec": universe[_tk].get("sector", ""),
+                                 "ind": universe[_tk].get("industry", ""),
+                                 "mc": round((universe[_tk].get("market_cap") or 0)/1e9, 2)}
+            _cnt = {}
+            for _r in _led.values():
+                _cnt[_r["st"]] = _cnt.get(_r["st"], 0) + 1
+            write_json("universe_ledger", {
+                "asof": _now(), "count": len(_led), "by_status": _cnt,
+                "note": "Gate verdict for every universe name. 'miss' carries "
+                        "by-how-much where the gate has a distance.",
+                "rows": _led})
+            print(f"[ledger] universe_ledger.json: {len(_led)} names — {_cnt}")
+        except Exception as e:
+            print(f"[ledger] FAILED (non-fatal): {e}")
         vm = v2["meta"]
         print(f"[v2] trade book: {vm['trade_candidates']} candidates, "
               f"{vm['trade_near_misses']} near-misses, {vm['trade_breakouts']} breakouts, "
@@ -5060,6 +5364,13 @@ GEX_UNIVERSE = {
              "PLTR", "MU", "COIN", "MSTR", "NFLX", "AVGO", "SMCI", "INTC",
              "HOOD", "UBER", "TSM", "ORCL", "QCOM", "BA", "SNOW", "BABA",
              "SPY", "QQQ", "IWM"],
+    # Elliott's briefing scan names observed Aug 2026 that are NOT in seed —
+    # candidates by demonstration (his scan covers them daily). The OCC rules
+    # below still confirm or reject each with data; this list only nominates.
+    "scan_2026_08": ["GOOG", "MP", "SNDK", "IBM", "CRWD"],
+    # Stock cap for the whole GEX universe (indices SPY/QQQ/IWM ride outside
+    # the cap). Top-mcap universe names fill remaining slots; Rules 1-3 gate.
+    "stock_cap": 50,
     "rule1_min_ratio_pct": 10.0,     # options share-equivalents / shares volume
     "rule2_min_contracts": 100_000,  # avg daily options contracts
     "rule3_min_agg_oi": 500_000,     # aggregate OI, chains within 90d
@@ -5068,6 +5379,39 @@ GEX_UNIVERSE = {
     "confirmed_min_samples": 20,
     "max_state_sessions": 30,        # prune history beyond this
 }
+
+
+
+def _gex_candidates(cfg=None):
+    """
+    The GEX-universe candidate list (Tier 2): verified seed first, then
+    Elliott's scanned names, then top-market-cap universe names, capped at
+    cfg["stock_cap"] stocks (+ SPY/QQQ/IWM outside the cap). Nomination only —
+    run_gex_universe's OCC Rules 1-3 still confirm or reject every name.
+    """
+    cfg = cfg or GEX_UNIVERSE
+    idx = [s for s in cfg["seed"] if s in ("SPY", "QQQ", "IWM")]
+    out, seen = [], set()
+    def _add(sym):
+        if sym and sym not in seen and sym not in ("SPY", "QQQ", "IWM"):
+            seen.add(sym); out.append(sym)
+    for s in cfg["seed"]:
+        _add(s)
+    for s in cfg.get("scan_2026_08", []):
+        _add(s)
+    cap = int(cfg.get("stock_cap", 50))
+    if len(out) < cap:
+        try:
+            uni = load_universe_from_csv()
+            for tk, _v in sorted(uni.items(),
+                                 key=lambda kv: -(kv[1].get("market_cap") or 0)):
+                if len(out) >= cap:
+                    break
+                _add(tk)
+        except Exception as e:
+            print(f"[gexu] top-mcap fill skipped: {e}")
+    return out[:cap] + idx
+
 
 _OCC_BASE = "https://marketdata.theocc.com"
 
@@ -5162,7 +5506,8 @@ def _gexu_state_save(state):
         json.dump(state, f, separators=(",", ":"))
 
 
-def evaluate_gex_universe(samples, shares_avg, cfg=None, ibkr_seed=None):
+def evaluate_gex_universe(samples, shares_avg, cfg=None, ibkr_seed=None,
+                          candidates=None):
     """
     PURE FUNCTION. Apply Rules 1-2 (5 pending per-run data; 3 pending OI feed)
     with adaptive data depth: provisional at >=8 samples, confirmed at >=20.
@@ -5173,8 +5518,10 @@ def evaluate_gex_universe(samples, shares_avg, cfg=None, ibkr_seed=None):
     Returns ranked list of dicts.
     """
     cfg = cfg or GEX_UNIVERSE
+    # candidates is INJECTED by the caller (run_gex_universe) precisely so this
+    # function stays pure — _gex_candidates() reads universe.csv.
     out = []
-    for sym in cfg["seed"]:
+    for sym in (candidates if candidates is not None else cfg["seed"]):
         s = samples.get(sym, {})
         vals = [v for _d, v in sorted(s.items())[-cfg["trailing_sessions"]:]
                 if v is not None]
@@ -5230,7 +5577,10 @@ def run_gex_universe():
     samples = state.setdefault("samples", {})
     got, failed, pattern_note = 0, 0, None
     import time
-    for sym in cfg["seed"]:
+    _gex_cands = _gex_candidates(cfg)   # computed ONCE per run (reads universe.csv)
+    print(f"[gexu] {len(_gex_cands)} candidates "
+          f"(seed + briefing scan + top-mcap fill, cap {cfg.get('stock_cap')})")
+    for sym in _gex_cands:
         if samples.get(sym, {}).get(rd) is not None:
             continue   # already sampled today
         vol, note = fetch_occ_symbol_volume(sym, rd)
@@ -5256,7 +5606,7 @@ def run_gex_universe():
     # shares volume from committed weekly history (last 4 complete weeks / 5)
     weekly = load_weekly_from_csv()
     shares_avg = {}
-    for sym in cfg["seed"]:
+    for sym in _gex_cands:
         bars = weekly.get(sym) or []
         wv = [v for (_d, _c, v) in bars[-5:-1] if v]
         if wv:
@@ -5274,7 +5624,8 @@ def run_gex_universe():
         except Exception:
             pass
 
-    universe = evaluate_gex_universe(samples, shares_avg, cfg, ibkr_seed)
+    universe = evaluate_gex_universe(samples, shares_avg, cfg, ibkr_seed,
+                                     candidates=_gex_cands)
     payload = {
         "asof": _now(),
         "spec": "PHOENIX_REVIEW.md Part 4 E3b — Stage 0 (Coach's rules)",
@@ -5501,7 +5852,7 @@ def run_detail_bundle():
     """
     import os, json
     # who to cover: GEX universe seed + pinned trades (the names actually opened)
-    want = set(GEX_UNIVERSE["seed"]) | _pinned_tickers()
+    want = set(_gex_candidates(GEX_UNIVERSE)) | _pinned_tickers()
     want.discard("SPY"); want.discard("QQQ"); want.discard("IWM")
     want = sorted(want)
 
@@ -5528,12 +5879,21 @@ def run_detail_bundle():
                     entry["pe"] = round(mc / 1e9 / sum(nis), 1)
         bundle[tk] = entry
 
-    # ratings/earnings/profile from Yahoo — small set, paced
+    # ratings/earnings/profile from Yahoo — small set, paced.
+    # CSV-derived data above covers every name in `want` (free, no network).
+    # The Yahoo pass deliberately stays on the ORIGINAL small set: seed +
+    # pinned. Widening it to the full ~50-name GEX universe would break this
+    # step's stated guarantee of never hitting the per-ticker throttle.
+    # Everything else keeps its coverage from the rotating run_research pass.
+    yahoo_want = sorted((set(GEX_UNIVERSE["seed"]) | _pinned_tickers())
+                        - {"SPY", "QQQ", "IWM"})
+    print(f"[detail] bundle covers {len(want)} names; "
+          f"Yahoo pass on {len(yahoo_want)} (seed + pinned)")
     try:
         import yfinance as yf
         import time
         got = 0
-        for tk in want:
+        for tk in yahoo_want:
             try:
                 t = yf.Ticker(tk)
                 info = {}
@@ -8294,12 +8654,14 @@ def run_full():
                                                  # heavy CBOE loop
     step("gex_universe",   run_gex_universe)   # feeds the screener - never optional
     step("gex_stocks",     run_gex_stocks_cboe)   # real per-ticker OI, feeds the screener
+    step("universe_charts", run_universe_charts, optional=True)
     step("stocks",         run_stocks)
 
     # --- smart money: cheap, and it was starving at the end of the run ------
     step("perf_series",    run_perf_series)   # needs industry.json from stocks
     step("congress",       run_congress_trades)
     step("house_ptr",      run_house_ptr)
+    step("senate_efd",     run_senate_efd,    optional=True)
     step("oge",            run_oge_disclosures)
     step("institutional_13f", run_institutional_13f)
 
@@ -8363,6 +8725,10 @@ def run_engine(name):
         run_financials_all()
     elif name == "ratingsall":
         run_ratings_all()
+    elif name == "universe_charts":
+        run_universe_charts()
+    elif name == "senate":
+        run_senate_efd()
     elif name == "stocks":
         run_stocks()
     elif name == "theses":

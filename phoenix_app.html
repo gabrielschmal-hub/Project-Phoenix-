@@ -4797,6 +4797,30 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     }).join("");
     var el=document.getElementById("scrTable");
     el.innerHTML=head+rows;
+    // Tier 0: the search box found nothing among candidates — consult the
+    // universe ledger so ANY name answers with its gate scorecard instead of
+    // a silent empty table (the INTC case, 13 Aug).
+    if(!arr.length && scrSearch){
+      var q=scrSearch.toUpperCase().trim();
+      el.innerHTML=head+'<div class="loading" style="padding:26px 14px">Checking the universe ledger for '+q+'\u2026</div>';
+      pxLedger(function(L){
+        var r=L&&L.rows&&(L.rows[q]||null);
+        var inner;
+        if(r){
+          inner='<div style="padding:18px 10px 6px">'+pxGateCardHTML(q,r)+
+            '<div style="margin-top:10px"><button class="scr-open-tk" data-tk="'+q+'" '+
+            'style="background:var(--card2);border:1px solid var(--line2);color:var(--ink);'+
+            'padding:8px 14px;border-radius:6px;font:12px var(--mono);cursor:pointer">Open '+q+' ticker page \u2192</button></div></div>';
+        } else if(L){
+          inner='<div class="ed-note" style="margin:18px 10px">No candidate matches, and \u201c'+q+'\u201d is not in the '+(L.count||"")+'-name universe ledger.</div>';
+        } else {
+          inner='<div class="ed-note" style="margin:18px 10px">No candidate matches. universe_ledger.json is not published yet \u2014 it appears after the next engine run.</div>';
+        }
+        el.innerHTML=head+inner;
+        var b=el.querySelector(".scr-open-tk");
+        if(b) b.addEventListener("click",function(){ scrOpenTicker(this.getAttribute("data-tk")); });
+      });
+    }
     // inline filters live inside the table now
     var fTk=el.querySelector("#fTk");
     if(fTk) fTk.addEventListener("input",function(){
@@ -8156,7 +8180,13 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     var tile=document.getElementById("dpGexTile");
     if(!tile) return;
     function render(g){
-      if(!g||g.stock_validity==="INVALID_THIN_CHAIN"||!(g.profile&&g.profile.length)){ tile.style.display="none"; return; }
+      if(!g||g.stock_validity==="INVALID_THIN_CHAIN"||!(g.profile&&g.profile.length)){
+        tile.style.display="";
+        var _st=document.getElementById("dpGexStats");
+        if(_st) _st.innerHTML='<div class="ed-note">'+(g?'Options chain too thin for a reliable dealer read \u2014 GEX not computed for this name.':'Not in the GEX universe \u2014 options flow is tracked for ~50 rule-passing names; this isn\u2019t one of them.')+'</div>';
+        var _pl=document.getElementById("dpGexPlot"); if(_pl) _pl.innerHTML="";
+        return;
+      }
       tile.style.display="block";
       var ov=g.overview||{}, L=g.levels||{};
       function lv(o){ return o&&o.strike!=null?o.strike:"\u2014"; }
@@ -8193,6 +8223,47 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       .then(function(d){ dpGexCache[tk]=d; render(d); })
       .catch(function(){ dpGexMiss[tk]=true; tile.style.display="none"; });
   }
+  // ---------------- Tier 0: the universe ledger ----------------------------
+  // Gate verdict for EVERY universe name (outputs/universe_ledger.json).
+  // Lazy-fetched once; powers screener search-anything and detail scorecards.
+  var pxLedgerCache=null, pxLedgerPending=null;
+  function pxLedger(cb){
+    if(pxLedgerCache!==null){ cb(pxLedgerCache||null); return; }
+    if(pxLedgerPending){ pxLedgerPending.push(cb); return; }
+    pxLedgerPending=[cb];
+    getJSON("universe_ledger").then(function(d){
+      pxLedgerCache=d||false;
+      (pxLedgerPending||[]).forEach(function(f){ f(d||null); }); pxLedgerPending=null;
+    }).catch(function(){
+      pxLedgerCache=false;
+      (pxLedgerPending||[]).forEach(function(f){ f(null); }); pxLedgerPending=null;
+    });
+  }
+  var PX_GATE_LABELS={trend200:"above 40-week",trend50:"above rising 10-week",
+    industry:"industry passing",near_high:"within 8% of 2-yr high",
+    stage2:"stage 2 (30-week rising)",tradability:"size & liquidity"};
+  function pxGateCardHTML(tk,r){
+    if(!r) return '<div class="ed-note">'+tk+' is not in the universe ledger.</div>';
+    var col=r.st==="passer"?"var(--green)":r.st==="near_miss"?"var(--amber)":"var(--red)";
+    var missBits=(r.miss||[]).map(function(m){
+      var lbl=PX_GATE_LABELS[m.g]||m.g;
+      var by=(m.by!=null)?' <b>'+(m.by>0?'+':'')+m.by+'%</b>':'';
+      return '<span class="c" style="border-color:var(--red)">'+lbl+by+'</span>';
+    }).join("");
+    var stTxt=r.st==="passer"?"PASSER":r.st==="near_miss"?"NEAR-MISS":
+              r.st==="no_data"?"NO DATA":"DROPPED";
+    return '<div class="mcds" data-scorecard="'+tk+'">'+
+      '<span class="n" style="color:'+col+';font-size:20px">'+(r.gp!=null?r.gp+"/6":"\u2014")+'</span>'+
+      '<span class="v" style="color:'+col+'">'+stTxt+'</span>'+
+      '<span class="chips">'+
+        (r.last!=null?'<span class="c">last <b>'+r.last+'</b></span>':'')+
+        (r.pvh!=null?'<span class="c">vs 2y high <b>'+r.pvh+'%</b></span>':'')+
+        (r.ind?'<span class="c">'+r.ind+'</span>':'')+
+        missBits+'</span>'+
+      '<span class="wn">Gate verdict from the last engine run \u00b7 the default screener list stays passers and near-misses; this card is the search-anything surface.</span>'+
+    '</div>';
+  }
+
   var dpChartMiss={};     // {tk: true} — fetched and genuinely absent
   var dpFinCache={};      // {tk: {quarters:[...], mcap_B, pe, name, sector}}
   var dpFinMiss={};       // {tk: true}
@@ -8254,7 +8325,24 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     if(dpCache[tk] && dpCache[tk].bars[tf]){ cb(dpCache[tk].bars[tf]); return; }
     dpLoadChart(tk,function(d){
       if(!dpCache[tk]) dpCache[tk]={bars:{},meta:null};
-      if(!d){ dpCache[tk].bars[tf]=[]; cb([]); return; }
+      if(!d){
+        // Tier 0 fallback: no daily coverage for this name — serve the
+        // committed weekly series (outputs/charts_w/<TK>.json) so EVERY
+        // universe ticker still draws a real 2-year chart.
+        getJSON("charts_w/"+tk.replace(/[\/.]/g,"-")).then(function(w){
+          var ws=(w&&w.w&&w.w.c)||[], wt=(w&&w.w&&w.w.t)||[];
+          var bars=ws.map(function(c,i){ return {t:wt[i]||"",o:c,h:c,l:c,c:c,v:0}; });
+          dpCache[tk].bars.daily=bars; dpCache[tk].bars.weekly=bars;
+          if(bars.length&&!dpCache[tk].meta){
+            dpCache[tk].meta={last:bars[bars.length-1].c,
+              prev:bars.length>1?bars[bars.length-2].c:null,
+              low52:null,high52:null,exch:null,weekly_only:true};
+            trPrices[tk]=bars[bars.length-1].c;
+          }
+          cb(bars);
+        }).catch(function(){ dpCache[tk].bars[tf]=[]; cb([]); });
+        return;
+      }
       var bars=dpExpand(d.chart&&d.chart[tf]);
       dpCache[tk].bars[tf]=bars;
       if(!dpCache[tk].meta){
