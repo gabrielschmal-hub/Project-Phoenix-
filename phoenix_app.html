@@ -1349,6 +1349,15 @@ html:not(.light) .sm-chip.on{color:#141210!important}
   background:rgba(2,10,20,.62);backdrop-filter:blur(11px);-webkit-backdrop-filter:blur(11px)}
 html.light .ed-scrim{background:rgba(60,44,28,.42)}
 .ed-scrim.on{display:block}
+.ed-tabs{display:flex;justify-content:center;gap:0;margin:0 0 22px}
+.ed-tabs button{font-family:var(--mono);font-size:11.5px;letter-spacing:1.4px;
+  text-transform:uppercase;background:transparent;color:var(--inkFade);
+  border:1px solid var(--line2);padding:8px 20px;cursor:pointer;transition:.12s}
+.ed-tabs button:first-child{border-radius:5px 0 0 5px}
+.ed-tabs button:last-child{border-radius:0 5px 5px 0;border-left:none}
+.ed-tabs button.on{background:var(--gold);border-color:var(--gold);color:#0A0A0A}
+.ed-tabs button .dot{color:var(--amber);margin-left:6px}
+.ed-wk .ed-sec:first-child{border-top:none;padding-top:0}
 .ed-wrap{position:fixed;inset:0;z-index:610;display:none;overflow-y:auto;
   -webkit-overflow-scrolling:touch;background:var(--bg)}
 .ed-wrap.on{display:block}
@@ -1668,6 +1677,15 @@ html:not(.light) .rp-selbar{color:#E8EDF2;font-size:13px}
 .scr-nopat{font-family:var(--mono);font-size:11px;color:var(--inkFade)}
 /* the pattern column needs its own track in the screener grid */
 .scr-tr,.scr-th{grid-template-columns:34px 1.7fr 140px 78px 62px 50px 50px 66px 74px!important}
+.scr-tr.gexu,.scr-th.gexu{grid-template-columns:34px 1.25fr 100px 104px 56px 56px 118px!important}
+.gexu-badge{font-family:var(--mono);font-size:10.5px;letter-spacing:.4px;padding:2px 7px;
+  border-radius:3px;border:1px solid var(--line2);color:var(--inkLight)}
+.gexu-badge.in{border-color:var(--green);color:var(--green)}
+.gexu-badge.out{border-color:var(--red);color:var(--red)}
+.gexu-badge.prov{border-color:var(--amber);color:var(--amber)}
+@media(max-width:900px){
+  .scr-tr.gexu,.scr-th.gexu{grid-template-columns:26px 1fr 78px 86px 46px 46px 96px!important}
+}
 @media(max-width:900px){
   .scr-tr,.scr-th{grid-template-columns:28px 1.4fr 110px 66px 54px 44px 44px 56px 62px!important}
   .scr-pat{width:104px;height:32px}
@@ -2590,7 +2608,64 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         '<span class="w-when">'+escW(it.when||"")+'</span></div>';
     }).join("");
   }
+  // Daily | Weekly. The toggle swaps the WIRE slots only — the tape, the map
+  // (GEX histogram + VIX term), setups and the calendar are live market state
+  // and stay on screen in both modes. Weekly sections arrive as sanitized
+  // markup in the Edition's own class language, so they render natively.
+  var edWireMode="daily", edWireData=null;
+  function edWeeklyFor(w){
+    var acct=(window.PHOENIX_PROFILE==="A")?"aldemar":"gabriel";
+    var p=w&&w.accounts&&w.accounts[acct];
+    return (p&&p.weekly)||null;
+  }
+  function edRenderWeekly(){
+    var host=document.getElementById("edWeekly");
+    var pos=document.getElementById("edWirePos"),
+        wor=document.getElementById("edWireWorld");
+    if(!host) return;
+    var on=(edWireMode==="weekly");
+    host.style.display=on?"":"none";
+    if(pos) pos.style.display=on?"none":"";
+    if(wor&&on) wor.style.display="none";
+    if(!on) return;
+    var wk=edWeeklyFor(edWireData);
+    if(!wk){
+      var acct=(window.PHOENIX_PROFILE==="A")?"aldemar":"gabriel";
+      host.innerHTML='<div class="ed-sec"><div class="ed-k"><span>The weekly</span>'+
+        '<span class="ed-n">not committed</span></div>'+
+        '<div class="ed-note">No weekend brief for '+escW(acct)+' yet. Drop '+
+        '<b>wire/phoenix-weekly-'+escW(acct)+'-YYYY-MM-DD.html</b> into the repo '+
+        'and the next run publishes it here.</div></div>';
+      return;
+    }
+    var wkStale="";
+    try{
+      var ddays=(Date.now()-new Date(wk.date+"T00:00:00").getTime())/864e5;
+      if(ddays>7) wkStale=pxStaleTag(wk.date);   // a weekend edition is fresh for its week
+    }catch(e){}
+    var h='<div class="ed-sec"><div class="ed-k"><span>The weekly</span>'+
+      '<span class="ed-n">week of '+escW(wk.date||"")+wkStale+'</span></div>'+
+      (wk.headline?'<h2 class="ed-hl">'+escW(wk.headline)+'</h2>':'')+
+      (wk.standfirst?'<p class="ed-body">'+escW(wk.standfirst)+'</p>':'')+'</div>';
+    (wk.sections||[]).forEach(function(s){
+      h+='<div class="ed-sec"><div class="ed-k"><span>'+escW(s.kicker||"")+
+         '</span><span class="ed-n">'+escW(s.right||"")+'</span></div>'+
+         (s.html||"")+'</div>';
+    });
+    host.innerHTML=h;
+  }
+  function edSetMode(m){
+    edWireMode=(m==="weekly")?"weekly":"daily";
+    Array.prototype.forEach.call(
+      document.querySelectorAll("#edTabs button"),function(b){
+        b.classList.toggle("on",b.getAttribute("data-edmode")===edWireMode);
+      });
+    edRenderWeekly();
+    if(edWireMode==="daily") edWire(edWireData);
+  }
+
   function edWire(w){
+    edWireData=w;
     var acct=(window.PHOENIX_PROFILE==="A")?"aldemar":"gabriel";
     var pos=document.getElementById("edWirePos"),
         wor=document.getElementById("edWireWorld");
@@ -2604,6 +2679,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         '<div class="ed-note">No wire for '+escW(acct)+' today. Drop '+
         '<b>wire/phoenix-wire-'+escW(acct)+'-'+today+'.html</b> into the repo '+
         'and the next run publishes it here.</div>';
+      edWeeklyBadge(); edRenderWeekly();
       return;
     }
     pos.style.display=""; wor.style.display="";
@@ -2639,6 +2715,16 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     if(p.ondeck) hx+='<p class="ed-body" style="margin-top:16px"><b>On deck.</b> '+
       p.ondeck+'</p>';
     wor.innerHTML=hx;
+    edWeeklyBadge(); edRenderWeekly();
+  }
+
+  // a quiet dot on the Weekly tab when a weekend brief is waiting unread
+  function edWeeklyBadge(){
+    var b=document.querySelector('#edTabs button[data-edmode="weekly"]');
+    if(!b) return;
+    var wk=edWeeklyFor(edWireData);
+    b.innerHTML="Weekly"+(wk?'<span class="dot">\u25cf</span>':"");
+    b.title=wk?("weekend brief for "+wk.date):"no weekend brief committed";
   }
 
   function edBuild(){
@@ -2670,6 +2756,15 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       edCalendar(cal);
       edWatch(m,g,cal);
       edWire(r[8]||null);
+      var tabs=document.getElementById("edTabs");
+      if(tabs&&!tabs.getAttribute("data-bound")){
+        tabs.setAttribute("data-bound","1");
+        Array.prototype.forEach.call(tabs.querySelectorAll("button"),function(b){
+          b.addEventListener("click",function(){
+            edSetMode(this.getAttribute("data-edmode"));
+          });
+        });
+      }
       trLoad(function(){ edBook(ser,ind); edSmart(con,inst); edSetups(st,g); });
     }).catch(function(e){
       edSet("edBody",'<div class="err" style="padding:30px">The edition could not be built: '+
@@ -4680,6 +4775,75 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     return '<span class="lblchip" style="background:'+bg+';color:'+c+'">'+lbl+'</span>';
   }
   function capFmt(v){ return v==null?"\u2014":(v>=1000?(v/1000).toFixed(1)+"T":Math.round(v)+"B"); }
+
+  // The GEX universe table. Reads outputs/gex_universe.json (scrGexu) — the
+  // ~50 rule-tested names, NOT the 2,900-name screener universe. Every row
+  // shows why it is in or out, and pending rules are labelled pending rather
+  // than rendered as passes.
+  function renderGexUniverse(){
+    var el=document.getElementById("scrTable");
+    var cEl=document.getElementById("scrCount");
+    if(!el) return;
+    if(scrGexu===null){ el.innerHTML='<div class="loading">Loading the GEX universe\u2026</div>';
+      if(cEl) cEl.textContent=""; return; }
+    var rows=(scrGexu||[]).slice();
+    if(!rows.length){
+      if(cEl){ cEl.textContent="not published yet"; cEl.style.color="var(--amber)"; }
+      el.innerHTML='<div class="ed-note" style="margin:18px 10px">'+
+        'outputs/gex_universe.json has no rows yet. The OCC sampler needs a few '+
+        'sessions per name before it can judge Rules 1\u20132 \u2014 the file '+
+        'appears after the next runs.</div>';
+      return;
+    }
+    if(scrSearch){
+      var q=scrSearch.toLowerCase();
+      rows=rows.filter(function(r){ return (r.ticker||"").toLowerCase().indexOf(q)>=0; });
+    }
+    rows.sort(function(a,b){ return (a.rank||999)-(b.rank||999); });
+    var nIn=(scrGexu||[]).filter(function(r){return r.eligible_provisional;}).length;
+    if(cEl){
+      cEl.textContent=rows.length+" tested \u00b7 "+nIn+" eligible \u00b7 Rules 1\u20132 live, 3 & 5 pending"+
+        (scrGexuAsof?" \u00b7 "+String(scrGexuAsof).slice(0,10):"");
+      cEl.style.color="var(--inkFade)";
+    }
+    function num(v,d){ return (v==null)?"\u2014":Number(v).toLocaleString(undefined,
+      {minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
+    var head='<div class="scr-th gexu"><span>#</span><span>Ticker</span>'+
+      '<span>Opt/day</span><span>Opt/shares</span><span>R1</span><span>R2</span>'+
+      '<span>Status</span></div>';
+    var body=rows.map(function(r){
+      function rule(v){
+        return (v===true)?'<span style="color:var(--green)">pass</span>':
+               (v===false)?'<span style="color:var(--red)">fail</span>':
+               '<span style="color:var(--inkFade)">\u2014</span>';
+      }
+      var depth=r.data_depth||"";
+      var cls=r.eligible_provisional?(depth==="confirmed"?"in":"prov"):"out";
+      var lbl=r.eligible_provisional?(depth==="confirmed"?"IN \u00b7 confirmed":"IN \u00b7 provisional")
+             :(depth==="insufficient"?"NEEDS DATA":"OUT");
+      return '<div class="scr-tr gexu" data-row-tk="'+r.ticker+'" title="'+
+        (r.source||"")+' \u00b7 R3 '+(r.rule3_agg_oi||"?")+' \u00b7 R5 '+(r.rule5_weeklies||"?")+'">'+
+        '<span>'+(r.rank||"")+'</span>'+
+        '<span><b>'+r.ticker+'</b></span>'+
+        '<span>'+num(r.avg_opt_contracts_day)+'</span>'+
+        '<span>'+(r.opt_to_shares_ratio_pct==null?"\u2014":num(r.opt_to_shares_ratio_pct,1)+"%")+'</span>'+
+        '<span>'+rule(r.rule1_ratio)+'</span>'+
+        '<span>'+rule(r.rule2_abs_volume)+'</span>'+
+        '<span><span class="gexu-badge '+cls+'">'+lbl+'</span></span>'+
+      '</div>';
+    }).join("");
+    el.innerHTML=head+body+
+      '<div class="ed-note" style="margin:14px 10px 4px">Rules 1 and 2 are '+
+      'measured from OCC daily volume. Rule 3 (aggregate open interest) and '+
+      'Rule 5 (weekly expirations) are not wired to a feed yet and show as '+
+      'pending rather than as passes. Names outside this list get no GEX read '+
+      'anywhere in Phoenix \u2014 by design.</div>';
+    Array.prototype.forEach.call(el.querySelectorAll(".scr-tr.gexu"),function(row){
+      row.addEventListener("click",function(){
+        scrOpenTicker(this.getAttribute("data-row-tk"));
+      });
+    });
+  }
 
   function renderScreener(){
     if(!scrData) return;
@@ -9709,6 +9873,11 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     <div class="ed-hello" id="edDate"></div>
   </div>
 
+  <div class="ed-tabs" id="edTabs">
+    <button type="button" data-edmode="daily" class="on">Daily</button>
+    <button type="button" data-edmode="weekly">Weekly</button>
+  </div>
+
   <div class="ed-verdict">
     <div><div class="ed-call" id="edCall">…</div>
       <div class="ed-vwhy" id="edWhy"></div></div>
@@ -9720,6 +9889,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     <div id="edBookRows"></div><div id="edBookBody"></div><div id="edBookGex"></div></div>
 
   <div class="ed-sec" id="edWirePos"></div>
+  <div id="edWeekly" class="ed-wk" style="display:none"></div>
 
   <div class="ed-sec"><div class="ed-k"><span>The tape</span>
       <span class="ed-n">ranked by how unusual</span></div>

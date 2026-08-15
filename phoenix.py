@@ -893,24 +893,86 @@ def _wire_parse_html(raw):
     return out
 
 
-def run_wire():
-    """Publish outputs/wire.json from the newest committed wire file per account."""
-    import glob as _g, re as _re, os as _os
-    files = _g.glob(_os.path.join(WIRE_DIR, "phoenix-wire-*.html"))
-    if not files:
-        print(f"[wire] no files under {WIRE_DIR}/ — nothing to publish. "
-              f"Commit phoenix-wire-<account>-YYYY-MM-DD.html to feed the Edition.")
-        return
-    best = {}
-    for p in sorted(files):
-        m = _re.search(r"phoenix-wire-([a-z0-9_]+)-(\d{4}-\d{2}-\d{2})\.html$", p)
-        if not m:
-            print(f"[wire] skipping {p} — name must be "
-                  f"phoenix-wire-<account>-YYYY-MM-DD.html")
+def _wire_sanitize(s):
+    """
+    Strip anything executable or style-bearing from committed HTML before the
+    app injects it. The weekly is written in the Edition's own class language,
+    so its section markup renders natively — but its <style> block carries a
+    LIGHT :root and would repaint the app if it ever came along for the ride.
+    PURE.
+    """
+    import re as _re
+    s = s or ""
+    for tag in ("script", "style", "iframe", "object", "embed", "svg"):
+        s = _re.sub(rf"<{tag}\b.*?</{tag}>", "", s, flags=_re.S | _re.I)
+        s = _re.sub(rf"<{tag}\b[^>]*/?>", "", s, flags=_re.I)
+    s = _re.sub(r"<(link|meta)\b[^>]*>", "", s, flags=_re.I)
+    s = _re.sub(r"\son[a-z]+\s*=\s*(\"[^\"]*\"|'[^']*'|[^\s>]+)", "", s, flags=_re.I)
+    s = _re.sub(r"(href|src)\s*=\s*([\"'])\s*javascript:[^\"']*\2", r'\1="#"',
+                s, flags=_re.I)
+    return s.strip()
+
+
+def _wire_parse_weekly(raw):
+    """
+    Parse a weekly brief into ORDERED sections, keeping each section's markup
+    verbatim (sanitized) rather than reducing it to items.
+
+    The weekly carries element types the daily never uses — tape cards, book
+    rows with R-multiples, a calendar strip. Reducing those to a fixed schema
+    would silently drop the richest parts, and would break again every time the
+    Saturday brief gains a new block. Capturing the section body instead means
+    the app renders whatever was written, and a format change costs nothing.
+    PURE.
+    """
+    import re as _re
+    out = {"headline": None, "standfirst": None, "sections": []}
+    m = _re.search(r'class="ed-call"[^>]*>(.*?)</div>', raw, _re.S)
+    if m:
+        out["headline"] = _wire_strip(m.group(1))
+    m = _re.search(r'class="ed-vwhy"[^>]*>(.*?)</div>', raw, _re.S)
+    if m:
+        out["standfirst"] = _wire_strip(m.group(1))
+    chunks = _re.split(r'<div class="ed-sec"[^>]*>', raw)[1:]
+    for ch in chunks:
+        # the last section runs to the page furniture — cut it there
+        for stop in ('<div class="ed-jump"', '<div class="ed-colophon"'):
+            i = ch.find(stop)
+            if i > 0:
+                ch = ch[:i]
+        k = _re.search(r'<div class="ed-k">\s*<span>(.*?)</span>\s*'
+                       r'<span class="ed-n">(.*?)</span>\s*</div>', ch, _re.S)
+        kicker = _wire_strip(k.group(1)) if k else ""
+        right = _wire_strip(k.group(2)) if k else ""
+        body = ch[k.end():] if k else ch
+        body = _wire_sanitize(body)
+        if not (kicker or body):
             continue
-        acct, d = m.group(1), m.group(2)
-        if acct not in best or d > best[acct][0]:
-            best[acct] = (d, p)
+        out["sections"].append({"kicker": kicker, "right": right, "html": body})
+    return out
+
+
+def run_wire():
+    """Publish outputs/wire.json: the newest daily wire AND weekly brief per account."""
+    import glob as _g, re as _re, os as _os
+    files = _g.glob(_os.path.join(WIRE_DIR, "phoenix-*-*.html"))
+    if not files:
+        print(f"[wire] no files under {WIRE_DIR}/ — nothing to publish. Commit "
+              f"phoenix-wire-<account>-YYYY-MM-DD.html (daily) or "
+              f"phoenix-weekly-<account>-YYYY-MM-DD.html (weekend) to feed it.")
+        return
+    best, best_wk = {}, {}
+    for p in sorted(files):
+        m = _re.search(r"phoenix-(wire|weekly)-([a-z0-9_]+)-"
+                       r"(\d{4}-\d{2}-\d{2})\.html$", p)
+        if not m:
+            print(f"[wire] skipping {p} — name must be phoenix-wire-<account>-"
+                  f"YYYY-MM-DD.html or phoenix-weekly-<account>-YYYY-MM-DD.html")
+            continue
+        kind, acct, d = m.group(1), m.group(2), m.group(3)
+        tgt = best if kind == "wire" else best_wk
+        if acct not in tgt or d > tgt[acct][0]:
+            tgt[acct] = (d, p)
     accounts = {}
     for acct, (d, p) in sorted(best.items()):
         try:
@@ -928,9 +990,26 @@ def run_wire():
                    + len((payload.get("world") or {}).get("items") or []))
         payload.update({"date": d, "file": p, "parser": parser})
         accounts[acct] = payload
-        print(f"[wire] {acct}: {d} via {parser} — "
+        print(f"[wire] {acct}: daily {d} via {parser} — "
               f"headline {'ok' if payload.get('headline') else 'MISSING'}, "
               f"{len(payload.get('themes') or [])} themes, {n_items} items")
+
+    # ---- the weekly brief: same folder, its own cadence --------------------
+    for acct, (d, p) in sorted(best_wk.items()):
+        try:
+            raw = open(p, encoding="utf-8", errors="ignore").read()
+        except Exception as e:
+            print(f"[wire] {acct} weekly: cannot read {p}: {e}")
+            continue
+        wk = _wire_parse_weekly(raw)
+        wk.update({"date": d, "file": p})
+        if not wk["sections"] and not wk.get("headline"):
+            print(f"[wire] {acct} weekly: nothing recognised in {p} — skipped")
+            continue
+        accounts.setdefault(acct, {"date": None, "parser": "weekly-only"})
+        accounts[acct]["weekly"] = wk
+        print(f"[wire] {acct}: weekly {d} — {len(wk['sections'])} sections "
+              f"({', '.join(s['kicker'] for s in wk['sections'][:4])})")
     data = {"asof": _now(),
             "date": max((v["date"] for v in accounts.values()), default=None),
             "accounts": accounts}
@@ -943,7 +1022,7 @@ def run_wire():
             n = (len((v.get("positions") or {}).get("items") or [])
                  + sum(len(t.get("items") or []) for t in (v.get("themes") or []))
                  + len((v.get("world") or {}).get("items") or []))
-            if not v.get("headline") and n == 0:
+            if not v.get("headline") and n == 0 and not v.get("weekly"):
                 probs.append(f"{a}: no headline and no items — the parser found "
                              f"nothing it recognises in {v.get('file')}")
         return probs
