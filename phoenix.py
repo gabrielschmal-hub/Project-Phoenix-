@@ -4121,6 +4121,141 @@ def run_macro_series_daily():
     return len(out)
 
 
+# ============================================================
+# MACRO DAILY OHLC — one chart, six instruments
+#
+# spx_daily.json stays exactly as it is (the Edition and the gamma overlay
+# read it). This writes the SAME shape for the other macro instruments so the
+# Markets chart can switch between them without changing its renderer.
+#
+# Candles need OHLC. Five instruments have it from Yahoo. The credit spread
+# does NOT — FRED publishes one number per day — so it is written as a LINE
+# and labelled as one rather than faked into four identical values.
+# ============================================================
+MACRO_DAILY_INSTRUMENTS = [
+    # key      yahoo/fred     label                    kind
+    ("SPX",   "^GSPC",  "S&P 500",                  "candles"),
+    ("NDX",   "^IXIC",  "Nasdaq Composite",         "candles"),
+    ("GOLD",  "GC=F",   "Gold (front future)",      "candles"),
+    ("OIL",   "CL=F",   "WTI crude (front future)", "candles"),
+    ("TLT",   "TLT",    "Bonds · 20yr Treasury",    "candles"),
+    ("HYOAS", "BAMLH0A0HYM2", "Credit spread · HY OAS", "line"),
+]
+
+
+def run_macro_daily(period="1y"):
+    """Publish outputs/macro_daily.json: daily bars for every macro instrument."""
+    import os as _os
+    try:
+        import yfinance as yf
+    except Exception as e:
+        print(f"[macrod] yfinance unavailable: {e} — keeping previous file")
+        return None
+
+    instruments, problems = {}, []
+    for key, sym, label, kind in MACRO_DAILY_INSTRUMENTS:
+        if kind == "line":
+            continue
+        try:
+            df = yf.download(sym, period=period, interval="1d",
+                             auto_adjust=False, progress=False)
+            if df is None or len(df) == 0:
+                problems.append(f"{key}: empty pull")
+                continue
+
+            def col(name):
+                c = df[name]
+                if hasattr(c, "columns"):
+                    c = c.iloc[:, 0]
+                return c
+
+            o, h, l, cl, v = (col("Open"), col("High"), col("Low"),
+                              col("Close"), col("Volume"))
+            bars = []
+            for d in df.index:
+                def g(series, nd=2):
+                    try:
+                        return round(float(series.loc[d]), nd)
+                    except Exception:
+                        return None
+                cv = g(cl)
+                if cv is None:
+                    continue
+                try:
+                    ds = d.strftime("%Y-%m-%d")
+                except AttributeError:
+                    ds = str(d)[:10]
+                try:
+                    vv = int(float(v.loc[d]))
+                except Exception:
+                    vv = None
+                bars.append({"date": ds, "o": g(o), "h": g(h), "l": g(l),
+                             "c": cv, "v": vv})
+            if len(bars) < 30:
+                problems.append(f"{key}: only {len(bars)} bars")
+                continue
+            instruments[key] = {"label": label, "kind": "candles",
+                                "symbol": sym, "bars": bars,
+                                "asof": bars[-1]["date"]}
+            print(f"[macrod] {key:6} {len(bars):4} bars  last {bars[-1]['date']} "
+                  f"{bars[-1]['c']}")
+        except Exception as e:
+            problems.append(f"{key}: {e}")
+
+    # ---- credit spread: read the HY OAS the daily macro series already carries.
+    # fred() lives INSIDE run_macro(), so it cannot be called from here, and
+    # re-fetching the same series twice per run would be waste. macro_series
+    # forward-fills it from FRED's weekly release — which is exactly why it is
+    # drawn as a LINE and never as candles.
+    try:
+        import json as _json
+        rows = []
+        try:
+            ms = _json.load(open(_os.path.join(OUTPUTS_DIR, "macro_series.json")))
+            for r in (ms.get("series") or []):
+                v = r.get("hy")
+                if v is None or not r.get("date"):
+                    continue
+                rows.append({"date": str(r["date"])[:10], "c": round(float(v), 2)})
+        except FileNotFoundError:
+            problems.append("HYOAS: macro_series.json not written yet")
+        rows = rows[-400:]
+        if len(rows) >= 30:
+            instruments["HYOAS"] = {
+                "label": "Credit spread · HY OAS", "kind": "line",
+                "symbol": "BAMLH0A0HYM2", "bars": rows,
+                "asof": rows[-1]["date"],
+                "note": "FRED HY OAS, forward-filled from the weekly release — "
+                        "drawn as a line, not candles."}
+            print(f"[macrod] HYOAS  {len(rows):4} points last {rows[-1]['date']} "
+                  f"{rows[-1]['c']}%")
+        else:
+            problems.append(f"HYOAS: only {len(rows)} points")
+    except Exception as e:
+        problems.append(f"HYOAS: {e}")
+
+    if not instruments:
+        print("[macrod] nothing fetched — keeping previous macro_daily.json")
+        return None
+    for p in problems:
+        print(f"[macrod] MISSING {p}")
+
+    def _validate_macro_daily(res):
+        probs = []
+        n = len((res or {}).get("instruments") or {})
+        if n < 3:
+            probs.append(f"only {n} instruments fetched (<3) — pull likely broken")
+        return probs
+
+    write_json_guarded("macro_daily", {
+        "asof": _now(), "count": len(instruments),
+        "order": [k for k, _s, _l, _t in MACRO_DAILY_INSTRUMENTS
+                  if k in instruments],
+        "missing": problems,
+        "instruments": instruments}, _validate_macro_daily)
+    return len(instruments)
+
+
 def run_spx_daily(period="1y"):
     """Pull ~1yr of SPX daily OHLC+volume and write spx_daily.json."""
     try:
@@ -4234,6 +4369,218 @@ def load_weekly_from_csv(path="stock_weekly.csv"):
     for tk in data:
         data[tk].sort()
     return dict(data)
+
+def load_daily_from_csv(path="stock_daily.csv"):
+    """
+    Load {ticker: [(date, close), ...]} from the committed daily CSV.
+
+    Same contract as load_weekly_from_csv, one row per ticker per SESSION.
+    Produced offline by tools/build_stock_daily.ipynb (Colab) — the engine
+    never fetches 2,900 daily histories itself.
+    """
+    import csv, os, gzip, io
+    from collections import defaultdict
+    # a gzipped file wins if present: same contract, ~6x smaller to commit
+    gz = path + ".gz"
+    if os.path.exists(gz):
+        fh = io.TextIOWrapper(gzip.open(gz, "rb"), encoding="utf-8")
+        print(f"[daily] reading {gz} ({os.path.getsize(gz)/1e6:.1f} MB gzipped)")
+    elif os.path.exists(path):
+        fh = open(path)
+        print(f"[daily] reading {path} ({os.path.getsize(path)/1e6:.1f} MB)")
+    else:
+        return {}
+    data = defaultdict(list)
+    with fh as f:
+        for row in csv.DictReader(f):
+            try:
+                data[row["ticker"]].append((row["date"], float(row["close"])))
+            except Exception:
+                continue
+    for tk in data:
+        data[tk].sort()
+    return dict(data)
+
+
+def load_shares_outstanding(path="shares_outstanding.csv"):
+    """
+    {ticker: shares} from the committed file (tools/build_stock_daily.ipynb
+    emits it alongside stock_daily.csv). Optional — see refresh_universe_caps
+    for what happens without it.
+    """
+    import csv, os
+    if not os.path.exists(path):
+        return {}
+    out = {}
+    with open(path) as f:
+        for row in csv.DictReader(f):
+            try:
+                sh = float(row["shares"])
+                if sh > 0:
+                    out[row["ticker"]] = sh
+            except Exception:
+                continue
+    return out
+
+
+def refresh_universe_caps(universe, closes, shares=None):
+    """
+    Recompute market cap from the LATEST committed close, every run. PURE.
+
+    universe.csv ships a market cap with no date on it. Left alone it goes
+    stale between exports, and every cap-weighted number downstream — sector
+    and industry indices, the tradability gate — quietly drifts with it.
+
+    With shares_outstanding.csv:  mcap = shares x latest close. Exact.
+    Without it:                   shares are IMPLIED as mcap / latest close,
+                                  which leaves today's cap unchanged but still
+                                  gives every past session a real weight (see
+                                  compute_rotation_series_daily). Labelled
+                                  'implied' so nobody mistakes it for measured.
+
+    Returns (new_universe, report).
+    """
+    shares = shares or {}
+    out, rep = {}, {"source": "shares_outstanding.csv" if shares else "implied",
+                    "measured": 0, "implied": 0, "unchanged": 0,
+                    "rejected": 0, "rejected_names": [],
+                    "inconsistent": 0, "inconsistent_names": [],
+                    "moved_5pct": 0, "biggest": []}
+    moves = []
+    for tk, info in universe.items():
+        rows = closes.get(tk) or []
+        last = rows[-1][1] if rows else None
+        old = float(info.get("market_cap") or 0)
+        new_info = dict(info)
+        if last and last > 0:
+            sh = shares.get(tk)
+            if sh:
+                new = sh * last
+                pct = ((new / old - 1) * 100) if old > 0 else None
+                # PLAUSIBILITY TEST (primary). If the universe cap is merely
+                # stale, then cap/shares must equal this ticker's price on SOME
+                # day in the window. When it lands outside the whole year's
+                # range, the cap and the share count are describing different
+                # things — ADR ratios (ordinary shares vs ADSs), preferreds and
+                # closed-end funds are the usual culprits. Measured on the real
+                # 16 Aug file: 2,437 of 2,514 pass, 77 fail. Those 77 would
+                # otherwise enter an industry index at a badly wrong weight.
+                bad_shares = False
+                if old > 0 and rows:
+                    px = [c for _d, c in rows if c and c > 0]
+                    if px:
+                        need = old / sh
+                        if not (min(px) * 0.97 <= need <= max(px) * 1.03):
+                            bad_shares = True
+                if bad_shares:
+                    new_info["cap_source"] = "shares_inconsistent"
+                    new_info["shares"] = old / last   # implied: consistent by construction
+                    rep["inconsistent"] += 1
+                    rep["inconsistent_names"].append(
+                        {"ticker": tk, "implied_px": round(old / sh, 2),
+                         "range": [round(min(px), 2), round(max(px), 2)]})
+                # A cap also cannot credibly move >300% between exports.
+                elif pct is not None and abs(pct) > 300:
+                    new_info["cap_source"] = "rejected_outlier"
+                    new_info["shares"] = old / last
+                    rep["rejected"] += 1
+                    rep["rejected_names"].append({"ticker": tk,
+                                                  "pct": round(pct, 1)})
+                else:
+                    new_info["market_cap"] = new
+                    new_info["shares"] = sh
+                    new_info["cap_source"] = "measured"
+                    rep["measured"] += 1
+                    if pct is not None:
+                        moves.append((tk, pct))
+            elif old > 0:
+                new_info["shares"] = old / last     # implied, constant forward
+                new_info["cap_source"] = "implied"
+                rep["implied"] += 1
+            else:
+                new_info["cap_source"] = "unknown"
+                rep["unchanged"] += 1
+        else:
+            new_info["cap_source"] = "no_price"
+            rep["unchanged"] += 1
+        out[tk] = new_info
+    moves.sort(key=lambda x: -abs(x[1]))
+    rep["moved_5pct"] = sum(1 for _t, m in moves if abs(m) >= 5)
+    rep["biggest"] = [{"ticker": t, "pct": round(m, 1)} for t, m in moves[:8]]
+    return out, rep
+
+
+def compute_rotation_series_daily(daily_data, universe, min_members=3):
+    """
+    Cap-weighted DAILY index per sector and per industry, rebased to 100.
+
+    PURE. Weights DRIFT: each session is weighted by that session's market cap
+    (shares x that day's close), not by today's. Static current weights would
+    apply a winner's post-run size to its own pre-run returns — the index would
+    show a past it never had. Shares come from universe['shares'] (measured or
+    implied by refresh_universe_caps) and are held constant across the window;
+    a year of buybacks is second-order next to the price move.
+
+    A name counts on a session only if it has both a prior and a current close,
+    so a listing that starts mid-window cannot fake a jump.
+
+    Returns (dates, {"sectors": [...], "industries": [...]}).
+    """
+    from collections import defaultdict
+
+    all_dates = set()
+    for _tk, rows in daily_data.items():
+        for d, _c in rows:
+            all_dates.add(d)
+    dates = sorted(all_dates)
+    if len(dates) < 2:
+        return [], {"sectors": [], "industries": []}
+
+    closes = {tk: dict(rows) for tk, rows in daily_data.items()}
+    groups = {"sectors": defaultdict(list), "industries": defaultdict(list)}
+    for tk, info in universe.items():
+        if tk not in closes or len(closes[tk]) < 2:
+            continue
+        sh = float(info.get("shares") or 0)
+        if sh <= 0:
+            mc = float(info.get("market_cap") or 0)
+            last = closes[tk].get(dates[-1])
+            sh = (mc / last) if (mc > 0 and last) else 0.0
+        if sh <= 0:
+            continue
+        if info.get("sector"):
+            groups["sectors"][info["sector"]].append((tk, sh))
+        if info.get("industry"):
+            groups["industries"][info["industry"]].append((tk, sh))
+
+    out = {"sectors": [], "industries": []}
+    for bucket, members in groups.items():
+        rows = []
+        for name, mems in members.items():
+            if len(mems) < min_members:
+                continue
+            lvl, series = 100.0, [100.0]
+            for i in range(1, len(dates)):
+                d0, d1 = dates[i - 1], dates[i]
+                num = wsum = 0.0
+                for tk, sh in mems:
+                    c0 = closes[tk].get(d0)
+                    c1 = closes[tk].get(d1)
+                    if not c0 or not c1 or c0 <= 0:
+                        continue
+                    w = sh * c0          # cap at the START of the session
+                    num += (c1 / c0 - 1.0) * w
+                    wsum += w
+                lvl *= (1 + (num / wsum if wsum else 0.0))
+                series.append(round(lvl, 3))
+            last_caps = sum(sh * (closes[tk].get(dates[-1]) or 0)
+                            for tk, sh in mems)
+            rows.append({"name": name, "series": series, "n": len(mems),
+                         "mcap_B": round(last_caps / 1e9, 1),
+                         "chg": round(series[-1] - 100.0, 2)})
+        rows.sort(key=lambda x: -x["chg"])
+        out[bucket] = rows
+    return dates, out
 
 def load_quarterly_fundamentals(path="macroflow_fundamentals_quarterly.csv"):
     """
@@ -4507,6 +4854,175 @@ def _third_friday(year, month):
     d = date(year, month, 1)
     d += timedelta(days=(4 - d.weekday()) % 7)      # first Friday
     return d + timedelta(days=14)                    # third Friday
+
+
+# ============================================================
+# ROTATION, DAILY — the log that turns a weekly picture into a daily one
+#
+# Sector and industry SERIES are cap-weighted from the universe's weekly bars,
+# because daily bars for ~2,900 names is not a thing this engine can fetch.
+# But the 1-DAY cap-weighted move per sector and per industry IS computed every
+# run (d1, from the daily-return pass).
+#
+# So: append d1 every run, append-only, one row per date, first run of a date
+# wins. From those rows a genuine DAILY series is compounded — same doctrine as
+# the signal log. Day one shows one point and says so; by month two the chart
+# answers "what changed this week" honestly instead of interpolating a guess.
+# ============================================================
+def run_rotation_daily():
+    """Append today's d1 per sector/industry; rebuild the daily rotation series."""
+    import json as _json, os as _os
+
+    hist_dir = _os.path.join(OUTPUTS_DIR, "history")
+    _os.makedirs(hist_dir, exist_ok=True)
+    log_path = _os.path.join(hist_dir, "rotation_daily.jsonl")
+
+    def _read(name, key, label_field):
+        try:
+            d = _json.load(open(_os.path.join(OUTPUTS_DIR, name)))
+        except Exception as e:
+            print(f"[rotd] {name} unavailable: {e}")
+            return {}, None
+        rows, asof = d.get(key) or [], d.get("asof")
+        out = {}
+        for r in rows:
+            nm, d1 = r.get(label_field), r.get("d1")
+            if nm and d1 is not None:
+                out[nm] = round(float(d1), 3)
+        return out, asof
+
+    sec, sec_asof = _read("sector_perf.json", "sectors", "sector")
+    ind, ind_asof = _read("industry.json", "industries", "industry")
+    if not sec and not ind:
+        print("[rotd] no d1 values available — nothing appended")
+        return
+
+    today = _now()[:10]
+    seen = {}
+    if _os.path.exists(log_path):
+        for line in open(log_path):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                r = _json.loads(line)
+                seen[r["date"]] = r
+            except Exception:
+                continue
+    if today in seen:
+        print(f"[rotd] {today} already logged — first run of a date wins, "
+              f"not overwriting")
+    else:
+        row = {"date": today, "sectors": sec, "industries": ind,
+               "src_asof": {"sector": sec_asof, "industry": ind_asof}}
+        with open(log_path, "a") as f:
+            f.write(_json.dumps(row, separators=(",", ":")) + "\n")
+        seen[today] = row
+        print(f"[rotd] appended {today}: {len(sec)} sectors, {len(ind)} industries")
+
+    # ---- PRIMARY: true daily series from the committed daily CSV ----------
+    # The log below is the fallback that works from day one; this is the real
+    # thing — one row per ticker per session, so 3M actually means 63 sessions
+    # of history the first time it runs rather than 63 days from now.
+    try:
+        dd = load_daily_from_csv()
+    except Exception as e:
+        dd = {}
+        print(f"[rotd] stock_daily.csv unreadable: {e}")
+    if dd:
+        # refresh the caps FIRST: universe.csv ships a market cap with no date,
+        # and every weight below depends on it being current
+        uni = load_universe_from_csv()
+        uni, caprep = refresh_universe_caps(uni, dd, load_shares_outstanding())
+        print(f"[rotd] market caps: {caprep['source']} \u00b7 "
+              f"{caprep['measured']} measured, {caprep['implied']} implied, "
+              f"{caprep['moved_5pct']} moved >=5% since universe.csv")
+        if caprep["inconsistent"]:
+            print(f"[rotd] {caprep['inconsistent']} tickers where cap and share "
+                  f"count disagree (ADR ratios / preferreds / CEFs) — using "
+                  f"implied shares for these: " +
+                  ", ".join(r["ticker"] for r in caprep["inconsistent_names"][:8]))
+        if caprep["rejected"]:
+            print(f"[rotd] REJECTED {caprep['rejected']} implausible cap moves "
+                  f"(>300%) — check stock_daily.csv for: " +
+                  ", ".join(f"{r['ticker']} {r['pct']:+.0f}%"
+                            for r in caprep["rejected_names"][:6]))
+        if caprep["biggest"]:
+            print("[rotd] biggest cap moves: " +
+                  ", ".join(f"{b['ticker']} {b['pct']:+.1f}%"
+                            for b in caprep["biggest"][:5]))
+        write_json("market_caps", {
+            "asof": _now(), "source": caprep["source"],
+            "note": ("Market cap recomputed each run as shares x latest "
+                     "committed close. 'implied' means shares were derived "
+                     "from universe.csv's cap and today's price — the level is "
+                     "unchanged, but past sessions still get real weights."),
+            "measured": caprep["measured"], "implied": caprep["implied"],
+            "rejected": caprep["rejected"],
+            "rejected_names": caprep["rejected_names"][:40],
+            "inconsistent": caprep["inconsistent"],
+            "inconsistent_names": caprep["inconsistent_names"][:60],
+            "moved_5pct": caprep["moved_5pct"], "biggest": caprep["biggest"],
+            "caps": {tk: round(float(v.get("market_cap") or 0) / 1e9, 3)
+                     for tk, v in uni.items() if v.get("market_cap")}})
+        cdates, series = compute_rotation_series_daily(dd, uni)
+        if cdates and (series["sectors"] or series["industries"]):
+            payload = {
+                "asof": _now(), "dates": cdates, "days": len(cdates),
+                "cadence": "daily", "source": "stock_daily.csv",
+                "cap_source": caprep["source"],
+                "note": ("Cap-weighted daily index per sector and industry from "
+                         "the committed daily closes. Weights DRIFT: each "
+                         "session is weighted by that session's market cap, so "
+                         "a winner's current size is never applied to its own "
+                         "past returns."),
+                "sectors": series["sectors"],
+                "industries": series["industries"],
+                "today": {"sectors": sec, "industries": ind},
+            }
+            write_json("rotation_daily", payload)
+            print(f"[rotd] rotation_daily.json from stock_daily.csv: "
+                  f"{len(cdates)} sessions ({cdates[0]} -> {cdates[-1]}), "
+                  f"{len(series['sectors'])} sectors, "
+                  f"{len(series['industries'])} industries")
+            return
+        print("[rotd] stock_daily.csv present but produced no series — "
+              "falling back to the append-only log")
+    else:
+        print("[rotd] no stock_daily.csv — using the append-only log "
+              "(build it with tools/build_stock_daily.ipynb for full history)")
+
+    # ---- FALLBACK: compound the logged daily moves into rebased series ----
+    dates = sorted(seen)
+    def _series(bucket):
+        names = set()
+        for d in dates:
+            names.update((seen[d].get(bucket) or {}).keys())
+        out = []
+        for nm in sorted(names):
+            lvl, ser = 100.0, []
+            for d in dates:
+                v = (seen[d].get(bucket) or {}).get(nm)
+                lvl = lvl * (1 + (v or 0) / 100.0)
+                ser.append(round(lvl, 2))
+            out.append({"name": nm, "series": ser,
+                        "chg": round(ser[-1] - 100.0, 2)})
+        out.sort(key=lambda x: -x["chg"])
+        return out
+
+    payload = {
+        "asof": _now(), "dates": dates, "days": len(dates),
+        "cadence": "daily", "source": "daily-log",
+        "note": ("Compounded from the cap-weighted 1-day move logged each run. "
+                 "The history starts the day this step first ran — it does not "
+                 "backfill, because daily bars for the whole universe do not "
+                 "exist in this engine."),
+        "sectors": _series("sectors"),
+        "industries": _series("industries"),
+    }
+    write_json("rotation_daily", payload)
+    print(f"[rotd] rotation_daily.json: {len(dates)} day(s), "
+          f"{len(payload['sectors'])} sectors, {len(payload['industries'])} industries")
 
 
 def run_perf_series():
@@ -8720,6 +9236,7 @@ def run_full():
     # --- core: what the dashboard reads first -------------------------------
     step("macro",          run_macro)
     step("spx_daily",      run_spx_daily)
+    step("macro_daily",    run_macro_daily,   optional=True)
     step("macro_series",   run_macro_series_daily)   # daily, for the brief
     step("vix_term",       run_vix_term)
     step("gex",            run_gex_best)
@@ -8738,6 +9255,7 @@ def run_full():
 
     # --- smart money: cheap, and it was starving at the end of the run ------
     step("perf_series",    run_perf_series)   # needs industry.json from stocks
+    step("rotation_daily", run_rotation_daily, optional=True)
     step("congress",       run_congress_trades)
     step("house_ptr",      run_house_ptr)
     step("senate_efd",     run_senate_efd,    optional=True)
@@ -8784,6 +9302,10 @@ def run_engine(name):
         run_signals_index()
     elif name == "macro":
         run_macro()
+    elif name == "macro_daily":
+        run_macro_daily()
+    elif name == "rotation_daily":
+        run_rotation_daily()
     elif name == "spx_daily":
         run_spx_daily()
     elif name == "research":
