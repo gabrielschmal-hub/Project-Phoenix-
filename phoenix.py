@@ -4894,8 +4894,10 @@ def run_rotation_daily():
     sec, sec_asof = _read("sector_perf.json", "sectors", "sector")
     ind, ind_asof = _read("industry.json", "industries", "industry")
     if not sec and not ind:
-        print("[rotd] no d1 values available — nothing appended")
-        return
+        # NOT fatal: d1 only feeds the fallback log. The committed daily CSV is
+        # a separate source and must still be read.
+        print("[rotd] no d1 values in sector_perf/industry.json — skipping the "
+              "log append (the stock_daily.csv path below is unaffected)")
 
     today = _now()[:10]
     seen = {}
@@ -4909,7 +4911,9 @@ def run_rotation_daily():
                 seen[r["date"]] = r
             except Exception:
                 continue
-    if today in seen:
+    if not (sec or ind):
+        pass                                   # nothing to append today
+    elif today in seen:
         print(f"[rotd] {today} already logged — first run of a date wins, "
               f"not overwriting")
     else:
@@ -4929,6 +4933,9 @@ def run_rotation_daily():
     except Exception as e:
         dd = {}
         print(f"[rotd] stock_daily.csv unreadable: {e}")
+    print(f"[rotd] daily CSV: {len(dd)} tickers loaded"
+          if dd else "[rotd] daily CSV: NOT FOUND at stock_daily.csv[.gz] "
+                     "(repo root) — the chart will stay on the weekly series")
     if dd:
         # refresh the caps FIRST: universe.csv ships a market cap with no date,
         # and every weight below depends on it being current

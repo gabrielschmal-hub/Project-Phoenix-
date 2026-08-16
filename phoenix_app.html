@@ -4033,9 +4033,11 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     if(!host||!SRC) return;
     // RP_TF is in TRADING DAYS; a weekly series needs it converted to bars
     var span=(!RP_TF)?0:(CAD==="daily"?RP_TF:Math.max(1,Math.round(RP_TF/5)));
-    function cut(a){ return (span && a.length>span) ? a.slice(a.length-span) : a; }
+    // an N-period change needs N+1 points: [t-N ... t]. Returning exactly span
+    // points made 1D a single point rebased to 100 -> every row read +0.0%.
+    function cut(a){ return (span && a.length>span+1) ? a.slice(a.length-span-1) : a; }
     function reb(a){ var b=a[0]||1; return a.map(function(v){return v/b*100;}); }
-    var minLen=(CAD==="daily")?1:5;
+    var minLen=1;
     var rows=(SRC[RP_MODE]||[]).filter(function(r){return r.series&&r.series.length>minLen;})
       .map(function(r){
         var s2=reb(cut(r.series));
