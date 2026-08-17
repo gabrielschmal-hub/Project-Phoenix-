@@ -4964,11 +4964,21 @@ def run_rotation_daily():
     # compounds one day's move twice — visible on 16-17 Aug as Broadcasting
     # +4.53% logged on Sunday and again on Monday. Skip an append whose values
     # are identical to the newest logged row.
+    import datetime as _dt
+    def _is_session(d):
+        try:
+            y, m, dd = map(int, str(d)[:10].split("-"))
+            return _dt.date(y, m, dd).weekday() < 5      # Mon-Fri only
+        except Exception:
+            return True
     _prev = seen[max(seen)] if seen else None
     _same = bool(_prev and _prev.get("sectors") == sec
                  and _prev.get("industries") == ind)
     if not (sec or ind):
         pass                                   # nothing to append today
+    elif not _is_session(today):
+        print(f"[rotd] {today} is not a trading day — not appending "
+              f"(a weekend run carries Friday's close)")
     elif _same:
         print(f"[rotd] d1 values identical to {max(seen)} — the underlying close "
               f"has not changed, not appending (would double-count)")
@@ -5043,10 +5053,23 @@ def run_rotation_daily():
         spliced = 0
         if cdates:
             last_csv = cdates[-1]
+            _last_vals = None
             for d in sorted(seen):
                 if d <= last_csv:
                     continue
                 row = seen[d]
+                # the log written before the double-count guard existed can
+                # hold a weekend row and a repeat of the same close — neither
+                # is a session, and splicing them invents moves
+                if not _is_session(d):
+                    print(f"[rotd] splice: skipping {d} (not a trading day)")
+                    continue
+                _vals = (row.get("sectors"), row.get("industries"))
+                if _vals == _last_vals:
+                    print(f"[rotd] splice: skipping {d} (identical to the "
+                          f"previous logged row — would double-count)")
+                    continue
+                _last_vals = _vals
                 for bucket, key in (("sectors", "sectors"),
                                     ("industries", "industries")):
                     moves = row.get(key) or {}
@@ -5064,8 +5087,38 @@ def run_rotation_daily():
                 print(f"[rotd] spliced {spliced} logged session(s) after "
                       f"{last_csv} onto the CSV history -> now through {cdates[-1]}")
         if cdates and (series["sectors"] or series["industries"]):
+            # S&P 500 on the SAME daily grid. Without this the readout showed
+            # "-NaN%" because the weekly benchmark cannot be mixed in here.
+            bench = None
+            try:
+                _sp = _json.load(open(_os.path.join(OUTPUTS_DIR, "spx_daily.json")))
+                _by = {}
+                for b in (_sp.get("bars") or []):
+                    if b.get("date") and b.get("c"):
+                        _by[str(b["date"])[:10]] = float(b["c"])
+                _vals, _base = [], None
+                for d in cdates:
+                    v = _by.get(d)
+                    if v and _base is None:
+                        _base = v
+                    _vals.append(round(v / _base * 100, 3) if (v and _base) else None)
+                # carry the last known level across gaps so the line is continuous
+                _last = 100.0
+                for i, v in enumerate(_vals):
+                    if v is None:
+                        _vals[i] = _last
+                    else:
+                        _last = v
+                if _base:
+                    bench = {"name": "S&P 500", "series": _vals,
+                             "chg": round(_vals[-1] - 100.0, 2)}
+                    print(f"[rotd] benchmark: S&P 500 aligned to the daily grid "
+                          f"({bench['chg']:+.2f}% over {len(cdates)} sessions)")
+            except Exception as e:
+                print(f"[rotd] no daily benchmark ({e}) — the S&P row will be hidden")
             payload = {
                 "asof": _now(), "dates": cdates, "days": len(cdates),
+                "benchmark": bench,
                 "cadence": "daily", "source": "stock_daily.csv",
                 "cap_source": caprep["source"],
                 "csv_through": (cdates[-1 - spliced] if spliced else

@@ -4052,9 +4052,12 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     }
     // the daily log has no benchmark line of its own — borrow SPX from the
     // weekly file only when cadences match, never mix the two on one axis
-    var bmRaw=(CAD==="daily")?{}:(RP_DATA&&RP_DATA.benchmark)||{};
+    var bmRaw=(CAD==="daily")
+      ? ((SRC&&SRC.benchmark)||{})            // daily grid, from the engine
+      : ((RP_DATA&&RP_DATA.benchmark)||{});
     var bm={name:bmRaw.name||"S&P 500",series:reb(cut(bmRaw.series||[]))};
-    bm.chg=bm.series.length?+(bm.series[bm.series.length-1]-100).toFixed(2):0;
+    bm.chg=bm.series.length?+(bm.series[bm.series.length-1]-100).toFixed(2):null;
+    var bmOK=(bm.series.length>1&&isFinite(bm.chg));
     var dates=cut((CAD==="daily")?(SRC.dates||[]):(bmRaw.dates||[]));
     // with few rows, slice(0,4) and slice(-4) overlap and the same series gets
     // drawn twice. Never let the two halves touch.
@@ -4095,8 +4098,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
                        hasSel?2.6:1.8));
     });
     bot.forEach(function(r,i){ traces.push(line(r,RED[i%RED.length],"solid")); });
-    traces.push({type:"scatter",mode:"lines",name:bm.name||"S&P 500",
-      x:dates,y:bm.series||[],
+    if(bmOK) traces.push({type:"scatter",mode:"lines",name:bm.name||"S&P 500",
+      x:dates,y:bm.series,
       line:{color:C.ink,width:3,dash:"dot"},
       hoverinfo:"none"});
 
@@ -4106,7 +4109,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     // sessions to be worth scrubbing.
     var scrub=(CAD==="daily"&&dates.length>10);
     Plotly.newPlot("rpPlot",traces,{
-      height:scrub?386:330,margin:{l:56,r:14,t:10,b:scrub?18:34},
+      height:scrub?430:330,margin:{l:56,r:14,t:10,b:scrub?96:34},
       paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",
       font:{family:"monospace",size:11,color:C.dim},
       xaxis:{type:"date",gridcolor:C.grid,tickfont:{size:11,color:C.ink},
@@ -4117,7 +4120,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
              zeroline:false},
       shapes:[{type:"line",x0:dates[0],x1:dates[dates.length-1],y0:100,y1:100,
         line:{color:C.grid,width:1,dash:"dot"}}],
-      showlegend:true,legend:{orientation:"h",y:-0.18,font:{size:10.5,color:C.ink}},
+      showlegend:true,legend:{orientation:"h",y:scrub?-0.42:-0.18,
+        font:{size:10.5,color:C.ink}},
       // "x unified" drew a box listing every series, which with eight lines
       // covered most of the chart. The readout panel on the right already does
       // that job, so suppress the label and keep only the hover EVENT.
@@ -4144,11 +4148,13 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
              '</span><span class="vl" style="color:'+(r.pc>=0?"var(--green)":"var(--red)")+'">'+
              (r.pc>=0?"+":"\u2212")+Math.abs(r.pc).toFixed(1)+'%</span></div>';
         });
-        var bv=bm.series[i]-100;
-        h+='<div class="rr bm"><i style="background:var(--ink)"></i><span class="nm">'+
-           bm.name+'</span><span class="vl" style="color:'+(bv>=0?"var(--green)":"var(--red)")+
-           '">'+(bv>=0?"+":"\u2212")+Math.abs(bv).toFixed(1)+'%</span></div>'+
-           '<div class="rp-hint">move across the chart</div>';
+        var bv=bmOK?(bm.series[i]-100):null;
+        if(bv!=null&&isFinite(bv)){
+          h+='<div class="rr bm"><i style="background:var(--ink)"></i><span class="nm">'+
+             bm.name+'</span><span class="vl" style="color:'+(bv>=0?"var(--green)":"var(--red)")+
+             '">'+(bv>=0?"+":"\u2212")+Math.abs(bv).toFixed(1)+'%</span></div>';
+        }
+        h+='<div class="rp-hint">move across the chart</div>';
         var box=document.getElementById("rpRead");
         if(box) box.innerHTML=h;
       }
