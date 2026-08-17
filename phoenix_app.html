@@ -2163,8 +2163,9 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         '<div class="thead"><span class="ttl">Rotation \u00b7 performance</span>'+
           '<span class="rp-tabs"><button class="rp-tab on" id="rpSectors">Sectors</button>'+
           '<button class="rp-tab" id="rpIndustries">Industries</button></span>'+
-          '<span class="rp-tf"><button id="rpTf1D">1D</button><button id="rpTf1W">1W</button>'+
-          '<button id="rpTf1M">1M</button><button id="rpTf3M">3M</button>'+
+          '<span class="rp-tf"><button id="rpTf1D" title="last month, one point per session">1M\u00b7D</button>'+
+          '<button id="rpTf1W" title="last month, one point per week">1M\u00b7W</button>'+
+          '<button id="rpTf3M">3M</button>'+
           '<button id="rpTf6M">6M</button><button id="rpTf1Y" class="on">12M</button></span>'+
           '<span class="tnote" id="rpNote"></span></div>'+
         '<div class="tbody"><div class="rp-main">'+
@@ -3962,7 +3963,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   // ================= ROTATION PERFORMANCE =================================
   // One chart, two views. The winners and losers as lines against SPX, so you
   // can see WHEN the rotation happened rather than only that it did.
-  var RP_MODE="sectors", RP_DATA=null, RP_N=4, RP_TF=0;
+  var RP_MODE="sectors", RP_DATA=null, RP_N=4, RP_TF=0, RP_GRAIN="daily";
+  var RP_SPX=null;          // spx_daily bars, for the benchmark line
   var RP_SEL={}, RP_REST=[];   // picked names; the rest fade back for context   // 0 = full window
 
   // rotation_daily.json is compounded from the cap-weighted 1-day move logged
@@ -3973,9 +3975,19 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   function rpInit(){
     Promise.all([
       getJSON("perf_series").catch(function(){return null;}),
-      getJSON("rotation_daily").catch(function(){return null;})
+      getJSON("rotation_daily").catch(function(){return null;}),
+      getJSON("spx_daily").catch(function(){return null;})
     ]).then(function(r){
       RP_DATA=r[0]; RP_DAILY=r[1];
+      // the S&P line is built HERE from the daily bars, so it works with any
+      // engine version — the whole point of the chart is relative performance
+      RP_SPX=null;
+      if(r[2]&&r[2].bars&&r[2].bars.length){
+        RP_SPX={};
+        r[2].bars.forEach(function(b){
+          if(b&&b.date&&b.c) RP_SPX[String(b.date).slice(0,10)]=+b.c;
+        });
+      }
       if(!RP_DATA && !RP_DAILY){
         var el=document.getElementById("rpBody");
         if(el) el.innerHTML=errHTML("perf_series.json","neither perf_series.json nor rotation_daily.json is published yet");
@@ -3989,11 +4001,15 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     // TRADING-DAY counts now. rpDraw converts them to bars for whichever
     // cadence is actually in use, so 1W means 5 sessions on the daily series
     // and 1 bar on the weekly one — never a silently different window.
-    [["rpTf1D",1],["rpTf1W",5],["rpTf1M",21],["rpTf3M",63],
+    // window (trading days) + grain. "1D" as a one-session change was useless:
+    // a two-point chart cannot show what changed. Both month views cover 21
+    // sessions; one plots every session, the other every fifth.
+    [["rpTf1D",21],["rpTf1W",21],["rpTf3M",63],
      ["rpTf6M",126],["rpTf1Y",0]].forEach(function(x){
       var b=document.getElementById(x[0]);
       if(b) b.addEventListener("click",function(){
         RP_TF=x[1];
+        RP_GRAIN=(x[0]==="rpTf1W")?"weekly":"daily";
         [].forEach.call(document.querySelectorAll(".rp-tf button"),function(q){q.className="";});
         b.className="on";
         rpDraw();
@@ -4037,7 +4053,15 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     var span=(!RP_TF)?0:(CAD==="daily"?RP_TF:Math.max(1,Math.round(RP_TF/5)));
     // an N-period change needs N+1 points: [t-N ... t]. Returning exactly span
     // points made 1D a single point rebased to 100 -> every row read +0.0%.
-    function cut(a){ return (span && a.length>span+1) ? a.slice(a.length-span-1) : a; }
+    function cut(a){
+      var w=(span && a.length>span+1) ? a.slice(a.length-span-1) : a;
+      if(RP_GRAIN!=="weekly" || w.length<3) return w;
+      // one point per week, anchored on the LATEST session so the last value
+      // is always today's, never a stale Friday
+      var out=[],i;
+      for(i=w.length-1;i>=0;i-=5) out.push(w[i]);
+      return out.reverse();
+    }
     function reb(a){ var b=a[0]||1; return a.map(function(v){return v/b*100;}); }
     var minLen=1;
     var rows=(SRC[RP_MODE]||[]).filter(function(r){return r.series&&r.series.length>minLen;})
@@ -4052,9 +4076,26 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     }
     // the daily log has no benchmark line of its own — borrow SPX from the
     // weekly file only when cadences match, never mix the two on one axis
-    var bmRaw=(CAD==="daily")
-      ? ((SRC&&SRC.benchmark)||{})            // daily grid, from the engine
-      : ((RP_DATA&&RP_DATA.benchmark)||{});
+    var bmRaw;
+    if(CAD==="daily"){
+      // prefer a benchmark the engine supplied; otherwise build one from
+      // spx_daily.json on exactly these dates
+      bmRaw=(SRC&&SRC.benchmark)||null;
+      if((!bmRaw||!(bmRaw.series||[]).length)&&RP_SPX&&(SRC.dates||[]).length){
+        var lvl=null,ser=[];
+        (SRC.dates||[]).forEach(function(d){
+          var v=RP_SPX[d];
+          if(v!=null) lvl=v;
+          ser.push(lvl);
+        });
+        var base=ser.find(function(v){return v!=null;});
+        if(base) bmRaw={name:"S&P 500",
+          series:ser.map(function(v){return v==null?100:+(v/base*100).toFixed(3);})};
+      }
+      bmRaw=bmRaw||{};
+    } else {
+      bmRaw=(RP_DATA&&RP_DATA.benchmark)||{};
+    }
     var bm={name:bmRaw.name||"S&P 500",series:reb(cut(bmRaw.series||[]))};
     bm.chg=bm.series.length?+(bm.series[bm.series.length-1]-100).toFixed(2):null;
     var bmOK=(bm.series.length>1&&isFinite(bm.chg));
@@ -4107,7 +4148,10 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     // pan traps the page scroll on iPad). A RANGE SLIDER gives the same
     // control with an explicit handle — shown only when there are enough
     // sessions to be worth scrubbing.
-    var scrub=(CAD==="daily"&&dates.length>10);
+    // No range slider. On iPad its handles sat over the legend and intercepted
+    // the taps meant for row-select / Clear. The window buttons choose the
+    // period; the hover readout gives any single date.
+    var scrub=false;
     Plotly.newPlot("rpPlot",traces,{
       height:scrub?430:330,margin:{l:56,r:14,t:10,b:scrub?96:34},
       paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",
@@ -4261,6 +4305,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     var note=document.getElementById("rpNote");
     if(note){
       var unit=(CAD==="daily")?"session":"week";
+      var grainTxt=(CAD==="daily"&&RP_GRAIN==="weekly")?" \u00b7 weekly points":"";
       var fromCsv=(SRC.source==="stock_daily.csv");
       // when logged sessions extend the CSV snapshot, say so — the last N
       // points come from a different (still cap-weighted) leg
@@ -4282,7 +4327,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
              " session(s) \u2014 commit stock_daily.csv.gz to the repo ROOT")
           : " \u00b7 rotation_daily.json not published \u2014 check the [rotd] lines in the run log";
       }
-      note.textContent=rows.length+" "+RP_MODE+" \u00b7 "+CAD+" \u00b7 "+win+short+sp+
+      note.textContent=rows.length+" "+RP_MODE+" \u00b7 "+CAD+grainTxt+" \u00b7 "+win+short+sp+
         " \u00b7 cap-weighted from the universe";
     }
   }
