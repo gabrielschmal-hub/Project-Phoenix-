@@ -1366,8 +1366,12 @@ html.light .ed-scrim{background:rgba(60,44,28,.42)}
 .dp-grp .h{display:flex;align-items:center;gap:7px;margin:4px 0 2px}
 .dp-grp .t{font:13px/1.25 var(--serif);flex:1}
 .dp-grp .m{display:flex;align-items:baseline;gap:8px;margin:1px 0 5px}
-.dp-grp .f{display:flex;gap:9px;font:9.5px/1 var(--mono);color:var(--inkFade);margin-top:5px;
-  padding-top:5px;border-top:1px solid var(--line)}
+.dp-grp .f{display:flex;gap:9px;font:9.5px/1 var(--mono);color:var(--inkFade);margin-top:7px;
+  padding-top:6px;border-top:1px solid var(--line)}
+.dp-grp .nv-spk{height:96px!important;width:100%;display:block;margin-top:4px}
+.dp-grp .t{font-size:14px}
+.dp-grp .nv-p{font-size:18px}
+@media(max-width:620px){.dp-grp .nv-spk{height:80px!important}}
 .dp-grp .f .op{margin-left:auto;color:var(--gold)}
 .nvw{margin-top:14px;padding-top:13px;border-top:1px solid var(--line)}
 .nv-srch{display:flex;align-items:center;gap:9px;margin-bottom:10px}
@@ -4064,7 +4068,9 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   // their names), bottom-up (ticker -> its industry and sector), and search.
   // Loaded lazily the first time Markets renders — it is ~1.7MB.
   var NV=null, NV_TF="r63", NV_VIEW="strip", NV_L={t:"sectors"}, NV_PENDING=false;
-  var NV_TFL={r21:"1 month",r63:"3 months",r252:"12 months"};
+  var NV_TFL={r1:"1 session",r5:"1 week",r21:"1 month",r63:"3 months",r252:"12 months"};
+  var NV_TFB={r1:"1D",r5:"1W",r21:"1M",r63:"3M",r252:"12M"};
+  var NV_TFK=["r1","r5","r21","r63","r252"];
   function nvEsc(s){return String(s==null?"":s).replace(/&/g,"&amp;")
     .replace(/</g,"&lt;").replace(/"/g,"&quot;");}
   function nvSpark(sp,mp,w,h){
@@ -4140,9 +4146,9 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
          '<button class="nvlv'+(NV_L.t==="industries"?" on":"")+'" data-nvlv="industries">Industries</button>';
     }
     h+='<span style="width:10px"></span>';
-    ["r21","r63","r252"].forEach(function(k){
+    NV_TFK.forEach(function(k){
       h+='<button class="nvtf'+(NV_TF===k?" on":"")+'" data-nvtf="'+k+'">'+
-        ({r21:"1M",r63:"3M",r252:"12M"})[k]+'</button>';});
+        NV_TFB[k]+'</button>';});
     h+='<span class="sp"></span>'+
       '<button class="nvv'+(NV_VIEW==="strip"?" on":"")+'" data-nvv="strip">Strip</button>'+
       '<button class="nvv'+(NV_VIEW==="cards"?" on":"")+'" data-nvv="cards">Cards</button></div>';
@@ -4173,8 +4179,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         '<button class="nvm'+(mode==="industries"?" on":"")+'" data-nvm="industries">Industries</button>'+
         '<button class="nvm'+(mode==="tickers"?" on":"")+'" data-nvm="tickers">All names</button>'+
         '<span style="width:10px"></span>'+
-        ["r21","r63","r252"].map(function(k){return '<button class="nvtf'+(NV_TF===k?" on":"")+
-          '" data-nvtf="'+k+'">'+({r21:"1M",r63:"3M",r252:"12M"})[k]+'</button>';}).join("")+
+        NV_TFK.map(function(k){return '<button class="nvtf'+(NV_TF===k?" on":"")+
+          '" data-nvtf="'+k+'">'+NV_TFB[k]+'</button>';}).join("")+
         '<span class="sp"></span>'+
         '<button class="nvv'+(NV_VIEW==="strip"?" on":"")+'" data-nvv="strip">Strip</button>'+
         '<button class="nvv'+(NV_VIEW==="cards"?" on":"")+'" data-nvv="cards">Cards</button></div>'+
@@ -4256,7 +4262,11 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     var g=e.target.closest?e.target.closest("[data-nvgo]"):null;
     if(g){ NV_L=JSON.parse(g.getAttribute("data-nvgo"));
       // fired from a ticker page: leave the detail view and show the navigator
-      if(g.closest(".dp-grp")){ try{ go("markets"); }catch(err){}
+      if(g.closest(".dp-grp")){
+        // close the detail overlay first — it used to stay open on top of the
+        // navigator, so the industry opened "behind" the ticker page
+        try{ dpReturnTo=null; trBackFromDetail(); }catch(err){}
+        try{ go("markets"); }catch(err){}
         setTimeout(function(){ nvDraw();
           var w=document.getElementById("nvWrap");
           if(w&&w.scrollIntoView) w.scrollIntoView({behavior:"smooth",block:"center"});
@@ -8845,7 +8855,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
             (g?nvRs(g.rs):"")+'</div>'+
           '<div class="m">'+(g?nvPc(g[NV_TF]||0):'<span class="nv-p">\u2014</span>')+
             '<span class="ed-n">'+nvEsc(sub)+'</span></div>'+
-          (g?nvSpark(g.sp,g.mp,150,40):"")+
+          (g?nvSpark(g.sp,g.mp,300,96):"")+
           '<div class="f"><span>'+NV_TFL[NV_TF]+'</span>'+
             '<span class="op">open \u2192</span></div></button>';
       }

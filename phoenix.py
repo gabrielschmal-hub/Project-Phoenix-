@@ -5002,6 +5002,7 @@ def run_rotation_nav():
                 continue
             out[r["name"]] = {
                 "n": r.get("n", 0),
+                "r1": _nav_ret(ser, 1), "r5": _nav_ret(ser, 5),
                 "r21": _nav_ret(ser, 21), "r63": _nav_ret(ser, 63),
                 "r252": round(ser[-1] - 100.0, 2),
                 "sp": _nav_anchored(ser), "mp": _nav_anchored(_nav_ma(ser)),
@@ -5050,6 +5051,7 @@ def run_rotation_nav():
             "s": info.get("sector", ""), "i": info.get("industry", ""),
             "p": round(ser[-1], 2),
             "mc": round(float(info.get("market_cap") or 0) / 1e9, 1),
+            "r1": _nav_ret(idx, 1), "r5": _nav_ret(idx, 5),
             "r21": _nav_ret(idx, 21), "r63": _nav_ret(idx, 63),
             "r252": round(idx[-1] - 100.0, 2),
             "sp": _nav_anchored(idx), "mp": _nav_anchored(_nav_ma(idx)),
