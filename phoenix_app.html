@@ -4022,6 +4022,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   });
 
   function rpDraw(){
+    // dragmode pan + a range slider: scroll through days instead of being
+    // stuck with whatever window the buttons picked
     var host=document.getElementById("rpPlot");
     if(typeof Plotly==="undefined") return;
     // pick the cadence: the daily log if it has enough history for the window
@@ -4098,11 +4100,18 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       line:{color:C.ink,width:3,dash:"dot"},
       hoverinfo:"none"});
 
+    // Scrolling through days: dragmode stays false on purpose (a touch-drag
+    // pan traps the page scroll on iPad). A RANGE SLIDER gives the same
+    // control with an explicit handle — shown only when there are enough
+    // sessions to be worth scrubbing.
+    var scrub=(CAD==="daily"&&dates.length>10);
     Plotly.newPlot("rpPlot",traces,{
-      height:330,margin:{l:56,r:14,t:10,b:34},
+      height:scrub?386:330,margin:{l:56,r:14,t:10,b:scrub?18:34},
       paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",
       font:{family:"monospace",size:11,color:C.dim},
-      xaxis:{type:"date",gridcolor:C.grid,tickfont:{size:11,color:C.ink}},
+      xaxis:{type:"date",gridcolor:C.grid,tickfont:{size:11,color:C.ink},
+        rangeslider:scrub?{visible:true,thickness:0.13,
+          bgcolor:"rgba(0,0,0,0)",bordercolor:C.grid,borderwidth:1}:{visible:false}},
       yaxis:{title:{text:"rebased to 100",font:{size:11,color:C.dim}},
              gridcolor:C.grid,tickfont:{size:11,color:C.ink},
              zeroline:false},
@@ -4256,6 +4265,12 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       // the CSV series carries real history from its first run
       var short=(CAD==="daily"&&!fromCsv&&RP_TF&&(SRC.days||0)<RP_TF)
         ? " \u00b7 log has "+SRC.days+" so far" : "";
+      if(CAD!=="daily"){
+        short=RP_DAILY
+          ? (" \u00b7 daily source has only "+(RP_DAILY.days||0)+
+             " session(s) \u2014 commit stock_daily.csv.gz to the repo ROOT")
+          : " \u00b7 rotation_daily.json not published \u2014 check the [rotd] lines in the run log";
+      }
       note.textContent=rows.length+" "+RP_MODE+" \u00b7 "+CAD+" \u00b7 "+win+short+
         " \u00b7 cap-weighted from the universe";
     }
