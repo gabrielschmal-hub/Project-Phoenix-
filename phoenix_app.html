@@ -1356,6 +1356,81 @@ html.light .ed-scrim{background:rgba(60,44,28,.42)}
 .mk-instr button:hover{color:var(--inkMed);border-color:var(--inkFade)}
 .mk-instr button.on{background:var(--gold);border-color:var(--gold);color:#0A0A0A}
 @media(max-width:820px){.mk-instr button{font-size:9.5px;padding:3px 7px}}
+/* ---------- rotation navigator ---------- */
+.dp-groups{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:620px){.dp-groups{grid-template-columns:1fr}}
+.dp-grp{background:var(--card2);border:1px solid var(--line);border-radius:7px;padding:10px 11px 8px;
+  text-align:left;cursor:pointer;font-family:var(--serif);color:var(--ink);width:100%}
+.dp-grp:hover{border-color:var(--gold)}
+.dp-grp .k{font:700 9px/1 var(--mono);letter-spacing:1.4px;color:var(--inkFade);text-transform:uppercase}
+.dp-grp .h{display:flex;align-items:center;gap:7px;margin:4px 0 2px}
+.dp-grp .t{font:13px/1.25 var(--serif);flex:1}
+.dp-grp .m{display:flex;align-items:baseline;gap:8px;margin:1px 0 5px}
+.dp-grp .f{display:flex;gap:9px;font:9.5px/1 var(--mono);color:var(--inkFade);margin-top:5px;
+  padding-top:5px;border-top:1px solid var(--line)}
+.dp-grp .f .op{margin-left:auto;color:var(--gold)}
+.nvw{margin-top:14px;padding-top:13px;border-top:1px solid var(--line)}
+.nv-srch{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.nv-srch input{flex:1;background:var(--card2);border:1px solid var(--line2);border-radius:6px;
+  padding:8px 11px;font:12.5px/1.3 var(--mono);color:var(--ink);outline:none}
+.nv-srch input:focus{border-color:var(--gold)}
+.nv-res{border:1px solid var(--line2);border-radius:7px;margin-bottom:10px;overflow:hidden}
+.nv-res .rh{font:700 9.5px/1 var(--mono);letter-spacing:1.4px;color:var(--inkFade);text-transform:uppercase;
+  padding:7px 11px;background:var(--card2);border-bottom:1px solid var(--line)}
+.nv-res button{display:flex;align-items:center;gap:9px;width:100%;padding:7px 11px;background:transparent;
+  border:0;border-bottom:1px solid var(--line);cursor:pointer;font-family:var(--serif);color:var(--ink);text-align:left}
+.nv-res button:hover{background:var(--card2)}.nv-res button:last-child{border-bottom:0}
+.nv-kind{font:9px/1 var(--mono);letter-spacing:.8px;padding:2.5px 6px;border-radius:3px;border:1px solid var(--line2);
+  color:var(--inkFade);text-transform:uppercase;flex:none;width:70px;text-align:center}
+.nv-kind.tk{color:var(--gold);border-color:var(--gold)}
+.nv-kind.ind{color:var(--blue);border-color:var(--blue)}
+.nv-res .nm{flex:1;font:12.5px/1.3 var(--serif)}
+.nv-res .nm b{font:700 13px/1.3 var(--mono);letter-spacing:.5px}
+.nv-res .path{font:10px/1 var(--mono);color:var(--inkGhost)}
+.nv-crumb{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.nv-crumb button,.nv-crumb span.cur{font:10px/1 var(--mono);letter-spacing:.5px;padding:5px 9px;border-radius:5px;
+  border:1px solid var(--line2);background:transparent;color:var(--inkLight);cursor:pointer}
+.nv-crumb span.cur{background:var(--gold);border-color:var(--gold);color:#FFFDF9;cursor:default}
+.nv-crumb i{color:var(--inkGhost);font-style:normal}
+.nv-head{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin-bottom:9px}
+.nv-head h3{font:400 17px/1.2 var(--serif);margin:0}
+.nv-head .big{font:700 18px/1 var(--mono)}
+.nv-head .meta{font:10px/1 var(--mono);color:var(--inkFade)}
+.nv-bar{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.nv-bar button{font:10px/1 var(--mono);background:transparent;color:var(--inkFade);border:1px solid var(--line2);
+  padding:5px 10px;border-radius:5px;cursor:pointer}
+.nv-bar button.on{background:var(--gold);border-color:var(--gold);color:#FFFDF9}
+.nv-bar .sp{margin-left:auto}
+.nv-strip{border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.nv-row{display:flex;align-items:center;gap:12px;width:100%;padding:6px 11px;background:var(--card2);border:0;
+  border-bottom:1px solid var(--line);cursor:pointer;color:var(--ink);font-family:var(--serif);text-align:left}
+.nv-row:hover{background:var(--card)}.nv-row:last-child{border-bottom:0}
+.nv-n{flex:0 0 30%;font:12px/1.3 var(--serif);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nv-n b{font:700 12.5px/1.3 var(--mono);letter-spacing:.5px}
+.nv-n i{font:9.5px/1 var(--mono);color:var(--inkGhost);font-style:normal;margin-left:6px}
+.nv-spk{flex:0 0 96px;width:96px;height:24px}
+.nv-b{flex:0 0 80px;width:80px;height:5px;background:var(--line);border-radius:3px;overflow:hidden}
+.nv-b b{display:block;height:100%}
+.nv-p{font:700 12.5px/1 var(--mono);flex:0 0 62px;text-align:right}
+.nv-p.pos{color:var(--green)}.nv-p.neg{color:var(--red)}
+.nv-rs{font:9.5px/1 var(--mono);padding:2px 5px;border-radius:3px;border:1px solid var(--line2);
+  color:var(--inkFade);white-space:nowrap;flex:none}
+.nv-rs.pos{color:var(--blue);border-color:var(--blue)}
+.nv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:9px}
+.nv-card{background:var(--card2);border:1px solid var(--line);border-radius:7px;padding:9px 10px 7px;
+  text-align:left;cursor:pointer;font-family:var(--serif);color:var(--ink);width:100%}
+.nv-card:hover{border-color:var(--gold)}
+.nv-card .h{display:flex;align-items:center;gap:7px;margin-bottom:2px}
+.nv-card .t{font:12px/1.25 var(--serif);flex:1}.nv-card .t b{font:700 13px/1.25 var(--mono)}
+.nv-card .m{display:flex;align-items:baseline;gap:7px;margin:1px 0 4px}
+.nv-card .nv-p{font-size:15.5px;flex:none;text-align:left}
+.nv-card .nv-spk{width:100%;flex:none;height:38px;display:block}
+.nv-card .f{display:flex;gap:9px;font:9px/1 var(--mono);color:var(--inkFade);margin-top:4px;padding-top:4px;
+  border-top:1px solid var(--line)}
+.nv-card .f .op{margin-left:auto;color:var(--gold)}
+.nv-note{font:italic 11px/1.55 var(--serif);color:var(--inkFade);margin-top:9px}
+.nv-note b{font-style:normal;color:var(--inkMed)}
+@media(max-width:820px){.nv-n{flex:0 0 40%}.nv-spk{flex:0 0 70px;width:70px}.nv-b{display:none}}
 .ed-tabs{display:flex;justify-content:center;gap:0;margin:0 0 22px}
 .ed-tabs button{font-family:var(--mono);font-size:11.5px;letter-spacing:1.4px;
   text-transform:uppercase;background:transparent;color:var(--inkFade);
@@ -2012,7 +2087,13 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     var c=getComputedStyle(document.documentElement);
     function v(n,f){ return (c.getPropertyValue(n)||"").trim()||f; }
     return { ink:v("--ink","#EDEEF0"), dim:v("--inkLight","#B6C7D6"),
-             grid:v("--line","rgba(255,255,255,.14)") };
+             grid:v("--line","rgba(255,255,255,.14)"),
+             // the navigator's sparklines need these; they resolve from
+             // whichever theme is active, so light/dark both come out right
+             green:v("--green","#3FBF77"), red:v("--red","#D9534F"),
+             gold:v("--gold","#D37736"),
+             greenBg:v("--greenBg","rgba(63,191,119,.13)"),
+             redBg:v("--redBg","rgba(217,83,79,.13)") };
   }
 
   function url(name){ return (BASE||"") + name + ".json?t=" + Date.now(); }
@@ -2171,7 +2252,12 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         '<div class="tbody"><div class="rp-main">'+
           '<div class="rp-chartcol"><div class="rp-plot" id="rpPlot"></div></div>'+
           '<div class="rp-read" id="rpRead"></div></div>'+
-          '<div id="rpBody"><div class="loading">\u2026</div></div></div></div></div>'+
+          '<div id="rpBody"><div class="loading">\u2026</div></div>'+
+          '<div class="nvw" id="nvWrap"><div class="nv-srch">'+
+            '<input id="nvQ" placeholder="Search any ticker, industry or sector" autocomplete="off">'+
+          '</div><div id="nvRes"></div><div class="nv-crumb" id="nvCrumb"></div>'+
+          '<div id="nvView"></div><div class="nv-note" id="nvNote"></div></div>'+
+          '</div></div></div>'+
 
     '</div>';
 
@@ -3972,6 +4058,228 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   // ran. perf_series.json (weekly, long history) stays the fallback. Whichever
   // is used is NAMED under the chart; the cadence is never implied.
   var RP_DAILY=null;
+
+  // ================= ROTATION NAVIGATOR ==================================
+  // Three directions from one dataset: top-down (sector -> its industries ->
+  // their names), bottom-up (ticker -> its industry and sector), and search.
+  // Loaded lazily the first time Markets renders — it is ~1.7MB.
+  var NV=null, NV_TF="r63", NV_VIEW="strip", NV_L={t:"sectors"}, NV_PENDING=false;
+  var NV_TFL={r21:"1 month",r63:"3 months",r252:"12 months"};
+  function nvEsc(s){return String(s==null?"":s).replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;").replace(/"/g,"&quot;");}
+  function nvSpark(sp,mp,w,h){
+    if(!sp||sp.length<2) return '<span class="nv-spk"></span>';
+    var all=sp.concat(mp||[]),lo=Math.min.apply(null,all),hi=Math.max.apply(null,all),r=(hi-lo)||1;
+    function P(a){return a.map(function(v,i){
+      return (i/(a.length-1)*w).toFixed(1)+","+(h-(v-lo)/r*h).toFixed(1);}).join(" ");}
+    var C=PXC(), up=sp[sp.length-1]>=(mp&&mp.length?mp[mp.length-1]:sp[0]);
+    var col=up?C.green:C.red, fill=up?C.greenBg:C.redBg;
+    return '<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" class="nv-spk">'+
+      '<polygon points="0,'+h+' '+P(sp)+' '+w+','+h+'" fill="'+fill+'"/>'+
+      (mp&&mp.length?'<polyline points="'+P(mp)+'" fill="none" stroke="'+C.gold+'" stroke-width="1.2" opacity=".9"/>':'')+
+      '<polyline points="'+P(sp)+'" fill="none" stroke="'+col+'" stroke-width="1.5"/></svg>';
+  }
+  function nvPc(v){return '<span class="nv-p '+(v>=0?"pos":"neg")+'">'+
+    (v>=0?"+":"\u2212")+Math.abs(v).toFixed(1)+'%</span>';}
+  function nvRs(v){v=v||0;return '<span class="nv-rs '+(v>=0?"pos":"")+'">RS '+
+    (v>=0?"+":"\u2212")+Math.abs(v)+'</span>';}
+  function nvGo(o){return "data-nvgo='"+JSON.stringify(o).replace(/'/g,"&#39;")+"'";}
+
+  function nvRows(kind){
+    var src=(kind==="sectors")?NV.sectors:NV.industries, out=[];
+    for(var k in src){var v=src[k];
+      out.push({label:nvEsc(k),
+        sub:(kind==="sectors")?((NV.s2i[k]||[]).length+" industries"):(v.n+" names"),
+        v:v[NV_TF],rs:v.rs,sp:v.sp,mp:v.mp,
+        go:{t:(kind==="sectors")?"sector":"industry",k:k}});}
+    out.sort(function(a,b){return b.v-a.v;});return out;
+  }
+  function nvIndOf(sec){
+    var out=[];(NV.s2i[sec]||[]).forEach(function(n){var v=NV.industries[n];if(!v)return;
+      out.push({label:nvEsc(n),sub:v.n+" names",v:v[NV_TF],rs:v.rs,sp:v.sp,mp:v.mp,
+        go:{t:"industry",k:n}});});
+    out.sort(function(a,b){return b.v-a.v;});return out;
+  }
+  function nvTkOf(key,isSec){
+    var out=[];
+    for(var t in NV.tickers){var v=NV.tickers[t];
+      if(isSec? v.s===key : v.i===key)
+        out.push({label:"<b>"+t+"</b>",sub:v.mc?("$"+v.mc+"B"):"",v:v[NV_TF],rs:v.rs,
+          sp:v.sp,mp:v.mp,tk:t,go:{t:"ticker",k:t}});}
+    out.sort(function(a,b){return b.v-a.v;});return out;
+  }
+  function nvRender(rows,empty){
+    if(!rows.length) return '<div class="ed-note">'+(empty||"Nothing here yet.")+'</div>';
+    var mx=Math.max.apply(null,rows.map(function(r){return Math.abs(r.v);}))||1;
+    if(NV_VIEW==="strip"){
+      return '<div class="nv-strip">'+rows.map(function(r){
+        return '<button class="nv-row" '+nvGo(r.go)+'>'+
+          '<span class="nv-n">'+r.label+'<i>'+nvEsc(r.sub)+'</i></span>'+
+          nvSpark(r.sp,r.mp,96,24)+
+          '<span class="nv-b"><b style="width:'+(Math.abs(r.v)/mx*100).toFixed(0)+
+            '%;background:'+(r.v>=0?"var(--green)":"var(--red)")+'"></b></span>'+
+          nvPc(r.v)+nvRs(r.rs)+'</button>';}).join("")+'</div>';
+    }
+    return '<div class="nv-grid">'+rows.map(function(r){
+      return '<button class="nv-card" '+nvGo(r.go)+'>'+
+        '<div class="h"><span class="t">'+r.label+'</span>'+nvRs(r.rs)+'</div>'+
+        '<div class="m">'+nvPc(r.v)+'<span class="ed-n">'+nvEsc(r.sub)+'</span></div>'+
+        nvSpark(r.sp,r.mp,150,38)+
+        '<div class="f"><span>'+NV_TFL[NV_TF]+'</span><span class="op">open \u2192</span></div>'+
+        '</button>';}).join("")+'</div>';
+  }
+  function nvCrumb(parts){
+    document.getElementById("nvCrumb").innerHTML=parts.map(function(p,i){
+      return (i?'<i>\u203a</i>':'')+(p.go?'<button '+nvGo(p.go)+'>'+nvEsc(p.label)+'</button>'
+        :'<span class="cur">'+nvEsc(p.label)+'</span>');}).join("");
+  }
+  function nvBar(showTopToggle){
+    var h='<div class="nv-bar">';
+    if(showTopToggle){
+      h+='<button class="nvlv'+(NV_L.t==="sectors"?" on":"")+'" data-nvlv="sectors">Sectors</button>'+
+         '<button class="nvlv'+(NV_L.t==="industries"?" on":"")+'" data-nvlv="industries">Industries</button>';
+    }
+    h+='<span style="width:10px"></span>';
+    ["r21","r63","r252"].forEach(function(k){
+      h+='<button class="nvtf'+(NV_TF===k?" on":"")+'" data-nvtf="'+k+'">'+
+        ({r21:"1M",r63:"3M",r252:"12M"})[k]+'</button>';});
+    h+='<span class="sp"></span>'+
+      '<button class="nvv'+(NV_VIEW==="strip"?" on":"")+'" data-nvv="strip">Strip</button>'+
+      '<button class="nvv'+(NV_VIEW==="cards"?" on":"")+'" data-nvv="cards">Cards</button></div>';
+    return h;
+  }
+  function nvHead(title,meta,val,extra){
+    return '<div class="nv-head"><h3>'+title+'</h3>'+
+      (val!=null?'<span class="big '+(val>=0?"nv-p pos":"nv-p neg")+'">'+
+        (val>=0?"+":"\u2212")+Math.abs(val).toFixed(1)+'%</span>':'')+
+      '<span class="meta">'+meta+'</span>'+(extra||"")+'</div>';
+  }
+  function nvDraw(){
+    if(!NV) return;
+    var L=NV_L, V=document.getElementById("nvView"), note="";
+    if(!V) return;
+    if(L.t==="sectors"||L.t==="industries"){
+      nvCrumb([{label:(L.t==="sectors")?"Sectors":"Industries"}]);
+      V.innerHTML=nvHead((L.t==="sectors")?"All sectors":"All industries",
+        (L.t==="sectors")?"20 \u00b7 tap one for its industries":"116 \u00b7 tap one for its names",
+        null,"")+nvBar(true)+nvRender(nvRows(L.t));
+      note="The percentage is the <b>"+NV_TFL[NV_TF]+"</b> change of that cap-weighted index.";
+    } else if(L.t==="sector"){
+      var s=NV.sectors[L.k]||{},mode=L.mode||"industries";
+      nvCrumb([{label:"Sectors",go:{t:"sectors"}},{label:L.k}]);
+      var tg='<span class="sp"></span>';
+      V.innerHTML=nvHead(nvEsc(L.k),(NV.s2i[L.k]||[]).length+" industries",s[NV_TF],"")+
+        '<div class="nv-bar">'+
+        '<button class="nvm'+(mode==="industries"?" on":"")+'" data-nvm="industries">Industries</button>'+
+        '<button class="nvm'+(mode==="tickers"?" on":"")+'" data-nvm="tickers">All names</button>'+
+        '<span style="width:10px"></span>'+
+        ["r21","r63","r252"].map(function(k){return '<button class="nvtf'+(NV_TF===k?" on":"")+
+          '" data-nvtf="'+k+'">'+({r21:"1M",r63:"3M",r252:"12M"})[k]+'</button>';}).join("")+
+        '<span class="sp"></span>'+
+        '<button class="nvv'+(NV_VIEW==="strip"?" on":"")+'" data-nvv="strip">Strip</button>'+
+        '<button class="nvv'+(NV_VIEW==="cards"?" on":"")+'" data-nvv="cards">Cards</button></div>'+
+        nvRender(mode==="industries"?nvIndOf(L.k):nvTkOf(L.k,true));
+      note=(mode==="industries")
+        ? "Tap an industry to open its names \u2014 <b>sector \u203a industry \u203a ticker</b>."
+        : "Every name in the sector, skipping the industry step.";
+    } else if(L.t==="industry"){
+      var s=NV.industries[L.k]||{},sec=null;
+      for(var k in NV.s2i){ if(NV.s2i[k].indexOf(L.k)>=0){sec=k;break;} }
+      nvCrumb([{label:"Sectors",go:{t:"sectors"}}]
+        .concat(sec?[{label:sec,go:{t:"sector",k:sec}}]:[]).concat([{label:L.k}]));
+      V.innerHTML=nvHead(nvEsc(L.k),(s.n||0)+" names"+(sec?" \u00b7 in "+nvEsc(sec):""),
+        s[NV_TF],"")+nvBar(false)+nvRender(nvTkOf(L.k,false),"No names with enough history here.");
+      note="Tap a name to open its ticker page.";
+    } else if(L.t==="ticker"){
+      var v=NV.tickers[L.k]||{};
+      nvCrumb([{label:"Sectors",go:{t:"sectors"}},{label:v.s,go:{t:"sector",k:v.s}},
+               {label:v.i,go:{t:"industry",k:v.i}},{label:L.k}]);
+      var ind=NV.industries[v.i]||{},sec=NV.sectors[v.s]||{};
+      V.innerHTML=nvHead('<b style="font-family:var(--mono)">'+nvEsc(L.k)+'</b>',
+          "$"+(v.p||0).toFixed(2)+(v.mc?" \u00b7 $"+v.mc+"B":""),v[NV_TF],"")+
+        '<div class="nv-bar"><button class="nvopen" data-nvtk="'+nvEsc(L.k)+
+          '">Open '+nvEsc(L.k)+' ticker page \u2192</button></div>'+
+        '<div class="nv-grid">'+
+        '<button class="nv-card" '+nvGo({t:"industry",k:v.i})+'>'+
+          '<div class="h"><span class="t">'+nvEsc(v.i)+'</span>'+nvRs(ind.rs)+'</div>'+
+          '<div class="m">'+nvPc(ind[NV_TF]||0)+'<span class="ed-n">its industry</span></div>'+
+          nvSpark(ind.sp,ind.mp,150,38)+
+          '<div class="f"><span>who else is in it</span><span class="op">open \u2192</span></div></button>'+
+        '<button class="nv-card" '+nvGo({t:"sector",k:v.s})+'>'+
+          '<div class="h"><span class="t">'+nvEsc(v.s)+'</span>'+nvRs(sec.rs)+'</div>'+
+          '<div class="m">'+nvPc(sec[NV_TF]||0)+'<span class="ed-n">its sector</span></div>'+
+          nvSpark(sec.sp,sec.mp,150,38)+
+          '<div class="f"><span>the wider group</span><span class="op">open \u2192</span></div></button>'+
+        '</div>';
+      note="From any name, one tap to its industry or its sector.";
+    }
+    var n=document.getElementById("nvNote"); if(n) n.innerHTML=note;
+  }
+  function nvSearch(q){
+    var box=document.getElementById("nvRes"); if(!box||!NV) return;
+    q=(q||"").trim().toLowerCase();
+    if(!q){ box.innerHTML=""; return; }
+    function grp(title,items){ return items.length? '<div class="nv-res"><div class="rh">'+title+
+      '</div>'+items.join("")+'</div>' : ""; }
+    var tks=Object.keys(NV.tickers).filter(function(k){return k.toLowerCase().indexOf(q)===0;})
+      .slice(0,6).map(function(t){var v=NV.tickers[t];
+        return '<button '+nvGo({t:"ticker",k:t})+'><span class="nv-kind tk">ticker</span>'+
+          '<span class="nm"><b>'+t+'</b></span><span class="path">'+nvEsc(v.i)+' \u00b7 '+
+          nvEsc(v.s)+'</span>'+nvPc(v[NV_TF])+'</button>';});
+    var inds=Object.keys(NV.industries).filter(function(k){return k.toLowerCase().indexOf(q)>=0;})
+      .slice(0,6).map(function(n){var v=NV.industries[n];
+        return '<button '+nvGo({t:"industry",k:n})+'><span class="nv-kind ind">industry</span>'+
+          '<span class="nm">'+nvEsc(n)+'</span><span class="path">'+v.n+' names</span>'+
+          nvPc(v[NV_TF])+'</button>';});
+    var secs=Object.keys(NV.sectors).filter(function(k){return k.toLowerCase().indexOf(q)>=0;})
+      .slice(0,4).map(function(n){var v=NV.sectors[n];
+        return '<button '+nvGo({t:"sector",k:n})+'><span class="nv-kind">sector</span>'+
+          '<span class="nm">'+nvEsc(n)+'</span><span class="path">'+(NV.s2i[n]||[]).length+
+          ' industries</span>'+nvPc(v[NV_TF])+'</button>';});
+    box.innerHTML=grp("Tickers",tks)+grp("Industries",inds)+grp("Sectors",secs)||
+      '<div class="nv-res"><div class="rh">No match</div></div>';
+  }
+  function nvInit(){
+    if(NV||NV_PENDING) { nvDraw(); return; }
+    NV_PENDING=true;
+    var V=document.getElementById("nvView");
+    if(V) V.innerHTML='<div class="loading">Loading the navigator\u2026</div>';
+    getJSON("rotation_nav").then(function(d){
+      NV=d; NV_PENDING=false; nvDraw();
+    }).catch(function(){
+      NV_PENDING=false;
+      if(V) V.innerHTML='<div class="ed-note">rotation_nav.json is not published yet '+
+        '\u2014 it appears after the next engine run.</div>';
+    });
+  }
+  document.addEventListener("click",function(e){
+    var g=e.target.closest?e.target.closest("[data-nvgo]"):null;
+    if(g){ NV_L=JSON.parse(g.getAttribute("data-nvgo"));
+      // fired from a ticker page: leave the detail view and show the navigator
+      if(g.closest(".dp-grp")){ try{ go("markets"); }catch(err){}
+        setTimeout(function(){ nvDraw();
+          var w=document.getElementById("nvWrap");
+          if(w&&w.scrollIntoView) w.scrollIntoView({behavior:"smooth",block:"center"});
+        },260); }
+      var q=document.getElementById("nvQ"); if(q) q.value="";
+      var r=document.getElementById("nvRes"); if(r) r.innerHTML="";
+      nvDraw(); return; }
+    var tk=e.target.closest?e.target.closest("[data-nvtk]"):null;
+    if(tk){ scrOpenTicker(tk.getAttribute("data-nvtk")); return; }
+    var lv=e.target.closest?e.target.closest("[data-nvlv]"):null;
+    if(lv){ NV_L={t:lv.getAttribute("data-nvlv")}; nvDraw(); return; }
+    var tf=e.target.closest?e.target.closest("[data-nvtf]"):null;
+    if(tf){ NV_TF=tf.getAttribute("data-nvtf"); nvDraw();
+      var qq=document.getElementById("nvQ"); if(qq&&qq.value) nvSearch(qq.value); return; }
+    var vv=e.target.closest?e.target.closest("[data-nvv]"):null;
+    if(vv){ NV_VIEW=vv.getAttribute("data-nvv"); nvDraw(); return; }
+    var md=e.target.closest?e.target.closest("[data-nvm]"):null;
+    if(md){ NV_L.mode=md.getAttribute("data-nvm"); nvDraw(); return; }
+  });
+  document.addEventListener("input",function(e){
+    if(e.target&&e.target.id==="nvQ") nvSearch(e.target.value);
+  });
+
   function rpInit(){
     Promise.all([
       getJSON("perf_series").catch(function(){return null;}),
@@ -3994,6 +4302,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         return;
       }
       rpDraw();
+      nvInit();
     });
     // timeframe buttons REBASE rather than zoom: pick 3M and every line
     // restarts at 100 on that date, which answers "what has moved lately"
@@ -8514,6 +8823,44 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   var dpChartCache={};    // {tk: {chart:{daily,weekly,monthly}, quote, range52}}
   // ---- E3b Stage 1: per-stock GEX structure panel (coach-briefing style) ----
   var dpGexCache={}, dpGexMiss={};
+  // ---- where a ticker sits: its industry and its sector, side by side -----
+  // Deliberately two SPARKLINES, not two full charts. The ticker's own chart
+  // above answers "how is INTC"; these answer "is this INTC or is this semis",
+  // which is the question that actually changes a decision. Tapping either
+  // opens the navigator at that level rather than duplicating it here.
+  function dpLoadGroups(tk){
+    var tile=document.getElementById("dpGroupTile"),
+        host=document.getElementById("dpGroups"),
+        meta=document.getElementById("dpGroupMeta");
+    if(!tile||!host) return;
+    function paint(){
+      var v=NV&&NV.tickers?NV.tickers[tk]:null;
+      if(!v||!(v.i||v.s)){ tile.style.display="none"; return; }
+      var ind=(NV.industries||{})[v.i]||null, sec=(NV.sectors||{})[v.s]||null;
+      function card(kind,name,g,sub,go){
+        if(!name) return "";
+        return '<button class="dp-grp" '+nvGo(go)+'>'+
+          '<span class="k">'+kind+'</span>'+
+          '<div class="h"><span class="t">'+nvEsc(name)+'</span>'+
+            (g?nvRs(g.rs):"")+'</div>'+
+          '<div class="m">'+(g?nvPc(g[NV_TF]||0):'<span class="nv-p">\u2014</span>')+
+            '<span class="ed-n">'+nvEsc(sub)+'</span></div>'+
+          (g?nvSpark(g.sp,g.mp,150,40):"")+
+          '<div class="f"><span>'+NV_TFL[NV_TF]+'</span>'+
+            '<span class="op">open \u2192</span></div></button>';
+      }
+      host.innerHTML=
+        card("Industry",v.i,ind,(ind?ind.n+" names":""),{t:"industry",k:v.i})+
+        card("Sector",v.s,sec,((NV.s2i&&NV.s2i[v.s])?NV.s2i[v.s].length+" industries":""),
+             {t:"sector",k:v.s});
+      if(meta) meta.textContent=nvEsc(v.i)+" \u00b7 "+nvEsc(v.s);
+      tile.style.display="";
+    }
+    if(NV){ paint(); return; }
+    tile.style.display="none";
+    getJSON("rotation_nav").then(function(d){ NV=d; paint(); }).catch(function(){});
+  }
+
   function dpLoadGex(tk){
     var tile=document.getElementById("dpGexTile");
     if(!tile) return;
@@ -9181,6 +9528,12 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
             '</div>'+
             '<div class="w-card-b" style="padding:10px 12px"><div class="dp-chart-body"><div class="plot" id="dpPlot"><div class="loading">Fetching chart\u2026</div></div></div></div>'+
           '</div>'+
+          // WHERE IT SITS — its industry and its sector, side by side
+          '<div class="w-card" id="dpGroupTile" style="display:none">'+
+            '<div class="w-card-h"><span class="w-card-t">Where it sits '+
+              '<span class="sub" id="dpGroupMeta"></span></span></div>'+
+            '<div class="w-card-b"><div class="dp-groups" id="dpGroups"></div></div>'+
+          '</div>'+
           // GEX
           '<div class="w-card" id="dpGexTile" style="display:none">'+
             '<div class="w-card-h"><span class="w-card-t">GEX structure <span class="sub" id="dpGexMeta"></span></span></div>'+
@@ -9226,6 +9579,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       tog.onclick=function(){ wrap.classList.toggle("open"); };
       if(t.entry==null) wrap.classList.add("open");   // nothing set yet: show it
     })();
+    dpLoadGroups(tk);
     dpLoadGex(tk);
     dpLoadSmart(tk);
     var tvb=document.getElementById("dpTvBtn");

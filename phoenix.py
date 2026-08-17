@@ -4917,6 +4917,188 @@ def _third_friday(year, month):
 # the signal log. Day one shows one point and says so; by month two the chart
 # answers "what changed this week" honestly instead of interpolating a guess.
 # ============================================================
+# ============================================================
+# ROTATION NAVIGATOR — the cross-linked dataset
+#
+# One file that lets the app answer all three directions without another
+# fetch: top-down (sector -> its industries -> their names), bottom-up
+# (ticker -> its industry and sector), and search (any of the three).
+#
+# Everything here is derived from files the engine already produced —
+# rotation_daily.json for the series, universe.csv for membership,
+# stock_daily.csv for per-ticker history. No new network.
+#
+# Sparklines are resampled ANCHORED ON THE LATEST SESSION. Plain [::step]
+# sampling can end on a stale bar, and since the last point decides whether a
+# line draws above or below its 50-day average, that silently mis-colours rows.
+# ============================================================
+NAV_SPARK_POINTS = 40
+
+
+def _nav_anchored(seq, n=NAV_SPARK_POINTS):
+    """Downsample to n points, always keeping the newest. PURE."""
+    if not seq:
+        return []
+    if len(seq) <= n:
+        return [round(float(x), 1) for x in seq]
+    step = max(1, len(seq) // n)
+    out = [seq[i] for i in range(len(seq) - 1, -1, -step)][:n]
+    # 1 decimal: these drive a 25px sparkline, and the extra digit across
+    # ~2,800 tickers costs about a megabyte of payload for no visible gain
+    return [round(float(x), 1) for x in out[::-1]]
+
+
+def _nav_ma(seq, k=50):
+    """Trailing mean. PURE."""
+    return [sum(seq[max(0, i - k + 1):i + 1]) / len(seq[max(0, i - k + 1):i + 1])
+            for i in range(len(seq))]
+
+
+def _nav_ret(seq, k):
+    return round((seq[-1] / seq[-1 - k] - 1) * 100, 2) if len(seq) > k else 0.0
+
+
+def run_rotation_nav():
+    """Publish outputs/rotation_nav.json — search + drill-down in one payload."""
+    import json as _json, os as _os
+    from collections import defaultdict
+
+    try:
+        rot = _json.load(open(_os.path.join(OUTPUTS_DIR, "rotation_daily.json")))
+    except Exception as e:
+        print(f"[nav] rotation_daily.json unavailable ({e}) — skipped")
+        return
+    dates = rot.get("dates") or []
+    if len(dates) < 30:
+        print(f"[nav] only {len(dates)} sessions — too little to navigate, skipped")
+        return
+
+    uni = load_universe_from_csv()
+    daily = load_daily_from_csv()
+    if not daily:
+        print("[nav] no stock_daily.csv — ticker level would be empty, skipped")
+        return
+
+    # ---- benchmark, for the RS ranks -------------------------------------
+    spx = []
+    try:
+        sd = _json.load(open(_os.path.join(OUTPUTS_DIR, "spx_daily.json")))
+        by = {str(b["date"])[:10]: float(b["c"])
+              for b in (sd.get("bars") or []) if b.get("date") and b.get("c")}
+        lvl = None
+        for d in dates:
+            lvl = by.get(d, lvl)
+            spx.append(lvl)
+        base = next((x for x in spx if x), None)
+        spx = [(x / base * 100 if x and base else 100.0) for x in spx]
+    except Exception:
+        spx = [100.0] * len(dates)
+
+    def pack_group(rows):
+        out = {}
+        for r in rows:
+            ser = r.get("series") or []
+            if len(ser) < 30:
+                continue
+            out[r["name"]] = {
+                "n": r.get("n", 0),
+                "r21": _nav_ret(ser, 21), "r63": _nav_ret(ser, 63),
+                "r252": round(ser[-1] - 100.0, 2),
+                "sp": _nav_anchored(ser), "mp": _nav_anchored(_nav_ma(ser)),
+            }
+        return out
+
+    sectors = pack_group(rot.get("sectors") or [])
+    industries = pack_group(rot.get("industries") or [])
+
+    def rank_rs(group):
+        base = _nav_ret(spx, 63)
+        rel = sorted(((k, v["r63"] - base) for k, v in group.items()),
+                     key=lambda x: x[1])
+        n = len(rel)
+        for i, (k, _v) in enumerate(rel):
+            group[k]["rs"] = round((i / max(1, n - 1)) * 100 - 50)
+    rank_rs(sectors)
+    rank_rs(industries)
+
+    # ---- sector -> industries, straight from the universe taxonomy -------
+    s2i = defaultdict(set)
+    for tk, info in uni.items():
+        s, i = info.get("sector"), info.get("industry")
+        if s and i:
+            s2i[s].add(i)
+    s2i = {k: sorted(v) for k, v in sorted(s2i.items())}
+
+    # ---- tickers ---------------------------------------------------------
+    tickers, by_ind = {}, defaultdict(list)
+    for tk, info in uni.items():
+        rows = daily.get(tk)
+        if not rows:
+            continue
+        cl = dict(rows)
+        ser, last = [], None
+        for d in dates:
+            v = cl.get(d)
+            last = v if v else last
+            ser.append(last)
+        ser = [x for x in ser if x]
+        if len(ser) < 70:
+            continue
+        b = ser[0]
+        idx = [x / b * 100 for x in ser]
+        tickers[tk] = {
+            "s": info.get("sector", ""), "i": info.get("industry", ""),
+            "p": round(ser[-1], 2),
+            "mc": round(float(info.get("market_cap") or 0) / 1e9, 1),
+            "r21": _nav_ret(idx, 21), "r63": _nav_ret(idx, 63),
+            "r252": round(idx[-1] - 100.0, 2),
+            "sp": _nav_anchored(idx), "mp": _nav_anchored(_nav_ma(idx)),
+        }
+        if info.get("industry"):
+            by_ind[info["industry"]].append(tk)
+
+    # RS per ticker is ranked WITHIN its own industry — a semiconductor is
+    # judged against semiconductors, not against utilities.
+    for ind, tks in by_ind.items():
+        tks.sort(key=lambda t: tickers[t]["r63"])
+        n = len(tks)
+        for i, t in enumerate(tks):
+            tickers[t]["rs"] = round((i / max(1, n - 1)) * 100 - 50)
+    for t in tickers:
+        tickers[t].setdefault("rs", 0)
+
+    payload = {
+        "asof": _now(), "through": dates[-1], "sessions": len(dates),
+        "note": ("Search and drill-down in one payload. RS for a sector or "
+                 "industry is its 3-month return ranked against the S&P across "
+                 "the whole group; RS for a ticker is ranked within its own "
+                 "industry."),
+        "sectors": sectors, "industries": industries,
+        "s2i": s2i, "tickers": tickers,
+    }
+
+    def _validate_nav(pl):
+        probs = []
+        if len(pl.get("tickers") or {}) < 200:
+            probs.append(f"only {len(pl.get('tickers') or {})} tickers (<200)")
+        if len(pl.get("industries") or {}) < 20:
+            probs.append(f"only {len(pl.get('industries') or {})} industries (<20)")
+        return probs
+
+    write_json_guarded("rotation_nav", payload, _validate_nav)
+    # rewrite without whitespace: this file is fetched by a phone
+    try:
+        _p = _os.path.join(OUTPUTS_DIR, "rotation_nav.json")
+        _d = _json.load(open(_p))
+        _json.dump(_d, open(_p, "w"), separators=(",", ":"))
+        print(f"[nav] compacted to {_os.path.getsize(_p)/1e6:.2f} MB")
+    except Exception as e:
+        print(f"[nav] compaction skipped: {e}")
+    print(f"[nav] rotation_nav.json: {len(sectors)} sectors, "
+          f"{len(industries)} industries, {len(tickers)} tickers, "
+          f"through {dates[-1]}")
+
+
 def run_rotation_daily():
     """Append today's d1 per sector/industry; rebuild the daily rotation series."""
     import json as _json, os as _os
@@ -9389,8 +9571,8 @@ def run_full():
     # --- core: what the dashboard reads first -------------------------------
     step("macro",          run_macro)
     step("spx_daily",      run_spx_daily)
-    step("macro_daily",    run_macro_daily,   optional=True)
     step("macro_series",   run_macro_series_daily)   # daily, for the brief
+    step("macro_daily",    run_macro_daily,   optional=True)   # AFTER macro_series: reads its HY OAS for the credit line
     step("vix_term",       run_vix_term)
     step("gex",            run_gex_best)
     # AFTER gex on purpose: the score reads gex.json, and running before it
@@ -9409,6 +9591,7 @@ def run_full():
     # --- smart money: cheap, and it was starving at the end of the run ------
     step("perf_series",    run_perf_series)   # needs industry.json from stocks
     step("rotation_daily", run_rotation_daily, optional=True)
+    step("rotation_nav",   run_rotation_nav,  optional=True)
     step("congress",       run_congress_trades)
     step("house_ptr",      run_house_ptr)
     step("senate_efd",     run_senate_efd,    optional=True)
@@ -9457,6 +9640,8 @@ def run_engine(name):
         run_macro()
     elif name == "macro_daily":
         run_macro_daily()
+    elif name == "rotation_nav":
+        run_rotation_nav()
     elif name == "rotation_daily":
         run_rotation_daily()
     elif name == "spx_daily":
