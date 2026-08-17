@@ -4374,33 +4374,81 @@ def load_daily_from_csv(path="stock_daily.csv"):
     """
     Load {ticker: [(date, close), ...]} from the committed daily CSV.
 
-    Same contract as load_weekly_from_csv, one row per ticker per SESSION.
-    Produced offline by tools/build_stock_daily.ipynb (Colab) — the engine
-    never fetches 2,900 daily histories itself.
+    Searches the plain file, the gzipped twin, and a couple of places the file
+    commonly lands by accident. When nothing is found it LISTS what is actually
+    in the working directory — a silent {} here is what made the chart fall
+    back to the 2-day log while the CSV sat somewhere unexpected.
     """
     import csv, os, gzip, io
     from collections import defaultdict
-    # a gzipped file wins if present: same contract, ~6x smaller to commit
-    gz = path + ".gz"
-    if os.path.exists(gz):
-        fh = io.TextIOWrapper(gzip.open(gz, "rb"), encoding="utf-8")
-        print(f"[daily] reading {gz} ({os.path.getsize(gz)/1e6:.1f} MB gzipped)")
-    elif os.path.exists(path):
-        fh = open(path)
-        print(f"[daily] reading {path} ({os.path.getsize(path)/1e6:.1f} MB)")
-    else:
+    # Name-agnostic discovery. iOS Files rewrites extensions on rename, so the
+    # same data legitimately arrives as stock_daily.csv, stock_daily.csv.gz,
+    # stock_daily.gz.csv, stock_daily.gz, or "stock_daily (1).csv". Content is
+    # sniffed below, so the NAME only has to get us to the right file.
+    import glob as _glob
+    stem = os.path.basename(path).rsplit(".", 1)[0]        # "stock_daily"
+    cands = []
+    for d in ("", "data", OUTPUTS_DIR):
+        for pat in (stem + ".*", stem + "*.csv", stem + "*.gz"):
+            cands += _glob.glob(os.path.join(d, pat) if d else pat)
+    # exact names first, then anything else; de-duplicate, keep order
+    pref = [path + ".gz", path, path + ".gz.csv", stem + ".gz"]
+    ordered, seen_p = [], set()
+    for c in pref + sorted(cands):
+        if c not in seen_p and os.path.exists(c) and os.path.isfile(c):
+            seen_p.add(c)
+            ordered.append(c)
+    found = ordered[0] if ordered else None
+    if len(ordered) > 1:
+        print(f"[daily] {len(ordered)} candidate files found {ordered} — "
+              f"using {found}")
+    if not found:
+        print(f"[daily] {path}[.gz] NOT FOUND. cwd={os.getcwd()}")
+        try:
+            here = sorted(os.listdir("."))
+            csvs = [f for f in here if f.lower().endswith((".csv", ".csv.gz"))]
+            print(f"[daily] CSV-ish files in the repo root: {csvs or 'NONE'}")
+            near = [f for f in here if "daily" in f.lower() or "stock" in f.lower()]
+            if near:
+                print(f"[daily] files matching stock/daily: {near}")
+        except Exception as e:
+            print(f"[daily] could not list cwd: {e}")
         return {}
+    # Sniff the MAGIC BYTES, do not trust the extension. iPad downloads and
+    # GitHub uploads routinely drop the .gz, leaving gzip data in a file called
+    # stock_daily.csv — which then parses as binary garbage and yields nothing.
+    # 1f 8b is gzip; anything else is read as text.
+    with open(found, "rb") as _probe:
+        magic = _probe.read(2)
+    is_gz = (magic == b"\x1f\x8b")
+    if is_gz:
+        fh = io.TextIOWrapper(gzip.open(found, "rb"), encoding="utf-8")
+    else:
+        fh = open(found, encoding="utf-8", errors="replace")
+    label = "gzipped" if is_gz else "plain"
+    if is_gz and not found.endswith(".gz"):
+        print(f"[daily] NOTE: {found} is gzip data with a .csv name — reading it "
+              f"as gzip anyway (rename it to {found}.gz when convenient)")
+    print(f"[daily] reading {found} ({os.path.getsize(found)/1e6:.1f} MB, {label})")
     data = defaultdict(list)
+    bad_rows = 0
     with fh as f:
-        for row in csv.DictReader(f):
+        rd = csv.DictReader(f)
+        cols = [c.strip().lower() for c in (rd.fieldnames or [])]
+        if not {"ticker", "date", "close"} <= set(cols):
+            print(f"[daily] WRONG COLUMNS: got {rd.fieldnames}, need ticker,date,close")
+            return {}
+        for row in rd:
             try:
                 data[row["ticker"]].append((row["date"], float(row["close"])))
             except Exception:
+                bad_rows += 1
                 continue
+    if bad_rows:
+        print(f"[daily] {bad_rows} unparseable rows skipped")
     for tk in data:
         data[tk].sort()
     return dict(data)
-
 
 def load_shares_outstanding(path="shares_outstanding.csv"):
     """
@@ -4911,8 +4959,19 @@ def run_rotation_daily():
                 seen[r["date"]] = r
             except Exception:
                 continue
+    # The engine can run twice on one trading day, or on a weekend, and both
+    # runs carry the SAME d1 (the last close has not changed). Appending both
+    # compounds one day's move twice — visible on 16-17 Aug as Broadcasting
+    # +4.53% logged on Sunday and again on Monday. Skip an append whose values
+    # are identical to the newest logged row.
+    _prev = seen[max(seen)] if seen else None
+    _same = bool(_prev and _prev.get("sectors") == sec
+                 and _prev.get("industries") == ind)
     if not (sec or ind):
         pass                                   # nothing to append today
+    elif _same:
+        print(f"[rotd] d1 values identical to {max(seen)} — the underlying close "
+              f"has not changed, not appending (would double-count)")
     elif today in seen:
         print(f"[rotd] {today} already logged — first run of a date wins, "
               f"not overwriting")
@@ -4973,11 +5032,45 @@ def run_rotation_daily():
             "caps": {tk: round(float(v.get("market_cap") or 0) / 1e9, 3)
                      for tk, v in uni.items() if v.get("market_cap")}})
         cdates, series = compute_rotation_series_daily(dd, uni)
+        # ---- SPLICE: the CSV is a snapshot that ends when Colab last ran.
+        # Every engine run already computes a cap-weighted 1-day move per
+        # sector and industry (d1, from daily_recent.csv). Any logged session
+        # AFTER the CSV's last date is compounded onto the end, so the series
+        # stays current between weekly rebuilds instead of ageing.
+        # Both legs are cap-weighted 1-day returns over the same taxonomy; the
+        # CSV leg uses drifting share-based weights and the spliced leg uses
+        # universe caps, so the join is labelled rather than hidden.
+        spliced = 0
+        if cdates:
+            last_csv = cdates[-1]
+            for d in sorted(seen):
+                if d <= last_csv:
+                    continue
+                row = seen[d]
+                for bucket, key in (("sectors", "sectors"),
+                                    ("industries", "industries")):
+                    moves = row.get(key) or {}
+                    for r in series[bucket]:
+                        mv = moves.get(r["name"])
+                        nxt = r["series"][-1] * (1 + (mv or 0) / 100.0)
+                        r["series"].append(round(nxt, 3))
+                cdates.append(d)
+                spliced += 1
+            if spliced:
+                for bucket in ("sectors", "industries"):
+                    for r in series[bucket]:
+                        r["chg"] = round(r["series"][-1] - 100.0, 2)
+                    series[bucket].sort(key=lambda x: -x["chg"])
+                print(f"[rotd] spliced {spliced} logged session(s) after "
+                      f"{last_csv} onto the CSV history -> now through {cdates[-1]}")
         if cdates and (series["sectors"] or series["industries"]):
             payload = {
                 "asof": _now(), "dates": cdates, "days": len(cdates),
                 "cadence": "daily", "source": "stock_daily.csv",
                 "cap_source": caprep["source"],
+                "csv_through": (cdates[-1 - spliced] if spliced else
+                                (cdates[-1] if cdates else None)),
+                "spliced_sessions": spliced,
                 "note": ("Cap-weighted daily index per sector and industry from "
                          "the committed daily closes. Weights DRIFT: each "
                          "session is weighted by that session's market cap, so "

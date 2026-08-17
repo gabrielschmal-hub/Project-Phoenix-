@@ -4256,6 +4256,11 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     if(note){
       var unit=(CAD==="daily")?"session":"week";
       var fromCsv=(SRC.source==="stock_daily.csv");
+      // when logged sessions extend the CSV snapshot, say so — the last N
+      // points come from a different (still cap-weighted) leg
+      var sp=(fromCsv&&SRC.spliced_sessions)?
+        (" \u00b7 +"+SRC.spliced_sessions+" live session"+
+         (SRC.spliced_sessions===1?"":"s")+" since "+(SRC.csv_through||"")):"";
       var win=RP_TF
         ? ("last "+span+" "+unit+(span===1?"":"s"))
         : ((CAD==="daily")
@@ -4271,7 +4276,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
              " session(s) \u2014 commit stock_daily.csv.gz to the repo ROOT")
           : " \u00b7 rotation_daily.json not published \u2014 check the [rotd] lines in the run log";
       }
-      note.textContent=rows.length+" "+RP_MODE+" \u00b7 "+CAD+" \u00b7 "+win+short+
+      note.textContent=rows.length+" "+RP_MODE+" \u00b7 "+CAD+" \u00b7 "+win+short+sp+
         " \u00b7 cap-weighted from the universe";
     }
   }
