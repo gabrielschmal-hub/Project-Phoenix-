@@ -714,9 +714,11 @@
 .fmet-v{white-space:nowrap}
 .qread{overflow-wrap:anywhere}
 /* the narrower column needs the bars to give way first */
-.fmet-bars{width:96px;min-width:0}
-@media(max-width:1560px){.fmet-bars{width:76px}}
-@media(max-width:1320px){.fmet-bars{width:60px}}
+.fmet-bars{width:132px;min-width:0;gap:3px}
+@media(max-width:1500px){.fmet-bars{width:112px}}
+@media(max-width:1320px){.fmet-bars{width:88px}}
+.fmet-v{font-size:22px}
+.fcard2{padding:14px 14px 12px}
 .qrow{gap:4px}
 .qbtn{padding:3px 6px;font-size:9px}
 .fcard2{background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:14px 16px 12px}
@@ -4349,8 +4351,19 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     var ci=e.target.closest("[data-dpind]"), cs2=e.target.closest("[data-dpsec]"),
         ce=e.target.closest("[data-dpexch]"), cw=e.target.closest("[data-dpwatch]");
     if(ci||cs2){
-      NV_L=ci?{t:"industry",k:ci.getAttribute("data-dpind")}
-             :{t:"sector",k:cs2.getAttribute("data-dpsec")};
+      var _key=ci?ci.getAttribute("data-dpind"):cs2.getAttribute("data-dpsec");
+      var _kind=ci?"industry":"sector";
+      // verify against the navigator now that it is certainly loaded
+      if(NV){
+        var _pool=(_kind==="industry")?NV.industries:NV.sectors;
+        if(!(_pool&&_pool[_key])){
+          var _el=ci||cs2;
+          _el.classList.add("off");
+          _el.title="not in the Phoenix universe taxonomy";
+          return;
+        }
+      }
+      NV_L={t:_kind,k:_key};
       try{ dpReturnTo=null; trBackFromDetail(); }catch(err){}
       try{ go("markets"); }catch(err){}
       setTimeout(function(){ nvInit(); nvDraw();
@@ -9627,8 +9640,9 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
                 dpIndustry=_n.i||p.industry||afp.industry||t.industry||_s.industry||"";
                 dpSector  =_n.s||p.sector||afp.sector||_s.sector||"";
                 // is the name one the navigator actually knows?
-                dpIndOK=!!(NV&&NV.industries&&NV.industries[dpIndustry]);
-                dpSecOK=!!(NV&&NV.sectors&&NV.sectors[dpSector]);
+                dpIndOK=(!NV)||!!(NV.industries&&NV.industries[dpIndustry]);
+                dpSecOK=(!NV)||!!(NV.sectors&&NV.sectors[dpSector]);
+                if(!NV){ try{ nvInit(); }catch(err){} }
                 // exchange: chart meta first, then the bundle profile, then the
                 // ledger — meta is only populated once daily bars have loaded
                 dpExch    =meta.exch||p.exchange||afp.exchange||_s.exchange||"";
@@ -10000,7 +10014,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     var rng = (hi - lo) || 1, H = 36;
     var zero = H - (0 - lo) / rng * H;
     var bars = vals.map(function (x, i) {
-      if (x == null) return '<span class="fmb" style="flex:1"></span>';
+      if (x == null) return "";   // no bar for a quarter with no value
       var y = H - (x - lo) / rng * H;
       var top = x >= 0 ? y : zero, ht = Math.max(2, Math.abs(zero - y));
       var good = opts.lowerIsBetter ? (x < 0) : (x >= 0);
@@ -10010,7 +10024,10 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         '<i style="position:absolute;left:1px;right:1px;top:' + top.toFixed(1) + 'px;height:' +
         ht.toFixed(1) + 'px;background:' + c + ';opacity:.85;border-radius:1px"></i></span>';
     }).join("");
+    // only offer quarters this metric actually has — an empty chip promised
+    // data that was never there (the "Q4 24" with nothing behind it)
     var chips = rows.map(function (r, i) {
+      if (vals[i] == null) return "";
       return '<button class="qbtn fbcol2" data-fm="' + mid + '" data-i="' + i + '">' +
         _finQlab(r.q) + '</button>';
     }).join("");

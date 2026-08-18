@@ -4262,6 +4262,7 @@ def run_macro_daily(period="1y"):
             if len(bars) < 30:
                 problems.append(f"{key}: only {len(bars)} bars")
                 continue
+            bars = _yf_fill_last(sym, bars)
             instruments[key] = {"label": label, "kind": "candles",
                                 "symbol": sym, "bars": bars,
                                 "asof": bars[-1]["date"]}
@@ -4324,6 +4325,73 @@ def run_macro_daily(period="1y"):
     return len(instruments)
 
 
+def _yf_fill_last(sym, bars, tries=3, pause=4.0):
+    """
+    Yahoo under load returns the NEWEST bar as NaN. That single bad value
+    cascades: the bar is dropped, the board shows the prior session, and the
+    GEX spot (which reads the spx_daily close) goes NaN so flip and walls come
+    back None. Re-ask for just the last few days until a real close appears.
+    Returns the possibly-extended bar list. Never raises.
+    """
+    import time, math
+    try:
+        import yfinance as yf
+    except Exception:
+        return bars
+    have = set(b.get("date") for b in bars)
+    for attempt in range(tries):
+        try:
+            d = yf.download(sym, period="5d", interval="1d",
+                            auto_adjust=False, progress=False)
+            if d is None or len(d) == 0:
+                time.sleep(pause); continue
+
+            def c(n):
+                x = d[n]
+                return x.iloc[:, 0] if hasattr(x, "columns") else x
+
+            o, h, l, cl, v = c("Open"), c("High"), c("Low"), c("Close"), c("Volume")
+            added = 0
+            for ts in d.index:
+                try:
+                    ds = ts.strftime("%Y-%m-%d")
+                except AttributeError:
+                    ds = str(ts)[:10]
+                if ds in have:
+                    continue
+                try:
+                    cv = float(cl.loc[ts])
+                except Exception:
+                    continue
+                if math.isnan(cv) or math.isinf(cv):
+                    continue
+                def g(s):
+                    try:
+                        x = float(s.loc[ts])
+                        return None if (math.isnan(x) or math.isinf(x)) else round(x, 2)
+                    except Exception:
+                        return None
+                try:
+                    vv = int(float(v.loc[ts]))
+                except Exception:
+                    vv = None
+                bars.append({"date": ds, "o": g(o), "h": g(h), "l": g(l),
+                             "c": round(cv, 2), "v": vv})
+                have.add(ds); added += 1
+            if added:
+                bars.sort(key=lambda b: b["date"])
+                print(f"[yf] {sym}: recovered {added} bar(s) on retry "
+                      f"{attempt + 1} -> now through {bars[-1]['date']}")
+                return bars
+        except Exception as e:
+            print(f"[yf] {sym} retry {attempt + 1} failed: {e}")
+        time.sleep(pause)
+    if bars:
+        print(f"[yf] {sym}: newest bar still {bars[-1]['date']} after {tries} "
+              f"retries \u2014 Yahoo is throttling; downstream will use it as-is")
+    return bars
+
+
 def run_spx_daily(period="1y"):
     """Pull ~1yr of SPX daily OHLC+volume and write spx_daily.json."""
     try:
@@ -4368,7 +4436,9 @@ def run_spx_daily(period="1y"):
         write_json_guarded("spx_daily", {"symbol": "SPX", "bars": bars,
                                          "asof": bars[-1]["date"] if bars else None},
                            _validate_spx)
-        print(f"[spx_daily] wrote outputs/spx_daily.json ({len(bars)} daily bars)")
+        bars = _yf_fill_last("^GSPC", bars)
+        print(f"[spx_daily] wrote outputs/spx_daily.json ({len(bars)} daily bars, "
+              f"through {bars[-1]['date'] if bars else 'n/a'})")
         return bars
     except Exception as e:
         print(f"[spx_daily] failed: {e}")
@@ -8070,9 +8140,21 @@ def run_gex_cboe(symbol="_SPX", label="SPX"):
             import json as _j
             _sd = _j.load(open(os.path.join(OUTPUTS_DIR, "spx_daily.json")))
             _bars = _sd.get("bars") or []
-            _c = _bars[-1].get("c") if _bars else None
+            # walk BACK to the newest bar with a real close. A NaN/None close
+            # on the newest bar used to become the spot, and every downstream
+            # number (net GEX, flip, both walls) came out NaN/None from it.
+            _c, _cd = None, None
+            import math as _m
+            for _b in reversed(_bars):
+                _x = _b.get("c")
+                try:
+                    _x = float(_x)
+                except (TypeError, ValueError):
+                    continue
+                if not (_m.isnan(_x) or _m.isinf(_x)):
+                    _c, _cd = _x, _b.get("date"); break
             if _c:
-                spot, spot_source = float(_c), "spx_daily close"
+                spot, spot_source = _c, "spx_daily close (%s)" % _cd
         except Exception:
             pass
     if spot_source == "payload":
