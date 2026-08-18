@@ -94,11 +94,39 @@ PUBLISH_HOLDS = []   # files the publish gate refused to overwrite this run
 # ============================================================
 # OUTPUTS — the JSON the frontend reads
 # ============================================================
+def _json_safe(o, _stats=None):
+    """
+    Replace NaN/Infinity with None, recursively. PURE.
+
+    json.dump happily writes bare NaN, which is NOT valid JSON: the browser's
+    JSON.parse rejects the whole file ("The string did not match the expected
+    pattern"), so one bad float from a rate-limited Yahoo pull takes down an
+    entire panel. Every writer goes through this now.
+    """
+    import math
+    if isinstance(o, float):
+        if math.isnan(o) or math.isinf(o):
+            if _stats is not None:
+                _stats[0] += 1
+            return None
+        return o
+    if isinstance(o, dict):
+        return {k: _json_safe(v, _stats) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [_json_safe(v, _stats) for v in o]
+    return o
+
+
 def write_json(name, data):
     os.makedirs(OUTPUTS_DIR, exist_ok=True)
     path = os.path.join(OUTPUTS_DIR, f"{name}.json")
+    stats = [0]
+    clean = _json_safe(data, stats)
+    if stats[0]:
+        print(f"[json] {name}.json: {stats[0]} NaN/Inf value(s) written as null "
+              f"— upstream data was incomplete (rate limit or partial bar)")
     with open(path, "w") as f:
-        json.dump(data, f, indent=1)
+        json.dump(clean, f, indent=1, allow_nan=False)
     return path
 
 def write_json_guarded(name, data, validator, warnings=None):
@@ -529,7 +557,7 @@ def write_signal_log(v2, regime=None, spx=None):
     }
 
     with open(path, "w") as f:
-        json.dump(doc, f, separators=(",", ":"))
+        json.dump(_json_safe(doc), f, separators=(",", ":"), allow_nan=False)
     kb = os.path.getsize(path) / 1024
     print(f"[signals] {day}: {len(trade)} trade + {len(invest)} invest rows "
           f"-> {path} ({kb:.0f}KB)")
@@ -575,7 +603,7 @@ def run_universe_charts():
             safe = tk.replace("/", "-").replace(".", "-")   # same rule as charts/
             t = [b[0] for b in bars]
             c = [b[1] for b in bars]
-            _json.dump({"tk": tk, "w": {"t": t, "c": c}},
+            _json.dump(_json_safe({"tk": tk, "w": {"t": t, "c": c}}),
                        open(_os.path.join(CHARTS_W_DIR, f"{safe}.json"), "w"),
                        separators=(",", ":"))
             n += 1
@@ -3784,7 +3812,7 @@ def write_financials(quarterly, universe=None, source_csv=None, next_dates=None,
                 payload["pe"] = round(mc / 1e9 / sum(nis), 1)
         safe = tk.replace("/", "-").replace(".", "-")
         with open(os.path.join(fin_dir, f"{safe}.json"), "w") as f:
-            json.dump(payload, f, separators=(",", ":"))
+            json.dump(_json_safe(payload), f, separators=(",", ":"), allow_nan=False)
         written += 1
 
     if digest:
@@ -3909,7 +3937,7 @@ def write_charts(daily_ohlcv, weekly_csv=None, tickers=None, quarterly=None, uni
                         payload["pe"] = round(mc2 / 1e9 / sum(nis), 1)
         safe = tk.replace("/", "-").replace(".", "-")
         with open(os.path.join(charts_dir, f"{safe}.json"), "w") as f:
-            json.dump(payload, f, separators=(",", ":"))
+            json.dump(_json_safe(payload), f, separators=(",", ":"), allow_nan=False)
         written += 1
 
     print(f"[charts] wrote {written} chart files (0 extra network calls){f', {skipped} had no bars' if skipped else ''}")
@@ -4181,6 +4209,11 @@ def run_macro_daily(period="1y"):
                 cv = g(cl)
                 if cv is None:
                     continue
+                # a rate-limited pull returns a row with NaN close; keeping it
+                # produced a hole in the chart AND invalid JSON downstream
+                import math as _m
+                if isinstance(cv, float) and (_m.isnan(cv) or _m.isinf(cv)):
+                    continue
                 try:
                     ds = d.strftime("%Y-%m-%d")
                 except AttributeError:
@@ -4281,7 +4314,11 @@ def run_spx_daily(period="1y"):
         for d in df.index:
             def g(series):
                 try:
-                    val = float(series.loc[d]); return round(val, 2)
+                    val = float(series.loc[d])
+                    import math as _m
+                    if _m.isnan(val) or _m.isinf(val):
+                        return None          # rate-limited / partial bar
+                    return round(val, 2)
                 except Exception:
                     return None
             def gd(dt):
@@ -5092,7 +5129,8 @@ def run_rotation_nav():
     try:
         _p = _os.path.join(OUTPUTS_DIR, "rotation_nav.json")
         _d = _json.load(open(_p))
-        _json.dump(_d, open(_p, "w"), separators=(",", ":"))
+        _json.dump(_json_safe(_d), open(_p, "w"), separators=(",", ":"),
+                   allow_nan=False)
         print(f"[nav] compacted to {_os.path.getsize(_p)/1e6:.2f} MB")
     except Exception as e:
         print(f"[nav] compaction skipped: {e}")
@@ -8312,6 +8350,7 @@ def run_congress_trades():
     grouped by ticker. Non-fatal on any network/parse failure.
     """
     import json, os, requests
+    import re as re
     from datetime import datetime, timedelta
 
     universe = load_universe_from_csv()
