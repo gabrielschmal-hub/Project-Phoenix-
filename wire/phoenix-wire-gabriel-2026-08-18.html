@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html class="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Phoenix Wire · Gabriel · 2026-08-18</title><style>
+:root{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenSoft:#269360; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redSoft:#C4452B; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15); --blue:#2C5A82;
+  --serif:Georgia,'Times New Roman',serif;
+  --mono:'Courier New',ui-monospace,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--serif);
+  -webkit-font-smoothing:antialiased}
+.ed-wrap{background:var(--bg)}
+.ed-page{max-width:1180px;margin:0 auto;padding:30px 30px 60px;position:relative}
+.ed-x{position:absolute;top:18px;right:26px;z-index:5;background:var(--card);
+  border:1px solid var(--line2);border-radius:99px;padding:7px 15px;cursor:pointer;
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--inkLight);
+  text-decoration:none}
+.ed-x:hover{color:var(--gold);border-color:var(--gold)}
+.ed-mast{text-align:center;border-bottom:2px solid var(--line2);padding-bottom:15px}
+.ed-meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--inkFade);padding-right:130px}
+.ed-meta span:last-child{text-align:right}
+.ed-brand{display:flex;align-items:center;justify-content:center;gap:14px;margin:10px 0 4px}
+.ed-mark{width:52px;height:40px;flex:0 0 auto;display:block}
+.ed-brand .ed-name{font-family:var(--serif);font-size:56px;line-height:1;letter-spacing:-.02em}
+.ed-sub{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--inkLight)}
+.ed-sub-gamma{position:relative}
+.ed-sub-gamma::after{content:"· gamma";font-family:var(--mono);font-style:normal;
+  font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+  margin-left:9px;vertical-align:middle}
+.ed-hello{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--inkFade);margin-top:11px}
+.ed-verdict{border-bottom:1px solid var(--line);padding:20px 0 18px}
+.ed-call{font-family:var(--serif);font-size:33px;line-height:1.12}
+.ed-call em{font-style:normal;color:var(--gold)}
+.ed-vwhy{font-size:14.5px;color:var(--inkLight);margin-top:9px;line-height:1.6}
+.ed-sec{border-bottom:1px solid var(--line);padding:24px 0}
+.ed-sec:last-of-type{border-bottom:0}
+.ed-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--inkFade);display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.ed-n{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--inkLight);
+  text-transform:none;letter-spacing:0}
+.ed-hl{font-family:var(--serif);font-size:30px;line-height:1.16;margin:9px 0 13px;
+  letter-spacing:-.01em}
+.ed-hl.sm{font-size:25px}
+.ed-body{font-size:15px;line-height:1.68;color:var(--inkMed);margin:0 0 12px}
+.ed-pos{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px 16px;
+  align-items:baseline;font-family:var(--mono);font-size:13px;padding:10px 0;
+  border-bottom:1px solid var(--line)}
+.ed-pos .tk{font-family:var(--serif);font-size:18px;font-weight:700}
+.ed-pos .nt{font-family:var(--sans);font-size:12.5px;color:var(--inkFade)}
+.ed-tape{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.ed-ins{border:1px solid var(--line);border-radius:3px;padding:11px 12px 6px;
+  background:var(--card);overflow:hidden}
+.ed-ins.lead{border-color:var(--gold);border-left-width:3px}
+.ed-ins .i-k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--inkFade);display:flex;justify-content:space-between}
+.ed-ins .i-sig{color:var(--gold)}
+.ed-ins .i-v{font-family:var(--mono);font-size:19px;font-weight:700;margin-top:4px}
+.ed-ins .i-c{font-family:var(--mono);font-size:12px}
+.ed-sk{width:100%;height:44px;display:block;margin-top:5px}
+.ed-sk .ar{fill:currentColor;opacity:.12;stroke:none}
+.ed-sk .ln{fill:none;stroke:currentColor;stroke-width:1.6}
+.ed-sk.g{color:var(--green)}.ed-sk.r{color:var(--red)}
+.ed-rot{margin:8px 0 12px}
+.ed-rr{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:baseline;
+  padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ed-rr:last-child{border-bottom:0}
+.ed-rr .bar{width:110px;height:5px;background:var(--line);border-radius:3px;overflow:hidden;
+  justify-self:end}
+.ed-rr .bar b{display:block;height:100%}
+.ed-rr .pc{font-family:var(--mono);font-size:13px;min-width:70px;text-align:right}
+.ed-rr .yours{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--gold);
+  border:1px solid var(--gold);border-radius:2px;padding:1px 5px;margin-left:7px}
+.ed-smart{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;margin:8px 0 12px}
+.ed-sm{padding:11px 0;border-bottom:1px solid var(--line)}
+.ed-sm .sm-t{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--inkFade);margin-bottom:5px}
+.ed-sm .sm-l{font-size:13.5px;line-height:1.55;color:var(--inkMed)}
+.ed-setups{margin:10px 0 14px}
+.ed-su{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px 16px;
+  align-items:baseline;padding:11px 0;border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:13px}
+.ed-su:last-child{border-bottom:0}
+.ed-su .tk{font-family:var(--serif);font-size:17px;font-weight:700}
+.ed-su .nt{font-family:var(--sans);font-size:12.5px;color:var(--inkFade)}
+.ed-su .badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:2px 7px;
+  border:1px solid var(--line2);border-radius:2px;color:var(--inkLight)}
+.ed-su .badge.hot{border-color:var(--gold);color:var(--gold)}
+.ed-map{border:1px solid var(--line);border-radius:3px;background:var(--card);padding:8px;
+  margin:8px 0 14px;position:relative}
+.ed-gexh .ed-map{height:auto}
+.gexh-scroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+  padding-bottom:4px}
+.gex-svg{display:block;margin-top:6px}
+.gexh-key{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;padding:10px 2px 2px;
+  font-family:var(--mono);font-size:11.5px;color:var(--inkLight)}
+.gexh-key span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.gexh-key i{width:13px;height:4px;border-radius:2px;display:inline-block;flex:0 0 auto}
+.gexh-key b{font-weight:700;letter-spacing:.02em}
+.gexh-key em{font-style:normal}
+.gexh-key u{text-decoration:none;color:var(--inkFade);font-size:10.5px}
+.gexh-key s{text-decoration:none;color:var(--inkFade);font-style:italic;font-size:10.5px}
+.gexh-key .k-note{opacity:.8;font-style:italic;white-space:normal;flex-basis:100%;
+  line-height:1.5}
+.gexh-key .lv.off i{opacity:.45}
+.ed-chartk{font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--inkFade);display:flex;justify-content:space-between;
+  align-items:baseline;gap:14px;margin:6px 0}
+.ed-vix{border:1px solid var(--line);border-radius:3px;background:var(--card);height:250px;
+  position:relative;padding:8px;margin-bottom:14px}
+.ed-vix .vix-svg{position:absolute;inset:8px;width:calc(100% - 16px);
+  height:calc(100% - 16px)}
+.ed-note{font-size:13px;line-height:1.6;color:var(--inkFade);border-left:2px solid var(--line2);
+  padding:8px 0 8px 12px;margin:10px 0 4px;font-style:italic}
+.ed-cals{margin:10px 0 14px}
+.ed-cal{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px 14px;
+  align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ed-cal:last-child{border-bottom:0}
+.ed-cal.hot{border-left:3px solid var(--gold);padding-left:11px;margin-left:-14px}
+.ed-cal .c-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:2px 7px;
+  border-radius:2px;border:1px solid var(--line2);color:var(--inkLight)}
+.ed-cal .c-fomc{border-color:var(--red);color:var(--red)}
+.ed-cal .c-cpi{border-color:var(--gold);color:var(--gold)}
+.ed-cal .c-opex{border-color:var(--amber);color:var(--amber)}
+.ed-cal .c-w{font-family:var(--mono);font-size:12px;color:var(--inkLight);white-space:nowrap}
+.ed-cal .c-w.hot{color:var(--gold);font-weight:700}
+.ed-cal .c-d{font-family:var(--mono);font-size:11px;color:var(--inkFade);white-space:nowrap}
+.ed-w{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;
+  font-size:13.5px;padding:9px 0;border-bottom:1px solid var(--line)}
+.ed-w:last-child{border-bottom:0}
+.ed-w .w-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;padding:2px 7px;
+  border-radius:2px;background:var(--gold);color:#FFFDF9}
+.ed-w .w-tag.low{background:var(--line2);color:var(--ink)}
+.ed-w .w-when{font-family:var(--mono);font-size:11.5px;color:var(--inkFade);white-space:nowrap}
+.brief-watch{background:rgba(211,119,54,.10);border:1px solid rgba(211,119,54,.38);
+  border-radius:7px;padding:10px 13px;margin-top:11px;font-size:13.5px;line-height:1.6}
+.brief-watch .k{font-family:var(--mono);font-size:11px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--ink);display:block;margin-bottom:4px}
+.ed-jump{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:26px}
+.ed-jump a{display:block;text-align:center;padding:14px 8px;border:1px solid var(--line2);
+  border-radius:3px;color:var(--ink);font-family:var(--mono);font-size:11.5px;
+  letter-spacing:.14em;text-transform:uppercase;background:var(--card);cursor:pointer;
+  text-decoration:none}
+.ed-jump a:hover{border-color:var(--gold);color:var(--gold)}
+.ed-colophon{margin-top:20px;text-align:center;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--inkFade)}
+.ed-cond{margin-top:2px}
+@media(max-width:820px){
+  .ed-page{padding:20px 16px 50px}
+  .ed-brand .ed-name{font-size:36px}.ed-mark{width:38px;height:29px}
+  .ed-meta{padding-right:96px}
+  .ed-call{font-size:25px}
+  .ed-hl{font-size:23px}.ed-hl.sm{font-size:20px}
+  .ed-tape{grid-template-columns:1fr 1fr}.ed-jump{grid-template-columns:1fr 1fr}
+  .ed-smart{grid-template-columns:1fr;gap:0}
+  .ed-pos,.ed-su{grid-template-columns:auto 1fr;gap:3px 12px}
+  .ed-cal{grid-template-columns:auto 1fr;gap:3px 10px}
+  .ed-cal .c-w,.ed-cal .c-d{grid-column:span 2;font-size:11.5px}
+  .ed-vix{height:240px}
+}
+
+.pos-strip{margin:2px 0 4px;border-top:1px solid var(--line)}
+.pos-line{display:flex;gap:14px;align-items:baseline;padding:9px 0;
+  border-bottom:1px solid var(--line);font-family:var(--mono);font-size:13px}
+.pos-line:last-child{border-bottom:0}
+.pos-line .tk{font-family:var(--serif);font-size:17px;font-weight:700}
+.ed-w .w-tag.war-strike{background:var(--red);color:#FFFDF9}
+.ed-w .w-tag.war-oil{background:var(--amber);color:#FFFDF9}
+.ed-w .w-tag.war-talks{background:var(--green);color:#FFFDF9}
+.ed-w .w-tag.war-politics,.ed-w .w-tag.war-military{background:var(--line2);color:var(--ink)}
+</style></head><body><div class="ed-wrap"><div class="ed-page"><a class="ed-x" href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">CLOSE ✕</a><div class="ed-mast"><div class="ed-meta"><span>Phoenix Daily</span><span>Morning edition · Rome</span></div><div class="ed-brand"><svg class="ed-mark" viewBox="0 0 89 69" aria-hidden="true"><path fill="var(--gold)" fill-rule="evenodd" d="M3.90 3.70 L5.00 9.40 L9.20 17.70 L23.60 27.30 L22.60 27.80 L11.50 22.00 L10.90 23.10 L14.20 30.80 L17.10 33.70 L28.70 40.30 L30.60 42.70 L29.60 42.80 L22.60 38.10 L21.00 38.50 L22.20 41.80 L25.10 45.70 L35.80 51.60 L36.10 54.60 L38.80 55.30 L39.00 57.40 L43.40 64.70 L44.70 63.80 L45.10 61.50 L48.70 56.80 L49.30 54.10 L51.60 53.80 L52.60 51.10 L61.80 46.70 L64.70 43.80 L67.00 39.10 L65.30 37.60 L65.50 37.00 L71.70 32.80 L74.90 27.40 L76.00 22.70 L75.00 22.30 L70.70 25.60 L65.10 28.20 L60.70 31.60 L57.10 33.20 L53.20 36.60 L54.30 33.20 L60.50 28.10 L63.80 27.70 L75.80 19.70 L79.70 15.80 L84.00 5.10 L84.00 3.70 L83.20 3.20 L77.70 7.60 L64.10 16.20 L61.30 19.80 L57.10 21.20 L53.10 24.20 L47.20 30.10 L44.90 34.80 L45.80 39.40 L43.40 41.50 L41.30 38.50 L42.00 34.80 L40.90 31.50 L34.80 24.20 L27.90 19.30 L26.00 19.40 L24.70 17.20 L10.20 7.60 L6.80 4.20 L4.70 3.20 Z M49.70 42.30 L47.60 47.70 L45.90 49.70 L47.60 52.30 L46.90 52.90 L43.30 50.80 L43.00 49.90 L45.30 46.20 Z M24.30 28.30 L26.40 28.10 L29.70 30.30 L33.60 34.20 L33.80 35.50 Z M64.60 38.20 L63.70 39.60 L54.70 45.60 L53.30 45.70 L59.20 40.30 Z"/></svg><span class="ed-name">Phoenix</span></div><div class="ed-sub" title="chosen for the policy tightening regime">Rising rates punish conviction held too long.</div><div class="ed-hello">Good morning Gabriel · Monday, 17 August 2026</div></div><div class="ed-verdict"><div><div class="ed-call">The deal expires and Trump threatens the mediator — <em>Brent takes $90</em></div><div class="ed-vwhy">The 60-day memorandum that had held since June lapsed on Monday with neither side willing to extend it. Trump demanded Iran "put up the white flag of surrender", said he is "not in a hurry", and threatened to bomb Oman — the country mediating the talks — if it gets in the way. Brent took $90, WTI closed 84.50, the 30-year yield hit 5.31% (its highest since 2007) and the S&P gave up 0.45% to 7,750.48 with the VIX up 6.6%. All three of your names moved on it: BAC tagged 65.23 intraday and closed at the session low, INTC bounced 1.0%, GOOG slipped 0.6%.</div></div></div><div class="ed-sec"><div class="ed-k"><span>The tape</span><span class="ed-n">2026-08-17 · previous session</span></div><div class="ed-tape"><div class="ed-ins"><div class="i-k"><span>VIX</span><span class="i-sig">1.0σ</span></div><div class="i-v">15.19</div><div class="i-c"><span style="color:var(--green);font-weight:700">+6.60%</span></div><svg class="ed-sk g" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,23.0 L5.3,9.9 L10.6,15.0 L15.8,13.5 L21.1,16.3 L26.4,20.8 L31.7,28.0 L36.9,27.1 L42.2,29.7 L47.5,33.2 L52.8,29.9 L58.1,25.3 L63.3,31.6 L68.6,36.4 L73.9,23.7 L79.2,27.7 L84.4,32.6 L89.7,26.3 L95.0,14.2 L100.3,14.9 L105.6,14.6 L110.8,15.3 L116.1,14.8 L121.4,17.5 L126.7,3.0 L131.9,24.2 L137.2,31.5 L142.5,27.7 L147.8,31.8 L153.1,35.7 L158.3,37.1 L163.6,33.8 L168.9,34.9 L174.2,39.2 L179.4,38.7 L184.7,41.0 L190.0,35.4 L190,44 L0,44 Z" class="ar"/><path d="M0.0,23.0 L5.3,9.9 L10.6,15.0 L15.8,13.5 L21.1,16.3 L26.4,20.8 L31.7,28.0 L36.9,27.1 L42.2,29.7 L47.5,33.2 L52.8,29.9 L58.1,25.3 L63.3,31.6 L68.6,36.4 L73.9,23.7 L79.2,27.7 L84.4,32.6 L89.7,26.3 L95.0,14.2 L100.3,14.9 L105.6,14.6 L110.8,15.3 L116.1,14.8 L121.4,17.5 L126.7,3.0 L131.9,24.2 L137.2,31.5 L142.5,27.7 L147.8,31.8 L153.1,35.7 L158.3,37.1 L163.6,33.8 L168.9,34.9 L174.2,39.2 L179.4,38.7 L184.7,41.0 L190.0,35.4" class="ln"/></svg></div><div class="ed-ins"><div class="i-k"><span>WTI crude</span><span class="i-sig">0.7σ</span></div><div class="i-v">84.5</div><div class="i-c"><span style="color:var(--green);font-weight:700">+2.55%</span></div><svg class="ed-sk g" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,30.9 L4.9,33.5 L9.7,38.1 L14.6,35.6 L19.5,39.9 L24.4,37.5 L29.2,39.5 L34.1,41.0 L39.0,40.8 L43.8,41.0 L48.7,38.0 L53.6,33.0 L58.5,35.3 L63.3,36.4 L68.2,25.6 L73.1,23.7 L77.9,23.2 L82.8,24.3 L87.7,18.6 L92.6,17.4 L97.4,14.7 L102.3,11.6 L107.2,3.0 L112.1,7.6 L116.9,18.4 L121.8,23.8 L126.7,15.4 L131.5,16.8 L136.4,15.1 L141.3,22.0 L146.2,29.4 L151.0,30.3 L155.9,27.0 L160.8,25.5 L165.6,19.2 L170.5,17.5 L175.4,17.3 L180.3,20.6 L185.1,18.7 L190.0,15.4 L190,44 L0,44 Z" class="ar"/><path d="M0.0,30.9 L4.9,33.5 L9.7,38.1 L14.6,35.6 L19.5,39.9 L24.4,37.5 L29.2,39.5 L34.1,41.0 L39.0,40.8 L43.8,41.0 L48.7,38.0 L53.6,33.0 L58.5,35.3 L63.3,36.4 L68.2,25.6 L73.1,23.7 L77.9,23.2 L82.8,24.3 L87.7,18.6 L92.6,17.4 L97.4,14.7 L102.3,11.6 L107.2,3.0 L112.1,7.6 L116.9,18.4 L121.8,23.8 L126.7,15.4 L131.5,16.8 L136.4,15.1 L141.3,22.0 L146.2,29.4 L151.0,30.3 L155.9,27.0 L160.8,25.5 L165.6,19.2 L170.5,17.5 L175.4,17.3 L180.3,20.6 L185.1,18.7 L190.0,15.4" class="ln"/></svg></div><div class="ed-ins"><div class="i-k"><span>S&P 500</span><span class="i-sig">0.5σ</span></div><div class="i-v">7,750</div><div class="i-c"><span style="color:var(--red);font-weight:700">−0.45%</span></div><svg class="ed-sk r" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,28.7 L4.9,37.1 L9.7,37.7 L14.6,37.7 L19.5,38.0 L24.4,31.2 L29.2,26.6 L34.1,27.9 L39.0,27.8 L43.8,23.6 L48.7,26.2 L53.6,27.9 L58.5,23.1 L63.3,20.6 L68.2,25.3 L73.1,23.1 L77.9,20.8 L82.8,23.9 L87.7,29.9 L92.6,31.0 L97.4,25.8 L102.3,26.6 L107.2,33.7 L112.1,33.5 L116.9,33.4 L121.8,32.1 L126.7,41.0 L131.5,31.4 L136.4,27.3 L141.3,18.6 L146.2,7.9 L151.0,8.9 L155.9,10.0 L160.8,6.3 L165.6,6.6 L170.5,8.6 L175.4,7.0 L180.3,3.0 L185.1,4.0 L190.0,6.8 L190,44 L0,44 Z" class="ar"/><path d="M0.0,28.7 L4.9,37.1 L9.7,37.7 L14.6,37.7 L19.5,38.0 L24.4,31.2 L29.2,26.6 L34.1,27.9 L39.0,27.8 L43.8,23.6 L48.7,26.2 L53.6,27.9 L58.5,23.1 L63.3,20.6 L68.2,25.3 L73.1,23.1 L77.9,20.8 L82.8,23.9 L87.7,29.9 L92.6,31.0 L97.4,25.8 L102.3,26.6 L107.2,33.7 L112.1,33.5 L116.9,33.4 L121.8,32.1 L126.7,41.0 L131.5,31.4 L136.4,27.3 L141.3,18.6 L146.2,7.9 L151.0,8.9 L155.9,10.0 L160.8,6.3 L165.6,6.6 L170.5,8.6 L175.4,7.0 L180.3,3.0 L185.1,4.0 L190.0,6.8" class="ln"/></svg></div><div class="ed-ins"><div class="i-k"><span>Nasdaq</span><span class="i-sig">0.3σ</span></div><div class="i-v">26,649</div><div class="i-c"><span style="color:var(--red);font-weight:700">−0.30%</span></div><svg class="ed-sk r" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,13.2 L5.3,22.6 L10.6,24.4 L15.8,26.3 L21.1,27.2 L26.4,18.8 L31.7,12.5 L36.9,15.3 L42.2,18.6 L47.5,14.0 L52.8,18.8 L58.1,18.0 L63.3,12.6 L68.6,11.4 L73.9,18.0 L79.2,14.2 L84.4,11.6 L89.7,17.8 L95.0,23.7 L100.3,23.9 L105.6,29.8 L110.8,32.4 L116.1,33.1 L121.4,34.0 L126.7,41.0 L131.9,30.1 L137.2,17.3 L142.5,6.5 L147.8,10.1 L153.1,10.3 L158.3,4.8 L163.6,6.2 L168.9,8.8 L174.2,6.5 L179.4,3.0 L184.7,4.2 L190.0,5.5 L190,44 L0,44 Z" class="ar"/><path d="M0.0,13.2 L5.3,22.6 L10.6,24.4 L15.8,26.3 L21.1,27.2 L26.4,18.8 L31.7,12.5 L36.9,15.3 L42.2,18.6 L47.5,14.0 L52.8,18.8 L58.1,18.0 L63.3,12.6 L68.6,11.4 L73.9,18.0 L79.2,14.2 L84.4,11.6 L89.7,17.8 L95.0,23.7 L100.3,23.9 L105.6,29.8 L110.8,32.4 L116.1,33.1 L121.4,34.0 L126.7,41.0 L131.9,30.1 L137.2,17.3 L142.5,6.5 L147.8,10.1 L153.1,10.3 L158.3,4.8 L163.6,6.2 L168.9,8.8 L174.2,6.5 L179.4,3.0 L184.7,4.2 L190.0,5.5" class="ln"/></svg></div></div><div class="pos-strip"><div class="pos-line"><span class="tk">GOOG</span><span>341.45 · <span style="color:var(--red);font-weight:700">−0.61%</span> on the day · <span style="color:var(--green);font-weight:700">+4.8%</span> on entry · <b>0.8R</b> open</span></div><div class="pos-line"><span class="tk">INTC</span><span>103.49 · <span style="color:var(--green);font-weight:700">+0.97%</span> on the day · <span style="color:var(--red);font-weight:700">−2.0%</span> on entry · <b>-0.2R</b> open</span></div><div class="pos-line"><span class="tk">BAC</span><span>63.89 · <span style="color:var(--red);font-weight:700">−0.93%</span> on the day · <span style="color:var(--red);font-weight:700">−0.8%</span> on entry · <b>-0.1R</b> open</span></div></div></div><div class="ed-sec"><div class="ed-k"><span>Your positions</span><span class="ed-n">signal vs noise</span></div><h2 class="ed-hl sm">1 signal on BAC — read before the open (GOOG, INTC quiet)</h2><div><div class="ed-w"><span class="w-tag">Signal</span><span><b>BAC</b> — <b>BAC tags 65.23 intraday and closes at the low of the day — the resistance in your thesis held</b>. Monday printed a high of 65.23, clean through the 65 level you flagged, then closed 63.89 — the session low — on a day the 30-year yield hit 5.31%, its highest since June 2007. A steepener that good and the stock still could not hold above 65 is the market telling you where the supply sits. Gabriel is −0.76% on entry at −0.12R with the stop 5.8% below at 60.39; Aldemar −0.42% at −0.06R, stop 7.1% below. Nothing here is broken — the entry was a pullback trade and the level is doing exactly what a resistance level does — but a second rejection at 65 would change the character of it, and the retail earnings landing this week (Home Depot, Walmart, Target) speak directly to the consumer-credit side of the thesis.</span><span class="w-when">IBKR · Yahoo Finance · 2026-08-17</span></div><div class="ed-w"><span class="w-tag low">Noise</span><span><b>GOOG</b> — <b>GOOG −0.61% to 341.45 — drifting with the tape, not against it</b>. A fifth session without a story of its own; it fell slightly less than the Nasdaq. Still the strongest position in the book at +4.78% on entry and 0.77R, and now clearly below its gamma flip near 344 — the mechanic that dampened moves is no longer helping.</span><span class="w-when">IBKR · Phoenix engine · 2026-08-17</span></div><div class="ed-w"><span class="w-tag low">Noise</span><span><b>INTC</b> — <b>INTC +1.0% to 103.49, recovering part of Friday's giveback</b>. A bounce with no news attached — chips traded better while the broad tape fell, which reads as position-squaring rather than the BofA CPU thesis being re-litigated. Gabriel is −1.95% on entry at −0.21R, stop 8.3% below; Aldemar −2.19% at −0.09R, his 81.10 stop 27.6% below. Its own put wall at 105 is still overhead: Monday's high of 105.97 poked through and failed to hold, so that level is now resistance rather than support until it closes back above.</span><span class="w-when">IBKR · Phoenix engine · 2026-08-17</span></div></div><p class="ed-body"><b>Signal</b> changes the thesis, the levels or the size — earnings, a regulator with teeth, M&A, a ruling with a revenue line attached. Everything else is filed as noise on purpose; a real signal survives skepticism.</p></div><div class="ed-sec"><div class="ed-k"><span>The war · US–Iran</span><span class="ed-n">MoU expired · no extension · Hormuz shut</span></div><h2 class="ed-hl sm">The negotiation window closed and nobody asked for more time</h2><div><div class="ed-w"><span class="w-tag war-talks">TALKS</span><span><b>The 60-day memorandum of understanding expired Monday; neither side moved to extend it</b>. The framework that had capped the conflict since mid-June is simply gone. Both sides had accused each other of violating it for weeks, and its lapse removes the structure that oil had been pricing an extension of.</span><span class="w-when">Al Jazeera · CBS · 2026-08-17</span></div><div class="ed-w"><span class="w-tag war-politics">POLITICS</span><span><b>Trump threatens to bomb Oman "if it gets in the way" of reopening the strait</b>. Oman is the mediator, a US ally, and was itself hit by Iranian drones earlier this year. Threatening the one channel both sides still use is the clearest signal yet that Washington has stopped treating a negotiated reopening as the base case.</span><span class="w-when">Washington Post · Euronews · 2026-08-17</span></div><div class="ed-w"><span class="w-tag war-politics">POLITICS</span><span><b>"White flag of surrender" — and no timetable: "I'm not in a hurry"</b>. Trump also claimed direct contact with the IRGC. Iran's foreign minister Araghchi answered that Tehran has "not yet made a decision to restart negotiations" and that Hormuz "will remain Iranian". Two maximalist positions with no process left between them.</span><span class="w-when">Al Jazeera · 2026-08-17</span></div><div class="ed-w"><span class="w-tag war-oil">OIL</span><span><b>Brent takes $90; WTI closes 84.50, up 2.55%</b>. The premium that spent last week rebuilding got its confirmation. This is the third consecutive higher close and the level that starts feeding the inflation path again rather than merely tracking headlines.</span><span class="w-when">Trading Economics · Yahoo Finance · 2026-08-17</span></div></div><p class="ed-body">The transmission is oil → inflation → the regime call, and Monday reversed the direction it had been running all last week. Two cooling prints had pulled CPI y/y to 3.3 against the 2.5 floor — clearing by 0.8 — and pushed September to a hold; crude at these levels pushes that gate back open and keeps Policy tightening alive rather than expiring. The 30-year at 5.31% is the same message from the bond market: energy and deficits, not policy. For the book this cuts both ways — a steeper curve is the BAC thesis, while higher input costs and a 6.6% jump in the VIX are the tax on everything else. The next thing that would change the read is any signal that talks restart; there is currently no scheduled channel for that to happen through.</p></div><div class="ed-sec"><div class="ed-k"><span>The world &amp; the market</span><span class="ed-n">in terms of news</span></div><h2 class="ed-hl sm">Yields at 2007 highs, oil at $90, and a market that finally noticed</h2><div><div class="ed-w"><span class="w-tag low">RATES</span><span><b>The 30-year hits 5.31%, its highest since June 2007; the 10-year climbs to 4.72%</b>. The long end keeps selling off through cooler inflation prints, which makes this a fiscal-and-energy verdict rather than a policy one. It is a direct headwind for long-duration equity and the cleanest support for owning a lender.</span><span class="w-when">Yahoo Finance · STL News · 2026-08-17</span></div><div class="ed-w"><span class="w-tag low">TAPE</span><span><b>S&amp;P −0.45% to 7,750.48, Nasdaq −0.30%, Dow −0.46%; VIX +6.6% to 15.19</b>. The first session in three weeks where volatility rose meaningfully. Still only 0.6% off Thursday's record, so this is repricing risk rather than exiting it — but the VIX had been under 15 for a fortnight, and that complacency just ended.</span><span class="w-when">STL News · Yahoo Finance · 2026-08-17</span></div><div class="ed-w"><span class="w-tag low">ENERGY</span><span><b>Crude's third straight higher close as the Hormuz deadline passes without a deal</b>. Energy was the one place to be. With the strait shut and no negotiating framework left, the supply question no longer has a scheduled resolution date attached to it.</span><span class="w-when">Trading Economics · 2026-08-17</span></div><div class="ed-w"><span class="w-tag low">EARNINGS</span><span><b>Home Depot, Walmart and Target report this week</b>. They land straight after a −0.6% retail sales print and a sentiment reading of 51. Guidance is the read-through on whether the consumer is genuinely cracking — which matters more to the BAC credit thesis than any rate move this week.</span><span class="w-when">STL News · 2026-08-17</span></div></div><p class="ed-body"><b>On deck.</b> <b>Monthly OPEX</b> in 3 days — Monthly expiry. Dealer gamma rolls off and the levels reset on Monday.</p></div><div class="ed-jump"><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Markets</a><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Screeners</a><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Trade</a><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Portfolio</a></div><div class="ed-colophon">Phoenix OS v1.0 · not investment advice</div></div></div></body></html>
