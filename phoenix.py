@@ -2562,6 +2562,29 @@ def stock_engine_v2(stock_data, universe, quarterly=None, daily_ret=None,
                      + (3 if c["breakout"] else 0) - ext_pen)
             c["trade_score"] = round(max(0, min(100, score)))
             c["ext_pct"] = round(c["_ext"], 1)
+            # PUBLISH THE PARTS. Every component above was computed and then
+            # thrown away, so the app could only show a bare number. The ticker
+            # page now explains a score instead of asserting it.
+            c["trade_parts"] = [
+                {"k": "Relative strength vs market", "w": tw["rs_mkt"],
+                 "s": round(rs_mkt), "why": f"4-week return ranks {round(rs_mkt)}/100 in the pool"},
+                {"k": "Volume surge", "w": tw["vol_surge"], "s": round(vol_p),
+                 "why": f"surge {c.get('surge', 0)}% vs the 60-day average"},
+                {"k": "Base tightness", "w": tw["tightness"], "s": round(tightness),
+                 "why": f"{c['ext_pct']}% extended from the base"},
+                {"k": "12-month RS", "w": tw["rs12"], "s": round(rs12),
+                 "why": f"12-week return ranks {round(rs12)}/100"},
+                {"k": "Base quality", "w": tw["base_quality"], "s": round(bq),
+                 "why": "shape and depth of the base"},
+                {"k": "Trigger proximity", "w": tw["trigger_prox"], "s": round(trig),
+                 "why": "distance to the entry trigger"},
+            ]
+            if c.get("breakout"):
+                c["trade_parts"].append({"k": "Breakout bonus", "w": 0.0, "s": 100,
+                                         "why": "+3 flat, breaking out today"})
+            if ext_pen > 0:
+                c["trade_parts"].append({"k": "Extension penalty", "w": 0.0, "s": 0,
+                                         "why": f"\u2212{ext_pen:.1f} for being {c['ext_pct']}% extended"})
             for k in list(c.keys()):
                 if k.startswith("_"):
                     del c[k]
@@ -2600,6 +2623,18 @@ def stock_engine_v2(stock_data, universe, quarterly=None, daily_ret=None,
                      + rs12 * iw["rs12"])
             c["invest_score"] = round(max(0, min(100, score)))
             c["fund_score"] = round(fund)
+            c["invest_parts"] = [
+                {"k": "Fundamentals composite", "w": iw["fundamentals"], "s": round(fund),
+                 "why": f"rev {c.get('rev_yoy', 0):+.1f}% YoY, ROE {c.get('roe', 0):.1f}%"},
+                {"k": "Long relative strength", "w": iw["long_rs"], "s": round(long_rs),
+                 "why": "52-week return vs the pool"},
+                {"k": "Durability", "w": iw["durability"], "s": round(dur),
+                 "why": f"{c.get('weeks_in_stage2', 0)} weeks in stage 2"},
+                {"k": "Drawdown resilience", "w": iw["dd_resilience"], "s": round(ddr),
+                 "why": "shallower falls than the pool"},
+                {"k": "12-month RS", "w": iw["rs12"], "s": round(rs12),
+                 "why": "12-week return vs the pool"},
+            ]
             c["max_dd_pct"] = round(-c["_mdd"], 1)
             for k in list(c.keys()):
                 if k.startswith("_"):
