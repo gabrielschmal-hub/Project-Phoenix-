@@ -1,5 +1,5 @@
 {
- "asof": "2026-08-17 19:46 UTC",
+ "asof": "2026-08-18 05:31 UTC",
  "regime": "POLICY_TIGHTENING",
  "confidence": 36.5,
  "confidence_note": "regime score, not a calibrated probability (A4)",
@@ -8,26 +8,26 @@
  },
  "secondary_tag": "INFLATIONARY",
  "inputs": {
-  "wti_12m": 32.6,
-  "wti_3m": -12.62,
-  "wti_vs_2yr": 18.25,
+  "wti_12m": 31.21,
+  "wti_3m": -21.84,
+  "wti_vs_2yr": 15.58,
   "cpi_yoy": 3.3,
   "cpi_chg_3m": -0.87,
-  "spx_3m": 3.72,
-  "spx_1m": 4.58,
-  "dd": -0.44,
-  "trail_dd": -0.44,
-  "spx_off_low": 3.5,
+  "spx_3m": 5.09,
+  "spx_1m": 4.4,
+  "dd": 0.0,
+  "trail_dd": 0.0,
+  "spx_off_low": 5.04,
   "fresh_high": true,
-  "us02_3m": 21.0,
-  "real_3m": 41.0,
-  "vix": 15.26,
-  "vix_3m_chg": -8.62,
-  "hy": 270.0
+  "us02_3m": 30.0,
+  "real_3m": 46.0,
+  "vix": 14.25,
+  "vix_3m_chg": -22.68,
+  "hy": 273.0
  },
  "explain": {
   "regime": "POLICY_TIGHTENING",
-  "held_weeks": 6,
+  "held_weeks": 5,
   "since": "2026-07-13",
   "drivers": [
    {
@@ -40,31 +40,31 @@
     "ok": true
    },
    {
+    "key": "us02_3m",
+    "label": "2Y yield 3m change (bp)",
+    "value": 30.0,
+    "op": ">",
+    "threshold": 40,
+    "clear_by": -10.0,
+    "ok": false
+   },
+   {
     "key": "dd",
     "label": "Drawdown",
-    "value": -0.44,
+    "value": 0.0,
     "op": ">",
     "threshold": -12,
-    "clear_by": 11.56,
+    "clear_by": 12.0,
     "ok": true
    },
    {
     "key": "real_3m",
     "label": "Real 10Y 3m change (bp)",
-    "value": 41.0,
+    "value": 46.0,
     "op": ">",
     "threshold": 25,
-    "clear_by": 16.0,
+    "clear_by": 21.0,
     "ok": true
-   },
-   {
-    "key": "us02_3m",
-    "label": "2Y yield 3m change (bp)",
-    "value": 21.0,
-    "op": ">",
-    "threshold": 40,
-    "clear_by": -19.0,
-    "ok": false
    }
   ],
   "watch": [
@@ -77,16 +77,16 @@
    },
    {
     "if": "Drawdown falls below -12",
-    "now": -0.44,
+    "now": 0.0,
     "threshold": -12,
-    "distance": 11.56,
+    "distance": 12.0,
     "then": "POLICY_TIGHTENING no longer qualifies"
    },
    {
     "if": "Real 10Y 3m change (bp) falls below 25",
-    "now": 41.0,
+    "now": 46.0,
     "threshold": 25,
-    "distance": 16.0,
+    "distance": 21.0,
     "then": "POLICY_TIGHTENING no longer qualifies"
    }
   ],
