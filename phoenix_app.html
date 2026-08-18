@@ -676,7 +676,39 @@
   .w-card-n{font-family:var(--mono);font-size:11.5px;color:var(--inkFade);}
   .w-card-b{padding:14px 16px;}
   /* hero */
-  .w-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:4px 2px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+  .w-chips{display:flex;gap:7px;flex-wrap:wrap;margin:9px 0 2px}
+.w-chip{font:12px/1 var(--serif);padding:7px 12px;border-radius:6px;border:1px solid var(--line2);
+  background:var(--card2);color:var(--inkMed);cursor:pointer}
+.w-chip:hover{border-color:var(--gold);color:var(--gold)}
+.w-chip b{font:400 10.5px/1 var(--mono);color:var(--inkFade);margin-right:6px}
+.w-chip.wl{border-color:var(--gold);color:var(--gold)}
+.w-chip.wl.on{background:var(--gold);color:#FFFDF9}
+.w-name h1{font-size:34px!important}
+.w-facts .v{font-size:23px!important}
+.w-score{font-size:66px!important}
+/* score explanation */
+.spg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:900px){.spg{grid-template-columns:1fr}}
+.spc{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.spc .h{display:flex;align-items:baseline;gap:9px;padding-bottom:8px;margin-bottom:6px;
+  border-bottom:1px solid var(--line)}
+.spc .h b{font:400 16px/1.2 var(--serif)}
+.spc .h .t{margin-left:auto;font:700 22px/1 var(--mono)}
+.spr{display:flex;align-items:center;gap:9px;padding:6px 0;font:12px/1.3 var(--serif);flex-wrap:wrap}
+.spr .n{flex:0 0 38%}
+.spr .w{font:10px/1 var(--mono);color:var(--inkFade);width:30px;text-align:right}
+.spr .b{flex:1;min-width:44px;height:5px;background:var(--line);border-radius:3px;overflow:hidden}
+.spr .b i{display:block;height:100%}
+.spr .s{font:700 12px/1 var(--mono);width:24px;text-align:right}
+.spr .y{flex:0 0 100%;font:10.5px/1.4 var(--mono);color:var(--inkGhost);margin-top:-2px}
+/* interactive quarters */
+.qrow{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.qbtn{font:9.5px/1 var(--mono);padding:4px 7px;border-radius:4px;border:1px solid var(--line2);
+  background:transparent;color:var(--inkFade);cursor:pointer}
+.qbtn.on{background:var(--gold);border-color:var(--gold);color:#FFFDF9}
+.qread{font:11.5px/1.5 var(--mono);color:var(--inkMed);margin-top:6px;min-height:16px}
+.qread b{color:var(--ink);font-size:13px}
+.w-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:4px 2px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
   .w-hero-l{flex:1;min-width:250px;}
   .w-name{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
   .w-name h1{font-size:34px;font-weight:700;letter-spacing:-.5px;margin:0;line-height:1.05;}
@@ -1180,7 +1212,7 @@ body.px-detail{overflow:hidden!important}
 body.px-detail #pxnav,body.px-detail #pxstatus{filter:blur(2px);opacity:.5;pointer-events:none}
 body.px-detail .app::after{content:"";position:fixed;inset:0;z-index:410;background:rgba(6,10,16,.55);
   backdrop-filter:blur(11px);-webkit-backdrop-filter:blur(11px)}
-body.px-detail .dp-wrap{position:fixed!important;inset:4vh 3vw 3vh!important;z-index:420!important;
+body.px-detail .dp-wrap{position:fixed!important;inset:2vh 1.2vw 1.5vh!important;z-index:420!important;
   overflow-y:auto!important;background:var(--card2)!important;border:1px solid var(--line2);
   border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.55);padding:0 0 18px!important}
 html.light body.px-detail .app::after{background:rgba(250,246,238,.5)}
@@ -4258,7 +4290,67 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         '\u2014 it appears after the next engine run.</div>';
     });
   }
+  // tap a quarter (bar OR label) -> exact figure and the change on the quarter
   document.addEventListener("click",function(e){
+    var fb=e.target.closest?e.target.closest(".fbcol"):null;
+    if(!fb) return;
+    var gid=fb.getAttribute("data-fb"), i=+fb.getAttribute("data-i");
+    var wrap=document.querySelector('.fbwrap[data-fbid="'+gid+'"]'); if(!wrap) return;
+    var P; try{ P=JSON.parse(wrap.getAttribute("data-fbp")); }catch(err){ return; }
+    var v=P.v[i], prev=i>0?P.v[i-1]:null;
+    function f(x){ return P.pct ? ((x>=0?"+":"\u2212")+Math.abs(x).toFixed(1)+"%")
+      : ((x<0?"\u2212":"")+"$"+Math.abs(x).toFixed(Math.abs(x)>=100?0:2)+"B"); }
+    var d="";
+    if(prev!=null&&prev!==0){
+      var ch=P.pct?(v-prev):((v/prev-1)*100), pos=ch>=0;
+      d=' <span style="color:'+(pos?"var(--green)":"var(--red)")+'">'+(pos?"+":"\u2212")+
+        Math.abs(ch).toFixed(1)+(P.pct?" pts":"%")+' vs prior quarter</span>';
+    }
+    var out=document.getElementById("qr_"+gid);
+    if(out) out.innerHTML=P.q[i]+" \u2192 <b>"+f(v)+"</b>"+d;
+    wrap.querySelectorAll(".fbcol").forEach(function(c){
+      c.style.opacity=(+c.getAttribute("data-i")===i)?"1":".55"; });
+  });
+
+  // ticker-page chips: industry / sector / exchange / watchlist
+  document.addEventListener("click",function(e){
+    if(!e.target.closest) return;
+    var ci=e.target.closest("[data-dpind]"), cs2=e.target.closest("[data-dpsec]"),
+        ce=e.target.closest("[data-dpexch]"), cw=e.target.closest("[data-dpwatch]");
+    if(ci||cs2){
+      NV_L=ci?{t:"industry",k:ci.getAttribute("data-dpind")}
+             :{t:"sector",k:cs2.getAttribute("data-dpsec")};
+      try{ dpReturnTo=null; trBackFromDetail(); }catch(err){}
+      try{ go("markets"); }catch(err){}
+      setTimeout(function(){ nvInit(); nvDraw();
+        var w=document.getElementById("nvWrap");
+        if(w&&w.scrollIntoView) w.scrollIntoView({behavior:"smooth",block:"center"});
+      },280);
+      return;
+    }
+    if(ce){
+      // exchange opens the matching instrument on the macro chart
+      var x=(ce.getAttribute("data-dpexch")||"").toUpperCase();
+      var ins=(x.indexOf("NAS")>=0||x==="NMS")?"NDX":"SPX";
+      try{ dpReturnTo=null; trBackFromDetail(); }catch(err){}
+      try{ go("markets"); }catch(err){}
+      setTimeout(function(){ try{ mkSetInstrument(ins); }catch(err){}
+        var h=document.getElementById("spxPlot");
+        if(h&&h.scrollIntoView) h.scrollIntoView({behavior:"smooth",block:"center"});
+      },280);
+      return;
+    }
+    if(cw){
+      var tkw=cw.getAttribute("data-dpwatch");
+      try{
+        var L=JSON.parse(localStorage.getItem("px_watch")||"[]");
+        var i=L.indexOf(tkw);
+        if(i>=0){ L.splice(i,1); cw.classList.remove("on"); }
+        else { L.push(tkw); cw.classList.add("on"); }
+        localStorage.setItem("px_watch",JSON.stringify(L));
+      }catch(err){ cw.classList.toggle("on"); }
+      return;
+    }
     var g=e.target.closest?e.target.closest("[data-nvgo]"):null;
     if(g){ NV_L=JSON.parse(g.getAttribute("data-nvgo"));
       // fired from a ticker page: leave the detail view and show the navigator
@@ -8959,6 +9051,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     '</div>';
   }
 
+  var dpIndustry="",dpSector="",dpExch="";
   var dpChartMiss={};     // {tk: true} — fetched and genuinely absent
   var dpFinCache={};      // {tk: {quarters:[...], mcap_B, pe, name, sector}}
   var dpFinMiss={};       // {tk: true}
@@ -9488,7 +9581,30 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
           '<div class="w-hero">'+
             '<div class="w-hero-l">'+
               '<div class="w-name"><h1>'+(name||tk)+'</h1><span class="tkr">'+tk+'</span>'+statusChip+fdBadge+'</div>'+
-              '<div class="w-sect">'+[(p.industry||t.industry||""),(p.sector||"")].filter(Boolean).join(" \u00b7 ")+'</div>'+
+              // clickable path chips. Membership is resolved from the detail
+              // bundle, then the screener row, then rotation_nav — the bundle
+              // only covers ~65 names, so without the fallbacks most tickers
+              // showed no industry or sector at all.
+              (function(){
+                var _s=(scrData||[]).find(function(x){return x.ticker===tk;})||{};
+                var _n=(NV&&NV.tickers&&NV.tickers[tk])||{};
+                dpIndustry=p.industry||afp.industry||t.industry||_s.industry||_n.i||"";
+                dpSector  =p.sector||afp.sector||_s.sector||_n.s||"";
+                // exchange: chart meta first, then the bundle profile, then the
+                // ledger — meta is only populated once daily bars have loaded
+                dpExch    =meta.exch||p.exchange||afp.exchange||_s.exchange||"";
+                return "";
+              })()+
+              '<div class="w-chips">'+
+                (dpIndustry?'<button class="w-chip" data-dpind="'+
+                   String(dpIndustry).replace(/"/g,"&quot;")+'"><b>industry</b>'+
+                   dpIndustry+'</button>':'')+
+                (dpSector?'<button class="w-chip" data-dpsec="'+
+                   String(dpSector).replace(/"/g,"&quot;")+'"><b>sector</b>'+dpSector+'</button>':'')+
+                (dpExch?'<button class="w-chip" data-dpexch="'+dpExch+'"><b>exchange</b>'+
+                   dpExch+'</button>':'')+
+                '<button class="w-chip wl" data-dpwatch="'+tk+'">\u2606 Watchlist</button>'+
+              '</div>'+
               '<div class="w-facts">'+
                 '<div class="w-fact"><div class="k">Price</div><div class="v" id="dpPx">'+(cur!=null?fmtN(cur):"\u2014")+' <span class="chg" id="dpChg" style="font-size:12px;font-weight:400">'+chgHtml+'</span></div></div>'+
                 '<div class="w-fact"><div class="k">Market cap</div><div class="v">'+(q.mcap_B!=null?capFmt(q.mcap_B):"\u2014")+'</div></div>'+
@@ -9499,6 +9615,9 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
             '</div>'+
             '<div class="w-hero-r" id="dpScoreBox"></div>'+
           '</div>'+
+          '<div class="w-card" id="dpScoreWhyTile" style="display:none">'+
+            '<div class="w-card-h"><span class="w-card-t">How it scored</span></div>'+
+            '<div class="w-card-b" id="dpScoreWhy"></div></div>'+
           // PLAN — collapsible, at the top. A STUDY record has no plan: it is a
           // ticker you are looking at, not a position, so it offers to become one.
           (t.status==="study"
@@ -9563,7 +9682,17 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     // score box: Phoenix's own two-score read, in Winston's hero position
     (function(){
       var box=document.getElementById("dpScoreBox"); if(!box) return;
-      var s=(scrData||[]).find(function(x){return x.ticker===tk;})||{};
+      // the row can live in any of the three books — the blend list is
+      // filtered, so looking only there left the score grid empty
+      function _findRow(t2){
+        var pools=[scrData||[], (scrV2&&scrV2.trade)||[], (scrV2&&scrV2.invest)||[]];
+        for(var i=0;i<pools.length;i++){
+          var r=pools[i].find(function(x){return x.ticker===t2;});
+          if(r) return r;
+        }
+        return {};
+      }
+      var s=_findRow(tk);
       var tS=s.trade_score, iS=s.invest_score;
       var best=Math.max(tS||0,iS||0);
       var col=best>=70?"var(--green)":best>=50?"var(--gold)":best>0?"var(--amber)":"var(--inkFade)";
@@ -9579,6 +9708,37 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         '<div style="font-family:var(--mono);font-size:11.5px;color:var(--inkFade);margin-top:7px">'+
           'Trade '+(tS!=null?tS:"\u2014")+' \u00b7 Invest '+(iS!=null?iS:"\u2014")+'</div>'+
         '<div class="w-verdict">'+verdict+'</div>';
+      // WHY that score — the engine now publishes every pillar, so the page
+      // explains the number instead of asserting it.
+      var host=document.getElementById("dpScoreWhy");
+      if(host){
+        function card(title,total,parts,col){
+          if(!parts||!parts.length) return "";
+          var rows=parts.map(function(p){
+            var c=p.s>=60?"var(--green)":p.s>=40?"var(--amber)":"var(--red)";
+            return '<div class="spr"><span class="n">'+escW(p.k)+'</span>'+
+              '<span class="w">'+(p.w?Math.round(p.w*100)+"%":"flat")+'</span>'+
+              '<span class="b"><i style="width:'+Math.max(2,p.s)+'%;background:'+c+'"></i></span>'+
+              '<span class="s" style="color:'+c+'">'+p.s+'</span>'+
+              '<span class="y">'+escW(p.why||"")+'</span></div>';
+          }).join("");
+          return '<div class="spc"><div class="h"><b>'+title+'</b>'+
+            '<span class="t" style="color:'+col+'">'+(total!=null?total:"\u2014")+'</span></div>'+rows+'</div>';
+        }
+        var tp=s.trade_parts, ip=s.invest_parts;
+        if((tp&&tp.length)||(ip&&ip.length)){
+          host.innerHTML='<div class="spg">'+
+            card("Trade engine",tS,tp,"var(--gold)")+
+            card("Invest engine",iS,ip,"var(--gold)")+'</div>'+
+            '<div class="ed-note" style="margin-top:9px">Phoenix\u2019s own weights '+
+            '(<span style="font-family:var(--mono)">trade_weights</span> / '+
+            '<span style="font-family:var(--mono)">invest_weights</span>). '+
+            '<b>validated: false</b> \u2014 not yet through the backtest.</div>';
+          host.parentNode.style.display="";
+        } else {
+          host.parentNode.style.display="none";
+        }
+      }
     })();
     // plan dropdown
     (function(){
@@ -9719,8 +9879,11 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   // Quarterly financials with small inline bar charts — revenue trend and margin
   // trend per quarter, which is what you actually read at a glance.
   // ---- Winston-style financials: big metrics + per-quarter bars ----
+  // one id per bar group so a tap can report the exact quarter
+  var _FBID=0;
   function _finBars(rows, key, opts){
     opts=opts||{};
+    var gid="fb"+(++_FBID);
     var vals=rows.filter(function(r){return r[key]!=null;});
     if(vals.length<2) return "";
     var arr=vals.map(function(r){return r[key];});
@@ -9736,14 +9899,23 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       var pos=v>=0;
       var c=opts.color||(pos?"var(--green)":"var(--red)");
       if(opts.growthKey){ var g=r[opts.growthKey]; c=g==null?"var(--inkGhost)":(g>=0?"var(--green)":"var(--red)"); }
-      return '<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:'+(h+16)+'px">'+
+      var qi=vals.indexOf(r);
+      return '<div class="fbcol" data-fb="'+gid+'" data-i="'+qi+'" style="flex:1;display:flex;'+
+             'flex-direction:column;justify-content:flex-end;height:'+(h+16)+'px;cursor:pointer">'+
              '<div class="finbar-v">'+fmtV(v)+'</div>'+
              '<div style="height:'+bh+'px;background:'+c+';opacity:'+(opts.op||0.9)+';border-radius:3px 3px 0 0"></div></div>';
     }).join("");
-    var labs=vals.map(function(r){return '<div class="finbar-q">'+(r.q||"").slice(2,7)+'</div>';}).join("");
+    // the payload a tap needs: values, labels and how to format them
+    var payload=JSON.stringify({v:arr,q:vals.map(function(r){return (r.q||"").slice(0,7);}),
+                                pct:!!opts.pct});
+    var labs=vals.map(function(r,i){
+      return '<div class="finbar-q fbcol" data-fb="'+gid+'" data-i="'+i+'" style="cursor:pointer">'+
+             (r.q||"").slice(2,7)+'</div>';}).join("");
     return '<div class="fin-sub">'+(opts.title||key)+'</div>'+
+           '<div class="fbwrap" data-fbid="'+gid+'" data-fbp=\''+payload.replace(/'/g,"&#39;")+'\'>'+
            '<div style="display:flex;align-items:flex-end;gap:5px;height:'+(h+16)+'px;margin-bottom:4px">'+bars+'</div>'+
-           (opts.labels!==false?'<div style="display:flex;gap:5px">'+labs+'</div>':'');
+           (opts.labels!==false?'<div style="display:flex;gap:5px">'+labs+'</div>':'')+
+           '<div class="qread" id="qr_'+gid+'"></div></div>';
   }
 
   function dpFin(e, tk){
