@@ -641,7 +641,9 @@
   .dp-stat .v{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink);}
   /* chart-first body: chart is the hero, levels panel to its right */
   .dp-body{flex:1;display:block;padding:14px 16px 60px;overflow-y:auto;overflow-x:hidden;min-height:0;}
-  .dp-col{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+  /* was max-width:1000px — that cap is why the page never used the screen and
+     why the fourth financials card was being squeezed off the edge */
+  .dp-col{max-width:1720px;margin:0 auto;display:flex;flex-direction:column;gap:14px;min-width:0;}
   .dp-left{display:flex;flex-direction:column;gap:12px;align-self:start;}
   .dp-chart-tile{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:10px 12px;display:flex;flex-direction:column;flex-shrink:0;}
   .dp-chart-body{position:relative;height:320px;min-height:320px;flex:0 0 320px;width:100%;}
@@ -704,12 +706,19 @@
 .spr .s{font:700 12px/1 var(--mono);width:24px;text-align:right}
 .spr .y{flex:0 0 100%;font:10.5px/1.4 var(--mono);color:var(--inkGhost);margin-top:-2px}
 /* interactive quarters */
-.fgrid2{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-@media(max-width:1180px){.fgrid2{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:660px){.fgrid2{grid-template-columns:1fr}}
+.fgrid2{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media(max-width:1180px){.fgrid2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:660px){.fgrid2{grid-template-columns:minmax(0,1fr)}}
+.fcard2{min-width:0;overflow:hidden}
+.fmet,.fmet-r,.fmet-l,.qread{min-width:0}
+.fmet-v{white-space:nowrap}
+.qread{overflow-wrap:anywhere}
 /* the narrower column needs the bars to give way first */
-.fmet-bars{width:104px}
-@media(max-width:1400px){.fmet-bars{width:84px}}
+.fmet-bars{width:96px;min-width:0}
+@media(max-width:1560px){.fmet-bars{width:76px}}
+@media(max-width:1320px){.fmet-bars{width:60px}}
+.qrow{gap:4px}
+.qbtn{padding:3px 6px;font-size:9px}
 .fcard2{background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:14px 16px 12px}
 .fcard2 h3{font:400 19px/1.2 var(--serif);margin:0 0 3px}
 .fcap{font:italic 11.5px/1.4 var(--serif);color:var(--inkFade);margin-bottom:10px}
