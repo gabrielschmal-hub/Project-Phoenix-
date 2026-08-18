@@ -702,6 +702,19 @@
 .spr .s{font:700 12px/1 var(--mono);width:24px;text-align:right}
 .spr .y{flex:0 0 100%;font:10.5px/1.4 var(--mono);color:var(--inkGhost);margin-top:-2px}
 /* interactive quarters */
+.fgrid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.fcard2{background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:14px 16px 12px}
+.fcard2 h3{font:400 19px/1.2 var(--serif);margin:0 0 3px}
+.fcap{font:italic 11.5px/1.4 var(--serif);color:var(--inkFade);margin-bottom:10px}
+.fmet{padding:11px 0;border-top:1px solid var(--line)}
+.fmet:first-of-type{border-top:none;padding-top:2px}
+.fmet-l{font:12.5px/1 var(--serif);color:var(--inkMed)}
+.fmet-r{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-top:5px}
+.fmet-v{font:700 24px/1 var(--mono)}
+.fmet-v.pos{color:var(--green)}.fmet-v.neg{color:var(--red)}
+.fmet-bars{display:flex;gap:2px;width:140px;flex:none;align-items:flex-end}
+.fmb{display:block;cursor:pointer}
+.fmet-s{font:11px/1.4 var(--serif);color:var(--inkFade);margin-top:5px}
 .qrow{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
 .qbtn{font:9.5px/1 var(--mono);padding:4px 7px;border-radius:4px;border:1px solid var(--line2);
   background:transparent;color:var(--inkFade);cursor:pointer}
@@ -4292,6 +4305,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   }
   // tap a quarter (bar OR label) -> exact figure and the change on the quarter
   document.addEventListener("click",function(e){
+    var f2=e.target.closest?e.target.closest(".fbcol2"):null;
+    if(f2){ _finShow(f2.getAttribute("data-fm"), +f2.getAttribute("data-i")); return; }
     var fb=e.target.closest?e.target.closest(".fbcol"):null;
     if(!fb) return;
     var gid=fb.getAttribute("data-fb"), i=+fb.getAttribute("data-i");
@@ -9918,74 +9933,169 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
            '<div class="qread" id="qr_'+gid+'"></div></div>';
   }
 
-  function dpFin(e, tk){
-    var fin=e.financials||[], el=document.getElementById("dpFin"); if(!el) return;
-    if(!fin.length){
-      el.innerHTML='<div style="font-family:var(--mono);font-size:11.5px;color:var(--inkFade);padding:10px 4px;line-height:1.7">'+
-        (dpFinMiss[tk]
-          ? (tk||"This ticker")+' has no quarterly data on file yet.<br>The engine auto-backfills the biggest missing names each daily run.'
-          : 'Loading financials\u2026')+'</div>';
-      return;
+  // ============ FINANCIALS — four cards, every metric interactive ==========
+  // Replaces the old single wall of bars. Each card answers one question, each
+  // metric carries its own quarter chips, and tapping a chip or a bar names the
+  // exact figure and the change on the quarter. Units follow the company: a
+  // $30m business reads in millions, not a rounded-to-zero billion.
+  var _FMID = 0;
+  function _finMoney(bn){            // values arrive in $B
+    if (bn == null) return "\u2014";
+    var x = bn * 1e9, a = Math.abs(x);
+    var u = a >= 1e9 ? "B" : a >= 1e6 ? "M" : a >= 1e3 ? "K" : "";
+    var d = { B: 1e9, M: 1e6, K: 1e3, "": 1 }[u], v = x / d;
+    var dp = (u === "B" && Math.abs(v) < 100) ? 2 : (Math.abs(v) >= 100 ? 0 : 1);
+    return (v < 0 ? "\u2212" : "") + "$" + Math.abs(v).toFixed(dp) + u;
+  }
+  function _finPct(v, dp) {
+    return v == null ? "\u2014"
+      : (v >= 0 ? "+" : "\u2212") + Math.abs(v).toFixed(dp == null ? 1 : dp) + "%";
+  }
+  function _finQlab(q) {
+    if (!q) return "";
+    var p = String(q).split("-"), m = p[1];
+    return ({ "03": "Q1", "06": "Q2", "09": "Q3", "12": "Q4" }[m] || m) + " " + (p[0] || "").slice(2);
+  }
+  function _finMetric(label, rows, key, opts) {
+    opts = opts || {};
+    var vals = rows.map(function (r) { return r[key] == null ? null : r[key]; });
+    if (!vals.some(function (x) { return x != null; })) return "";
+    var mid = "fm" + (++_FMID);
+    var isPct = !!opts.pct;
+    var fmt = isPct ? function (x) { return _finPct(x, opts.dp); }
+      : (opts.raw ? function (x) { return x == null ? "\u2014" : x.toFixed(2); } : _finMoney);
+    // bars, sharing a zero baseline so sign is visible
+    var fin = vals.filter(function (x) { return x != null; });
+    var lo = Math.min.apply(null, fin.concat([0])), hi = Math.max.apply(null, fin.concat([0]));
+    var rng = (hi - lo) || 1, H = 36;
+    var zero = H - (0 - lo) / rng * H;
+    var bars = vals.map(function (x, i) {
+      if (x == null) return '<span class="fmb" style="flex:1"></span>';
+      var y = H - (x - lo) / rng * H;
+      var top = x >= 0 ? y : zero, ht = Math.max(2, Math.abs(zero - y));
+      var good = opts.lowerIsBetter ? (x < 0) : (x >= 0);
+      var c = good ? "var(--green)" : "var(--red)";
+      return '<span class="fmb fbcol2" data-fm="' + mid + '" data-i="' + i + '" ' +
+        'style="flex:1;height:' + H + 'px;position:relative">' +
+        '<i style="position:absolute;left:1px;right:1px;top:' + top.toFixed(1) + 'px;height:' +
+        ht.toFixed(1) + 'px;background:' + c + ';opacity:.85;border-radius:1px"></i></span>';
+    }).join("");
+    var chips = rows.map(function (r, i) {
+      return '<button class="qbtn fbcol2" data-fm="' + mid + '" data-i="' + i + '">' +
+        _finQlab(r.q) + '</button>';
+    }).join("");
+    var payload = JSON.stringify({
+      v: vals, q: rows.map(function (r) { return _finQlab(r.q); }),
+      pct: isPct, raw: !!opts.raw, dp: opts.dp || 1
+    }).replace(/'/g, "&#39;");
+    var lastIdx = -1;
+    for (var i = vals.length - 1; i >= 0; i--) { if (vals[i] != null) { lastIdx = i; break; } }
+    var headline = lastIdx >= 0 ? fmt(vals[lastIdx]) : "\u2014";
+    var tone = "";
+    if (lastIdx >= 0 && vals[lastIdx] != null) {
+      var good2 = opts.lowerIsBetter ? (vals[lastIdx] < (opts.goodBelow == null ? 1 : opts.goodBelow))
+        : (vals[lastIdx] >= 0);
+      tone = good2 ? "pos" : "neg";
     }
-    function col(v){ return v==null?"var(--inkFade)":(v>=0?"var(--green)":"var(--red)"); }
-    function pct(v,d){ return v==null?"\u2014":(v>=0?"+":"")+v.toFixed(d==null?0:d)+"%"; }
-    var last=fin[fin.length-1]||{};
-
-    // HEADLINE METRIC CARDS — the numbers worth checking first, big and clear
-    var cards=[
-      ["Revenue", last.revenue_B!=null?"$"+last.revenue_B.toFixed(2)+"B":"\u2014", last.rev_yoy!=null?pct(last.rev_yoy,1)+" YoY":"", col(last.rev_yoy)],
-      ["Net Margin", pct(last.net_margin,1), last.net_margin>=15?"strong":last.net_margin>=0?"thin":"negative", col(last.net_margin)],
-      ["ROE", pct(last.roe,1), last.roe>=15?"excellent":last.roe>=0?"positive":"negative", col(last.roe)],
-      ["FCF Margin", pct(last.fcf_margin,1), last.fcf_margin>=0?"cash generative":"cash burn", col(last.fcf_margin)],
-      ["Gross Margin", pct(last.gross_margin,1), "", col(last.gross_margin)],
-      ["Debt/Equity", last.debt_equity!=null?last.debt_equity.toFixed(2):"\u2014", last.debt_equity==null?"":(last.debt_equity<=1?"low":last.debt_equity<=2?"moderate":"elevated"),
-       (last.debt_equity==null?"var(--inkFade)":(last.debt_equity<=1?"var(--green)":last.debt_equity<=2?"var(--amber)":"var(--red)"))]
-    ];
-    var head='<div class="fin-cards">'+cards.map(function(c){
-      return '<div class="fin-card">'+
-        '<div class="fc-k">'+c[0]+'</div>'+
-        '<div class="fc-v" style="color:'+c[3]+'">'+c[1]+'</div>'+
-        (c[2]?'<div class="fc-s">'+c[2]+'</div>':'')+
-      '</div>';
-    }).join("")+'</div>';
-
-    // REVENUE + a second series side by side (net income or FCF)
-    var revBars=_finBars(fin,"revenue_B",{title:"Revenue by quarter",growthKey:"rev_yoy",h:70});
-    var secondKey=fin.some(function(f){return f.fcf_B!=null;})?"fcf_B":"net_income_B";
-    var secondTitle=secondKey==="fcf_B"?"Free cash flow":"Net income";
-    var secondBars=_finBars(fin,secondKey,{title:secondTitle,h:70});
-    var twoUp='<div class="fin-2up">'+
-      '<div>'+revBars+'</div>'+
-      (secondBars?'<div>'+secondBars+'</div>':'')+
-    '</div>';
-
-    // MARGIN TRENDS side by side
-    var nmBars=_finBars(fin,"net_margin",{title:"Net margin",pct:true,h:44,op:0.85});
-    var gmBars=_finBars(fin,"gross_margin",{title:"Gross margin",pct:true,h:44,color:"var(--gold)",op:0.75});
-    var trends=(nmBars||gmBars)?'<div class="fin-2up" style="margin-top:6px">'+
-      (nmBars?'<div>'+nmBars+'</div>':'')+(gmBars?'<div>'+gmBars+'</div>':'')+'</div>':'';
-
-    // MARGIN LADDER — the shape of the business, latest quarter
-    var ladder=[["Gross",last.gross_margin],["Operating",last.op_margin],["EBITDA",last.ebitda_margin],["FCF",last.fcf_margin]]
-               .filter(function(x){return x[1]!=null;});
-    var lad="";
-    if(ladder.length){
-      lad='<div class="fin-ladder"><div class="fin-sub">Margin structure \u00b7 latest quarter</div>'+
-        ladder.map(function(x){
-          var v=Math.max(-100,Math.min(100,x[1])), neg=v<0, w=Math.min(50,Math.abs(v)/2);
-          return '<div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">'+
-            '<span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--ink);width:78px">'+x[0]+'</span>'+
-            '<div style="flex:1;height:10px;background:var(--card2);border:1px solid var(--line);border-radius:4px;position:relative;overflow:hidden">'+
-              '<div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--line2)"></div>'+
-              '<div style="position:absolute;top:0;bottom:0;'+(neg?"right:50%;":"left:50%;")+'width:'+w+'%;background:'+(neg?"var(--redSoft)":"var(--greenSoft)")+'"></div>'+
-            '</div>'+
-            '<span style="font-family:var(--mono);font-size:12.5px;font-weight:700;color:'+col(x[1])+';width:58px;text-align:right">'+pct(x[1],1)+'</span>'+
-          '</div>';
-        }).join("")+'</div>';
-    }
-    el.innerHTML=head+twoUp+trends+lad;
+    return '<div class="fmet" data-fmid="' + mid + '" data-fmp=\'' + payload + '\'>' +
+      '<div class="fmet-l">' + label + '</div>' +
+      '<div class="fmet-r"><div class="fmet-v ' + tone + '">' + headline + '</div>' +
+      '<div class="fmet-bars">' + bars + '</div></div>' +
+      (opts.sub ? '<div class="fmet-s">' + opts.sub + '</div>' : '') +
+      '<div class="qrow">' + chips + '</div>' +
+      '<div class="qread" id="qr_' + mid + '"></div></div>';
   }
 
+  function dpFin(e, tk) {
+    var fin = e.financials || [], el = document.getElementById("dpFin");
+    if (!el) return;
+    if (!fin.length) {
+      el.innerHTML = '<div class="ed-note">' + (dpFinMiss[tk]
+        ? (tk || "This ticker") + ' has no quarterly data on file yet. The engine backfills the biggest missing names each daily run.'
+        : 'Loading financials\u2026') + '</div>';
+      return;
+    }
+    var rows = fin.slice(-8);
+    var last = rows[rows.length - 1] || {};
+
+    // profile: which lens to read this business through
+    var revYoY = last.rev_yoy, nm = last.net_margin, fcfm = last.fcf_margin;
+    var profile = null;
+    if (nm != null && nm < 0 && revYoY != null && revYoY > 0)
+      profile = { k: "Turnaround profile", h: "Losses with the top line turning.",
+        p: "The normal pillars are the wrong lens: what matters is whether the loss is narrowing, whether cash still covers the spend, and whether price has run ahead of the recovery." };
+    else if (revYoY != null && revYoY >= 25)
+      profile = { k: "Growth profile", h: "Graded on the future, not the last twelve months.",
+        p: "Fast growers are valued on where margins are going. Watch whether revenue growth is accelerating and whether operating margin expands as the business scales \u2014 proof the growth is efficient rather than bought." };
+
+    function card(title, cap, body) {
+      if (!body) return "";
+      return '<div class="fcard2"><h3>' + title + '</h3><div class="fcap">' + cap + '</div>' + body + '</div>';
+    }
+    var quality = _finMetric("Gross margin", rows, "gross_margin", { pct: true, sub: "What is left after the cost of making it" })
+      + _finMetric("Operating margin", rows, "op_margin", { pct: true, sub: "After running the business" })
+      + _finMetric("Net margin", rows, "net_margin", { pct: true, sub: "What actually reaches the bottom line" })
+      + _finMetric("Return on equity", rows, "roe", { pct: true, sub: "Profit against shareholder capital" });
+    var growth = _finMetric("Revenue", rows, "revenue_B", { sub: "Quarterly, not annualised" })
+      + _finMetric("Revenue growth YoY", rows, "rev_yoy", { pct: true, sub: "Against the same quarter last year" })
+      + _finMetric("Net income", rows, "net_income_B", { sub: "The bottom line in cash terms" })
+      + _finMetric("EBITDA", rows, "ebitda_B", { sub: "Before interest, tax, depreciation" });
+    var cash = _finMetric("Operating cash flow", rows, "ocf_B", { sub: "Cash the operations actually threw off" })
+      + _finMetric("Free cash flow", rows, "fcf_B", { sub: "After the capital spending" })
+      + _finMetric("FCF margin", rows, "fcf_margin", { pct: true, sub: "Free cash as a share of revenue" });
+    var stab = _finMetric("Debt / equity", rows, "debt_equity", { raw: true, lowerIsBetter: true, goodBelow: 1, sub: "Below 1 is comfortable" })
+      + _finMetric("Current ratio", rows, "current_ratio", { raw: true, sub: "Short-term assets against short-term bills" })
+      + _finMetric("EBITDA margin", rows, "ebitda_margin", { pct: true, sub: "Operating cash generation before the accounting" });
+
+    var html = '<div class="fgrid2">' +
+      card("Quality", "Can it turn revenue into profit?", quality) +
+      card("Growth", "Is the top line moving, and which way?", growth) +
+      card("Cash flow", "Profit is an opinion; cash is a fact.", cash) +
+      card("Stability", "Could a bad year break it?", stab) +
+      '</div>';
+    if (profile) {
+      html += '<div class="fband"><div class="fb-k">' + profile.k + ' \u00b7 read differently</div>' +
+        '<h3>' + profile.h + '</h3><p>' + profile.p + '</p></div>';
+    }
+    html += '<div class="ed-note" style="margin-top:10px">' + rows.length +
+      ' quarters through ' + (last.q || "\u2014") +
+      ' \u00b7 tap any quarter chip or bar for the exact figure and the change on the quarter.</div>';
+    el.innerHTML = html;
+    // land every metric on its newest quarter
+    el.querySelectorAll("[data-fmid]").forEach(function (m) {
+      var p = JSON.parse(m.getAttribute("data-fmp"));
+      _finShow(m.getAttribute("data-fmid"), p.v.length - 1);
+    });
+  }
+
+  function _finShow(mid, i) {
+    var el = document.querySelector('[data-fmid="' + mid + '"]');
+    if (!el) return;
+    var P; try { P = JSON.parse(el.getAttribute("data-fmp")); } catch (e) { return; }
+    var v = P.v[i], prev = null;
+    for (var k = i - 1; k >= 0; k--) { if (P.v[k] != null) { prev = P.v[k]; break; } }
+    function f(x) {
+      return x == null ? "\u2014"
+        : P.pct ? _finPct(x, P.dp) : (P.raw ? x.toFixed(2) : _finMoney(x));
+    }
+    var d = "";
+    if (v != null && prev != null && prev !== 0) {
+      var pctMode = P.pct || P.raw;
+      var ch = pctMode ? (v - prev) : ((v / prev - 1) * 100);
+      var pos = ch >= 0;
+      d = ' <span style="color:' + (pos ? "var(--green)" : "var(--red)") + '">' +
+        (pos ? "+" : "\u2212") + Math.abs(ch).toFixed(1) + (pctMode ? " pts" : "%") +
+        ' vs prior quarter</span>';
+    }
+    var out = document.getElementById("qr_" + mid);
+    if (out) out.innerHTML = (P.q[i] || "") + " \u2192 <b>" + f(v) + "</b>" + d;
+    el.querySelectorAll(".qbtn").forEach(function (b) {
+      b.classList.toggle("on", +b.getAttribute("data-i") === i);
+    });
+    el.querySelectorAll(".fmet-bars .fmb i").forEach(function (bar, bi) {
+      bar.style.opacity = (bi === i) ? "1" : ".45";
+    });
+  }
   function dpRat(e, tk){
     var r=e.ratings, p=e.profile||{}, el=document.getElementById("dpRat"); if(!el) return;
     var cur=(e.quote&&e.quote.last)||trPrices[tk]||(dpCache[tk]&&dpCache[tk].meta&&dpCache[tk].meta.last)||null;
