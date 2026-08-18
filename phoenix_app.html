@@ -682,6 +682,8 @@
 .w-chip:hover{border-color:var(--gold);color:var(--gold)}
 .w-chip b{font:400 10.5px/1 var(--mono);color:var(--inkFade);margin-right:6px}
 .w-chip.wl{border-color:var(--gold);color:var(--gold)}
+.w-chip.off{cursor:default;opacity:.65}
+.w-chip.off:hover{border-color:var(--line2);color:var(--inkMed)}
 .w-chip.wl.on{background:var(--gold);color:#FFFDF9}
 .w-name h1{font-size:34px!important}
 .w-facts .v{font-size:23px!important}
@@ -702,7 +704,12 @@
 .spr .s{font:700 12px/1 var(--mono);width:24px;text-align:right}
 .spr .y{flex:0 0 100%;font:10.5px/1.4 var(--mono);color:var(--inkGhost);margin-top:-2px}
 /* interactive quarters */
-.fgrid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.fgrid2{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:1180px){.fgrid2{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:660px){.fgrid2{grid-template-columns:1fr}}
+/* the narrower column needs the bars to give way first */
+.fmet-bars{width:104px}
+@media(max-width:1400px){.fmet-bars{width:84px}}
 .fcard2{background:var(--card2);border:1px solid var(--line);border-radius:9px;padding:14px 16px 12px}
 .fcard2 h3{font:400 19px/1.2 var(--serif);margin:0 0 3px}
 .fcap{font:italic 11.5px/1.4 var(--serif);color:var(--inkFade);margin-bottom:10px}
@@ -9066,7 +9073,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     '</div>';
   }
 
-  var dpIndustry="",dpSector="",dpExch="";
+  var dpIndustry="",dpSector="",dpExch="",dpIndOK=false,dpSecOK=false;
   var dpChartMiss={};     // {tk: true} — fetched and genuinely absent
   var dpFinCache={};      // {tk: {quarters:[...], mcap_B, pe, name, sector}}
   var dpFinMiss={};       // {tk: true}
@@ -9603,19 +9610,33 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
               (function(){
                 var _s=(scrData||[]).find(function(x){return x.ticker===tk;})||{};
                 var _n=(NV&&NV.tickers&&NV.tickers[tk])||{};
-                dpIndustry=p.industry||afp.industry||t.industry||_s.industry||_n.i||"";
-                dpSector  =p.sector||afp.sector||_s.sector||_n.s||"";
+                // TAXONOMY: rotation_nav is Phoenix's own universe
+                // ("Motor vehicles"); detail_bundle carries Yahoo's
+                // ("Auto Manufacturers"). They are different vocabularies, and
+                // only the first can be opened by the navigator — so it wins,
+                // and the header now agrees with "Where it sits" below.
+                dpIndustry=_n.i||p.industry||afp.industry||t.industry||_s.industry||"";
+                dpSector  =_n.s||p.sector||afp.sector||_s.sector||"";
+                // is the name one the navigator actually knows?
+                dpIndOK=!!(NV&&NV.industries&&NV.industries[dpIndustry]);
+                dpSecOK=!!(NV&&NV.sectors&&NV.sectors[dpSector]);
                 // exchange: chart meta first, then the bundle profile, then the
                 // ledger — meta is only populated once daily bars have loaded
                 dpExch    =meta.exch||p.exchange||afp.exchange||_s.exchange||"";
                 return "";
               })()+
               '<div class="w-chips">'+
-                (dpIndustry?'<button class="w-chip" data-dpind="'+
-                   String(dpIndustry).replace(/"/g,"&quot;")+'"><b>industry</b>'+
-                   dpIndustry+'</button>':'')+
-                (dpSector?'<button class="w-chip" data-dpsec="'+
-                   String(dpSector).replace(/"/g,"&quot;")+'"><b>sector</b>'+dpSector+'</button>':'')+
+                (dpIndustry?(dpIndOK
+                   ?'<button class="w-chip" data-dpind="'+
+                      String(dpIndustry).replace(/"/g,"&quot;")+'"><b>industry</b>'+
+                      dpIndustry+'</button>'
+                   :'<span class="w-chip off" title="not in the Phoenix universe taxonomy">'+
+                      '<b>industry</b>'+dpIndustry+'</span>'):'')+
+                (dpSector?(dpSecOK
+                   ?'<button class="w-chip" data-dpsec="'+
+                      String(dpSector).replace(/"/g,"&quot;")+'"><b>sector</b>'+dpSector+'</button>'
+                   :'<span class="w-chip off" title="not in the Phoenix universe taxonomy">'+
+                      '<b>sector</b>'+dpSector+'</span>'):'')+
                 (dpExch?'<button class="w-chip" data-dpexch="'+dpExch+'"><b>exchange</b>'+
                    dpExch+'</button>':'')+
                 '<button class="w-chip wl" data-dpwatch="'+tk+'">\u2606 Watchlist</button>'+
