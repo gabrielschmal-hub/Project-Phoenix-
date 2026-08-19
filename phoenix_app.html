@@ -10017,7 +10017,12 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       if (x == null) return "";   // no bar for a quarter with no value
       var y = H - (x - lo) / rng * H;
       var top = x >= 0 ? y : zero, ht = Math.max(2, Math.abs(zero - y));
-      var good = opts.lowerIsBetter ? (x < 0) : (x >= 0);
+      // sign is the wrong test for a ratio like debt/equity: a LOW positive
+      // value is good there. Colour against the same threshold the headline
+      // uses, so bars and value never disagree.
+      var good = opts.lowerIsBetter
+        ? (x < (opts.goodBelow == null ? 1 : opts.goodBelow))
+        : (x >= 0);
       var c = good ? "var(--green)" : "var(--red)";
       return '<span class="fmb fbcol2" data-fm="' + mid + '" data-i="' + i + '" ' +
         'style="flex:1;height:' + H + 'px;position:relative">' +

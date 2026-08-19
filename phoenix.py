@@ -4339,6 +4339,20 @@ def _yf_fill_last(sym, bars, tries=3, pause=4.0):
     except Exception:
         return bars
     have = set(b.get("date") for b in bars)
+    # Gate: only re-ask when the newest bar is genuinely stale — i.e. older
+    # than the last weekday. A fresh series skips the extra call entirely, so
+    # a healthy run pays nothing and a throttled one gets its retries.
+    try:
+        import datetime as _dt
+        _today = _dt.date.today()
+        _last_wd = _today - _dt.timedelta(days=1)
+        while _last_wd.weekday() >= 5:
+            _last_wd -= _dt.timedelta(days=1)
+        _newest = max(have) if have else ""
+        if _newest >= _last_wd.isoformat():
+            return bars                          # already current
+    except Exception:
+        pass
     for attempt in range(tries):
         try:
             d = yf.download(sym, period="5d", interval="1d",
