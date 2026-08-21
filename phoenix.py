@@ -4199,11 +4199,42 @@ MACRO_DAILY_INSTRUMENTS = [
     # key      yahoo/fred     label                    kind
     ("SPX",   "^GSPC",  "S&P 500",                  "candles"),
     ("NDX",   "^IXIC",  "Nasdaq Composite",         "candles"),
+    ("DOW",   "^DJI",   "Dow Jones Industrial",     "candles"),
+    ("RUT",   "^RUT",   "Russell 2000",             "candles"),
     ("GOLD",  "GC=F",   "Gold (front future)",      "candles"),
     ("OIL",   "CL=F",   "WTI crude (front future)", "candles"),
-    ("TLT",   "TLT",    "Bonds · 20yr Treasury",    "candles"),
-    ("HYOAS", "BAMLH0A0HYM2", "Credit spread · HY OAS", "line"),
+    ("DXY",   "DX-Y.NYB", "Dollar index",           "candles"),
+    ("BTC",   "BTC-USD", "Bitcoin",                 "candles"),
+    ("US10Y", "^TNX",   "US 10Y yield",             "candles"),
+    ("TLT",   "TLT",    "Bonds \u00b7 20yr Treasury",    "candles"),
+    ("HYOAS", "BAMLH0A0HYM2", "Credit spread \u00b7 HY OAS", "line"),
 ]
+
+# Yahoo's yield tickers have been quoted BOTH ways over the years: ^TNX as
+# 4.25 (percent) and as 42.5 (index = percent x10). The rest of the engine
+# assumes the x10 form (run_macro_series divides tnx by 10). Rather than bet
+# on either, normalise from the data: a 10Y or 30Y yield above 20% has not
+# happened since the early 1980s, so a median above that can only be the
+# index form. This is correct under either convention.
+# (Kept keyed by a set so a 30Y or 2Y can be added later without new logic.)
+MACRO_YIELD_KEYS = {"US10Y"}
+
+
+def _normalise_yield_bars(key, bars):
+    if key not in MACRO_YIELD_KEYS or not bars:
+        return bars
+    closes = sorted(b["c"] for b in bars if b.get("c") is not None)
+    if not closes:
+        return bars
+    median = closes[len(closes) // 2]
+    if median <= 20:
+        return bars                      # already quoted in percent
+    for b in bars:
+        for k in ("o", "h", "l", "c"):
+            if b.get(k) is not None:
+                b[k] = round(b[k] / 10.0, 3)
+    print(f"[macrod] {key}: median {median} -> index form, divided by 10")
+    return bars
 
 
 def run_macro_daily(period="1y"):
@@ -4263,6 +4294,7 @@ def run_macro_daily(period="1y"):
                 problems.append(f"{key}: only {len(bars)} bars")
                 continue
             bars = _yf_fill_last(sym, bars)
+            bars = _normalise_yield_bars(key, bars)
             instruments[key] = {"label": label, "kind": "candles",
                                 "symbol": sym, "bars": bars,
                                 "asof": bars[-1]["date"]}

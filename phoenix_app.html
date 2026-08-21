@@ -1051,7 +1051,8 @@ body{background:transparent!important;font-family:-apple-system,BlinkMacSystemFo
 .app{position:relative;z-index:5;display:block;height:auto}
 
 #pxnav{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;gap:26px;padding:20px 30px;
-  transition:transform .45s cubic-bezier(.3,.8,.3,1),opacity .35s ease;background:linear-gradient(180deg,rgba(8,11,15,.78),rgba(8,11,15,0))}
+  transition:transform .45s cubic-bezier(.3,.8,.3,1),opacity .35s ease;background:linear-gradient(180deg,rgba(8,11,15,.78),rgba(8,11,15,0));
+  will-change:transform;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 #pxnav.hide{transform:translateY(-130%);opacity:0;pointer-events:none}
 .pxbrand svg{width:44px;height:34px;display:block}
 .pxlinks{display:flex;align-items:center;gap:30px;flex:1;justify-content:center;overflow-x:auto;scrollbar-width:none}
@@ -1102,9 +1103,16 @@ html{scroll-snap-type:y proximity;scroll-behavior:smooth}
 .pxtrack b{display:block;height:100%;background:#E8792B;border-radius:4px;width:0}
 .pxspark{margin-top:12px;height:44px;width:100%}
 
-#pxstatus{position:fixed;left:22px;right:22px;bottom:16px;z-index:65;display:flex;align-items:center;justify-content:space-between;
+#pxstatus{position:fixed;left:22px;right:22px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:65;display:flex;align-items:center;justify-content:space-between;
   padding:15px 26px;border-radius:16px;background:rgba(18,22,28,.76);border:1px solid rgba(255,255,255,.085);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);font-size:14px;color:#B9BFC7}
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);font-size:14px;color:#B9BFC7;
+  /* iOS Safari will not repaint a position:fixed element that carries a
+     backdrop-filter while a momentum scroll is running — it strands it
+     mid-screen until the scroll settles. Promoting it to its own compositing
+     layer keeps it pinned. translateZ on a fixed element is safe here: it only
+     re-bases FIXED DESCENDANTS, and this bar has none. */
+  -webkit-transform:translateZ(0);transform:translateZ(0);
+  will-change:transform;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 #pxstatus .l,#pxstatus .mid{display:flex;align-items:center;gap:9px}
 @media(max-width:1000px){
   #pxnav{padding:14px 16px;gap:14px}
@@ -1175,7 +1183,7 @@ html{scroll-snap-type:none!important}
 #pxstatus{color:#CDD5DE!important;background:rgba(14,19,26,.86)!important}
 
 /* ===== slimmer status bar, theme switch inside it, room for the add-trade button ===== */
-#pxstatus{padding:9px 18px!important;bottom:10px!important;left:14px!important;right:14px!important;
+#pxstatus{padding:9px 18px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;left:14px!important;right:14px!important;
   font-size:12.5px!important;border-radius:13px!important}
 #pxstatus .r{display:flex;align-items:center;gap:14px}
 .tr-add-btn{bottom:calc(env(safe-area-inset-bottom) + 62px)!important;z-index:70!important}
@@ -1420,6 +1428,7 @@ html.light .ed-scrim{background:rgba(60,44,28,.42)}
 .mk-instr button.on{background:var(--gold);border-color:var(--gold);color:#0A0A0A}
 @media(max-width:820px){.mk-instr button{font-size:9.5px;padding:3px 7px}}
 /* ── macro chart v2: timeframe segment, feature chips, view toggle ── */
+.a-spx .thead .ttl,.a-spx .thead .tnote{white-space:nowrap}
 .mk-seg{display:flex;border:1px solid var(--line2);border-radius:5px;overflow:hidden;flex:none}
 .mk-seg button{font-family:var(--mono);font-size:10.5px;letter-spacing:.6px;color:var(--inkLight);
   background:transparent;border:0;padding:5px 10px;cursor:pointer;line-height:1.15}
@@ -1467,8 +1476,13 @@ canvas.mk-cv{width:100%;height:100%;display:block;touch-action:none;cursor:cross
 .spx-hint{position:absolute;right:10px;bottom:3px;font-family:var(--mono);font-size:9.5px;
   letter-spacing:.6px;color:var(--inkGhost);pointer-events:none}
 /* cards */
-#spxCards{position:absolute;inset:0;display:none;grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(2,1fr);gap:11px}
+#spxCards{display:none;grid-template-columns:repeat(3,1fr);grid-auto-rows:152px;gap:11px}
+/* Chart mode keeps the tile at its fixed height; Cards mode lets it grow so
+   every instrument gets a readable sparkline instead of a 40px sliver. */
+.mkt-grid .tile.a-spx .tbody.mk-cards-on,.a-spx .tbody.mk-cards-on,
+.m-spx .tbody.mk-cards-on{height:auto!important;min-height:0!important;
+  overflow:visible!important;padding-top:2px}
+.a-spx .tbody.mk-cards-on #spxPlotWrap{display:none}
 .spx-mcard{background:var(--card2);border:1px solid var(--line);border-radius:8px;
   padding:11px 12px 8px;display:flex;flex-direction:column;cursor:pointer;
   transition:border-color .12s;min-height:0;touch-action:manipulation}
@@ -1487,7 +1501,7 @@ canvas.mk-cv{width:100%;height:100%;display:block;touch-action:none;cursor:cross
 .spx-mcard .mc-empty{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);
   margin:auto 0;line-height:1.5}
 @media(max-width:900px){
-  #spxCards{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr)}
+  #spxCards{grid-template-columns:repeat(2,1fr);grid-auto-rows:146px}
   .spx-ohlc{margin-left:0;width:100%}
   .spx-ohlc .oh-cell{min-width:62px;padding:0 8px}
   .mk-view{margin-left:0}
@@ -2328,10 +2342,9 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       // ── asset marquee (unchanged) ──
       '<div class="a-assets"><div class="asset-band" id="assetBand"><div class="loading">\u2026</div></div></div>'+
 
-      // ── THE BOARD: the handful of prices that set the tone ──
-      '<div class="mkt-row r-1"><div class="tile a-board">'+
-        '<div class="thead"><span class="ttl">The Board</span><span class="tnote" id="boardNote"></span></div>'+
-        '<div class="tbody" id="boardBody"><div class="loading">\u2026</div></div></div></div>'+
+      // THE BOARD tile was removed: the macro cards above show the same prices
+      // in the same place. loadBoard() still RUNS — it is what fills mktSeries
+      // and triggers mktBrief(), so deleting it would silently break the brief.
 
       // ── the macro calendar strip ──
       '<div class="mkt-row r-1"><div class="tile a-cal">'+
@@ -2345,8 +2358,13 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
           '<span class="mk-instr" id="mkInstr">'+
             '<button data-ins="SPX" class="on">S&P 500</button>'+
             '<button data-ins="NDX">Nasdaq</button>'+
+            '<button data-ins="DOW">Dow</button>'+
+            '<button data-ins="RUT">Russell</button>'+
             '<button data-ins="GOLD">Gold</button>'+
             '<button data-ins="OIL">Oil</button>'+
+            '<button data-ins="DXY">Dollar</button>'+
+            '<button data-ins="BTC">Bitcoin</button>'+
+            '<button data-ins="US10Y">10Y</button>'+
             '<button data-ins="TLT">Bonds</button>'+
             '<button data-ins="HYOAS">Credit</button>'+
           '</span>'+
@@ -2361,8 +2379,8 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
             '<button class="mk-chip on" id="mkGex"><i style="background:var(--amber)"></i>GEX</button>'+
           '</span>'+
           '<span class="mk-seg mk-view">'+
-            '<button id="spxVChart" class="on">Chart</button>'+
-            '<button id="spxVCards">Cards</button>'+
+            '<button id="spxVChart">Chart</button>'+
+            '<button id="spxVCards" class="on">Cards</button>'+
           '</span>'+
           '<span class="tnote" id="spxAsof"></span></div>'+
         '<div class="mkt-hero" id="spxHero">'+
@@ -2581,10 +2599,14 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     ];
     getJSON("macro_series").then(function(d){
       var s=(d&&d.series)||[];
-      var el=document.getElementById("boardBody"); if(!el) return;
-      if(s.length<2){ el.innerHTML='<div class="loading">No series data yet.</div>'; return; }
+      // The Board tile is gone, but this function still owns mktSeries and the
+      // brief. Set them FIRST and treat the rendering as optional, or removing
+      // the tile takes Mission Control's brief down with it.
+      var el=document.getElementById("boardBody");
+      if(s.length<2){ if(el) el.innerHTML='<div class="loading">No series data yet.</div>'; return; }
       var last=s[s.length-1], prev=s[s.length-2];
       mktSeries={last:last,prev:prev,all:s};
+      if(!el){ mktBrief(); return; }
       var note=document.getElementById("boardNote");
       if(note&&last.date) note.textContent=last.date;
       var html='<div class="board-hd"><span>Name</span><span style="text-align:right">Last</span>'+
@@ -4013,13 +4035,21 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   // bar shape. Weekly and monthly are resampled here — the engine writes daily
   // only, and nothing intraday exists anywhere in the pipeline.
   // ─────────────────────────────────────────────────────────────────────────
-  var MK_INSTR="SPX", MK_TF="D", MK_VIEW="chart";
+  var MK_INSTR="SPX", MK_TF="D", MK_VIEW="cards";   // Cards opens by default
   var MK_E50=true, MK_E200=true, MK_GEXON=true;
-  var MK_LABELS={SPX:"S&P 500",NDX:"Nasdaq Composite",GOLD:"Gold",
-                 OIL:"WTI crude",TLT:"Bonds \u00b7 20yr Treasury",
+  // VIX is deliberately absent: the VIX term-structure tile below already owns
+  // volatility and says more than a VIX candle would.
+  var MK_LABELS={SPX:"S&P 500",NDX:"Nasdaq Composite",DOW:"Dow Jones Industrial",
+                 RUT:"Russell 2000",GOLD:"Gold",OIL:"WTI crude",
+                 DXY:"Dollar index",BTC:"Bitcoin",US10Y:"US 10Y yield",
+                 TLT:"Bonds \u00b7 20yr Treasury",
                  HYOAS:"Credit spread \u00b7 HY OAS"};
-  var MK_DEC={SPX:2,NDX:2,GOLD:1,OIL:2,TLT:2,HYOAS:2};
-  var MK_ORDER=["SPX","NDX","GOLD","OIL","TLT","HYOAS"];
+  var MK_DEC={SPX:2,NDX:2,DOW:2,RUT:2,GOLD:1,OIL:2,DXY:2,BTC:0,
+              US10Y:2,TLT:2,HYOAS:2};
+  // instruments where a RISING value is risk-off, so green/red must invert
+  var MK_INVERT={HYOAS:1,US10Y:1};
+  var MK_ORDER=["SPX","NDX","DOW","RUT","GOLD","OIL","DXY","BTC",
+                "US10Y","TLT","HYOAS"];
   var MK_TFLBL={D:"Daily",W:"Weekly",M:"Monthly"};
   var MK_TFWIN={D:60,W:52,M:36};          // bars visible by default in the chart
   var MK_TFCARD={D:63,W:52,M:36};         // bars in a card sparkline
@@ -4080,13 +4110,18 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
   }
   function mkEnsureAll(){ return Promise.all(MK_ORDER.map(function(k){
     return mkEnsure(k).catch(function(){}); })); }
+  // levels arrive either as {strike:...} (run_gex) or as a bare number
+  // (CBOE/MME spec). Accept both — the walls stopped drawing when they didn't.
+  function mkLvl(x){
+    var v=(x&&x.strike!=null)?x.strike:(typeof x==="number"?x:null);
+    return (v==null||!isFinite(+v))?null:+v;
+  }
   function mkEnsureGex(){
     if(MK_GEXL!==null) return Promise.resolve();
     if(!MK_P.gex) MK_P.gex=getJSON("gex").then(function(g){
       var ov=(g&&g.overview)||{}, L=(g&&g.levels)||{};
       MK_GEXL={flip:ov.gamma_flip!=null?+ov.gamma_flip:null,
-               call:(L.call_wall&&L.call_wall.strike!=null)?+L.call_wall.strike:null,
-               put:(L.put_wall&&L.put_wall.strike!=null)?+L.put_wall.strike:null};
+               call:mkLvl(L.call_wall), put:mkLvl(L.put_wall)};
     }).catch(function(){ MK_GEXL={flip:null,call:null,put:null}; });
     return MK_P.gex;
   }
@@ -4266,13 +4301,16 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     var ins=sfx?"SPX":MK_INSTR, tf=sfx?"D":MK_TF, d=mkSeries(ins,tf); if(!d) return;
     var bars=d.bars,q=bars[i]; if(!q) return;
     var K=mkC(), p=(i>0?bars[i-1].c:q.c), pc=p?((q.c-p)/p*100):0, up=pc>=0, dec=d.dec;
+    // a rising VIX, yield or credit spread is risk-off: colour it the same way
+    // the cards do, or the chart and the grid would disagree with each other
+    var good=MK_INVERT[ins]?!up:up;
     var html=mkCell(tf==="D"?"DATE":(tf==="W"?"WEEK OF":"MONTH"),q.date,"oh-date");
     if(d.kind==="candle"){
       html+=mkCell("O",mkFmt(q.o,dec))+mkCell("H",mkFmt(q.h,dec))+
-            mkCell("L",mkFmt(q.l,dec))+mkCell("C",mkFmt(q.c,dec),"",up?K.green:K.red);
+            mkCell("L",mkFmt(q.l,dec))+mkCell("C",mkFmt(q.c,dec),"",good?K.green:K.red);
       if(q.v) html+=mkCell("VOL",(q.v/1e9).toFixed(2)+"B");
-    } else { html+=mkCell("VALUE",mkFmt(q.c,dec),"",up?K.green:K.red); }
-    html+=mkCell("CHG",(up?"+":"")+pc.toFixed(2)+"%","oh-chg",up?K.green:K.red);
+    } else { html+=mkCell("VALUE",mkFmt(q.c,dec),"",good?K.green:K.red); }
+    html+=mkCell("CHG",(up?"+":"")+pc.toFixed(2)+"%","oh-chg",good?K.green:K.red);
     el.innerHTML=html;
   }
   function mkHeader(sfx){
@@ -4286,9 +4324,10 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     if(px) px.textContent=mkFmt(last.c,d.dec);
     var kk=document.getElementById("spxPxK"+sfx);
     if(kk) kk.textContent=(tf==="D")?"Last close":("Last "+MK_TFLBL[tf].toLowerCase()+" close");
-    var ch=last.c-prev.c, cp=prev.c?(ch/prev.c*100):0, up=ch>=0;
+    var ch=last.c-prev.c, cp=prev.c?(ch/prev.c*100):0, up=ch>=0,
+        good=MK_INVERT[ins]?!up:up;
     var ce=document.getElementById("spxChg"+sfx);
-    if(ce) ce.innerHTML='<span style="color:'+(up?K.green:K.red)+'">'+(up?"+":"")+
+    if(ce) ce.innerHTML='<span style="color:'+(good?K.green:K.red)+'">'+(up?"+":"")+
       mkFmt(ch,d.dec)+' ('+(up?"+":"")+cp.toFixed(2)+'%)</span>';
     var sa=document.getElementById("spxAsof"+sfx); if(sa) sa.textContent=last.date;
   }
@@ -4446,13 +4485,14 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
             wbars=Math.min(MK_TFCARD[MK_TF],n-1), a=Math.max(0,n-1-wbars),
             last=bars[n-1], base=bars[a],
             chg=base.c?((last.c-base.c)/base.c*100):0,
-            inv=(key==="HYOAS"), good=inv?(chg<0):(chg>=0);
+            inv=!!MK_INVERT[key], good=inv?(chg<0):(chg>=0);
         el.innerHTML='<div class="h"><span class="t">'+d.label+
           '</span><span class="chip">'+key+'</span></div>'+
           '<div class="m"><span class="px">'+mkFmt(last.c,d.dec)+'</span>'+
           '<span class="pc" style="color:'+(good?K.green:K.red)+'">'+
           (chg>=0?"+":"")+chg.toFixed(1)+'%</span></div><canvas></canvas>'+
           '<div class="f"><span>'+MK_TFNOTE[MK_TF]+(d.line?" \u00b7 EMAs off":"")+
+          (MK_INVERT[key]?" \u00b7 up = risk-off":"")+
           ((key==="SPX"&&MK_GEXON&&MK_GEXL&&MK_GEXL.flip!=null)?" \u00b7 flip":"")+
           '</span><span class="o">open \u2192</span></div>';
         el.addEventListener("click",function(){
@@ -4472,8 +4512,12 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         hero=document.getElementById("spxHero"), ins=document.getElementById("mkInstr");
     if(pw) pw.style.display=(v==="chart")?"":"none";
     if(cw) cw.style.display=(v==="cards")?"grid":"none";
-    if(hero) hero.style.visibility=(v==="chart")?"":"hidden";
-    if(ins) ins.style.visibility=(v==="chart")?"":"hidden";
+    var tb=document.querySelector(".a-spx .tbody");
+    if(tb) tb.classList.toggle("mk-cards-on",v==="cards");
+    // hide rather than merely blank them: visibility:hidden still reserves a
+    // 46px band of empty space above the cards
+    if(hero) hero.style.display=(v==="chart")?"":"none";
+    if(ins) ins.style.display=(v==="chart")?"":"none";
     var a=document.getElementById("spxVChart"), b=document.getElementById("spxVCards");
     if(a) a.className=(v==="chart")?"on":"";
     if(b) b.className=(v==="cards")?"on":"";
@@ -4559,11 +4603,24 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       .then(function(){
         var d=mkSeries(ins,sfx?"D":MK_TF);
         if(!d||!d.bars.length){
+          // clear the header too, or it keeps showing the PREVIOUS instrument's
+          // price next to an error about this one
+          var t0=document.getElementById("spxTitle"+sfx);
+          if(t0) t0.textContent=(MK_LABELS[ins]||ins)+" \u00b7 "+MK_TFLBL[sfx?"D":MK_TF];
+          var p0=document.getElementById("spxPx"+sfx); if(p0) p0.textContent="\u2014";
+          var c0=document.getElementById("spxChg"+sfx); if(c0) c0.innerHTML="";
+          var o0=document.getElementById("spxOhlc"+sfx); if(o0) o0.innerHTML="";
+          var a0=document.getElementById("spxAsof"+sfx); if(a0) a0.textContent="";
           host.innerHTML='<div class="err">No daily data for '+ins+
-            ' yet. It populates on the next engine run.</div>'; return; }
+            ' yet \u2014 the engine lists it under "missing" when a pull fails.'+
+            ' It populates on the next successful run.</div>';
+          if(!sfx) mkSyncPills();
+          return; }
         mkFit(sfx); mkHeader(sfx); mkReadout(d.bars.length-1,sfx);
         if(!sfx){ mkSyncPills(); mkBindCanvas(); mkBindControls(); }
-        mkPaint(sfx);
+        // the Edition copy is always the chart; Markets honours the chosen view
+        if(!sfx && MK_VIEW==="cards") mkSetView("cards");
+        else mkPaint(sfx);
         drawn["spx"+sfx]=true;
       }).catch(function(e){
         host.innerHTML=errHTML(ins==="SPX"?"spx_daily.json":"macro_daily.json",
@@ -5612,10 +5669,12 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
         ? 'Losing <b>'+ov.gamma_flip.toLocaleString()+'</b> flips dealers to amplifying \u2014 ranges widen, selloffs run further than they should'
         : 'Reclaiming <b>'+ov.gamma_flip.toLocaleString()+'</b> flips dealers back to dampening \u2014 until then, moves extend']);
       var L3=(g&&g.levels)||{};
-      if(L3.put_wall&&L3.put_wall.strike&&ov.spx_spot>L3.put_wall.strike)
-        watch.push(["HIGH",'A break of the put wall at <b>'+L3.put_wall.strike.toLocaleString()+'</b> removes the largest block of supportive hedging']);
-      if(L3.call_wall&&L3.call_wall.strike&&ov.spx_spot<L3.call_wall.strike)
-        watch.push(["MED",'Rallies into <b>'+L3.call_wall.strike.toLocaleString()+'</b> meet the call wall, where dealer selling usually caps the move']);
+      function l3(x){ return (x&&x.strike!=null)?x.strike:(typeof x==="number"?x:null); }
+      var pw3=l3(L3.put_wall), cw3=l3(L3.call_wall);
+      if(pw3!=null&&ov.spx_spot>pw3)
+        watch.push(["HIGH",'A break of the put wall at <b>'+pw3.toLocaleString()+'</b> removes the largest block of supportive hedging']);
+      if(cw3!=null&&ov.spx_spot<cw3)
+        watch.push(["MED",'Rallies into <b>'+cw3.toLocaleString()+'</b> meet the call wall, where dealer selling usually caps the move']);
     }
     if(last&&last.vix!=null){
       var v=+last.vix;
@@ -5700,7 +5759,12 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
       pxNoteStale(document.getElementById("gexNote"+sfx), d.asof);
       var neg=(o.net_gex_B||0)<0;
       var regColor=neg?"var(--red)":"var(--green)", regBg=neg?"var(--redBg)":"var(--greenBg)";
-      function lvl(o2){ if(!o2) return "\u2014"; return (o2.strike!=null?o2.strike.toLocaleString():"\u2014"); }
+      // gex.json carries levels in TWO shapes: the original run_gex path writes
+      // {strike:...} dicts, the newer CBOE/MME spec writes bare strike numbers.
+      // This used to read .strike only, so walls and pin showed as em-dashes
+      // while the histogram (which tolerates both) drew them fine.
+      function lvl(o2){ var v=(o2&&o2.strike!=null)?o2.strike:(typeof o2==="number"?o2:null);
+        return (v==null)?"\u2014":v.toLocaleString(); }
       var html='<div class="gex-hero"><span class="gex-net" style="color:'+regColor+'">'+(o.net_gex_B!=null?(o.net_gex_B>0?"+":"")+o.net_gex_B+"B":"\u2014")+'</span>'+
         '<span class="gex-reg" style="background:'+regBg+';color:'+regColor+'">'+(o.regime||"")+'</span></div>'+
         '<div class="gex-rows">'+
