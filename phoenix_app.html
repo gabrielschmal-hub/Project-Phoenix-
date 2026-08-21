@@ -1419,6 +1419,79 @@ html.light .ed-scrim{background:rgba(60,44,28,.42)}
 .mk-instr button:hover{color:var(--inkMed);border-color:var(--inkFade)}
 .mk-instr button.on{background:var(--gold);border-color:var(--gold);color:#0A0A0A}
 @media(max-width:820px){.mk-instr button{font-size:9.5px;padding:3px 7px}}
+/* ── macro chart v2: timeframe segment, feature chips, view toggle ── */
+.mk-seg{display:flex;border:1px solid var(--line2);border-radius:5px;overflow:hidden;flex:none}
+.mk-seg button{font-family:var(--mono);font-size:10.5px;letter-spacing:.6px;color:var(--inkLight);
+  background:transparent;border:0;padding:5px 10px;cursor:pointer;line-height:1.15}
+.mk-seg button+button{border-left:1px solid var(--line2)}
+.mk-seg button:hover{color:var(--inkMed)}
+.mk-seg button.on{background:var(--gold);color:#0A0A0A}
+html.light .mk-seg button.on{color:#FFFDF8}
+.mk-view{margin-left:auto}
+.mk-chips{display:flex;gap:5px;flex-wrap:wrap;align-items:center;flex:none}
+.mk-chip{font-family:var(--mono);font-size:10.5px;letter-spacing:.6px;color:var(--inkLight);
+  background:var(--card2);border:1px solid var(--line2);border-radius:4px;padding:5px 9px;
+  cursor:pointer;line-height:1.15;display:inline-flex;align-items:center;gap:6px}
+.mk-chip i{width:8px;height:8px;border-radius:2px;display:inline-block;flex:none}
+.mk-chip.on{color:var(--ink)}
+.mk-chip:not(.on){opacity:.42}
+.mk-chip:not(.on) i{background:var(--inkGhost)!important}
+.mk-chip:hover{border-color:var(--gold)}
+/* labelled OHLC readout — one cell per field, not a run-on line */
+#spxHero{align-items:flex-end}
+#spxHero .hc{padding-bottom:4px}
+.mkt-hero .spx-px{display:flex;flex-direction:column;gap:3px}
+.mkt-hero .spx-px .k{font-family:var(--mono);font-size:9.5px;letter-spacing:1.6px;
+  text-transform:uppercase;color:var(--inkFade)}
+.spx-ohlc{margin-left:auto;display:flex;align-items:flex-end;gap:0;flex-wrap:nowrap;
+  overflow-x:auto;-webkit-overflow-scrolling:touch}
+.spx-ohlc .oh-cell{display:flex;flex-direction:column;gap:4px;padding:0 12px;
+  border-left:1px solid var(--line);text-align:right;min-width:70px;flex:none}
+.spx-ohlc .oh-cell:first-child{border-left:0}
+.spx-ohlc .oh-k{font-family:var(--mono);font-size:9.5px;letter-spacing:1.4px;color:var(--inkFade)}
+.spx-ohlc .oh-v{font-family:var(--mono);font-size:13.5px;color:var(--inkMed)}
+.spx-ohlc .oh-date{min-width:94px;text-align:left}
+.spx-ohlc .oh-date .oh-v{font-size:12.5px;color:var(--ink)}
+.spx-ohlc .oh-chg .oh-v{font-weight:700}
+/* stage */
+#spxPlotWrap{position:absolute;inset:0}
+canvas.mk-cv{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+.spx-fit{position:absolute;top:8px;left:8px;z-index:5;font-family:var(--mono);font-size:10px;
+  letter-spacing:1px;color:var(--inkFade);border:1px solid var(--line2);border-radius:4px;
+  padding:5px 9px;background:var(--card2);cursor:pointer;touch-action:manipulation}
+.spx-fit:hover{color:var(--ink);border-color:var(--gold)}
+.spx-xhb{position:absolute;top:8px;right:8px;z-index:5;display:none;font-family:var(--mono);
+  font-size:9.5px;letter-spacing:1px;color:var(--gold);border:1px solid var(--gold);
+  border-radius:4px;padding:5px 9px;background:var(--card2)}
+.spx-xhb.on{display:block}
+.spx-hint{position:absolute;right:10px;bottom:3px;font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.6px;color:var(--inkGhost);pointer-events:none}
+/* cards */
+#spxCards{position:absolute;inset:0;display:none;grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(2,1fr);gap:11px}
+.spx-mcard{background:var(--card2);border:1px solid var(--line);border-radius:8px;
+  padding:11px 12px 8px;display:flex;flex-direction:column;cursor:pointer;
+  transition:border-color .12s;min-height:0;touch-action:manipulation}
+.spx-mcard:hover{border-color:var(--gold)}
+.spx-mcard .h{display:flex;align-items:center;gap:8px}
+.spx-mcard .t{font-family:var(--serif);font-size:15px;line-height:1.2;flex:1}
+.spx-mcard .chip{font-family:var(--mono);font-size:9.5px;letter-spacing:.8px;color:var(--inkLight);
+  border:1px solid var(--line2);border-radius:4px;padding:3px 6px}
+.spx-mcard .m{display:flex;align-items:baseline;gap:9px;margin:5px 0 6px}
+.spx-mcard .px{font-family:var(--mono);font-size:16px;font-weight:700}
+.spx-mcard .pc{font-family:var(--mono);font-size:13px;font-weight:700}
+.spx-mcard canvas{width:100%;flex:1;min-height:0;display:block}
+.spx-mcard .f{display:flex;font-family:var(--mono);font-size:9.5px;color:var(--inkFade);
+  margin-top:6px;padding-top:6px;border-top:1px solid var(--line)}
+.spx-mcard .f .o{margin-left:auto;color:var(--gold)}
+.spx-mcard .mc-empty{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);
+  margin:auto 0;line-height:1.5}
+@media(max-width:900px){
+  #spxCards{grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(3,1fr)}
+  .spx-ohlc{margin-left:0;width:100%}
+  .spx-ohlc .oh-cell{min-width:62px;padding:0 8px}
+  .mk-view{margin-left:0}
+}
 /* ---------- rotation navigator ---------- */
 .dp-groups{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:620px){.dp-groups{grid-template-columns:1fr}}
@@ -2266,7 +2339,7 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
           '<span class="tnote" id="calNote"></span></div>'+
         '<div class="tbody"><div id="calStrip"><div class="loading">\u2026</div></div></div></div>'+
 
-      // ── SPX candles with the gamma levels drawn on ──
+      // ── the macro chart: candles or cards, 1D/1W/1M, EMAs, SPX gamma levels ──
       '<div class="mkt-row r-1"><div class="tile tall a-spx">'+
         '<div class="thead"><span class="ttl" id="spxTitle">S&P 500 \u00B7 Daily</span>'+
           '<span class="mk-instr" id="mkInstr">'+
@@ -2277,13 +2350,35 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
             '<button data-ins="TLT">Bonds</button>'+
             '<button data-ins="HYOAS">Credit</button>'+
           '</span>'+
+          '<span class="mk-seg" id="mkTf">'+
+            '<button data-tf="D" class="on">1D</button>'+
+            '<button data-tf="W">1W</button>'+
+            '<button data-tf="M">1M</button>'+
+          '</span>'+
+          '<span class="mk-chips">'+
+            '<button class="mk-chip on" id="mkEma50"><i style="background:var(--gold)"></i>EMA 50</button>'+
+            '<button class="mk-chip on" id="mkEma200"><i style="background:var(--blue,#2C5A82)"></i>EMA 200</button>'+
+            '<button class="mk-chip on" id="mkGex"><i style="background:var(--amber)"></i>GEX</button>'+
+          '</span>'+
+          '<span class="mk-seg mk-view">'+
+            '<button id="spxVChart" class="on">Chart</button>'+
+            '<button id="spxVCards">Cards</button>'+
+          '</span>'+
           '<span class="tnote" id="spxAsof"></span></div>'+
-        '<div class="mkt-hero"><span class="hn" id="spxPx">\u2014</span>'+
-          '<span class="hc" id="spxChg"></span><span class="hh" id="spxHover"></span></div>'+
-        '<div class="tbody"><div class="plot" id="spxPlot"></div>'+
-          '<div class="spx-zoom"><button id="spxZoomIn">+</button>'+
-          '<button id="spxZoomOut">\u2212</button>'+
-          '<button id="spxZoomReset">\u21ba</button></div></div></div></div>'+
+        '<div class="mkt-hero" id="spxHero">'+
+          '<span class="spx-px"><span class="k" id="spxPxK">Last close</span>'+
+            '<span class="hn" id="spxPx">\u2014</span></span>'+
+          '<span class="hc" id="spxChg"></span>'+
+          '<span class="spx-ohlc" id="spxOhlc"></span></div>'+
+        '<div class="tbody">'+
+          '<div id="spxPlotWrap">'+
+            '<div class="plot" id="spxPlot"></div>'+
+            '<button class="spx-fit" id="spxFit">FIT \u21ba</button>'+
+            '<div class="spx-xhb" id="spxXhb">CROSSHAIR \u00b7 tap to exit</div>'+
+            '<div class="spx-hint">drag \u00b7 pan &nbsp; pinch \u00b7 zoom &nbsp; hold \u00b7 crosshair &nbsp; double-tap \u00b7 reset</div>'+
+          '</div>'+
+          '<div id="spxCards"></div>'+
+        '</div></div></div>'+
 
       // ── regime + GEX side by side ──
       '<div class="mkt-row r-2">'+
@@ -3906,179 +4001,575 @@ html.light .scr-book.on{background:#8F3F17!important;color:#FFFFFF!important;
     document.getElementById("rgBody").innerHTML=html;
   }
 
-  // Which macro instrument the big chart is showing. SPX keeps its own file
-  // (spx_daily.json) so the Edition and the gamma overlay are untouched; the
-  // rest come from macro_daily.json in the identical bar shape.
-  var MK_INSTR="SPX";
+  // ─────────────────────────────────────────────────────────────────────────
+  // MACRO CHART v2 — canvas, not Plotly.
+  // Why: Plotly's touch handling on iPad could not pan (it reads e.buttons,
+  // which Safari reports as 0 for touch) and never re-fit the y-axis to the
+  // visible window, so panning looked broken. This is a small purpose-built
+  // renderer: one finger pans with inertia, two fingers pinch, press-and-hold
+  // gives a crosshair, and the y-axis always fits what you're looking at.
+  // SPX keeps its own file (spx_daily.json) so the Edition copy and the gamma
+  // overlay are untouched; the rest come from macro_daily.json in the same
+  // bar shape. Weekly and monthly are resampled here — the engine writes daily
+  // only, and nothing intraday exists anywhere in the pipeline.
+  // ─────────────────────────────────────────────────────────────────────────
+  var MK_INSTR="SPX", MK_TF="D", MK_VIEW="chart";
+  var MK_E50=true, MK_E200=true, MK_GEXON=true;
   var MK_LABELS={SPX:"S&P 500",NDX:"Nasdaq Composite",GOLD:"Gold",
                  OIL:"WTI crude",TLT:"Bonds \u00b7 20yr Treasury",
                  HYOAS:"Credit spread \u00b7 HY OAS"};
-  function mkSetInstrument(ins){
-    MK_INSTR=ins||"SPX";
-    [].forEach.call(document.querySelectorAll("#mkInstr button"),function(b){
-      b.className=(b.getAttribute("data-ins")===MK_INSTR)?"on":"";
+  var MK_DEC={SPX:2,NDX:2,GOLD:1,OIL:2,TLT:2,HYOAS:2};
+  var MK_ORDER=["SPX","NDX","GOLD","OIL","TLT","HYOAS"];
+  var MK_TFLBL={D:"Daily",W:"Weekly",M:"Monthly"};
+  var MK_TFWIN={D:60,W:52,M:36};          // bars visible by default in the chart
+  var MK_TFCARD={D:63,W:52,M:36};         // bars in a card sparkline
+  var MK_TFNOTE={D:"3 months \u00b7 daily",W:"1 year \u00b7 weekly",M:"3 years \u00b7 monthly"};
+  var MK_DATA={}, MK_P={}, MK_GEXL=null, MK_RS={}, MK_BOUND=false;
+
+  function mkC(){
+    var c=getComputedStyle(document.documentElement);
+    function v(n,f){ return (c.getPropertyValue(n)||"").trim()||f; }
+    return { ink:v("--ink","#E7EEF6"), fade:v("--inkFade","#6B8299"),
+             ghost:v("--inkGhost","#47596C"), med:v("--inkMed","#C4D2DF"),
+             grid:v("--line","rgba(255,255,255,.14)"),
+             green:v("--green","#3FBF77"), red:v("--red","#D9534F"),
+             gold:v("--gold","#D37736"), amber:v("--amber","#D8A24A"),
+             blue:v("--blue","#2C5A82"), card:v("--card","#08192B") };
+  }
+  function mkFmt(v,d){ return (v==null||isNaN(v))?"\u2014"
+    :v.toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d}); }
+
+  // ── data ────────────────────────────────────────────────────────────────
+  // Bars arrive as {date,o,h,l,c,v}. A line series (HY OAS) has no OHLC, so we
+  // synthesise flat bars: every downstream reader keeps working and we draw it
+  // as a line. Any bar with a null/NaN close is dropped — Yahoo hands those
+  // back when it throttles, and one of them used to null out the whole panel.
+  function mkClean(bars,isLine){
+    var out=[];
+    (bars||[]).forEach(function(b){
+      var c=(b&&b.c!=null)?+b.c:null;
+      if(c==null||!isFinite(c)) return;
+      var o=(b.o!=null&&isFinite(+b.o))?+b.o:c,
+          h=(b.h!=null&&isFinite(+b.h))?+b.h:c,
+          l=(b.l!=null&&isFinite(+b.l))?+b.l:c;
+      if(isLine){ o=h=l=c; }
+      out.push({date:b.date,o:o,h:Math.max(o,h,c),l:Math.min(o,l,c),c:c,
+                v:(b.v!=null&&isFinite(+b.v))?+b.v:null});
     });
-    drawn.spx=false;              // force a redraw of the same host
+    return out;
+  }
+  function mkEnsure(ins){
+    if(MK_DATA[ins]) return Promise.resolve();
+    if(ins==="SPX"){
+      if(!MK_P.spx) MK_P.spx=getJSON("spx_daily").then(function(d){
+        MK_DATA.SPX={bars:mkClean(d&&d.bars,false),kind:"candle",
+                     label:MK_LABELS.SPX,dec:2,line:false};
+      });
+      return MK_P.spx;
+    }
+    if(!MK_P.md) MK_P.md=getJSON("macro_daily").then(function(md){
+      var I=(md&&md.instruments)||{};
+      Object.keys(I).forEach(function(k){
+        var it=I[k]||{}, isLine=(it.kind==="line");
+        MK_DATA[k]={bars:mkClean(it.bars,isLine),kind:isLine?"line":"candle",
+                    label:it.label||MK_LABELS[k]||k,dec:(MK_DEC[k]==null?2:MK_DEC[k]),
+                    line:isLine,note:it.note||null};
+      });
+    });
+    return MK_P.md;
+  }
+  function mkEnsureAll(){ return Promise.all(MK_ORDER.map(function(k){
+    return mkEnsure(k).catch(function(){}); })); }
+  function mkEnsureGex(){
+    if(MK_GEXL!==null) return Promise.resolve();
+    if(!MK_P.gex) MK_P.gex=getJSON("gex").then(function(g){
+      var ov=(g&&g.overview)||{}, L=(g&&g.levels)||{};
+      MK_GEXL={flip:ov.gamma_flip!=null?+ov.gamma_flip:null,
+               call:(L.call_wall&&L.call_wall.strike!=null)?+L.call_wall.strike:null,
+               put:(L.put_wall&&L.put_wall.strike!=null)?+L.put_wall.strike:null};
+    }).catch(function(){ MK_GEXL={flip:null,call:null,put:null}; });
+    return MK_P.gex;
+  }
+
+  // ── resample: daily → weekly (ISO week) / monthly ───────────────────────
+  function mkResample(bars,tf){
+    if(tf==="D") return bars;
+    var out=[],cur=null,key=null;
+    for(var i=0;i<bars.length;i++){
+      var b=bars[i],k;
+      if(tf==="W"){ var t=new Date(b.date+"T00:00:00Z");
+        t.setUTCDate(t.getUTCDate()-((t.getUTCDay()+6)%7)); k=t.toISOString().slice(0,10); }
+      else k=String(b.date).slice(0,7);
+      if(k!==key){ if(cur)out.push(cur); key=k;
+        cur={date:b.date,o:b.o,h:b.h,l:b.l,c:b.c,v:b.v||0}; }
+      else { cur.h=Math.max(cur.h,b.h); cur.l=Math.min(cur.l,b.l);
+             cur.c=b.c; cur.date=b.date; if(b.v)cur.v+=b.v; }
+    }
+    if(cur)out.push(cur);
+    return out;
+  }
+  function mkEma(bars,p){
+    var k=2/(p+1),o=new Array(bars.length),e=null;
+    for(var i=0;i<bars.length;i++){ var c=bars[i].c; e=(e===null)?c:(c-e)*k+e;
+      o[i]=(i>=p-1)?e:null; }
+    return o;
+  }
+  function mkSeries(ins,tf){
+    var key=ins+tf; if(MK_RS[key]) return MK_RS[key];
+    var d=MK_DATA[ins]; if(!d) return null;
+    var bars=mkResample(d.bars,tf);
+    MK_RS[key]={bars:bars,e50:mkEma(bars,50),e200:mkEma(bars,200),
+      dec:d.dec,kind:d.kind,line:d.line,label:d.label};
+    return MK_RS[key];
+  }
+
+  // ── per-host view state (Markets is "", Edition/MC copies pass a suffix) ──
+  var MK_V={};
+  function mkV(sfx){ if(!MK_V[sfx]) MK_V[sfx]={i0:0,i1:0,cross:null,xh:false}; return MK_V[sfx]; }
+  var MK_PADR=62, MK_PADT=10, MK_PADB=32, MK_VOLH=0.16;
+
+  function mkHostCanvas(host){
+    var c=host.querySelector("canvas.mk-cv");
+    if(!c){ host.innerHTML=""; c=document.createElement("canvas"); c.className="mk-cv";
+            host.appendChild(c); }
+    return c;
+  }
+  function mkFit(sfx){
+    var ins=sfx?"SPX":MK_INSTR, tf=sfx?"D":MK_TF, s=mkSeries(ins,tf); if(!s) return;
+    var n=s.bars.length, w=Math.min(MK_TFWIN[tf],Math.max(8,n-1)), V=mkV(sfx);
+    V.i1=n-1; V.i0=Math.max(0,n-1-w);
+  }
+  function mkClamp(sfx){
+    var ins=sfx?"SPX":MK_INSTR, tf=sfx?"D":MK_TF, s=mkSeries(ins,tf); if(!s) return;
+    var n=s.bars.length, V=mkV(sfx), span=V.i1-V.i0;
+    if(span<8){ var m=(V.i0+V.i1)/2; V.i0=m-4; V.i1=m+4; span=8; }
+    if(span>n-1){ V.i0=0; V.i1=n-1; return; }
+    if(V.i0<0){ V.i0=0; V.i1=span; }
+    if(V.i1>n-1){ V.i1=n-1; V.i0=n-1-span; }
+  }
+
+  // ── paint ───────────────────────────────────────────────────────────────
+  function mkPaint(sfx){
+    sfx=sfx||"";
+    var host=document.getElementById("spxPlot"+sfx); if(!host) return;
+    var ins=sfx?"SPX":MK_INSTR, tf=sfx?"D":MK_TF, d=mkSeries(ins,tf); if(!d) return;
+    var cv=mkHostCanvas(host), r=host.getBoundingClientRect();
+    if(r.width<10||r.height<10) return;
+    var DPR=Math.min(2,window.devicePixelRatio||1);
+    if(cv.width!==Math.round(r.width*DPR)||cv.height!==Math.round(r.height*DPR)){
+      cv.width=Math.round(r.width*DPR); cv.height=Math.round(r.height*DPR);
+    }
+    var ctx=cv.getContext("2d"), K=mkC(), MONO="'Courier New',monospace";
+    var bars=d.bars,n=bars.length,w=r.width,h=r.height,V=mkV(sfx);
+    if(V.i1<=0){ mkFit(sfx); }
+    var i0=V.i0,i1=V.i1,span=i1-i0;
+    var a=Math.max(0,Math.floor(i0)), b=Math.min(n-1,Math.ceil(i1));
+    ctx.setTransform(DPR,0,0,DPR,0,0); ctx.clearRect(0,0,w,h);
+    var hasVol=false; for(var q=a;q<=b;q++) if(bars[q].v){ hasVol=true; break; }
+    var showGex=(ins==="SPX"&&MK_GEXON&&MK_GEXL),
+        priceH=h-MK_PADT-MK_PADB-(hasVol?h*MK_VOLH:0), plotW=w-MK_PADR;
+    var lo=Infinity,hi=-Infinity,i;
+    for(i=a;i<=b;i++){ var bb=bars[i];
+      if(bb.l<lo)lo=bb.l; if(bb.h>hi)hi=bb.h;
+      if(MK_E50&&d.e50[i]!=null){ lo=Math.min(lo,d.e50[i]); hi=Math.max(hi,d.e50[i]); }
+      if(MK_E200&&d.e200[i]!=null){ lo=Math.min(lo,d.e200[i]); hi=Math.max(hi,d.e200[i]); } }
+    if(!isFinite(lo)||!isFinite(hi)) return;
+    if(showGex){ var tol=(hi-lo)*0.55;
+      [MK_GEXL.flip,MK_GEXL.call,MK_GEXL.put].forEach(function(L){
+        if(L==null) return;
+        if(L>lo-tol&&L<hi+tol){ lo=Math.min(lo,L); hi=Math.max(hi,L); } }); }
+    var pad=(hi-lo)*0.06||1; lo-=pad; hi+=pad;
+    function X(i){ return (i-i0)/span*plotW; }
+    function Y(v){ return MK_PADT+(hi-v)/(hi-lo)*priceH; }
+    var bw=Math.max(1,Math.min(14,(plotW/span)*0.62));
+    ctx.font="10px "+MONO;
+    // grid + price axis
+    ctx.textAlign="left";
+    for(var g=0;g<=4;g++){ var pv=lo+(hi-lo)*g/4, y=Y(pv);
+      ctx.strokeStyle=K.grid; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(plotW,y); ctx.stroke();
+      ctx.fillStyle=K.fade; ctx.fillText(mkFmt(pv,d.dec),plotW+7,y+3); }
+    // time axis
+    var step=Math.max(1,Math.round(span/6)); ctx.textAlign="center"; ctx.fillStyle=K.fade;
+    for(i=Math.max(a,Math.ceil(i0/step)*step);i<=b;i+=step){
+      ctx.fillText((tf==="M")?String(bars[i].date).slice(0,7):String(bars[i].date).slice(5),X(i),h-18); }
+    // volume
+    if(hasVol){ var vm=0; for(i=a;i<=b;i++) if(bars[i].v>vm)vm=bars[i].v;
+      if(vm>0) for(i=a;i<=b;i++){ var vb=bars[i]; if(!vb.v) continue;
+        ctx.fillStyle=(vb.c>=vb.o)?"rgba(45,138,85,.42)":"rgba(176,48,48,.42)";
+        var vh=(vb.v/vm)*(h*MK_VOLH-8);
+        ctx.fillRect(X(i)-bw/2,h-MK_PADB-vh,bw,vh); } }
+    // GEX lines behind price; labels drawn after, or the candles paint over them
+    var gexL=[];
+    if(showGex){
+      [[MK_GEXL.call,"#2D8A55","Call wall"],[MK_GEXL.flip,K.amber,"Flip"],
+       [MK_GEXL.put,"#B03030","Put wall"]].forEach(function(L){
+        if(L[0]==null) return; var y=Y(L[0]);
+        if(y<MK_PADT-4||y>MK_PADT+priceH+4) return;
+        ctx.strokeStyle=L[1]; ctx.setLineDash([3,3]); ctx.beginPath();
+        ctx.moveTo(0,y); ctx.lineTo(plotW,y); ctx.stroke(); ctx.setLineDash([]);
+        gexL.push([y,L[1],L[2]+" "+mkFmt(L[0],0)]); }); }
+    // price
+    if(d.kind==="candle"){
+      for(i=a;i<=b;i++){ var c3=bars[i],up=c3.c>=c3.o,col=up?K.green:K.red,x=X(i);
+        ctx.strokeStyle=col; ctx.beginPath(); ctx.moveTo(x,Y(c3.h)); ctx.lineTo(x,Y(c3.l)); ctx.stroke();
+        ctx.fillStyle=up?"rgba(45,138,85,.62)":"rgba(176,48,48,.62)";
+        var y1=Y(Math.max(c3.o,c3.c)),y2=Y(Math.min(c3.o,c3.c));
+        ctx.fillRect(x-bw/2,y1,bw,Math.max(1,y2-y1));
+        ctx.strokeRect(x-bw/2,y1,bw,Math.max(1,y2-y1)); }
+    } else {
+      ctx.strokeStyle=K.gold; ctx.lineWidth=1.6; ctx.beginPath();
+      for(i=a;i<=b;i++){ var yy=Y(bars[i].c); (i===a)?ctx.moveTo(X(i),yy):ctx.lineTo(X(i),yy); }
+      ctx.stroke(); ctx.lineWidth=1;
+    }
+    // EMAs
+    function ln(arr,col){ ctx.strokeStyle=col; ctx.lineWidth=1.7; ctx.beginPath(); var st=false;
+      for(var i=a;i<=b;i++){ if(arr[i]==null) continue; var y=Y(arr[i]);
+        st?ctx.lineTo(X(i),y):ctx.moveTo(X(i),y); st=true; }
+      ctx.stroke(); ctx.lineWidth=1; }
+    if(MK_E50) ln(d.e50,K.gold);
+    if(MK_E200) ln(d.e200,K.blue);
+    // GEX labels on top, staggered so two levels never overlap
+    if(gexL.length){ ctx.font="10px "+MONO; ctx.textAlign="right"; var used=[];
+      gexL.forEach(function(L){ var ly=L[0]-4;
+        while(used.some(function(u){ return Math.abs(u-ly)<15; })) ly+=16;
+        used.push(ly);
+        var tw=ctx.measureText(L[2]).width;
+        ctx.fillStyle=K.card; ctx.globalAlpha=.86;
+        ctx.fillRect(plotW-tw-13,ly-10,tw+11,13); ctx.globalAlpha=1;
+        ctx.fillStyle=L[1]; ctx.fillText(L[2],plotW-8,ly); }); }
+    // crosshair
+    if(V.cross){ var ci=Math.max(a,Math.min(b,V.cross.i)),cx=X(ci),cy=V.cross.y;
+      ctx.strokeStyle=K.fade; ctx.globalAlpha=.55; ctx.setLineDash([3,3]);
+      ctx.beginPath(); ctx.moveTo(cx,MK_PADT); ctx.lineTo(cx,h-MK_PADB); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(plotW,cy); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha=1;
+      ctx.font="10px "+MONO;
+      var pvv=hi-(cy-MK_PADT)/priceH*(hi-lo), pt=mkFmt(pvv,d.dec), ptw=ctx.measureText(pt).width;
+      ctx.fillStyle=K.ink; ctx.fillRect(plotW+2,cy-8,ptw+10,15);
+      ctx.fillStyle=K.card; ctx.textAlign="left"; ctx.fillText(pt,plotW+7,cy+3);
+      var dt=String(bars[ci].date), dtw=ctx.measureText(dt).width;
+      ctx.fillStyle=K.ink; ctx.fillRect(cx-dtw/2-5,h-MK_PADB+4,dtw+10,14);
+      ctx.fillStyle=K.card; ctx.textAlign="center"; ctx.fillText(dt,cx,h-MK_PADB+14); }
+  }
+  var mkRaf=0;
+  function mkSchedule(sfx){ if(mkRaf) return;
+    mkRaf=requestAnimationFrame(function(){ mkRaf=0; mkPaint(sfx||""); }); }
+
+  // ── header + labelled OHLC readout ──────────────────────────────────────
+  function mkCell(k,v,cls,col){
+    return '<span class="oh-cell'+(cls?" "+cls:"")+'"><span class="oh-k">'+k+'</span>'+
+           '<span class="oh-v"'+(col?' style="color:'+col+'"':'')+'>'+v+'</span></span>';
+  }
+  function mkReadout(i,sfx){
+    sfx=sfx||"";
+    var el=document.getElementById("spxOhlc"+sfx); if(!el) return;
+    var ins=sfx?"SPX":MK_INSTR, tf=sfx?"D":MK_TF, d=mkSeries(ins,tf); if(!d) return;
+    var bars=d.bars,q=bars[i]; if(!q) return;
+    var K=mkC(), p=(i>0?bars[i-1].c:q.c), pc=p?((q.c-p)/p*100):0, up=pc>=0, dec=d.dec;
+    var html=mkCell(tf==="D"?"DATE":(tf==="W"?"WEEK OF":"MONTH"),q.date,"oh-date");
+    if(d.kind==="candle"){
+      html+=mkCell("O",mkFmt(q.o,dec))+mkCell("H",mkFmt(q.h,dec))+
+            mkCell("L",mkFmt(q.l,dec))+mkCell("C",mkFmt(q.c,dec),"",up?K.green:K.red);
+      if(q.v) html+=mkCell("VOL",(q.v/1e9).toFixed(2)+"B");
+    } else { html+=mkCell("VALUE",mkFmt(q.c,dec),"",up?K.green:K.red); }
+    html+=mkCell("CHG",(up?"+":"")+pc.toFixed(2)+"%","oh-chg",up?K.green:K.red);
+    el.innerHTML=html;
+  }
+  function mkHeader(sfx){
+    sfx=sfx||"";
+    var ins=sfx?"SPX":MK_INSTR, tf=sfx?"D":MK_TF, d=mkSeries(ins,tf); if(!d) return;
+    var bars=d.bars,n=bars.length; if(!n) return;
+    var last=bars[n-1], prev=bars[n-2]||last, K=mkC();
+    var t=document.getElementById("spxTitle"+sfx);
+    if(t) t.textContent=d.label+" \u00b7 "+MK_TFLBL[tf];
+    var px=document.getElementById("spxPx"+sfx);
+    if(px) px.textContent=mkFmt(last.c,d.dec);
+    var kk=document.getElementById("spxPxK"+sfx);
+    if(kk) kk.textContent=(tf==="D")?"Last close":("Last "+MK_TFLBL[tf].toLowerCase()+" close");
+    var ch=last.c-prev.c, cp=prev.c?(ch/prev.c*100):0, up=ch>=0;
+    var ce=document.getElementById("spxChg"+sfx);
+    if(ce) ce.innerHTML='<span style="color:'+(up?K.green:K.red)+'">'+(up?"+":"")+
+      mkFmt(ch,d.dec)+' ('+(up?"+":"")+cp.toFixed(2)+'%)</span>';
+    var sa=document.getElementById("spxAsof"+sfx); if(sa) sa.textContent=last.date;
+  }
+
+  // ── interaction: iPad first ─────────────────────────────────────────────
+  // Never reads e.buttons — Safari reports 0 for touch, which is exactly why
+  // the Plotly version could not pan. One finger drags (with inertia), two
+  // pinch, press-and-hold 260ms arms the crosshair, double-tap refits.
+  function mkBindCanvas(){
+    var host=document.getElementById("spxPlot"); if(!host) return;
+    var cv=mkHostCanvas(host);
+    if(cv.getAttribute("data-bound")) return;
+    cv.setAttribute("data-bound","1");
+    var P={},pan=null,pinch=null,hold=null,lastTap=0,vel=0,glide=0,RECT=null;
+    function rect(){ RECT=host.getBoundingClientRect(); return RECT; }
+    function idxAt(x){ var V=mkV(""); return V.i0+(x/(rect().width-MK_PADR))*(V.i1-V.i0); }
+    function nbars(){ var s=mkSeries(MK_INSTR,MK_TF); return s?s.bars.length:0; }
+    function stopGlide(){ if(glide){ cancelAnimationFrame(glide); glide=0; } vel=0; }
+    function startGlide(){
+      if(Math.abs(vel)<0.06) return;
+      (function step(){ vel*=0.93;
+        var V=mkV(""), per=(rect().width-MK_PADR)/(V.i1-V.i0), di=vel/per;
+        V.i0-=di; V.i1-=di; mkClamp(""); mkPaint("");
+        glide=(Math.abs(vel)>0.06)?requestAnimationFrame(step):0; })();
+    }
+    function setXH(on){
+      var V=mkV(""); V.xh=on;
+      var badge=document.getElementById("spxXhb");
+      if(badge) badge.className="spx-xhb"+(on?" on":"");
+      if(!on){ V.cross=null; mkReadout(Math.max(0,nbars()-1),""); mkSchedule(""); }
+    }
+    MK_SETXH=setXH; MK_STOPGLIDE=stopGlide;
+    cv.addEventListener("pointerdown",function(e){
+      try{ cv.setPointerCapture(e.pointerId); }catch(err){}
+      P[e.pointerId]={x:e.clientX,y:e.clientY};
+      var ids=Object.keys(P), V=mkV(""); stopGlide(); rect();
+      if(ids.length===2){ pan=null;
+        pinch={d:Math.abs(P[ids[0]].x-P[ids[1]].x)||1,i0:V.i0,i1:V.i1};
+        if(hold){ clearTimeout(hold); hold=null; } return; }
+      if(ids.length!==1) return;
+      var t=Date.now(), dbl=(t-lastTap<320);
+      if(dbl){ setXH(false); mkFit(""); mkSchedule(""); lastTap=0; }
+      else lastTap=t;
+      pan={x:e.clientX,y:e.clientY,i0:V.i0,i1:V.i1,moved:false,t:t,lx:e.clientX,lt:t};
+      if(dbl) return;
+      if(V.xh){ var r0=rect();
+        V.cross={i:Math.round(idxAt(e.clientX-r0.left)),
+                 y:Math.max(MK_PADT,Math.min(e.clientY-r0.top,r0.height-MK_PADB))};
+        mkReadout(V.cross.i,""); mkSchedule(""); }
+      else hold=setTimeout(function(){ hold=null;
+        if(pan&&!pan.moved){ setXH(true); var r1=rect();
+          mkV("").cross={i:Math.round(idxAt(pan.x-r1.left)),
+                         y:Math.max(MK_PADT,Math.min(pan.y-r1.top,r1.height-MK_PADB))};
+          mkReadout(mkV("").cross.i,""); mkSchedule("");
+          if(navigator.vibrate) try{ navigator.vibrate(8); }catch(err){} } },260);
+    },{passive:true});
+    cv.addEventListener("pointermove",function(e){
+      if(!P[e.pointerId]) return;
+      P[e.pointerId]={x:e.clientX,y:e.clientY};
+      var ids=Object.keys(P), V=mkV(""), r=rect();
+      if(ids.length===2&&pinch){
+        var dist=Math.abs(P[ids[0]].x-P[ids[1]].x)||1, f=pinch.d/dist,
+            mid=(P[ids[0]].x+P[ids[1]].x)/2-r.left,
+            ii=pinch.i0+(mid/(r.width-MK_PADR))*(pinch.i1-pinch.i0);
+        V.i0=ii-(ii-pinch.i0)*f; V.i1=ii+(pinch.i1-ii)*f; mkClamp(""); mkSchedule(""); return; }
+      if(!pan) return;
+      var dx=e.clientX-pan.x;
+      if(!pan.moved&&Math.abs(dx)>4){ pan.moved=true; if(hold){ clearTimeout(hold); hold=null; } }
+      if(V.xh){
+        V.cross={i:Math.round(Math.max(0,Math.min(nbars()-1,idxAt(e.clientX-r.left)))),
+                 y:Math.max(MK_PADT,Math.min(e.clientY-r.top,r.height-MK_PADB))};
+        mkReadout(V.cross.i,""); mkSchedule(""); return; }
+      if(pan.moved){
+        var per=(r.width-MK_PADR)/(pan.i1-pan.i0);
+        V.i0=pan.i0-dx/per; V.i1=pan.i1-dx/per; mkClamp("");
+        var now=Date.now(), dt=now-pan.lt;
+        if(dt>0){ vel=(e.clientX-pan.lx)/dt*16; pan.lx=e.clientX; pan.lt=now; }
+        mkSchedule(""); }
+    },{passive:true});
+    function up(e){
+      delete P[e.pointerId];
+      var ids=Object.keys(P);
+      if(hold){ clearTimeout(hold); hold=null; }
+      if(ids.length<2) pinch=null;
+      if(ids.length===0){
+        if(pan&&pan.moved&&!mkV("").xh) startGlide();
+        if(pan&&!pan.moved&&mkV("").xh&&Date.now()-pan.t<250) setXH(false);
+        pan=null; }
+    }
+    cv.addEventListener("pointerup",up,{passive:true});
+    cv.addEventListener("pointercancel",up,{passive:true});
+    cv.addEventListener("mousemove",function(e){
+      if(pan||mkV("").xh) return;
+      var r=rect(), n=nbars(); if(!n) return;
+      mkV("").cross={i:Math.round(Math.max(0,Math.min(n-1,idxAt(e.clientX-r.left)))),
+                     y:Math.max(MK_PADT,Math.min(e.clientY-r.top,r.height-MK_PADB))};
+      mkReadout(mkV("").cross.i,""); mkSchedule("");
+    });
+    cv.addEventListener("mouseleave",function(){
+      if(!mkV("").xh&&!pan){ mkV("").cross=null; mkSchedule(""); } });
+    cv.addEventListener("wheel",function(e){
+      e.preventDefault(); stopGlide();
+      var V=mkV(""), r=rect(), ii=idxAt(e.clientX-r.left), f=(e.deltaY>0)?1.14:0.88;
+      V.i0=ii-(ii-V.i0)*f; V.i1=ii+(V.i1-ii)*f; mkClamp(""); mkSchedule("");
+    },{passive:false});
+    cv.addEventListener("dblclick",function(){ setXH(false); mkFit(""); mkSchedule(""); });
+  }
+  var MK_SETXH=function(){}, MK_STOPGLIDE=function(){};
+
+  // ── cards ───────────────────────────────────────────────────────────────
+  function mkSpark(cv,d,a,b,good,isSpx){
+    var r=cv.getBoundingClientRect(); if(r.width<10||r.height<6) return;
+    var DPR=Math.min(2,window.devicePixelRatio||1);
+    cv.width=Math.round(r.width*DPR); cv.height=Math.round(r.height*DPR);
+    var g=cv.getContext("2d"); g.setTransform(DPR,0,0,DPR,0,0);
+    var K=mkC(), w=r.width,h=r.height,bars=d.bars,lo=Infinity,hi=-Infinity,i;
+    for(i=a;i<=b;i++){ var v=bars[i].c; if(v<lo)lo=v; if(v>hi)hi=v;
+      if(!d.line){ if(MK_E50&&d.e50[i]!=null){ lo=Math.min(lo,d.e50[i]); hi=Math.max(hi,d.e50[i]); }
+        if(MK_E200&&d.e200[i]!=null){ lo=Math.min(lo,d.e200[i]); hi=Math.max(hi,d.e200[i]); } } }
+    if(!isFinite(lo)||!isFinite(hi)) return;
+    var flip=(isSpx&&MK_GEXON&&MK_GEXL&&MK_GEXL.flip!=null)?MK_GEXL.flip:null;
+    if(flip!=null){ lo=Math.min(lo,flip); hi=Math.max(hi,flip); }
+    var pad=(hi-lo)*0.09||1; lo-=pad; hi+=pad;
+    function X(i){ return (i-a)/Math.max(1,(b-a))*w; }
+    function Y(v){ return (hi-v)/(hi-lo)*h; }
+    g.beginPath(); g.moveTo(X(a),h);
+    for(i=a;i<=b;i++) g.lineTo(X(i),Y(bars[i].c));
+    g.lineTo(X(b),h); g.closePath();
+    g.fillStyle=good?"rgba(45,138,85,.12)":"rgba(176,48,48,.12)"; g.fill();
+    if(flip!=null){ var fy=Y(flip); g.strokeStyle=K.amber; g.setLineDash([2,3]); g.lineWidth=1;
+      g.beginPath(); g.moveTo(0,fy); g.lineTo(w,fy); g.stroke(); g.setLineDash([]); }
+    g.strokeStyle=good?K.green:K.red; g.lineWidth=1.5; g.beginPath();
+    for(i=a;i<=b;i++){ (i===a)?g.moveTo(X(i),Y(bars[i].c)):g.lineTo(X(i),Y(bars[i].c)); }
+    g.stroke();
+    function ln(arr,col){ g.strokeStyle=col; g.lineWidth=1.25; g.beginPath(); var st=false;
+      for(var i=a;i<=b;i++){ if(arr[i]==null) continue;
+        st?g.lineTo(X(i),Y(arr[i])):g.moveTo(X(i),Y(arr[i])); st=true; }
+      g.stroke(); }
+    if(!d.line){ if(MK_E50) ln(d.e50,K.gold); if(MK_E200) ln(d.e200,K.blue); }
+    g.lineWidth=1;
+  }
+  function mkCards(){
+    var host=document.getElementById("spxCards"); if(!host) return;
+    mkEnsureAll().then(mkEnsureGex).then(function(){
+      var K=mkC(); host.innerHTML="";
+      MK_ORDER.forEach(function(key){
+        var d=mkSeries(key,MK_TF);
+        var el=document.createElement("div"); el.className="spx-mcard";
+        if(!d||!d.bars.length){
+          el.innerHTML='<div class="h"><span class="t">'+(MK_LABELS[key]||key)+
+            '</span><span class="chip">'+key+'</span></div>'+
+            '<div class="mc-empty">No data yet \u2014 populates on the next engine run.</div>';
+          host.appendChild(el); return; }
+        var bars=d.bars,n=bars.length,
+            wbars=Math.min(MK_TFCARD[MK_TF],n-1), a=Math.max(0,n-1-wbars),
+            last=bars[n-1], base=bars[a],
+            chg=base.c?((last.c-base.c)/base.c*100):0,
+            inv=(key==="HYOAS"), good=inv?(chg<0):(chg>=0);
+        el.innerHTML='<div class="h"><span class="t">'+d.label+
+          '</span><span class="chip">'+key+'</span></div>'+
+          '<div class="m"><span class="px">'+mkFmt(last.c,d.dec)+'</span>'+
+          '<span class="pc" style="color:'+(good?K.green:K.red)+'">'+
+          (chg>=0?"+":"")+chg.toFixed(1)+'%</span></div><canvas></canvas>'+
+          '<div class="f"><span>'+MK_TFNOTE[MK_TF]+(d.line?" \u00b7 EMAs off":"")+
+          ((key==="SPX"&&MK_GEXON&&MK_GEXL&&MK_GEXL.flip!=null)?" \u00b7 flip":"")+
+          '</span><span class="o">open \u2192</span></div>';
+        el.addEventListener("click",function(){
+          MK_INSTR=key; mkSetView("chart"); mkSyncPills();
+          mkFit(""); mkHeader(""); mkReadout(mkSeries(MK_INSTR,MK_TF).bars.length-1,"");
+          mkPaint(""); });
+        host.appendChild(el);
+        mkSpark(el.querySelector("canvas"),d,a,n-1,good,key==="SPX");
+      });
+    });
+  }
+
+  // ── controls ────────────────────────────────────────────────────────────
+  function mkSetView(v){
+    MK_VIEW=v;
+    var pw=document.getElementById("spxPlotWrap"), cw=document.getElementById("spxCards"),
+        hero=document.getElementById("spxHero"), ins=document.getElementById("mkInstr");
+    if(pw) pw.style.display=(v==="chart")?"":"none";
+    if(cw) cw.style.display=(v==="cards")?"grid":"none";
+    if(hero) hero.style.visibility=(v==="chart")?"":"hidden";
+    if(ins) ins.style.visibility=(v==="chart")?"":"hidden";
+    var a=document.getElementById("spxVChart"), b=document.getElementById("spxVCards");
+    if(a) a.className=(v==="chart")?"on":"";
+    if(b) b.className=(v==="cards")?"on":"";
+    if(v==="cards"){ MK_SETXH(false); mkCards(); }
+  }
+  function mkEmaAvail(){
+    var s=mkSeries(MK_INSTR,MK_TF), n=s?s.bars.length:0, isLine=s?s.line:false;
+    function mark(id,p,on){
+      var b=document.getElementById(id); if(!b) return;
+      var ok=(!isLine&&n>=p);
+      b.className="mk-chip"+(ok&&on?" on":"");
+      b.style.textDecoration=ok?"":"line-through";
+      b.title=ok?"":(isLine?"not drawn on a weekly FRED series"
+        :"needs "+p+" "+MK_TFLBL[MK_TF].toLowerCase()+" bars \u2014 only "+n+" available");
+    }
+    mark("mkEma50",50,MK_E50); mark("mkEma200",200,MK_E200);
+    var gb=document.getElementById("mkGex");
+    if(gb){ gb.className="mk-chip"+(MK_GEXON?" on":"");
+      gb.style.display=(MK_INSTR==="SPX"||MK_VIEW==="cards")?"":"none"; }
+  }
+  function mkSyncPills(){
+    [].forEach.call(document.querySelectorAll("#mkInstr button"),function(b){
+      b.className=(b.getAttribute("data-ins")===MK_INSTR)?"on":""; });
+    [].forEach.call(document.querySelectorAll("#mkTf button"),function(b){
+      b.className=(b.getAttribute("data-tf")===MK_TF)?"on":""; });
+    mkEmaAvail();
+  }
+  // kept for the exchange chip on the ticker page, which deep-links here
+  function mkSetInstrument(ins){
+    MK_INSTR=ins||"SPX"; MK_STOPGLIDE(); MK_SETXH(false);
+    mkSetView("chart");
+    drawn.spx=false;
     drawSPX("");
   }
+  function mkBindControls(){
+    if(MK_BOUND) return; MK_BOUND=true;
+    var tf=document.getElementById("mkTf");
+    if(tf) tf.addEventListener("click",function(e){
+      var b=e.target.closest?e.target.closest("[data-tf]"):null; if(!b) return;
+      MK_TF=b.getAttribute("data-tf"); MK_STOPGLIDE(); MK_SETXH(false);
+      mkSyncPills(); mkFit("");
+      if(MK_VIEW==="cards"){ mkHeader(""); mkCards(); }
+      else { mkHeader(""); var s=mkSeries(MK_INSTR,MK_TF);
+             if(s) mkReadout(s.bars.length-1,""); mkPaint(""); }
+    });
+    function chip(id,get,set){
+      var b=document.getElementById(id); if(!b) return;
+      b.addEventListener("click",function(){ set(!get()); mkEmaAvail();
+        if(MK_VIEW==="cards") mkCards(); else mkPaint(""); });
+    }
+    chip("mkEma50",function(){return MK_E50;},function(v){MK_E50=v;});
+    chip("mkEma200",function(){return MK_E200;},function(v){MK_E200=v;});
+    chip("mkGex",function(){return MK_GEXON;},function(v){MK_GEXON=v;});
+    var vc=document.getElementById("spxVChart"), vk=document.getElementById("spxVCards");
+    if(vc) vc.addEventListener("click",function(){ mkSetView("chart"); mkSyncPills();
+      mkHeader(""); var s=mkSeries(MK_INSTR,MK_TF); if(s) mkReadout(s.bars.length-1,"");
+      mkPaint(""); });
+    if(vk) vk.addEventListener("click",function(){ mkSetView("cards"); mkSyncPills(); });
+    var ft=document.getElementById("spxFit");
+    if(ft) ft.addEventListener("click",function(){ MK_STOPGLIDE(); MK_SETXH(false);
+      mkFit(""); mkPaint(""); });
+    // the canvas is theme-driven, so a DARK/LIGHT switch has to repaint it
+    try{
+      new MutationObserver(function(){
+        if(MK_VIEW==="cards") mkCards(); else mkSchedule("");
+      }).observe(document.documentElement,{attributes:true,attributeFilter:["class"]});
+    }catch(e){}
+    var rt=null;
+    window.addEventListener("resize",function(){
+      clearTimeout(rt);
+      rt=setTimeout(function(){ if(MK_VIEW==="cards") mkCards(); else mkPaint(""); },120);
+    });
+  }
+
+  // ── entry point (same name/signature the rest of the app already calls) ──
   function drawSPX(sfx){
     sfx=sfx||"";
     if(!sfx && drawn.spx) return;
     if(sfx && drawn["spx"+sfx]) return;
-    var _spxHost=document.getElementById("spxPlot"+sfx);
-    // the Edition copy (sfx set) always shows SPX; only the Markets chart switches
+    var host=document.getElementById("spxPlot"+sfx); if(!host) return;
     var ins=sfx?"SPX":MK_INSTR;
-    var loader=(ins==="SPX")
-      ? getJSON("spx_daily")
-      : getJSON("macro_daily").then(function(md){
-          var it=md&&md.instruments&&md.instruments[ins];
-          if(!it) throw new Error("instrument "+ins+" not in macro_daily.json");
-          return {bars:it.bars, kind:it.kind, label:it.label, note:it.note};
-        });
-    Promise.all([loader, getJSON("gex").catch(function(){return null;})]).then(function(res){
-      var d=res[0];
-      // gamma levels belong to SPX ONLY — drawing them on gold would be a lie
-      var gex=(ins==="SPX")?res[1]:null;
-      var isLine=(d&&d.kind==="line");
-      var _t=document.getElementById("spxTitle"+sfx);
-      if(_t) _t.textContent=(MK_LABELS[ins]||ins)+" \u00b7 Daily";
-      var bars=(d&&d.bars)||[]; if(!bars.length){ document.getElementById("spxPlot"+sfx).innerHTML='<div class="err">No daily data for '+ins+' yet. It populates on the next engine run.</div>'; return; }
-      // a line series has no OHLC: synthesise flat bars so every downstream
-      // reader (hover, volume, zoom) keeps working, then draw it as a line
-      if(isLine) bars=bars.map(function(b){return {date:b.date,o:b.c,h:b.c,l:b.c,c:b.c,v:null};});
-      var dates=bars.map(function(b){return b.date;});
-      var last=bars[bars.length-1], prev=bars.length>1?bars[bars.length-2]:last;
-      var chg=((last.c-prev.c)/prev.c*100), chgpts=(last.c-prev.c);
-      // big header
-      document.getElementById("spxPx"+sfx).textContent=last.c.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-      var cc=chg>=0?"var(--green)":"var(--red)";
-      document.getElementById("spxChg"+sfx).innerHTML='<span style="color:'+cc+'">'+(chg>=0?"+":"")+chgpts.toFixed(2)+' ('+(chg>=0?"+":"")+chg.toFixed(2)+'%)</span>';
-      var _sa=document.getElementById("spxAsof"+sfx); if(_sa) _sa.textContent=last.date;
-
-      // per-bar % change for hover
-      var pct=bars.map(function(b,i){ if(i===0)return 0; var p=bars[i-1].c; return p?((b.c-p)/p*100):0; });
-      var hovertext=bars.map(function(b,i){
-        return "O "+b.o.toLocaleString()+"  H "+b.h.toLocaleString()+"<br>L "+b.l.toLocaleString()+"  C "+b.c.toLocaleString()+
-               "<br>Vol "+(b.v?(b.v/1e9).toFixed(2)+"B":"\u2014")+"  "+(pct[i]>=0?"+":"")+pct[i].toFixed(2)+"%";
+    Promise.all([mkEnsure(ins),(ins==="SPX")?mkEnsureGex():Promise.resolve()])
+      .then(function(){
+        var d=mkSeries(ins,sfx?"D":MK_TF);
+        if(!d||!d.bars.length){
+          host.innerHTML='<div class="err">No daily data for '+ins+
+            ' yet. It populates on the next engine run.</div>'; return; }
+        mkFit(sfx); mkHeader(sfx); mkReadout(d.bars.length-1,sfx);
+        if(!sfx){ mkSyncPills(); mkBindCanvas(); mkBindControls(); }
+        mkPaint(sfx);
+        drawn["spx"+sfx]=true;
+      }).catch(function(e){
+        host.innerHTML=errHTML(ins==="SPX"?"spx_daily.json":"macro_daily.json",
+          (e&&e.message)||String(e));
+        console.error("[spx]",e);
       });
-      var volColors=bars.map(function(b){return (b.c>=b.o)?"rgba(45,138,85,.45)":"rgba(176,48,48,.45)";});
-      var candle={type:"candlestick",x:dates,open:bars.map(function(b){return b.o;}),high:bars.map(function(b){return b.h;}),low:bars.map(function(b){return b.l;}),close:bars.map(function(b){return b.c;}),
-        text:hovertext,hoverinfo:"text+x",
-        increasing:{line:{color:"#2D8A55"},fillcolor:"rgba(45,138,85,.6)"},decreasing:{line:{color:"#B03030"},fillcolor:"rgba(176,48,48,.6)"},yaxis:"y",name:"",showlegend:false};
-      if(isLine){
-        candle={type:"scatter",mode:"lines",x:dates,
-          y:bars.map(function(b){return b.c;}),
-          line:{color:PXC().gold||"#D37736",width:1.6},
-          text:hovertext,hoverinfo:"text+x",yaxis:"y",name:"",showlegend:false};
-      }
-      var vol={type:"bar",x:dates,y:bars.map(function(b){return b.v;}),marker:{color:volColors},yaxis:"y2",name:"Vol",hoverinfo:"skip",showlegend:false};
-
-      var layout=baseLayout();
-      layout.dragmode="pan";
-      layout.hovermode="x";
-      layout.hoverlabel={bgcolor:"#FAF7F2",bordercolor:"#C8BFA8",font:{family:"'Courier New',monospace",size:11,color:PXC().ink}};
-      layout.grid={rows:2,columns:1,roworder:"top to bottom"};
-      layout.yaxis={domain:[0.24,1],side:"right",gridcolor:PXC().grid,tickfont:tf(),fixedrange:false,autorange:true};
-      layout.yaxis2={domain:[0,0.18],side:"right",gridcolor:PXC().grid,tickfont:tf(8),fixedrange:true,showticklabels:false};
-      layout.xaxis={rangeslider:{visible:false},gridcolor:PXC().grid,tickfont:tf(),rangebreaks:[{bounds:["sat","mon"]}]};
-      // default view: last ~60 sessions (still pannable/zoomable to full history)
-      if(dates.length>60){ layout.xaxis.range=[dates[dates.length-60], dates[dates.length-1]]; }
-
-      // GEX levels as horizontal lines (gamma flip, call wall, put wall)
-      var shapes=[], anns=[];
-      if(gex){
-        var ov=gex.overview||{}, L=gex.levels||{};
-        function lvlLine(val,color,label){
-          if(val==null) return;
-          shapes.push({type:"line",xref:"paper",x0:0,x1:1,yref:"y",y0:val,y1:val,
-            line:{color:color,width:1,dash:"dot"}});
-          anns.push({xref:"paper",x:1,y:val,yref:"y",xanchor:"right",yanchor:"bottom",
-            text:label+" "+val.toLocaleString(),showarrow:false,
-            font:{family:"'Courier New',monospace",size:11,color:color},bgcolor:"rgba(250,247,242,.7)"});
-        }
-        lvlLine(ov.gamma_flip,"#A67C00","Flip");
-        lvlLine(L.call_wall&&L.call_wall.strike,"#1A5C38","Call wall");
-        lvlLine(L.put_wall&&L.put_wall.strike,"#7A1E1E","Put wall");
-      }
-      layout.shapes=shapes; layout.annotations=anns;
-
-      var conf={displayModeBar:false,responsive:true,scrollZoom:true,doubleClick:"reset"};
-      Plotly.newPlot("spxPlot"+sfx,[candle,vol],layout,conf);
-
-      var plotEl=document.getElementById("spxPlot"+sfx);
-
-      // shared: update the corner readout for a given bar index
-      function showBar(i){
-        if(i==null||i<0||i>=bars.length||!bars[i])return;
-        var b=bars[i];
-        document.getElementById("spxHover"+sfx).innerHTML=
-          '<span class="hk">'+b.date+'</span> O '+b.o.toLocaleString()+' H '+b.h.toLocaleString()+
-          ' L '+b.l.toLocaleString()+' C '+b.c.toLocaleString()+' \u00B7 Vol '+(b.v?(b.v/1e9).toFixed(2)+'B':'\u2014')+
-          ' \u00B7 <span style="color:'+(pct[i]>=0?"var(--green)":"var(--red)")+'">'+(pct[i]>=0?"+":"")+pct[i].toFixed(2)+'%</span>';
-      }
-      // desktop hover
-      plotEl.on("plotly_hover",function(ev){
-        var pt=ev.points&&ev.points[0]; if(!pt)return; showBar(pt.pointIndex);
-      });
-      // touch scrub: map finger x-position to nearest bar, update readout live.
-      // Works on iPad where there's no hover. Does not block Plotly's pan.
-      function scrubFromTouch(clientX){
-        try{
-          var gd=plotEl; var xa=gd._fullLayout.xaxis;
-          var rect=gd.getBoundingClientRect();
-          var xInData=xa.p2d(clientX-rect.left);
-          // xInData is a date-ish value; find nearest bar by index along visible range
-          // Plotly gives category/linear index for date axis; match to closest date
-          var target=xInData;
-          var lo=0,hi=bars.length-1,best=0,bestDiff=Infinity;
-          for(var k=0;k<bars.length;k++){
-            var t=new Date(bars[k].date).getTime();
-            var diff=Math.abs(t-new Date(_fromAxis(target)).getTime());
-            if(diff<bestDiff){bestDiff=diff;best=k;}
-          }
-          showBar(best);
-        }catch(e){}
-      }
-      function _fromAxis(v){
-        // xaxis.p2d on a date axis returns ms or date string depending on version
-        if(typeof v==="number"){ return v; }
-        return v;
-      }
-      var scrubbing=false;
-      plotEl.addEventListener("touchstart",function(e){ scrubbing=true; if(e.touches[0])scrubFromTouch(e.touches[0].clientX); },{passive:true});
-      plotEl.addEventListener("touchmove",function(e){ if(scrubbing&&e.touches[0])scrubFromTouch(e.touches[0].clientX); },{passive:true});
-      plotEl.addEventListener("touchend",function(){ scrubbing=false; },{passive:true});
-
-      // zoom buttons — operate on the x-axis range, keep drag as pan
-      function curRange(){
-        var xa=plotEl._fullLayout.xaxis;
-        return [xa.range[0], xa.range[1]];
-      }
-      function setXRange(r){ Plotly.relayout(plotEl,{"xaxis.range":r}); }
-      function zoomBy(factor){
-        var r=curRange();
-        var a=new Date(r[0]).getTime(), b=new Date(r[1]).getTime();
-        if(isNaN(a)||isNaN(b)){ a=r[0]; b=r[1]; }
-        var mid=(a+b)/2, half=(b-a)/2*factor;
-        setXRange([new Date(mid-half).toISOString().slice(0,10), new Date(mid+half).toISOString().slice(0,10)]);
-      }
-      // Zoom controls only exist on the Markets page — Mission Control hosts the
-      // same chart without them. These must be suffix-aware AND null-safe, or
-      // drawSPX("MC") would wire Markets' buttons to Mission Control's chart.
-      var zi=document.getElementById("spxZoomIn"+sfx),
-          zo=document.getElementById("spxZoomOut"+sfx),
-          zr=document.getElementById("spxZoomReset"+sfx);
-      if(zi) zi.addEventListener("click",function(){ zoomBy(0.6); });
-      if(zo) zo.addEventListener("click",function(){ zoomBy(1.6); });
-      if(zr) zr.addEventListener("click",function(){
-        var r=(dates.length>60)?[dates[dates.length-60],dates[dates.length-1]]:[dates[0],dates[dates.length-1]];
-        setXRange(r);
-      });
-      drawn[("spx")+sfx]=true;
-    }).catch(function(e){
-      if(_spxHost) _spxHost.innerHTML=errHTML("spx_daily.json", (e&&e.message)||String(e));
-      console.error("[spx]", e);      // stack goes to the console for diagnosis
-    });
   }
 
   function initMarkets(){
