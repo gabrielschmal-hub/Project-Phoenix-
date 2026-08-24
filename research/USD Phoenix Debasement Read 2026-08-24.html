@@ -1,0 +1,464 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>USD &middot; Phoenix Equity Research &middot; 23 Aug 2026</title>
+<style>
+:root{
+  --bg:#020F1F; --card:#08192B; --card2:#0C2137; --line:#14304A; --line2:#1E4462;
+  --ink:#E7EEF6; --inkMed:#C4D2DF; --inkLight:#94A8BA; --inkFade:#6B8299; --inkGhost:#47596C;
+  --gold:#D37736; --green:#3FBF77; --greenBg:rgba(63,191,119,.13);
+  --red:#D9534F; --redBg:rgba(217,83,79,.13);
+  --amber:#D8A24A; --amberBg:rgba(216,162,74,.13);
+  --rail:#010A15; --railLine:#0E2942;
+  --gCall:#2D8A55; --gPut:#C43A30; --gSpot:#3B82C4; --gFlip:#E8C34A; --gPin:#9B7BD4;
+  --serif:Georgia,'Times New Roman',serif; --mono:'Courier New',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:#020F1F;color-scheme:dark}
+html.light{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:15.5px;line-height:1.62}
+.shell{display:grid;grid-template-columns:236px 1fr;max-width:1420px;margin:0 auto}
+.rail{background:var(--rail);border-right:1px solid var(--railLine);padding:22px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.rail .logo{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--gold);font-weight:700;padding:0 20px 15px;border-bottom:1px solid var(--railLine)}
+.rail .logo span{color:var(--inkFade);letter-spacing:.16em}
+.toc{list-style:none;margin:12px 0 0;padding:0}
+.toc a{display:flex;gap:10px;padding:7px 20px;color:var(--inkLight);text-decoration:none;font-family:var(--mono);font-size:11.5px;border-left:2px solid transparent}
+.toc a:hover{color:var(--ink);background:rgba(211,119,54,.07);border-left-color:var(--gold)}
+.toc a b{color:var(--inkGhost);font-weight:400;min-width:16px}
+.grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--inkGhost);padding:15px 20px 4px;text-transform:uppercase}
+.rail .stat{margin:16px 20px 0;padding-top:13px;border-top:1px solid var(--railLine);font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.85}
+.rail .stat b{color:var(--red)}
+main{padding:0 40px 90px;min-width:0}
+.mast{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:24px 0 13px;border-bottom:2px solid var(--gold)}
+.mast .t{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--inkFade);text-transform:uppercase}
+.mast .r{font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);text-align:right;line-height:1.8}
+h1{font-weight:400;font-size:clamp(31px,4.8vw,50px);line-height:1.08;letter-spacing:-.015em;margin:24px 0 6px}
+h1 em{font-style:italic;color:var(--gold)}
+h2{font-weight:400;font-size:26px;letter-spacing:-.01em;margin:0 0 3px}
+h3{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 9px}
+p{color:var(--inkMed);margin:0 0 13px}
+.lede{font-size:18.5px;line-height:1.58;color:var(--ink)}
+.mono{font-family:var(--mono)} a{color:var(--gold)}
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+.sh{display:flex;gap:14px;align-items:baseline;margin-bottom:19px}
+.sh .n{font-family:var(--mono);font-size:11px;color:var(--gold);font-weight:700;padding-top:8px;min-width:24px}
+.sh p{margin:2px 0 0;font-size:14px;color:var(--inkLight)}
+.verdict{border:1px solid var(--red);border-left:3px solid var(--red);background:var(--redBg);padding:16px 20px;margin:22px 0 0}
+.verdict .l{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--red);font-weight:700;text-transform:uppercase}
+.verdict .t{font-size:24px;margin:5px 0 7px;line-height:1.2}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:24px 0 0}
+.cell{background:var(--card);padding:11px 13px}
+.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade)}
+.cell .v{font-family:var(--mono);font-size:17.5px;font-weight:700;margin-top:3px}
+.cell .s{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:1px}
+.up{color:var(--green)}.dn{color:var(--red)}.am{color:var(--gold)}.wr{color:var(--amber)}
+.gexp{border:1px solid var(--line2);background:var(--card)}
+.gexh{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--card2)}
+.gexh .tk{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.07em}
+.badge{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;padding:4px 11px;border-radius:3px;background:var(--gCall);color:#02160C}
+.b-out{border:1px solid var(--line2);color:var(--inkLight);padding:4px 10px;font-family:var(--mono);font-size:10.5px;border-radius:3px}
+.gexh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--inkLight)}
+.gexsub{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);padding:8px 15px;border-bottom:1px solid var(--line)}
+.ggrid{stroke:#0F2438;stroke-width:1}
+.gax{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.gaxr{font-family:var(--mono);font-size:9.5px;fill:var(--inkLight);opacity:.75}
+.gaxt{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;fill:var(--inkGhost)}
+.gcall{fill:var(--gCall)} .gput{fill:var(--gPut)}
+.gcurve{fill:none;stroke:var(--ink);stroke-width:1.6;opacity:.9}
+.garea{fill:#2A4A78;opacity:.16;stroke:none}
+.gkey{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:9px 15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--inkFade)}
+.gkey span{display:inline-flex;align-items:center;gap:6px}
+.gkey i{width:11px;height:3px;border-radius:2px;display:inline-block}
+.gkey .note{display:block !important;color:var(--inkGhost);flex-basis:100%;width:100%;line-height:1.6;font-size:10px;padding-top:4px}
+.gkey .note b{display:inline;color:var(--inkFade)}
+.lad{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:74px 176px 1fr;gap:12px;align-items:center;padding:9px 15px;border-bottom:1px solid #0E2438;border-left:3px solid transparent;font-family:var(--mono);font-size:12.5px}
+.lrow:last-child{border-bottom:none}
+.lrow .p{font-weight:700}
+.lrow .d{color:var(--inkFade);font-size:11.5px;font-family:var(--serif)}
+.lrow .lab{letter-spacing:.08em;font-weight:700;font-size:10.5px}
+.l-call{border-left-color:var(--gCall)} .l-put{border-left-color:var(--gPut)}
+.l-spot{border-left-color:var(--gSpot);background:rgba(59,130,196,.10);border-top:1px solid #2C5C86;border-bottom:1px solid #2C5C86}
+.l-flip{border-left-color:var(--gFlip);background:rgba(232,195,74,.07)}
+.narr{padding:14px 15px;border-top:1px solid var(--line);background:var(--card2);font-size:14px;color:var(--inkMed);line-height:1.6}
+.chart{border:1px solid var(--line);background:var(--card);padding:14px 10px 6px;margin:6px 0 14px}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:#0F2438;stroke-width:1}
+.axl{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.pl{fill:none;stroke:var(--ink);stroke-width:1.6}
+.m50{fill:none;stroke:var(--gold);stroke-width:1.2}
+.m200{fill:none;stroke:#5E7C99;stroke-width:1.4;stroke-dasharray:5 3}
+.ar{fill:url(#g1)}
+.lbl{font-family:var(--mono);font-size:10px;font-weight:700}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:5px 4px 7px}
+.legend i{display:inline-block;width:13px;height:2px;vertical-align:middle;margin-right:5px}
+.tw{border:1px solid var(--line);background:var(--card);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #0E2438;color:var(--inkMed)}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.hl td{background:rgba(63,191,119,.08)} tr.hlr td{background:rgba(217,83,79,.07)}
+tr.me td{background:rgba(211,119,54,.10)}
+.gates{border:1px solid var(--line);background:var(--card)}
+.gate{display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:13px 17px;border-bottom:1px solid #0E2438}
+.gate:last-child{border-bottom:none} .gate.f{background:rgba(217,83,79,.05)}
+.gate .idx{font-family:var(--mono);font-size:10px;color:var(--inkGhost)}
+.gate .nm{font-family:var(--mono);font-size:13px;font-weight:700}
+.gate .dt{font-size:12.5px;color:var(--inkLight);margin-top:2px;line-height:1.45}
+.tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border:1px solid;white-space:nowrap;border-radius:2px}
+.t-fail{color:var(--red);border-color:var(--red);background:var(--redBg)}
+.t-warn{color:var(--amber);border-color:var(--amber);background:var(--amberBg)}
+.t-pass{color:var(--green);border-color:var(--green);background:var(--greenBg)}
+.stamp{border:1px solid var(--line);border-top:none;background:var(--card2);padding:13px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.stamp .x{font-family:var(--mono);font-size:12px;color:var(--inkLight)}
+.stamp .o{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--red);letter-spacing:.08em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);background:var(--card);padding:16px 18px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #0E2438;font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv span:first-child{color:var(--inkLight)} .kv span:last-child{font-family:var(--mono);font-weight:700}
+.rule{border-left:2px solid var(--gold);background:rgba(211,119,54,.05);padding:11px 15px;margin:14px 0;font-size:13.5px;color:var(--inkMed)}
+.rule .rid{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px}
+.note{border-left:2px solid var(--line2);padding:2px 0 2px 15px;margin:15px 0;color:var(--inkMed)}
+.note b{color:var(--ink)}
+.news{border:1px solid var(--line);background:var(--card)}
+.nhdr{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);padding:10px 16px;background:var(--card2);border-bottom:1px solid var(--line)}
+.nrow{display:grid;grid-template-columns:86px 1fr;gap:14px;padding:11px 16px;border-bottom:1px solid #0E2438}
+.nrow:last-child{border-bottom:none}
+.nrow .dt{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding-top:2px}
+.nrow .hd{font-size:14.5px;color:var(--ink);margin-bottom:3px}
+.nrow .bd{font-size:12.8px;color:var(--inkLight);line-height:1.5}
+.pill{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.09em;padding:2px 7px;border:1px solid var(--line2);color:var(--inkFade);margin-right:7px;vertical-align:1px;border-radius:2px}
+.pill.bull{border-color:var(--green);color:var(--green)}
+.pill.bear{border-color:var(--red);color:var(--red)}
+.pill.neu{border-color:var(--amber);color:var(--amber)}
+ul{margin:0 0 12px;padding-left:17px;color:var(--inkMed)}li{margin-bottom:5px}
+.foot{padding:28px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);line-height:1.9}
+/* strip: fixed column counts so the last cell never orphans */
+.strip{grid-template-columns:repeat(8,1fr)}
+@media(max-width:1500px){.strip{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:620px){.strip{grid-template-columns:repeat(2,1fr)}}
+/* tablet landscape: rail becomes a compact top bar, not a dead column */
+@media(max-width:1200px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:none;border-bottom:1px solid var(--railLine);
+        display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:12px 24px}
+  .rail .logo{border-bottom:none;padding:0;font-size:10.5px;line-height:1.5}
+  .rail .stat{margin:0;padding:0;border-top:none;font-size:10.5px;line-height:1.7;text-align:right}
+  main{padding:0 24px 70px}
+}
+@media(max-width:760px){
+  .two,.three{grid-template-columns:1fr}
+  .lrow{grid-template-columns:66px 1fr}.lrow .d{display:none}
+  main{padding:0 18px 60px}
+  .rail{padding:10px 18px}
+}
+
+/* ===== light theme : colours only, toggled by html.light — sampled from phoenix_app.html ===== */
+html.light{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15);
+  --rail:#F3EADC; --railLine:rgba(122,96,68,.22);
+  --gCall:#1E7A4E; --gPut:#B4362F; --gSpot:#2C5A82; --gFlip:#A87A1C; --gPin:#7A5CA8;
+}
+html.light,html.light body,html.light .shell,html.light main{background:#F6EFE4}
+html.light body{color:#2C2118}
+html.light .rail{background:#F3EADC}
+html.light .card,html.light .tw,html.light .gates,html.light .news,html.light .gexp,html.light .chart,html.light .cell{background:rgba(255,253,249,.86)}
+html.light .stamp,html.light .gexh,html.light .narr,html.light .nhdr,html.light .gexsub{background:rgba(248,241,231,.94)}
+html.light .pxtheme{background:rgba(248,241,231,.96)}
+html.light .ggrid,html.light .grid{stroke:rgba(122,96,68,.16)}
+html.light .pl{stroke:#2C2118}
+html.light .gcurve{stroke:#2C2118}
+html.light .garea{fill:#7A6044;opacity:.16}
+html.light .m200{stroke:#8C7A67}
+html.light .badge{background:var(--gCall);color:#FFFDF9}
+html.light .lrow.l-spot{background:rgba(44,90,130,.10);border-top-color:rgba(44,90,130,.4);border-bottom-color:rgba(44,90,130,.4)}
+html.light .lrow.l-flip{background:rgba(168,122,28,.10)}
+html.light .gate.f{background:rgba(180,54,47,.055)}
+html.light tr.hl td{background:rgba(30,122,78,.09)}
+html.light tr.hlr td{background:rgba(180,54,47,.07)}
+html.light tr.me td{background:rgba(194,99,42,.10)}
+html.light td{border-bottom-color:rgba(122,96,68,.14)}
+html.light .gate,html.light .nrow,html.light .lrow{border-bottom-color:rgba(122,96,68,.14)}
+html.light .rule{background:rgba(194,99,42,.06)}
+html.light .toc a:hover{background:rgba(194,99,42,.09)}
+/* theme switch */
+.pxtheme{z-index:40;display:flex;gap:0;border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:var(--card2)}
+.pxtheme button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 12px;border:0;background:transparent;color:var(--inkFade);cursor:pointer}
+.pxtheme button.on{background:var(--gold);color:#FFFDF9;font-weight:700}
+.pxtheme button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+@media print{.pxtheme,.rail{display:none}.shell{grid-template-columns:1fr}main{padding:0}}
+
+/* ===== theme switch hardening — must stay last in the sheet ===== */
+.pxtheme{position:fixed;top:14px;right:18px;bottom:auto;left:auto;
+  height:auto;width:auto;max-height:34px;align-items:center;line-height:1}
+.pxtheme button{height:28px;line-height:28px;padding:0 12px;white-space:nowrap;flex:0 0 auto}
+@media(max-width:1200px){
+  .pxtheme{top:auto;bottom:14px;right:14px}
+}
+@media print{.pxtheme{display:none}}
+</style></head><body><div class="shell">
+<nav class="rail"><div class="logo">PHOENIX<br><span>EQUITY RESEARCH</span></div>
+<div class="stat" style="margin-top:20px;border-top:none;padding-top:0">USD &middot; $DEBASEMENT<br>DOLLAR READ<br>23 AUG 2026<br><br>GATES: <b>&mdash; FAIL</b><br>SCORE: &mdash;/100<br>VERDICT: <b>SEE §8</b></div></nav>
+<main>
+<div class="pxtheme" role="group" aria-label="Theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></div>
+<div class="mast"><div class="t">MACRO : USD &middot; Dollar &middot; Gold &middot; Bitcoin &middot; The Debasement Trade &middot; L3 single-name thesis</div>
+<div class="r">MON 24 AUG 2026 &middot; DATA THROUGH FRI 21 AUG CLOSE<br>IBKR LIVE &middot; FX &middot; METALS &middot; DIGITAL ASSETS &middot; MACRO_DOCTRINE_v1</div></div>
+<section id="verdict">
+  <h1>The Treasury tried to<br>calm the bond market.<br>The market bought <em>gold</em>.</h1>
+  <p class="lede" style="max-width:76ch;margin-top:18px">On 19&ndash;20 August the US Treasury announced it would at least double its long-bond buyback operations. The intent was to compress yields and steady the market. Within two sessions gold broke to a two-month high, bitcoin ripped through $68,000 and then $77,000, over <b>$4 billion of bearish crypto positions were liquidated</b>, and the dollar sat at a three-month low. <b style="color:var(--ink)">An intervention designed to reassure was read as confirmation.</b></p>
+  <div class="verdict" style="border-color:var(--amber);background:var(--amberBg);border-left-color:var(--amber)">
+    <div class="l" style="color:var(--amber)">The read &middot; and the caveat that governs it</div>
+    <div class="t">THE DEBASEMENT TRADE HAS BEEN RESURRECTED &mdash; five days ago</div>
+    <p style="margin:0;font-size:14px">Three weeks ago the consensus was that the dollar had <b>stabilised</b>, gold had <b>fallen sharply</b> from its highs, and bitcoin had <b>lagged a rising market</b>. The trade was being written off. <b style="color:var(--ink)">Everything in this report describes a move that is one week old and has not yet been tested by a single data print.</b></p></div>
+  <div class="strip">
+    <div class="cell"><div class="k">DXY</div><div class="v dn">~98.8</div><div class="s dn">3-month low</div></div>
+    <div class="cell"><div class="k">GLD</div><div class="v up">428.88</div><div class="s up">+1.3% &middot; broke 13w high</div></div>
+    <div class="cell"><div class="k">Gold vs ATH</div><div class="v wr">&minus;15.8%</div><div class="s">ATH $5,589 &middot; 28 Jan</div></div>
+    <div class="cell"><div class="k">Bitcoin</div><div class="v up">~$77,200</div><div class="s up">+20% in a week</div></div>
+    <div class="cell"><div class="k">BTC vs cycle high</div><div class="v dn">&minus;38.7%</div><div class="s">$126k &middot; Oct 2025</div></div>
+    <div class="cell"><div class="k">10-year</div><div class="v dn">4.74%</div><div class="s dn">20-month high</div></div>
+    <div class="cell"><div class="k">Gold implied vol</div><div class="v dn">27.0%</div><div class="s dn">97th pctile 13w</div></div>
+    <div class="cell"><div class="k">Liquidated</div><div class="v dn">$4bn+</div><div class="s dn">bearish crypto bets</div></div>
+  </div>
+</section>
+
+<section id="correction">
+  <div class="sh"><div class="n">00</div><div><h2>One clarification first</h2>
+  <p>Because the sign matters more here than anywhere else in the report.</p></div></div>
+  <div class="note" style="border-left-color:var(--gold)"><b>Bond <i>prices</i> are down, not up. Bond <i>yields</i> are up.</b> The 10-year is at <b class="mono">4.74%</b>, a twenty-month high, and the 30-year is above <b class="mono">5.25%</b> &mdash; which means anyone holding long Treasuries has lost money. <b style="color:var(--ink)">There was a bond rally, and it is the reason this whole report exists</b> &mdash; but it lasted roughly two sessions. The Treasury's buyback announcement on 19&ndash;20 August pushed prices up and yields down briefly; by Friday the 10-year had <b>"more than erased the decline"</b> and was back testing its highs.</div>
+  <div class="rule"><span class="rid">Why the distinction changes the interpretation</span>If bonds were genuinely rallying alongside gold and bitcoin, the story would be a straightforward flight to safety with falling real yields &mdash; benign, and bullish for everything. <b style="color:var(--ink)">What is actually happening is the opposite and far more interesting:</b> gold and bitcoin are rising <i>while</i> long bonds are falling. That combination does not fit a safety trade. It fits a <b>funding-credibility trade</b> &mdash; capital leaving the sovereign's paper and moving into assets the sovereign cannot issue more of.</div>
+</section>
+
+<section id="what">
+  <div class="sh"><div class="n">01</div><div><h2>What actually happened, in sequence</h2>
+  <p>Five sessions, one catalyst, three markets.</p></div></div>
+  <div class="news">
+    <div class="nhdr">19&ndash;24 August 2026</div>
+    <div class="nrow"><div class="dt">WED 19 AUG</div><div><div class="hd"><span class="pill neu">POLICY</span>Treasury announces it will at least double long-bond buybacks</div>
+      <div class="bd">Buybacks of 10&ndash;30 year securities to rise to <b style="color:var(--ink)">$4bn next quarter</b>, with Bessent signalling it could exceed that. Framed as liquidity support after the surge in yields raised concerns over market functioning. <b style="color:var(--amber)">The stated purpose was stability.</b></div></div></div>
+    <div class="nrow"><div class="dt">WED 19 AUG</div><div><div class="hd"><span class="pill bull">GOLD</span>Breaks to a two-month high, ~$4,557/oz</div>
+      <div class="bd">Same session. Gold had been flat through the summer after falling from its January all-time high of <b style="color:var(--ink)">$5,589</b>.</div></div></div>
+    <div class="nrow"><div class="dt">THU 20 AUG</div><div><div class="hd"><span class="pill bull">BITCOIN</span>Breaks $68,000, then squeezes through $77,000</div>
+      <div class="bd">Over <b style="color:var(--ink)">$4 billion of bearish positions liquidated in one afternoon.</b> US bitcoin ETFs took in <b>$606m on 20 August alone</b> and more than $1.6bn Monday to Thursday. Traders had been positioned for BTC to stay below $67,000.</div></div></div>
+    <div class="nrow"><div class="dt">FRI 21 AUG</div><div><div class="hd"><span class="pill bear">BONDS</span>The 10-year more than erases the buyback rally, back to 4.74%</div>
+      <div class="bd">Testing twenty-month highs. <b style="color:var(--ink)">The intervention held for roughly two sessions.</b></div></div></div>
+    <div class="nrow"><div class="dt">FRI 21 AUG</div><div><div class="hd"><span class="pill bear">DOLLAR</span>Near three-month lows on debt concerns</div>
+      <div class="bd">Reporting attributes the weakness explicitly to <b>rising US government debt making the dollar less attractive</b>, compounded by higher oil as sanctions on Iran are prepared.</div></div></div>
+    <div class="nrow"><div class="dt">MON 24 AUG</div><div><div class="hd"><span class="pill bull">TODAY</span>GLD +1.30%, breaking its 13-week high; BTC holding ~$77,000</div>
+      <div class="bd">Gold implied volatility now at the <b style="color:var(--ink)">97th percentile of the last 13 weeks</b> &mdash; the only asset reviewed across this entire series where options are <i>expensive</i> rather than cheap.</div></div></div>
+  </div>
+</section>
+
+<section id="manip">
+  <div class="sh"><div class="n">02</div><div><h2>The intervention question, answered precisely</h2>
+  <p>There is real, disclosed official intervention here. It is also not what most people mean by the word.</p></div></div>
+  <p class="lede" style="max-width:76ch">It is worth separating three things that get collapsed together: <b>disclosed official operations</b>, <b>market-structure amplification</b>, and <b>conspiracy</b>. The first two are happening and are analytically important. The third is not needed to explain anything on this page.</p>
+  <div class="three" style="margin-top:22px">
+    <div class="card" style="border-left:2px solid var(--amber)"><h3 style="color:var(--amber)">1 &middot; Disclosed official operations &mdash; real</h3>
+      <ul style="font-size:13px;margin-bottom:0">
+        <li><b style="color:var(--ink)">Treasury buybacks doubled</b> to $4bn/quarter in 10&ndash;30 year paper, possibly more</li>
+        <li><b style="color:var(--ink)">FIMA facility</b> &mdash; a request for the Fed to raise the limit, improving dollar liquidity offshore</li>
+        <li><b style="color:var(--ink)">Joint yen intervention</b>, executed by <i>selling euros</i></li>
+      </ul>
+      <p style="font-size:12.8px;margin:9px 0 0;color:var(--inkLight)">These are announced, public, and are price interventions by definition. <b>Calling them intervention is accurate; calling them secret is not.</b></p></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">2 &middot; Structural amplification &mdash; real</h3>
+      <p style="font-size:13px;margin-bottom:8px">The bitcoin move was <b style="color:var(--ink)">not primarily buying</b>. It was <b>$4bn of forced short liquidation</b> in an afternoon. Crowded positioning turned a policy headline into a 20% week.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)">That is market structure doing the work &mdash; the same mechanic as a gamma squeeze. <b>It exaggerates the signal and it does not repeat.</b></p></div>
+    <div class="card"><h3>3 &middot; What does not need explaining</h3>
+      <p style="font-size:13px;margin-bottom:8px">The dollar's decline requires no hidden hand. <b style="color:var(--ink)">Rising issuance, a widening deficit, AI-related corporate debt competing for the same duration buyers, and oil-driven inflation</b> are a sufficient and publicly documented cause.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)">A flow story explains it completely. <b>Reaching past it costs you the actual signal.</b></p></div>
+  </div>
+  <div class="rule" style="border-left-width:3px"><span class="rid">The finding that matters &mdash; the intervention is failing, and that is the information</span>Three separate official actions to hold long yields down, and the 10-year is <b>higher after them than before</b>. When authorities push on a price and the price moves the other way, that is not a scandal &mdash; <b style="color:var(--ink)">it is a measurement of the size of the flow they are fighting.</b> The tradeable inference is about escalation: if the next step is a materially larger buyback programme, or an explicit yield objective, the pricing of US duration changes regime. <b class="mono am">Very little in current market pricing anticipates that.</b></div>
+  <div class="rule"><span class="rid">The reflexive trap in the policy itself</span>Buying back long bonds to suppress yields is, mechanically, <b>money creation against government paper.</b> The market understood this immediately: the announcement intended to calm the bond market instead sent capital into the two assets whose supply cannot be expanded by policy. <b style="color:var(--ink)">Gold's supply grows ~1.5&ndash;2% a year from mining; bitcoin's is capped at 21 million.</b> That is precisely why they moved on a <i>Treasury</i> headline rather than a Fed one.</div>
+</section>
+
+<section id="dollar">
+  <div class="sh"><div class="n">03</div><div><h2>The dollar &mdash; where it actually is</h2></div></div>
+  <div class="two">
+    <div class="card"><h3>Technically</h3>
+      <div class="kv"><span>DXY</span><span class="dn">~98.8&ndash;99.6</span></div>
+      <div class="kv"><span>Position</span><span class="dn">3-month low</span></div>
+      <div class="kv"><span>200-day MA</span><span class="dn">~102.4 &middot; falling</span></div>
+      <div class="kv"><span>Rejection level</span><span>102.38</span></div>
+      <div class="kv"><span>RSI</span><span>~49 &middot; neutral</span></div>
+      <div class="kv"><span>Structure</span><span class="wr">testing channel support</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">Run through the Phoenix weekly gates, the dollar fails <span class="mono">trend200</span> on both level and slope</b> &mdash; below a falling long average. On any equity in this series that reading would produce a no-trade.</p></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">The broken correlation, restated</h3>
+      <p style="font-size:13.5px;margin-bottom:9px">DXY and the 10-year yield are normally <b>positively correlated</b>: higher yields attract foreign capital into US bonds, which requires buying dollars.</p>
+      <p style="font-size:13.5px;margin-bottom:9px">Right now the 10-year is at a <b>twenty-month high</b> and the dollar is at a <b>three-month low</b>.</p>
+      <p style="font-size:13.5px;margin:0"><b style="color:var(--ink)">The foreign buyer is not showing up for the higher yield. That is the entire story of this report in one sentence</b> &mdash; and it is why gold and bitcoin are bid.</p></div>
+  </div>
+  <div class="rule"><span class="rid">The doom loop, and what breaks it</span>Weaker dollar &rarr; imported inflation, commodities priced in dollars rise &rarr; higher yields &rarr; greater fiscal concern &rarr; weaker dollar. <b>The loop is self-reinforcing, which is what makes it worth respecting rather than dismissing.</b> Two things break it: <b class="mono am">a Fed hike</b>, which restores the rate differential and inflation-fighting credibility, or <b class="mono am">a credible fiscal plan</b> &mdash; and Bessent has signalled one is coming while arguing the deficit has already peaked. <b style="color:var(--ink)">Neither is scheduled before 11 September.</b></div>
+</section>
+
+<section id="gold">
+  <div class="sh"><div class="n">04</div><div><h2>Gold &mdash; what it is actually saying</h2>
+  <p>And the one detail almost everyone gets wrong about it right now.</p></div></div>
+  <div class="two">
+    <div class="card"><h3>The numbers</h3>
+      <div class="kv"><span>GLD</span><span class="up">$428.88 &middot; +1.30%</span></div>
+      <div class="kv"><span>13-week high</span><span class="up">424.88 &mdash; broken today</span></div>
+      <div class="kv"><span>52-week high</span><span class="wr">509.66</span></div>
+      <div class="kv"><span>Distance from high</span><span class="wr">&minus;15.8%</span></div>
+      <div class="kv"><span>52-week low</span><span>309.67</span></div>
+      <div class="kv"><span>From the low</span><span class="up">+38.5%</span></div>
+      <div class="kv"><span>Year to date</span><span class="up">+8.2%</span></div>
+      <div class="kv"><span>One year</span><span class="up">+21.6%</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)">Spot gold reached an all-time high of <b style="color:var(--ink)">$5,589/oz on 28 January 2026</b>, then corrected hard through the summer.</p></div>
+    <div class="card" style="border-left:2px solid var(--amber)"><h3 style="color:var(--amber)">The detail that matters &mdash; gold options are expensive</h3>
+      <div class="kv"><span>Implied volatility</span><span class="dn">27.0%</span></div>
+      <div class="kv"><span>Realised volatility</span><span>23.4%</span></div>
+      <div class="kv"><span>Spread</span><span class="dn">+3.6 &mdash; implied ABOVE realised</span></div>
+      <div class="kv"><span>IV percentile, 13 weeks</span><span class="dn">97th</span></div>
+      <div class="kv"><span>IV percentile, 52 weeks</span><span class="dn">78th</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">Across fifteen instruments reviewed in this series, gold is the only one where implied volatility exceeds realised.</b> Everywhere else &mdash; every equity, the index &mdash; options are cheap relative to actual movement. In gold they are <b>expensive, at the 97th percentile of the quarter.</b></p></div>
+  </div>
+  <div class="rule" style="border-left-width:3px"><span class="rid">What rich gold vol tells you that the price does not</span>Cheap options mean the market is not paying attention. <b style="color:var(--ink)">Expensive options mean it already is.</b> Gold implied volatility at the 97th percentile of the quarter says the debasement bid is <b>not an unnoticed opportunity</b> &mdash; it is a crowded, actively hedged, well-understood position. <b>That does not make the direction wrong. It means the easy expression of it has already been priced</b>, and that buying convexity here costs materially more than it did a month ago. Compare with SPY implied volatility at the 21st percentile: <b class="mono am">the market is paying up to hedge the currency and paying almost nothing to hedge the equity index.</b></div>
+  <div class="rule"><span class="rid">The structural bid underneath the tactical one</span>Beyond this week, gold's demand base has genuinely changed: <b>central bank reserve diversification</b>, ETF inflows, and the slow de-dollarisation trend across emerging-market central banks have reframed it from a crisis hedge into a <b style="color:var(--ink)">structural reserve asset</b>. That is a multi-year process and it does not reverse on one CPI print &mdash; which is exactly why gold, and not bitcoin, is the cleaner expression of the fiscal thesis.</div>
+</section>
+
+<section id="btc">
+  <div class="sh"><div class="n">05</div><div><h2>Bitcoin &mdash; and why it is not doing what it looks like</h2>
+  <p>The single most misread asset on this page.</p></div></div>
+  <div class="two">
+    <div class="card"><h3>The numbers</h3>
+      <div class="kv"><span>Bitcoin</span><span class="up">~$77,000&ndash;77,400</span></div>
+      <div class="kv"><span>Last week</span><span class="up">+20%, broke $79k intraday</span></div>
+      <div class="kv"><span>Prior range</span><span>$62,000&ndash;66,000</span></div>
+      <div class="kv"><span>End of June</span><span class="dn">below $60,000</span></div>
+      <div class="kv"><span>January high</span><span>~$95,000</span></div>
+      <div class="kv"><span>Cycle high, Oct 2025</span><span class="dn">$126,000</span></div>
+      <div class="kv"><span>From the cycle high</span><span class="dn">&minus;38.7%</span></div>
+      <div class="kv"><span>ETF inflows</span><span class="up">$606m in one day</span></div>
+    </div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">The correlation break nobody priced</h3>
+      <div class="kv"><span>BTC&ndash;gold correlation, Oct 2025</span><span>+0.29</span></div>
+      <div class="kv"><span>By spring 2026</span><span class="dn">&minus;0.88</span></div>
+      <div class="kv"><span>One-year rolling now</span><span class="dn">&minus;0.17</span></div>
+      <div class="kv"><span>BTC beta to risk assets</span><span class="dn">~1.5</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">A swing from +0.29 to &minus;0.88 is a structural break, not a bad week.</b> Gold behaves like a shock absorber &mdash; it wins on bad news and falling real yields. <b>Bitcoin has started trading like a high-beta technology stock.</b> Holding both is no longer doubling up on the same bet.</p></div>
+  </div>
+  <div class="rule" style="border-left-width:3px"><span class="rid">Why this week's bitcoin move is weaker evidence than it appears</span>The rally is being reported as a debasement trade, and the ETF inflows are real. But the mechanism was <b style="color:var(--ink)">a short squeeze</b>: traders were positioned for bitcoin to stay below $67,000, and <b>over $4 billion of bearish bets were liquidated in a single afternoon.</b> Forced covering is not conviction buying. <b>It moves price further and faster than the underlying flow justifies, and it cannot repeat</b> &mdash; those shorts are already gone. A 20% week built substantially on liquidation is <b class="mono am">the weakest form of confirmation for a macro thesis</b>, and it is precisely the kind of move that retraces when the next flow does not arrive.</div>
+  <div class="rule"><span class="rid">The honest version of the bitcoin case</span><b style="color:var(--green)">For it:</b> 21 million hard cap, enforced by protocol rather than by policy &mdash; more precisely scarce than gold, whose supply still grows 1.5&ndash;2% a year. Returning ETF flows and corporate treasury adoption are genuine structural demand. <b style="color:var(--red)">Against it:</b> in 2022 bitcoin fell ~65% while CPI peaked at 9.1% &mdash; it did not work as an inflation hedge when tested. Its relationship to inflation runs <b>through monetary-policy expectations</b> rather than through prices directly, which is why a hawkish Fed hurts it. <b style="color:var(--ink)">Gold is better empirically; bitcoin is better theoretically.</b> In a regime where the near-term risk is a <i>hike</i>, the empirical case is the one that pays.</div>
+</section>
+
+<section id="opportunity">
+  <div class="sh"><div class="n">06</div><div><h2>Where the opportunity is &mdash; and where it is not</h2>
+  <p>Ranked by how much of the thesis is already in the price.</p></div></div>
+  <div class="tw"><table>
+    <tr><th>Expression</th><th>What it needs</th><th class="n">Already priced?</th><th>Assessment</th></tr>
+    <tr class="hlr"><td><b style="color:var(--ink)">Long gold, here</b></td><td>Continued fiscal concern</td><td class="n dn">Largely</td><td>IV at the 97th percentile of the quarter. Direction defensible, <b>convexity expensive</b>, and it is 15.8% below its January high for a reason</td></tr>
+    <tr class="hlr"><td><b style="color:var(--ink)">Long bitcoin, here</b></td><td>Flows to continue post-squeeze</td><td class="n dn">Yes, violently</td><td>+20% in a week on $4bn of liquidation. <b>The buyers who had to buy have bought</b></td></tr>
+    <tr><td><b style="color:var(--ink)">Short dollar</b></td><td>No September hike</td><td class="n wr">Partly</td><td>Consensus, crowded, and <b>a hike reverses it fast.</b> The most obvious trade on the page, which is the problem</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Gold miners over bullion</b></td><td>Gold to hold, not to rise</td><td class="n up">Less so</td><td>Operational leverage to a commodity whose <i>structural</i> bid is intact. A second-derivative expression, less crowded than the metal</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Equity index hedges</b></td><td>Only that risk exists</td><td class="n up">No</td><td><b>SPY IV at the 21st percentile against gold IV at the 97th.</b> The market is paying up to hedge the currency and almost nothing to hedge stocks</td></tr>
+    <tr><td><b style="color:var(--ink)">Long duration Treasuries</b></td><td>Yields to fall</td><td class="n wr">Contested</td><td>Three interventions have failed to hold yields down. <b>Catching this requires being early to a policy escalation that has not been announced</b></td></tr>
+  </table></div>
+  <div class="rule" style="border-left-width:3px"><span class="rid">The single cleanest asymmetry on the page</span>Gold implied volatility sits at the <b>97th percentile</b> of its quarter. SPY implied volatility sits at the <b>21st</b>. <b style="color:var(--ink)">The same macro risk is being priced expensively in one market and almost not at all in the other.</b> If the fiscal thesis is right, it eventually reaches equities through the discount rate &mdash; and equity hedges are currently a fraction of the cost of gold convexity. <b class="mono am">That is where the mispricing lives, if there is one.</b></div>
+</section>
+
+<section id="risks">
+  <div class="sh"><div class="n">07</div><div><h2>The risks &mdash; stated against the thesis</h2>
+  <p>The strongest arguments that this whole read is wrong.</p></div></div>
+  <div class="two">
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Risk 1 &middot; It is five days old</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">Three weeks ago the published consensus was that <b style="color:var(--ink)">the dollar had stabilised and strengthened, gold had fallen sharply from its highs, and bitcoin had declined even as equities rallied.</b> The debasement trade was being written off as a two-year story that had run its course.</p>
+      <p style="font-size:13.5px;margin:0"><b>That view was not stupid then and it may not be wrong now.</b> One week of price action following one policy headline is a thin foundation.</p></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Risk 2 &middot; A September hike breaks it</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">Prediction markets have a hike at ~31%; J.P. Morgan has it as base case. A 25bp move restores the rate differential and, more importantly, <b style="color:var(--ink)">the inflation-fighting credibility whose absence is the entire premise here.</b></p>
+      <p style="font-size:13.5px;margin:0">Dollar up, gold down, bitcoin down hardest &mdash; <b>1.5 beta cuts both ways</b>, and a non-yielding asset suffers most when real yields rise.</p></div>
+  </div>
+  <div class="two" style="margin-top:18px">
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Risk 3 &middot; The squeeze unwinds</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">$4bn of shorts were liquidated. <b style="color:var(--ink)">Those positions no longer exist to provide further fuel.</b> Bitcoin's marginal move is still driven by derivatives, and crowded longs cascade lower exactly as crowded shorts squeezed higher.</p>
+      <p style="font-size:13.5px;margin:0">The same structure that produced +20% produces the retrace.</p></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Risk 4 &middot; The intervention succeeds</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">Bessent has signalled buybacks could exceed $4bn per issue and that <b>a fiscal plan is coming</b>, while arguing the deficit has peaked. If a credible plan lands, the term premium compresses.</p>
+      <p style="font-size:13.5px;margin:0"><b style="color:var(--ink)">The entire fiscal-credibility premise is a bet against policy competence over a multi-month horizon</b> &mdash; a bet that has lost money often.</p></div>
+  </div>
+  <div class="rule"><span class="rid">And the risk specific to how this gets traded</span>Gold, bitcoin and short-dollar are <b>one position wearing three costumes.</b> They share a single driver &mdash; the credibility of US fiscal and monetary policy &mdash; so holding all three is not diversification, it is triple-weighting one macro call. <b style="color:var(--ink)">The gold&ndash;bitcoin correlation at &minus;0.17 on a one-year basis makes this look diversified on a spreadsheet and it is not</b>, because the correlation that matters is the one that appears on the day the thesis resolves.</div>
+</section>
+
+<section id="scenarios">
+  <div class="sh"><div class="n">08</div><div><h2>The coming months &mdash; three paths</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Path</th><th class="n">Trigger</th><th>Dollar</th><th>Gold</th><th>Bitcoin</th><th>Long bonds</th></tr>
+    <tr class="hlr"><td><b style="color:var(--ink)">Hike, credibility restored</b></td><td class="n">~31%</td><td class="up">rallies hard</td><td class="dn">falls</td><td class="dn">falls hardest</td><td class="up">30-yr can <i>rally</i> on credibility</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Hold, fiscal concern persists</b></td><td class="n">~50%</td><td class="dn">grinds lower</td><td class="up">structural bid holds</td><td class="wr">follows equities, not gold</td><td class="dn">stays under pressure</td></tr>
+    <tr class="hlr"><td><b style="color:var(--ink)">Escalation / disorderly</b></td><td class="n">tail</td><td class="dn">falls sharply</td><td class="up">new highs</td><td class="wr">initially falls with risk, then rallies</td><td class="dn">the 30-yr above 5.5%</td></tr>
+  </table></div>
+  <div class="rule" style="border-left-width:3px"><span class="rid">The one indicator that resolves the middle path</span>In the hold scenario, the question is whether the long end cooperates. <b style="color:var(--ink)">If the 2-year falls and the 10-year does not, the market has told you the problem was never the Fed</b> &mdash; and gold's structural bid is validated while the dollar keeps sliding. That is the configuration in which the debasement read is right for the right reason rather than right by accident. <b class="mono am">Watch the 10s&ndash;2s spread, not the level of either.</b></div>
+  <div class="rule"><span class="rid">The distinguishing test for the tail</span>In an ordinary risk-off, long bonds <b>rally</b>. If equities fall and long bonds fall with them, the flight-to-safety thesis is refuted and the funding-credibility scenario is in progress. <b>In that regime gold works and bitcoin does not</b>, at least initially &mdash; its 1.5 beta means capital leaves it first, before the debasement logic reasserts. <i>Caveat: in a pure inflation shock bonds and equities also fall together, so this is a strong prior rather than a law.</i></div>
+</section>
+
+<section id="inval">
+  <div class="sh"><div class="n">09</div><div><h2>Invalidation</h2>
+  <p>Written before the outcome.</p></div></div>
+  <div class="two">
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">This read is wrong if</h3>
+      <ul style="margin-bottom:0">
+        <li><b>The dollar rallies while yields keep rising.</b> Restores the normal correlation and refutes the risk-premium reading outright &mdash; the cleanest falsification</li>
+        <li>Gold fails back below <b class="mono">$424.88</b> on GLD and stays there &mdash; the 13-week high becomes a failed breakout</li>
+        <li>Bitcoin gives back the squeeze and returns below <b class="mono">$67,000</b>, confirming liquidation rather than flow</li>
+        <li>The 10-year falls below <b class="mono">4.40%</b> without a Fed cut &mdash; issuance concern overstated</li>
+        <li>A credible fiscal plan lands and the term premium compresses</li>
+      </ul></div>
+    <div class="card" style="border-left:2px solid var(--green)"><h3 style="color:var(--green)">This read is confirmed if</h3>
+      <ul style="margin-bottom:0">
+        <li><b>Equities and long bonds fall together</b> on a risk-off day</li>
+        <li>The 30-year moves above <b class="mono">5.50%</b> despite further intervention</li>
+        <li>Gold makes new highs <i>alongside</i> a rising 10-year &mdash; the pure debasement expression</li>
+        <li>The Treasury escalates to a materially larger buyback or names an explicit yield objective</li>
+        <li>A long-bond auction tails badly</li>
+        <li>Central bank gold buying accelerates in the next reserve data</li>
+      </ul></div>
+  </div>
+  <div class="rule"><span class="rid">The dates</span><b class="mono am">Wed 26 August &mdash; July PCE</b>, the Fed's preferred gauge. <b class="mono am">Fri 11 September &mdash; August CPI</b>, which decides September. <b class="mono am">15&ndash;16 September &mdash; FOMC</b> with a fresh dot plot showing whether the committee has moved toward its three dissenters. <b style="color:var(--ink)">This entire read is a five-day-old move that has not yet met a single data print. The first one is in two days.</b></div>
+</section>
+
+<section id="book" style="border-bottom:none">
+  <div class="sh"><div class="n">10</div><div><h2>What this means for the book</h2></div></div>
+  <div class="note" style="border-left-color:var(--gold)"><b>None of this is directly tradeable by a $2,000 systematic long-only equity breakout account.</b> Gold, bitcoin and the dollar are outside the mandate. Saying so plainly is more useful than manufacturing an equity proxy for a macro view.</div>
+  <div class="three" style="margin-top:18px">
+    <div class="card"><h3>What it does explain</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">Thirteen single names reviewed, <b>zero full gate passes.</b> A rising-discount-rate regime with a weakening currency produces narrow leadership and punishes long-duration equity.</p>
+      <p style="font-size:13.5px;margin:0"><b style="color:var(--ink)">The gate stack was reading the macro correctly without being told about it.</b></p></div>
+    <div class="card"><h3>The one place it touches the book</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">If a gold-miner or precious-metals name clears the weekly gates in the coming weeks, <b style="color:var(--ink)">this report is the reason to take it seriously</b> rather than treat it as a commodity oddity.</p>
+      <p style="font-size:13.5px;margin:0">Structural central-bank demand is a genuine multi-year driver, and miners are the equity expression.</p></div>
+    <div class="card"><h3>The timing instruction</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">Two binary events inside four sessions in September, with <b>no forward guidance</b> to dampen either.</p>
+      <p style="font-size:13.5px;margin:0"><b class="mono am">Be flat into 11 September.</b> Resume the single-name reviews after the FOMC, with fresh gamma reads.</p></div>
+  </div>
+  <div class="verdict" style="border-color:var(--amber);background:var(--amberBg);border-left-color:var(--amber);margin-top:26px">
+    <div class="l" style="color:var(--amber)">The picture</div>
+    <p style="margin:8px 0 0;font-size:16px;color:var(--ink)">The US Treasury announced an intervention intended to steady the bond market, and the market responded by buying the two assets the government cannot print. Gold broke a two-month high, bitcoin squeezed 20%, the dollar sat at a three-month low &mdash; <b style="color:var(--ink)">and within two sessions the 10-year had erased the entire rally the intervention was meant to produce.</b> That is the whole regime in one week.</p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)"><b style="color:var(--ink)">The intervention is real, disclosed, and failing</b> &mdash; three official actions and yields are higher after them than before. No hidden hand is required to explain any of it; issuance, deficits and AI-related corporate debt are a sufficient cause. The bitcoin move is the weakest evidence on the page, built on <b>$4bn of forced short liquidation</b> rather than conviction, and bitcoin's correlation to gold has broken to <b class="mono">&minus;0.88</b> &mdash; it is trading as high-beta risk, not as digital gold.</p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)">The sharpest observation is a volatility one. <b style="color:var(--ink)">Gold implied volatility sits at the 97th percentile of its quarter; SPY implied volatility sits at the 21st.</b> The same macro risk is being priced richly in the currency hedge and almost not at all in the equity index. <b class="mono am">If there is a mispricing in this market, that gap is where it lives</b> &mdash; and the whole read rests on a move that is five days old and has not yet met a data print.</p>
+  </div>
+</section>
+
+<div class="foot">
+PHOENIX EQUITY RESEARCH &middot; DOLLAR REGIME READ &middot; USD / GOLD / BITCOIN &middot; 24 AUG 2026 &middot; PREPARED TO MACRO_DOCTRINE_v1 §3<br>
+PRICE, VOLUME, OPTION OPEN INTEREST, IMPLIED VOLATILITY AND SECTOR DATA: INTERACTIVE BROKERS API, RETRIEVED 24 AUG 2026, THROUGH FRI 21 AUG CLOSE.<br>
+GATES COMPUTED ON WEEKLY BARS PER phoenix.py: 40-WEEK, 30-WEEK AND 10-WEEK SMA AGAINST THE 104-WEEK HIGH. GEX COMPUTED FROM IBKR OPEN INTEREST ACROSS THE LIVE CHAIN USING THE PHOENIX METHOD &mdash; WALLS ON OPEN INTEREST, FLIP FROM THE CUMULATIVE PROFILE.<br>
+LIMITATIONS &mdash; PER-CONTRACT IV UNAVAILABLE, SO A SINGLE UNDERLYING IV IS APPLIED ACROSS STRIKES; THIS UNDERSTATES WING GAMMA. DEALER POSITIONING IS INFERRED FROM THE STANDARD CONVENTION, NOT OBSERVED. GLD LEVELS FROM THE IBKR FEED, MON 24 AUG 2026 INTRADAY. DXY, TREASURY, SPOT GOLD AND BITCOIN LEVELS ARE FROM PUBLISHED MARKET REPORTING DATED 19-24 AUG AND SHOULD BE TREATED AS APPROXIMATE. CORRELATION FIGURES ARE AS PUBLISHED BY THIRD PARTIES AND NOT INDEPENDENTLY RECOMPUTED. OFFICIAL OPERATIONS ARE DESCRIBED AS PUBLICLY DISCLOSED; NO CLAIM OF UNDISCLOSED ACTIVITY IS MADE OR IMPLIED, AND NO POLITICAL VIEW IS EXPRESSED. GOLD, BITCOIN AND FX ARE OUTSIDE THIS BOOK'S MANDATE AND NO POSITION IS RECOMMENDED.<br>
+NOT INVESTMENT ADVICE. PREPARED FOR ONE SYSTEMATIC LONG-ONLY EQUITY BOOK AND CALIBRATED TO ITS RULES, ACCOUNT SIZE AND COST BASE.
+</div>
+</main></div>
+<script>
+(function(){var root=document.documentElement,d=document.getElementById("thDark"),l=document.getElementById("thLight");
+function set(m){var g=(m==="light");root.classList.toggle("light",g);root.style.colorScheme=g?"light":"dark";
+d.className=g?"":"on";l.className=g?"on":"";try{localStorage.setItem("pxTheme",m);}catch(e){}}
+var s=null;try{s=localStorage.getItem("pxTheme");}catch(e){}set(s||"dark");
+d.addEventListener("click",function(){set("dark");});l.addEventListener("click",function(){set("light");});})();
+</script></body></html>
