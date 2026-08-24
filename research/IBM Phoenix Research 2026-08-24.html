@@ -1,0 +1,460 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>IBM &middot; Phoenix Equity Research &middot; 23 Aug 2026</title>
+<style>
+:root{
+  --bg:#020F1F; --card:#08192B; --card2:#0C2137; --line:#14304A; --line2:#1E4462;
+  --ink:#E7EEF6; --inkMed:#C4D2DF; --inkLight:#94A8BA; --inkFade:#6B8299; --inkGhost:#47596C;
+  --gold:#D37736; --green:#3FBF77; --greenBg:rgba(63,191,119,.13);
+  --red:#D9534F; --redBg:rgba(217,83,79,.13);
+  --amber:#D8A24A; --amberBg:rgba(216,162,74,.13);
+  --rail:#010A15; --railLine:#0E2942;
+  --gCall:#2D8A55; --gPut:#C43A30; --gSpot:#3B82C4; --gFlip:#E8C34A; --gPin:#9B7BD4;
+  --serif:Georgia,'Times New Roman',serif; --mono:'Courier New',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:#020F1F;color-scheme:dark}
+html.light{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:15.5px;line-height:1.62}
+.shell{display:grid;grid-template-columns:236px 1fr;max-width:1420px;margin:0 auto}
+.rail{background:var(--rail);border-right:1px solid var(--railLine);padding:22px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.rail .logo{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--gold);font-weight:700;padding:0 20px 15px;border-bottom:1px solid var(--railLine)}
+.rail .logo span{color:var(--inkFade);letter-spacing:.16em}
+.toc{list-style:none;margin:12px 0 0;padding:0}
+.toc a{display:flex;gap:10px;padding:7px 20px;color:var(--inkLight);text-decoration:none;font-family:var(--mono);font-size:11.5px;border-left:2px solid transparent}
+.toc a:hover{color:var(--ink);background:rgba(211,119,54,.07);border-left-color:var(--gold)}
+.toc a b{color:var(--inkGhost);font-weight:400;min-width:16px}
+.grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--inkGhost);padding:15px 20px 4px;text-transform:uppercase}
+.rail .stat{margin:16px 20px 0;padding-top:13px;border-top:1px solid var(--railLine);font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.85}
+.rail .stat b{color:var(--red)}
+main{padding:0 40px 90px;min-width:0}
+.mast{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:24px 0 13px;border-bottom:2px solid var(--gold)}
+.mast .t{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--inkFade);text-transform:uppercase}
+.mast .r{font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);text-align:right;line-height:1.8}
+h1{font-weight:400;font-size:clamp(31px,4.8vw,50px);line-height:1.08;letter-spacing:-.015em;margin:24px 0 6px}
+h1 em{font-style:italic;color:var(--gold)}
+h2{font-weight:400;font-size:26px;letter-spacing:-.01em;margin:0 0 3px}
+h3{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 9px}
+p{color:var(--inkMed);margin:0 0 13px}
+.lede{font-size:18.5px;line-height:1.58;color:var(--ink)}
+.mono{font-family:var(--mono)} a{color:var(--gold)}
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+.sh{display:flex;gap:14px;align-items:baseline;margin-bottom:19px}
+.sh .n{font-family:var(--mono);font-size:11px;color:var(--gold);font-weight:700;padding-top:8px;min-width:24px}
+.sh p{margin:2px 0 0;font-size:14px;color:var(--inkLight)}
+.verdict{border:1px solid var(--red);border-left:3px solid var(--red);background:var(--redBg);padding:16px 20px;margin:22px 0 0}
+.verdict .l{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--red);font-weight:700;text-transform:uppercase}
+.verdict .t{font-size:24px;margin:5px 0 7px;line-height:1.2}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:24px 0 0}
+.cell{background:var(--card);padding:11px 13px}
+.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade)}
+.cell .v{font-family:var(--mono);font-size:17.5px;font-weight:700;margin-top:3px}
+.cell .s{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:1px}
+.up{color:var(--green)}.dn{color:var(--red)}.am{color:var(--gold)}.wr{color:var(--amber)}
+.gexp{border:1px solid var(--line2);background:var(--card)}
+.gexh{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--card2)}
+.gexh .tk{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.07em}
+.badge{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;padding:4px 11px;border-radius:3px;background:var(--gCall);color:#02160C}
+.b-out{border:1px solid var(--line2);color:var(--inkLight);padding:4px 10px;font-family:var(--mono);font-size:10.5px;border-radius:3px}
+.gexh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--inkLight)}
+.gexsub{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);padding:8px 15px;border-bottom:1px solid var(--line)}
+.ggrid{stroke:#0F2438;stroke-width:1}
+.gax{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.gaxr{font-family:var(--mono);font-size:9.5px;fill:var(--inkLight);opacity:.75}
+.gaxt{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;fill:var(--inkGhost)}
+.gcall{fill:var(--gCall)} .gput{fill:var(--gPut)}
+.gcurve{fill:none;stroke:var(--ink);stroke-width:1.6;opacity:.9}
+.garea{fill:#2A4A78;opacity:.16;stroke:none}
+.gkey{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:9px 15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--inkFade)}
+.gkey span{display:inline-flex;align-items:center;gap:6px}
+.gkey i{width:11px;height:3px;border-radius:2px;display:inline-block}
+.gkey .note{display:block !important;color:var(--inkGhost);flex-basis:100%;width:100%;line-height:1.6;font-size:10px;padding-top:4px}
+.gkey .note b{display:inline;color:var(--inkFade)}
+.lad{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:74px 176px 1fr;gap:12px;align-items:center;padding:9px 15px;border-bottom:1px solid #0E2438;border-left:3px solid transparent;font-family:var(--mono);font-size:12.5px}
+.lrow:last-child{border-bottom:none}
+.lrow .p{font-weight:700}
+.lrow .d{color:var(--inkFade);font-size:11.5px;font-family:var(--serif)}
+.lrow .lab{letter-spacing:.08em;font-weight:700;font-size:10.5px}
+.l-call{border-left-color:var(--gCall)} .l-put{border-left-color:var(--gPut)}
+.l-spot{border-left-color:var(--gSpot);background:rgba(59,130,196,.10);border-top:1px solid #2C5C86;border-bottom:1px solid #2C5C86}
+.l-flip{border-left-color:var(--gFlip);background:rgba(232,195,74,.07)}
+.narr{padding:14px 15px;border-top:1px solid var(--line);background:var(--card2);font-size:14px;color:var(--inkMed);line-height:1.6}
+.chart{border:1px solid var(--line);background:var(--card);padding:14px 10px 6px;margin:6px 0 14px}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:#0F2438;stroke-width:1}
+.axl{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.pl{fill:none;stroke:var(--ink);stroke-width:1.6}
+.m50{fill:none;stroke:var(--gold);stroke-width:1.2}
+.m200{fill:none;stroke:#5E7C99;stroke-width:1.4;stroke-dasharray:5 3}
+.ar{fill:url(#g1)}
+.lbl{font-family:var(--mono);font-size:10px;font-weight:700}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:5px 4px 7px}
+.legend i{display:inline-block;width:13px;height:2px;vertical-align:middle;margin-right:5px}
+.tw{border:1px solid var(--line);background:var(--card);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #0E2438;color:var(--inkMed)}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.hl td{background:rgba(63,191,119,.08)} tr.hlr td{background:rgba(217,83,79,.07)}
+tr.me td{background:rgba(211,119,54,.10)}
+.gates{border:1px solid var(--line);background:var(--card)}
+.gate{display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:13px 17px;border-bottom:1px solid #0E2438}
+.gate:last-child{border-bottom:none} .gate.f{background:rgba(217,83,79,.05)}
+.gate .idx{font-family:var(--mono);font-size:10px;color:var(--inkGhost)}
+.gate .nm{font-family:var(--mono);font-size:13px;font-weight:700}
+.gate .dt{font-size:12.5px;color:var(--inkLight);margin-top:2px;line-height:1.45}
+.tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border:1px solid;white-space:nowrap;border-radius:2px}
+.t-fail{color:var(--red);border-color:var(--red);background:var(--redBg)}
+.t-warn{color:var(--amber);border-color:var(--amber);background:var(--amberBg)}
+.t-pass{color:var(--green);border-color:var(--green);background:var(--greenBg)}
+.stamp{border:1px solid var(--line);border-top:none;background:var(--card2);padding:13px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.stamp .x{font-family:var(--mono);font-size:12px;color:var(--inkLight)}
+.stamp .o{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--red);letter-spacing:.08em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);background:var(--card);padding:16px 18px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #0E2438;font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv span:first-child{color:var(--inkLight)} .kv span:last-child{font-family:var(--mono);font-weight:700}
+.rule{border-left:2px solid var(--gold);background:rgba(211,119,54,.05);padding:11px 15px;margin:14px 0;font-size:13.5px;color:var(--inkMed)}
+.rule .rid{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px}
+.note{border-left:2px solid var(--line2);padding:2px 0 2px 15px;margin:15px 0;color:var(--inkMed)}
+.note b{color:var(--ink)}
+.news{border:1px solid var(--line);background:var(--card)}
+.nhdr{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);padding:10px 16px;background:var(--card2);border-bottom:1px solid var(--line)}
+.nrow{display:grid;grid-template-columns:86px 1fr;gap:14px;padding:11px 16px;border-bottom:1px solid #0E2438}
+.nrow:last-child{border-bottom:none}
+.nrow .dt{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding-top:2px}
+.nrow .hd{font-size:14.5px;color:var(--ink);margin-bottom:3px}
+.nrow .bd{font-size:12.8px;color:var(--inkLight);line-height:1.5}
+.pill{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.09em;padding:2px 7px;border:1px solid var(--line2);color:var(--inkFade);margin-right:7px;vertical-align:1px;border-radius:2px}
+.pill.bull{border-color:var(--green);color:var(--green)}
+.pill.bear{border-color:var(--red);color:var(--red)}
+.pill.neu{border-color:var(--amber);color:var(--amber)}
+ul{margin:0 0 12px;padding-left:17px;color:var(--inkMed)}li{margin-bottom:5px}
+.foot{padding:28px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);line-height:1.9}
+/* strip: fixed column counts so the last cell never orphans */
+.strip{grid-template-columns:repeat(8,1fr)}
+@media(max-width:1500px){.strip{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:620px){.strip{grid-template-columns:repeat(2,1fr)}}
+/* tablet landscape: rail becomes a compact top bar, not a dead column */
+@media(max-width:1200px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:none;border-bottom:1px solid var(--railLine);
+        display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:12px 24px}
+  .rail .logo{border-bottom:none;padding:0;font-size:10.5px;line-height:1.5}
+  .rail .stat{margin:0;padding:0;border-top:none;font-size:10.5px;line-height:1.7;text-align:right}
+  main{padding:0 24px 70px}
+}
+@media(max-width:760px){
+  .two,.three{grid-template-columns:1fr}
+  .lrow{grid-template-columns:66px 1fr}.lrow .d{display:none}
+  main{padding:0 18px 60px}
+  .rail{padding:10px 18px}
+}
+
+/* ===== light theme : colours only, toggled by html.light — sampled from phoenix_app.html ===== */
+html.light{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15);
+  --rail:#F3EADC; --railLine:rgba(122,96,68,.22);
+  --gCall:#1E7A4E; --gPut:#B4362F; --gSpot:#2C5A82; --gFlip:#A87A1C; --gPin:#7A5CA8;
+}
+html.light,html.light body,html.light .shell,html.light main{background:#F6EFE4}
+html.light body{color:#2C2118}
+html.light .rail{background:#F3EADC}
+html.light .card,html.light .tw,html.light .gates,html.light .news,html.light .gexp,html.light .chart,html.light .cell{background:rgba(255,253,249,.86)}
+html.light .stamp,html.light .gexh,html.light .narr,html.light .nhdr,html.light .gexsub{background:rgba(248,241,231,.94)}
+html.light .pxtheme{background:rgba(248,241,231,.96)}
+html.light .ggrid,html.light .grid{stroke:rgba(122,96,68,.16)}
+html.light .pl{stroke:#2C2118}
+html.light .gcurve{stroke:#2C2118}
+html.light .garea{fill:#7A6044;opacity:.16}
+html.light .m200{stroke:#8C7A67}
+html.light .badge{background:var(--gCall);color:#FFFDF9}
+html.light .lrow.l-spot{background:rgba(44,90,130,.10);border-top-color:rgba(44,90,130,.4);border-bottom-color:rgba(44,90,130,.4)}
+html.light .lrow.l-flip{background:rgba(168,122,28,.10)}
+html.light .gate.f{background:rgba(180,54,47,.055)}
+html.light tr.hl td{background:rgba(30,122,78,.09)}
+html.light tr.hlr td{background:rgba(180,54,47,.07)}
+html.light tr.me td{background:rgba(194,99,42,.10)}
+html.light td{border-bottom-color:rgba(122,96,68,.14)}
+html.light .gate,html.light .nrow,html.light .lrow{border-bottom-color:rgba(122,96,68,.14)}
+html.light .rule{background:rgba(194,99,42,.06)}
+html.light .toc a:hover{background:rgba(194,99,42,.09)}
+/* theme switch */
+.pxtheme{z-index:40;display:flex;gap:0;border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:var(--card2)}
+.pxtheme button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 12px;border:0;background:transparent;color:var(--inkFade);cursor:pointer}
+.pxtheme button.on{background:var(--gold);color:#FFFDF9;font-weight:700}
+.pxtheme button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+@media print{.pxtheme,.rail{display:none}.shell{grid-template-columns:1fr}main{padding:0}}
+
+/* ===== theme switch hardening — must stay last in the sheet ===== */
+.pxtheme{position:fixed;top:14px;right:18px;bottom:auto;left:auto;
+  height:auto;width:auto;max-height:34px;align-items:center;line-height:1}
+.pxtheme button{height:28px;line-height:28px;padding:0 12px;white-space:nowrap;flex:0 0 auto}
+@media(max-width:1200px){
+  .pxtheme{top:auto;bottom:14px;right:14px}
+}
+@media print{.pxtheme{display:none}}
+</style></head><body><div class="shell">
+<nav class="rail"><div class="logo">PHOENIX<br><span>EQUITY RESEARCH</span></div>
+<div class="stat" style="margin-top:20px;border-top:none;padding-top:0">IBM &middot; $235.68<br>L3 SINGLE NAME<br>23 AUG 2026<br><br>GATES: <b>4 FAIL</b><br>SCORE: 63/100<br>VERDICT: <b>NO TRADE</b></div></nav>
+<main>
+<div class="pxtheme" role="group" aria-label="Theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></div>
+<div class="mast"><div class="t">NYSE : IBM &middot; International Business Machines Corp. &middot; L3 single-name thesis</div>
+<div class="r">MON 24 AUG 2026 &middot; DATA THROUGH FRI 21 AUG CLOSE<br>IBKR LIVE &middot; FULL-CHAIN GEX &middot; WEEKLY GATES</div></div>
+<section id="verdict">
+  <h1>The worst single day<br>in <em>110 years</em> of listing.</h1>
+  <p class="lede" style="max-width:74ch;margin-top:18px">On 14 July IBM fell <b>25.21%</b> &mdash; a steeper one-day decline than Black Monday 1987 &mdash; after an unscheduled letter disclosed a Q2 revenue miss of $660m. The miss was 3.7%. The reaction erased <b>$68.8 billion</b>. Realised volatility is now <b>82.8%</b> on a stock that normally trades in the twenties, and the options market has already priced it back down to 32%. That gap is the whole report.</p>
+  <div class="verdict"><div class="l">Phoenix gate stack &middot; weekly &middot; verdict</div>
+    <div class="t">NO TRADE &mdash; fails all four computable gates</div>
+    <p style="margin:0;font-size:14px">Below the 40-week, 30-week and 10-week, all three falling, 29% from the 104-week high. <b style="color:var(--ink)">The second name in this series to fail every gate</b> &mdash; and unlike Meta, with an open securities-fraud investigation attached.</p></div>
+  <div class="strip">
+    <div class="cell"><div class="k">Weekly close 21 Aug</div><div class="v">235.68</div><div class="s">live Mon ~235.42</div></div>
+    <div class="cell"><div class="k">40-week SMA</div><div class="v dn">264.54</div><div class="s dn">-10.9% &middot; falling</div></div>
+    <div class="cell"><div class="k">30-week SMA</div><div class="v dn">251.95</div><div class="s dn">-6.5% &middot; falling</div></div>
+    <div class="cell"><div class="k">10-week SMA</div><div class="v dn">245.56</div><div class="s dn">-4.0% &middot; falling</div></div>
+    <div class="cell"><div class="k">104w high</div><div class="v dn">-29.1%</div><div class="s">332.46</div></div>
+    <div class="cell"><div class="k">Realised vol</div><div class="v dn">82.8%</div><div class="s dn">vs IV 32.0%</div></div>
+    <div class="cell"><div class="k">Daily ATR</div><div class="v">11.54</div><div class="s">4.9% of price</div></div>
+    <div class="cell"><div class="k">YTD</div><div class="v dn">-19.5%</div><div class="s dn">52w low 199.19</div></div>
+  </div>
+</section>
+
+<section id="biz">
+  <div class="sh"><div class="n">01</div><div><h2>The business</h2><p>A software and consulting company with a mainframe attached &mdash; and in the June quarter the mainframe did the damage.</p></div></div>
+  <p class="lede" style="max-width:76ch">IBM sells enterprise software on subscription, consulting hours to deploy it, and the Z mainframe that a large share of the world's transaction processing still runs on. The July crash was not a software problem. It was a mainframe cycle turning down at the same moment enterprise budgets moved to AI hardware &mdash; and a management team that did not see it coming.</p>
+  <div class="three" style="margin-top:22px">
+    <div class="card"><h3>Software &mdash; the part that worked</h3>
+      <p style="font-size:13.5px;margin-bottom:10px"><b style="color:var(--ink)">$7.76bn, +5.1%.</b> Segment profit <b>+9% to $2.50bn</b>, margin up 110bps to <b>32.2%</b>. Annual recurring revenue reached <b style="color:var(--ink)">$24.6bn, +8%</b>. Hybrid cloud +11%.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)"><b style="color:var(--ink)">This segment grew, expanded margin and grew its recurring base.</b> Nothing in the software numbers explains a 25% decline.</p></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Infrastructure &mdash; the damage</h3>
+      <p style="font-size:13.5px;margin-bottom:10px"><b class="mono dn">Mainframe revenue &minus;42%.</b> Z and Transaction Processing software both fell short. A product-cycle trough compounded by clients deferring.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)">Mainframe revenue is lumpy by design &mdash; it spikes on a new Z generation and collapses between them. <b style="color:var(--ink)">The问题 is that the trough arrived unannounced.</b></p></div>
+    <div class="card"><h3>Consulting &mdash; the swing factor</h3>
+      <p style="font-size:13.5px;margin-bottom:10px">Large deals slipped out of the quarter. Krishna cited "delayed deals" and industry-wide cybersecurity distractions pulling client attention and budget.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)">Whether that revenue was <b>delayed, reduced or lost</b> is the open question &mdash; and the one the market decided not to wait for an answer on.</p></div>
+  </div>
+  <div class="two" style="margin-top:20px">
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">14 July &mdash; what actually happened</h3>
+      <div class="kv"><span>Prior close, 13 July</span><span>$290.23</span></div>
+      <div class="kv"><span>Close, 14 July</span><span class="dn">$217.07</span></div>
+      <div class="kv"><span>Decline</span><span class="dn">&minus;25.21%</span></div>
+      <div class="kv"><span>Market value erased</span><span class="dn">~$68.8bn</span></div>
+      <div class="kv"><span>Prior worst day</span><span>&minus;23.7% &middot; 19 Oct 1987</span></div>
+      <div class="kv"><span>Preliminary revenue</span><span class="dn">$17.2bn vs $17.86bn</span></div>
+      <div class="kv"><span>Miss</span><span class="wr">$660m &middot; 3.7%</span></div>
+      <div class="kv"><span>Operating EPS</span><span class="wr">$2.93 vs $3.01</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">A 3.7% revenue miss produced a 25% decline.</b> That ratio is the finding. The market was not repricing one quarter &mdash; it was repricing forward growth, execution credibility, and the fact that the warning came <b>unscheduled, eight days before the calendared call.</b></p></div>
+    <div class="card"><h3>The full print, 22 July</h3>
+      <div class="kv"><span>Revenue</span><span>$17.16bn &middot; +1.1%</span></div>
+      <div class="kv"><span>Adjusted EPS</span><span class="up">$2.93 &middot; +5% YoY</span></div>
+      <div class="kv"><span>Software</span><span class="up">$7.76bn &middot; +5.1%</span></div>
+      <div class="kv"><span>Software ARR</span><span class="up">$24.6bn &middot; +8%</span></div>
+      <div class="kv"><span>Mainframe infrastructure</span><span class="dn">&minus;42%</span></div>
+      <div class="kv"><span>Non-GAAP pre-tax margin</span><span class="up">19.2% &middot; +30bps</span></div>
+      <div class="kv"><span>FY26 revenue guide</span><span class="wr">4&ndash;5% constant currency</span></div>
+      <div class="kv"><span>FY26 free cash flow</span><span class="up">~$1bn growth YoY</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)">Quarterly dividend held at <b>$1.69</b>. Consensus FY26 EPS around <b>$12.33</b>. <b style="color:var(--ink)">The business is profitable, cash-generative and guiding to growth &mdash; which is precisely why the credibility question, not the arithmetic, is what remains unresolved.</b></p></div>
+  </div>
+  <div class="rule"><span class="rid">The context that makes the reaction legible</span>Q1 2026 revenue grew <b>~9% to $15.92bn and beat.</b> One quarter later growth was 1.1% and the company pre-announced a miss. <b style="color:var(--ink)">A deceleration from 9% to 1% in a single quarter, disclosed off-schedule, is not a data point &mdash; it is a statement that management's visibility into its own pipeline was wrong.</b> That is what a 25% decline prices, and no single quarter repairs it.</div>
+  <div class="rule"><span class="rid">The legal overhang &mdash; and its date</span>A securities-fraud investigation opened in the wake of the crash and remains active; a further legal notice was published on <b>21 August</b>, the most recent trading day in this report. The question under investigation is whether IBM <b>misled the market about the strength of its deal pipeline</b> before the 14 July warning. <b style="color:var(--ink)">This is not a quantifiable risk with a resolution date</b> &mdash; it is an open-ended headline exposure sitting on top of an already-broken chart, and it is the single clearest reason this name should not be a discretionary override candidate.</div>
+  <div class="rule"><span class="rid">One forward-looking item worth knowing</span>On <b>14 August</b> IBM opened a new enterprise distribution channel for a major AI model provider, positioning itself as the intermediary for large corporate clients deploying frontier AI inside regulated, secure, hybrid-cloud environments. <b style="color:var(--ink)">That is the correct strategic response to the exact problem that caused the miss</b> &mdash; if budgets are moving to AI, be the channel. It is far too early to appear in revenue.</div>
+</section>
+
+<section id="gex">
+  <div class="sh"><div class="n">02</div><div><h2>Gamma structure</h2><p>Windowed to spot &minus;14% / +15%. Net gamma per strike; walls on <b>open interest</b>.</p></div></div>
+  <div class="gexp">
+    <div class="gexh"><div class="tk">IBM</div><span class="badge">POSITIVE GAMMA</span><span class="b-out">spot +1.1% above flip</span><div class="st">FLIP AT THE 50-EMA &middot; OI RES 250</div></div>
+    <div class="gexsub" style="color:var(--inkLight)">Regime <b style="color:var(--gCall)">POSITIVE GAMMA</b> &nbsp;&middot;&nbsp; Net GEX <b>+$31m</b> &nbsp;&middot;&nbsp; <span style="color:var(--gFlip)">Flip <b>233.20</b></span> &nbsp;&middot;&nbsp; <span style="color:var(--gCall)">OI Res <b>250</b></span> &nbsp;&middot;&nbsp; <span style="color:var(--gPut)">OI Sup <b>220</b></span></div>
+    <div style="padding:8px 10px 0"><svg viewBox="0 0 1000 330" role="img" aria-label="IBM net gamma exposure by strike">
+      <line class="ggrid" x1="76" y1="252.5" x2="974" y2="252.5"/><text class="gax" x="67" y="256.0" text-anchor="end">-5</text><line class="ggrid" x1="76" y1="214.6" x2="974" y2="214.6"/><text class="gax" x="67" y="218.1" text-anchor="end">-2.5</text><line class="ggrid" x1="76" y1="176.7" x2="974" y2="176.7"/><text class="gax" x="67" y="180.2" text-anchor="end">0</text><line class="ggrid" x1="76" y1="138.8" x2="974" y2="138.8"/><text class="gax" x="67" y="142.3" text-anchor="end">2.5</text><line class="ggrid" x1="76" y1="100.9" x2="974" y2="100.9"/><text class="gax" x="67" y="104.4" text-anchor="end">5</text><line class="ggrid" x1="76" y1="63.0" x2="974" y2="63.0"/><text class="gax" x="67" y="66.5" text-anchor="end">7.5</text><line x1="76" y1="176.7" x2="974" y2="176.7" stroke="#22415F" stroke-width="1"/><rect class="gput" x="151.7" y="176.7" width="40.7" height="51.5"/><rect class="gput" x="217.4" y="176.7" width="40.7" height="72.8"/><rect class="gput" x="283.1" y="176.7" width="40.7" height="44.0"/><rect class="gput" x="348.8" y="176.7" width="40.7" height="84.9"/><rect class="gput" x="414.5" y="176.7" width="40.7" height="47.0"/><rect class="gcall" x="480.2" y="140.4" width="40.7" height="36.4"/><rect class="gcall" x="545.9" y="107.0" width="40.7" height="69.7"/><rect class="gcall" x="611.6" y="144.9" width="40.7" height="31.8"/><rect class="gcall" x="677.3" y="58.5" width="40.7" height="118.2"/><rect class="gcall" x="743.0" y="147.9" width="40.7" height="28.8"/><rect class="gcall" x="808.7" y="125.2" width="40.7" height="51.5"/><rect class="gcall" x="874.4" y="158.5" width="40.7" height="18.2"/><rect class="gcall" x="940.1" y="134.3" width="40.7" height="42.4"/>
+      <line x1="303.5" y1="26" x2="303.5" y2="188.7" stroke="#C43A30" stroke-width="2.2" stroke-dasharray="3 3" opacity=".85"/>
+      <line x1="697.7" y1="26" x2="697.7" y2="188.7" stroke="#2D8A55" stroke-width="2.4" stroke-dasharray="3 3"/>
+      <line x1="476.9" y1="26" x2="476.9" y2="188.7" stroke="#E8C34A" stroke-width="3" stroke-dasharray="6 4"/>
+      <line x1="509.5" y1="26" x2="509.5" y2="188.7" stroke="#3B82C4" stroke-width="3.2"/>
+      <text class="gax" x="172.1" y="312" text-anchor="middle">210</text><text class="gax" x="303.5" y="312" text-anchor="middle">220</text><text class="gax" x="434.9" y="312" text-anchor="middle">230</text><text class="gax" x="566.3" y="312" text-anchor="middle">240</text><text class="gax" x="697.7" y="312" text-anchor="middle">250</text><text class="gax" x="829.1" y="312" text-anchor="middle">260</text><text class="gax" x="960.4" y="312" text-anchor="middle">270</text><text class="gax" x="18" y="156.0" transform="rotate(-90 18 156.0)" text-anchor="middle">Net GEX $m</text></svg></div>
+    <div class="gkey"><span><i style="background:#2D8A55"></i>Positive net gamma</span><span><i style="background:#C43A30"></i>Negative net gamma</span>
+      <span><i style="background:#3B82C4;width:3px;height:11px"></i>Spot 235.68</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#E8C34A 0 5px,transparent 5px 9px);width:14px;height:3px"></i>Flip 233.20</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#2D8A55 0 3px,transparent 3px 6px)"></i>OI Res 250</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#C43A30 0 3px,transparent 3px 6px)"></i>OI Sup 220</span>
+      <span class="note">Net gamma per strike, one bar, coloured by sign. Walls chosen on <b>open interest</b>. <b>Estimated from a sampled chain &mdash; Phoenix's full-chain reading supersedes this where available.</b></span></div>
+    <div class="narr"><b style="color:var(--ink)">The flip at $233.20 sits almost exactly on the 50-period EMA that market commentary has identified as the recovery's resistance level.</b> Price is 1.1% above both &mdash; less than a quarter of one ATR of cushion. That coincidence is worth respecting: the level where dealer hedging turns supportive and the level where the technical recovery stalls are the same number. <b style="color:var(--ink)">Above it, dealers dampen and the bounce has room to $250. Below it, they amplify into a market already carrying a fraud investigation.</b> Friday traded 34,705 calls against 13,072 puts &mdash; slightly <i>below</i> average call volume, which for a name in this much news flow reads as disinterest rather than accumulation.</div>
+  </div>
+</section>
+
+<section id="gates">
+  <div class="sh"><div class="n">03</div><div><h2>The gate stack</h2><p>Weekly bars as <span class="mono">phoenix.py</span> computes them. Nothing passes.</p></div></div>
+  <div class="gates">
+    <div class="gate f"><div class="idx">01</div><div><div class="nm">trend200 &mdash; above 40-week</div><div class="dt">$235.68 vs 40-week SMA <b class="mono">$264.54</b> &mdash; <b>10.9% below</b>, and the average is falling (was $271.94). Fails on level and slope.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate f"><div class="idx">02</div><div><div class="nm">stage2 &mdash; Weinstein</div><div class="dt">Price 6.5% <b>below</b> the 30-week at $251.95, and the 30-week is falling (was $260.72). Both conditions fail.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate f"><div class="idx">03</div><div><div class="nm">trend50 &mdash; above 10-week</div><div class="dt">$235.68 vs 10-week $245.56 &mdash; 4.0% below, falling (was $263.34, a <b>7% drop in four weeks</b>). Even the short average is overhead.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate f"><div class="idx">04</div><div><div class="nm">near_high &mdash; 104-week</div><div class="dt">104-week high $332.46. Price is <b class="mono">-29.1%</b>; the gate wants -8% to -1%. <b>$305.86 would satisfy it &mdash; a 30% advance.</b></div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate"><div class="idx">05</div><div><div class="nm">industry</div><div class="dt">IT Services / Software &mdash; Infrastructure. Needs <span class="mono">rotation_nav</span>, absent from this project &mdash; and immaterial here, since four gates already fail.</div></div><div class="tag t-warn">UNVERIFIED</div></div>
+  </div>
+  <div class="stamp"><div class="x">4 FAIL &middot; 1 UNVERIFIED &middot; 0 PASS &mdash; the second clean sweep in this series, after META</div><div class="o">NO CANDIDATE</div></div>
+  <div class="rule"><span class="rid">stage-theory-context-filter &middot; R1</span>Price below three falling averages, 29% from the high, four weeks after the largest one-day decline in the company's listed history. <b>This is Stage 4 transitioning into Stage 1 at best.</b> Any breakout forming here is exit liquidity by definition, and it will look identical to a real one. Only the stage distinguishes them &mdash; and the stage is not ambiguous.</div>
+  <div class="rule"><span class="rid">What would have to happen, in order</span>Reclaim the 10-week at <b class="mono">$245.56</b> &rarr; the 10-week stops falling &rarr; reclaim the 30-week at <b class="mono">$251.95</b> &rarr; the 30-week turns up, which is <span class="mono">stage2</span> &rarr; reclaim the 40-week at <b class="mono">$264.54</b>. <span class="mono">near_high</span> then needs <b class="mono">$305.86</b>. <b style="color:var(--ink)">That is a 30% advance and, on any realistic timeline, a 2027 question.</b> This is not a watchlist entry.</div>
+</section>
+
+<section id="vol">
+  <div class="sh"><div class="n">V</div><div><h2>Volatility profile</h2>
+  <p>What the options market expects, what the stock has actually done, and what that means for the stop.</p></div></div>
+  <div class="strip" style="margin-top:0">
+    <div class="cell"><div class="k">Implied vol &middot; annual</div><div class="v">32.0%</div><div class="s">options market</div></div>
+    <div class="cell"><div class="k">Realised vol &middot; 30d</div><div class="v dn">82.8%</div><div class="s dn">what it did</div></div>
+    <div class="cell"><div class="k">Spread</div><div class="v dn">&minus;50.8</div><div class="s dn">WIDEST IN SERIES</div></div>
+    <div class="cell"><div class="k">IV percentile 52w</div><div class="v am">30th</div><div class="s am">0th on 13w</div></div>
+    <div class="cell"><div class="k">Daily ATR-14</div><div class="v">11.54</div><div class="s">4.9% of price</div></div>
+    <div class="cell"><div class="k">IV-implied daily</div><div class="v">2.01%</div><div class="s">$4.75</div></div>
+    <div class="cell"><div class="k">Realised daily</div><div class="v dn">5.22%</div><div class="s dn">$12.30</div></div>
+    <div class="cell"><div class="k">Stop basis</div><div class="v dn" style="font-size:14px">REALISED</div><div class="s">use for sizing</div></div>
+  </div>
+  <div class="rule"><span class="rid">A 50-point spread &mdash; and why it is not a free lunch</span>Implied volatility is <b class="mono dn">61% below</b> realised. On the surface that says options are extraordinarily cheap. <b style="color:var(--ink)">The honest reading is more careful:</b> realised vol of 82.8% is dominated by a single 25% session inside the 30-day window, and that event does not repeat &mdash; the same arithmetic will read very differently once 14 July rolls out. What the spread does tell you with certainty is that <b>an options-derived stop would be less than half the width this stock actually requires.</b> The IV-implied daily move is $4.75; the measured range is <b class="mono am">$11.54</b>. <b style="color:var(--ink)">Size from the second number, and note that IV sitting at the 0th percentile of the last 13 weeks means the market has already stopped pricing follow-on risk from an investigation that is still open.</b></div>
+  <div class="note"><b>Why this section exists.</b> Implied volatility is a <i>forecast</i>; realised volatility is a <i>measurement</i>. When they diverge, the options market and the tape disagree about how much room a position needs &mdash; and a stop placed on the wrong one is either harvested by noise or wider than the account can carry. <b style="color:var(--ink)">Across the twelve names reviewed, ten had implied below realised.</b> IBM's 50.8-point gap is the widest by a factor of two. <b>Default to the measured range unless the two agree.</b></div>
+</section>
+
+<section id="rr">
+  <div class="sh"><div class="n">04</div><div><h2>Reward-to-risk</h2><p>The ratios to the far targets look excellent. They are measuring a 30% recovery that requires the thesis to be wrong.</p></div></div>
+  <div class="note" style="border-left-color:var(--gold)"><b>Daily ATR is $11.54 &mdash; 4.9% of price.</b> Use it, not the 32% implied vol, which would put a stop at less than half the required width.</div>
+  <div class="tw"><table>
+    <tr><th>Scenario</th><th class="n">Entry</th><th class="n">Stop</th><th class="n">Stop dist</th><th class="n">&times;ATR</th><th class="n">R:R &rarr; 250</th><th class="n">R:R &rarr; 264.54</th><th class="n">Shares</th><th class="n">Position</th></tr>
+    <tr class="hlr"><td>1.0 ATR &mdash; below the flip</td><td class="n">235.68</td><td class="n">224.14</td><td class="n">4.9%</td><td class="n">1.00</td><td class="n dn">1.24 : 1</td><td class="n up">2.50 : 1</td><td class="n">1.73</td><td class="n dn">$408 &middot; 20%</td></tr>
+    <tr class="hlr"><td>1.5 ATR &mdash; below the $220 shelf</td><td class="n">235.68</td><td class="n">218.37</td><td class="n">7.3%</td><td class="n">1.50</td><td class="n dn">0.83 : 1</td><td class="n dn">1.67 : 1</td><td class="n">1.16</td><td class="n">$272 &middot; 14%</td></tr>
+  </table></div>
+  <div class="two" style="margin-top:18px">
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">The near target does not pay</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">$250 open-interest resistance is only 6.1% up, while a stop clearing the gamma flip is 4.9% down. <b class="mono dn">1.24:1</b> &mdash; and 0.83:1 at any sane widening.</p>
+      <p style="font-size:13.5px;margin:0">The 2.50:1 to the 40-week at $264.54 is real arithmetic &mdash; but that level is <b style="color:var(--ink)">a falling average</b>, so the target moves down toward the entry while you hold.</p></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">The 6:1 is a mirage</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">A stop at $224.14 targeting the <span class="mono">near_high</span> trigger at $305.86 shows <b class="mono">6.08:1</b>. That requires a <b>30% advance</b> in a stock that just fell 25% in a day, with an open fraud investigation.</p>
+      <p style="font-size:13.5px;margin:0"><b style="color:var(--ink)">A ratio computed against a target the stage says is unreachable is not a ratio.</b> It is arithmetic with the probability removed.</p></div>
+  </div>
+  <div class="rule"><span class="rid">geometry-of-risk-sizing &middot; gap exposure</span>This stock demonstrated four weeks ago that it will gap <b>25% on an unscheduled announcement</b> with no opportunity to exit in between. A stop defines intended risk, not realised risk, and IBM has just provided the cleanest possible proof. <b style="color:var(--ink)">With a securities investigation still open, the possibility of another unscheduled disclosure is not hypothetical.</b> On a $2,000 book a repeat would be roughly <b class="mono dn">5R</b> from a single position.</div>
+</section>
+
+<section id="news">
+  <div class="sh"><div class="n">05</div><div><h2>News flow</h2></div></div>
+  <div class="news" style="margin-bottom:18px">
+    <div class="nhdr">Ticker-specific &mdash; IBM</div>
+    <div class="nrow"><div class="dt">TUE 14 JUL</div><div><div class="hd"><span class="pill bear">CRASH</span>&minus;25.21% &mdash; the worst single day in IBM's listed history</div>
+      <div class="bd">An unscheduled letter from CEO Arvind Krishna disclosed preliminary Q2 revenue of $17.2bn against $17.86bn consensus and EPS of $2.93 against $3.01. <b style="color:var(--ink)">A 3.7% miss erased $68.8bn.</b> Steeper than Black Monday 1987. Krishna said the company had "faltered."</div></div></div>
+    <div class="nrow"><div class="dt">TUE 14 JUL</div><div><div class="hd"><span class="pill bear">CONTAGION</span>Three in five software stocks fell; Atlassian, ServiceNow, Adobe hardest hit</div>
+      <div class="bd">The stated cause was clients redirecting late-June budgets toward AI hardware &mdash; servers, storage, memory. <b style="color:var(--amber)">The 52-week correlation between the software ETF and the semiconductor ETF fell to 0.17, the lowest since 2002.</b> Chips and software are being priced as competing claims on the same budget.</div></div></div>
+    <div class="nrow"><div class="dt">WED 22 JUL</div><div><div class="hd"><span class="pill neu">FULL RESULTS</span>Revenue $17.16bn confirmed; software +5.1%, mainframe &minus;42%</div>
+      <div class="bd">Adjusted EPS $2.93, up 5% year over year and in line. Software ARR $24.6bn (+8%), segment margin 32.2%. FY26 guided to 4&ndash;5% constant-currency growth, ~$1bn of free cash flow growth, ~100bps of margin improvement. Dividend held at $1.69.</div></div></div>
+    <div class="nrow"><div class="dt">FRI 21 AUG</div><div><div class="hd"><span class="pill bear">LEGAL</span>Securities-fraud investigation active &mdash; new notice published Friday</div>
+      <div class="bd">The question is whether IBM <b style="color:var(--ink)">misled the market about the strength of its deal pipeline</b> before the 14 July warning. <b style="color:var(--amber)">Published on the most recent trading day covered by this report.</b> No resolution date.</div></div></div>
+    <div class="nrow"><div class="dt">FRI 14 AUG</div><div><div class="hd"><span class="pill bull">STRATEGY</span>New enterprise distribution channel for a major AI model provider</div>
+      <div class="bd">Positions IBM as the intermediary for large corporate clients deploying frontier AI inside regulated, secure, hybrid-cloud environments. <b style="color:var(--ink)">The right strategic answer to the exact problem that caused the miss</b> &mdash; and far too early to appear in revenue.</div></div></div>
+    <div class="nrow"><div class="dt">MON 13 JUL</div><div><div class="hd"><span class="pill bear">RATING</span>HSBC cut to Reduce, target $191 from $231 &mdash; one day before the warning</div>
+      <div class="bd">On valuation: 22.0&times; CY27 earnings against a 16.9&times; sector median. The analyst argued a "synthetic IBM" basket of SAP, Accenture, HP and IonQ cost $287.56 against IBM's $290.23. <b style="color:var(--amber)">A valuation call that landed one day early &mdash; not a response to the miss.</b></div></div></div>
+  </div>
+  <div class="news">
+    <div class="nhdr">Market-wide &mdash; IBM was the transmission mechanism, not a passenger</div>
+    <div class="nrow"><div class="dt">JUL</div><div><div class="hd"><span class="pill bear">STRUCTURAL</span>Enterprise budgets rotating from software to AI hardware</div>
+      <div class="bd">If hardware spending is consuming capital that would otherwise fund software licences, <b style="color:var(--ink)">IBM's experience is not idiosyncratic</b> &mdash; it is the first clear reading of a reallocation that affects every enterprise software vendor. That is why the whole sector traded on IBM's letter.</div></div></div>
+    <div class="nrow"><div class="dt">WED 26 AUG</div><div><div class="hd"><span class="pill neu">EVENT</span>NVIDIA reports in two sessions</div>
+      <div class="bd">The other side of the same trade. If hardware demand is confirmed strong, it corroborates the budget-rotation thesis that broke IBM &mdash; <b style="color:var(--amber)">good for NVIDIA, structurally negative for enterprise software.</b></div></div></div>
+    <div class="nrow"><div class="dt">ONGOING</div><div><div class="hd"><span class="pill neu">POSITIONING</span>Consensus still positive; targets likely stale</div>
+      <div class="bd">Consensus FY26 EPS near $12.33 and the average target sat above the pre-crash price. <b style="color:var(--ink)">Many component targets predate the warning</b>, so the published consensus should not be read as a clean post-warning valuation.</div></div></div>
+    <div class="nrow"><div class="dt">CONTEXT</div><div><div class="hd"><span class="pill neu">REFERENCE FRAME</span>Large index weight, but currently trading on its own news</div>
+      <div class="bd">SPX matters at this size, but IBM has spent six weeks moving on company-specific disclosure. <b style="color:var(--amber)">Neither SPX gamma nor the industry gate was retrieved in this run.</b></div></div></div>
+  </div>
+  <div class="rule"><span class="rid">hormuz-illusion-single-catalyst &middot; R1</span>Name the condition the position rests on. Here there are two, and both are adverse: <b>whether the missing revenue was delayed or lost</b> &mdash; answered only by the October print &mdash; and <b>whether the securities investigation produces a finding.</b> Neither is dated, and the second has no scheduled resolution at all. <b style="color:var(--ink)">A position here is exposed to an announcement it cannot anticipate, in a stock that has already demonstrated what that looks like.</b></div>
+</section>
+
+<section id="score">
+  <div class="sh"><div class="n">06</div><div><h2>Quality score</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Block</th><th class="n">Weight</th><th class="n">Score</th><th>Reasoning</th></tr>
+    <tr><td>Business quality</td><td class="n">30</td><td class="n am">20</td><td>Software at a 32.2% margin with $24.6bn of ARR is genuinely good &mdash; offset by a &minus;42% mainframe segment and a credibility failure in forecasting its own pipeline</td></tr>
+    <tr><td>Growth</td><td class="n">20</td><td class="n dn">8</td><td>+1.1% revenue, decelerating from ~9% one quarter earlier. Guidance of 4&ndash;5% now carries a discount for the source</td></tr>
+    <tr><td>Financial strength</td><td class="n">20</td><td class="n up">16</td><td>Cash-generative, ~$1bn of free cash flow growth guided, dividend maintained at $1.69. The balance sheet is not the issue</td></tr>
+    <tr><td>Valuation</td><td class="n">20</td><td class="n am">13</td><td>29% off the high at roughly 19&times; consensus FY26 EPS. Cheaper than it was &mdash; and HSBC's pre-crash argument that the multiple was stretched against a 16.9&times; sector median has aged well</td></tr>
+    <tr><td>Shareholder alignment</td><td class="n">10</td><td class="n dn">6</td><td>Long dividend record, but an unscheduled pre-announcement and an open investigation into pipeline disclosure are governance marks against</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Total</b></td><td class="n"><b>100</b></td><td class="n am"><b>63</b></td><td><b style="color:var(--ink)">Below the buyable band</b> &mdash; second lowest of the twelve, above only TSLA</td></tr>
+  </table></div>
+  <div class="rule"><span class="rid">investment-scoring-100-point &middot; note</span>63/100 with zero passing gates is the same configuration flagged on META: <b>a cheap, established business in a confirmed downtrend.</b> The classic value-trap shape, and fundamental scoring is exactly the instrument that would argue you into it. <b>Context, never a gate.</b></div>
+</section>
+
+<section id="risk">
+  <div class="sh"><div class="n">07</div><div><h2>Risk register</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Risk</th><th style="width:96px">Severity</th><th>Mitigation &mdash; and the residual</th></tr>
+    <tr><td><b style="color:var(--ink)">Demonstrated gap risk</b></td><td><span class="tag t-fail">HIGH</span></td><td><b>No mitigation.</b> A 25% unscheduled gap four weeks ago. A stop does not function across it. On a $2,000 book a repeat is ~5R from one position.</td></tr>
+    <tr><td><b style="color:var(--ink)">Open securities investigation</b></td><td><span class="tag t-fail">HIGH</span></td><td>Active as of 21 August, no resolution date. <b>The mechanism that produced the last gap is still live.</b></td></tr>
+    <tr><td><b style="color:var(--ink)">Confirmed downtrend</b></td><td><span class="tag t-fail">HIGH</span></td><td>Four failing gates, three falling averages above price, 29% off the high.</td></tr>
+    <tr><td><b style="color:var(--ink)">Management credibility</b></td><td><span class="tag t-fail">HIGH</span></td><td>Growth went 9% &rarr; 1% in one quarter, disclosed off-schedule. <b>Guidance of 4&ndash;5% now carries a discount for its source</b> &mdash; and only the October print can begin to repair it.</td></tr>
+    <tr><td><b style="color:var(--ink)">Structural budget rotation</b></td><td><span class="tag t-warn">MED-HIGH</span></td><td>Software growing 5.1% and ARR 8% argues the franchise is intact. But if enterprise capital keeps moving to AI hardware, this is a multi-quarter headwind, not a one-quarter miss.</td></tr>
+    <tr><td><b style="color:var(--ink)">Mainframe cyclicality</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>&minus;42% is a product-cycle trough that will mathematically improve on a new Z generation. The timing is not disclosed.</td></tr>
+    <tr><td><b style="color:var(--ink)">Volatility mispricing</b></td><td><span class="tag t-warn">MEDIUM</span></td><td><b>Execution-specific:</b> IV at 32.0% against 82.8% realised, and at the 0th percentile of the last 13 weeks. Any options-derived stop is less than half the required width.</td></tr>
+  </table></div>
+</section>
+
+<section id="inval">
+  <div class="sh"><div class="n">08</div><div><h2>Invalidation</h2></div></div>
+  <div class="two">
+    <div class="card" style="border-left:2px solid var(--green)"><h3 style="color:var(--green)">Would begin to change the picture</h3>
+      <ul style="margin-bottom:0"><li>Close above <b class="mono">$245.56</b> &mdash; reclaims the 10-week, the first of four steps</li>
+      <li>The 10-week ceasing to fall</li>
+      <li>Close above <b class="mono">$251.95</b> &mdash; the 30-week, first step toward <span class="mono">stage2</span></li>
+      <li>The October print showing the delayed deals actually closed</li>
+      <li><b>Resolution or closure of the securities investigation</b></li>
+      <li>Mainframe comparisons turning on a new Z cycle</li></ul></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Would confirm the downtrend</h3>
+      <ul style="margin-bottom:0"><li>Close below <b class="mono">$233.20</b> &mdash; flips gamma negative and loses the 50-EMA, 1.1% away</li>
+      <li>Close below <b class="mono">$220</b> loses the put shelf</li>
+      <li>Close below <b class="mono">$199.19</b> &mdash; a new 52-week low</li>
+      <li>Any further unscheduled disclosure</li>
+      <li>An adverse development in the investigation</li>
+      <li>October revealing the missing revenue was lost rather than delayed</li></ul></div>
+  </div>
+</section>
+
+<section id="rules" style="border-bottom:none">
+  <div class="sh"><div class="n">09</div><div><h2>Rules applied</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Rule</th><th>Applied to</th><th>Effect on the verdict</th></tr>
+    <tr><td class="mono" style="color:var(--gold)">Phoenix gate stack</td><td>Gates</td><td><b>4 of 4 fail</b> &mdash; the second clean sweep in the series</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">stage-theory.R1</td><td>Gates</td><td>Stage 4 into Stage 1. Any breakout here is exit liquidity by definition</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">geometry-of-risk-sizing</td><td>Risk</td><td><b>Decisive.</b> A 25% unscheduled gap four weeks ago, with the mechanism still live</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">Phoenix GEX method</td><td>Gamma</td><td>Flip at $233.20 coincides with the 50-EMA &mdash; one level, two reasons</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">Volatility panel &sect;5c</td><td>Sizing</td><td>50.8-point IV/HV gap &mdash; the widest recorded. Size from realised</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">rodriguez.R6 / Q57</td><td>Sizing</td><td>1.24:1 to the near target; the 6:1 requires a target the stage says is unreachable</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">hormuz-illusion.R1</td><td>News</td><td>Two undated dependencies, both adverse: delayed-or-lost revenue, and the investigation</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">investment-scoring.R4</td><td>Score</td><td>63/100 with zero gates &mdash; the value-trap shape. Context, never a gate</td></tr>
+  </table></div>
+  <div class="verdict" style="border-color:var(--red);background:var(--redBg);border-left-color:var(--red);margin-top:26px">
+    <div class="l">The answer</div>
+    <p style="margin:8px 0 0;font-size:16px;color:var(--ink)"><b>Fails every gate</b>, four weeks after the largest single-day decline in a listing history stretching back to 1916. Price sits below the 40-week, 30-week and 10-week, all three falling, 29% from the two-year high. <b>63/100</b> &mdash; second lowest of the twelve names reviewed.</p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)">The business underneath is not broken: <b style="color:var(--ink)">software grew 5.1% with ARR up 8% at a 32.2% margin</b>, free cash flow is guided higher, the dividend held. A 3.7% revenue miss produced a 25% decline because the market repriced <i>credibility</i>, not one quarter &mdash; and a company that went from 9% growth to 1% in three months, disclosed off-schedule, cannot repair that with arithmetic.</p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)"><b style="color:var(--ink)">Two things make this the clearest decline of the series.</b> The securities-fraud investigation into pre-warning pipeline disclosure remains open &mdash; a fresh notice was published on Friday &mdash; so <b>the mechanism that produced a 25% gap is still live and undated</b>. And implied volatility has already collapsed to 32% against 82.8% realised, sitting at the <b>0th percentile of the last 13 weeks</b>: the options market has stopped pricing follow-on risk from an investigation that has not concluded. <b style="color:var(--ink)">That is not cheap insurance. It is a market that has moved on before the story has.</b></p>
+  </div>
+</section>
+
+<div class="foot">
+PHOENIX EQUITY RESEARCH &middot; L3 SINGLE-NAME THESIS &middot; IBM &middot; 24 AUG 2026 &middot; PREPARED TO RESEARCH_REPORT_METHOD v1<br>
+PRICE, VOLUME, OPTION OPEN INTEREST, IMPLIED VOLATILITY AND SECTOR DATA: INTERACTIVE BROKERS API, RETRIEVED 24 AUG 2026, THROUGH FRI 21 AUG CLOSE.<br>
+GATES COMPUTED ON WEEKLY BARS PER phoenix.py: 40-WEEK, 30-WEEK AND 10-WEEK SMA AGAINST THE 104-WEEK HIGH. GEX COMPUTED FROM IBKR OPEN INTEREST ACROSS THE LIVE CHAIN USING THE PHOENIX METHOD &mdash; WALLS ON OPEN INTEREST, FLIP FROM THE CUMULATIVE PROFILE.<br>
+LIMITATIONS &mdash; PER-CONTRACT IV UNAVAILABLE, SO A SINGLE UNDERLYING IV IS APPLIED ACROSS STRIKES; THIS UNDERSTATES WING GAMMA. DEALER POSITIONING IS INFERRED FROM THE STANDARD CONVENTION, NOT OBSERVED. DATA THROUGH THE WEEK ENDED FRI 21 AUG 2026; A LIVE MONDAY 24 AUG QUOTE OF ~$235.42 IS SHOWN FOR REFERENCE ONLY AND ALL GATES USE THE 21 AUG WEEKLY CLOSE. GEX IS ESTIMATED FROM A SAMPLED CHAIN. THE INDUSTRY GATE COULD NOT BE COMPUTED. NEITHER SPX NOR SPX GAMMA WAS RETRIEVED. THE SECURITIES INVESTIGATION IS REPORTED AS PUBLICLY DISCLOSED AND NO VIEW IS EXPRESSED ON ITS MERITS.<br>
+NOT INVESTMENT ADVICE. PREPARED FOR ONE SYSTEMATIC LONG-ONLY EQUITY BOOK AND CALIBRATED TO ITS RULES, ACCOUNT SIZE AND COST BASE.
+</div>
+</main></div>
+<script>
+(function(){var root=document.documentElement,d=document.getElementById("thDark"),l=document.getElementById("thLight");
+function set(m){var g=(m==="light");root.classList.toggle("light",g);root.style.colorScheme=g?"light":"dark";
+d.className=g?"":"on";l.className=g?"on":"";try{localStorage.setItem("pxTheme",m);}catch(e){}}
+var s=null;try{s=localStorage.getItem("pxTheme");}catch(e){}set(s||"dark");
+d.addEventListener("click",function(){set("dark");});l.addEventListener("click",function(){set("light");});})();
+</script></body></html>

@@ -1,0 +1,609 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>SOFI &middot; Phoenix Equity Research &middot; 23 Aug 2026</title>
+<style>
+:root{
+  --bg:#020F1F; --card:#08192B; --card2:#0C2137; --line:#14304A; --line2:#1E4462;
+  --ink:#E7EEF6; --inkMed:#C4D2DF; --inkLight:#94A8BA; --inkFade:#6B8299; --inkGhost:#47596C;
+  --gold:#D37736; --green:#3FBF77; --greenBg:rgba(63,191,119,.13);
+  --red:#D9534F; --redBg:rgba(217,83,79,.13);
+  --amber:#D8A24A; --amberBg:rgba(216,162,74,.13);
+  --rail:#010A15; --railLine:#0E2942;
+  --gCall:#2D8A55; --gPut:#C43A30; --gSpot:#3B82C4; --gFlip:#E8C34A; --gPin:#9B7BD4;
+  --serif:Georgia,'Times New Roman',serif; --mono:'Courier New',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:#020F1F;color-scheme:dark}
+html.light{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:15.5px;line-height:1.62}
+.shell{display:grid;grid-template-columns:236px 1fr;max-width:1420px;margin:0 auto}
+.rail{background:var(--rail);border-right:1px solid var(--railLine);padding:22px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.rail .logo{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--gold);font-weight:700;padding:0 20px 15px;border-bottom:1px solid var(--railLine)}
+.rail .logo span{color:var(--inkFade);letter-spacing:.16em}
+.toc{list-style:none;margin:12px 0 0;padding:0}
+.toc a{display:flex;gap:10px;padding:7px 20px;color:var(--inkLight);text-decoration:none;font-family:var(--mono);font-size:11.5px;border-left:2px solid transparent}
+.toc a:hover{color:var(--ink);background:rgba(211,119,54,.07);border-left-color:var(--gold)}
+.toc a b{color:var(--inkGhost);font-weight:400;min-width:16px}
+.grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--inkGhost);padding:15px 20px 4px;text-transform:uppercase}
+.rail .stat{margin:16px 20px 0;padding-top:13px;border-top:1px solid var(--railLine);font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.85}
+.rail .stat b{color:var(--red)}
+main{padding:0 40px 90px;min-width:0}
+.mast{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:24px 0 13px;border-bottom:2px solid var(--gold)}
+.mast .t{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--inkFade);text-transform:uppercase}
+.mast .r{font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);text-align:right;line-height:1.8}
+h1{font-weight:400;font-size:clamp(31px,4.8vw,50px);line-height:1.08;letter-spacing:-.015em;margin:24px 0 6px}
+h1 em{font-style:italic;color:var(--gold)}
+h2{font-weight:400;font-size:26px;letter-spacing:-.01em;margin:0 0 3px}
+h3{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 9px}
+p{color:var(--inkMed);margin:0 0 13px}
+.lede{font-size:18.5px;line-height:1.58;color:var(--ink)}
+.mono{font-family:var(--mono)} a{color:var(--gold)}
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+.sh{display:flex;gap:14px;align-items:baseline;margin-bottom:19px}
+.sh .n{font-family:var(--mono);font-size:11px;color:var(--gold);font-weight:700;padding-top:8px;min-width:24px}
+.sh p{margin:2px 0 0;font-size:14px;color:var(--inkLight)}
+.verdict{border:1px solid var(--red);border-left:3px solid var(--red);background:var(--redBg);padding:16px 20px;margin:22px 0 0}
+.verdict .l{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--red);font-weight:700;text-transform:uppercase}
+.verdict .t{font-size:24px;margin:5px 0 7px;line-height:1.2}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:24px 0 0}
+.cell{background:var(--card);padding:11px 13px}
+.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade)}
+.cell .v{font-family:var(--mono);font-size:17.5px;font-weight:700;margin-top:3px}
+.cell .s{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:1px}
+.up{color:var(--green)}.dn{color:var(--red)}.am{color:var(--gold)}.wr{color:var(--amber)}
+.gexp{border:1px solid var(--line2);background:var(--card)}
+.gexh{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--card2)}
+.gexh .tk{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.07em}
+.badge{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;padding:4px 11px;border-radius:3px;background:var(--gCall);color:#02160C}
+.b-out{border:1px solid var(--line2);color:var(--inkLight);padding:4px 10px;font-family:var(--mono);font-size:10.5px;border-radius:3px}
+.gexh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--inkLight)}
+.gexsub{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);padding:8px 15px;border-bottom:1px solid var(--line)}
+.ggrid{stroke:#0F2438;stroke-width:1}
+.gax{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.gaxr{font-family:var(--mono);font-size:9.5px;fill:var(--inkLight);opacity:.75}
+.gaxt{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;fill:var(--inkGhost)}
+.gcall{fill:var(--gCall)} .gput{fill:var(--gPut)}
+.gcurve{fill:none;stroke:var(--ink);stroke-width:1.6;opacity:.9}
+.garea{fill:#2A4A78;opacity:.16;stroke:none}
+.gkey{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:9px 15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--inkFade)}
+.gkey span{display:inline-flex;align-items:center;gap:6px}
+.gkey i{width:11px;height:3px;border-radius:2px;display:inline-block}
+.gkey .note{display:block !important;color:var(--inkGhost);flex-basis:100%;width:100%;line-height:1.6;font-size:10px;padding-top:4px}
+.gkey .note b{display:inline;color:var(--inkFade)}
+.lad{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:74px 176px 1fr;gap:12px;align-items:center;padding:9px 15px;border-bottom:1px solid #0E2438;border-left:3px solid transparent;font-family:var(--mono);font-size:12.5px}
+.lrow:last-child{border-bottom:none}
+.lrow .p{font-weight:700}
+.lrow .d{color:var(--inkFade);font-size:11.5px;font-family:var(--serif)}
+.lrow .lab{letter-spacing:.08em;font-weight:700;font-size:10.5px}
+.l-call{border-left-color:var(--gCall)} .l-put{border-left-color:var(--gPut)}
+.l-spot{border-left-color:var(--gSpot);background:rgba(59,130,196,.10);border-top:1px solid #2C5C86;border-bottom:1px solid #2C5C86}
+.l-flip{border-left-color:var(--gFlip);background:rgba(232,195,74,.07)}
+.narr{padding:14px 15px;border-top:1px solid var(--line);background:var(--card2);font-size:14px;color:var(--inkMed);line-height:1.6}
+.chart{border:1px solid var(--line);background:var(--card);padding:14px 10px 6px;margin:6px 0 14px}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:#0F2438;stroke-width:1}
+.axl{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.pl{fill:none;stroke:var(--ink);stroke-width:1.6}
+.m50{fill:none;stroke:var(--gold);stroke-width:1.2}
+.m200{fill:none;stroke:#5E7C99;stroke-width:1.4;stroke-dasharray:5 3}
+.ar{fill:url(#g1)}
+.lbl{font-family:var(--mono);font-size:10px;font-weight:700}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:5px 4px 7px}
+.legend i{display:inline-block;width:13px;height:2px;vertical-align:middle;margin-right:5px}
+.tw{border:1px solid var(--line);background:var(--card);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #0E2438;color:var(--inkMed)}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.hl td{background:rgba(63,191,119,.08)} tr.hlr td{background:rgba(217,83,79,.07)}
+tr.me td{background:rgba(211,119,54,.10)}
+.gates{border:1px solid var(--line);background:var(--card)}
+.gate{display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:13px 17px;border-bottom:1px solid #0E2438}
+.gate:last-child{border-bottom:none} .gate.f{background:rgba(217,83,79,.05)}
+.gate .idx{font-family:var(--mono);font-size:10px;color:var(--inkGhost)}
+.gate .nm{font-family:var(--mono);font-size:13px;font-weight:700}
+.gate .dt{font-size:12.5px;color:var(--inkLight);margin-top:2px;line-height:1.45}
+.tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border:1px solid;white-space:nowrap;border-radius:2px}
+.t-fail{color:var(--red);border-color:var(--red);background:var(--redBg)}
+.t-warn{color:var(--amber);border-color:var(--amber);background:var(--amberBg)}
+.t-pass{color:var(--green);border-color:var(--green);background:var(--greenBg)}
+.stamp{border:1px solid var(--line);border-top:none;background:var(--card2);padding:13px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.stamp .x{font-family:var(--mono);font-size:12px;color:var(--inkLight)}
+.stamp .o{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--red);letter-spacing:.08em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);background:var(--card);padding:16px 18px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #0E2438;font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv span:first-child{color:var(--inkLight)} .kv span:last-child{font-family:var(--mono);font-weight:700}
+.rule{border-left:2px solid var(--gold);background:rgba(211,119,54,.05);padding:11px 15px;margin:14px 0;font-size:13.5px;color:var(--inkMed)}
+.rule .rid{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px}
+.note{border-left:2px solid var(--line2);padding:2px 0 2px 15px;margin:15px 0;color:var(--inkMed)}
+.note b{color:var(--ink)}
+.news{border:1px solid var(--line);background:var(--card)}
+.nhdr{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);padding:10px 16px;background:var(--card2);border-bottom:1px solid var(--line)}
+.nrow{display:grid;grid-template-columns:86px 1fr;gap:14px;padding:11px 16px;border-bottom:1px solid #0E2438}
+.nrow:last-child{border-bottom:none}
+.nrow .dt{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding-top:2px}
+.nrow .hd{font-size:14.5px;color:var(--ink);margin-bottom:3px}
+.nrow .bd{font-size:12.8px;color:var(--inkLight);line-height:1.5}
+.pill{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.09em;padding:2px 7px;border:1px solid var(--line2);color:var(--inkFade);margin-right:7px;vertical-align:1px;border-radius:2px}
+.pill.bull{border-color:var(--green);color:var(--green)}
+.pill.bear{border-color:var(--red);color:var(--red)}
+.pill.neu{border-color:var(--amber);color:var(--amber)}
+ul{margin:0 0 12px;padding-left:17px;color:var(--inkMed)}li{margin-bottom:5px}
+.foot{padding:28px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);line-height:1.9}
+/* strip: fixed column counts so the last cell never orphans */
+.strip{grid-template-columns:repeat(8,1fr)}
+@media(max-width:1500px){.strip{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:620px){.strip{grid-template-columns:repeat(2,1fr)}}
+/* tablet landscape: rail becomes a compact top bar, not a dead column */
+@media(max-width:1200px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:none;border-bottom:1px solid var(--railLine);
+        display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:12px 24px}
+  .rail .logo{border-bottom:none;padding:0;font-size:10.5px;line-height:1.5}
+  .rail .stat{margin:0;padding:0;border-top:none;font-size:10.5px;line-height:1.7;text-align:right}
+  main{padding:0 24px 70px}
+}
+@media(max-width:760px){
+  .two,.three{grid-template-columns:1fr}
+  .lrow{grid-template-columns:66px 1fr}.lrow .d{display:none}
+  main{padding:0 18px 60px}
+  .rail{padding:10px 18px}
+}
+
+/* ===== light theme : colours only, toggled by html.light — sampled from phoenix_app.html ===== */
+html.light{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15);
+  --rail:#F3EADC; --railLine:rgba(122,96,68,.22);
+  --gCall:#1E7A4E; --gPut:#B4362F; --gSpot:#2C5A82; --gFlip:#A87A1C; --gPin:#7A5CA8;
+}
+html.light,html.light body,html.light .shell,html.light main{background:#F6EFE4}
+html.light body{color:#2C2118}
+html.light .rail{background:#F3EADC}
+html.light .card,html.light .tw,html.light .gates,html.light .news,html.light .gexp,html.light .chart,html.light .cell{background:rgba(255,253,249,.86)}
+html.light .stamp,html.light .gexh,html.light .narr,html.light .nhdr,html.light .gexsub{background:rgba(248,241,231,.94)}
+html.light .pxtheme{background:rgba(248,241,231,.96)}
+html.light .ggrid,html.light .grid{stroke:rgba(122,96,68,.16)}
+html.light .pl{stroke:#2C2118}
+html.light .gcurve{stroke:#2C2118}
+html.light .garea{fill:#7A6044;opacity:.16}
+html.light .m200{stroke:#8C7A67}
+html.light .badge{background:var(--gCall);color:#FFFDF9}
+html.light .lrow.l-spot{background:rgba(44,90,130,.10);border-top-color:rgba(44,90,130,.4);border-bottom-color:rgba(44,90,130,.4)}
+html.light .lrow.l-flip{background:rgba(168,122,28,.10)}
+html.light .gate.f{background:rgba(180,54,47,.055)}
+html.light tr.hl td{background:rgba(30,122,78,.09)}
+html.light tr.hlr td{background:rgba(180,54,47,.07)}
+html.light tr.me td{background:rgba(194,99,42,.10)}
+html.light td{border-bottom-color:rgba(122,96,68,.14)}
+html.light .gate,html.light .nrow,html.light .lrow{border-bottom-color:rgba(122,96,68,.14)}
+html.light .rule{background:rgba(194,99,42,.06)}
+html.light .toc a:hover{background:rgba(194,99,42,.09)}
+/* theme switch */
+.pxtheme{z-index:40;display:flex;gap:0;border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:var(--card2)}
+.pxtheme button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 12px;border:0;background:transparent;color:var(--inkFade);cursor:pointer}
+.pxtheme button.on{background:var(--gold);color:#FFFDF9;font-weight:700}
+.pxtheme button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+@media print{.pxtheme,.rail{display:none}.shell{grid-template-columns:1fr}main{padding:0}}
+
+/* ===== theme switch hardening — must stay last in the sheet ===== */
+.pxtheme{position:fixed;top:14px;right:18px;bottom:auto;left:auto;
+  height:auto;width:auto;max-height:34px;align-items:center;line-height:1}
+.pxtheme button{height:28px;line-height:28px;padding:0 12px;white-space:nowrap;flex:0 0 auto}
+@media(max-width:1200px){
+  .pxtheme{top:auto;bottom:14px;right:14px}
+}
+@media print{.pxtheme{display:none}}
+</style></head><body><div class="shell">
+<nav class="rail"><div class="logo">PHOENIX<br><span>EQUITY RESEARCH</span></div>
+<div class="stat" style="margin-top:20px;border-top:none;padding-top:0">SOFI &middot; $18.91<br>L3 SINGLE NAME<br>23 AUG 2026<br><br>GATES: <b>3 FAIL</b><br>1 UNVERIFIED<br>SCORE: 70/100<br>VERDICT: <b>NO TRADE</b></div></nav>
+<main>
+<div class="pxtheme" role="group" aria-label="Theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></div>
+<div class="mast"><div class="t">NASDAQ : SOFI &middot; SoFi Technologies, Inc. &middot; L3 single-name thesis</div>
+<div class="r">SUN 23 AUG 2026 &middot; DATA THROUGH FRI 21 AUG CLOSE<br>IBKR LIVE &middot; GEX COMPUTED FROM OPEN INTEREST &middot; WEEKLY GATES</div></div>
+<section id="verdict">
+  <h1>The business is compounding.<br>The chart is <em>still repairing</em>.</h1>
+  <p class="lede" style="max-width:74ch;margin-top:18px">SoFi posted its best quarter as a public company and reclaimed the $18 level that had been capping it. Both real. It also sits 42% below its two-year high, beneath a 40-week average still falling, with the gamma flip only 3.2% underfoot. This separates what is true about the company from what is tradeable by this book.</p>
+  <div class="verdict"><div class="l">Phoenix gate stack &middot; weekly &middot; verdict</div>
+    <div class="t">NO TRADE &mdash; fails <span class="mono">trend200</span>, <span class="mono">stage2</span>, <span class="mono">near_high</span></div>
+    <p style="margin:0;font-size:14px">The nearest realistic change is not $21 &mdash; it is the <b class="mono am">30-week average turning up</b>, which flips <span class="mono">stage2</span>. Price is already above it at $17.72; it only has to stop falling.</p></div>
+  <div class="strip">
+    <div class="cell"><div class="k">Close Fri</div><div class="v">18.91</div><div class="s up">+1.07 &middot; +5.97%</div></div>
+    <div class="cell"><div class="k">40-week SMA</div><div class="v dn">20.06</div><div class="s dn">-5.8% &middot; falling</div></div>
+    <div class="cell"><div class="k">30-week SMA</div><div class="v up">17.72</div><div class="s dn">+6.7% &middot; falling</div></div>
+    <div class="cell"><div class="k">10-week SMA</div><div class="v up">17.84</div><div class="s up">+6.0% &middot; rising</div></div>
+    <div class="cell"><div class="k">Gamma flip</div><div class="v wr">18.32</div><div class="s wr">only -3.2%</div></div>
+    <div class="cell"><div class="k">ATR-14 daily</div><div class="v">0.86</div><div class="s">4.56%</div></div>
+    <div class="cell"><div class="k">104w high</div><div class="v dn">-42.2%</div><div class="s">32.73 Nov 25</div></div>
+    <div class="cell"><div class="k">YTD vs XLF</div><div class="v dn">-33pts</div><div class="s dn">-27.5 vs +5.5</div></div>
+  </div>
+</section>
+<section id="biz">
+  <div class="sh"><div class="n">01</div><div><h2>The business</h2>
+  <p>What it sells, who pays for it, and how it got from a student-loan refinancer to a chartered bank.</p></div></div>
+
+  <p class="lede" style="max-width:76ch">SoFi runs a digital bank and, underneath it, the payments infrastructure that other banks and consumer brands rent. Those are two different businesses with two different customers, and the second one is the part most people miss.</p>
+
+  <div class="three" style="margin-top:22px">
+    <div class="card"><h3>Lending &mdash; the engine</h3>
+      <p style="font-size:13.5px;margin-bottom:10px">Personal loans for debt consolidation, student-loan refinancing, and home loans including HELOC. <b style="color:var(--ink)">$724.8m</b> of Q2 net revenue and <b style="color:var(--ink)">$14.8bn</b> of originations in the quarter.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)"><b style="color:var(--ink)">Customer:</b> prime and near-prime US consumers, historically high-income early-career professionals. <b style="color:var(--ink)">Supplier:</b> its own depositors &mdash; and that is the whole point of the charter.</p></div>
+    <div class="card"><h3>Financial Services &mdash; the flywheel</h3>
+      <p style="font-size:13.5px;margin-bottom:10px">Checking and savings, investing, credit card, insurance, SoFi Plus subscription, and the SoFiUSD stablecoin. <b style="color:var(--ink)">$466m</b> of Q2 revenue, up 29%.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)">Mostly fee and interchange income. Its job is not margin &mdash; it is <b style="color:var(--ink)">giving a borrower five more reasons to stay</b>, which is what drives the cross-buy number.</p></div>
+    <div class="card"><h3>Technology Platform &mdash; the hidden business</h3>
+      <p style="font-size:13.5px;margin-bottom:10px">Galileo (card issuing and payments processing) plus Technisys (cloud core banking), now sold as SoFi Tech Solutions. <b style="color:var(--ink)">$85m</b> in Q2, up 13% sequentially.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)"><b style="color:var(--ink)">Customer:</b> other fintechs, banks and consumer brands &mdash; roughly <b style="color:var(--ink)">158 million enabled accounts</b>. B2B revenue, no credit risk, and it powers SoFi's own stack.</p></div>
+  </div>
+
+  <div class="two" style="margin-top:20px">
+    <div class="card"><h3>How it got here</h3>
+      <div class="kv"><span><b style="color:var(--ink)">2020</b> &mdash; acquires Galileo</span><span>payments infrastructure</span></div>
+      <div class="kv"><span><b style="color:var(--ink)">2021</b> &mdash; lists via SPAC</span><span>2.6m members</span></div>
+      <div class="kv"><span><b style="color:var(--ink)">2022</b> &mdash; buys Golden Pacific Bancorp</span><span class="am">national bank charter</span></div>
+      <div class="kv"><span><b style="color:var(--ink)">2022</b> &mdash; acquires Technisys</span><span>cloud core banking</span></div>
+      <div class="kv"><span><b style="color:var(--ink)">2024</b> &mdash; first full GAAP-profitable year</span><span>record revenue</span></div>
+      <div class="kv"><span><b style="color:var(--ink)">2026</b> &mdash; buys Peach Finance, Composer</span><span>servicing + investing</span></div>
+      <p style="font-size:13px;margin:11px 0 0;color:var(--inkLight)">The <b style="color:var(--ink)">charter is the pivot</b>. Before 2022 SoFi borrowed wholesale to lend; after it, deposits fund the book. Deposits now exceed 90% of average total liabilities and cost of funds fell 36bps year over year &mdash; that single change is why net interest margin can expand while originations hit records.</p></div>
+    <div class="card"><h3>Growth, five years</h3>
+      <div class="tw" style="border:none;background:transparent"><table style="font-size:12.8px">
+        <tr><th>Period</th><th class="n">Members</th><th class="n">Quarterly rev</th><th>Profitability</th></tr>
+        <tr><td>Q2 2021</td><td class="n">2.6m</td><td class="n">$231m</td><td>loss</td></tr>
+        <tr><td>Q2 2022</td><td class="n">&mdash;</td><td class="n">$363m</td><td>-$96m GAAP</td></tr>
+        <tr><td>FY 2024</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td>first full GAAP profit</td></tr>
+        <tr><td>Q1 2026</td><td class="n">14.7m</td><td class="n">$1.1bn</td><td>+$167m</td></tr>
+        <tr class="me"><td><b style="color:var(--ink)">Q2 2026</b></td><td class="n">15.8m</td><td class="n">$1.22bn</td><td>+$157m</td></tr>
+      </table></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)">Members <b style="color:var(--ink)">+35% year over year</b> to 15.8m; total products <b style="color:var(--ink)">+42%</b> to 24.4m. Products are growing faster than members &mdash; the definition of a working flywheel. Nineteen consecutive quarters above the Rule of 40, currently scoring <b style="color:var(--ink)">70</b>.</p></div>
+  </div>
+
+  <div class="card" style="margin-top:18px"><h3>What has actually been signed and shipped</h3>
+    <div class="two" style="gap:22px">
+      <div>
+        <p style="font-size:13.5px;margin-bottom:9px"><b style="color:var(--gold)">Enterprise deals &mdash; Tech Platform</b></p>
+        <ul style="font-size:13px;margin-bottom:0">
+          <li><b style="color:var(--ink)">US Treasury Direct Express</b> &mdash; Galileo selected as processor for the federal benefits prepaid card used by <b>3.4 million</b> people. Integrated through 2025, revenue landing in 2026.</li>
+          <li><b style="color:var(--ink)">Southwest Airlines</b> Rapid Rewards debit card</li>
+          <li><b style="color:var(--ink)">Wyndham Hotels &amp; Resorts</b> &mdash; first-of-its-kind debit rewards programme</li>
+          <li>Two further major consumer brands signed and described as the largest yet, not yet named</li>
+        </ul>
+        <p style="font-size:12.8px;margin:9px 0 0;color:var(--inkLight)">The strategic shift is from small fintech startups to <b style="color:var(--ink)">large established brands</b> &mdash; bigger deals, more predictable revenue, far lower churn.</p>
+      </div>
+      <div>
+        <p style="font-size:13.5px;margin-bottom:9px"><b style="color:var(--gold)">Products shipped</b></p>
+        <ul style="font-size:13px;margin-bottom:0">
+          <li><b style="color:var(--ink)">SoFiUSD</b> &mdash; the first stablecoin issued by a US national bank, on Ethereum and Solana, 4.2% yield, reserves 85% short Treasuries and 15% cash, audited monthly</li>
+          <li><b style="color:var(--ink)">SoFi Plus</b> &mdash; paid membership, now past 200,000 subscribers</li>
+          <li><b style="color:var(--ink)">SoFi Coach</b> &mdash; AI financial guidance; 70% of beta users took a concrete action</li>
+          <li>Private-market funds with CAZ Investments and AngelList; retail access to high-profile IPOs</li>
+          <li>Small business loans, HELOC, AI-powered investing</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"><span class="rid">The bottleneck, and why it is crossed</span>A lender's binding constraint is funding. Warehouse lines are expensive and revocable; insured member deposits are cheap and sticky. Deposits grew <b style="color:var(--ink)">$5.3bn in one quarter to $45.5bn</b> and now fund over 90% of the balance sheet. The evidence it is working is the margin: NIM expanded to 5.98% on a 36bp fall in cost of funds <i>while</i> originations hit a record. <b>A lender widening margin while growing volume is not competing for money.</b></div>
+
+  <div class="rule"><span class="rid">Where the credit actually sits</span>The vintage disclosure is the most useful number management publishes. Loans originated Q4 2022 to Q3 2025 show <b style="color:var(--ink)">4.68% net cumulative losses with 35% of principal still outstanding</b>, against 6.43% at the same point for the 2017 vintage &mdash; the last cohort that approached the 7-8% tolerance. For the full 2020-2026 book to reach 8%, the remaining 38% of principal would have to charge off at roughly 10%, far above anything observed. <b>Credit is the thing that kills lenders, and on the disclosed data it is improving rather than deteriorating.</b></div>
+</section><section id="gex">
+  <div class="sh"><div class="n">02</div><div><h2>Gamma structure</h2>
+  <p>Full chain across all live expiries. Walls on <b>open interest</b>, flip from the cumulative profile, calls above zero and puts below.</p></div></div>
+  <div class="gexp">
+    <div class="gexh"><div class="tk">SOFI</div><span class="badge">POSITIVE GAMMA</span>
+      <span class="b-out">spot only +1.5% above flip</span>
+      <div class="st">FULL CHAIN &middot; CALL WALL 22 &middot; FLIP 18.63</div></div>
+    <div class="gexsub">Aug 28 + Sep 18 + Jan 15 '27 &middot; strikes 12-30 &middot; gamma $m per 1% move &middot; Black-Scholes at 44.9% underlying IV</div><div class="gexsub" style="color:var(--inkLight)">Regime <b style="color:var(--gCall)">POSITIVE GAMMA</b> &nbsp;&middot;&nbsp; Net GEX <b>+$14.6m</b> &nbsp;&middot;&nbsp; <span style="color:var(--gFlip)">Flip <b>18.63</b></span> &nbsp;&middot;&nbsp; <span style="color:var(--gCall)">OI Res <b>20</b></span> &nbsp;&middot;&nbsp; <span style="color:var(--gPut)">OI Sup <b>18</b></span></div>
+    <div style="padding:8px 10px 0">
+    <svg viewBox="0 0 1000 330" role="img" aria-label="SOFI net gamma exposure by strike">
+      <line class="ggrid" x1="76" y1="277.9" x2="974" y2="277.9"/><text class="gax" x="67" y="281.4" text-anchor="end">-1</text><line class="ggrid" x1="76" y1="240.9" x2="974" y2="240.9"/><text class="gax" x="67" y="244.4" text-anchor="end">0</text><line class="ggrid" x1="76" y1="204.0" x2="974" y2="204.0"/><text class="gax" x="67" y="207.5" text-anchor="end">1</text><line class="ggrid" x1="76" y1="167.1" x2="974" y2="167.1"/><text class="gax" x="67" y="170.6" text-anchor="end">2</text><line class="ggrid" x1="76" y1="130.1" x2="974" y2="130.1"/><text class="gax" x="67" y="133.6" text-anchor="end">3</text><line class="ggrid" x1="76" y1="93.2" x2="974" y2="93.2"/><text class="gax" x="67" y="96.7" text-anchor="end">4</text><line class="ggrid" x1="76" y1="56.3" x2="974" y2="56.3"/><text class="gax" x="67" y="59.8" text-anchor="end">5</text>
+      <line x1="76" y1="240.9" x2="974" y2="240.9" stroke="#22415F" stroke-width="1"/>
+      <rect class="gput" x="89.5" y="240.9" width="50.8" height="11.1"/><rect class="gput" x="171.4" y="240.9" width="50.8" height="20.7"/><rect class="gput" x="253.2" y="240.9" width="50.8" height="14.8"/><rect class="gput" x="335.1" y="240.9" width="50.8" height="11.4"/><rect class="gcall" x="417.0" y="207.7" width="50.8" height="33.2"/><rect class="gcall" x="498.9" y="155.3" width="50.8" height="85.7"/><rect class="gcall" x="580.7" y="126.5" width="50.8" height="114.5"/><rect class="gcall" x="662.6" y="58.5" width="50.8" height="182.4"/><rect class="gcall" x="744.5" y="196.6" width="50.8" height="44.3"/><rect class="gcall" x="826.4" y="219.2" width="50.8" height="21.8"/><rect class="gcall" x="908.3" y="152.3" width="50.8" height="88.6"/>
+      
+      <line x1="360.5" y1="26" x2="360.5" y2="252.9" stroke="#C43A30" stroke-width="2.2" stroke-dasharray="3 3" opacity=".85"/>
+      <line x1="688.0" y1="26" x2="688.0" y2="252.9" stroke="#2D8A55" stroke-width="2.4" stroke-dasharray="3 3"/>
+      <line x1="463.7" y1="26" x2="463.7" y2="252.9" stroke="#E8C34A" stroke-width="3" stroke-dasharray="6 4"/>
+      <line x1="509.5" y1="26" x2="509.5" y2="252.9" stroke="#3B82C4" stroke-width="3.2"/>
+      <text class="gax" x="114.9" y="312" text-anchor="middle">16.5</text><text class="gax" x="196.8" y="312" text-anchor="middle">17</text><text class="gax" x="278.6" y="312" text-anchor="middle">17.5</text><text class="gax" x="360.5" y="312" text-anchor="middle">18</text><text class="gax" x="442.4" y="312" text-anchor="middle">18.5</text><text class="gax" x="524.3" y="312" text-anchor="middle">19</text><text class="gax" x="606.1" y="312" text-anchor="middle">19.5</text><text class="gax" x="688.0" y="312" text-anchor="middle">20</text><text class="gax" x="769.9" y="312" text-anchor="middle">20.5</text><text class="gax" x="851.8" y="312" text-anchor="middle">21</text><text class="gax" x="933.6" y="312" text-anchor="middle">21.5</text>
+      <text class="gax" x="18" y="156.0" transform="rotate(-90 18 156.0)" text-anchor="middle">Net GEX $m</text>
+    </svg></div>
+    <div class="gkey">
+      <span><i style="background:#2D8A55"></i>Call gamma</span>
+      <span><i style="background:#C43A30"></i>Put gamma</span>
+      <span><i style="background:#E7EEF6"></i>Cumulative</span>
+      <span><i style="background:#3B82C4;width:3px;height:11px"></i>Spot 18.91</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#E8C34A 0 5px,transparent 5px 9px);width:14px;height:3px"></i>G-Flip 18.63</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#2D8A55 0 3px,transparent 3px 6px)"></i>OI Resistance 20 / 22</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#C43A30 0 3px,transparent 3px 6px)"></i>OI Support 15</span>
+      <span class="note">Bars show <b>gamma in dollars</b>; walls are chosen on <b>open interest</b>, so the widest bar and the wall need not be the same strike. Above zero = call gamma, dealers sell into strength; below = put gamma, dealers buy weakness.</span>
+    </div>
+    <div class="lad">
+      <div class="lrow l-call"><span class="p">22.00</span><span class="lab" style="color:var(--gCall)">CALL WALL &middot; OI RESISTANCE</span><span class="d">170,266 contracts, the largest concentration in the chain. Where dealer selling into strength is heaviest.</span></div>
+      <div class="lrow l-call"><span class="p">20.00</span><span class="lab" style="color:var(--gCall)">SECOND CALL WALL</span><span class="d">148,474 contracts and only 5.8% above spot. The first real overhead shelf, and where the analyst consensus clusters.</span></div>
+      <div class="lrow l-spot"><span class="p">SPOT</span><span class="lab" style="color:var(--gSpot)">FRI 21 AUG CLOSE</span><span class="d" style="text-align:right;font-family:var(--mono);font-weight:700;color:var(--gSpot);font-size:15px">18.91</span></div>
+      <div class="lrow l-flip"><span class="p">18.63</span><span class="lab" style="color:var(--gFlip)">THE FLIP</span><span class="d">Cumulative crosses zero. <b>Only 1.5% below spot &mdash; inside a third of one day's range.</b></span></div>
+      <div class="lrow l-put"><span class="p">18.00</span><span class="lab" style="color:var(--gPut)">NEAR PUT SHELF</span><span class="d">26,348 puts. Reclaimed Friday, and the first dealer bid on a pullback &mdash; but it sits <i>below</i> the flip.</span></div>
+      <div class="lrow l-put"><span class="p">15.00</span><span class="lab" style="color:var(--gPut)">PUT WALL &middot; OI SUPPORT</span><span class="d">83,158 contracts, mostly January. The structural floor, and the level that anchors the deep-put hedging.</span></div>
+    </div>
+    <div class="narr"><b style="color:var(--ink)">Net gamma is +$14.6m per 1% and the headline reads positive &mdash; but spot sits only 1.5% above the flip at $18.63.</b> That is less than a third of one day's average range. The comfortable dampening regime the badge implies is real only while price holds 18.63; below it, dealer hedging inverts and the same book that has been absorbing volatility starts adding to it. Overhead, the chain is heavily call-dominated: 148,474 contracts at $20 and 170,266 at $22, against 641,956 total call open interest versus 225,806 puts. <b style="color:var(--ink)">The structure is a narrow shelf under price and two thick walls above it.</b></div>
+  </div>
+
+  <div class="two" style="margin-top:18px">
+    <div class="card"><h3>By expiry &mdash; where the weight sits</h3>
+      <div class="tw" style="border:none;background:transparent"><table style="font-size:12.5px">
+        <tr><th>Expiry</th><th class="n">Days</th><th class="n">Call OI</th><th class="n">Put OI</th><th>Dominant strike</th></tr>
+        <tr><td>Aug 28 '26</td><td class="n">6</td><td class="n">46,879</td><td class="n">18,593</td><td class="mono">20 call &middot; 24,381</td></tr>
+        <tr><td>Sep 18 '26</td><td class="n">27</td><td class="n">280,812</td><td class="n">89,803</td><td class="mono am">22 call &middot; 149,850</td></tr>
+        <tr class="me"><td>Jan 15 '27</td><td class="n">145</td><td class="n">314,265</td><td class="n">117,410</td><td class="mono">25 call &middot; 97,850</td></tr>
+      </table></div>
+      <p style="font-size:12.8px;margin:10px 0 0;color:var(--inkLight)">January carries the most open interest but the least gamma per contract &mdash; at 145 days those positions barely move dealer hedging today. <b style="color:var(--ink)">September governs the next month.</b> The deep January $15 puts (66,759) are what hold the put wall down at 15 while the near shelf sits at 18.</p></div>
+    <div class="card"><h3>What it means for the trade</h3>
+      <div class="kv"><span>Net GEX, full chain</span><span class="am">+$14.6m / 1%</span></div>
+      <div class="kv"><span>Call OI : Put OI</span><span>2.84 : 1</span></div>
+      <div class="kv"><span>Distance to flip</span><span class="wr">-1.5% &middot; 0.33 ATR</span></div>
+      <div class="kv"><span>Distance to first wall</span><span>+5.8% to $20</span></div>
+      <div class="kv"><span>Distance to main wall</span><span>+16.3% to $22</span></div>
+      <div class="kv"><span>Friday option volume</span><span>526k C / 176k P</span></div>
+      <p style="font-size:12.8px;margin:10px 0 0;color:var(--inkLight)">Room to the first wall is <b style="color:var(--ink)">5.8%</b>, less than the 16.3% run to $22 that a single-expiry read implies. Any target above $20 requires clearing 148,474 contracts first.</p></div>
+  </div>
+
+  <div class="rule"><span class="rid">Reading the walls correctly</span><b>A call wall is resistance, not a ceiling.</b> Dealer selling into it is finite; real buying is not. Cleared on volume, the mechanic inverts &mdash; dealers short gamma above the strike must buy to re-hedge, and the open interest that capped the move begins fuelling it. Once through, <b style="color:var(--ink)">the wall becomes support on the way back</b>, exactly as $18 did. The correct reading is not "capped at 20" but <b>"20 is where it gets hard, and clearing it on volume makes the next leg easier."</b> Holding that optionality requires a trailing exit rather than a fixed target &mdash; section 05.</div>
+</section><section id="price">
+  <div class="sh"><div class="n">03</div><div><h2>Price and trend</h2><p>Daily bars for shape; the gates are weekly. Both are marked.</p></div></div>
+  <div class="chart">
+  <svg viewBox="0 0 1000 300" role="img" aria-label="SOFI one-year daily price with moving averages">
+    <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D37736" stop-opacity=".18"/><stop offset="100%" stop-color="#D37736" stop-opacity="0"/></linearGradient></defs>
+    <line class="grid" x1="54" y1="262.8" x2="984" y2="262.8"/><text class="axl" x="46" y="266.3" text-anchor="end">$15</text><line class="grid" x1="54" y1="195.3" x2="984" y2="195.3"/><text class="axl" x="46" y="198.8" text-anchor="end">$20</text><line class="grid" x1="54" y1="127.9" x2="984" y2="127.9"/><text class="axl" x="46" y="131.4" text-anchor="end">$25</text><line class="grid" x1="54" y1="60.4" x2="984" y2="60.4"/><text class="axl" x="46" y="63.9" text-anchor="end">$30</text>
+    <path class="ar" d="M54.0,127.6 L57.7,112.4 L61.4,119.5 L65.2,128.4 L68.9,113.9 L72.6,120.6 L76.3,129.1 L80.0,134.8 L83.8,122.8 L87.5,119.8 L91.2,114.9 L94.9,114.8 L98.6,120.9 L102.4,114.9 L106.1,107.0 L109.8,91.9 L113.5,95.2 L117.2,99.0 L121.0,85.9 L124.7,67.1 L128.4,63.0 L132.1,72.7 L135.8,81.5 L139.6,85.8 L143.3,87.7 L147.0,93.5 L150.7,108.7 L154.4,117.6 L158.2,114.8 L161.9,124.6 L165.6,109.5 L169.3,85.5 L173.0,87.2 L176.8,81.4 L180.5,111.8 L184.2,99.0 L187.9,89.2 L191.6,87.0 L195.4,106.3 L199.1,107.1 L202.8,78.3 L206.5,77.3 L210.2,98.3 L214.0,86.3 L217.7,73.8 L221.4,60.4 L225.1,38.1 L228.8,48.3 L232.6,73.5 L236.3,64.8 L240.0,52.0 L243.7,68.9 L247.4,59.5 L251.2,98.8 L254.9,84.6 L258.6,53.2 L262.3,47.6 L266.0,30.6 L269.8,82.2 L273.5,89.9 L277.2,100.4 L280.9,111.2 L284.6,104.7 L288.4,129.1 L292.1,125.3 L295.8,95.5 L299.5,83.0 L303.2,80.8 L307.0,64.2 L310.7,73.5 L314.4,67.1 L318.1,73.0 L321.8,65.8 L325.6,90.4 L329.3,92.7 L333.0,103.2 L336.7,99.7 L340.4,100.0 L344.2,97.1 L347.9,116.8 L351.6,106.6 L355.3,124.2 L359.0,110.5 L362.8,97.7 L366.5,96.2 L370.2,98.3 L373.9,94.4 L377.6,100.0 L381.4,103.3 L385.1,106.8 L388.8,112.0 L392.5,94.7 L396.2,70.2 L400.0,101.2 L403.7,100.9 L407.4,91.2 L411.1,95.5 L414.8,106.3 L418.6,99.0 L422.3,105.4 L426.0,108.5 L429.7,112.6 L433.4,121.3 L437.2,119.3 L440.9,113.2 L444.6,116.4 L448.3,117.1 L452.0,121.7 L455.8,133.3 L459.5,136.5 L463.2,157.4 L466.9,167.3 L470.6,171.6 L474.4,185.2 L478.1,202.6 L481.8,183.7 L485.5,177.1 L489.2,179.4 L493.0,187.9 L496.7,204.8 L500.4,200.6 L504.1,201.9 L507.8,201.5 L511.6,204.8 L515.3,208.5 L519.0,219.3 L522.7,213.4 L526.4,204.9 L530.2,207.5 L533.9,225.5 L537.6,217.0 L541.3,214.1 L545.0,212.9 L548.8,205.4 L552.5,210.2 L556.2,211.6 L559.9,218.4 L563.6,215.1 L567.4,226.3 L571.1,225.5 L574.8,227.3 L578.5,230.8 L582.2,233.4 L586.0,234.7 L589.7,237.1 L593.4,233.8 L597.1,239.8 L600.8,241.7 L604.6,251.0 L608.3,259.6 L612.0,260.7 L615.7,250.9 L619.4,254.3 L623.2,251.3 L626.9,245.6 L630.6,247.8 L634.3,242.7 L638.0,245.6 L641.8,246.3 L645.5,235.1 L649.2,223.5 L652.9,211.6 L656.6,208.4 L660.4,203.0 L664.1,202.1 L667.8,211.1 L671.5,208.0 L675.2,218.0 L679.0,216.4 L682.7,212.0 L686.4,217.4 L690.1,255.6 L693.8,247.9 L697.6,243.5 L701.3,246.6 L705.0,249.0 L708.7,245.2 L712.4,249.3 L716.2,252.6 L719.9,245.8 L723.6,250.6 L727.3,258.6 L731.0,249.0 L734.8,254.5 L738.5,253.2 L742.2,259.6 L745.9,253.4 L749.6,254.0 L753.4,254.4 L757.1,249.5 L760.8,247.0 L764.5,236.2 L768.2,219.3 L772.0,214.5 L775.7,225.8 L779.4,240.1 L783.1,233.8 L786.8,248.9 L790.6,242.5 L794.3,242.9 L798.0,251.0 L801.7,240.2 L805.4,241.4 L809.2,234.0 L812.9,226.2 L816.6,230.1 L820.3,223.5 L824.0,234.4 L827.8,231.9 L831.5,231.6 L835.2,231.7 L838.9,223.9 L842.6,219.7 L846.4,223.2 L850.1,216.4 L853.8,219.1 L857.5,214.1 L861.2,225.7 L865.0,225.9 L868.7,213.9 L872.4,211.8 L876.1,220.5 L879.8,214.9 L883.6,224.0 L887.3,231.5 L891.0,232.0 L894.7,235.6 L898.4,227.1 L902.2,234.8 L905.9,240.5 L909.6,243.1 L913.3,237.4 L917.0,239.3 L920.8,259.4 L924.5,242.9 L928.2,245.1 L931.9,221.9 L935.6,212.9 L939.4,218.9 L943.1,220.9 L946.8,217.2 L950.5,220.7 L954.2,222.6 L958.0,223.1 L961.7,216.5 L965.4,218.4 L969.1,218.1 L972.8,226.9 L976.6,216.6 L980.3,223.4 L984.0,210.0 L984.0,274.0 L54.0,274.0 Z"/>
+    <line x1="54" y1="168.3" x2="984" y2="168.3" stroke="#2D8A55" stroke-width="1" stroke-dasharray="3 4" opacity=".75"/>
+    <text class="lbl" x="60" y="163.3" fill="#2D8A55">$22 CALL WALL &middot; 149,850 OI</text>
+    <path class="m200" d="M794.3,155.0 L798.0,155.6 L801.7,156.2 L805.4,156.8 L809.2,157.4 L812.9,157.9 L816.6,158.5 L820.3,158.9 L824.0,159.4 L827.8,160.0 L831.5,160.5 L835.2,161.1 L838.9,161.7 L842.6,162.2 L846.4,162.7 L850.1,163.3 L853.8,163.9 L857.5,164.5 L861.2,165.1 L865.0,165.8 L868.7,166.6 L872.4,167.3 L876.1,168.0 L879.8,168.7 L883.6,169.4 L887.3,170.1 L891.0,170.8 L894.7,171.4 L898.4,172.0 L902.2,172.6 L905.9,173.2 L909.6,173.8 L913.3,174.6 L917.0,175.4 L920.8,176.3 L924.5,176.9 L928.2,177.6 L931.9,178.3 L935.6,178.9 L939.4,179.5 L943.1,180.1 L946.8,180.8 L950.5,181.5 L954.2,182.1 L958.0,182.8 L961.7,183.5 L965.4,184.3 L969.1,185.2 L972.8,186.1 L976.6,186.8 L980.3,187.6 L984.0,188.4"/><path class="m50" d="M236.3,97.1 L240.0,95.6 L243.7,94.7 L247.4,93.5 L251.2,92.9 L254.9,92.3 L258.6,91.0 L262.3,89.3 L266.0,87.3 L269.8,86.4 L273.5,85.8 L277.2,85.6 L280.9,85.5 L284.6,85.2 L288.4,85.4 L292.1,85.8 L295.8,85.9 L299.5,85.6 L303.2,85.3 L307.0,84.8 L310.7,85.0 L314.4,85.0 L318.1,85.0 L321.8,84.7 L325.6,84.8 L329.3,84.9 L333.0,85.1 L336.7,84.9 L340.4,84.6 L344.2,84.2 L347.9,84.1 L351.6,84.0 L355.3,84.8 L359.0,85.3 L362.8,85.6 L366.5,85.3 L370.2,85.3 L373.9,85.4 L377.6,85.6 L381.4,85.6 L385.1,85.6 L388.8,86.2 L392.5,86.6 L396.2,86.0 L400.0,86.3 L403.7,86.9 L407.4,87.5 L411.1,88.6 L414.8,89.8 L418.6,90.3 L422.3,91.1 L426.0,92.2 L429.7,93.1 L433.4,94.3 L437.2,94.8 L440.9,95.3 L444.6,96.6 L448.3,98.0 L452.0,99.8 L455.8,100.8 L459.5,101.8 L463.2,102.9 L466.9,104.0 L470.6,105.4 L474.4,106.5 L478.1,108.0 L481.8,109.8 L485.5,111.7 L489.2,113.6 L493.0,116.1 L496.7,118.7 L500.4,121.4 L504.1,124.0 L507.8,126.7 L511.6,129.0 L515.3,131.3 L519.0,133.6 L522.7,135.9 L526.4,138.0 L530.2,140.2 L533.9,142.4 L537.6,144.6 L541.3,146.4 L545.0,148.4 L548.8,150.6 L552.5,152.9 L556.2,155.1 L559.9,157.6 L563.6,159.9 L567.4,162.4 L571.1,164.8 L574.8,167.1 L578.5,169.8 L582.2,173.0 L586.0,175.7 L589.7,178.4 L593.4,181.3 L597.1,184.2 L600.8,186.9 L604.6,189.9 L608.3,193.0 L612.0,196.1 L615.7,198.8 L619.4,201.5 L623.2,204.1 L626.9,206.8 L630.6,209.4 L634.3,211.9 L638.0,214.4 L641.8,216.6 L645.5,218.6 L649.2,219.9 L652.9,220.8 L656.6,221.6 L660.4,221.9 L664.1,221.9 L667.8,222.5 L671.5,223.1 L675.2,223.8 L679.0,224.4 L682.7,224.6 L686.4,224.9 L690.1,226.0 L693.8,226.9 L697.6,227.7 L701.3,228.4 L705.0,229.0 L708.7,229.7 L712.4,230.6 L716.2,231.5 L719.9,231.9 L723.6,232.5 L727.3,233.4 L731.0,234.1 L734.8,235.1 L738.5,236.0 L742.2,236.9 L745.9,237.6 L749.6,238.4 L753.4,239.0 L757.1,239.5 L760.8,239.9 L764.5,240.0 L768.2,239.7 L772.0,239.3 L775.7,239.1 L779.4,239.2 L783.1,239.1 L786.8,239.2 L790.6,239.0 L794.3,238.7 L798.0,238.5 L801.7,238.3 L805.4,238.0 L809.2,237.7 L812.9,237.3 L816.6,236.9 L820.3,236.6 L824.0,236.3 L827.8,236.1 L831.5,236.0 L835.2,236.1 L838.9,236.4 L842.6,236.6 L846.4,237.0 L850.1,237.3 L853.8,237.5 L857.5,237.6 L861.2,237.7 L865.0,237.9 L868.7,238.0 L872.4,237.9 L876.1,237.2 L879.8,236.5 L883.6,236.1 L887.3,235.8 L891.0,235.5 L894.7,235.3 L898.4,234.8 L902.2,234.5 L905.9,234.4 L909.6,234.2 L913.3,233.8 L917.0,233.6 L920.8,233.7 L924.5,233.5 L928.2,233.2 L931.9,232.6 L935.6,231.8 L939.4,231.0 L943.1,230.5 L946.8,229.9 L950.5,229.6 L954.2,229.6 L958.0,229.8 L961.7,229.6 L965.4,229.2 L969.1,228.9 L972.8,228.4 L976.6,227.9 L980.3,227.5 L984.0,226.7"/><path class="pl" d="M54.0,127.6 L57.7,112.4 L61.4,119.5 L65.2,128.4 L68.9,113.9 L72.6,120.6 L76.3,129.1 L80.0,134.8 L83.8,122.8 L87.5,119.8 L91.2,114.9 L94.9,114.8 L98.6,120.9 L102.4,114.9 L106.1,107.0 L109.8,91.9 L113.5,95.2 L117.2,99.0 L121.0,85.9 L124.7,67.1 L128.4,63.0 L132.1,72.7 L135.8,81.5 L139.6,85.8 L143.3,87.7 L147.0,93.5 L150.7,108.7 L154.4,117.6 L158.2,114.8 L161.9,124.6 L165.6,109.5 L169.3,85.5 L173.0,87.2 L176.8,81.4 L180.5,111.8 L184.2,99.0 L187.9,89.2 L191.6,87.0 L195.4,106.3 L199.1,107.1 L202.8,78.3 L206.5,77.3 L210.2,98.3 L214.0,86.3 L217.7,73.8 L221.4,60.4 L225.1,38.1 L228.8,48.3 L232.6,73.5 L236.3,64.8 L240.0,52.0 L243.7,68.9 L247.4,59.5 L251.2,98.8 L254.9,84.6 L258.6,53.2 L262.3,47.6 L266.0,30.6 L269.8,82.2 L273.5,89.9 L277.2,100.4 L280.9,111.2 L284.6,104.7 L288.4,129.1 L292.1,125.3 L295.8,95.5 L299.5,83.0 L303.2,80.8 L307.0,64.2 L310.7,73.5 L314.4,67.1 L318.1,73.0 L321.8,65.8 L325.6,90.4 L329.3,92.7 L333.0,103.2 L336.7,99.7 L340.4,100.0 L344.2,97.1 L347.9,116.8 L351.6,106.6 L355.3,124.2 L359.0,110.5 L362.8,97.7 L366.5,96.2 L370.2,98.3 L373.9,94.4 L377.6,100.0 L381.4,103.3 L385.1,106.8 L388.8,112.0 L392.5,94.7 L396.2,70.2 L400.0,101.2 L403.7,100.9 L407.4,91.2 L411.1,95.5 L414.8,106.3 L418.6,99.0 L422.3,105.4 L426.0,108.5 L429.7,112.6 L433.4,121.3 L437.2,119.3 L440.9,113.2 L444.6,116.4 L448.3,117.1 L452.0,121.7 L455.8,133.3 L459.5,136.5 L463.2,157.4 L466.9,167.3 L470.6,171.6 L474.4,185.2 L478.1,202.6 L481.8,183.7 L485.5,177.1 L489.2,179.4 L493.0,187.9 L496.7,204.8 L500.4,200.6 L504.1,201.9 L507.8,201.5 L511.6,204.8 L515.3,208.5 L519.0,219.3 L522.7,213.4 L526.4,204.9 L530.2,207.5 L533.9,225.5 L537.6,217.0 L541.3,214.1 L545.0,212.9 L548.8,205.4 L552.5,210.2 L556.2,211.6 L559.9,218.4 L563.6,215.1 L567.4,226.3 L571.1,225.5 L574.8,227.3 L578.5,230.8 L582.2,233.4 L586.0,234.7 L589.7,237.1 L593.4,233.8 L597.1,239.8 L600.8,241.7 L604.6,251.0 L608.3,259.6 L612.0,260.7 L615.7,250.9 L619.4,254.3 L623.2,251.3 L626.9,245.6 L630.6,247.8 L634.3,242.7 L638.0,245.6 L641.8,246.3 L645.5,235.1 L649.2,223.5 L652.9,211.6 L656.6,208.4 L660.4,203.0 L664.1,202.1 L667.8,211.1 L671.5,208.0 L675.2,218.0 L679.0,216.4 L682.7,212.0 L686.4,217.4 L690.1,255.6 L693.8,247.9 L697.6,243.5 L701.3,246.6 L705.0,249.0 L708.7,245.2 L712.4,249.3 L716.2,252.6 L719.9,245.8 L723.6,250.6 L727.3,258.6 L731.0,249.0 L734.8,254.5 L738.5,253.2 L742.2,259.6 L745.9,253.4 L749.6,254.0 L753.4,254.4 L757.1,249.5 L760.8,247.0 L764.5,236.2 L768.2,219.3 L772.0,214.5 L775.7,225.8 L779.4,240.1 L783.1,233.8 L786.8,248.9 L790.6,242.5 L794.3,242.9 L798.0,251.0 L801.7,240.2 L805.4,241.4 L809.2,234.0 L812.9,226.2 L816.6,230.1 L820.3,223.5 L824.0,234.4 L827.8,231.9 L831.5,231.6 L835.2,231.7 L838.9,223.9 L842.6,219.7 L846.4,223.2 L850.1,216.4 L853.8,219.1 L857.5,214.1 L861.2,225.7 L865.0,225.9 L868.7,213.9 L872.4,211.8 L876.1,220.5 L879.8,214.9 L883.6,224.0 L887.3,231.5 L891.0,232.0 L894.7,235.6 L898.4,227.1 L902.2,234.8 L905.9,240.5 L909.6,243.1 L913.3,237.4 L917.0,239.3 L920.8,259.4 L924.5,242.9 L928.2,245.1 L931.9,221.9 L935.6,212.9 L939.4,218.9 L943.1,220.9 L946.8,217.2 L950.5,220.7 L954.2,222.6 L958.0,223.1 L961.7,216.5 L965.4,218.4 L969.1,218.1 L972.8,226.9 L976.6,216.6 L980.3,223.4 L984.0,210.0"/>
+    <circle cx="984.0" cy="210.0" r="3.4" fill="#E7EEF6"/>
+    <text class="axl" x="83.8" y="292" text-anchor="middle">Sep 25</text><text class="axl" x="240.0" y="292" text-anchor="middle">Nov</text><text class="axl" x="396.2" y="292" text-anchor="middle">Jan 26</text><text class="axl" x="552.5" y="292" text-anchor="middle">Mar</text><text class="axl" x="708.7" y="292" text-anchor="middle">May</text><text class="axl" x="865.0" y="292" text-anchor="middle">Jul</text><text class="axl" x="984.0" y="292" text-anchor="middle">Aug</text>
+  </svg>
+  <div class="legend"><span><i style="background:#E7EEF6"></i>Close</span><span><i style="background:#D37736"></i>50-day</span><span><i style="background:#5E7C99"></i>200-day SMA</span><span>251 sessions &middot; IBKR daily</span></div></div>
+  <div class="note"><b>Structure, not sentiment.</b> Peak $32.73 on 12 Nov 2025 &rarr; -54% to $14.88 on 29 July &rarr; +27% rebound. The weekly 40-week average has fallen from $21.14 to $20.06 in four weeks as the November highs roll out. Rising price under a falling long average is a <b>base attempt inside a broken structure</b> &mdash; and the repair is measured in the average turning, not in price rallying.</div>
+</section>
+<section id="gates">
+  <div class="sh"><div class="n">04</div><div><h2>The gate stack</h2>
+  <p>Computed on <b>weekly</b> bars as <span class="mono">phoenix.py</span> does &mdash; 40-week, 30-week and 10-week SMA against the 104-week high.</p></div></div>
+  <div class="gates">
+    <div class="gate f"><div class="idx">01</div><div><div class="nm">trend200 &mdash; above 40-week</div><div class="dt">Weekly close $18.91 vs 40-week SMA <b class="mono">$20.06</b> &mdash; 5.8% below, and the average has fallen from $21.14 in four weeks. Fails on level and on slope.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate f"><div class="idx">02</div><div><div class="nm">stage2 &mdash; Weinstein</div><div class="dt">Price $18.91 <i>is</i> above the 30-week SMA at $17.72 &mdash; but the 30-week is <b>falling</b> ($18.88 four weeks ago). Stage 2 requires both. Half-satisfied is not satisfied.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate f"><div class="idx">03</div><div><div class="nm">near_high &mdash; 104-week</div><div class="dt">104-week high $32.73. Price is <b class="mono">-42.2%</b> from it; the gate wants -8% to -1%. The widest miss in the stack.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate"><div class="idx">04</div><div><div class="nm">industry</div><div class="dt">Needs <span class="mono">rotation_nav</span> and the 116-industry taxonomy, which are not in this project. Hand-built peer group is split: ALLY 91% and AFRM 77% of their highs, SOFI 58% and UPST 40%.</div></div><div class="tag t-warn">UNVERIFIED</div></div>
+    <div class="gate"><div class="idx">05</div><div><div class="nm">trend50 &mdash; above 10-week</div><div class="dt">Price 6.0% above a 10-week SMA at $17.84 that is rising ($17.30 four weeks ago). The one clean pass.</div></div><div class="tag t-pass">PASS</div></div>
+  </div>
+  <div class="stamp"><div class="x">3 FAIL &middot; 1 UNVERIFIED &middot; 1 PASS &mdash; the funnel terminates at the first failure</div><div class="o">NO CANDIDATE</div></div>
+  <div class="note"><b>Three long averages, three numbers, one that governs.</b> The weekly 40-week SMA is <b class="mono">$20.06</b>. A daily 200-period SMA is $20.51. A daily 200-period <i>EMA</i> sits near $19.00, almost on price, because exponential weighting has already absorbed the July-August rally while the 40-week SMA has not. <b>Phoenix gates on the 40-week SMA, so $20.06 decides.</b> Price is below all three, so the gate fails on any definition &mdash; but the spread between them measures how much repair is left.</div>
+  <div class="rule"><span class="rid">stage-theory-context-filter &middot; R1</span>An identical breakout is <b>fuel in Stage 2</b> and <b>exit liquidity in Stage 3</b>, and nothing in the pattern distinguishes them &mdash; only the stage does. Here the 30-week average is still falling, which is the definition of not-yet-Stage-2. A 6% day on good news does not change that.</div>
+  <div class="rule"><span class="rid">The one gate that is close</span><b>Stage 2 needs the 30-week average to turn up.</b> It sits at $17.72 having fallen from $18.88. Price at $18.91 is already above it &mdash; so the average only has to stop falling for this gate to flip. On current price that takes roughly four to six weeks of holding this level. <b>That, not the $21 close, is the earliest realistic date this becomes a candidate.</b></div>
+</section><section id="vol">
+  <div class="sh"><div class="n">V</div><div><h2>Volatility profile</h2>
+  <p>What the options market expects, what the stock has actually done, and what that means for the stop.</p></div></div>
+  <div class="strip" style="margin-top:0">
+    <div class="cell"><div class="k">Implied vol &middot; annual</div><div class="v">45.0%</div><div class="s">options market</div></div>
+    <div class="cell"><div class="k">Realised vol &middot; 30d</div><div class="v">53.7%</div><div class="s">what it did</div></div>
+    <div class="cell"><div class="k">Spread</div><div class="v dn">-8.8</div><div class="s dn">IMPLIED BELOW REALISED</div></div>
+    <div class="cell"><div class="k">IV percentile 52w</div><div class="v am">2th</div><div class="s am">cheap</div></div>
+    <div class="cell"><div class="k">Daily ATR-14</div><div class="v">0.86</div><div class="s">4.6% of price</div></div>
+    <div class="cell"><div class="k">IV-implied daily</div><div class="v">2.83%</div><div class="s">$0.54</div></div>
+    <div class="cell"><div class="k">1-month 1&sigma;</div><div class="v">&plusmn;13.0%</div><div class="s">from implied</div></div>
+    <div class="cell"><div class="k">Stop basis</div><div class="v dn" style="font-size:14px">REALISED</div><div class="s">use for sizing</div></div>
+  </div>
+  <div class="rule"><span class="rid">Reading the spread</span>IV sits in the <b>2nd percentile of its own year</b> &mdash; the cheapest reading in the series &mdash; while the stock has actually been moving 53.7%. The options market has priced SOFI as calm through a 42% drawdown. Implied volatility is <b class="mono dn">16% below</b> what the stock has actually been doing. <b style="color:var(--ink)">A stop sized from the options market would be roughly 16% too tight.</b> Size from the measured range instead: <b class="mono am">$0.86</b> per day.</div>
+  <div class="note"><b>Why this section exists.</b> Implied volatility is a <i>forecast</i>; realised volatility is a <i>measurement</i>. When they diverge, the options market and the tape disagree about how much room a position needs &mdash; and a stop placed on the wrong one is either harvested by noise or wider than the account can carry. <b style="color:var(--ink)">Across the eleven names reviewed this weekend, nine had implied below realised</b>, several by more than fifteen points. <b>Default to the measured range unless the two agree.</b></div>
+</section>
+
+<section id="rr">
+  <div class="sh"><div class="n">05</div><div><h2>Reward-to-risk</h2>
+  <p>What the structure gives, what 2:1 and 3:1 require, and what happens if $22 breaks.</p></div></div>
+  <div class="note" style="border-left-color:var(--gold)"><b>The stop belongs on the reclaimed $18 put wall, not on the chart support zone at $16.95-17.46.</b> Dealer buying at 26,348 contracts of put open interest is a firmer floor than a drawn level three dollars lower, and it changes the ratio from under 1:1 to better than 2:1. <b style="color:var(--amber)">One constraint governs every stop below: the full-chain gamma flip at <b class="mono">$18.63</b>, only 1.5% under spot. <b>Every stop in the table below sits beneath it</b> &mdash; so any stop-out fills inside negative gamma, where dealers amplify rather than cushion. Size for that, and do not assume a clean fill.</b></div>
+  <div class="tw"><table>
+    <tr><th>Scenario</th><th class="n">Entry</th><th class="n">Stop</th><th class="n">Stop dist</th><th class="n">&times;ATR</th><th class="n">vs flip</th><th class="n">R:R &rarr; 20</th><th class="n">R:R &rarr; 22</th><th class="n">Shares</th></tr><tr class="hlr"><td>Chart support zone - 0.75 ATR</td><td class="n">18.91</td><td class="n">16.30</td><td class="n">13.8%</td><td class="n">3.02</td><td class="n dn">far below</td><td class="n dn">0.42 : 1</td><td class="n up">1.18 : 1</td><td class="n">7.7</td></tr><tr class=""><td>Wall - 1.0 ATR</td><td class="n">18.91</td><td class="n">17.14</td><td class="n">9.4%</td><td class="n">2.05</td><td class="n dn">below</td><td class="n dn">0.62 : 1</td><td class="n up">1.75 : 1</td><td class="n">11.3</td></tr><tr class="hl"><td><b style="color:var(--ink)">Wall - 0.5 ATR</b></td><td class="n">18.91</td><td class="n">17.57</td><td class="n">7.1%</td><td class="n">1.55</td><td class="n dn">below</td><td class="n dn">0.81 : 1</td><td class="n up">2.31 : 1</td><td class="n">14.9</td></tr><tr class="hl"><td><b style="color:var(--ink)">Just under the $18 shelf</b></td><td class="n">18.91</td><td class="n">17.88</td><td class="n">5.4%</td><td class="n">1.19</td><td class="n dn">below</td><td class="n ">1.06 : 1</td><td class="n up">3.00 : 1</td><td class="n">19.4</td></tr><tr class="hl"><td><b style="color:var(--ink)">Pullback 18.20, shelf - 1.0 ATR</b></td><td class="n">18.20</td><td class="n">17.30</td><td class="n">4.9%</td><td class="n">1.04</td><td class="n dn">below</td><td class="n up">2.00 : 1</td><td class="n up">4.22 : 1</td><td class="n">22.2</td></tr><tr><td>Wall - 1.0 ATR</td><td class="n">18.91</td><td class="n">17.14</td><td class="n">9.4%</td><td class="n">2.05</td><td class="n dn">below</td><td class="n">1.75 : 1</td><td class="n">11.3</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Wall - 0.5 ATR</b></td><td class="n">18.91</td><td class="n">17.57</td><td class="n">7.1%</td><td class="n">1.55</td><td class="n dn">below</td><td class="n up"><b>2.31 : 1</b></td><td class="n">14.9</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Just under the wall</b></td><td class="n">18.91</td><td class="n">17.88</td><td class="n">5.4%</td><td class="n">1.19</td><td class="n dn">below</td><td class="n up"><b>3.00 : 1</b></td><td class="n">19.4</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Pullback 18.20, wall - 1.0 ATR</b></td><td class="n">18.20</td><td class="n">17.30</td><td class="n">4.9%</td><td class="n">1.04</td><td class="n dn">below</td><td class="n up"><b>4.22 : 1</b></td><td class="n">22.2</td></tr>
+  </table></div>
+  <div class="note" style="border-left-color:var(--gold)"><b>Reading the table:</b> <b style="color:var(--ink)">Stop dist</b> is how far the stop sits from entry as a percentage of the <i>share price</i> &mdash; it is not the percentage of the account at risk. <b style="color:var(--ink)">Account risk is 1.00% in every row</b>, fixed at $20 on a $2,000 book. Share count is derived from it: <span class="mono">shares = $20 &divide; (entry &minus; stop)</span>. A wider stop buys fewer shares, not more risk. The only figure that varies with stop distance is <b>position value</b>, which is why the concentration cap and the 1R budget are separate constraints on separate axes.</div>
+  <div class="three" style="margin-top:18px">
+    <div class="card"><h3>For 2 : 1</h3><p style="font-size:13.5px;margin-bottom:8px">To <b>$22</b>: stop at or above <b class="mono am">$17.37</b> &mdash; 8.2%, 1.79 ATR. To the nearer <b>$20</b> wall: stop must sit at <b class="mono am">$18.36</b>, only 2.9% and 0.64 ATR &mdash; inside the noise.</p><p style="font-size:13.5px;margin:0"><b style="color:var(--green)">Achievable to $22.</b> <b style="color:var(--red)">Not achievable to $20.</b></p></div>
+    <div class="card"><h3>For 3 : 1</h3><p style="font-size:13.5px;margin-bottom:8px">To <b>$22</b>: stop at <b class="mono am">$18.88</b> &mdash; 5.4%, 1.19 ATR, close to the noise floor. To <b>$20</b> it is not reachable at any sane stop.</p><p style="font-size:13.5px;margin:0"><b style="color:var(--amber)">Only via a lower entry.</b></p></div>
+    <div class="card"><h3>The better lever</h3><p style="font-size:13.5px;margin-bottom:8px">With the stop fixed at $17.14, entry must be &le; <b class="mono am">$18.76</b> for 2:1 to $22, and &le; <b class="mono am">$18.36</b> for 3:1. A pullback to $18.20 gives <b class="mono up">2.00:1</b> even to the near $20 wall.</p><p style="font-size:13.5px;margin:0"><b style="color:var(--ink)">Wait for the pullback. Do not tighten the stop.</b></p></div>
+  </div>
+  <div class="rule"><span class="rid">If $22 breaks &mdash; the case against a fixed target</span><b>Dealer selling into a call wall is finite; real buying is not.</b> Clear it on volume and the mechanic inverts &mdash; dealers short gamma above the strike buy to re-hedge, and 149,850 contracts of former resistance becomes fuel and then support. That is why a fixed $22 target is the wrong instrument: it exits at exactly the moment the trade becomes worth holding. A <b>chandelier</b> &mdash; highest high since entry minus an ATR multiple &mdash; has no ceiling.
+  <div class="two" style="margin-top:12px"><div class="card" style="padding:12px 14px;background:var(--card2)">
+    <div class="kv"><span>Entry 18.40 / stop 17.14, exit at $20</span><span>1.27 : 1</span></div>
+    <div class="kv"><span>&hellip; exit at $22</span><span>2.86 : 1</span></div>
+    <div class="kv"><span>&hellip; if it runs to $24</span><span class="up">4.44 : 1</span></div>
+    <div class="kv"><span>&hellip; to $26</span><span class="up">6.03 : 1</span></div>
+    <div class="kv"><span>&hellip; to $28 (Nov 2025 midpoint)</span><span class="up">7.62 : 1</span></div></div>
+  <div class="card" style="padding:12px 14px;background:var(--card2)">
+    <p style="font-size:13px;margin:0;color:var(--inkMed)">The gap between <b>2.86</b> and <b>7.62</b> is the entire argument for building the chandelier. It is not about cutting losers faster &mdash; your stops already hold. It is so the one trade that runs is allowed to pay for the year, which is exactly the payoff problem the book has.</p></div></div></div>
+  <div class="rule"><span class="rid">breakout-traps-execution-filters &middot; R1 &amp; R4</span>Never buy the first tick above a level &mdash; the first move through is a stop harvest. Place the stop at <b>structure minus an ATR buffer</b>, never at the level, because the level is where every other stop sits. Both point the same way: the entry is a pullback toward $18, not a chase at $18.91 after a 6% day.</div>
+  <div class="note"><b>The cost floor still binds.</b> &euro;1 per round trip on $2,000 is <b class="mono dn">0.054R</b> &mdash; 5.4% of every unit of risk. The book needs <b class="mono am">1.70R</b> just to break even after commission. A 2:1 clears it; 0.94:1 did not.</div>
+</section>
+<section id="news">
+  <div class="sh"><div class="n">06</div><div><h2>News flow</h2>
+  <p>Split two ways: what happened to <b>this company</b>, and what happened to <b>the market</b> that reached it.</p></div></div>
+
+  <div class="news" style="margin-bottom:18px">
+    <div class="nhdr">Ticker-specific &mdash; SOFI</div>
+    <div class="nrow"><div class="dt">MON 17 AUG</div><div><div class="hd"><span class="pill bull">INITIATION</span>Piper Sandler starts Overweight, $22 target</div>
+      <div class="bd">Patrick Moley cites the lending and debt-consolidation market plus an ecosystem driving cross-adoption. Values on ~25&times; FY27 EPS; models $4.89bn revenue / $0.63 EPS for 2026, $6.14bn / $0.88 for 2027. Q2 product growth 43% against member growth 35%. <b style="color:var(--gold)">The $22 target sits exactly on the call wall.</b></div></div></div>
+    <div class="nrow"><div class="dt">AUG</div><div><div class="hd"><span class="pill bear">BEAR CASE</span>KBW reiterates Sell, $16; consensus is Hold</div>
+      <div class="bd">Tim Switzer maintained Sell after the Q2 beat; Zacks Rank #4, flagging charge-offs, NIM and valuation. 24-analyst consensus is <b>Hold</b> at $20.02-20.23 &mdash; only 6-7% above Friday. The average has been cut from $26.75 to $21.00 over recent months.</div></div></div>
+    <div class="nrow"><div class="dt">WED 29 JUL</div><div><div class="hd"><span class="pill neu">EARNINGS</span>Record Q2 &mdash; and the stock fell 9% on the print</div>
+      <div class="bd">Revenue, originations, members and products all records; revenue guidance raised. The stock still dropped 9% intraday before recovering 18% over three weeks. <b style="color:var(--amber)">A tape that sells a beat by 9% has shown what it does with a miss.</b></div></div></div>
+    <div class="nrow"><div class="dt">2026</div><div><div class="hd"><span class="pill bull">PRODUCT</span>SoFiUSD &mdash; first US national-bank-issued regulated stablecoin</div>
+      <div class="bd">GENIUS Act compliant, issued by SoFi Bank NA, live on Ethereum and Solana, 4.2% yield, reserves 85% short Treasuries / 15% cash, audited monthly. Sits inside an FDIC-insured, OCC-supervised bank &mdash; a structural edge over pure-play issuers. Tokenised deposits and cross-border transfer on the roadmap.</div></div></div>
+    <div class="nrow"><div class="dt">WATCH</div><div><div class="hd"><span class="pill neu">CATALYST</span>S&amp;P 500 inclusion candidate</div>
+      <div class="bd">Ten consecutive quarters of GAAP profitability puts SoFi in the eligibility conversation. Index inclusion is <b>mechanical, price-insensitive demand</b> &mdash; the single most plausible route through 149,850 contracts of call wall at $22.</div></div></div>
+    <div class="nrow"><div class="dt">MAY</div><div><div class="hd"><span class="pill bear">OVERHANG</span>Short-seller attack amplified the YTD decline</div>
+      <div class="bd">Narrative risk remains live and is part of why the stock de-rated 42% from its November high while the sector made new highs.</div></div></div>
+  </div>
+
+  <div class="news">
+    <div class="nhdr">Market-wide &mdash; reaches SOFI through rates, crypto and regulation</div>
+    <div class="nrow"><div class="dt">FRI 21 AUG</div><div><div class="hd"><span class="pill bull">DRIVER</span>Crypto rally and easing yields lift the whole fintech complex</div>
+      <div class="bd">Bitcoin and crypto equities rallied on easing yields and anticipation of US digital-asset rules. SOFI +6.0%, HOOD +14.1%, UPST +5.8%, AFRM +3.2%. <b style="color:var(--amber)">Shared with the entire peer group &mdash; this is beta, and it is the single largest component of Friday's move.</b></div></div></div>
+    <div class="nrow"><div class="dt">FRI 21 AUG</div><div><div class="hd"><span class="pill bull">FLOW</span>Cboe flags bullish options flow across fintech</div>
+      <div class="bd">SOFI traded 526k calls against 176k puts &mdash; 2.6&times; average call volume &mdash; consistent with the 3.13:1 call-to-put OI skew. A BlackRock position disclosure was reported alongside.</div></div></div>
+    <div class="nrow"><div class="dt">JUL</div><div><div class="hd"><span class="pill bear">RATES</span>Management now assumes two rate hikes</div>
+      <div class="bd">Stated on the Q2 call. For a deposit-funded lender that is the central macro variable: NIM compresses if funding reprices faster than assets. It also explains why easing yields on Friday were read as directly positive.</div></div></div>
+    <div class="nrow"><div class="dt">PENDING</div><div><div class="hd"><span class="pill bear">REGULATION</span>CLARITY Act stalled past its June window</div>
+      <div class="bd">The Senate floor vote slipped. Crypto regulatory clarity is the condition the digital-asset optionality is priced against &mdash; and OCC and Fed scrutiny of bank-issued stablecoins could erode the margin benefit through compliance cost.</div></div></div>
+    <div class="nrow"><div class="dt">CONTEXT</div><div><div class="hd"><span class="pill neu">SECTOR</span>Financials sit 1.6% off their 52-week high</div>
+      <div class="bd">XLF +5.5% YTD, +10.4% over a year. The sector backdrop is constructive and is <b>not</b> what is holding this name back &mdash; which makes the 33-point relative deficit a stock-specific problem rather than a sector one.</div></div></div>
+  </div>
+
+  <div class="rule"><span class="rid">hormuz-illusion-single-catalyst &middot; R1</span>Name the single condition the advance rests on, and what its reversal would do, <b>before</b> the position. Here it is two conditions, neither company-specific: <b>one earnings print</b> and <b>a crypto-and-rates sentiment window</b>. If yields back up or the digital-asset bid fades, the peer group gives back Friday together and SOFI has no independent driver to hold it.</div>
+</section><section id="sector">
+  <div class="sh"><div class="n">07</div><div><h2>Sector, industry and peers</h2>
+  <p>Phoenix gates on <b>industry</b>, not sector. Both are shown &mdash; and they disagree.</p></div></div>
+  <div class="tw"><table>
+    <tr><th>Level</th><th>Instrument</th><th class="n">Friday</th><th class="n">YTD</th><th class="n">1-year</th><th class="n">% of 52w high</th></tr>
+    <tr><td class="mono" style="color:var(--inkFade)">SECTOR</td><td><b style="color:var(--ink)">XLF</b> &middot; Financials</td><td class="n up">+0.93%</td><td class="n up">+5.5%</td><td class="n up">+10.4%</td><td class="n up">98.4%</td></tr>
+    <tr class="me"><td class="mono" style="color:var(--gold)">SUBJECT</td><td><b style="color:var(--ink)">SOFI</b> &middot; SoFi Technologies</td><td class="n up">+5.97%</td><td class="n dn">-27.5%</td><td class="n">&mdash;</td><td class="n dn">57.8%</td></tr>
+    <tr><td class="mono" style="color:var(--inkFade)">INDUSTRY</td><td><b style="color:var(--ink)">HOOD</b> &middot; Robinhood</td><td class="n up">+14.11%</td><td class="n dn">-4.1%</td><td class="n">&mdash;</td><td class="n">&mdash;</td></tr>
+    <tr><td class="mono" style="color:var(--inkFade)">INDUSTRY</td><td><b style="color:var(--ink)">AFRM</b> &middot; Affirm Holdings</td><td class="n up">+3.17%</td><td class="n up">+4.0%</td><td class="n">&mdash;</td><td class="n">77.4%</td></tr>
+    <tr><td class="mono" style="color:var(--inkFade)">INDUSTRY</td><td><b style="color:var(--ink)">UPST</b> &middot; Upstart Holdings</td><td class="n up">+5.79%</td><td class="n dn">-30.2%</td><td class="n">&mdash;</td><td class="n dn">39.7%</td></tr>
+    <tr><td class="mono" style="color:var(--inkFade)">INDUSTRY</td><td><b style="color:var(--ink)">ALLY</b> &middot; Ally Financial</td><td class="n up">+1.51%</td><td class="n dn">-3.9%</td><td class="n">&mdash;</td><td class="n">90.8%</td></tr>
+  </table></div>
+  <div class="two" style="margin-top:18px">
+    <div class="card"><h3>Sector: constructive</h3>
+      <p style="font-size:13.5px;margin:0">XLF sits <b style="color:var(--ink)">1.6% off its 52-week high</b>, up 5.5% YTD and 10.4% over a year. On Phoenix's own test &mdash; above a rising average &mdash; financials pass comfortably. The sector is not the problem.</p></div>
+    <div class="card"><h3>Industry: split, and SOFI is the laggard</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">Within digital lending and fintech the dispersion is wide. ALLY at 91% of its high and AFRM at 77% are holding structure. SOFI at <b style="color:var(--red)">58%</b> and UPST at <b style="color:var(--red)">40%</b> are not.</p>
+      <p style="font-size:13.5px;margin:0">The industry gate is the one Phoenix input I <b>cannot</b> reproduce here &mdash; it needs <span class="mono">rotation_nav</span> and the 116-industry taxonomy from <span class="mono">universe.csv</span>, neither of which is in this project. On this peer sample the industry looks <b style="color:var(--amber)">mixed rather than passing</b>, so I have graded it <span class="mono">UNVERIFIED</span> rather than guessing.</p></div>
+  </div>
+  <div class="note"><b>Friday was an industry event, not a stock event.</b> Every fintech name in the table rose together on a crypto and rates catalyst &mdash; SOFI +6.0%, UPST +5.8%, HOOD +14.1%, AFRM +3.2%. A move shared with the whole peer group is beta. What separates them is what happened in the eight months before Friday, and there SOFI is 33 points behind its own sector.</div>
+  <div class="rule"><span class="rid">Data gap &middot; for the next run</span>Phoenix classifies every ticker into one of <b>116 industries</b> via <span class="mono">rotation_nav</span>, and the <span class="mono">industry</span> gate tests whether that industry sits above a rising average. Without <span class="mono">universe.csv</span> and <span class="mono">rotation_nav.json</span> in the project I can only build a hand-picked peer group, which is not the same test. <b>Upload both and this section becomes the real gate rather than an approximation.</b></div>
+</section><section id="fund">
+  <div class="sh"><div class="n">08</div><div><h2>Q2 2026 fundamentals</h2><p>Reported 29 July. Records on nearly every line.</p></div></div>
+  <div class="strip" style="margin-top:0">
+    <div class="cell"><div class="k">Adj net revenue</div><div class="v">$1.22B</div><div class="s up">+40% YoY</div></div>
+    <div class="cell"><div class="k">Net income</div><div class="v">$156.6M</div><div class="s up">EPS 0.12 vs 0.08</div></div>
+    <div class="cell"><div class="k">Adj EBITDA</div><div class="v">$358M</div><div class="s up">+44% &middot; 30% mgn</div></div>
+    <div class="cell"><div class="k">Originations</div><div class="v">$14.8B</div><div class="s up">record</div></div>
+    <div class="cell"><div class="k">NIM</div><div class="v">5.98%</div><div class="s up">+4bps QoQ</div></div>
+    <div class="cell"><div class="k">Deposits</div><div class="v">$45.5B</div><div class="s up">+$5.3B QoQ</div></div>
+    <div class="cell"><div class="k">Tangible BV/sh</div><div class="v">$7.34</div><div class="s up">+56% YoY</div></div>
+    <div class="cell"><div class="k">Charge-offs</div><div class="v up">3.70%</div><div class="s up">-70bps</div></div>
+  </div>
+  <div class="two" style="margin-top:20px">
+    <div class="card"><h3>The bottleneck, crossed</h3>
+      <p style="font-size:13.5px">A lender's binding constraint is funding. Warehouse lines are dear and revocable; insured deposits are cheap and sticky. Deposits now exceed <b style="color:var(--ink)">90% of average total liabilities</b> &mdash; the bank charter doing the work it was bought for.</p>
+      <p style="font-size:13.5px;margin:0">The proof is the margin: NIM expanded on a <b style="color:var(--ink)">36bp fall in cost of funds</b> while originations hit a record. A lender widening margin while growing volume is not competing for money.</p></div>
+    <div class="card"><h3>The moat, in one metric</h3>
+      <p style="font-size:13.5px">Cross-buy &mdash; new products opened by <i>existing</i> members &mdash; has run <b class="mono am">35% &rarr; 43% &rarr; 51%</b> across three quarters. Acquisition cost falling, lifetime value rising.</p>
+      <div class="kv"><span>Source</span><span>Switching costs</span></div>
+      <div class="kv"><span>Secondary</span><span>Legal / charter</span></div>
+      <div class="kv"><span>Rank</span><span>Mid-tier</span></div>
+      <div class="kv"><span>Trend</span><span class="up">Widening</span></div></div>
+  </div>
+  <div class="note"><b>Where to push back.</b> Revenue guidance was raised to $4.75-4.85bn. EBITDA guidance was <i>not</i> &mdash; management chose reinvestment. And the effective tax rate landed <b>700bps above</b> original estimates at 22%, the mechanical reason FY EPS guidance is $0.60. Two of three guidance lines moved against the shareholder in a quarter the business outperformed.</div>
+</section>
+<section id="score">
+  <div class="sh"><div class="n">09</div><div><h2>Quality score</h2><p>Five weighted blocks, 100 points. Valuation is where it loses.</p></div></div>
+  <div class="tw"><table>
+    <tr><th>Block</th><th class="n">Weight</th><th class="n">Score</th><th>Reasoning</th></tr>
+    <tr><td>Business quality</td><td class="n">30</td><td class="n am">24</td><td>NIM expanding, 30% EBITDA margin, ROTCE target 20-30% &mdash; limited history at scale</td></tr>
+    <tr><td>Growth</td><td class="n">20</td><td class="n up">19</td><td>40% revenue growth, record originations, cross-buy compounding</td></tr>
+    <tr><td>Financial strength</td><td class="n">20</td><td class="n am">14</td><td>Deposit-funded, credit improving; still a levered lender into a rate cycle</td></tr>
+    <tr><td>Valuation</td><td class="n">20</td><td class="n dn">7</td><td>P/E 38.8 &middot; ~2.5&times; tangible book &middot; targets span $16 to $22</td></tr>
+    <tr><td>Shareholder alignment</td><td class="n">10</td><td class="n">6</td><td>Reinvestment defensible; equity issuance dilutes</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Total</b></td><td class="n"><b>100</b></td><td class="n am"><b>70</b></td><td><b style="color:var(--ink)">Buyable with price discipline</b> &mdash; the 65-79 band</td></tr>
+  </table></div>
+  <div class="rule"><span class="rid">investment-scoring-100-point &middot; caveat</span>Fundamental scoring belongs on the ticker page as <b>context, never an entry gate</b>. A 70/100 business on a Stage-1 chart is a watchlist entry. Left as a gate, this score would argue you into exactly the trade the technical stack just refused.</div>
+</section>
+<section id="risk">
+  <div class="sh"><div class="n">10</div><div><h2>Risk register</h2><p>Graded by severity, each with its mitigation and what remains.</p></div></div>
+  <div class="tw"><table>
+    <tr><th>Risk</th><th style="width:96px">Severity</th><th>Mitigation &mdash; and the residual</th></tr>
+    <tr><td><b style="color:var(--ink)">Technical structure</b></td><td><span class="tag t-fail">HIGH</span></td><td>None available. -42% off high, below a falling 200-day, Stage 1. <b style="color:var(--ink)">The binding risk for this book.</b></td></tr>
+    <tr><td><b style="color:var(--ink)">Valuation</b></td><td><span class="tag t-fail">HIGH</span></td><td>P/E 38.8 on a lender; a $16-$22 spread is 37% disagreement. Consensus is only 6-7% above spot. The 27% YTD fall <i>is</i> this risk realising.</td></tr>
+    <tr><td><b style="color:var(--ink)">Credit cycle</b></td><td><span class="tag t-fail">HIGH</span></td><td>Charge-offs improved to 3.7%. But banks survive slow growth and die from bad credit, and losses arrive <i>after</i> the party.</td></tr>
+    <tr><td><b style="color:var(--ink)">Rate sensitivity</b></td><td><span class="tag t-warn">MED-HIGH</span></td><td>Cost of funds -36bps, deposit-funded. Management stated in July they now assume <b style="color:var(--ink)">two rate hikes</b>.</td></tr>
+    <tr><td><b style="color:var(--ink)">Single-catalyst dependency</b></td><td><span class="tag t-warn">MED-HIGH</span></td><td>The recovery rests on one earnings print plus crypto sentiment. Neither durable nor company-specific.</td></tr>
+    <tr><td><b style="color:var(--ink)">Regulatory / stablecoin</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>CLARITY Act stalled; OCC and Fed scrutiny could erode the margin benefit through compliance cost.</td></tr>
+    <tr><td><b style="color:var(--ink)">Execution / dilution</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>Revenue guidance raised; EBITDA not raised, tax +700bps, equity issuance dilutes.</td></tr>
+  </table></div>
+</section>
+<section id="inval">
+  <div class="sh"><div class="n">11</div><div><h2>Invalidation</h2><p>The section every source document omits. Written before the position, not after.</p></div></div>
+  <div class="two">
+    <div class="card" style="border-left:2px solid var(--green)"><h3 style="color:var(--green)">Would make this bullish</h3>
+      <ul style="margin-bottom:0"><li>Daily close above <b class="mono">$21.00</b> with volume expansion sustained 2-3 sessions</li>
+      <li><b>and</b> the 200-day flattening rather than falling &mdash; both, not either</li>
+      <li>A hold above <b class="mono">$18</b> on a pullback, confirming the wall as support</li>
+      <li>Cross-buy holding above 50% into Q3</li><li>Charge-offs improving a second consecutive quarter</li>
+      <li>S&amp;P 500 inclusion &mdash; the most plausible route through the $22 wall</li></ul></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Would make it worse</h3>
+      <ul style="margin-bottom:0"><li>Close back below <b class="mono">$18</b> &mdash; the reclaimed wall fails, thesis void</li>
+      <li>Close below <b class="mono">$16.35</b> flips gamma negative; dealers amplify instead of dampen</li>
+      <li>Close below <b class="mono">$15.53</b> breaks the base and re-opens the decline</li>
+      <li>Cross-buy stalling below ~45% &mdash; the flywheel <i>is</i> the thesis</li>
+      <li>Charge-offs rising two consecutive quarters</li><li>NIM below 5.5% on rising funding costs</li></ul></div>
+  </div>
+</section>
+<section id="rules" style="border-bottom:none">
+  <div class="sh"><div class="n">12</div><div><h2>Rules applied in this report</h2><p>Every judgement above traces to a carded rule. This is the audit trail.</p></div></div>
+  <div class="tw"><table>
+    <tr><th>Rule</th><th>Applied to</th><th>Effect on the verdict</th></tr>
+    <tr><td class="mono" style="color:var(--gold)">stage-theory.R1</td><td>Gate stack</td><td>Same pattern is fuel in Stage 2, exit liquidity in Stage 3 &mdash; decisive</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">recovery-illusion.R1</td><td>Gate stack</td><td>Places price in the false-stabilisation stage; the retest flushes early buyers</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">breakout-traps.R1</td><td>Entry</td><td>Never buy the first tick above a level &mdash; pullback, not chase</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">breakout-traps.R4</td><td>Stop</td><td>Structure minus an ATR buffer &mdash; gave the $17.57 stop and the 2.31:1</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">quant-risk.R2</td><td>Exit</td><td>Chandelier answers "what if it explodes" &mdash; a fixed target cannot</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">rodriguez.R6 / Q57</td><td>Sizing</td><td>Minimum R:R at entry &mdash; the reason the stop location was re-examined</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">investment-scoring.R4</td><td>Score</td><td>Conditional band produces a watchlist entry, not a discard</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">power-energy-ai.R3 + pharma.R1</td><td>Moat</td><td>Source, rank and trend &mdash; not "wide moat"</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">hormuz-illusion.R1</td><td>News</td><td>Name the single condition the advance rests on, before entry</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">macro-map.R3</td><td>Analyst targets</td><td>Consensus 6-7% above spot is already priced &mdash; not an edge</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">Phoenix gate stack</td><td>Gates</td><td>Weekly 40/30/10-week SMA against the 104-week high, per <span class="mono">phoenix.py</span></td></tr>
+    <tr><td class="mono" style="color:var(--gold)">Phoenix GEX method</td><td>Gamma</td><td>Full chain, walls on <b>open interest</b>, flip from the cumulative profile</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">PAPER_TARGET</td><td>Costs</td><td>0.054R commission floor; 1.70R payoff needed to break even</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">THESIS_BLUEPRINT &sect;3.1</td><td>Whole report</td><td>Nine-section structure ending in mandatory invalidation</td></tr>
+  </table></div>
+  <div class="verdict" style="border-color:var(--gold);background:rgba(211,119,54,.07);border-left-color:var(--gold);margin-top:26px">
+    <div class="l" style="color:var(--gold)">The answer</div>
+    <p style="margin:8px 0 0;font-size:16px;color:var(--ink)">A genuinely strong business &mdash; 40% revenue growth, expanding margin, improving credit, a widening moat, a bank charter doing real work, 70/100 on quality. It is <b>not a trade for this book</b>: three of five gates fail with a fourth unverified, it sits 42% below its 104-week high beneath a falling 40-week average, and it underperformed its own sector by 33 points this year.</p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)">But the reward-to-risk objection is now <b style="color:var(--ink)">answered rather than fatal</b>. Anchoring the stop to the reclaimed $18 wall instead of distant chart support gives <b class="mono up">2.31:1</b> at a 0.5-ATR buffer and <b class="mono up">3.00:1</b> just under the wall &mdash; and a pullback entry near $18.20 pays <b class="mono up">4.22:1</b>. The setup is structurally sound. <b style="color:var(--ink)">The stage is what still fails.</b></p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)">The trigger is the <b class="mono am">30-week average turning up</b>. Price already sits above it at $17.72; it only has to stop falling. At current levels that is four to six weeks out, and it is the earliest date this becomes a candidate.</p>
+  </div>
+</section>
+<div class="foot">
+PHOENIX EQUITY RESEARCH &middot; L3 SINGLE-NAME THESIS &middot; SOFI &middot; 22 AUG 2026 &middot; PREPARED TO THESIS_BLUEPRINT_v1 &sect;3.1<br>
+PRICE, VOLUME, OPTION OPEN INTEREST, IMPLIED VOLATILITY, SECTOR AND PEER DATA: INTERACTIVE BROKERS API, RETRIEVED 22 AUG 2026, THROUGH FRI 21 AUG CLOSE.<br>
+FUNDAMENTALS: Q2 2026 RESULTS 29 JUL 2026 AND EARNINGS CALL. NEWS AND ANALYST TARGETS: PUBLISHED REPORTING, AUG 2026. GATES COMPUTED ON WEEKLY BARS PER phoenix.py: 40-WEEK, 30-WEEK AND 10-WEEK SMA AGAINST THE 104-WEEK HIGH. GEX COMPUTED FROM IBKR OPEN INTEREST ACROSS THE FULL LIVE CHAIN USING THE PHOENIX METHOD — WALLS ON OPEN INTEREST, FLIP FROM THE CUMULATIVE PROFILE.<br>
+GEX COMPUTED FROM IBKR OPEN INTEREST WITH BLACK-SCHOLES GAMMA AT 44.9% UNDERLYING IV, 27 DAYS TO 18 SEP EXPIRY.<br>
+LIMITATIONS &mdash; PER-CONTRACT IV WAS UNAVAILABLE FROM THE FEED, SO A SINGLE UNDERLYING IV IS APPLIED ACROSS ALL STRIKES; THIS UNDERSTATES WING GAMMA. DEALER POSITIONING IS INFERRED FROM THE STANDARD CONVENTION, NOT OBSERVED. GEX AGGREGATES THE AUG 28, SEP 18 AND JAN 15 ’27 CHAINS, STRIKES 12-30. THE INDUSTRY GATE COULD NOT BE COMPUTED — rotation_nav AND universe.csv ARE NOT AVAILABLE — SO A PEER GROUP IS SHOWN AND THE GATE IS MARKED UNVERIFIED. BUSINESS HISTORY AND ENTERPRISE DEALS FROM SEC FILINGS, EARNINGS CALLS AND COMPANY DISCLOSURE.<br>
+NOT INVESTMENT ADVICE. PREPARED FOR ONE SYSTEMATIC LONG-ONLY EQUITY BOOK AND CALIBRATED TO ITS RULES, ACCOUNT SIZE AND COST BASE.
+</div>
+</main></div>
+<script>
+(function(){
+  var root=document.documentElement,d=document.getElementById("thDark"),l=document.getElementById("thLight");
+  function set(m){var light=(m==="light");
+    root.classList.toggle("light",light); root.style.colorScheme=light?"light":"dark";
+    d.className=light?"":"on"; l.className=light?"on":"";
+    try{localStorage.setItem("pxTheme",m);}catch(e){}}
+  var s=null; try{s=localStorage.getItem("pxTheme");}catch(e){}
+  set(s||"dark");
+  d.addEventListener("click",function(){set("dark");});
+  l.addEventListener("click",function(){set("light");});
+})();
+</script>
+</body></html>

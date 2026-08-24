@@ -1,0 +1,432 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>META &middot; Phoenix Equity Research &middot; 23 Aug 2026</title>
+<style>
+:root{
+  --bg:#020F1F; --card:#08192B; --card2:#0C2137; --line:#14304A; --line2:#1E4462;
+  --ink:#E7EEF6; --inkMed:#C4D2DF; --inkLight:#94A8BA; --inkFade:#6B8299; --inkGhost:#47596C;
+  --gold:#D37736; --green:#3FBF77; --greenBg:rgba(63,191,119,.13);
+  --red:#D9534F; --redBg:rgba(217,83,79,.13);
+  --amber:#D8A24A; --amberBg:rgba(216,162,74,.13);
+  --rail:#010A15; --railLine:#0E2942;
+  --gCall:#2D8A55; --gPut:#C43A30; --gSpot:#3B82C4; --gFlip:#E8C34A; --gPin:#9B7BD4;
+  --serif:Georgia,'Times New Roman',serif; --mono:'Courier New',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:#020F1F;color-scheme:dark}
+html.light{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:15.5px;line-height:1.62}
+.shell{display:grid;grid-template-columns:236px 1fr;max-width:1420px;margin:0 auto}
+.rail{background:var(--rail);border-right:1px solid var(--railLine);padding:22px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.rail .logo{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--gold);font-weight:700;padding:0 20px 15px;border-bottom:1px solid var(--railLine)}
+.rail .logo span{color:var(--inkFade);letter-spacing:.16em}
+.toc{list-style:none;margin:12px 0 0;padding:0}
+.toc a{display:flex;gap:10px;padding:7px 20px;color:var(--inkLight);text-decoration:none;font-family:var(--mono);font-size:11.5px;border-left:2px solid transparent}
+.toc a:hover{color:var(--ink);background:rgba(211,119,54,.07);border-left-color:var(--gold)}
+.toc a b{color:var(--inkGhost);font-weight:400;min-width:16px}
+.grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--inkGhost);padding:15px 20px 4px;text-transform:uppercase}
+.rail .stat{margin:16px 20px 0;padding-top:13px;border-top:1px solid var(--railLine);font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.85}
+.rail .stat b{color:var(--red)}
+main{padding:0 40px 90px;min-width:0}
+.mast{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:24px 0 13px;border-bottom:2px solid var(--gold)}
+.mast .t{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--inkFade);text-transform:uppercase}
+.mast .r{font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);text-align:right;line-height:1.8}
+h1{font-weight:400;font-size:clamp(31px,4.8vw,50px);line-height:1.08;letter-spacing:-.015em;margin:24px 0 6px}
+h1 em{font-style:italic;color:var(--gold)}
+h2{font-weight:400;font-size:26px;letter-spacing:-.01em;margin:0 0 3px}
+h3{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 9px}
+p{color:var(--inkMed);margin:0 0 13px}
+.lede{font-size:18.5px;line-height:1.58;color:var(--ink)}
+.mono{font-family:var(--mono)} a{color:var(--gold)}
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+.sh{display:flex;gap:14px;align-items:baseline;margin-bottom:19px}
+.sh .n{font-family:var(--mono);font-size:11px;color:var(--gold);font-weight:700;padding-top:8px;min-width:24px}
+.sh p{margin:2px 0 0;font-size:14px;color:var(--inkLight)}
+.verdict{border:1px solid var(--red);border-left:3px solid var(--red);background:var(--redBg);padding:16px 20px;margin:22px 0 0}
+.verdict .l{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--red);font-weight:700;text-transform:uppercase}
+.verdict .t{font-size:24px;margin:5px 0 7px;line-height:1.2}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:24px 0 0}
+.cell{background:var(--card);padding:11px 13px}
+.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade)}
+.cell .v{font-family:var(--mono);font-size:17.5px;font-weight:700;margin-top:3px}
+.cell .s{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:1px}
+.up{color:var(--green)}.dn{color:var(--red)}.am{color:var(--gold)}.wr{color:var(--amber)}
+.gexp{border:1px solid var(--line2);background:var(--card)}
+.gexh{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--card2)}
+.gexh .tk{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.07em}
+.badge{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;padding:4px 11px;border-radius:3px;background:var(--gCall);color:#02160C}
+.b-out{border:1px solid var(--line2);color:var(--inkLight);padding:4px 10px;font-family:var(--mono);font-size:10.5px;border-radius:3px}
+.gexh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--inkLight)}
+.gexsub{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);padding:8px 15px;border-bottom:1px solid var(--line)}
+.ggrid{stroke:#0F2438;stroke-width:1}
+.gax{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.gaxr{font-family:var(--mono);font-size:9.5px;fill:var(--inkLight);opacity:.75}
+.gaxt{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;fill:var(--inkGhost)}
+.gcall{fill:var(--gCall)} .gput{fill:var(--gPut)}
+.gcurve{fill:none;stroke:var(--ink);stroke-width:1.6;opacity:.9}
+.garea{fill:#2A4A78;opacity:.16;stroke:none}
+.gkey{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:9px 15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--inkFade)}
+.gkey span{display:inline-flex;align-items:center;gap:6px}
+.gkey i{width:11px;height:3px;border-radius:2px;display:inline-block}
+.gkey .note{display:block !important;color:var(--inkGhost);flex-basis:100%;width:100%;line-height:1.6;font-size:10px;padding-top:4px}
+.gkey .note b{display:inline;color:var(--inkFade)}
+.lad{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:74px 176px 1fr;gap:12px;align-items:center;padding:9px 15px;border-bottom:1px solid #0E2438;border-left:3px solid transparent;font-family:var(--mono);font-size:12.5px}
+.lrow:last-child{border-bottom:none}
+.lrow .p{font-weight:700}
+.lrow .d{color:var(--inkFade);font-size:11.5px;font-family:var(--serif)}
+.lrow .lab{letter-spacing:.08em;font-weight:700;font-size:10.5px}
+.l-call{border-left-color:var(--gCall)} .l-put{border-left-color:var(--gPut)}
+.l-spot{border-left-color:var(--gSpot);background:rgba(59,130,196,.10);border-top:1px solid #2C5C86;border-bottom:1px solid #2C5C86}
+.l-flip{border-left-color:var(--gFlip);background:rgba(232,195,74,.07)}
+.narr{padding:14px 15px;border-top:1px solid var(--line);background:var(--card2);font-size:14px;color:var(--inkMed);line-height:1.6}
+.chart{border:1px solid var(--line);background:var(--card);padding:14px 10px 6px;margin:6px 0 14px}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:#0F2438;stroke-width:1}
+.axl{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.pl{fill:none;stroke:var(--ink);stroke-width:1.6}
+.m50{fill:none;stroke:var(--gold);stroke-width:1.2}
+.m200{fill:none;stroke:#5E7C99;stroke-width:1.4;stroke-dasharray:5 3}
+.ar{fill:url(#g1)}
+.lbl{font-family:var(--mono);font-size:10px;font-weight:700}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:5px 4px 7px}
+.legend i{display:inline-block;width:13px;height:2px;vertical-align:middle;margin-right:5px}
+.tw{border:1px solid var(--line);background:var(--card);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #0E2438;color:var(--inkMed)}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.hl td{background:rgba(63,191,119,.08)} tr.hlr td{background:rgba(217,83,79,.07)}
+tr.me td{background:rgba(211,119,54,.10)}
+.gates{border:1px solid var(--line);background:var(--card)}
+.gate{display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:13px 17px;border-bottom:1px solid #0E2438}
+.gate:last-child{border-bottom:none} .gate.f{background:rgba(217,83,79,.05)}
+.gate .idx{font-family:var(--mono);font-size:10px;color:var(--inkGhost)}
+.gate .nm{font-family:var(--mono);font-size:13px;font-weight:700}
+.gate .dt{font-size:12.5px;color:var(--inkLight);margin-top:2px;line-height:1.45}
+.tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border:1px solid;white-space:nowrap;border-radius:2px}
+.t-fail{color:var(--red);border-color:var(--red);background:var(--redBg)}
+.t-warn{color:var(--amber);border-color:var(--amber);background:var(--amberBg)}
+.t-pass{color:var(--green);border-color:var(--green);background:var(--greenBg)}
+.stamp{border:1px solid var(--line);border-top:none;background:var(--card2);padding:13px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.stamp .x{font-family:var(--mono);font-size:12px;color:var(--inkLight)}
+.stamp .o{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--red);letter-spacing:.08em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);background:var(--card);padding:16px 18px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #0E2438;font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv span:first-child{color:var(--inkLight)} .kv span:last-child{font-family:var(--mono);font-weight:700}
+.rule{border-left:2px solid var(--gold);background:rgba(211,119,54,.05);padding:11px 15px;margin:14px 0;font-size:13.5px;color:var(--inkMed)}
+.rule .rid{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px}
+.note{border-left:2px solid var(--line2);padding:2px 0 2px 15px;margin:15px 0;color:var(--inkMed)}
+.note b{color:var(--ink)}
+.news{border:1px solid var(--line);background:var(--card)}
+.nhdr{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);padding:10px 16px;background:var(--card2);border-bottom:1px solid var(--line)}
+.nrow{display:grid;grid-template-columns:86px 1fr;gap:14px;padding:11px 16px;border-bottom:1px solid #0E2438}
+.nrow:last-child{border-bottom:none}
+.nrow .dt{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding-top:2px}
+.nrow .hd{font-size:14.5px;color:var(--ink);margin-bottom:3px}
+.nrow .bd{font-size:12.8px;color:var(--inkLight);line-height:1.5}
+.pill{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.09em;padding:2px 7px;border:1px solid var(--line2);color:var(--inkFade);margin-right:7px;vertical-align:1px;border-radius:2px}
+.pill.bull{border-color:var(--green);color:var(--green)}
+.pill.bear{border-color:var(--red);color:var(--red)}
+.pill.neu{border-color:var(--amber);color:var(--amber)}
+ul{margin:0 0 12px;padding-left:17px;color:var(--inkMed)}li{margin-bottom:5px}
+.foot{padding:28px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);line-height:1.9}
+/* strip: fixed column counts so the last cell never orphans */
+.strip{grid-template-columns:repeat(8,1fr)}
+@media(max-width:1500px){.strip{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:620px){.strip{grid-template-columns:repeat(2,1fr)}}
+/* tablet landscape: rail becomes a compact top bar, not a dead column */
+@media(max-width:1200px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:none;border-bottom:1px solid var(--railLine);
+        display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:12px 24px}
+  .rail .logo{border-bottom:none;padding:0;font-size:10.5px;line-height:1.5}
+  .rail .stat{margin:0;padding:0;border-top:none;font-size:10.5px;line-height:1.7;text-align:right}
+  main{padding:0 24px 70px}
+}
+@media(max-width:760px){
+  .two,.three{grid-template-columns:1fr}
+  .lrow{grid-template-columns:66px 1fr}.lrow .d{display:none}
+  main{padding:0 18px 60px}
+  .rail{padding:10px 18px}
+}
+
+/* ===== light theme : colours only, toggled by html.light — sampled from phoenix_app.html ===== */
+html.light{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15);
+  --rail:#F3EADC; --railLine:rgba(122,96,68,.22);
+  --gCall:#1E7A4E; --gPut:#B4362F; --gSpot:#2C5A82; --gFlip:#A87A1C; --gPin:#7A5CA8;
+}
+html.light,html.light body,html.light .shell,html.light main{background:#F6EFE4}
+html.light body{color:#2C2118}
+html.light .rail{background:#F3EADC}
+html.light .card,html.light .tw,html.light .gates,html.light .news,html.light .gexp,html.light .chart,html.light .cell{background:rgba(255,253,249,.86)}
+html.light .stamp,html.light .gexh,html.light .narr,html.light .nhdr,html.light .gexsub{background:rgba(248,241,231,.94)}
+html.light .pxtheme{background:rgba(248,241,231,.96)}
+html.light .ggrid,html.light .grid{stroke:rgba(122,96,68,.16)}
+html.light .pl{stroke:#2C2118}
+html.light .gcurve{stroke:#2C2118}
+html.light .garea{fill:#7A6044;opacity:.16}
+html.light .m200{stroke:#8C7A67}
+html.light .badge{background:var(--gCall);color:#FFFDF9}
+html.light .lrow.l-spot{background:rgba(44,90,130,.10);border-top-color:rgba(44,90,130,.4);border-bottom-color:rgba(44,90,130,.4)}
+html.light .lrow.l-flip{background:rgba(168,122,28,.10)}
+html.light .gate.f{background:rgba(180,54,47,.055)}
+html.light tr.hl td{background:rgba(30,122,78,.09)}
+html.light tr.hlr td{background:rgba(180,54,47,.07)}
+html.light tr.me td{background:rgba(194,99,42,.10)}
+html.light td{border-bottom-color:rgba(122,96,68,.14)}
+html.light .gate,html.light .nrow,html.light .lrow{border-bottom-color:rgba(122,96,68,.14)}
+html.light .rule{background:rgba(194,99,42,.06)}
+html.light .toc a:hover{background:rgba(194,99,42,.09)}
+/* theme switch */
+.pxtheme{z-index:40;display:flex;gap:0;border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:var(--card2)}
+.pxtheme button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 12px;border:0;background:transparent;color:var(--inkFade);cursor:pointer}
+.pxtheme button.on{background:var(--gold);color:#FFFDF9;font-weight:700}
+.pxtheme button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+@media print{.pxtheme,.rail{display:none}.shell{grid-template-columns:1fr}main{padding:0}}
+
+/* ===== theme switch hardening — must stay last in the sheet ===== */
+.pxtheme{position:fixed;top:14px;right:18px;bottom:auto;left:auto;
+  height:auto;width:auto;max-height:34px;align-items:center;line-height:1}
+.pxtheme button{height:28px;line-height:28px;padding:0 12px;white-space:nowrap;flex:0 0 auto}
+@media(max-width:1200px){
+  .pxtheme{top:auto;bottom:14px;right:14px}
+}
+@media print{.pxtheme{display:none}}
+</style></head><body><div class="shell">
+<nav class="rail"><div class="logo">PHOENIX<br><span>EQUITY RESEARCH</span></div>
+<div class="stat" style="margin-top:20px;border-top:none;padding-top:0">META &middot; $549.90<br>L3 SINGLE NAME<br>23 AUG 2026<br><br>GATES: <b>4 FAIL</b><br>SCORE: 74/100<br>VERDICT: <b>NO TRADE</b></div></nav>
+<main>
+<div class="pxtheme" role="group" aria-label="Theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></div>
+<div class="mast"><div class="t">NASDAQ : META &middot; Meta Platforms, Inc. &middot; L3 single-name thesis</div>
+<div class="r">SUN 23 AUG 2026 &middot; DATA THROUGH FRI 21 AUG CLOSE<br>IBKR LIVE &middot; FULL-CHAIN GEX &middot; WEEKLY GATES</div></div>
+<section id="verdict">
+  <h1>The only one that fails<br><em>every single gate</em>.</h1>
+  <p class="lede" style="max-width:74ch;margin-top:18px">Across seven names reviewed this weekend, six have at least one passing gate and most have three. Meta has none. Price sits below the 40-week, the 30-week and the 10-week &mdash; and all three are falling. This is not a pullback, a base, or a near-miss. It is a downtrend.</p>
+  <div class="verdict"><div class="l">Phoenix gate stack &middot; weekly &middot; verdict</div>
+    <div class="t">NO TRADE &mdash; fails all four computable gates</div>
+    <p style="margin:0;font-size:14px">31% below the 104-week high with every average above price and pointing down. <b style="color:var(--ink)">There is no configuration of entry and stop that makes this a Phoenix candidate</b>, and nothing on the chart is close to changing that.</p></div>
+  <div class="strip">
+    <div class="cell"><div class="k">Close Fri</div><div class="v">549.90</div><div class="s up">+7.12 &middot; +1.30%</div></div>
+    <div class="cell"><div class="k">40-week SMA</div><div class="v dn">621.91</div><div class="s dn">-11.6% &middot; falling</div></div>
+    <div class="cell"><div class="k">30-week SMA</div><div class="v dn">613.74</div><div class="s dn">-10.4% &middot; falling</div></div>
+    <div class="cell"><div class="k">10-week SMA</div><div class="v dn">590.93</div><div class="s dn">-6.9% &middot; falling</div></div>
+    <div class="cell"><div class="k">104w high</div><div class="v dn">-30.9%</div><div class="s">796.25</div></div>
+    <div class="cell"><div class="k">Implied vol</div><div class="v">34.1%</div><div class="s wr">51st pctile</div></div>
+    <div class="cell"><div class="k">Realised vol</div><div class="v dn">47.3%</div><div class="s dn">13pts above IV</div></div>
+    <div class="cell"><div class="k">YTD</div><div class="v dn">-16.2%</div><div class="s dn">52w low 520.26</div></div>
+  </div>
+</section>
+
+<section id="biz">
+  <div class="sh"><div class="n">01</div><div><h2>The business</h2><p>The most profitable advertising machine ever built, spending its profits on something the market does not yet believe in.</p></div></div>
+  <p class="lede" style="max-width:76ch">Meta operates the largest attention network in history and monetises it at extraordinary margin. The gap between that and a 31% drawdown is the whole story: the market is not questioning the advertising business, it is questioning what the cash is being spent on.</p>
+  <div class="three" style="margin-top:22px">
+    <div class="card"><h3>Family of Apps &mdash; the entire profit pool</h3>
+      <p style="font-size:13.5px;margin-bottom:10px">Facebook, Instagram, WhatsApp, Messenger. Roughly <b style="color:var(--ink)">3.5 billion daily users</b> across the family, monetised almost entirely through advertising.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)"><b style="color:var(--ink)">Customer:</b> advertisers, heavily weighted to performance and e-commerce. <b style="color:var(--ink)">Supplier:</b> its own users' attention, which costs nothing to acquire and is the reason margins look the way they do.</p></div>
+    <div class="card"><h3>Reality Labs &mdash; the drag</h3>
+      <p style="font-size:13.5px;margin-bottom:10px">Metaverse hardware and software. Persistently loss-making at a scale that would be existential for almost any other company.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)">Funded entirely by advertising. <b style="color:var(--ink)">The market has never priced this as an asset</b> &mdash; and the AI spend is now being read through the same lens.</p></div>
+    <div class="card"><h3>AI infrastructure &mdash; the new question</h3>
+      <p style="font-size:13.5px;margin-bottom:10px">Enormous capital committed to compute and model development, with the return arriving through better ad targeting and recommendation rather than a sellable cloud product.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)"><b style="color:var(--amber)">That is the structural problem:</b> Amazon and Alphabet can point to cloud revenue. Meta's AI return is internal and therefore harder to prove.</p></div>
+  </div>
+  <div class="card" style="margin-top:20px;border-left:2px solid var(--red)"><h3 style="color:var(--red)">The market's verdict, in one comparison</h3>
+    <p style="font-size:13.5px;margin-bottom:10px">Three hyperscalers reported within days of each other in late July, all with heavy AI capex and strong top lines:</p>
+    <div class="tw" style="border:none;background:transparent"><table style="font-size:13px">
+      <tr><th>Company</th><th>What it reported</th><th class="n">Reaction</th></tr>
+      <tr class="hl"><td><b style="color:var(--ink)">Amazon</b></td><td>AWS +37%, revenue beat, capex raised to $220bn</td><td class="n up">+9.5%</td></tr>
+      <tr><td><b style="color:var(--ink)">Alphabet</b></td><td>Cloud +82%, revenue beat, capex raised to $195&ndash;205bn</td><td class="n dn">fell</td></tr>
+      <tr class="hlr"><td><b style="color:var(--ink)">Meta</b></td><td>Revenue beat</td><td class="n dn">&minus;10%</td></tr>
+    </table></div>
+    <p style="font-size:13px;margin:11px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">Same quarter, same theme, three different verdicts.</b> Amazon rose because it could show cloud revenue arriving against the spend. Alphabet fell because the spend outran the proof. Meta fell hardest because there is <b>no external revenue line at all</b> to measure the AI investment against &mdash; the return has to show up inside an advertising business that was already growing.</p></div>
+  <div class="rule"><span class="rid">Why this matters more than the drawdown</span>A 31% decline in a business with these margins is not an earnings problem &mdash; it is a <b>capital allocation verdict</b>. The market has watched Reality Labs consume profit for years with nothing to show, and it is now applying the same scepticism to AI. <b style="color:var(--ink)">The stock will not re-rate on another revenue beat.</b> It re-rates when the spending either produces something measurable or stops.</div>
+  <div class="rule"><span class="rid">The regulatory overhang</span>Meta is a named defendant alongside Google, TikTok and Snap in the US youth-addiction litigation, which <b>survived motions to dismiss</b> and is now advancing in federal court. Not a near-term financial risk; a persistent discount on the multiple.</div>
+</section>
+
+<section id="gex">
+  <div class="sh"><div class="n">02</div><div><h2>Gamma structure</h2><p>Windowed to spot &minus;14% / +15%. Net gamma per strike; walls on <b>open interest</b>.</p></div></div>
+  <div class="gexp">
+    <div class="gexh"><div class="tk">META</div><span class="badge" style="background:var(--gPut);color:#FFF">NEGATIVE GAMMA</span><span class="b-out">spot 7.1% BELOW flip</span><div class="st">DEALERS AMPLIFY &middot; NOT DAMPEN</div></div>
+    <div class="gexsub" style="color:var(--inkLight)">Regime <b style="color:var(--gPut)">NEGATIVE GAMMA</b> &nbsp;&middot;&nbsp; Net GEX <b class="dn">&minus;$47m</b> &nbsp;&middot;&nbsp; <span style="color:var(--gFlip)">Flip <b>592.00</b></span> &nbsp;&middot;&nbsp; <span style="color:var(--gCall)">OI Res <b>600</b></span> &nbsp;&middot;&nbsp; <span style="color:var(--gPut)">OI Sup <b>540</b></span></div>
+    <div style="padding:8px 10px 0"><svg viewBox="0 0 1000 330" role="img" aria-label="META net gamma exposure by strike">
+      <line class="ggrid" x1="76" y1="273.4" x2="974" y2="273.4"/><text class="gax" x="67" y="276.9" text-anchor="end">-10</text><line class="ggrid" x1="76" y1="236.6" x2="974" y2="236.6"/><text class="gax" x="67" y="240.1" text-anchor="end">-7.5</text><line class="ggrid" x1="76" y1="199.8" x2="974" y2="199.8"/><text class="gax" x="67" y="203.3" text-anchor="end">-5</text><line class="ggrid" x1="76" y1="163.0" x2="974" y2="163.0"/><text class="gax" x="67" y="166.5" text-anchor="end">-2.5</text><line class="ggrid" x1="76" y1="126.2" x2="974" y2="126.2"/><text class="gax" x="67" y="129.7" text-anchor="end">0</text><line class="ggrid" x1="76" y1="89.4" x2="974" y2="89.4"/><text class="gax" x="67" y="92.9" text-anchor="end">2.5</text><line class="ggrid" x1="76" y1="52.6" x2="974" y2="52.6"/><text class="gax" x="67" y="56.1" text-anchor="end">5</text><line x1="76" y1="126.2" x2="974" y2="126.2" stroke="#22415F" stroke-width="1"/><rect class="gput" x="154.8" y="126.2" width="34.9" height="61.8"/><rect class="gput" x="211.1" y="126.2" width="34.9" height="100.1"/><rect class="gput" x="267.4" y="126.2" width="34.9" height="75.1"/><rect class="gput" x="323.7" y="126.2" width="34.9" height="123.6"/><rect class="gput" x="380.0" y="126.2" width="34.9" height="67.7"/><rect class="gput" x="436.3" y="126.2" width="34.9" height="135.4"/><rect class="gput" x="492.6" y="126.2" width="34.9" height="89.8"/><rect class="gput" x="548.9" y="126.2" width="34.9" height="55.9"/><rect class="gput" x="605.2" y="126.2" width="34.9" height="79.5"/><rect class="gput" x="661.6" y="126.2" width="34.9" height="42.7"/><rect class="gcall" x="717.9" y="99.7" width="34.9" height="26.5"/><rect class="gcall" x="774.2" y="58.5" width="34.9" height="67.7"/><rect class="gcall" x="830.5" y="95.3" width="34.9" height="30.9"/><rect class="gcall" x="886.8" y="76.2" width="34.9" height="50.0"/><rect class="gcall" x="943.1" y="102.7" width="34.9" height="23.6"/>
+      <line x1="453.8" y1="26" x2="453.8" y2="138.2" stroke="#C43A30" stroke-width="2.2" stroke-dasharray="3 3" opacity=".85"/>
+      <line x1="791.6" y1="26" x2="791.6" y2="138.2" stroke="#2D8A55" stroke-width="2.4" stroke-dasharray="3 3"/>
+      <line x1="746.6" y1="26" x2="746.6" y2="138.2" stroke="#E8C34A" stroke-width="3" stroke-dasharray="6 4"/>
+      <line x1="509.5" y1="26" x2="509.5" y2="138.2" stroke="#3B82C4" stroke-width="3.2"/>
+      <text class="gax" x="115.9" y="312" text-anchor="middle">480</text><text class="gax" x="228.5" y="312" text-anchor="middle">500</text><text class="gax" x="341.1" y="312" text-anchor="middle">520</text><text class="gax" x="453.8" y="312" text-anchor="middle">540</text><text class="gax" x="566.4" y="312" text-anchor="middle">560</text><text class="gax" x="679.0" y="312" text-anchor="middle">580</text><text class="gax" x="791.6" y="312" text-anchor="middle">600</text><text class="gax" x="904.3" y="312" text-anchor="middle">620</text><text class="gax" x="18" y="156.0" transform="rotate(-90 18 156.0)" text-anchor="middle">Net GEX $m</text></svg></div>
+    <div class="gkey"><span><i style="background:#2D8A55"></i>Positive net gamma</span><span><i style="background:#C43A30"></i>Negative net gamma</span>
+      <span><i style="background:#3B82C4;width:3px;height:11px"></i>Spot 549.90</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#E8C34A 0 5px,transparent 5px 9px);width:14px;height:3px"></i>Flip 592.00</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#2D8A55 0 3px,transparent 3px 6px)"></i>OI Res 600</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#C43A30 0 3px,transparent 3px 6px)"></i>OI Sup 540</span>
+      <span class="note">Net gamma per strike, one bar, coloured by sign. Walls chosen on <b>open interest</b>. <b>Estimated from a sampled chain &mdash; Phoenix's full-chain reading supersedes this where available.</b></span></div>
+    <div class="narr"><b style="color:var(--gPut)">This is the only name in the series trading in negative gamma, and it changes everything about how price behaves.</b> Spot sits <b>7.1% below the flip at $592</b>, which means dealer hedging <i>amplifies</i> rather than dampens: they sell into weakness and buy into strength, adding to whichever direction price is already moving. Every bar from $490 to $580 is red. <b style="color:var(--ink)">Practical consequence: expect larger daily ranges, more gap risk, and stops that fill worse than they should.</b> Realised volatility at 47.3% against 34.1% implied is that mechanic showing up in the data. Price must reclaim $592 before dealer flow becomes a stabiliser rather than an accelerant.</div>
+  </div>
+  <div class="rule"><span class="rid">Negative gamma is the one regime a small book should simply avoid</span>Positive gamma cushions you; negative gamma works against you in both directions. Combined with a failing gate stack, there is no version of this trade where the mechanics are on your side. <b style="color:var(--ink)">The flip at $592 is also 7.7% above the 10-week average</b> &mdash; so gamma turns supportive at roughly the same place the trend gates would begin to pass. That coincidence is the level to watch, and it is a long way from here.</div>
+</section>
+
+<section id="gates">
+  <div class="sh"><div class="n">03</div><div><h2>The gate stack</h2><p>Weekly bars as <span class="mono">phoenix.py</span> computes them. Nothing passes.</p></div></div>
+  <div class="gates">
+    <div class="gate f"><div class="idx">01</div><div><div class="nm">trend200 &mdash; above 40-week</div><div class="dt">$549.90 vs 40-week SMA <b class="mono">$621.91</b> &mdash; <b>11.6% below</b>, and the average is falling (was $630.15). Fails on level and slope.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate f"><div class="idx">02</div><div><div class="nm">stage2 &mdash; Weinstein</div><div class="dt">Price 10.4% <b>below</b> the 30-week at $613.74, and the 30-week is falling (was $623.53). Both conditions fail.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate f"><div class="idx">03</div><div><div class="nm">trend50 &mdash; above 10-week</div><div class="dt">$549.90 vs 10-week $590.93 &mdash; 6.9% below, falling (was $602.35). Even the short average is above price.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate f"><div class="idx">04</div><div><div class="nm">near_high &mdash; 104-week</div><div class="dt">104-week high $796.25. Price is <b class="mono">-30.9%</b>. The gate wants -8% to -1%.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate"><div class="idx">05</div><div><div class="nm">industry</div><div class="dt">Interactive Media &amp; Services. Needs <span class="mono">rotation_nav</span>, absent from this project &mdash; and immaterial here, since four gates already fail.</div></div><div class="tag t-warn">UNVERIFIED</div></div>
+  </div>
+  <div class="stamp"><div class="x">4 FAIL &middot; 1 UNVERIFIED &middot; 0 PASS &mdash; the only clean sweep in the series</div><div class="o">NO CANDIDATE</div></div>
+  <div class="rule"><span class="rid">stage-theory-context-filter &middot; R1</span>Price below three falling averages, 31% from the high, in negative gamma. <b>This is Stage 4</b> &mdash; the decline phase &mdash; not Stage 1 basing and certainly not Stage 2. Any breakout that forms here is exit liquidity by definition, and the pattern itself will look identical to a real one. <b style="color:var(--ink)">Only the stage distinguishes them, and the stage is unambiguous.</b></div>
+  <div class="rule"><span class="rid">What would have to change, in order</span>The sequence is long: price reclaims the 10-week at <b class="mono">$590.93</b> &rarr; the 10-week stops falling &rarr; price reclaims the 30-week at <b class="mono">$613.74</b> &rarr; the 30-week turns up, which is <span class="mono">stage2</span> &rarr; price reclaims the 40-week at <b class="mono">$621.91</b>. Only then does <span class="mono">near_high</span> become the remaining obstacle, and that needs <b class="mono">$732.55</b>. <b style="color:var(--ink)">That is a 33% advance away. This name is not a watchlist entry; it is a name to revisit in a quarter.</b></div>
+</section>
+
+<section id="vol">
+  <div class="sh"><div class="n">V</div><div><h2>Volatility profile</h2>
+  <p>What the options market expects, what the stock has actually done, and what that means for the stop.</p></div></div>
+  <div class="strip" style="margin-top:0">
+    <div class="cell"><div class="k">Implied vol &middot; annual</div><div class="v">34.1%</div><div class="s">options market</div></div>
+    <div class="cell"><div class="k">Realised vol &middot; 30d</div><div class="v">47.3%</div><div class="s">what it did</div></div>
+    <div class="cell"><div class="k">Spread</div><div class="v dn">-13.2</div><div class="s dn">IMPLIED BELOW REALISED</div></div>
+    <div class="cell"><div class="k">IV percentile 52w</div><div class="v ">51th</div><div class="s ">mid</div></div>
+    <div class="cell"><div class="k">Daily ATR-14</div><div class="v">~20.47</div><div class="s">3.7% of price</div></div>
+    <div class="cell"><div class="k">IV-implied daily</div><div class="v">2.15%</div><div class="s">$11.81</div></div>
+    <div class="cell"><div class="k">1-month 1&sigma;</div><div class="v">&plusmn;9.8%</div><div class="s">from implied</div></div>
+    <div class="cell"><div class="k">Stop basis</div><div class="v dn" style="font-size:14px">REALISED</div><div class="s">use for sizing</div></div>
+  </div>
+  <div class="rule"><span class="rid">Reading the spread</span>IV at the 51st percentile &mdash; the highest ranking here &mdash; and still 13 points under realised. <b>Negative gamma is part of the cause:</b> dealer amplification widens the actual range beyond what the options imply. Implied volatility is <b class="mono dn">28% below</b> what the stock has actually been doing. <b style="color:var(--ink)">A stop sized from the options market would be roughly 28% too tight.</b> Size from the measured range instead: <b class="mono am">$20.47</b> per day.</div>
+  <div class="note"><b>Why this section exists.</b> Implied volatility is a <i>forecast</i>; realised volatility is a <i>measurement</i>. When they diverge, the options market and the tape disagree about how much room a position needs &mdash; and a stop placed on the wrong one is either harvested by noise or wider than the account can carry. <b style="color:var(--ink)">Across the eleven names reviewed this weekend, nine had implied below realised</b>, several by more than fifteen points. <b>Default to the measured range unless the two agree.</b></div>
+</section>
+
+<section id="rr">
+  <div class="sh"><div class="n">04</div><div><h2>Reward-to-risk</h2><p>There is no long setup to price. The honest answer is the short version.</p></div></div>
+  <div class="note" style="border-left-color:var(--red)"><b>No reward-to-risk table appears here because no defensible long entry exists.</b> Every average is overhead resistance, dealer gamma works against the position in both directions, and the nearest structural target is the 10-week at $590.93 &mdash; which is itself falling toward price. Constructing a ratio would require inventing a level, and that is how a table becomes decoration.</div>
+  <div class="two">
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Why the obvious bounce trade fails</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">Price closed +1.30% Friday off a 52-week low of $520.26 &mdash; the shape that tempts a mean-reversion entry. The nearest resistance is the 10-week at <b class="mono">$590.93</b>, 7.5% up. A stop below the recent low needs <b class="mono">$515</b>, 6.4% down.</p>
+      <p style="font-size:13.5px;margin:0"><b class="mono dn">1.17:1</b> &mdash; and that is before accounting for negative gamma making the stop fill worse than the level suggests. <b style="color:var(--ink)">A sub-1.7R setup does not clear this book's commission floor.</b></p></div>
+    <div class="card"><h3>What a real entry would need</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">A close above <b class="mono am">$592</b> does two things at once: reclaims the 10-week and flips gamma positive. That is the first level where the mechanics stop working against a long.</p>
+      <p style="font-size:13.5px;margin:0"><b style="color:var(--ink)">It is 7.7% above spot</b>, and it is the only number on this page worth writing down.</p></div>
+  </div>
+  <div class="rule"><span class="rid">recovery-illusion-transition-trap &middot; R1</span>The five-stage bottom runs selling &rarr; maximum fear &rarr; <b>false stabilisation</b> &rarr; retest that flushes &rarr; genuine accumulation. A 1.3% up-day off a 52-week low, with every average falling overhead, is at best the second stage. <b>The retest exists specifically to flush people who buy here</b>, and being early at a bottom is a predictable failure rather than bad luck.</div>
+</section>
+
+<section id="news">
+  <div class="sh"><div class="n">05</div><div><h2>News flow</h2></div></div>
+  <div class="news" style="margin-bottom:18px">
+    <div class="nhdr">Ticker-specific &mdash; META</div>
+    <div class="nrow"><div class="dt">LATE JUL</div><div><div class="hd"><span class="pill bear">EARNINGS</span>Revenue beat, stock fell nearly 10%</div>
+      <div class="bd">The clearest signal in the report. Amazon beat and rose 9.5%; Alphabet beat and fell; Meta beat and fell hardest. <b style="color:var(--ink)">The differentiator was not growth &mdash; it was whether AI spending could be shown to produce external revenue.</b> Meta's cannot, by construction.</div></div></div>
+    <div class="nrow"><div class="dt">2026</div><div><div class="hd"><span class="pill bear">DRAWDOWN</span>31% below the 104-week high; &minus;16.2% year to date</div>
+      <div class="bd">From $796.25 to a 52-week low of $520.26. The worst technical position of the seven names reviewed, and the only one where every moving average sits above price.</div></div></div>
+    <div class="nrow"><div class="dt">2026</div><div><div class="hd"><span class="pill bear">LEGAL</span>Youth-addiction litigation advances past motions to dismiss</div>
+      <div class="bd">Named alongside Google, TikTok and Snap in US federal court. Not a near-term financial risk, but a persistent overhang on the multiple with no defined resolution date.</div></div></div>
+    <div class="nrow"><div class="dt">ONGOING</div><div><div class="hd"><span class="pill neu">CAPITAL</span>Reality Labs losses continue alongside AI capex</div>
+      <div class="bd">Two large, simultaneous, unproven capital programmes funded from one advertising business. <b style="color:var(--amber)">The market's patience with the first is informing its scepticism about the second.</b></div></div></div>
+  </div>
+  <div class="news">
+    <div class="nhdr">Market-wide &mdash; reaches META through AI sentiment and index flow</div>
+    <div class="nrow"><div class="dt">WED 26 AUG</div><div><div class="hd"><span class="pill bear">EVENT</span>NVIDIA reports Wednesday</div>
+      <div class="bd">No Meta earnings until late October, but a poor NVIDIA print would derate the whole AI complex &mdash; and Meta, already in negative gamma, would amplify rather than absorb it.</div></div></div>
+    <div class="nrow"><div class="dt">JUL/AUG</div><div><div class="hd"><span class="pill neu">SECTOR</span>The capex trade is being judged company by company</div>
+      <div class="bd">Investors are no longer rewarding AI spending in the abstract. <b style="color:var(--ink)">They are asking each company to show the return, and accepting different answers from each.</b> Meta's answer is the hardest to evidence.</div></div></div>
+    <div class="nrow"><div class="dt">CONTEXT</div><div><div class="hd"><span class="pill neu">INDEX</span>A top-ten S&amp;P weight &mdash; SPX is the reference</div>
+      <div class="bd">SPX and the SPX gamma regime govern a name this size. <b style="color:var(--amber)">Neither was retrieved in this run.</b></div></div></div>
+  </div>
+</section>
+
+<section id="score">
+  <div class="sh"><div class="n">06</div><div><h2>Quality score</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Block</th><th class="n">Weight</th><th class="n">Score</th><th>Reasoning</th></tr>
+    <tr><td>Business quality</td><td class="n">30</td><td class="n up">26</td><td>~3.5bn daily users, advertising margins among the best in any industry. The core is not in question</td></tr>
+    <tr><td>Growth</td><td class="n">20</td><td class="n am">14</td><td>Revenue beating, but growth is being outrun by spending and there is no second revenue line emerging</td></tr>
+    <tr><td>Financial strength</td><td class="n">20</td><td class="n up">17</td><td>Advertising cash flow funds everything internally. No debt or equity issuance needed</td></tr>
+    <tr><td>Valuation</td><td class="n">20</td><td class="n am">12</td><td>31% off the high on a business still growing &mdash; cheap on paper, and cheap for a reason the market has stated clearly</td></tr>
+    <tr><td>Shareholder alignment</td><td class="n">10</td><td class="n dn">5</td><td><b>The weakest score in the series.</b> Two large unproven capital programmes funded from shareholder profit, with Reality Labs as the precedent</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Total</b></td><td class="n"><b>100</b></td><td class="n am"><b>74</b></td><td><b style="color:var(--ink)">Buyable with price discipline</b> &mdash; the 65-79 band, and the lowest of the Mag 7</td></tr>
+  </table></div>
+  
+  <div class="rule"><span class="rid">investment-scoring-100-point &middot; caveat</span>74/100 with zero passing gates is the configuration where the score is <b>least useful</b>. A cheap high-quality business in a confirmed downtrend is the classic value trap shape, and fundamental scoring is precisely the instrument that would argue you into it. <b>Context, never a gate.</b></div>
+</section>
+
+<section id="risk">
+  <div class="sh"><div class="n">07</div><div><h2>Risk register</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Risk</th><th style="width:96px">Severity</th><th>Mitigation &mdash; and the residual</th></tr>
+    <tr><td><b style="color:var(--ink)">Confirmed downtrend</b></td><td><span class="tag t-fail">HIGH</span></td><td><b>No mitigation.</b> Four failing gates, three falling averages above price, 31% off the high. This is the binding fact.</td></tr>
+    <tr><td><b style="color:var(--ink)">Negative gamma regime</b></td><td><span class="tag t-fail">HIGH</span></td><td>Spot 7.1% below the flip. Dealers amplify moves in both directions &mdash; larger ranges, worse fills, more gap risk. Only reclaiming $592 fixes it.</td></tr>
+    <tr><td><b style="color:var(--ink)">Capital allocation credibility</b></td><td><span class="tag t-fail">HIGH</span></td><td>Reality Labs set the precedent; AI is being judged against it. <b>Unlike peers, the return is internal and cannot be shown as a revenue line.</b></td></tr>
+    <tr><td><b style="color:var(--ink)">Volatility mispricing</b></td><td><span class="tag t-warn">MED-HIGH</span></td><td>Implied 34.1% vs realised 47.3% &mdash; a 13-point gap, and negative gamma is part of the cause.</td></tr>
+    <tr><td><b style="color:var(--ink)">Litigation overhang</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>Youth-addiction suits past motions to dismiss. No resolution date, persistent multiple discount.</td></tr>
+    <tr><td><b style="color:var(--ink)">Indirect event risk</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>NVIDIA Wednesday. In negative gamma Meta amplifies a sector move rather than absorbing it.</td></tr>
+  </table></div>
+</section>
+
+<section id="inval">
+  <div class="sh"><div class="n">08</div><div><h2>Invalidation</h2></div></div>
+  <div class="two">
+    <div class="card" style="border-left:2px solid var(--green)"><h3 style="color:var(--green)">Would begin to change the picture</h3>
+      <ul style="margin-bottom:0"><li>Close above <b class="mono">$592.00</b> &mdash; reclaims the 10-week <b>and</b> flips gamma positive at the same level</li>
+      <li>The 10-week ceasing to fall</li>
+      <li>Close above <b class="mono">$613.74</b> &mdash; the 30-week, the first step toward <span class="mono">stage2</span></li>
+      <li>Close above <b class="mono">$621.91</b> &mdash; the 40-week</li>
+      <li>Evidence that AI spending is lifting ad monetisation measurably, not just being described</li></ul></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Would confirm the downtrend</h3>
+      <ul style="margin-bottom:0"><li>Close below <b class="mono">$520.26</b> &mdash; a new 52-week low</li>
+      <li>Failure at the 10-week on the next attempt, which is the classic Stage 4 pattern</li>
+      <li>A further capex increase without a stated return metric</li>
+      <li>Advertising growth decelerating while spending holds</li>
+      <li>Adverse ruling or expansion in the litigation</li></ul></div>
+  </div>
+</section>
+
+<section id="rules" style="border-bottom:none">
+  <div class="sh"><div class="n">09</div><div><h2>Rules applied</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Rule</th><th>Applied to</th><th>Effect on the verdict</th></tr>
+    <tr><td class="mono" style="color:var(--gold)">Phoenix gate stack</td><td>Gates</td><td><b>4 of 4 fail</b> &mdash; the only clean sweep in the series</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">stage-theory.R1</td><td>Gates</td><td>Stage 4 decline. Any breakout here is exit liquidity by definition</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">recovery-illusion.R1</td><td>Entry</td><td>A bounce off a 52-week low is the false-stabilisation stage, not a bottom</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">Phoenix GEX method</td><td>Gamma</td><td><b>Negative gamma</b> &mdash; dealers amplify. The only name in the series in this regime</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">rodriguez.R6 / Q57</td><td>Sizing</td><td>The obvious bounce trade pays 1.17:1 &mdash; below the 1.70R commission floor</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">investment-scoring.R4</td><td>Score</td><td>74/100 with zero passing gates is the value-trap shape. Context, never a gate</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">reference frame &sect;6a</td><td>Sector</td><td>Top-ten index weight &mdash; SPX and SPX gamma are the correct comparison</td></tr>
+  </table></div>
+  <div class="verdict" style="border-color:var(--red);background:var(--redBg);border-left-color:var(--red);margin-top:26px">
+    <div class="l">The answer</div>
+    <p style="margin:8px 0 0;font-size:16px;color:var(--ink)"><b>The only name of the seven that fails every gate.</b> Price sits below the 40-week, the 30-week and the 10-week, all three falling, 31% below the two-year high. It is also the only one in <b style="color:var(--gPut)">negative gamma</b> &mdash; dealers amplify moves rather than dampening them, which is why realised volatility runs 13 points above implied.</p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)">The business is not the problem: 3.5 billion daily users at advertising margins few companies achieve. <b style="color:var(--ink)">The problem is that Meta beat on revenue and fell 10% while Amazon beat and rose 9.5%.</b> The market is no longer paying for AI spending in the abstract &mdash; and Meta is the one company whose AI return has no external revenue line to prove it.</p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)">One number matters: <b class="mono am">$592.00</b>. It reclaims the 10-week and flips gamma positive at the same level. It is 7.7% above spot. <b style="color:var(--ink)">Until then this is not a watchlist entry &mdash; it is a name to revisit in a quarter.</b></p>
+  </div>
+</section>
+
+<div class="foot">
+PHOENIX EQUITY RESEARCH &middot; L3 SINGLE-NAME THESIS &middot; META &middot; 23 AUG 2026 &middot; PREPARED TO RESEARCH_REPORT_METHOD v1<br>
+PRICE, VOLUME, OPTION OPEN INTEREST, IMPLIED VOLATILITY AND SECTOR DATA: INTERACTIVE BROKERS API, RETRIEVED 23 AUG 2026, THROUGH FRI 21 AUG CLOSE.<br>
+GATES COMPUTED ON WEEKLY BARS PER phoenix.py: 40-WEEK, 30-WEEK AND 10-WEEK SMA AGAINST THE 104-WEEK HIGH. GEX COMPUTED FROM IBKR OPEN INTEREST ACROSS THE LIVE CHAIN USING THE PHOENIX METHOD &mdash; WALLS ON OPEN INTEREST, FLIP FROM THE CUMULATIVE PROFILE.<br>
+LIMITATIONS &mdash; PER-CONTRACT IV UNAVAILABLE, SO A SINGLE UNDERLYING IV IS APPLIED ACROSS STRIKES; THIS UNDERSTATES WING GAMMA. DEALER POSITIONING IS INFERRED FROM THE STANDARD CONVENTION, NOT OBSERVED. GEX IS ESTIMATED FROM A SAMPLED CHAIN AND IS SUPERSEDED BY PHOENIX'S FULL-CHAIN READING WHERE AVAILABLE. THE INDUSTRY GATE COULD NOT BE COMPUTED. SPX AND SPX GAMMA WERE NOT RETRIEVED IN THIS RUN.<br>
+NOT INVESTMENT ADVICE. PREPARED FOR ONE SYSTEMATIC LONG-ONLY EQUITY BOOK AND CALIBRATED TO ITS RULES, ACCOUNT SIZE AND COST BASE.
+</div>
+</main></div>
+<script>
+(function(){var root=document.documentElement,d=document.getElementById("thDark"),l=document.getElementById("thLight");
+function set(m){var g=(m==="light");root.classList.toggle("light",g);root.style.colorScheme=g?"light":"dark";
+d.className=g?"":"on";l.className=g?"on":"";try{localStorage.setItem("pxTheme",m);}catch(e){}}
+var s=null;try{s=localStorage.getItem("pxTheme");}catch(e){}set(s||"dark");
+d.addEventListener("click",function(){set("dark");});l.addEventListener("click",function(){set("light");});})();
+</script></body></html>

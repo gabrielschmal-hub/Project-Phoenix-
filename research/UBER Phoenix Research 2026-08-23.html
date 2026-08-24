@@ -1,0 +1,566 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>UBER &middot; Phoenix Equity Research &middot; 23 Aug 2026</title>
+<style>
+:root{
+  --bg:#020F1F; --card:#08192B; --card2:#0C2137; --line:#14304A; --line2:#1E4462;
+  --ink:#E7EEF6; --inkMed:#C4D2DF; --inkLight:#94A8BA; --inkFade:#6B8299; --inkGhost:#47596C;
+  --gold:#D37736; --green:#3FBF77; --greenBg:rgba(63,191,119,.13);
+  --red:#D9534F; --redBg:rgba(217,83,79,.13);
+  --amber:#D8A24A; --amberBg:rgba(216,162,74,.13);
+  --rail:#010A15; --railLine:#0E2942;
+  --gCall:#2D8A55; --gPut:#C43A30; --gSpot:#3B82C4; --gFlip:#E8C34A; --gPin:#9B7BD4;
+  --serif:Georgia,'Times New Roman',serif; --mono:'Courier New',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:#020F1F;color-scheme:dark}
+html.light{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:15.5px;line-height:1.62}
+.shell{display:grid;grid-template-columns:236px 1fr;max-width:1420px;margin:0 auto}
+.rail{background:var(--rail);border-right:1px solid var(--railLine);padding:22px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.rail .logo{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--gold);font-weight:700;padding:0 20px 15px;border-bottom:1px solid var(--railLine)}
+.rail .logo span{color:var(--inkFade);letter-spacing:.16em}
+.toc{list-style:none;margin:12px 0 0;padding:0}
+.toc a{display:flex;gap:10px;padding:7px 20px;color:var(--inkLight);text-decoration:none;font-family:var(--mono);font-size:11.5px;border-left:2px solid transparent}
+.toc a:hover{color:var(--ink);background:rgba(211,119,54,.07);border-left-color:var(--gold)}
+.toc a b{color:var(--inkGhost);font-weight:400;min-width:16px}
+.grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--inkGhost);padding:15px 20px 4px;text-transform:uppercase}
+.rail .stat{margin:16px 20px 0;padding-top:13px;border-top:1px solid var(--railLine);font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.85}
+.rail .stat b{color:var(--red)}
+main{padding:0 40px 90px;min-width:0}
+.mast{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:24px 0 13px;border-bottom:2px solid var(--gold)}
+.mast .t{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--inkFade);text-transform:uppercase}
+.mast .r{font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);text-align:right;line-height:1.8}
+h1{font-weight:400;font-size:clamp(31px,4.8vw,50px);line-height:1.08;letter-spacing:-.015em;margin:24px 0 6px}
+h1 em{font-style:italic;color:var(--gold)}
+h2{font-weight:400;font-size:26px;letter-spacing:-.01em;margin:0 0 3px}
+h3{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 9px}
+p{color:var(--inkMed);margin:0 0 13px}
+.lede{font-size:18.5px;line-height:1.58;color:var(--ink)}
+.mono{font-family:var(--mono)} a{color:var(--gold)}
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+.sh{display:flex;gap:14px;align-items:baseline;margin-bottom:19px}
+.sh .n{font-family:var(--mono);font-size:11px;color:var(--gold);font-weight:700;padding-top:8px;min-width:24px}
+.sh p{margin:2px 0 0;font-size:14px;color:var(--inkLight)}
+.verdict{border:1px solid var(--red);border-left:3px solid var(--red);background:var(--redBg);padding:16px 20px;margin:22px 0 0}
+.verdict .l{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--red);font-weight:700;text-transform:uppercase}
+.verdict .t{font-size:24px;margin:5px 0 7px;line-height:1.2}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:24px 0 0}
+.cell{background:var(--card);padding:11px 13px}
+.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade)}
+.cell .v{font-family:var(--mono);font-size:17.5px;font-weight:700;margin-top:3px}
+.cell .s{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:1px}
+.up{color:var(--green)}.dn{color:var(--red)}.am{color:var(--gold)}.wr{color:var(--amber)}
+.gexp{border:1px solid var(--line2);background:var(--card)}
+.gexh{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--card2)}
+.gexh .tk{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.07em}
+.badge{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;padding:4px 11px;border-radius:3px;background:var(--gCall);color:#02160C}
+.b-out{border:1px solid var(--line2);color:var(--inkLight);padding:4px 10px;font-family:var(--mono);font-size:10.5px;border-radius:3px}
+.gexh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--inkLight)}
+.gexsub{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);padding:8px 15px;border-bottom:1px solid var(--line)}
+.ggrid{stroke:#0F2438;stroke-width:1}
+.gax{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.gaxr{font-family:var(--mono);font-size:9.5px;fill:var(--inkLight);opacity:.75}
+.gaxt{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;fill:var(--inkGhost)}
+.gcall{fill:var(--gCall)} .gput{fill:var(--gPut)}
+.gcurve{fill:none;stroke:var(--ink);stroke-width:1.6;opacity:.9}
+.garea{fill:#2A4A78;opacity:.16;stroke:none}
+.gkey{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:9px 15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--inkFade)}
+.gkey span{display:inline-flex;align-items:center;gap:6px}
+.gkey i{width:11px;height:3px;border-radius:2px;display:inline-block}
+.gkey .note{display:block !important;color:var(--inkGhost);flex-basis:100%;width:100%;line-height:1.6;font-size:10px;padding-top:4px}
+.gkey .note b{display:inline;color:var(--inkFade)}
+.lad{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:74px 176px 1fr;gap:12px;align-items:center;padding:9px 15px;border-bottom:1px solid #0E2438;border-left:3px solid transparent;font-family:var(--mono);font-size:12.5px}
+.lrow:last-child{border-bottom:none}
+.lrow .p{font-weight:700}
+.lrow .d{color:var(--inkFade);font-size:11.5px;font-family:var(--serif)}
+.lrow .lab{letter-spacing:.08em;font-weight:700;font-size:10.5px}
+.l-call{border-left-color:var(--gCall)} .l-put{border-left-color:var(--gPut)}
+.l-spot{border-left-color:var(--gSpot);background:rgba(59,130,196,.10);border-top:1px solid #2C5C86;border-bottom:1px solid #2C5C86}
+.l-flip{border-left-color:var(--gFlip);background:rgba(232,195,74,.07)}
+.narr{padding:14px 15px;border-top:1px solid var(--line);background:var(--card2);font-size:14px;color:var(--inkMed);line-height:1.6}
+.chart{border:1px solid var(--line);background:var(--card);padding:14px 10px 6px;margin:6px 0 14px}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:#0F2438;stroke-width:1}
+.axl{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.pl{fill:none;stroke:var(--ink);stroke-width:1.6}
+.m50{fill:none;stroke:var(--gold);stroke-width:1.2}
+.m200{fill:none;stroke:#5E7C99;stroke-width:1.4;stroke-dasharray:5 3}
+.ar{fill:url(#g1)}
+.lbl{font-family:var(--mono);font-size:10px;font-weight:700}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:5px 4px 7px}
+.legend i{display:inline-block;width:13px;height:2px;vertical-align:middle;margin-right:5px}
+.tw{border:1px solid var(--line);background:var(--card);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #0E2438;color:var(--inkMed)}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.hl td{background:rgba(63,191,119,.08)} tr.hlr td{background:rgba(217,83,79,.07)}
+tr.me td{background:rgba(211,119,54,.10)}
+.gates{border:1px solid var(--line);background:var(--card)}
+.gate{display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:13px 17px;border-bottom:1px solid #0E2438}
+.gate:last-child{border-bottom:none} .gate.f{background:rgba(217,83,79,.05)}
+.gate .idx{font-family:var(--mono);font-size:10px;color:var(--inkGhost)}
+.gate .nm{font-family:var(--mono);font-size:13px;font-weight:700}
+.gate .dt{font-size:12.5px;color:var(--inkLight);margin-top:2px;line-height:1.45}
+.tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border:1px solid;white-space:nowrap;border-radius:2px}
+.t-fail{color:var(--red);border-color:var(--red);background:var(--redBg)}
+.t-warn{color:var(--amber);border-color:var(--amber);background:var(--amberBg)}
+.t-pass{color:var(--green);border-color:var(--green);background:var(--greenBg)}
+.stamp{border:1px solid var(--line);border-top:none;background:var(--card2);padding:13px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.stamp .x{font-family:var(--mono);font-size:12px;color:var(--inkLight)}
+.stamp .o{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--red);letter-spacing:.08em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);background:var(--card);padding:16px 18px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #0E2438;font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv span:first-child{color:var(--inkLight)} .kv span:last-child{font-family:var(--mono);font-weight:700}
+.rule{border-left:2px solid var(--gold);background:rgba(211,119,54,.05);padding:11px 15px;margin:14px 0;font-size:13.5px;color:var(--inkMed)}
+.rule .rid{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px}
+.note{border-left:2px solid var(--line2);padding:2px 0 2px 15px;margin:15px 0;color:var(--inkMed)}
+.note b{color:var(--ink)}
+.news{border:1px solid var(--line);background:var(--card)}
+.nhdr{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);padding:10px 16px;background:var(--card2);border-bottom:1px solid var(--line)}
+.nrow{display:grid;grid-template-columns:86px 1fr;gap:14px;padding:11px 16px;border-bottom:1px solid #0E2438}
+.nrow:last-child{border-bottom:none}
+.nrow .dt{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding-top:2px}
+.nrow .hd{font-size:14.5px;color:var(--ink);margin-bottom:3px}
+.nrow .bd{font-size:12.8px;color:var(--inkLight);line-height:1.5}
+.pill{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.09em;padding:2px 7px;border:1px solid var(--line2);color:var(--inkFade);margin-right:7px;vertical-align:1px;border-radius:2px}
+.pill.bull{border-color:var(--green);color:var(--green)}
+.pill.bear{border-color:var(--red);color:var(--red)}
+.pill.neu{border-color:var(--amber);color:var(--amber)}
+ul{margin:0 0 12px;padding-left:17px;color:var(--inkMed)}li{margin-bottom:5px}
+.foot{padding:28px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);line-height:1.9}
+/* strip: fixed column counts so the last cell never orphans */
+.strip{grid-template-columns:repeat(8,1fr)}
+@media(max-width:1500px){.strip{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:620px){.strip{grid-template-columns:repeat(2,1fr)}}
+/* tablet landscape: rail becomes a compact top bar, not a dead column */
+@media(max-width:1200px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:none;border-bottom:1px solid var(--railLine);
+        display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:12px 24px}
+  .rail .logo{border-bottom:none;padding:0;font-size:10.5px;line-height:1.5}
+  .rail .stat{margin:0;padding:0;border-top:none;font-size:10.5px;line-height:1.7;text-align:right}
+  main{padding:0 24px 70px}
+}
+@media(max-width:760px){
+  .two,.three{grid-template-columns:1fr}
+  .lrow{grid-template-columns:66px 1fr}.lrow .d{display:none}
+  main{padding:0 18px 60px}
+  .rail{padding:10px 18px}
+}
+
+/* ===== light theme : colours only, toggled by html.light — sampled from phoenix_app.html ===== */
+html.light{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15);
+  --rail:#F3EADC; --railLine:rgba(122,96,68,.22);
+  --gCall:#1E7A4E; --gPut:#B4362F; --gSpot:#2C5A82; --gFlip:#A87A1C; --gPin:#7A5CA8;
+}
+html.light,html.light body,html.light .shell,html.light main{background:#F6EFE4}
+html.light body{color:#2C2118}
+html.light .rail{background:#F3EADC}
+html.light .card,html.light .tw,html.light .gates,html.light .news,html.light .gexp,html.light .chart,html.light .cell{background:rgba(255,253,249,.86)}
+html.light .stamp,html.light .gexh,html.light .narr,html.light .nhdr,html.light .gexsub{background:rgba(248,241,231,.94)}
+html.light .pxtheme{background:rgba(248,241,231,.96)}
+html.light .ggrid,html.light .grid{stroke:rgba(122,96,68,.16)}
+html.light .pl{stroke:#2C2118}
+html.light .gcurve{stroke:#2C2118}
+html.light .garea{fill:#7A6044;opacity:.16}
+html.light .m200{stroke:#8C7A67}
+html.light .badge{background:var(--gCall);color:#FFFDF9}
+html.light .lrow.l-spot{background:rgba(44,90,130,.10);border-top-color:rgba(44,90,130,.4);border-bottom-color:rgba(44,90,130,.4)}
+html.light .lrow.l-flip{background:rgba(168,122,28,.10)}
+html.light .gate.f{background:rgba(180,54,47,.055)}
+html.light tr.hl td{background:rgba(30,122,78,.09)}
+html.light tr.hlr td{background:rgba(180,54,47,.07)}
+html.light tr.me td{background:rgba(194,99,42,.10)}
+html.light td{border-bottom-color:rgba(122,96,68,.14)}
+html.light .gate,html.light .nrow,html.light .lrow{border-bottom-color:rgba(122,96,68,.14)}
+html.light .rule{background:rgba(194,99,42,.06)}
+html.light .toc a:hover{background:rgba(194,99,42,.09)}
+/* theme switch */
+.pxtheme{z-index:40;display:flex;gap:0;border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:var(--card2)}
+.pxtheme button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 12px;border:0;background:transparent;color:var(--inkFade);cursor:pointer}
+.pxtheme button.on{background:var(--gold);color:#FFFDF9;font-weight:700}
+.pxtheme button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+@media print{.pxtheme,.rail{display:none}.shell{grid-template-columns:1fr}main{padding:0}}
+
+/* ===== theme switch hardening — must stay last in the sheet ===== */
+.pxtheme{position:fixed;top:14px;right:18px;bottom:auto;left:auto;
+  height:auto;width:auto;max-height:34px;align-items:center;line-height:1}
+.pxtheme button{height:28px;line-height:28px;padding:0 12px;white-space:nowrap;flex:0 0 auto}
+@media(max-width:1200px){
+  .pxtheme{top:auto;bottom:14px;right:14px}
+}
+@media print{.pxtheme{display:none}}
+</style></head><body><div class="shell">
+<nav class="rail"><div class="logo">PHOENIX<br><span>EQUITY RESEARCH</span></div>
+<div class="stat" style="margin-top:20px;border-top:none;padding-top:0">UBER &middot; $78.80<br>L3 SINGLE NAME<br>23 AUG 2026<br><br>GATES: <b>2 FAIL</b><br>SCORE: 72/100<br>VERDICT: <b>NO TRADE</b></div></nav>
+<main>
+<div class="pxtheme" role="group" aria-label="Theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></div>
+<div class="mast"><div class="t">NYSE : UBER &middot; Uber Technologies, Inc. &middot; L3 single-name thesis</div>
+<div class="r">SUN 23 AUG 2026 &middot; DATA THROUGH FRI 21 AUG CLOSE<br>IBKR LIVE &middot; FULL-CHAIN GEX &middot; WEEKLY GATES</div></div>
+<section id="verdict">
+  <h1>The cash machine works.<br>The chart is <em>range-bound</em>.</h1>
+  <p class="lede" style="max-width:74ch;margin-top:18px">Uber crossed $10 billion of trailing free cash flow for the first time and grew bookings 22% for a fourth straight quarter. It also trades 23% below its two-year high, in a range it has not left since February, with the 30-week average still drifting down. The business has compounded; the price has not.</p>
+  <div class="verdict"><div class="l">Phoenix gate stack &middot; weekly &middot; verdict</div>
+    <div class="t">NO TRADE &mdash; fails <span class="mono">stage2</span> and <span class="mono">near_high</span></div>
+    <p style="margin:0;font-size:14px">Closer than it looks. Price is <b>above</b> the 40-week and 10-week averages; the 30-week needs to turn up, and it is only $5.38 below price. <b class="mono am">The $80 call wall is 1.5% overhead</b> and is the immediate ceiling.</p></div>
+  <div class="strip">
+    <div class="cell"><div class="k">Close Fri</div><div class="v">78.80</div><div class="s up">+0.25 &middot; +0.32%</div></div>
+    <div class="cell"><div class="k">40-week SMA</div><div class="v up">76.16</div><div class="s dn">+3.5% &middot; falling</div></div>
+    <div class="cell"><div class="k">30-week SMA</div><div class="v up">73.42</div><div class="s dn">+7.3% &middot; falling</div></div>
+    <div class="cell"><div class="k">10-week SMA</div><div class="v up">73.53</div><div class="s up">+7.2% &middot; rising</div></div>
+    <div class="cell"><div class="k">Gamma flip</div><div class="v wr">76.19</div><div class="s wr">-3.4%</div></div>
+    <div class="cell"><div class="k">ATR-14</div><div class="v">2.74</div><div class="s">3.47%</div></div>
+    <div class="cell"><div class="k">104w high</div><div class="v dn">-22.7%</div><div class="s">101.99</div></div>
+    <div class="cell"><div class="k">YTD</div><div class="v dn">-3.6%</div><div class="s">RSI 62</div></div>
+  </div>
+</section>
+
+<section id="biz">
+  <div class="sh"><div class="n">01</div><div><h2>The business</h2><p>A three-sided marketplace that has become a cash generator, now spending that cash to own the autonomous layer.</p></div></div>
+  <p class="lede" style="max-width:76ch">Uber matches demand to supply and takes a cut. What changed is that the network reached the size where each incremental trip costs almost nothing to serve &mdash; and the company is now using the resulting cash flow to buy a position in a technology that could eliminate its largest cost line.</p>
+  <div class="three" style="margin-top:22px">
+    <div class="card"><h3>Mobility &mdash; the profit engine</h3>
+      <p style="font-size:13.5px;margin-bottom:10px">Ride-hailing across ~70 countries. <b style="color:var(--ink)">300 million weekly trips.</b> Operating income margin <b style="color:var(--ink)">7.6%</b> of gross bookings.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)"><b style="color:var(--ink)">Customer:</b> riders. <b style="color:var(--ink)">Supplier:</b> ~8m drivers, who are also the largest cost &mdash; which is the whole reason autonomy matters.</p></div>
+    <div class="card"><h3>Delivery &mdash; the scale play</h3>
+      <p style="font-size:13.5px;margin-bottom:10px">Uber Eats plus grocery and retail. Low margin by design, high frequency, and the reason a rider becomes a weekly user rather than a monthly one.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)"><b style="color:var(--ink)">Supplier:</b> restaurants and couriers. Under real pressure in Brazil, where food-delivery competition is bidding up two-wheeler supply.</p></div>
+    <div class="card"><h3>Freight + Advertising</h3>
+      <p style="font-size:13.5px;margin-bottom:10px">Freight brokerage is small and cyclical. <b style="color:var(--ink)">Advertising</b> is the quiet one &mdash; near-pure margin sold against demand the platform already owns.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)">This is where operating leverage actually shows up: revenue with no incremental driver or courier cost attached.</p></div>
+  </div>
+  <div class="two" style="margin-top:20px">
+    <div class="card"><h3>Q2 2026 &mdash; the numbers</h3>
+      <div class="kv"><span>Gross bookings</span><span class="up">$58.0bn &middot; +22%</span></div>
+      <div class="kv"><span>Revenue</span><span class="dn">$14.19bn &middot; missed $14.22bn</span></div>
+      <div class="kv"><span>Adjusted EBITDA</span><span class="up">$2.8bn &middot; +33%</span></div>
+      <div class="kv"><span>EBITDA margin of bookings</span><span class="up">4.9% vs 4.5%</span></div>
+      <div class="kv"><span>Non-GAAP operating income</span><span class="up">$2.1bn &middot; +40%</span></div>
+      <div class="kv"><span>Non-GAAP EPS</span><span class="up">$0.81 &middot; +35%</span></div>
+      <div class="kv"><span>Free cash flow, quarter</span><span class="up">$2.8bn</span></div>
+      <div class="kv"><span><b style="color:var(--ink)">TTM free cash flow</b></span><span class="am"><b>&gt;$10bn &middot; first time</b></span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)">Fourth consecutive quarter of 20%+ bookings growth, and earnings growing faster than revenue at every line. <b style="color:var(--ink)">The revenue miss was $30m on $14.2bn</b> &mdash; a rounding error that the market treated as a signal.</p></div>
+    <div class="card"><h3>The take-rate optical illusion</h3>
+      <p style="font-size:13.5px;margin-bottom:9px">Mobility take rate fell about <b style="color:var(--ink)">500bps</b>, which reads alarming. Roughly <b style="color:var(--ink)">400bps of it is a UK business-model change</b> that alters how revenue is recognised, not what Uber earns.</p>
+      <p style="font-size:13.5px;margin:0">Underlying net take rate is broadly stable and mobility operating margin held at 7.6%. <b style="color:var(--gold)">Read gross bookings and operating income, not revenue and take rate</b>, for the next several quarters.</p></div>
+  </div>
+  <div class="card" style="margin-top:18px"><h3>The autonomous bet &mdash; what has actually been committed</h3>
+    <div class="two" style="gap:22px">
+      <div><p style="font-size:13.5px;margin-bottom:9px"><b style="color:var(--gold)">Scale and money</b></p>
+        <ul style="font-size:13px;margin-bottom:0">
+          <li><b style="color:var(--ink)">$10bn+ multi-year programme</b> &mdash; equity stakes in partners plus balance-sheet support for fleets, real estate and vehicle off-take</li>
+          <li><b style="color:var(--ink)">120,000 vehicle off-take commitments</b></li>
+          <li>Every $1 Uber invests has catalysed <b style="color:var(--ink)">$2.50</b> of outside capital into partners</li>
+          <li>Live in <b style="color:var(--ink)">7 cities</b> today &rarr; targeting <b style="color:var(--ink)">15 by year-end</b></li>
+          <li>AV is still <b>under 0.5%</b> of 300m weekly trips</li>
+        </ul></div>
+      <div><p style="font-size:13.5px;margin-bottom:9px"><b style="color:var(--gold)">The partner stack</b></p>
+        <ul style="font-size:13px;margin-bottom:0">
+          <li><b style="color:var(--ink)">Driving tech:</b> Waymo, Zoox, Wayve, Baidu, Pony.ai, Nuro</li>
+          <li><b style="color:var(--ink)">Hardware:</b> Lucid, Nissan, Verne, Volkswagen, NVIDIA</li>
+          <li>Launching: Nuro+Lucid in the Bay, Zoox in Vegas, Wayve in London and Tokyo, Baidu in London, Pony/Verne in Zagreb</li>
+          <li><b style="color:var(--red)">Waymo exclusivity in Austin and Atlanta ends by early 2028</b>; the Phoenix pilot already wound down</li>
+        </ul></div>
+    </div>
+    <p style="font-size:13px;margin:12px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">The strategy is deliberately non-exclusive.</b> Management said plainly they do not want dependence on one partner. That is the correct posture and it is also why the Waymo headlines matter less than they read &mdash; over 20 AV partnerships globally, and the thesis is to be the <i>commercialisation layer</i> rather than the technology owner.</p></div>
+  <div class="card" style="margin-top:18px;border-left:2px solid var(--gold)"><h3>Drone delivery &mdash; announced 17 August, four days before this data</h3>
+    <div class="two" style="gap:22px">
+      <div><p style="font-size:13.5px;margin-bottom:9px"><b style="color:var(--gold)">The Zipline partnership</b></p>
+        <ul style="font-size:13px;margin-bottom:0">
+          <li>Strategic partnership <b>plus an equity investment</b> in Zipline, amount undisclosed</li>
+          <li>Target: <b style="color:var(--ink)">one million drone deliveries per day by end-2029</b></li>
+          <li>First deployments <b>this year in Dallas and Houston</b>, then "dozens of US cities"</li>
+          <li>Zipline delivers every 20 seconds across four continents; US average click-to-delivery ~18 minutes, best case 5</li>
+          <li><b style="color:var(--ink)">First time Zipline has been fully integrated into a retailer's app</b></li>
+        </ul></div>
+      <div><p style="font-size:13.5px;margin-bottom:9px"><b style="color:var(--gold)">It is not the first drone deal</b></p>
+        <ul style="font-size:13px;margin-bottom:0">
+          <li><b style="color:var(--ink)">Flytrex</b> &mdash; September 2025, equity stake, operating in Dallas. One of only four FAA-authorised beyond-visual-line-of-sight providers</li>
+          <li><b style="color:var(--ink)">Manna</b> &mdash; Ireland</li>
+          <li>Sidewalk robots alongside couriers</li>
+          <li>Over <b>30 autonomous partners</b> across mobility, delivery and freight</li>
+        </ul></div>
+    </div>
+    <p style="font-size:13px;margin:12px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">The pattern is consistent and it is the actual strategy.</b> Uber does not build the autonomy &mdash; it takes equity stakes in the people who do, then routes demand through them. Ground AV, aerial drones and sidewalk robots are the same playbook: <b>own the demand layer, rent the technology.</b> Khosrowshahi described customer appetite for rapid delivery as "insatiable".</p></div>
+
+  <div class="rule"><span class="rid">On "little competition" &mdash; the honest read</span>Drone delivery is a genuinely new revenue line and Uber is moving fast into it. But <b>it is not an uncontested market.</b> <b style="color:var(--ink)">DoorDash</b> is building an in-house drone programme and has just secured a key FAA certification. <b style="color:var(--ink)">Amazon and Walmart</b> already run drone delivery in selected markets &mdash; and Walmart is a Zipline customer, which makes it partner and competitor at once.
+  <div class="two" style="margin-top:12px"><div class="card" style="padding:12px 14px;background:var(--card2)">
+    <p style="font-size:13px;margin:0;color:var(--inkMed)"><b style="color:var(--green)">What Uber genuinely has:</b> the demand layer. Millions of consumers and hundreds of thousands of merchants already on the platform. DoorDash must build drones <i>and</i> keep its marketplace; Amazon and Walmart have logistics but a narrower merchant set. Uber can route a delivery to a courier, a robot or a drone by cost and distance &mdash; <b>the hybrid network is the moat, not the aircraft.</b></p></div>
+  <div class="card" style="padding:12px 14px;background:var(--card2)">
+    <p style="font-size:13px;margin:0;color:var(--inkMed)"><b style="color:var(--amber)">What the record cash flow buys:</b> $10bn TTM free cash flow funds equity stakes across every autonomy vertical simultaneously &mdash; which no competitor can match. That is a real structural advantage. <b>But it is capital deployed against a 2029 target with no disclosed P&amp;L path</b>, which is the same criticism the AV programme attracts, and it lands on the same line of the income statement.</p></div></div></div>
+  <div class="rule"><span class="rid">Delivery Hero &mdash; the other big commitment</span>Agreed acquisition expanding the platform to <b>nearly 100 markets</b> and roughly doubling the number where Uber offers both mobility and delivery. Timeline is long: close in <b>H2 2027</b>, planning through 2028, primary technology migration in <b>2029</b>. Synergies are platform consolidation and shared infrastructure. <b style="color:var(--ink)">Nothing in the next eighteen months depends on it, and integration risk is a 2029 problem</b> &mdash; but the capital is committed now.</div>
+  <div class="rule"><span class="rid">Where the operating leverage comes from</span>AI is showing up in the P&amp;L rather than the press release: <b>Cart Builder</b> is lifting average order sizes by up to 2&times;, and AI coding tools have <b>doubled code output per engineer</b>. That is why non-GAAP operating income grew 40% against bookings at 22%.</div>
+</section>
+<section id="gex">
+  <div class="sh"><div class="n">02</div><div><h2>Gamma structure</h2><p>Full chain. Walls on <b>open interest</b>, flip from the cumulative profile, calls above zero and puts below.</p></div></div>
+  <div class="gexp">
+    <div class="gexh"><div class="tk">UBER</div><span class="badge">POSITIVE GAMMA</span>
+      <span class="b-out">spot +3.4% above flip</span><div class="st">CALL WALL 80 &middot; 1.5% OVERHEAD</div></div>
+    <div class="gexsub">Sep 18 + Jan 15 '27 &middot; strikes 50-100 &middot; gamma $m per 1% move &middot; Black-Scholes at 33.7% underlying IV</div><div class="gexsub" style="color:var(--inkLight)">Regime <b style="color:var(--gCall)">POSITIVE GAMMA</b> &nbsp;&middot;&nbsp; Net GEX <b>+$15.3m</b> &nbsp;&middot;&nbsp; <span style="color:var(--gFlip)">Flip <b>76.19</b></span> &nbsp;&middot;&nbsp; <span style="color:var(--gCall)">OI Res <b>80</b></span> &nbsp;&middot;&nbsp; <span style="color:var(--gPut)">OI Sup <b>70</b></span></div>
+    <div style="padding:8px 10px 0"><svg viewBox="0 0 1000 330" role="img" aria-label="UBER net gamma exposure by strike">
+      <line class="ggrid" x1="76" y1="283.3" x2="974" y2="283.3"/><text class="gax" x="67" y="286.8" text-anchor="end">-5</text><line class="ggrid" x1="76" y1="217.3" x2="974" y2="217.3"/><text class="gax" x="67" y="220.8" text-anchor="end">0</text><line class="ggrid" x1="76" y1="151.4" x2="974" y2="151.4"/><text class="gax" x="67" y="154.9" text-anchor="end">5</text><line class="ggrid" x1="76" y1="85.4" x2="974" y2="85.4"/><text class="gax" x="67" y="88.9" text-anchor="end">10</text>
+      <line x1="76" y1="217.3" x2="974" y2="217.3" stroke="#22415F" stroke-width="1"/>
+      <rect class="gput" x="60.8" y="217.3" width="48.7" height="15.8"/><rect class="gput" x="139.3" y="217.3" width="48.7" height="44.3"/><rect class="gput" x="237.6" y="217.3" width="48.7" height="11.9"/><rect class="gcall" x="335.8" y="203.5" width="48.7" height="13.8"/><rect class="gcall" x="434.1" y="189.6" width="48.7" height="27.7"/><rect class="gcall" x="532.3" y="58.5" width="48.7" height="158.8"/><rect class="gcall" x="630.5" y="188.3" width="48.7" height="29.0"/><rect class="gcall" x="728.8" y="165.1" width="48.7" height="52.2"/><rect class="gcall" x="827.0" y="198.8" width="48.7" height="18.5"/><rect class="gcall" x="925.3" y="203.6" width="48.7" height="13.7"/>
+      
+      <line x1="163.7" y1="26" x2="163.7" y2="229.3" stroke="#C43A30" stroke-width="2.2" stroke-dasharray="3 3" opacity=".85"/>
+      <line x1="556.7" y1="26" x2="556.7" y2="229.3" stroke="#2D8A55" stroke-width="2.4" stroke-dasharray="3 3"/>
+      <line x1="407.0" y1="26" x2="407.0" y2="229.3" stroke="#E8C34A" stroke-width="3" stroke-dasharray="6 4"/>
+      <line x1="509.5" y1="26" x2="509.5" y2="229.3" stroke="#3B82C4" stroke-width="3.2"/>
+      <text class="gax" x="163.7" y="312" text-anchor="middle">70</text><text class="gax" x="262.0" y="312" text-anchor="middle">72.5</text><text class="gax" x="360.2" y="312" text-anchor="middle">75</text><text class="gax" x="458.4" y="312" text-anchor="middle">77.5</text><text class="gax" x="556.7" y="312" text-anchor="middle">80</text><text class="gax" x="654.9" y="312" text-anchor="middle">82.5</text><text class="gax" x="753.2" y="312" text-anchor="middle">85</text><text class="gax" x="851.4" y="312" text-anchor="middle">87.5</text><text class="gax" x="949.6" y="312" text-anchor="middle">90</text>
+      <text class="gax" x="18" y="156.0" transform="rotate(-90 18 156.0)" text-anchor="middle">Net GEX $m</text>
+    </svg></div>
+    <div class="gkey"><span><i style="background:#2D8A55"></i>Call gamma</span><span><i style="background:#C43A30"></i>Put gamma</span>
+      <span><i style="background:#E7EEF6"></i>Cumulative</span><span><i style="background:#3B82C4;width:3px;height:11px"></i>Spot 78.80</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#E8C34A 0 5px,transparent 5px 9px);width:14px;height:3px"></i>G-Flip 76.19</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#2D8A55 0 3px,transparent 3px 6px)"></i>OI Resistance 80</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#C43A30 0 3px,transparent 3px 6px)"></i>OI Support 70</span>
+      <span class="note">Bars show <b>gamma in dollars</b>; walls are chosen on <b>open interest</b>, so the widest bar and the wall need not be the same strike. Above zero = call gamma, dealers sell into strength; below = put gamma, dealers buy weakness.</span></div>
+    <div class="lad">
+      <div class="lrow l-call"><span class="p">85.00</span><span class="lab" style="color:var(--gCall)">SECOND CALL SHELF</span><span class="d">15,267 contracts. The level beyond the wall, and roughly where the range topped in October.</span></div>
+      <div class="lrow l-call"><span class="p">80.00</span><span class="lab" style="color:var(--gCall)">CALL WALL &middot; OI RESISTANCE</span><span class="d">42,633 contracts and Friday's high was 80.22. <b>1.5% overhead &mdash; the immediate ceiling.</b></span></div>
+      <div class="lrow l-spot"><span class="p">SPOT</span><span class="lab" style="color:var(--gSpot)">FRI 21 AUG CLOSE</span><span class="d" style="text-align:right;font-family:var(--mono);font-weight:700;color:var(--gSpot);font-size:15px">78.80</span></div>
+      <div class="lrow l-flip"><span class="p">76.19</span><span class="lab" style="color:var(--gFlip)">THE FLIP</span><span class="d">Cumulative crosses zero. 3.4% below spot &mdash; just under one ATR.</span></div>
+      <div class="lrow l-put"><span class="p">75.00</span><span class="lab" style="color:var(--gPut)">TWO-SIDED STRIKE</span><span class="d">11,610 calls against 7,901 puts. Contested, and the last shelf before the wall of puts.</span></div>
+      <div class="lrow l-put"><span class="p">70.00</span><span class="lab" style="color:var(--gPut)">PUT WALL &middot; OI SUPPORT</span><span class="d">27,234 contracts and the largest single put concentration. The structural floor.</span></div>
+    </div>
+    <div class="narr"><b style="color:var(--ink)">Net gamma +$15.3m per 1%, and the structure is unusually tight.</b> The put wall at 70 and the call wall at 80 bracket price in a $10 corridor &mdash; which is precisely the range the stock has traded since February. Dealers dampen inside it. The flip at 76.19 sits <b>3.4% below spot, just under one ATR</b>, so a single bad session puts the book into negative gamma. Call-to-put open interest is only <b style="color:var(--ink)">1.53:1</b>, far more balanced than a typical momentum name &mdash; there is no crowded upside bet here, which is why the $80 wall is a genuine barrier rather than a squeeze waiting to happen.</div>
+  </div>
+  <div class="two" style="margin-top:18px">
+    <div class="card"><h3>By expiry</h3>
+      <div class="tw" style="border:none;background:transparent"><table style="font-size:12.5px">
+        <tr><th>Expiry</th><th class="n">Days</th><th class="n">Call OI</th><th class="n">Put OI</th><th>Dominant</th></tr>
+        <tr class="me"><td>Sep 18 '26</td><td class="n">27</td><td class="n">64,885</td><td class="n">37,453</td><td class="mono am">80 call &middot; 29,675</td></tr>
+        <tr><td>Jan 15 '27</td><td class="n">145</td><td class="n">24,442</td><td class="n">20,967</td><td class="mono">70 put &middot; 12,986</td></tr>
+      </table></div>
+      <p style="font-size:12.8px;margin:10px 0 0;color:var(--inkLight)">September dominates both sides and holds the wall. January is where the downside hedges sit &mdash; and unlike SOFI, they are close to the money at 70 rather than far below, which is why the flip is only one ATR away.</p></div>
+    <div class="card"><h3>Positioning</h3>
+      <div class="kv"><span>Net GEX, full chain</span><span class="am">+$15.3m / 1%</span></div>
+      <div class="kv"><span>Call OI : Put OI</span><span>1.53 : 1</span></div>
+      <div class="kv"><span>Distance to flip</span><span class="wr">-3.4% &middot; 0.95 ATR</span></div>
+      <div class="kv"><span>Distance to call wall</span><span class="dn">+1.5% only</span></div>
+      <div class="kv"><span>Implied vol</span><span>33.7%</span></div>
+      <div class="kv"><span>Realised vol 30d</span><span class="am">40.4%</span></div>
+      <div class="kv"><span>IV percentile 52w</span><span>23rd</span></div>
+      <div class="kv"><span>Friday option volume</span><span>83k C / 29k P</span></div>
+      <p style="font-size:12.8px;margin:10px 0 0;color:var(--inkLight)">Realised vol runs <b style="color:var(--ink)">6.7 points above implied</b> &mdash; the options market is underpricing how much this actually moves.</p></div>
+  </div>
+  <div class="rule"><span class="rid">Reading the wall</span><b>A call wall is resistance, not a ceiling.</b> Dealer selling into it is finite. Cleared on volume, dealers short gamma above the strike must buy to re-hedge and the wall becomes support. Here it is unusually close &mdash; <b style="color:var(--ink)">1.5% overhead, and Friday's high was 80.22</b>, meaning price has already tested it. Balanced 1.53:1 open interest means there is no crowded call position to squeeze, so a break through 80 would be driven by real buying rather than hedging mechanics.</div>
+</section>
+<section id="price">
+  <div class="sh"><div class="n">03</div><div><h2>Price and trend</h2><p>A $10 corridor since February, and the gamma walls sit on both edges of it.</p></div></div>
+  <div class="chart"><svg viewBox="0 0 1000 300" role="img" aria-label="UBER one-year daily price">
+    <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D37736" stop-opacity=".18"/><stop offset="100%" stop-color="#D37736" stop-opacity="0"/></linearGradient></defs>
+    <line class="grid" x1="58" y1="232.5" x2="984" y2="232.5"/><text class="axl" x="50" y="236.0" text-anchor="end">$70</text><line class="grid" x1="58" y1="167.9" x2="984" y2="167.9"/><text class="axl" x="50" y="171.4" text-anchor="end">$80</text><line class="grid" x1="58" y1="103.3" x2="984" y2="103.3"/><text class="axl" x="50" y="106.8" text-anchor="end">$90</text><line class="grid" x1="58" y1="38.7" x2="984" y2="38.7"/><text class="axl" x="50" y="42.2" text-anchor="end">$100</text><path class="ar" d="M58.0,59.4 L61.7,70.0 L65.4,61.1 L69.1,68.9 L72.8,64.8 L76.5,79.1 L80.2,85.1 L83.9,84.3 L87.6,90.5 L91.3,96.9 L95.0,75.1 L98.7,68.1 L102.4,76.1 L106.2,73.1 L109.9,65.2 L113.6,46.1 L117.3,52.7 L121.0,84.2 L124.7,72.9 L128.4,48.3 L132.1,42.6 L135.8,52.9 L139.5,53.0 L143.2,54.2 L146.9,48.7 L150.6,41.5 L154.3,51.8 L158.0,60.6 L161.7,60.6 L165.4,60.6 L169.1,38.0 L172.8,52.9 L176.5,43.3 L180.2,64.5 L183.9,81.3 L187.6,76.9 L191.3,75.8 L195.0,74.1 L198.8,87.0 L202.5,88.4 L206.2,79.4 L209.9,83.7 L213.6,89.0 L217.3,73.5 L221.0,77.0 L224.7,61.8 L228.4,68.2 L232.1,66.1 L235.8,61.4 L239.5,61.3 L243.2,40.5 L246.9,73.1 L250.6,85.5 L254.3,89.6 L258.0,90.4 L261.7,76.8 L265.4,80.0 L269.1,80.2 L272.8,91.8 L276.5,92.8 L280.2,89.7 L283.9,97.7 L287.6,106.3 L291.4,146.2 L295.1,142.9 L298.8,144.1 L302.5,144.1 L306.2,131.3 L309.9,119.2 L313.6,125.5 L317.3,119.0 L321.0,98.9 L324.7,96.9 L328.4,94.8 L332.1,86.7 L335.8,109.3 L339.5,141.0 L343.2,132.8 L346.9,134.9 L350.6,155.9 L354.3,162.0 L358.0,173.5 L361.7,169.9 L365.4,172.4 L369.1,159.8 L372.8,161.6 L376.5,160.5 L380.2,159.8 L384.0,158.2 L387.7,154.2 L391.4,156.9 L395.1,149.4 L398.8,163.1 L402.5,132.1 L406.2,127.9 L409.9,118.9 L413.6,132.8 L417.3,137.7 L421.0,133.0 L424.7,137.9 L428.4,139.6 L432.1,136.6 L435.8,143.9 L439.5,140.4 L443.2,151.4 L446.9,153.0 L450.6,155.1 L454.3,159.9 L458.0,169.3 L461.7,156.9 L465.4,167.6 L469.1,162.5 L472.8,181.3 L476.6,207.2 L480.3,198.9 L484.0,201.7 L487.7,207.3 L491.4,209.9 L495.1,226.0 L498.8,224.6 L502.5,232.6 L506.2,229.1 L509.9,214.6 L513.6,213.5 L517.3,207.6 L521.0,227.9 L524.7,223.6 L528.4,214.2 L532.1,201.5 L535.8,197.5 L539.5,194.1 L543.2,191.4 L546.9,189.6 L550.6,197.4 L554.3,199.4 L558.0,207.7 L561.7,217.3 L565.4,200.4 L569.2,213.3 L572.9,211.0 L576.6,202.4 L580.3,182.2 L584.0,189.5 L587.7,198.0 L591.4,207.4 L595.1,199.4 L598.8,217.4 L602.5,212.6 L606.2,229.0 L609.9,237.8 L613.6,233.1 L617.3,220.1 L621.0,221.5 L624.7,220.6 L628.4,218.5 L632.1,221.3 L635.8,217.1 L639.5,220.8 L643.2,229.4 L646.9,217.4 L650.6,213.7 L654.3,185.5 L658.0,190.7 L661.8,186.5 L665.5,184.1 L669.2,185.6 L672.9,196.5 L676.6,202.2 L680.3,202.5 L684.0,192.0 L687.7,206.0 L691.4,203.6 L695.1,202.7 L698.8,199.4 L702.5,207.1 L706.2,213.5 L709.9,173.3 L713.6,189.0 L717.3,197.3 L721.0,192.8 L724.7,191.4 L728.4,202.2 L732.1,202.2 L735.8,199.6 L739.5,199.7 L743.2,206.1 L746.9,202.8 L750.6,209.2 L754.4,220.8 L758.1,231.7 L761.8,227.8 L765.5,226.6 L769.2,229.9 L772.9,208.2 L776.6,222.1 L780.3,221.6 L784.0,218.2 L787.7,227.9 L791.4,232.1 L795.1,230.1 L798.8,241.5 L802.5,235.4 L806.2,240.0 L809.9,214.1 L813.6,211.5 L817.3,226.6 L821.0,221.9 L824.7,223.3 L828.4,234.7 L832.1,207.6 L835.8,218.0 L839.5,192.5 L843.2,197.0 L847.0,218.6 L850.7,215.3 L854.4,203.9 L858.1,216.9 L861.8,204.5 L865.5,209.3 L869.2,204.4 L872.9,203.2 L876.6,205.0 L880.3,219.1 L884.0,215.3 L887.7,206.4 L891.4,216.6 L895.1,218.5 L898.8,222.5 L902.5,230.4 L906.2,239.6 L909.9,258.8 L913.6,244.3 L917.3,227.7 L921.0,224.8 L924.7,230.1 L928.4,230.2 L932.1,222.1 L935.8,219.7 L939.6,244.3 L943.3,229.5 L947.0,200.1 L950.7,180.6 L954.4,177.3 L958.1,197.9 L961.8,194.5 L965.5,194.1 L969.2,200.3 L972.9,202.4 L976.6,180.6 L980.3,177.3 L984.0,175.7 L984.0,274.0 L58.0,274.0 Z"/><line x1="58" y1="167.9" x2="984" y2="167.9" stroke="#2D8A55" stroke-width="1" stroke-dasharray="3 4" opacity=".75"/><text class="lbl" x="64" y="162.9" fill="#2D8A55">$80 CALL WALL · 42,633 OI</text><line x1="58" y1="232.5" x2="984" y2="232.5" stroke="#C43A30" stroke-width="1" stroke-dasharray="3 4" opacity=".75"/><text class="lbl" x="64" y="227.5" fill="#C43A30">$70 PUT WALL · 27,234 OI</text>
+    <path class="m200" d="M795.1,149.0 L798.8,149.9 L802.5,150.7 L806.2,151.6 L809.9,152.3 L813.6,153.1 L817.3,153.8 L821.0,154.5 L824.7,155.2 L828.4,155.9 L832.1,156.5 L835.8,157.2 L839.5,157.8 L843.2,158.4 L847.0,159.1 L850.7,159.9 L854.4,160.7 L858.1,161.5 L861.8,162.1 L865.5,162.8 L869.2,163.6 L872.9,164.4 L876.6,165.1 L880.3,166.0 L884.0,166.8 L887.7,167.6 L891.4,168.4 L895.1,169.3 L898.8,170.1 L902.5,170.9 L906.2,171.8 L909.9,172.9 L913.6,173.9 L917.3,174.8 L921.0,175.6 L924.7,176.3 L928.4,177.1 L932.1,177.8 L935.8,178.6 L939.6,179.4 L943.3,180.1 L947.0,180.7 L950.7,181.1 L954.4,181.6 L958.1,182.2 L961.8,182.8 L965.5,183.5 L969.2,184.1 L972.9,184.8 L976.6,185.4 L980.3,186.0 L984.0,186.7"/><path class="m50" d="M239.5,67.0 L243.2,66.7 L246.9,66.7 L250.6,67.2 L254.3,67.6 L258.0,68.1 L261.7,68.1 L265.4,68.0 L269.1,67.9 L272.8,67.9 L276.5,67.9 L280.2,68.1 L283.9,68.7 L287.6,69.3 L291.4,70.8 L295.1,72.4 L298.8,74.3 L302.5,76.1 L306.2,77.1 L309.9,78.0 L313.6,79.6 L317.3,81.1 L321.0,82.0 L324.7,82.9 L328.4,83.7 L332.1,84.5 L335.8,85.8 L339.5,87.6 L343.2,89.0 L346.9,90.5 L350.6,92.4 L354.3,94.9 L358.0,97.3 L361.7,99.9 L365.4,102.0 L369.1,103.6 L372.8,105.3 L376.5,107.0 L380.2,108.7 L384.0,110.1 L387.7,111.4 L391.4,113.0 L395.1,114.3 L398.8,115.8 L402.5,116.9 L406.2,118.0 L409.9,119.1 L413.6,120.4 L417.3,121.8 L421.0,123.3 L424.7,124.8 L428.4,126.8 L432.1,128.0 L435.8,129.2 L439.5,130.2 L443.2,131.4 L446.9,133.0 L450.6,134.5 L454.3,136.1 L458.0,137.6 L461.7,138.9 L465.4,140.4 L469.1,141.7 L472.8,143.2 L476.6,144.5 L480.3,145.6 L484.0,146.7 L487.7,148.0 L491.4,149.6 L495.1,151.7 L498.8,153.7 L502.5,156.0 L506.2,158.6 L509.9,160.9 L513.6,163.3 L517.3,165.7 L521.0,168.1 L524.7,169.7 L528.4,171.4 L532.1,172.7 L535.8,173.5 L539.5,174.2 L543.2,174.5 L546.9,174.9 L550.6,175.4 L554.3,176.2 L558.0,177.1 L561.7,178.3 L565.4,179.1 L569.2,180.2 L572.9,181.3 L576.6,182.2 L580.3,182.9 L584.0,183.4 L587.7,184.7 L591.4,186.3 L595.1,187.9 L598.8,189.6 L602.5,191.1 L606.2,193.0 L609.9,195.0 L613.6,196.9 L617.3,198.6 L621.0,200.1 L624.7,201.7 L628.4,203.1 L632.1,204.5 L635.8,205.7 L639.5,206.9 L643.2,208.1 L646.9,209.3 L650.6,210.2 L654.3,210.7 L658.0,210.9 L661.8,210.5 L665.5,210.2 L669.2,209.9 L672.9,209.6 L676.6,209.5 L680.3,209.0 L684.0,208.4 L687.7,207.8 L691.4,207.3 L695.1,207.1 L698.8,206.8 L702.5,206.8 L706.2,206.5 L709.9,205.5 L713.6,205.0 L717.3,204.9 L721.0,204.8 L724.7,204.8 L728.4,205.0 L732.1,205.2 L735.8,205.3 L739.5,205.3 L743.2,205.3 L746.9,205.0 L750.6,205.1 L754.4,205.3 L758.1,205.7 L761.8,206.2 L765.5,207.1 L769.2,207.9 L772.9,208.1 L776.6,208.4 L780.3,208.9 L784.0,208.9 L787.7,209.2 L791.4,209.2 L795.1,209.1 L798.8,209.3 L802.5,209.6 L806.2,209.9 L809.9,209.8 L813.6,209.7 L817.3,209.8 L821.0,209.9 L824.7,209.9 L828.4,210.0 L832.1,209.8 L835.8,209.9 L839.5,210.0 L843.2,210.2 L847.0,210.8 L850.7,211.4 L854.4,211.8 L858.1,212.2 L861.8,212.3 L865.5,212.4 L869.2,212.6 L872.9,212.6 L876.6,212.6 L880.3,212.9 L884.0,213.3 L887.7,213.2 L891.4,213.3 L895.1,214.2 L898.8,214.9 L902.5,215.5 L906.2,216.5 L909.9,217.8 L913.6,218.7 L917.3,219.2 L921.0,219.7 L924.7,220.3 L928.4,220.8 L932.1,221.2 L935.8,221.4 L939.6,221.8 L943.3,221.8 L947.0,221.2 L950.7,220.3 L954.4,219.3 L958.1,219.1 L961.8,218.5 L965.5,218.0 L969.2,217.6 L972.9,217.1 L976.6,216.1 L980.3,215.0 L984.0,213.7"/><path class="pl" d="M58.0,59.4 L61.7,70.0 L65.4,61.1 L69.1,68.9 L72.8,64.8 L76.5,79.1 L80.2,85.1 L83.9,84.3 L87.6,90.5 L91.3,96.9 L95.0,75.1 L98.7,68.1 L102.4,76.1 L106.2,73.1 L109.9,65.2 L113.6,46.1 L117.3,52.7 L121.0,84.2 L124.7,72.9 L128.4,48.3 L132.1,42.6 L135.8,52.9 L139.5,53.0 L143.2,54.2 L146.9,48.7 L150.6,41.5 L154.3,51.8 L158.0,60.6 L161.7,60.6 L165.4,60.6 L169.1,38.0 L172.8,52.9 L176.5,43.3 L180.2,64.5 L183.9,81.3 L187.6,76.9 L191.3,75.8 L195.0,74.1 L198.8,87.0 L202.5,88.4 L206.2,79.4 L209.9,83.7 L213.6,89.0 L217.3,73.5 L221.0,77.0 L224.7,61.8 L228.4,68.2 L232.1,66.1 L235.8,61.4 L239.5,61.3 L243.2,40.5 L246.9,73.1 L250.6,85.5 L254.3,89.6 L258.0,90.4 L261.7,76.8 L265.4,80.0 L269.1,80.2 L272.8,91.8 L276.5,92.8 L280.2,89.7 L283.9,97.7 L287.6,106.3 L291.4,146.2 L295.1,142.9 L298.8,144.1 L302.5,144.1 L306.2,131.3 L309.9,119.2 L313.6,125.5 L317.3,119.0 L321.0,98.9 L324.7,96.9 L328.4,94.8 L332.1,86.7 L335.8,109.3 L339.5,141.0 L343.2,132.8 L346.9,134.9 L350.6,155.9 L354.3,162.0 L358.0,173.5 L361.7,169.9 L365.4,172.4 L369.1,159.8 L372.8,161.6 L376.5,160.5 L380.2,159.8 L384.0,158.2 L387.7,154.2 L391.4,156.9 L395.1,149.4 L398.8,163.1 L402.5,132.1 L406.2,127.9 L409.9,118.9 L413.6,132.8 L417.3,137.7 L421.0,133.0 L424.7,137.9 L428.4,139.6 L432.1,136.6 L435.8,143.9 L439.5,140.4 L443.2,151.4 L446.9,153.0 L450.6,155.1 L454.3,159.9 L458.0,169.3 L461.7,156.9 L465.4,167.6 L469.1,162.5 L472.8,181.3 L476.6,207.2 L480.3,198.9 L484.0,201.7 L487.7,207.3 L491.4,209.9 L495.1,226.0 L498.8,224.6 L502.5,232.6 L506.2,229.1 L509.9,214.6 L513.6,213.5 L517.3,207.6 L521.0,227.9 L524.7,223.6 L528.4,214.2 L532.1,201.5 L535.8,197.5 L539.5,194.1 L543.2,191.4 L546.9,189.6 L550.6,197.4 L554.3,199.4 L558.0,207.7 L561.7,217.3 L565.4,200.4 L569.2,213.3 L572.9,211.0 L576.6,202.4 L580.3,182.2 L584.0,189.5 L587.7,198.0 L591.4,207.4 L595.1,199.4 L598.8,217.4 L602.5,212.6 L606.2,229.0 L609.9,237.8 L613.6,233.1 L617.3,220.1 L621.0,221.5 L624.7,220.6 L628.4,218.5 L632.1,221.3 L635.8,217.1 L639.5,220.8 L643.2,229.4 L646.9,217.4 L650.6,213.7 L654.3,185.5 L658.0,190.7 L661.8,186.5 L665.5,184.1 L669.2,185.6 L672.9,196.5 L676.6,202.2 L680.3,202.5 L684.0,192.0 L687.7,206.0 L691.4,203.6 L695.1,202.7 L698.8,199.4 L702.5,207.1 L706.2,213.5 L709.9,173.3 L713.6,189.0 L717.3,197.3 L721.0,192.8 L724.7,191.4 L728.4,202.2 L732.1,202.2 L735.8,199.6 L739.5,199.7 L743.2,206.1 L746.9,202.8 L750.6,209.2 L754.4,220.8 L758.1,231.7 L761.8,227.8 L765.5,226.6 L769.2,229.9 L772.9,208.2 L776.6,222.1 L780.3,221.6 L784.0,218.2 L787.7,227.9 L791.4,232.1 L795.1,230.1 L798.8,241.5 L802.5,235.4 L806.2,240.0 L809.9,214.1 L813.6,211.5 L817.3,226.6 L821.0,221.9 L824.7,223.3 L828.4,234.7 L832.1,207.6 L835.8,218.0 L839.5,192.5 L843.2,197.0 L847.0,218.6 L850.7,215.3 L854.4,203.9 L858.1,216.9 L861.8,204.5 L865.5,209.3 L869.2,204.4 L872.9,203.2 L876.6,205.0 L880.3,219.1 L884.0,215.3 L887.7,206.4 L891.4,216.6 L895.1,218.5 L898.8,222.5 L902.5,230.4 L906.2,239.6 L909.9,258.8 L913.6,244.3 L917.3,227.7 L921.0,224.8 L924.7,230.1 L928.4,230.2 L932.1,222.1 L935.8,219.7 L939.6,244.3 L943.3,229.5 L947.0,200.1 L950.7,180.6 L954.4,177.3 L958.1,197.9 L961.8,194.5 L965.5,194.1 L969.2,200.3 L972.9,202.4 L976.6,180.6 L980.3,177.3 L984.0,175.7"/>
+    <circle cx="984.0" cy="175.7" r="3.4" fill="#E7EEF6"/><text class="axl" x="87.6" y="292" text-anchor="middle">Sep 25</text><text class="axl" x="243.2" y="292" text-anchor="middle">Nov</text><text class="axl" x="398.8" y="292" text-anchor="middle">Jan 26</text><text class="axl" x="554.3" y="292" text-anchor="middle">Mar</text><text class="axl" x="709.9" y="292" text-anchor="middle">May</text><text class="axl" x="865.5" y="292" text-anchor="middle">Jul</text><text class="axl" x="984.0" y="292" text-anchor="middle">Aug</text></svg>
+    <div class="legend"><span><i style="background:#E7EEF6"></i>Close</span><span><i style="background:#D37736"></i>50-day</span><span><i style="background:#5E7C99"></i>200-day</span><span>251 sessions &middot; IBKR daily</span></div></div>
+  <div class="note"><b>The shape is a base, not a downtrend.</b> High $101.99 in October 2025, low $65.41 in June 2026, and since February the stock has oscillated in roughly $70-80. Price now sits at the top of that corridor with the 10-week average rising underneath it. <b>What is missing is the 30-week turning up</b> &mdash; it has fallen from 74.59 to 73.42 over four weeks, and until it flattens this is a range, not an advance.</div>
+</section>
+
+<section id="gates">
+  <div class="sh"><div class="n">04</div><div><h2>The gate stack</h2><p>Weekly bars as <span class="mono">phoenix.py</span> computes them.</p></div></div>
+  <div class="gates">
+    <div class="gate f"><div class="idx">01</div><div><div class="nm">near_high &mdash; 104-week</div><div class="dt">104-week high $101.99. Price is <b class="mono">-22.7%</b> from it; the gate wants -8% to -1%. The widest miss.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate f"><div class="idx">02</div><div><div class="nm">stage2 &mdash; Weinstein</div><div class="dt">Price $78.80 is comfortably above the 30-week at $73.42 &mdash; but the 30-week is <b>falling</b> (74.59 four weeks ago). Both conditions are required.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate"><div class="idx">03</div><div><div class="nm">industry</div><div class="dt">Needs <span class="mono">rotation_nav</span> and the 116-industry taxonomy, absent from this project. Uber sits in Industrials (Ground Transportation) under GICS, so XLF and XLK are both the wrong reference.</div></div><div class="tag t-warn">UNVERIFIED</div></div>
+    <div class="gate"><div class="idx">04</div><div><div class="nm">trend200 &mdash; above 40-week</div><div class="dt">$78.80 vs 40-week SMA <b class="mono">$76.16</b>, +3.5% above. Passes on level &mdash; but the average is still falling (was $78.01 four weeks ago), so this is a marginal pass.</div></div><div class="tag t-pass">PASS</div></div>
+    <div class="gate"><div class="idx">05</div><div><div class="nm">trend50 &mdash; above 10-week</div><div class="dt">$78.80 vs 10-week $73.53, +7.2%, and the average is rising. The cleanest reading on the chart.</div></div><div class="tag t-pass">PASS</div></div>
+  </div>
+  <div class="stamp"><div class="x">2 FAIL &middot; 1 UNVERIFIED &middot; 2 PASS &mdash; the funnel terminates at the first failure</div><div class="o">NO CANDIDATE</div></div>
+  <div class="rule"><span class="rid">The distance to a candidate</span><b>Two things have to happen, and they are very different in difficulty.</b> The 30-week turning up needs only that price holds current levels for roughly four to six weeks &mdash; plausible. <span class="mono">near_high</span> needs price within 8% of $101.99, which means <b class="mono am">$93.83</b> &mdash; a 19% rally from here. <b style="color:var(--ink)">The second is the binding constraint, and nothing about the current range suggests it is close.</b></div>
+  <div class="rule"><span class="rid">stage-theory-context-filter &middot; R1</span>An identical breakout is fuel in Stage 2 and exit liquidity in Stage 3, and only the stage distinguishes them. A falling 30-week average with price at the top of a six-month range is the textbook definition of Stage 1 basing &mdash; the stage before the one this book trades.</div>
+</section>
+<section id="vol">
+  <div class="sh"><div class="n">V</div><div><h2>Volatility profile</h2>
+  <p>What the options market expects, what the stock has actually done, and what that means for the stop.</p></div></div>
+  <div class="strip" style="margin-top:0">
+    <div class="cell"><div class="k">Implied vol &middot; annual</div><div class="v">33.7%</div><div class="s">options market</div></div>
+    <div class="cell"><div class="k">Realised vol &middot; 30d</div><div class="v">40.4%</div><div class="s">what it did</div></div>
+    <div class="cell"><div class="k">Spread</div><div class="v dn">-6.7</div><div class="s dn">IMPLIED BELOW REALISED</div></div>
+    <div class="cell"><div class="k">IV percentile 52w</div><div class="v am">23th</div><div class="s am">cheap</div></div>
+    <div class="cell"><div class="k">Daily ATR-14</div><div class="v">2.74</div><div class="s">3.5% of price</div></div>
+    <div class="cell"><div class="k">IV-implied daily</div><div class="v">2.12%</div><div class="s">$1.67</div></div>
+    <div class="cell"><div class="k">1-month 1&sigma;</div><div class="v">&plusmn;9.7%</div><div class="s">from implied</div></div>
+    <div class="cell"><div class="k">Stop basis</div><div class="v dn" style="font-size:14px">REALISED</div><div class="s">use for sizing</div></div>
+  </div>
+  <div class="rule"><span class="rid">Reading the spread</span>A moderate gap, and IV in the 23rd percentile. The most 'normal' volatility profile of the eleven &mdash; consistent with a stock that has been range-bound for six months. Implied volatility is <b class="mono dn">16% below</b> what the stock has actually been doing. <b style="color:var(--ink)">A stop sized from the options market would be roughly 16% too tight.</b> Size from the measured range instead: <b class="mono am">$2.74</b> per day.</div>
+  <div class="note"><b>Why this section exists.</b> Implied volatility is a <i>forecast</i>; realised volatility is a <i>measurement</i>. When they diverge, the options market and the tape disagree about how much room a position needs &mdash; and a stop placed on the wrong one is either harvested by noise or wider than the account can carry. <b style="color:var(--ink)">Across the eleven names reviewed this weekend, nine had implied below realised</b>, several by more than fifteen points. <b>Default to the measured range unless the two agree.</b></div>
+</section>
+
+<section id="rr">
+  <div class="sh"><div class="n">05</div><div><h2>Reward-to-risk</h2><p>The wall is 1.5% away. That is the problem with this setup, and it is arithmetic rather than opinion.</p></div></div>
+  <div class="note" style="border-left-color:var(--gold)"><b>The structure is unusually hostile to a long here.</b> Price sits at $78.80 with the call wall at $80 and the gamma flip at $76.19. There is <b class="mono">1.5%</b> of room above and <b class="mono">3.4%</b> of air below before dealer hedging inverts. Any stop that clears the flip is more than a full ATR wide, and the nearest meaningful target is only 1.5% away.</div>
+  <div class="tw"><table>
+    <tr><th>Scenario</th><th class="n">Entry</th><th class="n">Stop</th><th class="n">Stop dist</th><th class="n">&times;ATR</th><th class="n">R:R &rarr; 85</th><th class="n">R:R &rarr; 90</th><th class="n">Shares</th></tr>
+    <tr class="hlr"><td>Below the flip &mdash; 76.19 &minus; 0.5 ATR</td><td class="n">78.80</td><td class="n">74.82</td><td class="n">5.1%</td><td class="n">1.45</td><td class="n dn">1.56 : 1</td><td class="n">2.81 : 1</td><td class="n">5.0</td></tr>
+    <tr><td>Put wall &minus; 0.5 ATR</td><td class="n">78.80</td><td class="n">68.63</td><td class="n">12.9%</td><td class="n">3.71</td><td class="n dn">0.61 : 1</td><td class="n dn">1.10 : 1</td><td class="n">2.0</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Breakout entry above the wall</b></td><td class="n">80.30</td><td class="n">76.19</td><td class="n">5.1%</td><td class="n">1.50</td><td class="n">1.14 : 1</td><td class="n up"><b>2.36 : 1</b></td><td class="n">4.9</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Pullback to the flip, stop below it</b></td><td class="n">76.50</td><td class="n">73.76</td><td class="n">3.6%</td><td class="n">1.00</td><td class="n up"><b>3.10 : 1</b></td><td class="n up"><b>4.93 : 1</b></td><td class="n">7.3</td></tr>
+  </table></div>
+  <div class="note" style="border-left-color:var(--gold)"><b>Reading the table:</b> <b style="color:var(--ink)">Stop dist</b> is how far the stop sits from entry as a percentage of the <i>share price</i> &mdash; it is not the percentage of the account at risk. <b style="color:var(--ink)">Account risk is 1.00% in every row</b>, fixed at $20 on a $2,000 book. Share count is derived from it: <span class="mono">shares = $20 &divide; (entry &minus; stop)</span>. A wider stop buys fewer shares, not more risk. The only figure that varies with stop distance is <b>position value</b>, which is why the concentration cap and the 1R budget are separate constraints on separate axes.</div>
+  <div class="three" style="margin-top:18px">
+    <div class="card"><h3>Buying here does not work</h3><p style="font-size:13.5px;margin-bottom:8px">At $78.80 the only stop that clears the gamma flip is $74.82 &mdash; 5.1% and 1.45 ATR. Against a wall 1.5% overhead, that is <b class="mono dn">0.29:1</b> to the first target.</p><p style="font-size:13.5px;margin:0"><b style="color:var(--red)">Do not enter into a wall.</b></p></div>
+    <div class="card"><h3>For 2 : 1</h3><p style="font-size:13.5px;margin-bottom:8px">Requires either a <b>breakout entry above $80.30 targeting $90</b>, or a <b>pullback entry near the flip at $76.50</b>. Both work; neither is available at Friday's close.</p><p style="font-size:13.5px;margin:0"><b style="color:var(--amber)">Wait for one of the two.</b></p></div>
+    <div class="card"><h3>For 3 : 1</h3><p style="font-size:13.5px;margin-bottom:8px">Only the pullback entry delivers it: <b class="mono am">$76.50 with a stop at $73.76</b> gives 3.10:1 to $85 and 4.93:1 to $90, on a 1.00 ATR stop.</p><p style="font-size:13.5px;margin:0"><b style="color:var(--green)">Cleanest structure of the three names.</b></p></div>
+  </div>
+  <div class="rule"><span class="rid">If $80 breaks &mdash; the case against a fixed target</span>Dealer selling into 42,633 contracts is finite. Cleared on volume, the same open interest reverses into buying and $80 becomes support. With balanced 1.53:1 call-to-put open interest there is no crowded position to unwind, so a break would be real demand rather than a hedging squeeze &mdash; which makes it <i>more</i> durable, not less. Entry 80.30 with a stop at 76.19 pays <b class="mono">1.14:1 at $85</b>, <b class="mono up">2.36:1 at $90</b>, <b class="mono up">4.79:1 at $100</b>. A fixed target at $85 would exit at the worst possible moment.</div>
+  <div class="note"><b>Cost floor.</b> &euro;1 per round trip on a $2,000 account is <b class="mono dn">0.054R</b>. The book needs <b class="mono am">1.70R</b> to break even after commission. The pullback scenario clears it comfortably; buying at the wall does not clear it at all.</div>
+</section>
+
+<section id="news">
+  <div class="sh"><div class="n">06</div><div><h2>News flow</h2><p>Split between the company and the market conditions that reach it.</p></div></div>
+  <div class="news" style="margin-bottom:18px">
+    <div class="nhdr">Ticker-specific &mdash; UBER</div>
+    <div class="nrow"><div class="dt">WED 5 AUG</div><div><div class="hd"><span class="pill neu">EARNINGS</span>Bookings beat, revenue missed by $30m, stock fell</div>
+      <div class="bd">Gross bookings $58bn (+22%) cleared the high end of guidance; revenue came in at $14.19bn against $14.22bn expected. Shares fell 2.7% pre-market. <b style="color:var(--amber)">A 0.2% revenue miss against a 22% bookings beat &mdash; the market chose the smaller number.</b></div></div></div>
+    <div class="nrow"><div class="dt">WED 5 AUG</div><div><div class="hd"><span class="pill bull">MILESTONE</span>Trailing free cash flow tops $10bn for the first time</div>
+      <div class="bd">$2.8bn in the quarter. Non-GAAP operating income +40% against bookings +22% &mdash; operating leverage arriving in the numbers rather than the narrative.</div></div></div>
+    <div class="nrow"><div class="dt">WED 5 AUG</div><div><div class="hd"><span class="pill bear">PARTNERSHIP</span>Waymo exclusivity in Austin and Atlanta to end by early 2028</div>
+      <div class="bd">The Phoenix pilot already wound down. Khosrowshahi called Waymo "a very, very important partner" and confirmed operations continue next year, while stressing Uber will not depend on one provider. <b style="color:var(--ink)">Over 20 AV partnerships globally.</b></div></div></div>
+    <div class="nrow"><div class="dt">MON 17 AUG</div><div><div class="hd"><span class="pill bull">NEW BUSINESS</span>Zipline drone-delivery partnership and equity investment</div>
+      <div class="bd">Targeting <b style="color:var(--ink)">one million drone deliveries a day by end-2029</b>, starting in Dallas and Houston this year and expanding to dozens of US cities. Follows equity stakes in Flytrex and Manna. <b style="color:var(--amber)">Announced four days before this data and not yet reflected in the price &mdash; the stock closed +0.32% on Friday.</b></div></div></div>
+    <div class="nrow"><div class="dt">2026</div><div><div class="hd"><span class="pill bull">M&amp;A</span>Delivery Hero acquisition &mdash; nearly 100 markets</div>
+      <div class="bd">Roughly doubles the markets where Uber offers both mobility and delivery. Close expected H2 2027, planning through 2028, technology migration 2029. Long-dated, capital committed now.</div></div></div>
+    <div class="nrow"><div class="dt">2026</div><div><div class="hd"><span class="pill bear">COMPETITION</span>Brazil mobility softness on food-delivery competition</div>
+      <div class="bd">Competition from DD Food and others for two-wheeler supply has raised the cost of securing drivers. Uber is shifting incentives from the consumer side to the delivery side. Share is holding but moving from mobility to delivery.</div></div></div>
+    <div class="nrow"><div class="dt">2026</div><div><div class="hd"><span class="pill neu">POLITICAL</span>Six US politicians bought over $6m of Uber stock this year</div>
+      <div class="bd">Reported disclosures include President Trump and Nancy Pelosi. Noise rather than signal, but it is in the tape and worth knowing it is there.</div></div></div>
+  </div>
+  <div class="news">
+    <div class="nhdr">Market-wide &mdash; reaches UBER through rates, AV regulation and gig-economy policy</div>
+    <div class="nrow"><div class="dt">ONGOING</div><div><div class="hd"><span class="pill bear">REGULATION</span>AV safety and congestion scrutiny could slow city-by-city expansion</div>
+      <div class="bd">The 15-city target depends on permits as much as technology. Regulatory friction is the single most likely reason the AV rollout slips, and it is entirely outside Uber's control.</div></div></div>
+    <div class="nrow"><div class="dt">ONGOING</div><div><div class="hd"><span class="pill neu">RATES</span>A long-duration story in a higher-for-longer tape</div>
+      <div class="bd">The AV thesis pays out years from now. Rising real rates compress exactly that kind of terminal value, which is a plausible part of why a company compounding free cash flow at this rate trades 23% below its high.</div></div></div>
+    <div class="nrow"><div class="dt">CONTEXT</div><div><div class="hd"><span class="pill neu">SECTOR</span>Uber sits in Industrials, not Technology</div>
+      <div class="bd">GICS reclassified it to Ground Transportation. That matters for the industry gate and for peer comparison &mdash; the correct reference is not XLK, and this run did not retrieve the right sector ETF. <b style="color:var(--amber)">Marked unverified rather than guessed.</b></div></div></div>
+  </div>
+  <div class="rule"><span class="rid">hormuz-illusion-single-catalyst &middot; R1</span>Name the single condition the position rests on before taking it. Here the range has held for six months on the strength of the cash-flow story, and the <b>AV narrative is what would break it in either direction</b> &mdash; a city-launch acceleration or a partner defection. Neither is scheduled, which makes this a position with no dated catalyst.</div>
+</section>
+<section id="sector">
+  <div class="sh"><div class="n">07</div><div><h2>Sector and industry</h2><p>Uber is Industrials under GICS. The correct reference was not retrieved in this run and is marked rather than substituted.</p></div></div>
+  <div class="tw"><table>
+    <tr><th>Level</th><th>Instrument</th><th class="n">Friday</th><th class="n">YTD</th><th class="n">1-year</th><th class="n">% of 52w high</th></tr>
+    <tr><td class="mono" style="color:var(--inkFade)">SECTOR</td><td><b style="color:var(--ink)">XLI</b> &middot; Industrials <i style="color:var(--inkFade)">(not retrieved)</i></td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&mdash;</td><td class="n">&mdash;</td></tr>
+    <tr class="me"><td class="mono" style="color:var(--gold)">SUBJECT</td><td><b style="color:var(--ink)">UBER</b> &middot; Uber Technologies</td><td class="n up">+0.32%</td><td class="n dn">-3.6%</td><td class="n">&mdash;</td><td class="n dn">77.3%</td></tr>
+    <tr><td class="mono" style="color:var(--inkFade)">REFERENCE</td><td><b style="color:var(--ink)">XLK</b> &middot; Technology <i style="color:var(--inkFade)">(wrong sector, shown for tape)</i></td><td class="n up">+0.91%</td><td class="n up">+22.2%</td><td class="n up">+34.0%</td><td class="n up">98.4%</td></tr>
+  </table></div>
+  <div class="note"><b>The honest position: this section is incomplete.</b> Uber's GICS classification is Industrials / Ground Transportation, so neither XLK nor XLF is the right benchmark, and the run did not fetch XLI or the ride-hailing and delivery peer set (LYFT, DASH, ABNB). What can be said without the data: <b style="color:var(--ink)">Uber at 77.3% of its 52-week high is materially weaker than the broad tape</b>, where technology sits within 2% of its own high. Whether it is weak against <i>its own</i> industry is unresolved and would change the industry gate.</div>
+  <div class="rule"><span class="rid">Data gap &middot; for the next run</span>Phoenix classifies every ticker into one of <b>116 industries</b> via <span class="mono">rotation_nav</span>, and the <span class="mono">industry</span> gate tests whether that industry sits above a rising average. Upload <span class="mono">universe.csv</span> and <span class="mono">rotation_nav.json</span> and this becomes a computed gate rather than a caveat.</div>
+</section>
+
+<section id="fund">
+  <div class="sh"><div class="n">08</div><div><h2>Q2 2026 in numbers</h2><p>Reported 5 August. Every profitability line grew faster than the top line.</p></div></div>
+  <div class="strip" style="margin-top:0">
+    <div class="cell"><div class="k">Gross bookings</div><div class="v">$58.0B</div><div class="s up">+22% YoY</div></div>
+    <div class="cell"><div class="k">Revenue</div><div class="v dn">$14.19B</div><div class="s dn">missed by $30m</div></div>
+    <div class="cell"><div class="k">Adj EBITDA</div><div class="v">$2.8B</div><div class="s up">+33%</div></div>
+    <div class="cell"><div class="k">EBITDA / bookings</div><div class="v up">4.9%</div><div class="s up">from 4.5%</div></div>
+    <div class="cell"><div class="k">Non-GAAP OI</div><div class="v">$2.1B</div><div class="s up">+40%</div></div>
+    <div class="cell"><div class="k">Non-GAAP EPS</div><div class="v">$0.81</div><div class="s up">+35%</div></div>
+    <div class="cell"><div class="k">FCF quarter</div><div class="v">$2.8B</div><div class="s up">record</div></div>
+    <div class="cell"><div class="k">TTM FCF</div><div class="v am">$10B+</div><div class="s am">first time ever</div></div>
+  </div>
+  <div class="note"><b>Read the second row against the eighth.</b> A $30 million revenue shortfall on $14.19 billion sent the stock down; in the same quarter trailing free cash flow crossed $10 billion for the first time in company history and operating income grew 40%. <b style="color:var(--ink)">The market priced the miss and ignored the milestone.</b> Whether that is an opportunity or a correct read on multiple compression is the whole question &mdash; and the chart currently sides with the market.</div>
+</section>
+
+<section id="score">
+  <div class="sh"><div class="n">09</div><div><h2>Quality score</h2><p>Five weighted blocks, 100 points.</p></div></div>
+  <div class="tw"><table>
+    <tr><th>Block</th><th class="n">Weight</th><th class="n">Score</th><th>Reasoning</th></tr>
+    <tr><td>Business quality</td><td class="n">30</td><td class="n up">25</td><td>Network effects at scale, 4.9% EBITDA margin of bookings and rising, advertising optionality</td></tr>
+    <tr><td>Growth</td><td class="n">20</td><td class="n up">17</td><td>22% bookings growth, fourth straight quarter above 20% &mdash; but revenue growth is slower and optically distorted</td></tr>
+    <tr><td>Financial strength</td><td class="n">20</td><td class="n up">17</td><td>$10bn TTM free cash flow, $5.4bn unrestricted cash. Balance sheet is no longer a question</td></tr>
+    <tr><td>Valuation</td><td class="n">20</td><td class="n am">8</td><td>Down 23% from the high and still not obviously cheap on earnings; the $10bn AV commitment is capital with no dated return</td></tr>
+    <tr><td>Shareholder alignment</td><td class="n">10</td><td class="n">5</td><td>Heavy reinvestment into AV and Delivery Hero. Defensible strategically, dilutive to near-term returns</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Total</b></td><td class="n"><b>100</b></td><td class="n am"><b>72</b></td><td><b style="color:var(--ink)">Buyable with price discipline</b> &mdash; the 65-79 band</td></tr>
+  </table></div>
+  <div class="rule"><span class="rid">investment-scoring-100-point &middot; caveat</span>Fundamental scoring belongs on the ticker page as <b>context, never an entry gate</b>. A 72/100 business inside a six-month range is a watchlist entry. Used as a gate it would argue you into the trade the technical stack just refused.</div>
+</section>
+
+<section id="risk">
+  <div class="sh"><div class="n">10</div><div><h2>Risk register</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Risk</th><th style="width:96px">Severity</th><th>Mitigation &mdash; and the residual</th></tr>
+    <tr><td><b style="color:var(--ink)">Range-bound structure</b></td><td><span class="tag t-fail">HIGH</span></td><td>None available. Six months inside $70-80 with a falling 30-week average. <b style="color:var(--ink)">The binding risk for this book.</b></td></tr>
+    <tr><td><b style="color:var(--ink)">AV capital with no dated return</b></td><td><span class="tag t-fail">HIGH</span></td><td>$10bn+ committed, 120,000 vehicle off-take. Partners have raised $2.50 per Uber dollar, which de-risks the equity portion. P&amp;L impact timing is <i>explicitly not disclosed</i>.</td></tr>
+    <tr><td><b style="color:var(--ink)">Partner dependence and defection</b></td><td><span class="tag t-warn">MED-HIGH</span></td><td>Over 20 partnerships and a deliberate non-exclusivity strategy. But Waymo is the most credible operator and its exclusivity ends by 2028.</td></tr>
+    <tr><td><b style="color:var(--ink)">Competition in Latin America</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>Shifting incentives to the delivery side; share holding. Margins in the contested business are low, so the damage is to volume rather than profit.</td></tr>
+    <tr><td><b style="color:var(--ink)">Delivery Hero integration</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>Long runway &mdash; close 2027, migration 2029. Time to plan, and time for the rationale to change.</td></tr>
+    <tr><td><b style="color:var(--ink)">Reporting opacity</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>The UK model change costs 400bps of optical take rate and Uber does not break out AV-served trips. <b>Harder to verify the thesis from the outside than it was a year ago.</b></td></tr>
+  </table></div>
+</section>
+
+<section id="inval">
+  <div class="sh"><div class="n">11</div><div><h2>Invalidation</h2><p>Written before the position, not after.</p></div></div>
+  <div class="two">
+    <div class="card" style="border-left:2px solid var(--green)"><h3 style="color:var(--green)">Would make this bullish</h3>
+      <ul style="margin-bottom:0"><li>Daily close above <b class="mono">$80.30</b> with volume expansion sustained 2-3 sessions &mdash; clears the call wall</li>
+      <li><b>and</b> the 30-week average turning up, which flips <span class="mono">stage2</span></li>
+      <li>AV city count reaching 15 on schedule by year-end</li>
+      <li>First Zipline drone deliveries landing in Dallas and Houston on schedule this year</li>
+      <li>Revenue growth reconverging with bookings growth as the UK optical drag laps</li>
+      <li>A move to <b class="mono">$93.83</b> would satisfy <span class="mono">near_high</span> &mdash; the real threshold</li></ul></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Would make it worse</h3>
+      <ul style="margin-bottom:0"><li>Close below <b class="mono">$76.19</b> flips gamma negative; dealers amplify instead of dampen</li>
+      <li>Close below <b class="mono">$70</b> breaks the put wall and the six-month range</li>
+      <li>Bookings growth dropping below 20% &mdash; ends a four-quarter streak</li>
+      <li>A second major AV partner following Waymo out of exclusivity</li>
+      <li>AV and drone capital commitments rising without a disclosed P&amp;L path</li>
+      <li>DoorDash scaling its in-house drone programme faster than Uber scales partnerships</li></ul></div>
+  </div>
+</section>
+
+<section id="rules" style="border-bottom:none">
+  <div class="sh"><div class="n">12</div><div><h2>Rules applied</h2><p>Every judgement above traces to a carded rule.</p></div></div>
+  <div class="tw"><table>
+    <tr><th>Rule</th><th>Applied to</th><th>Effect on the verdict</th></tr>
+    <tr><td class="mono" style="color:var(--gold)">Phoenix gate stack</td><td>Gates</td><td>Weekly 40/30/10-week SMA against the 104-week high</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">stage-theory.R1</td><td>Gates</td><td>Falling 30-week with price at range top is Stage 1, not Stage 2</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">Phoenix GEX method</td><td>Gamma</td><td>Walls on open interest; found the $80 wall 1.5% overhead</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">breakout-traps.R1</td><td>Entry</td><td>Never buy the first tick &mdash; and never into a wall 1.5% away</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">breakout-traps.R4</td><td>Stop</td><td>Structure minus an ATR buffer &mdash; gave the flip-anchored stops</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">quant-risk.R2</td><td>Exit</td><td>Chandelier keeps 4.79:1 live if $80 clears; a fixed target does not</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">rodriguez.R6 / Q57</td><td>Sizing</td><td>Minimum R:R at entry &mdash; rejects buying at $78.80</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">investment-scoring.R4</td><td>Score</td><td>72/100 conditional band produces a watchlist entry, not a discard</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">hormuz-illusion.R1</td><td>News</td><td>Named the dependency: the AV narrative, with no dated catalyst</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">PAPER_TARGET</td><td>Costs</td><td>0.054R commission floor; 1.70R payoff needed to break even</td></tr>
+  </table></div>
+  <div class="verdict" style="border-color:var(--gold);background:rgba(211,119,54,.07);border-left-color:var(--gold);margin-top:26px">
+    <div class="l" style="color:var(--gold)">The answer</div>
+    <p style="margin:8px 0 0;font-size:16px;color:var(--ink)">A business that has crossed into serious cash generation &mdash; $10bn trailing free cash flow, operating income growing at nearly twice the rate of bookings, and a deliberate, well-capitalised position across ground autonomy, sidewalk robots and now drones. It scores 72/100 and it is <b>not a trade for this book</b>: <span class="mono">stage2</span> fails on a falling 30-week average and <span class="mono">near_high</span> misses by 15 percentage points.</p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)">The structural problem is immediate rather than distant. <b style="color:var(--ink)">The $80 call wall sits 1.5% overhead and Friday's high was $80.22.</b> Buying here means entering directly into 42,633 contracts of dealer supply with a stop that must be a full ATR wide to clear the gamma flip. <b class="mono dn">0.29:1.</b></p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)">Two entries work and neither exists yet: a <b class="mono up">close above $80.30</b> (2.36:1 to $90), or a <b class="mono up">pullback to $76.50</b> with a stop under the flip (3.10:1 to $85, 4.93:1 to $90). The pullback is the cleanest reward-to-risk of the three names reviewed this weekend.</p>
+  </div>
+</section>
+
+<div class="foot">
+PHOENIX EQUITY RESEARCH &middot; L3 SINGLE-NAME THESIS &middot; UBER &middot; 23 AUG 2026 &middot; PREPARED TO RESEARCH_REPORT_METHOD v1<br>
+PRICE, VOLUME, OPTION OPEN INTEREST, IMPLIED VOLATILITY AND SECTOR DATA: INTERACTIVE BROKERS API, RETRIEVED 23 AUG 2026, THROUGH FRI 21 AUG CLOSE.<br>
+GATES COMPUTED ON WEEKLY BARS PER phoenix.py: 40-WEEK, 30-WEEK AND 10-WEEK SMA AGAINST THE 104-WEEK HIGH. GEX COMPUTED FROM IBKR OPEN INTEREST ACROSS THE LIVE CHAIN USING THE PHOENIX METHOD &mdash; WALLS ON OPEN INTEREST, FLIP FROM THE CUMULATIVE PROFILE.<br>
+LIMITATIONS &mdash; PER-CONTRACT IV UNAVAILABLE, SO A SINGLE UNDERLYING IV IS APPLIED ACROSS STRIKES; THIS UNDERSTATES WING GAMMA. DEALER POSITIONING IS INFERRED FROM THE STANDARD CONVENTION, NOT OBSERVED. GEX AGGREGATES THE SEP 18 AND JAN 15 '27 CHAINS, STRIKES 50-100. THE INDUSTRY GATE COULD NOT BE COMPUTED AND THE CORRECT SECTOR ETF (XLI) AND RIDE-HAILING PEER SET WERE NOT RETRIEVED IN THIS RUN.<br>
+NOT INVESTMENT ADVICE. PREPARED FOR ONE SYSTEMATIC LONG-ONLY EQUITY BOOK AND CALIBRATED TO ITS RULES, ACCOUNT SIZE AND COST BASE.
+</div>
+</main></div>
+<script>
+(function(){var root=document.documentElement,d=document.getElementById("thDark"),l=document.getElementById("thLight");
+function set(m){var g=(m==="light");root.classList.toggle("light",g);root.style.colorScheme=g?"light":"dark";
+d.className=g?"":"on";l.className=g?"on":"";try{localStorage.setItem("pxTheme",m);}catch(e){}}
+var s=null;try{s=localStorage.getItem("pxTheme");}catch(e){}set(s||"dark");
+d.addEventListener("click",function(){set("dark");});l.addEventListener("click",function(){set("light");});})();
+</script></body></html>

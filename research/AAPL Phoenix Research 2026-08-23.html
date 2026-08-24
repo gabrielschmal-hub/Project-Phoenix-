@@ -1,0 +1,547 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>AAPL &middot; Phoenix Equity Research &middot; 23 Aug 2026</title>
+<style>
+:root{
+  --bg:#020F1F; --card:#08192B; --card2:#0C2137; --line:#14304A; --line2:#1E4462;
+  --ink:#E7EEF6; --inkMed:#C4D2DF; --inkLight:#94A8BA; --inkFade:#6B8299; --inkGhost:#47596C;
+  --gold:#D37736; --green:#3FBF77; --greenBg:rgba(63,191,119,.13);
+  --red:#D9534F; --redBg:rgba(217,83,79,.13);
+  --amber:#D8A24A; --amberBg:rgba(216,162,74,.13);
+  --rail:#010A15; --railLine:#0E2942;
+  --gCall:#2D8A55; --gPut:#C43A30; --gSpot:#3B82C4; --gFlip:#E8C34A; --gPin:#9B7BD4;
+  --serif:Georgia,'Times New Roman',serif; --mono:'Courier New',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:#020F1F;color-scheme:dark}
+html.light{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:15.5px;line-height:1.62}
+.shell{display:grid;grid-template-columns:236px 1fr;max-width:1420px;margin:0 auto}
+.rail{background:var(--rail);border-right:1px solid var(--railLine);padding:22px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.rail .logo{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--gold);font-weight:700;padding:0 20px 15px;border-bottom:1px solid var(--railLine)}
+.rail .logo span{color:var(--inkFade);letter-spacing:.16em}
+.toc{list-style:none;margin:12px 0 0;padding:0}
+.toc a{display:flex;gap:10px;padding:7px 20px;color:var(--inkLight);text-decoration:none;font-family:var(--mono);font-size:11.5px;border-left:2px solid transparent}
+.toc a:hover{color:var(--ink);background:rgba(211,119,54,.07);border-left-color:var(--gold)}
+.toc a b{color:var(--inkGhost);font-weight:400;min-width:16px}
+.grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--inkGhost);padding:15px 20px 4px;text-transform:uppercase}
+.rail .stat{margin:16px 20px 0;padding-top:13px;border-top:1px solid var(--railLine);font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.85}
+.rail .stat b{color:var(--red)}
+main{padding:0 40px 90px;min-width:0}
+.mast{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:24px 0 13px;border-bottom:2px solid var(--gold)}
+.mast .t{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--inkFade);text-transform:uppercase}
+.mast .r{font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);text-align:right;line-height:1.8}
+h1{font-weight:400;font-size:clamp(31px,4.8vw,50px);line-height:1.08;letter-spacing:-.015em;margin:24px 0 6px}
+h1 em{font-style:italic;color:var(--gold)}
+h2{font-weight:400;font-size:26px;letter-spacing:-.01em;margin:0 0 3px}
+h3{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 9px}
+p{color:var(--inkMed);margin:0 0 13px}
+.lede{font-size:18.5px;line-height:1.58;color:var(--ink)}
+.mono{font-family:var(--mono)} a{color:var(--gold)}
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+.sh{display:flex;gap:14px;align-items:baseline;margin-bottom:19px}
+.sh .n{font-family:var(--mono);font-size:11px;color:var(--gold);font-weight:700;padding-top:8px;min-width:24px}
+.sh p{margin:2px 0 0;font-size:14px;color:var(--inkLight)}
+.verdict{border:1px solid var(--red);border-left:3px solid var(--red);background:var(--redBg);padding:16px 20px;margin:22px 0 0}
+.verdict .l{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--red);font-weight:700;text-transform:uppercase}
+.verdict .t{font-size:24px;margin:5px 0 7px;line-height:1.2}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:24px 0 0}
+.cell{background:var(--card);padding:11px 13px}
+.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade)}
+.cell .v{font-family:var(--mono);font-size:17.5px;font-weight:700;margin-top:3px}
+.cell .s{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:1px}
+.up{color:var(--green)}.dn{color:var(--red)}.am{color:var(--gold)}.wr{color:var(--amber)}
+.gexp{border:1px solid var(--line2);background:var(--card)}
+.gexh{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--card2)}
+.gexh .tk{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.07em}
+.badge{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;padding:4px 11px;border-radius:3px;background:var(--gCall);color:#02160C}
+.b-out{border:1px solid var(--line2);color:var(--inkLight);padding:4px 10px;font-family:var(--mono);font-size:10.5px;border-radius:3px}
+.gexh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--inkLight)}
+.gexsub{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);padding:8px 15px;border-bottom:1px solid var(--line)}
+.ggrid{stroke:#0F2438;stroke-width:1}
+.gax{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.gaxr{font-family:var(--mono);font-size:9.5px;fill:var(--inkLight);opacity:.75}
+.gaxt{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;fill:var(--inkGhost)}
+.gcall{fill:var(--gCall)} .gput{fill:var(--gPut)}
+.gcurve{fill:none;stroke:var(--ink);stroke-width:1.6;opacity:.9}
+.garea{fill:#2A4A78;opacity:.16;stroke:none}
+.gkey{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:9px 15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--inkFade)}
+.gkey span{display:inline-flex;align-items:center;gap:6px}
+.gkey i{width:11px;height:3px;border-radius:2px;display:inline-block}
+.gkey .note{display:block !important;color:var(--inkGhost);flex-basis:100%;width:100%;line-height:1.6;font-size:10px;padding-top:4px}
+.gkey .note b{display:inline;color:var(--inkFade)}
+.lad{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:74px 176px 1fr;gap:12px;align-items:center;padding:9px 15px;border-bottom:1px solid #0E2438;border-left:3px solid transparent;font-family:var(--mono);font-size:12.5px}
+.lrow:last-child{border-bottom:none}
+.lrow .p{font-weight:700}
+.lrow .d{color:var(--inkFade);font-size:11.5px;font-family:var(--serif)}
+.lrow .lab{letter-spacing:.08em;font-weight:700;font-size:10.5px}
+.l-call{border-left-color:var(--gCall)} .l-put{border-left-color:var(--gPut)}
+.l-spot{border-left-color:var(--gSpot);background:rgba(59,130,196,.10);border-top:1px solid #2C5C86;border-bottom:1px solid #2C5C86}
+.l-flip{border-left-color:var(--gFlip);background:rgba(232,195,74,.07)}
+.narr{padding:14px 15px;border-top:1px solid var(--line);background:var(--card2);font-size:14px;color:var(--inkMed);line-height:1.6}
+.chart{border:1px solid var(--line);background:var(--card);padding:14px 10px 6px;margin:6px 0 14px}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:#0F2438;stroke-width:1}
+.axl{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.pl{fill:none;stroke:var(--ink);stroke-width:1.6}
+.m50{fill:none;stroke:var(--gold);stroke-width:1.2}
+.m200{fill:none;stroke:#5E7C99;stroke-width:1.4;stroke-dasharray:5 3}
+.ar{fill:url(#g1)}
+.lbl{font-family:var(--mono);font-size:10px;font-weight:700}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:5px 4px 7px}
+.legend i{display:inline-block;width:13px;height:2px;vertical-align:middle;margin-right:5px}
+.tw{border:1px solid var(--line);background:var(--card);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #0E2438;color:var(--inkMed)}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.hl td{background:rgba(63,191,119,.08)} tr.hlr td{background:rgba(217,83,79,.07)}
+tr.me td{background:rgba(211,119,54,.10)}
+.gates{border:1px solid var(--line);background:var(--card)}
+.gate{display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:13px 17px;border-bottom:1px solid #0E2438}
+.gate:last-child{border-bottom:none} .gate.f{background:rgba(217,83,79,.05)}
+.gate .idx{font-family:var(--mono);font-size:10px;color:var(--inkGhost)}
+.gate .nm{font-family:var(--mono);font-size:13px;font-weight:700}
+.gate .dt{font-size:12.5px;color:var(--inkLight);margin-top:2px;line-height:1.45}
+.tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border:1px solid;white-space:nowrap;border-radius:2px}
+.t-fail{color:var(--red);border-color:var(--red);background:var(--redBg)}
+.t-warn{color:var(--amber);border-color:var(--amber);background:var(--amberBg)}
+.t-pass{color:var(--green);border-color:var(--green);background:var(--greenBg)}
+.stamp{border:1px solid var(--line);border-top:none;background:var(--card2);padding:13px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.stamp .x{font-family:var(--mono);font-size:12px;color:var(--inkLight)}
+.stamp .o{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--red);letter-spacing:.08em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);background:var(--card);padding:16px 18px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #0E2438;font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv span:first-child{color:var(--inkLight)} .kv span:last-child{font-family:var(--mono);font-weight:700}
+.rule{border-left:2px solid var(--gold);background:rgba(211,119,54,.05);padding:11px 15px;margin:14px 0;font-size:13.5px;color:var(--inkMed)}
+.rule .rid{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px}
+.note{border-left:2px solid var(--line2);padding:2px 0 2px 15px;margin:15px 0;color:var(--inkMed)}
+.note b{color:var(--ink)}
+.news{border:1px solid var(--line);background:var(--card)}
+.nhdr{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);padding:10px 16px;background:var(--card2);border-bottom:1px solid var(--line)}
+.nrow{display:grid;grid-template-columns:86px 1fr;gap:14px;padding:11px 16px;border-bottom:1px solid #0E2438}
+.nrow:last-child{border-bottom:none}
+.nrow .dt{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding-top:2px}
+.nrow .hd{font-size:14.5px;color:var(--ink);margin-bottom:3px}
+.nrow .bd{font-size:12.8px;color:var(--inkLight);line-height:1.5}
+.pill{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.09em;padding:2px 7px;border:1px solid var(--line2);color:var(--inkFade);margin-right:7px;vertical-align:1px;border-radius:2px}
+.pill.bull{border-color:var(--green);color:var(--green)}
+.pill.bear{border-color:var(--red);color:var(--red)}
+.pill.neu{border-color:var(--amber);color:var(--amber)}
+ul{margin:0 0 12px;padding-left:17px;color:var(--inkMed)}li{margin-bottom:5px}
+.foot{padding:28px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);line-height:1.9}
+/* strip: fixed column counts so the last cell never orphans */
+.strip{grid-template-columns:repeat(8,1fr)}
+@media(max-width:1500px){.strip{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:620px){.strip{grid-template-columns:repeat(2,1fr)}}
+/* tablet landscape: rail becomes a compact top bar, not a dead column */
+@media(max-width:1200px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:none;border-bottom:1px solid var(--railLine);
+        display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:12px 24px}
+  .rail .logo{border-bottom:none;padding:0;font-size:10.5px;line-height:1.5}
+  .rail .stat{margin:0;padding:0;border-top:none;font-size:10.5px;line-height:1.7;text-align:right}
+  main{padding:0 24px 70px}
+}
+@media(max-width:760px){
+  .two,.three{grid-template-columns:1fr}
+  .lrow{grid-template-columns:66px 1fr}.lrow .d{display:none}
+  main{padding:0 18px 60px}
+  .rail{padding:10px 18px}
+}
+
+/* ===== light theme : colours only, toggled by html.light — sampled from phoenix_app.html ===== */
+html.light{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15);
+  --rail:#F3EADC; --railLine:rgba(122,96,68,.22);
+  --gCall:#1E7A4E; --gPut:#B4362F; --gSpot:#2C5A82; --gFlip:#A87A1C; --gPin:#7A5CA8;
+}
+html.light,html.light body,html.light .shell,html.light main{background:#F6EFE4}
+html.light body{color:#2C2118}
+html.light .rail{background:#F3EADC}
+html.light .card,html.light .tw,html.light .gates,html.light .news,html.light .gexp,html.light .chart,html.light .cell{background:rgba(255,253,249,.86)}
+html.light .stamp,html.light .gexh,html.light .narr,html.light .nhdr,html.light .gexsub{background:rgba(248,241,231,.94)}
+html.light .pxtheme{background:rgba(248,241,231,.96)}
+html.light .ggrid,html.light .grid{stroke:rgba(122,96,68,.16)}
+html.light .pl{stroke:#2C2118}
+html.light .gcurve{stroke:#2C2118}
+html.light .garea{fill:#7A6044;opacity:.16}
+html.light .m200{stroke:#8C7A67}
+html.light .badge{background:var(--gCall);color:#FFFDF9}
+html.light .lrow.l-spot{background:rgba(44,90,130,.10);border-top-color:rgba(44,90,130,.4);border-bottom-color:rgba(44,90,130,.4)}
+html.light .lrow.l-flip{background:rgba(168,122,28,.10)}
+html.light .gate.f{background:rgba(180,54,47,.055)}
+html.light tr.hl td{background:rgba(30,122,78,.09)}
+html.light tr.hlr td{background:rgba(180,54,47,.07)}
+html.light tr.me td{background:rgba(194,99,42,.10)}
+html.light td{border-bottom-color:rgba(122,96,68,.14)}
+html.light .gate,html.light .nrow,html.light .lrow{border-bottom-color:rgba(122,96,68,.14)}
+html.light .rule{background:rgba(194,99,42,.06)}
+html.light .toc a:hover{background:rgba(194,99,42,.09)}
+/* theme switch */
+.pxtheme{z-index:40;display:flex;gap:0;border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:var(--card2)}
+.pxtheme button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 12px;border:0;background:transparent;color:var(--inkFade);cursor:pointer}
+.pxtheme button.on{background:var(--gold);color:#FFFDF9;font-weight:700}
+.pxtheme button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+@media print{.pxtheme,.rail{display:none}.shell{grid-template-columns:1fr}main{padding:0}}
+
+/* ===== theme switch hardening — must stay last in the sheet ===== */
+.pxtheme{position:fixed;top:14px;right:18px;bottom:auto;left:auto;
+  height:auto;width:auto;max-height:34px;align-items:center;line-height:1}
+.pxtheme button{height:28px;line-height:28px;padding:0 12px;white-space:nowrap;flex:0 0 auto}
+@media(max-width:1200px){
+  .pxtheme{top:auto;bottom:14px;right:14px}
+}
+@media print{.pxtheme{display:none}}
+</style></head><body><div class="shell">
+<nav class="rail"><div class="logo">PHOENIX<br><span>EQUITY RESEARCH</span></div>
+<div class="stat" style="margin-top:20px;border-top:none;padding-top:0">AAPL &middot; $309.35<br>L3 SINGLE NAME<br>23 AUG 2026<br><br>GATES: <b>2 FAIL</b><br>SCORE: 83/100<br>VERDICT: <b>NEAR MISS</b></div></nav>
+<main>
+<div class="pxtheme" role="group" aria-label="Theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></div>
+<div class="mast"><div class="t">NASDAQ : AAPL &middot; Apple Inc. &middot; L3 single-name thesis</div>
+<div class="r">SUN 23 AUG 2026 &middot; DATA THROUGH FRI 21 AUG CLOSE<br>IBKR LIVE &middot; FULL-CHAIN GEX &middot; WEEKLY GATES</div></div>
+<section id="verdict">
+  <h1>Two gates missed by<br>inches. <em>Not by structure.</em></h1>
+  <p class="lede" style="max-width:74ch;margin-top:18px">Apple is above a rising 40-week average, above a rising 30-week average, and 14% clear of its gamma flip. It fails the stack on a 10-week average it sits $1.65 below, and a 104-week high it sits 2.2 points outside the band for. This is the closest thing to a Phoenix candidate reviewed this weekend &mdash; and it is not one yet.</p>
+  <div class="verdict" style="border-color:var(--amber);background:var(--amberBg);border-left-color:var(--amber)">
+    <div class="l" style="color:var(--amber)">Phoenix gate stack &middot; weekly &middot; verdict</div>
+    <div class="t">NEAR MISS &mdash; fails <span class="mono">trend50</span> by $1.65 and <span class="mono">near_high</span> by 2.2 points</div>
+    <p style="margin:0;font-size:14px">A close above <b class="mono am">$311.00</b> restores <span class="mono">trend50</span>. A close above <b class="mono am">$317.00</b> satisfies <span class="mono">near_high</span>. <b>Both are inside one ATR of Friday's close.</b> Two of five gates pass cleanly and the structure underneath is intact.</p></div>
+  <div class="strip">
+    <div class="cell"><div class="k">Close Fri</div><div class="v">309.35</div><div class="s dn">-1.61 &middot; -0.52%</div></div>
+    <div class="cell"><div class="k">40-week SMA</div><div class="v up">281.89</div><div class="s up">+9.7% &middot; rising</div></div>
+    <div class="cell"><div class="k">30-week SMA</div><div class="v up">286.24</div><div class="s up">+8.1% &middot; rising</div></div>
+    <div class="cell"><div class="k">10-week SMA</div><div class="v dn">311.00</div><div class="s dn">-0.5% &middot; rising</div></div>
+    <div class="cell"><div class="k">Gamma flip</div><div class="v up">271.45</div><div class="s up">+14.0% clear</div></div>
+    <div class="cell"><div class="k">ATR-14</div><div class="v">7.63</div><div class="s">2.47%</div></div>
+    <div class="cell"><div class="k">104w high</div><div class="v wr">-10.2%</div><div class="s">344.57</div></div>
+    <div class="cell"><div class="k">YTD</div><div class="v up">+14.1%</div><div class="s dn">XLK +22.2%</div></div>
+  </div>
+</section>
+
+<section id="biz">
+  <div class="sh"><div class="n">01</div><div><h2>The business</h2><p>A hardware installed base that has become a rent-collection machine, now spending heavily to avoid being disintermediated by AI.</p></div></div>
+  <p class="lede" style="max-width:76ch">Apple sells devices once and monetises them continuously. The installed base reached an all-time high across every product category and every geography this quarter &mdash; and that base, not the quarterly unit count, is the actual asset.</p>
+  <div class="three" style="margin-top:22px">
+    <div class="card"><h3>iPhone &mdash; the engine</h3>
+      <p style="font-size:13.5px;margin-bottom:10px"><b style="color:var(--ink)">$54.3bn, +22%</b> in the June quarter &mdash; half of all revenue. June-quarter records in every geography and a record for upgraders.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)"><b style="color:var(--ink)">Customer:</b> ~1.5bn active devices. <b style="color:var(--ink)">Supplier:</b> TSMC for A19 silicon, and a memory market whose costs rose enough to force price increases.</p></div>
+    <div class="card"><h3>Services &mdash; the margin</h3>
+      <p style="font-size:13.5px;margin-bottom:10px"><b style="color:var(--ink)">$30.7bn, +12%</b> &mdash; a June record, and a <b style="color:var(--red)">miss against $31.22bn expected</b>. Roughly 28% of revenue at far higher margin than hardware.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)">App Store, iCloud, Music, TV+, payments, and the Google search default. <b style="color:var(--ink)">This line is what the 50.1% gross margin rests on.</b></p></div>
+    <div class="card"><h3>Mac, iPad, Wearables</h3>
+      <p style="font-size:13.5px;margin-bottom:10px">Mac <b style="color:var(--ink)">$10.35bn, +29%</b> &mdash; a large beat, driven by the MacBook Neo, the low-cost laptop built on an iPhone chip. iPad $6.19bn missed; Wearables $7.88bn.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)">The Neo is the interesting one: Apple silicon economics applied to a price point it could not previously serve.</p></div>
+  </div>
+  <div class="two" style="margin-top:20px">
+    <div class="card"><h3>Q3 FY26 &mdash; and the asterisk</h3>
+      <div class="kv"><span>Revenue</span><span class="up">$109.4bn &middot; +16%</span></div>
+      <div class="kv"><span>Net income</span><span class="up">$29.8bn</span></div>
+      <div class="kv"><span>Diluted EPS</span><span class="up">$2.02 &middot; +29%</span></div>
+      <div class="kv"><span><b style="color:var(--amber)">of which tariff refund</b></span><span class="wr"><b>$0.11</b></span></div>
+      <div class="kv"><span>Gross margin</span><span class="up">50.1%</span></div>
+      <div class="kv"><span><b style="color:var(--amber)">of which tariff refund</b></span><span class="wr"><b>~2 points</b></span></div>
+      <div class="kv"><span>9-month operating cash flow</span><span class="up">~$117bn vs $81.8bn</span></div>
+      <div class="kv"><span>Buybacks + dividends, 9m</span><span>$62.1bn + $11.8bn</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">Nearly half the EPS beat was a one-time tariff refund.</b> Strip it out and EPS was $1.91 against $1.89 expected &mdash; a beat, but an ordinary one. The 50.1% gross margin becomes roughly 48%. <b>Read the underlying number, not the headline.</b></p></div>
+    <div class="card"><h3>Guidance is the problem</h3>
+      <p style="font-size:13.5px;margin-bottom:9px">September quarter revenue guided to <b style="color:var(--ink)">+9-11%</b>, decelerating from +16%. A <b>2.5-point FX headwind</b> and &mdash; the unusual part &mdash; <b style="color:var(--red)">supply constraints on iPhone, Mac and iPad simultaneously</b>.</p>
+      <div class="kv"><span>Gross margin guide</span><span>47-48%</span></div>
+      <div class="kv"><span>OpEx guide</span><span>$19.1-19.4bn</span></div>
+      <div class="kv"><span>iPhone growth guide</span><span>mid-teens</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)">Cook cited <b style="color:var(--ink)">less flexibility in the supply chain than normal</b> and constrained availability of advanced nodes. The stock fell 6% after hours on this, not on the quarter.</p></div>
+  </div>
+  <div class="card" style="margin-top:18px"><h3>What has actually shipped and changed</h3>
+    <div class="two" style="gap:22px">
+      <div><p style="font-size:13.5px;margin-bottom:9px"><b style="color:var(--gold)">Products and platform</b></p>
+        <ul style="font-size:13px;margin-bottom:0">
+          <li><b style="color:var(--ink)">All-new Siri AI</b> unveiled at WWDC26 &mdash; the centrepiece, and the thing the multiple is being asked to pay for</li>
+          <li><b style="color:var(--ink)">R&amp;D up 32%</b>, a hybrid of third-party cloud and Apple's own data centres</li>
+          <li><b style="color:var(--ink)">MacBook Neo</b> &mdash; iPhone-chip laptop at a new price point, and the driver of a 29% Mac quarter</li>
+          <li>New child-safety features shipped alongside the OS update</li>
+          <li>Installed base at an <b>all-time high in every category and geography</b></li>
+        </ul></div>
+      <div><p style="font-size:13.5px;margin-bottom:9px"><b style="color:var(--gold)">Corporate</b></p>
+        <ul style="font-size:13px;margin-bottom:0">
+          <li><b style="color:var(--red)">CEO transition</b> &mdash; this was Tim Cook's final earnings call</li>
+          <li><b style="color:var(--ink)">$600bn US reshoring commitment</b>, with supplier implications still working through</li>
+          <li>Dividend raised to <b>$0.27</b> &mdash; a 14th consecutive annual increase</li>
+          <li>Price increases taken, forced by exponential memory cost growth</li>
+          <li><b style="color:var(--ink)">EPS has beaten in each of the last eight quarters</b>; this was the largest beat of the run, and the most inflated</li>
+        </ul></div>
+    </div></div>
+  <div class="rule"><span class="rid">The single question that matters</span><b>Is Siri AI good enough?</b> The 32% R&amp;D increase, the multiple, and the "AI inflection" framing all rest on it. Early beta commentary is mixed at best. This is a case where the <b>product review cycle is the financial catalyst</b> &mdash; and unlike a supply constraint or an FX headwind, it cannot be modelled, only observed.</div>
+  <div class="rule"><span class="rid">Two structural changes worth holding in mind</span>A <b>CEO transition</b> and a <b>$600bn reshoring commitment</b> are both multi-year uncertainties that do not show up in a quarterly model. Neither is a reason to avoid the stock; both are reasons the multiple may stay compressed while the market waits for evidence.</div>
+</section>
+<section id="gex">
+  <div class="sh"><div class="n">02</div><div><h2>Gamma structure</h2><p>Full chain. Walls on <b>open interest</b>, flip from the cumulative profile.</p></div></div>
+  <div class="gexp">
+    <div class="gexh"><div class="tk">AAPL</div><span class="badge">POSITIVE GAMMA</span>
+      <span class="b-out">spot +6.5% above flip</span><div class="st">OI RES 310 IS AT SPOT &middot; FLIP 290.56</div></div>
+    <div class="gexsub">Sep 18 + Jan 15 '27 &middot; strikes 266-356 &middot; spot &plusmn;15% &middot; gamma $m per 1% move &middot; Black-Scholes at 23.9% underlying IV</div><div class="gexsub" style="color:var(--inkLight)">Regime <b style="color:var(--gCall)">POSITIVE GAMMA</b> &nbsp;&middot;&nbsp; Net GEX <b>+$430m</b> &nbsp;&middot;&nbsp; <span style="color:var(--gFlip)">Flip <b>290.56</b></span> &nbsp;&middot;&nbsp; <span style="color:var(--gCall)">OI Res <b>310</b></span> &nbsp;&middot;&nbsp; <span style="color:var(--gPut)">OI Sup <b>305</b></span> &nbsp;&middot;&nbsp; <span style="color:var(--gPin)">Deep magnet <b>300</b></span></div>
+    <div style="padding:8px 10px 0"><svg viewBox="0 0 1000 330" role="img" aria-label="AAPL net gamma exposure by strike">
+      <line class="ggrid" x1="76" y1="253.9" x2="974" y2="253.9"/><text class="gax" x="67" y="257.4" text-anchor="end">0</text><line class="ggrid" x1="76" y1="205.6" x2="974" y2="205.6"/><text class="gax" x="67" y="209.1" text-anchor="end">20</text><line class="ggrid" x1="76" y1="157.4" x2="974" y2="157.4"/><text class="gax" x="67" y="160.9" text-anchor="end">40</text><line class="ggrid" x1="76" y1="109.1" x2="974" y2="109.1"/><text class="gax" x="67" y="112.6" text-anchor="end">60</text><line class="ggrid" x1="76" y1="60.8" x2="974" y2="60.8"/><text class="gax" x="67" y="64.3" text-anchor="end">80</text>
+      <line x1="76" y1="253.9" x2="974" y2="253.9" stroke="#22415F" stroke-width="1"/>
+      <rect class="gput" x="100.1" y="253.9" width="31.0" height="5.2"/><rect class="gput" x="150.2" y="253.9" width="31.0" height="1.5"/><rect class="gput" x="200.2" y="253.9" width="31.0" height="2.7"/><rect class="gput" x="250.3" y="253.9" width="31.0" height="3.4"/><rect class="gput" x="300.3" y="253.9" width="31.0" height="7.7"/><rect class="gput" x="350.4" y="253.9" width="31.0" height="3.1"/><rect class="gcall" x="400.4" y="139.3" width="31.0" height="114.6"/><rect class="gcall" x="450.5" y="224.9" width="31.0" height="29.0"/><rect class="gcall" x="500.5" y="193.4" width="31.0" height="60.5"/><rect class="gcall" x="550.6" y="220.1" width="31.0" height="33.8"/><rect class="gcall" x="600.6" y="58.5" width="31.0" height="195.4"/><rect class="gcall" x="650.7" y="228.6" width="31.0" height="25.3"/><rect class="gcall" x="700.7" y="215.3" width="31.0" height="38.6"/><rect class="gcall" x="750.8" y="237.0" width="31.0" height="16.9"/><rect class="gcall" x="800.8" y="222.6" width="31.0" height="31.3"/><rect class="gcall" x="850.9" y="238.2" width="31.0" height="15.7"/><rect class="gcall" x="900.9" y="173.7" width="31.0" height="80.2"/><rect class="gcall" x="951.0" y="249.1" width="31.0" height="4.8"/>
+      <line x1="415.9" y1="26" x2="415.9" y2="265.9" stroke="#9B7BD4" stroke-width="2.2" stroke-dasharray="2 4" opacity=".8"/>
+      <line x1="466.0" y1="26" x2="466.0" y2="265.9" stroke="#C43A30" stroke-width="2.2" stroke-dasharray="3 3" opacity=".85"/>
+      <line x1="516.0" y1="26" x2="516.0" y2="265.9" stroke="#2D8A55" stroke-width="2.4" stroke-dasharray="3 3"/>
+      <line x1="321.4" y1="26" x2="321.4" y2="265.9" stroke="#E8C34A" stroke-width="3" stroke-dasharray="6 4"/>
+      <line x1="509.5" y1="26" x2="509.5" y2="265.9" stroke="#3B82C4" stroke-width="3.2"/>
+      <text class="gax" x="115.6" y="312" text-anchor="middle">270</text><text class="gax" x="215.7" y="312" text-anchor="middle">280</text><text class="gax" x="315.8" y="312" text-anchor="middle">290</text><text class="gax" x="415.9" y="312" text-anchor="middle">300</text><text class="gax" x="516.0" y="312" text-anchor="middle">310</text><text class="gax" x="616.1" y="312" text-anchor="middle">320</text><text class="gax" x="716.2" y="312" text-anchor="middle">330</text><text class="gax" x="816.3" y="312" text-anchor="middle">340</text><text class="gax" x="916.4" y="312" text-anchor="middle">350</text>
+      <text class="gax" x="18" y="156.0" transform="rotate(-90 18 156.0)" text-anchor="middle">Net GEX $m</text>
+    </svg></div>
+    <div class="gkey"><span><i style="background:#2D8A55"></i>Call gamma</span><span><i style="background:#C43A30"></i>Put gamma</span>
+      <span><i style="background:#E7EEF6"></i>Cumulative</span><span><i style="background:#3B82C4;width:3px;height:11px"></i>Spot 309.35</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#E8C34A 0 5px,transparent 5px 9px);width:14px;height:3px"></i>G-Flip 271.45</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#2D8A55 0 3px,transparent 3px 6px)"></i>OI Wall 300</span>
+      <span class="note">Bars show <b>gamma in dollars</b>; walls are chosen on <b>open interest</b>, so the widest bar and the wall need not be the same strike. Above zero = call gamma, dealers sell into strength; below = put gamma, dealers buy weakness.</span></div>
+    <div class="lad">
+      <div class="lrow l-call"><span class="p">350.00</span><span class="lab" style="color:var(--gCall)">UPPER CALL SHELF</span><span class="d">64,031 contracts. Above the all-time high &mdash; where a breakout would meet real supply.</span></div>
+      <div class="lrow l-call"><span class="p">320.00</span><span class="lab" style="color:var(--gCall)">CALL WALL &middot; NEAREST RESISTANCE</span><span class="d">69,181 contracts, 3.4% overhead. The first genuine ceiling and the level that caps the near-term move.</span></div>
+      <div class="lrow l-spot"><span class="p">SPOT</span><span class="lab" style="color:var(--gSpot)">FRI 21 AUG CLOSE</span><span class="d" style="text-align:right;font-family:var(--mono);font-weight:700;color:var(--gSpot);font-size:15px">309.35</span></div>
+      <div class="lrow l-call"><span class="p">300.00</span><span class="lab" style="color:var(--gCall)">LARGEST OI &middot; NOW SUPPORT</span><span class="d"><b>93,742 calls and 34,692 puts.</b> The biggest concentration in the chain sits <i>below</i> price &mdash; dealers buy pullbacks toward it.</span></div>
+      <div class="lrow l-flip"><span class="p">290.56</span><span class="lab" style="color:var(--gFlip)">THE FLIP</span><span class="d">6.5% below spot &mdash; 2.5 ATRs. Comfortable, but less than a single-expiry read suggests.</span></div>
+      <div class="lrow l-put"><span class="p">200.00</span><span class="lab" style="color:var(--gPut)">TAIL HEDGE</span><span class="d">21,479 January puts. Disaster insurance, not a support level.</span></div>
+    </div>
+    <div class="narr"><b style="color:var(--ink)">Net gamma +$430m per 1% on the full chain &mdash; the largest of any name reviewed, and the regime is comfortably positive.</b> But the levels are tighter than a sampled read suggests. <b style="color:var(--gCall)">OI resistance sits at $310, effectively on top of spot</b>, with support at $305 and a deep magnet at $300. Price is pinned between three nodes inside a 3% band. The flip at <b style="color:var(--gFlip)">$290.56</b> is 6.5% below &mdash; 2.5 ATRs, comfortable but not the 5-plus ATRs a partial chain implied. <b style="color:var(--ink)">This is a pin, not a trend.</b> Dealers dampen hard in both directions while price sits between 305 and 310, and the first real decision point is a clean break of one of them.</div>
+  </div>
+  <div class="two" style="margin-top:18px">
+    <div class="card"><h3>By expiry</h3>
+      <div class="tw" style="border:none;background:transparent"><table style="font-size:12.5px">
+        <tr><th>Expiry</th><th class="n">Days</th><th class="n">Call OI</th><th class="n">Put OI</th><th>Dominant</th></tr>
+        <tr class="me"><td>Sep 18 '26</td><td class="n">27</td><td class="n">129,363</td><td class="n">43,211</td><td class="mono am">320 call &middot; 32,921</td></tr>
+        <tr><td>Jan 15 '27</td><td class="n">145</td><td class="n">135,100</td><td class="n">38,528</td><td class="mono">300 call &middot; 66,331</td></tr>
+      </table></div>
+      <p style="font-size:12.8px;margin:10px 0 0;color:var(--inkLight)">January holds slightly more open interest but far less gamma at 145 days. <b style="color:var(--ink)">September governs hedging now</b>, and its dominant strike is the $320 wall directly overhead.</p></div>
+    <div class="card"><h3>Positioning</h3>
+      <div class="kv"><span>Net GEX, full chain</span><span class="am">+$430m / 1%</span></div>
+      <div class="kv"><span>Call OI : Put OI</span><span class="am">3.24 : 1</span></div>
+      <div class="kv"><span>Distance to flip</span><span class="up">-6.5% &middot; 2.5 ATR</span></div>
+      <div class="kv"><span>OI resistance</span><span class="dn">310 &mdash; at spot</span></div>
+      <div class="kv"><span>Implied vol</span><span>23.9%</span></div>
+      <div class="kv"><span>Realised vol 30d</span><span class="am">36.0%</span></div>
+      <div class="kv"><span>IV percentile 52w</span><span>42nd</span></div>
+      <div class="kv"><span>Friday option volume</span><span>924k C / 611k P</span></div>
+      <p style="font-size:12.8px;margin:10px 0 0;color:var(--inkLight)">Realised volatility is running <b style="color:var(--ink)">12 points above implied</b> &mdash; the widest gap of the three names. Options are cheap relative to how much this has actually been moving.</p></div>
+  </div>
+  <div class="rule"><span class="rid">Source note &mdash; this section uses Phoenix's own GEX</span>An independently sampled chain of seven strikes gave a flip of 271.45 and resistance at 320. <b>Phoenix's engine reads every strike and gives flip 290.56, OI resistance 310, support 305, deep magnet 300, net +$430m.</b> The full chain is the correct input and the sampled version was wrong in a way that mattered: it placed resistance 3.4% overhead when it is actually <i>at spot</i>. <b style="color:var(--ink)">Where Phoenix publishes a GEX reading, use it. Compute independently only for tickers Phoenix does not cover.</b></div>
+  <div class="rule"><span class="rid">What deep positive gamma actually means for a trade</span>It cuts both ways and the second half is usually forgotten. Dealers dampen <b>every</b> move, so drawdowns are cushioned &mdash; and so are advances. In this regime a breakout has to overcome hedging flow rather than being helped by it. <b style="color:var(--ink)">$310 is where that resistance concentrates, and it is already here</b>, and clearing it on volume would invert the mechanic: dealers short gamma above the strike must buy, and 69,181 contracts of supply becomes demand. Below, the $300 node is the floor that has to break before anything gets disorderly.</div>
+</section>
+
+<section id="price">
+  <div class="sh"><div class="n">03</div><div><h2>Price and trend</h2><p>A clean advance from April, an all-time high in July, and a sharp post-earnings reset.</p></div></div>
+  <div class="chart"><svg viewBox="0 0 1000 300" role="img" aria-label="AAPL one-year daily price">
+    <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D37736" stop-opacity=".18"/><stop offset="100%" stop-color="#D37736" stop-opacity="0"/></linearGradient></defs>
+    <line class="grid" x1="58" y1="241.9" x2="984" y2="241.9"/><text class="axl" x="50" y="245.4" text-anchor="end">$235</text><line class="grid" x1="58" y1="172.8" x2="984" y2="172.8"/><text class="axl" x="50" y="176.3" text-anchor="end">$270</text><line class="grid" x1="58" y1="113.7" x2="984" y2="113.7"/><text class="axl" x="50" y="117.2" text-anchor="end">$300</text><line class="grid" x1="58" y1="44.7" x2="984" y2="44.7"/><text class="axl" x="50" y="48.2" text-anchor="end">$335</text><path class="ar" d="M58.0,256.1 L61.7,257.3 L65.4,253.1 L69.1,250.7 L72.8,246.7 L76.5,247.5 L80.2,252.3 L83.9,235.0 L87.6,232.4 L91.3,232.6 L95.0,236.2 L98.7,243.1 L102.4,258.0 L106.2,251.7 L109.9,243.7 L113.6,238.5 L117.3,235.6 L121.0,234.0 L124.7,236.2 L128.4,221.2 L132.1,200.3 L135.8,203.5 L139.5,207.7 L143.2,198.7 L146.9,201.5 L150.6,203.5 L154.3,203.2 L158.0,201.5 L161.7,198.2 L165.4,196.5 L169.1,199.1 L172.8,199.5 L176.5,196.4 L180.2,204.3 L183.9,221.6 L187.6,216.9 L191.3,216.7 L195.0,213.6 L198.8,217.3 L202.5,207.8 L206.2,188.1 L209.9,187.1 L213.6,195.6 L217.3,193.4 L221.0,187.0 L224.7,175.2 L228.4,174.8 L232.1,173.4 L235.8,170.1 L239.5,172.1 L243.2,174.7 L246.9,172.8 L250.6,172.6 L254.3,173.3 L258.0,175.9 L261.7,174.0 L265.4,162.5 L269.1,166.0 L272.8,167.0 L276.5,168.1 L280.2,177.9 L283.9,177.9 L287.6,175.7 L291.4,180.2 L295.1,169.9 L298.8,161.2 L302.5,159.1 L306.2,158.0 L309.9,155.4 L313.6,147.0 L317.3,140.9 L321.0,144.9 L324.7,151.7 L328.4,155.5 L332.1,157.3 L335.8,158.7 L339.5,155.5 L343.2,157.0 L346.9,156.5 L350.6,164.7 L354.3,163.8 L358.0,169.2 L361.7,168.5 L365.4,165.6 L369.1,170.9 L372.8,168.2 L376.5,165.3 L380.2,166.1 L384.0,165.4 L387.7,166.8 L391.4,169.2 L395.1,170.9 L398.8,178.2 L402.5,187.9 L406.2,191.9 L409.9,194.5 L413.6,193.8 L417.3,192.1 L421.0,190.5 L424.7,192.6 L428.4,196.1 L432.1,201.4 L435.8,218.8 L439.5,216.9 L443.2,215.5 L446.9,216.1 L450.6,201.6 L454.3,196.0 L458.0,199.6 L461.7,196.0 L465.4,193.6 L469.1,172.8 L472.8,173.9 L476.6,160.0 L480.3,161.2 L484.0,156.8 L487.7,163.7 L491.4,165.6 L495.1,162.0 L498.8,189.2 L502.5,200.9 L506.2,184.9 L509.9,184.0 L513.6,191.4 L517.3,183.5 L521.0,180.4 L524.7,168.6 L528.4,164.5 L532.1,167.0 L535.8,184.3 L539.5,183.3 L543.2,185.2 L546.9,187.6 L550.6,192.0 L554.3,197.6 L558.0,192.8 L561.7,190.9 L565.4,191.0 L569.2,200.9 L572.9,212.0 L576.6,206.7 L580.3,203.9 L584.0,212.4 L587.7,214.3 L591.4,216.2 L595.1,209.3 L598.8,209.0 L602.5,207.1 L606.2,206.6 L609.9,214.6 L613.6,218.9 L617.3,204.8 L621.0,201.2 L624.7,200.6 L628.4,194.8 L632.1,205.4 L635.8,194.7 L639.5,191.6 L643.2,191.6 L646.9,194.1 L650.6,194.9 L654.3,179.9 L658.0,185.9 L661.8,172.4 L665.5,166.8 L669.2,180.4 L672.9,166.6 L676.6,166.1 L680.3,170.8 L684.0,177.6 L687.7,171.4 L691.4,172.5 L695.1,170.2 L698.8,152.9 L702.5,159.4 L706.2,144.9 L709.9,138.3 L713.6,138.5 L717.3,126.9 L721.0,128.1 L724.7,123.9 L728.4,115.9 L732.1,117.2 L735.8,113.2 L739.5,118.0 L743.2,115.7 L746.9,109.3 L750.6,103.9 L754.4,96.3 L758.1,97.3 L761.8,92.3 L765.5,89.0 L769.2,89.9 L772.9,101.3 L776.6,83.7 L780.3,93.5 L784.0,91.6 L787.7,99.2 L791.4,110.7 L795.1,132.3 L798.8,130.3 L802.5,122.3 L806.2,131.2 L809.9,120.8 L813.6,115.2 L817.3,121.7 L821.0,117.6 L824.7,119.6 L828.4,124.9 L832.1,127.3 L835.8,162.7 L839.5,145.7 L843.2,149.7 L847.0,134.7 L850.7,124.8 L854.4,96.7 L858.1,88.7 L861.8,92.7 L865.5,87.3 L869.2,81.7 L872.9,83.5 L876.6,79.6 L880.3,84.4 L884.0,59.5 L887.7,48.1 L891.4,47.2 L895.1,61.3 L898.8,59.0 L902.5,62.6 L906.2,71.0 L909.9,48.6 L913.6,40.9 L917.3,34.7 L921.0,38.4 L924.7,47.8 L928.4,96.1 L932.1,107.0 L935.8,95.2 L939.6,92.0 L943.3,89.2 L947.0,87.4 L950.7,97.4 L954.4,104.0 L958.1,109.3 L961.8,103.3 L965.5,102.0 L969.2,102.7 L972.9,93.9 L976.6,80.5 L980.3,91.4 L984.0,95.3 L984.0,274.0 L58.0,274.0 Z"/><line x1="58" y1="113.7" x2="984" y2="113.7" stroke="#2D8A55" stroke-width="1" stroke-dasharray="3 4" opacity=".75"/><text class="lbl" x="64" y="108.7" fill="#2D8A55">$300 CALL WALL · 93,742 OI</text><line x1="58" y1="15.1" x2="984" y2="15.1" stroke="#2D8A55" stroke-width="1" stroke-dasharray="3 4" opacity=".75"/><text class="lbl" x="64" y="10.1" fill="#2D8A55">$350 · 64,031 OI</text>
+    <path class="m200" d="M795.1,180.9 L798.8,180.3 L802.5,179.6 L806.2,179.0 L809.9,178.4 L813.6,177.7 L817.3,177.1 L821.0,176.4 L824.7,175.8 L828.4,175.3 L832.1,174.8 L835.8,174.4 L839.5,173.9 L843.2,173.4 L847.0,172.8 L850.7,172.2 L854.4,171.5 L858.1,170.7 L861.8,170.0 L865.5,169.3 L869.2,168.6 L872.9,168.0 L876.6,167.4 L880.3,166.8 L884.0,166.1 L887.7,165.3 L891.4,164.5 L895.1,163.8 L898.8,163.1 L902.5,162.4 L906.2,161.8 L909.9,161.1 L913.6,160.3 L917.3,159.5 L921.0,158.6 L924.7,157.8 L928.4,157.2 L932.1,156.6 L935.8,156.0 L939.6,155.4 L943.3,154.8 L947.0,154.3 L950.7,153.8 L954.4,153.4 L958.1,153.0 L961.8,152.5 L965.5,152.2 L969.2,151.8 L972.9,151.4 L976.6,151.0 L980.3,150.6 L984.0,150.2"/><path class="m50" d="M239.5,215.7 L243.2,214.1 L246.9,212.4 L250.6,210.8 L254.3,209.3 L258.0,207.8 L261.7,206.4 L265.4,204.6 L269.1,203.2 L272.8,201.9 L276.5,200.6 L280.2,199.4 L283.9,198.1 L287.6,196.5 L291.4,195.0 L295.1,193.6 L298.8,192.0 L302.5,190.5 L306.2,189.0 L309.9,187.4 L313.6,185.9 L317.3,184.7 L321.0,183.5 L324.7,182.4 L328.4,181.5 L332.1,180.6 L335.8,179.8 L339.5,178.8 L343.2,177.9 L346.9,177.1 L350.6,176.4 L354.3,175.7 L358.0,175.1 L361.7,174.6 L365.4,173.8 L369.1,172.8 L372.8,171.8 L376.5,170.8 L380.2,169.8 L384.0,168.8 L387.7,168.0 L391.4,167.6 L395.1,167.3 L398.8,166.9 L402.5,166.8 L406.2,166.9 L409.9,167.3 L413.6,167.7 L417.3,168.1 L421.0,168.5 L424.7,168.9 L428.4,169.3 L432.1,169.9 L435.8,170.8 L439.5,171.7 L443.2,172.5 L446.9,173.3 L450.6,174.1 L454.3,174.7 L458.0,175.3 L461.7,175.9 L465.4,176.2 L469.1,176.1 L472.8,176.1 L476.6,175.7 L480.3,175.5 L484.0,175.4 L487.7,175.5 L491.4,175.6 L495.1,175.8 L498.8,176.6 L502.5,177.8 L506.2,178.6 L509.9,179.3 L513.6,180.0 L517.3,180.5 L521.0,180.9 L524.7,181.2 L528.4,181.4 L532.1,181.6 L535.8,182.0 L539.5,182.3 L543.2,182.7 L546.9,183.0 L550.6,183.6 L554.3,184.1 L558.0,184.6 L561.7,185.1 L565.4,185.6 L569.2,186.3 L572.9,187.2 L576.6,188.0 L580.3,188.6 L584.0,189.3 L587.7,189.8 L591.4,190.3 L595.1,190.6 L598.8,190.9 L602.5,191.2 L606.2,191.6 L609.9,192.0 L613.6,192.5 L617.3,192.5 L621.0,192.2 L624.7,191.8 L628.4,191.4 L632.1,191.2 L635.8,191.1 L639.5,191.0 L643.2,190.8 L646.9,190.8 L650.6,190.8 L654.3,191.0 L658.0,191.2 L661.8,191.4 L665.5,191.6 L669.2,192.0 L672.9,192.1 L676.6,192.1 L680.3,192.3 L684.0,192.0 L687.7,191.5 L691.4,191.2 L695.1,190.9 L698.8,190.2 L702.5,189.7 L706.2,189.0 L709.9,188.4 L713.6,187.8 L717.3,187.0 L721.0,185.9 L724.7,184.7 L728.4,183.3 L732.1,181.9 L735.8,180.4 L739.5,178.8 L743.2,177.2 L746.9,175.6 L750.6,173.8 L754.4,171.8 L758.1,169.5 L761.8,167.2 L765.5,164.9 L769.2,162.4 L772.9,160.2 L776.6,157.5 L780.3,155.2 L784.0,152.8 L787.7,150.7 L791.4,148.8 L795.1,147.1 L798.8,145.4 L802.5,143.7 L806.2,142.3 L809.9,140.7 L813.6,139.1 L817.3,137.4 L821.0,135.9 L824.7,134.5 L828.4,133.1 L832.1,131.8 L835.8,131.1 L839.5,130.5 L843.2,129.7 L847.0,129.0 L850.7,128.1 L854.4,126.5 L858.1,124.9 L861.8,123.4 L865.5,121.8 L869.2,119.9 L872.9,118.1 L876.6,116.2 L880.3,114.5 L884.0,112.7 L887.7,110.4 L891.4,108.5 L895.1,106.9 L898.8,105.3 L902.5,104.1 L906.2,102.9 L909.9,101.4 L913.6,99.9 L917.3,98.3 L921.0,96.8 L924.7,95.4 L928.4,95.0 L932.1,94.9 L935.8,94.7 L939.6,94.7 L943.3,94.5 L947.0,94.4 L950.7,94.6 L954.4,94.9 L958.1,95.0 L961.8,95.4 L965.5,95.6 L969.2,95.8 L972.9,95.7 L976.6,95.1 L980.3,94.3 L984.0,93.6"/><path class="pl" d="M58.0,256.1 L61.7,257.3 L65.4,253.1 L69.1,250.7 L72.8,246.7 L76.5,247.5 L80.2,252.3 L83.9,235.0 L87.6,232.4 L91.3,232.6 L95.0,236.2 L98.7,243.1 L102.4,258.0 L106.2,251.7 L109.9,243.7 L113.6,238.5 L117.3,235.6 L121.0,234.0 L124.7,236.2 L128.4,221.2 L132.1,200.3 L135.8,203.5 L139.5,207.7 L143.2,198.7 L146.9,201.5 L150.6,203.5 L154.3,203.2 L158.0,201.5 L161.7,198.2 L165.4,196.5 L169.1,199.1 L172.8,199.5 L176.5,196.4 L180.2,204.3 L183.9,221.6 L187.6,216.9 L191.3,216.7 L195.0,213.6 L198.8,217.3 L202.5,207.8 L206.2,188.1 L209.9,187.1 L213.6,195.6 L217.3,193.4 L221.0,187.0 L224.7,175.2 L228.4,174.8 L232.1,173.4 L235.8,170.1 L239.5,172.1 L243.2,174.7 L246.9,172.8 L250.6,172.6 L254.3,173.3 L258.0,175.9 L261.7,174.0 L265.4,162.5 L269.1,166.0 L272.8,167.0 L276.5,168.1 L280.2,177.9 L283.9,177.9 L287.6,175.7 L291.4,180.2 L295.1,169.9 L298.8,161.2 L302.5,159.1 L306.2,158.0 L309.9,155.4 L313.6,147.0 L317.3,140.9 L321.0,144.9 L324.7,151.7 L328.4,155.5 L332.1,157.3 L335.8,158.7 L339.5,155.5 L343.2,157.0 L346.9,156.5 L350.6,164.7 L354.3,163.8 L358.0,169.2 L361.7,168.5 L365.4,165.6 L369.1,170.9 L372.8,168.2 L376.5,165.3 L380.2,166.1 L384.0,165.4 L387.7,166.8 L391.4,169.2 L395.1,170.9 L398.8,178.2 L402.5,187.9 L406.2,191.9 L409.9,194.5 L413.6,193.8 L417.3,192.1 L421.0,190.5 L424.7,192.6 L428.4,196.1 L432.1,201.4 L435.8,218.8 L439.5,216.9 L443.2,215.5 L446.9,216.1 L450.6,201.6 L454.3,196.0 L458.0,199.6 L461.7,196.0 L465.4,193.6 L469.1,172.8 L472.8,173.9 L476.6,160.0 L480.3,161.2 L484.0,156.8 L487.7,163.7 L491.4,165.6 L495.1,162.0 L498.8,189.2 L502.5,200.9 L506.2,184.9 L509.9,184.0 L513.6,191.4 L517.3,183.5 L521.0,180.4 L524.7,168.6 L528.4,164.5 L532.1,167.0 L535.8,184.3 L539.5,183.3 L543.2,185.2 L546.9,187.6 L550.6,192.0 L554.3,197.6 L558.0,192.8 L561.7,190.9 L565.4,191.0 L569.2,200.9 L572.9,212.0 L576.6,206.7 L580.3,203.9 L584.0,212.4 L587.7,214.3 L591.4,216.2 L595.1,209.3 L598.8,209.0 L602.5,207.1 L606.2,206.6 L609.9,214.6 L613.6,218.9 L617.3,204.8 L621.0,201.2 L624.7,200.6 L628.4,194.8 L632.1,205.4 L635.8,194.7 L639.5,191.6 L643.2,191.6 L646.9,194.1 L650.6,194.9 L654.3,179.9 L658.0,185.9 L661.8,172.4 L665.5,166.8 L669.2,180.4 L672.9,166.6 L676.6,166.1 L680.3,170.8 L684.0,177.6 L687.7,171.4 L691.4,172.5 L695.1,170.2 L698.8,152.9 L702.5,159.4 L706.2,144.9 L709.9,138.3 L713.6,138.5 L717.3,126.9 L721.0,128.1 L724.7,123.9 L728.4,115.9 L732.1,117.2 L735.8,113.2 L739.5,118.0 L743.2,115.7 L746.9,109.3 L750.6,103.9 L754.4,96.3 L758.1,97.3 L761.8,92.3 L765.5,89.0 L769.2,89.9 L772.9,101.3 L776.6,83.7 L780.3,93.5 L784.0,91.6 L787.7,99.2 L791.4,110.7 L795.1,132.3 L798.8,130.3 L802.5,122.3 L806.2,131.2 L809.9,120.8 L813.6,115.2 L817.3,121.7 L821.0,117.6 L824.7,119.6 L828.4,124.9 L832.1,127.3 L835.8,162.7 L839.5,145.7 L843.2,149.7 L847.0,134.7 L850.7,124.8 L854.4,96.7 L858.1,88.7 L861.8,92.7 L865.5,87.3 L869.2,81.7 L872.9,83.5 L876.6,79.6 L880.3,84.4 L884.0,59.5 L887.7,48.1 L891.4,47.2 L895.1,61.3 L898.8,59.0 L902.5,62.6 L906.2,71.0 L909.9,48.6 L913.6,40.9 L917.3,34.7 L921.0,38.4 L924.7,47.8 L928.4,96.1 L932.1,107.0 L935.8,95.2 L939.6,92.0 L943.3,89.2 L947.0,87.4 L950.7,97.4 L954.4,104.0 L958.1,109.3 L961.8,103.3 L965.5,102.0 L969.2,102.7 L972.9,93.9 L976.6,80.5 L980.3,91.4 L984.0,95.3"/>
+    <circle cx="984.0" cy="95.3" r="3.4" fill="#E7EEF6"/><text class="axl" x="87.6" y="292" text-anchor="middle">Sep 25</text><text class="axl" x="243.2" y="292" text-anchor="middle">Nov</text><text class="axl" x="398.8" y="292" text-anchor="middle">Jan 26</text><text class="axl" x="554.3" y="292" text-anchor="middle">Mar</text><text class="axl" x="709.9" y="292" text-anchor="middle">May</text><text class="axl" x="865.5" y="292" text-anchor="middle">Jul</text><text class="axl" x="984.0" y="292" text-anchor="middle">Aug</text></svg>
+    <div class="legend"><span><i style="background:#E7EEF6"></i>Close</span><span><i style="background:#D37736"></i>50-day</span><span><i style="background:#5E7C99"></i>200-day</span><span>251 sessions &middot; IBKR daily</span></div></div>
+  <div class="note"><b>This is the only one of the three with an intact uptrend.</b> From roughly $275 in April to an all-time high of <b>$344.57</b> in July, then a sharp reset to $300 on the guidance and a recovery to $309. Both the 40-week and 30-week averages are <b>rising</b> and price is well above them. The damage is confined to the last four weeks and to the 10-week average, which price is now $1.65 beneath. <b style="color:var(--ink)">Structurally this is a pullback inside an advance</b> &mdash; the opposite diagnosis to the other two names.</div>
+</section>
+
+<section id="gates">
+  <div class="sh"><div class="n">04</div><div><h2>The gate stack</h2><p>Weekly bars as <span class="mono">phoenix.py</span> computes them.</p></div></div>
+  <div class="gates">
+    <div class="gate f"><div class="idx">01</div><div><div class="nm">trend50 &mdash; above 10-week</div><div class="dt">$309.35 vs 10-week SMA <b class="mono">$311.00</b> &mdash; <b>$1.65 below, 0.5%</b>. The average is itself rising. Fails by a fifth of one ATR.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate f"><div class="idx">02</div><div><div class="nm">near_high &mdash; 104-week</div><div class="dt">104-week high $344.57. Price is <b class="mono">-10.2%</b>; the gate accepts -8% to -1%. <b>Misses by 2.2 percentage points</b> &mdash; $317.00 would satisfy it.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate"><div class="idx">03</div><div><div class="nm">industry</div><div class="dt">Needs <span class="mono">rotation_nav</span> and the 116-industry taxonomy. XLK is 98.4% of its 52-week high and +22.2% YTD, so the sector is unambiguously strong &mdash; but that is the sector, not the industry gate.</div></div><div class="tag t-warn">UNVERIFIED</div></div>
+    <div class="gate"><div class="idx">04</div><div><div class="nm">trend200 &mdash; above 40-week</div><div class="dt">$309.35 vs 40-week SMA <b class="mono">$281.89</b>, +9.7% above, and the average is <b>rising</b> (was $277.81). A clean pass on level and slope.</div></div><div class="tag t-pass">PASS</div></div>
+    <div class="gate"><div class="idx">05</div><div><div class="nm">stage2 &mdash; Weinstein</div><div class="dt">Price above the 30-week at $286.24 <b>and</b> the 30-week rising (was $279.46). <b style="color:var(--green)">Both conditions satisfied &mdash; genuine Stage 2.</b></div></div><div class="tag t-pass">PASS</div></div>
+  </div>
+  <div class="stamp" style="border-color:var(--amber)"><div class="x">2 FAIL &middot; 1 UNVERIFIED &middot; 2 PASS &mdash; both failures inside one ATR</div><div class="o" style="color:var(--amber)">NEAR MISS</div></div>
+  <div class="rule"><span class="rid">Why this one is different</span><b>Apple passes <span class="mono">stage2</span>.</b> Neither of the other two names does, and it is the gate that carries the most weight &mdash; a rising 30-week average with price above it is the definition of the stage this book trades. What fails is a 10-week average that price is $1.65 under, and a high-proximity test missed by 2.2 points. <b style="color:var(--ink)">Those are timing failures, not structural ones.</b> The distinction matters: SOFI and UBER need the trend to change; Apple needs four good sessions.</div>
+  <div class="rule"><span class="rid">The precise thresholds</span><span class="mono">trend50</span> restores on any close above <b class="mono am">$311.00</b> &mdash; 0.5% away, a fifth of one ATR. <span class="mono">near_high</span> requires <b class="mono am">$317.00</b>, which is 2.5% away, roughly one ATR. <b>A single strong week clears both.</b> Watch for it rather than anticipating it.</div>
+</section>
+<section id="vol">
+  <div class="sh"><div class="n">V</div><div><h2>Volatility profile</h2>
+  <p>What the options market expects, what the stock has actually done, and what that means for the stop.</p></div></div>
+  <div class="strip" style="margin-top:0">
+    <div class="cell"><div class="k">Implied vol &middot; annual</div><div class="v">23.9%</div><div class="s">options market</div></div>
+    <div class="cell"><div class="k">Realised vol &middot; 30d</div><div class="v">36.0%</div><div class="s">what it did</div></div>
+    <div class="cell"><div class="k">Spread</div><div class="v dn">-12.1</div><div class="s dn">IMPLIED BELOW REALISED</div></div>
+    <div class="cell"><div class="k">IV percentile 52w</div><div class="v ">42th</div><div class="s ">mid</div></div>
+    <div class="cell"><div class="k">Daily ATR-14</div><div class="v">7.63</div><div class="s">2.5% of price</div></div>
+    <div class="cell"><div class="k">IV-implied daily</div><div class="v">1.50%</div><div class="s">$4.65</div></div>
+    <div class="cell"><div class="k">1-month 1&sigma;</div><div class="v">&plusmn;6.9%</div><div class="s">from implied</div></div>
+    <div class="cell"><div class="k">Stop basis</div><div class="v dn" style="font-size:14px">REALISED</div><div class="s">use for sizing</div></div>
+  </div>
+  <div class="rule"><span class="rid">Reading the spread</span>A 12-point gap on a mega-cap is unusual. Realised 36.0% reflects the July all-time high and the 6% guidance drop; implied has already forgotten both. Implied volatility is <b class="mono dn">34% below</b> what the stock has actually been doing. <b style="color:var(--ink)">A stop sized from the options market would be roughly 34% too tight.</b> Size from the measured range instead: <b class="mono am">$7.63</b> per day.</div>
+  <div class="note"><b>Why this section exists.</b> Implied volatility is a <i>forecast</i>; realised volatility is a <i>measurement</i>. When they diverge, the options market and the tape disagree about how much room a position needs &mdash; and a stop placed on the wrong one is either harvested by noise or wider than the account can carry. <b style="color:var(--ink)">Across the eleven names reviewed this weekend, nine had implied below realised</b>, several by more than fifteen points. <b>Default to the measured range unless the two agree.</b></div>
+</section>
+
+<section id="rr">
+  <div class="sh"><div class="n">05</div><div><h2>Reward-to-risk</h2><p>Deep positive gamma gives an unusually clean stop. The ceiling is what constrains the ratio.</p></div></div>
+  <div class="note" style="border-left-color:var(--gold)"><b>The $300 open-interest node is the stop level.</b> 93,742 calls and 34,692 puts at one strike, sitting 3.0% below price, with dealers buying pullbacks toward it. That is a firmer floor than any drawn support line &mdash; and unlike the other two names, <b style="color:var(--amber)">the gamma flip is 14% away, so no realistic stop fills inside negative gamma.</b> This is the cleanest execution environment of the three.</div>
+  <div class="tw"><table>
+    <tr><th>Scenario</th><th class="n">Entry</th><th class="n">Stop</th><th class="n">Stop dist</th><th class="n">&times;ATR</th><th class="n">R:R &rarr; 320</th><th class="n">R:R &rarr; 344</th><th class="n">Shares</th></tr>
+    <tr class="hlr"><td>Buying here, below the 10-week</td><td class="n">309.35</td><td class="n">296.19</td><td class="n">4.3%</td><td class="n">1.72</td><td class="n dn">0.81 : 1</td><td class="n">2.67 : 1</td><td class="n">1.5</td></tr>
+    <tr><td>$300 node &minus; 1.0 ATR</td><td class="n">309.35</td><td class="n">292.37</td><td class="n">5.5%</td><td class="n">2.23</td><td class="n dn">0.63 : 1</td><td class="n">2.07 : 1</td><td class="n">1.2</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Gate-triggered entry above 311</b></td><td class="n">311.50</td><td class="n">303.37</td><td class="n">2.6%</td><td class="n">1.07</td><td class="n">1.05 : 1</td><td class="n up"><b>4.07 : 1</b></td><td class="n">2.5</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Breakout above the $320 wall</b></td><td class="n">321.00</td><td class="n">311.00</td><td class="n">3.1%</td><td class="n">1.31</td><td class="n">&mdash;</td><td class="n up"><b>2.36 : 1</b></td><td class="n">2.0</td></tr>
+  </table></div>
+  <div class="note" style="border-left-color:var(--gold)"><b>Reading the table:</b> <b style="color:var(--ink)">Stop dist</b> is how far the stop sits from entry as a percentage of the <i>share price</i> &mdash; it is not the percentage of the account at risk. <b style="color:var(--ink)">Account risk is 1.00% in every row</b>, fixed at $20 on a $2,000 book. Share count is derived from it: <span class="mono">shares = $20 &divide; (entry &minus; stop)</span>. A wider stop buys fewer shares, not more risk. The only figure that varies with stop distance is <b>position value</b>, which is why the concentration cap and the 1R budget are separate constraints on separate axes.</div>
+  <div class="three" style="margin-top:18px">
+    <div class="card"><h3>Buying here</h3><p style="font-size:13.5px;margin-bottom:8px">Works to the all-time high at <b class="mono">2.67:1</b>, but it means entering <i>below</i> a rising 10-week average with the gate failing &mdash; which is precisely the discretionary override the gate stack exists to prevent.</p><p style="font-size:13.5px;margin:0"><b style="color:var(--red)">Ratio is acceptable; the process is not.</b></p></div>
+    <div class="card"><h3>For 2 : 1</h3><p style="font-size:13.5px;margin-bottom:8px">Available three ways &mdash; and the best is the one that also satisfies the gates: <b class="mono am">entry above $311.50, stop $303.37</b>, targeting the July high. <b class="mono up">4.07:1</b> on a 1.07 ATR stop.</p><p style="font-size:13.5px;margin:0"><b style="color:var(--green)">Best structure of the three names.</b></p></div>
+    <div class="card"><h3>For 3 : 1</h3><p style="font-size:13.5px;margin-bottom:8px">The gate-triggered entry delivers <b class="mono up">4.07:1</b> to $344.57 with a stop just above the $300 node. The constraint is the <b>$320 wall in between</b>, which will slow the move.</p><p style="font-size:13.5px;margin:0"><b style="color:var(--green)">Achievable, with patience through 320.</b></p></div>
+  </div>
+  <div class="rule"><span class="rid">If $320 clears &mdash; the case against a fixed target</span>69,181 contracts of dealer supply sit at $320, and clearing it on volume inverts the flow. Above the all-time high at $344.57 there is <b>no open interest structure at all</b> &mdash; the chain simply thins out. That is the condition in which a trailing exit earns its keep: entry 311.50 with a stop at 303.37 pays <b class="mono">4.07:1 at $344</b>, <b class="mono up">5.98:1 at $360</b>, <b class="mono up">8.44:1 at $380</b>. A fixed target at the old high would exit exactly where the resistance ends.</div>
+  <div class="note"><b>Cost floor.</b> &euro;1 per round trip on a $2,000 account is <b class="mono dn">0.054R</b>; the book needs <b class="mono am">1.70R</b> to break even. Note the position-size problem at this price: <b style="color:var(--ink)">a 1R risk of $20 against a $8.13 stop distance buys 2.5 shares, or $780 of stock &mdash; 39% of the account</b>, which breaches the 35% concentration cap. <b class="mono dn">This trade is too large for the account even when the ratio works.</b></div>
+</section>
+
+<section id="news">
+  <div class="sh"><div class="n">06</div><div><h2>News flow</h2></div></div>
+  <div class="news" style="margin-bottom:18px">
+    <div class="nhdr">Ticker-specific &mdash; AAPL</div>
+    <div class="nrow"><div class="dt">THU 30 JUL</div><div><div class="hd"><span class="pill neu">EARNINGS</span>Record June quarter, then a 6% fall on guidance</div>
+      <div class="bd">$109.4bn revenue (+16%), EPS $2.02 (+29%), records in every geography. Shares fell over 6% after hours on September-quarter guidance of +9-11% with supply constraints across iPhone, Mac and iPad. <b style="color:var(--amber)">The quarter was not the problem; the next one is.</b></div></div></div>
+    <div class="nrow"><div class="dt">THU 30 JUL</div><div><div class="hd"><span class="pill bear">QUALITY OF EARNINGS</span>Half the beat was a one-time tariff refund</div>
+      <div class="bd">$0.11 of the $0.13 beat, and roughly 2 points of the 50.1% gross margin. Adjusted, EPS was $1.91 against $1.89 expected. <b style="color:var(--ink)">The largest beat in eight quarters was also the least operational.</b></div></div></div>
+    <div class="nrow"><div class="dt">THU 30 JUL</div><div><div class="hd"><span class="pill bear">SERVICES</span>$30.74bn missed the $31.22bn estimate</div>
+      <div class="bd">Still a June record and +12%, but Services is the margin engine and the line the multiple depends on. Cook attributed the shortfall to sequential FX headwinds.</div></div></div>
+    <div class="nrow"><div class="dt">JUL</div><div><div class="hd"><span class="pill bull">PRODUCT</span>All-new Siri AI at WWDC26; R&amp;D up 32%</div>
+      <div class="bd">The centrepiece of the AI story and the justification for the spending step-up. Hybrid architecture across third-party cloud and Apple's own data centres. <b style="color:var(--amber)">Early beta reception has been mixed &mdash; the review cycle is the catalyst.</b></div></div></div>
+    <div class="nrow"><div class="dt">JUL</div><div><div class="hd"><span class="pill neu">LEADERSHIP</span>Tim Cook's final earnings call as CEO</div>
+      <div class="bd">A transition of this scale is a multi-year uncertainty that no quarterly model captures. Not a reason to avoid the stock; a reason the multiple may stay compressed while the market waits.</div></div></div>
+    <div class="nrow"><div class="dt">AUG</div><div><div class="hd"><span class="pill neu">CAPITAL</span>Dividend raised to $0.27 &mdash; 14th straight annual increase</div>
+      <div class="bd">$62.1bn of buybacks and $11.8bn of dividends across nine months, against ~$117bn of operating cash flow. The return machine is intact and accelerating.</div></div></div>
+  </div>
+  <div class="news">
+    <div class="nhdr">Market-wide &mdash; reaches AAPL through supply chains, tariffs and the AI trade</div>
+    <div class="nrow"><div class="dt">ONGOING</div><div><div class="hd"><span class="pill bear">SUPPLY</span>Memory costs rising exponentially; advanced-node availability tight</div>
+      <div class="bd">Cook said Apple did not want to raise prices and was forced to. Constrained advanced nodes affect iPhone, Mac and iPad simultaneously &mdash; an industry condition, not an Apple execution failure, which means it hits peers too.</div></div></div>
+    <div class="nrow"><div class="dt">ONGOING</div><div><div class="hd"><span class="pill neu">TARIFFS</span>Refunds flattered this quarter; the policy remains live</div>
+      <div class="bd">A $0.11 EPS benefit this quarter and a guided one-point margin benefit next. <b style="color:var(--ink)">A tailwind that reverses is a headwind</b>, and the $600bn reshoring commitment is the structural response.</div></div></div>
+    <div class="nrow"><div class="dt">CONTEXT</div><div><div class="hd"><span class="pill bull">SECTOR</span>Technology within 2% of its 52-week high</div>
+      <div class="bd">XLK +22.2% YTD, +34.0% over a year, 98.4% of its high. <b style="color:var(--amber)">Apple at +14.1% YTD is lagging its own sector by 8 points</b> &mdash; the backdrop is not the constraint here.</div></div></div>
+    <div class="nrow"><div class="dt">CONTEXT</div><div><div class="hd"><span class="pill neu">POSITIONING</span>Realised volatility 12 points above implied</div>
+      <div class="bd">36.0% realised against 23.9% implied &mdash; the widest gap of the three names. The options market is underpricing movement, which is unusual for a mega-cap and worth noting before sizing.</div></div></div>
+  </div>
+  <div class="rule"><span class="rid">hormuz-illusion-single-catalyst &middot; R1</span>Name the condition the position rests on. Here it is <b>Siri AI reception</b>. The 32% R&amp;D increase, the "AI inflection" framing and a meaningful part of the multiple all depend on a product whose early reviews are mixed. Unlike FX or supply, it cannot be modelled &mdash; only observed, and probably not before the autumn release cycle.</div>
+</section>
+<section id="sector">
+  <div class="sh"><div class="n">07</div><div><h2>Sector and industry</h2><p>The sector is at its highs and Apple is lagging it.</p></div></div>
+  <div class="tw"><table>
+    <tr><th>Level</th><th>Instrument</th><th class="n">Friday</th><th class="n">YTD</th><th class="n">1-year</th><th class="n">% of 52w high</th></tr>
+    <tr><td class="mono" style="color:var(--inkFade)">SECTOR</td><td><b style="color:var(--ink)">XLK</b> &middot; Technology</td><td class="n up">+0.91%</td><td class="n up">+22.2%</td><td class="n up">+34.0%</td><td class="n up">98.4%</td></tr>
+    <tr class="me"><td class="mono" style="color:var(--gold)">SUBJECT</td><td><b style="color:var(--ink)">AAPL</b> &middot; Apple Inc.</td><td class="n dn">-0.52%</td><td class="n up">+14.1%</td><td class="n">&mdash;</td><td class="n wr">89.8%</td></tr>
+    <tr><td class="mono" style="color:var(--inkFade)">REFERENCE</td><td><b style="color:var(--ink)">XLF</b> &middot; Financials</td><td class="n up">+0.93%</td><td class="n up">+5.5%</td><td class="n up">+10.4%</td><td class="n up">98.4%</td></tr>
+  </table></div>
+  <div class="note"><b>Apple is up 14.1% this year into a sector up 22.2% &mdash; an 8-point deficit.</b> Read that with care: at a top-three index weight, Apple is a large component of the thing it is being compared against, so the gap measures <i>the rest of technology outrunning it</i> rather than Apple lagging an independent benchmark. At 89.8% of its 52-week high against a sector at 98.4%, Apple is the laggard in a leading group rather than a leader in a lagging one. <b style="color:var(--ink)">The tape is not what is holding this back; the September guidance is.</b></div>
+  <div class="rule"><span class="rid">For a top-weight index name, the sector is the wrong reference</span><b>Apple is a top-three weight in the S&amp;P 500, so the causation largely runs the other way.</b> It does not follow technology; it is a substantial part of what technology and the index <i>are</i>. For names of this size the governing context is <b style="color:var(--ink)">the index itself and the index gamma regime</b> &mdash; SPX dealer positioning moves AAPL through index-level hedging flow, ETF creation and redemption, and the passive bid, none of which pass through XLK first.
+  <p style="font-size:13px;margin:11px 0 0;color:var(--inkMed)">The rule of thumb: <b>the higher a name's correlation to SPX, the more the index and its gamma regime govern it; the lower the correlation, the more sector and industry matter.</b> For the top 20-30 index weights the sector comparison is close to decorative. It becomes genuinely informative somewhere past the top 50, and it is the primary reference for a mid-cap like SOFI, which has 33 points of relative deficit to XLF that is entirely its own.</p>
+  <p style="font-size:13px;margin:9px 0 0;color:var(--inkMed)"><b style="color:var(--amber)">This run did not retrieve SPX price data or SPX gamma.</b> Both belong here for a name this size and their absence is the real gap in this section &mdash; not the missing industry taxonomy.</p></div>
+
+  <div class="rule"><span class="rid">Data gap &middot; for the next run</span>The <span class="mono">industry</span> gate requires <span class="mono">rotation_nav</span> and the 116-industry taxonomy, neither of which is in this project. Sector strength is not a substitute &mdash; Apple's industry (Technology Hardware, Storage &amp; Peripherals) can diverge from XLK, which is heavily weighted to semiconductors and software.</div>
+</section>
+
+<section id="fund">
+  <div class="sh"><div class="n">08</div><div><h2>Q3 FY26 in numbers</h2><p>Reported 30 July. Read the adjusted line, not the headline.</p></div></div>
+  <div class="strip" style="margin-top:0">
+    <div class="cell"><div class="k">Revenue</div><div class="v">$109.4B</div><div class="s up">+16% YoY</div></div>
+    <div class="cell"><div class="k">Net income</div><div class="v">$29.8B</div><div class="s up">record June qtr</div></div>
+    <div class="cell"><div class="k">EPS reported</div><div class="v">$2.02</div><div class="s up">+29%</div></div>
+    <div class="cell"><div class="k">EPS ex-tariff</div><div class="v wr">$1.91</div><div class="s wr">vs $1.89 est</div></div>
+    <div class="cell"><div class="k">iPhone</div><div class="v up">$54.3B</div><div class="s up">+22%</div></div>
+    <div class="cell"><div class="k">Services</div><div class="v dn">$30.7B</div><div class="s dn">missed $31.2B</div></div>
+    <div class="cell"><div class="k">Mac</div><div class="v up">$10.35B</div><div class="s up">+29% &middot; big beat</div></div>
+    <div class="cell"><div class="k">Gross margin</div><div class="v">50.1%</div><div class="s wr">~48% ex-tariff</div></div>
+  </div>
+  <div class="note"><b>Two numbers tell the story.</b> iPhone at +22% is the best hardware quarter in years and shows the upgrade cycle is real. Services at +12% and <i>below</i> consensus is the one that matters more &mdash; it is the higher-margin line, it is what justifies the multiple, and it decelerated. <b style="color:var(--ink)">A hardware beat paired with a services miss is the wrong shape for a company valued as a platform.</b></div>
+</section>
+
+<section id="score">
+  <div class="sh"><div class="n">09</div><div><h2>Quality score</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Block</th><th class="n">Weight</th><th class="n">Score</th><th>Reasoning</th></tr>
+    <tr><td>Business quality</td><td class="n">30</td><td class="n up">28</td><td>~48% underlying gross margin, installed base at an all-time high everywhere, switching costs among the strongest in any industry</td></tr>
+    <tr><td>Growth</td><td class="n">20</td><td class="n up">15</td><td>+16% revenue and +22% iPhone are strong &mdash; but guidance decelerates to +9-11% and Services missed</td></tr>
+    <tr><td>Financial strength</td><td class="n">20</td><td class="n up">19</td><td>~$117bn of nine-month operating cash flow. Effectively unconstrained</td></tr>
+    <tr><td>Valuation</td><td class="n">20</td><td class="n am">12</td><td>Not cheap, but 10% off the high with earnings still growing. Better than the other two names on this axis</td></tr>
+    <tr><td>Shareholder alignment</td><td class="n">10</td><td class="n up">9</td><td>$62.1bn buybacks, $11.8bn dividends, 14 straight years of dividend increases</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Total</b></td><td class="n"><b>100</b></td><td class="n up"><b>83</b></td><td><b style="color:var(--ink)">High-quality candidate</b> &mdash; the 80-100 band</td></tr>
+  </table></div>
+  <div class="rule"><span class="rid">investment-scoring-100-point &middot; caveat</span>83/100 is the top band, and this is exactly where the caveat earns its keep. <b>Fundamental scoring is context, never an entry gate.</b> A high-quality business sitting below a rising 10-week average is still not a technical candidate &mdash; and a score this good is precisely what would tempt an override.</div>
+</section>
+
+<section id="risk">
+  <div class="sh"><div class="n">10</div><div><h2>Risk register</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Risk</th><th style="width:96px">Severity</th><th>Mitigation &mdash; and the residual</th></tr>
+    <tr><td><b style="color:var(--ink)">Siri AI reception</b></td><td><span class="tag t-fail">HIGH</span></td><td>32% R&amp;D increase and a hybrid architecture. But early beta reviews are mixed, and the AI premium in the multiple rests on this alone.</td></tr>
+    <tr><td><b style="color:var(--ink)">Supply constraints</b></td><td><span class="tag t-fail">HIGH</span></td><td>Explicitly guided, across three product lines at once. Industry-wide advanced-node tightness, so peers share it &mdash; but it caps the September quarter regardless.</td></tr>
+    <tr><td><b style="color:var(--ink)">Services deceleration</b></td><td><span class="tag t-warn">MED-HIGH</span></td><td>Still a June record at +12%. But this is the margin line and it missed; sustained sub-consensus growth here compresses the whole valuation case.</td></tr>
+    <tr><td><b style="color:var(--ink)">Earnings quality</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>$0.11 of tariff refund in EPS and ~2 points in gross margin. A one-time benefit that reverses becomes a headwind in the comparison.</td></tr>
+    <tr><td><b style="color:var(--ink)">CEO transition</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>Orderly and long-signalled. Still a multi-year uncertainty no model captures.</td></tr>
+    <tr><td><b style="color:var(--ink)">Position size at this price</b></td><td><span class="tag t-warn">MEDIUM</span></td><td><b style="color:var(--ink)">Specific to this book.</b> A 1R risk against a normal ATR stop buys a position worth 39% of a $2,000 account &mdash; over the 35% concentration cap.</td></tr>
+  </table></div>
+</section>
+
+<section id="inval">
+  <div class="sh"><div class="n">11</div><div><h2>Invalidation</h2></div></div>
+  <div class="two">
+    <div class="card" style="border-left:2px solid var(--green)"><h3 style="color:var(--green)">Would make this a candidate</h3>
+      <ul style="margin-bottom:0"><li>Daily close above <b class="mono">$311.00</b> &mdash; restores <span class="mono">trend50</span></li>
+      <li>Daily close above <b class="mono">$317.00</b> &mdash; satisfies <span class="mono">near_high</span>. <b>Both gates clear together above 317.</b></li>
+      <li>Clearing the <b class="mono">$320</b> call wall on volume sustained 2-3 sessions</li>
+      <li>Services reaccelerating above 12% in the September quarter</li>
+      <li>Positive Siri AI reception through the autumn release cycle</li></ul></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Would make it worse</h3>
+      <ul style="margin-bottom:0"><li>Close below <b class="mono">$300</b> &mdash; breaks the largest open-interest node and the dealer bid beneath it</li>
+      <li>Close below <b class="mono">$286.24</b> &mdash; the 30-week average, which would end <span class="mono">stage2</span></li>
+      <li>September guidance missed on supply rather than FX</li>
+      <li>A second consecutive Services miss</li>
+      <li>Siri AI reviewing poorly at general release &mdash; the AI premium unwinds</li></ul></div>
+  </div>
+</section>
+
+<section id="rules" style="border-bottom:none">
+  <div class="sh"><div class="n">12</div><div><h2>Rules applied</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Rule</th><th>Applied to</th><th>Effect on the verdict</th></tr>
+    <tr><td class="mono" style="color:var(--gold)">Phoenix gate stack</td><td>Gates</td><td>Weekly 40/30/10-week SMA against the 104-week high &mdash; found two near-misses, not structural failures</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">stage-theory.R1</td><td>Gates</td><td>Rising 30-week with price above it is genuine Stage 2 &mdash; the only one of three names to pass</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">Phoenix GEX method</td><td>Gamma</td><td>Largest OI node sits <i>below</i> spot, making it support &mdash; the opposite of the other two</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">breakout-traps.R4</td><td>Stop</td><td>Structure minus an ATR buffer, anchored to the $300 node</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">quant-risk.R2</td><td>Exit</td><td>Above the all-time high there is no OI structure &mdash; a trailing exit is the only way to hold that</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">investment-scoring.R4</td><td>Score</td><td>83/100 is the top band &mdash; and the caveat against using it as a gate matters most here</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">tail-risk / concentration</td><td>Sizing</td><td><b>Flagged the 35% cap breach</b> &mdash; the position is too large for the account even when the ratio works</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">hormuz-illusion.R1</td><td>News</td><td>Named the dependency: Siri AI reception, unmodellable and undated</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">PAPER_TARGET</td><td>Costs</td><td>0.054R commission floor; 1.70R payoff needed to break even</td></tr>
+  </table></div>
+  <div class="verdict" style="border-color:var(--amber);background:var(--amberBg);border-left-color:var(--amber);margin-top:26px">
+    <div class="l" style="color:var(--amber)">The answer</div>
+    <p style="margin:8px 0 0;font-size:16px;color:var(--ink)">The strongest of the three by a distance. <b>83/100</b>, a rising 40-week and 30-week average, genuine Stage 2, deep positive gamma with the largest open-interest node acting as support 3% below price, and a gamma flip 14% away. <b style="color:var(--ink)">It fails two gates by a total of one ATR.</b></p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)">A close above <b class="mono am">$311.00</b> restores <span class="mono">trend50</span>; a close above <b class="mono am">$317.00</b> satisfies <span class="mono">near_high</span>. Both clear together above 317, and the gate-triggered entry pays <b class="mono up">4.07:1</b> to the July high on a 1.07 ATR stop. That is the best structure across all three names.</p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)"><b style="color:var(--ink)">The constraint is your account, not the setup.</b> A 1R risk against a normal stop buys $780 of stock &mdash; 39% of a $2,000 book, over the 35% cap. At this price the trade does not fit, however good it looks. That is worth knowing now rather than at the moment the gates clear.</p>
+  </div>
+</section>
+
+<div class="foot">
+PHOENIX EQUITY RESEARCH &middot; L3 SINGLE-NAME THESIS &middot; AAPL &middot; 23 AUG 2026 &middot; PREPARED TO RESEARCH_REPORT_METHOD v1<br>
+PRICE, VOLUME, OPTION OPEN INTEREST, IMPLIED VOLATILITY AND SECTOR DATA: INTERACTIVE BROKERS API, RETRIEVED 23 AUG 2026, THROUGH FRI 21 AUG CLOSE.<br>
+GATES COMPUTED ON WEEKLY BARS PER phoenix.py: 40-WEEK, 30-WEEK AND 10-WEEK SMA AGAINST THE 104-WEEK HIGH. GEX COMPUTED FROM IBKR OPEN INTEREST ACROSS THE LIVE CHAIN USING THE PHOENIX METHOD &mdash; WALLS ON OPEN INTEREST, FLIP FROM THE CUMULATIVE PROFILE.<br>
+LIMITATIONS &mdash; PER-CONTRACT IV UNAVAILABLE, SO A SINGLE UNDERLYING IV IS APPLIED ACROSS STRIKES; THIS UNDERSTATES WING GAMMA. DEALER POSITIONING IS INFERRED FROM THE STANDARD CONVENTION, NOT OBSERVED. GEX AGGREGATES THE SEP 18 AND JAN 15 '27 CHAINS, STRIKES 200-350. THE INDUSTRY GATE COULD NOT BE COMPUTED — rotation_nav AND universe.csv ARE NOT AVAILABLE — SO SECTOR DATA IS SHOWN AND THE GATE IS MARKED UNVERIFIED.<br>
+NOT INVESTMENT ADVICE. PREPARED FOR ONE SYSTEMATIC LONG-ONLY EQUITY BOOK AND CALIBRATED TO ITS RULES, ACCOUNT SIZE AND COST BASE.
+</div>
+</main></div>
+<script>
+(function(){var root=document.documentElement,d=document.getElementById("thDark"),l=document.getElementById("thLight");
+function set(m){var g=(m==="light");root.classList.toggle("light",g);root.style.colorScheme=g?"light":"dark";
+d.className=g?"":"on";l.className=g?"on":"";try{localStorage.setItem("pxTheme",m);}catch(e){}}
+var s=null;try{s=localStorage.getItem("pxTheme");}catch(e){}set(s||"dark");
+d.addEventListener("click",function(){set("dark");});l.addEventListener("click",function(){set("light");});})();
+</script></body></html>

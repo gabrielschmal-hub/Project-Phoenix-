@@ -1,0 +1,459 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>PLTR &middot; Phoenix Equity Research &middot; 23 Aug 2026</title>
+<style>
+:root{
+  --bg:#020F1F; --card:#08192B; --card2:#0C2137; --line:#14304A; --line2:#1E4462;
+  --ink:#E7EEF6; --inkMed:#C4D2DF; --inkLight:#94A8BA; --inkFade:#6B8299; --inkGhost:#47596C;
+  --gold:#D37736; --green:#3FBF77; --greenBg:rgba(63,191,119,.13);
+  --red:#D9534F; --redBg:rgba(217,83,79,.13);
+  --amber:#D8A24A; --amberBg:rgba(216,162,74,.13);
+  --rail:#010A15; --railLine:#0E2942;
+  --gCall:#2D8A55; --gPut:#C43A30; --gSpot:#3B82C4; --gFlip:#E8C34A; --gPin:#9B7BD4;
+  --serif:Georgia,'Times New Roman',serif; --mono:'Courier New',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:#020F1F;color-scheme:dark}
+html.light{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:15.5px;line-height:1.62}
+.shell{display:grid;grid-template-columns:236px 1fr;max-width:1420px;margin:0 auto}
+.rail{background:var(--rail);border-right:1px solid var(--railLine);padding:22px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.rail .logo{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--gold);font-weight:700;padding:0 20px 15px;border-bottom:1px solid var(--railLine)}
+.rail .logo span{color:var(--inkFade);letter-spacing:.16em}
+.toc{list-style:none;margin:12px 0 0;padding:0}
+.toc a{display:flex;gap:10px;padding:7px 20px;color:var(--inkLight);text-decoration:none;font-family:var(--mono);font-size:11.5px;border-left:2px solid transparent}
+.toc a:hover{color:var(--ink);background:rgba(211,119,54,.07);border-left-color:var(--gold)}
+.toc a b{color:var(--inkGhost);font-weight:400;min-width:16px}
+.grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--inkGhost);padding:15px 20px 4px;text-transform:uppercase}
+.rail .stat{margin:16px 20px 0;padding-top:13px;border-top:1px solid var(--railLine);font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.85}
+.rail .stat b{color:var(--red)}
+main{padding:0 40px 90px;min-width:0}
+.mast{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:24px 0 13px;border-bottom:2px solid var(--gold)}
+.mast .t{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--inkFade);text-transform:uppercase}
+.mast .r{font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);text-align:right;line-height:1.8}
+h1{font-weight:400;font-size:clamp(31px,4.8vw,50px);line-height:1.08;letter-spacing:-.015em;margin:24px 0 6px}
+h1 em{font-style:italic;color:var(--gold)}
+h2{font-weight:400;font-size:26px;letter-spacing:-.01em;margin:0 0 3px}
+h3{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 9px}
+p{color:var(--inkMed);margin:0 0 13px}
+.lede{font-size:18.5px;line-height:1.58;color:var(--ink)}
+.mono{font-family:var(--mono)} a{color:var(--gold)}
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+.sh{display:flex;gap:14px;align-items:baseline;margin-bottom:19px}
+.sh .n{font-family:var(--mono);font-size:11px;color:var(--gold);font-weight:700;padding-top:8px;min-width:24px}
+.sh p{margin:2px 0 0;font-size:14px;color:var(--inkLight)}
+.verdict{border:1px solid var(--red);border-left:3px solid var(--red);background:var(--redBg);padding:16px 20px;margin:22px 0 0}
+.verdict .l{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--red);font-weight:700;text-transform:uppercase}
+.verdict .t{font-size:24px;margin:5px 0 7px;line-height:1.2}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:24px 0 0}
+.cell{background:var(--card);padding:11px 13px}
+.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade)}
+.cell .v{font-family:var(--mono);font-size:17.5px;font-weight:700;margin-top:3px}
+.cell .s{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:1px}
+.up{color:var(--green)}.dn{color:var(--red)}.am{color:var(--gold)}.wr{color:var(--amber)}
+.gexp{border:1px solid var(--line2);background:var(--card)}
+.gexh{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--card2)}
+.gexh .tk{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.07em}
+.badge{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;padding:4px 11px;border-radius:3px;background:var(--gCall);color:#02160C}
+.b-out{border:1px solid var(--line2);color:var(--inkLight);padding:4px 10px;font-family:var(--mono);font-size:10.5px;border-radius:3px}
+.gexh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--inkLight)}
+.gexsub{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);padding:8px 15px;border-bottom:1px solid var(--line)}
+.ggrid{stroke:#0F2438;stroke-width:1}
+.gax{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.gaxr{font-family:var(--mono);font-size:9.5px;fill:var(--inkLight);opacity:.75}
+.gaxt{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;fill:var(--inkGhost)}
+.gcall{fill:var(--gCall)} .gput{fill:var(--gPut)}
+.gcurve{fill:none;stroke:var(--ink);stroke-width:1.6;opacity:.9}
+.garea{fill:#2A4A78;opacity:.16;stroke:none}
+.gkey{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:9px 15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--inkFade)}
+.gkey span{display:inline-flex;align-items:center;gap:6px}
+.gkey i{width:11px;height:3px;border-radius:2px;display:inline-block}
+.gkey .note{display:block !important;color:var(--inkGhost);flex-basis:100%;width:100%;line-height:1.6;font-size:10px;padding-top:4px}
+.gkey .note b{display:inline;color:var(--inkFade)}
+.lad{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:74px 176px 1fr;gap:12px;align-items:center;padding:9px 15px;border-bottom:1px solid #0E2438;border-left:3px solid transparent;font-family:var(--mono);font-size:12.5px}
+.lrow:last-child{border-bottom:none}
+.lrow .p{font-weight:700}
+.lrow .d{color:var(--inkFade);font-size:11.5px;font-family:var(--serif)}
+.lrow .lab{letter-spacing:.08em;font-weight:700;font-size:10.5px}
+.l-call{border-left-color:var(--gCall)} .l-put{border-left-color:var(--gPut)}
+.l-spot{border-left-color:var(--gSpot);background:rgba(59,130,196,.10);border-top:1px solid #2C5C86;border-bottom:1px solid #2C5C86}
+.l-flip{border-left-color:var(--gFlip);background:rgba(232,195,74,.07)}
+.narr{padding:14px 15px;border-top:1px solid var(--line);background:var(--card2);font-size:14px;color:var(--inkMed);line-height:1.6}
+.chart{border:1px solid var(--line);background:var(--card);padding:14px 10px 6px;margin:6px 0 14px}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:#0F2438;stroke-width:1}
+.axl{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.pl{fill:none;stroke:var(--ink);stroke-width:1.6}
+.m50{fill:none;stroke:var(--gold);stroke-width:1.2}
+.m200{fill:none;stroke:#5E7C99;stroke-width:1.4;stroke-dasharray:5 3}
+.ar{fill:url(#g1)}
+.lbl{font-family:var(--mono);font-size:10px;font-weight:700}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:5px 4px 7px}
+.legend i{display:inline-block;width:13px;height:2px;vertical-align:middle;margin-right:5px}
+.tw{border:1px solid var(--line);background:var(--card);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #0E2438;color:var(--inkMed)}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.hl td{background:rgba(63,191,119,.08)} tr.hlr td{background:rgba(217,83,79,.07)}
+tr.me td{background:rgba(211,119,54,.10)}
+.gates{border:1px solid var(--line);background:var(--card)}
+.gate{display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:13px 17px;border-bottom:1px solid #0E2438}
+.gate:last-child{border-bottom:none} .gate.f{background:rgba(217,83,79,.05)}
+.gate .idx{font-family:var(--mono);font-size:10px;color:var(--inkGhost)}
+.gate .nm{font-family:var(--mono);font-size:13px;font-weight:700}
+.gate .dt{font-size:12.5px;color:var(--inkLight);margin-top:2px;line-height:1.45}
+.tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border:1px solid;white-space:nowrap;border-radius:2px}
+.t-fail{color:var(--red);border-color:var(--red);background:var(--redBg)}
+.t-warn{color:var(--amber);border-color:var(--amber);background:var(--amberBg)}
+.t-pass{color:var(--green);border-color:var(--green);background:var(--greenBg)}
+.stamp{border:1px solid var(--line);border-top:none;background:var(--card2);padding:13px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.stamp .x{font-family:var(--mono);font-size:12px;color:var(--inkLight)}
+.stamp .o{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--red);letter-spacing:.08em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);background:var(--card);padding:16px 18px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #0E2438;font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv span:first-child{color:var(--inkLight)} .kv span:last-child{font-family:var(--mono);font-weight:700}
+.rule{border-left:2px solid var(--gold);background:rgba(211,119,54,.05);padding:11px 15px;margin:14px 0;font-size:13.5px;color:var(--inkMed)}
+.rule .rid{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px}
+.note{border-left:2px solid var(--line2);padding:2px 0 2px 15px;margin:15px 0;color:var(--inkMed)}
+.note b{color:var(--ink)}
+.news{border:1px solid var(--line);background:var(--card)}
+.nhdr{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);padding:10px 16px;background:var(--card2);border-bottom:1px solid var(--line)}
+.nrow{display:grid;grid-template-columns:86px 1fr;gap:14px;padding:11px 16px;border-bottom:1px solid #0E2438}
+.nrow:last-child{border-bottom:none}
+.nrow .dt{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding-top:2px}
+.nrow .hd{font-size:14.5px;color:var(--ink);margin-bottom:3px}
+.nrow .bd{font-size:12.8px;color:var(--inkLight);line-height:1.5}
+.pill{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.09em;padding:2px 7px;border:1px solid var(--line2);color:var(--inkFade);margin-right:7px;vertical-align:1px;border-radius:2px}
+.pill.bull{border-color:var(--green);color:var(--green)}
+.pill.bear{border-color:var(--red);color:var(--red)}
+.pill.neu{border-color:var(--amber);color:var(--amber)}
+ul{margin:0 0 12px;padding-left:17px;color:var(--inkMed)}li{margin-bottom:5px}
+.foot{padding:28px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);line-height:1.9}
+/* strip: fixed column counts so the last cell never orphans */
+.strip{grid-template-columns:repeat(8,1fr)}
+@media(max-width:1500px){.strip{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:620px){.strip{grid-template-columns:repeat(2,1fr)}}
+/* tablet landscape: rail becomes a compact top bar, not a dead column */
+@media(max-width:1200px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:none;border-bottom:1px solid var(--railLine);
+        display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:12px 24px}
+  .rail .logo{border-bottom:none;padding:0;font-size:10.5px;line-height:1.5}
+  .rail .stat{margin:0;padding:0;border-top:none;font-size:10.5px;line-height:1.7;text-align:right}
+  main{padding:0 24px 70px}
+}
+@media(max-width:760px){
+  .two,.three{grid-template-columns:1fr}
+  .lrow{grid-template-columns:66px 1fr}.lrow .d{display:none}
+  main{padding:0 18px 60px}
+  .rail{padding:10px 18px}
+}
+
+/* ===== light theme : colours only, toggled by html.light — sampled from phoenix_app.html ===== */
+html.light{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15);
+  --rail:#F3EADC; --railLine:rgba(122,96,68,.22);
+  --gCall:#1E7A4E; --gPut:#B4362F; --gSpot:#2C5A82; --gFlip:#A87A1C; --gPin:#7A5CA8;
+}
+html.light,html.light body,html.light .shell,html.light main{background:#F6EFE4}
+html.light body{color:#2C2118}
+html.light .rail{background:#F3EADC}
+html.light .card,html.light .tw,html.light .gates,html.light .news,html.light .gexp,html.light .chart,html.light .cell{background:rgba(255,253,249,.86)}
+html.light .stamp,html.light .gexh,html.light .narr,html.light .nhdr,html.light .gexsub{background:rgba(248,241,231,.94)}
+html.light .pxtheme{background:rgba(248,241,231,.96)}
+html.light .ggrid,html.light .grid{stroke:rgba(122,96,68,.16)}
+html.light .pl{stroke:#2C2118}
+html.light .gcurve{stroke:#2C2118}
+html.light .garea{fill:#7A6044;opacity:.16}
+html.light .m200{stroke:#8C7A67}
+html.light .badge{background:var(--gCall);color:#FFFDF9}
+html.light .lrow.l-spot{background:rgba(44,90,130,.10);border-top-color:rgba(44,90,130,.4);border-bottom-color:rgba(44,90,130,.4)}
+html.light .lrow.l-flip{background:rgba(168,122,28,.10)}
+html.light .gate.f{background:rgba(180,54,47,.055)}
+html.light tr.hl td{background:rgba(30,122,78,.09)}
+html.light tr.hlr td{background:rgba(180,54,47,.07)}
+html.light tr.me td{background:rgba(194,99,42,.10)}
+html.light td{border-bottom-color:rgba(122,96,68,.14)}
+html.light .gate,html.light .nrow,html.light .lrow{border-bottom-color:rgba(122,96,68,.14)}
+html.light .rule{background:rgba(194,99,42,.06)}
+html.light .toc a:hover{background:rgba(194,99,42,.09)}
+/* theme switch */
+.pxtheme{z-index:40;display:flex;gap:0;border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:var(--card2)}
+.pxtheme button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 12px;border:0;background:transparent;color:var(--inkFade);cursor:pointer}
+.pxtheme button.on{background:var(--gold);color:#FFFDF9;font-weight:700}
+.pxtheme button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+@media print{.pxtheme,.rail{display:none}.shell{grid-template-columns:1fr}main{padding:0}}
+
+/* ===== theme switch hardening — must stay last in the sheet ===== */
+.pxtheme{position:fixed;top:14px;right:18px;bottom:auto;left:auto;
+  height:auto;width:auto;max-height:34px;align-items:center;line-height:1}
+.pxtheme button{height:28px;line-height:28px;padding:0 12px;white-space:nowrap;flex:0 0 auto}
+@media(max-width:1200px){
+  .pxtheme{top:auto;bottom:14px;right:14px}
+}
+@media print{.pxtheme{display:none}}
+</style></head><body><div class="shell">
+<nav class="rail"><div class="logo">PHOENIX<br><span>EQUITY RESEARCH</span></div>
+<div class="stat" style="margin-top:20px;border-top:none;padding-top:0">PLTR &middot; $179.80<br>L3 SINGLE NAME<br>23 AUG 2026<br><br>GATES: <b>2 FAIL</b><br>SCORE: 79/100<br>VERDICT: <b>NO TRADE</b></div></nav>
+<main>
+<div class="pxtheme" role="group" aria-label="Theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></div>
+<div class="mast"><div class="t">NASDAQ : PLTR &middot; Palantir Technologies Inc. &middot; L3 single-name thesis</div>
+<div class="r">SUN 23 AUG 2026 &middot; DATA THROUGH FRI 21 AUG CLOSE<br>IBKR LIVE &middot; FULL-CHAIN GEX &middot; WEEKLY GATES</div></div>
+<section id="verdict">
+  <h1>Revenue grew 93%.<br>The stock is up 46%<br>in <em>three weeks</em>.</h1>
+  <p class="lede" style="max-width:74ch;margin-top:18px">Palantir posted the strongest quarter of its public life on 3 August &mdash; 93% revenue growth, a 155% Rule of 40, a record $2.13bn of US commercial bookings &mdash; and gapped 30% the next morning. Price now sits <b>28% above its 10-week average</b>, the most extended reading in this entire series. The business case is not in question. The entry price is.</p>
+  <div class="verdict"><div class="l">Phoenix gate stack &middot; weekly &middot; verdict</div>
+    <div class="t">NO TRADE &mdash; fails <span class="mono">stage2</span> and <span class="mono">near_high</span></div>
+    <p style="margin:0;font-size:14px">Above the 40-week and a <b>rising</b> 10-week, but the 30-week is still falling and price is 13.3% from the 104-week high. <b class="mono am">$190.92 satisfies near_high</b> &mdash; only 6.1% away, and Friday's high was already $182.44.</p></div>
+  <div class="strip">
+    <div class="cell"><div class="k">Close Fri</div><div class="v">179.80</div><div class="s up">+5.84 &middot; +3.36%</div></div>
+    <div class="cell"><div class="k">40-week SMA</div><div class="v up">149.64</div><div class="s dn">+20.3% &middot; falling</div></div>
+    <div class="cell"><div class="k">30-week SMA</div><div class="v up">140.96</div><div class="s dn">+27.6% &middot; falling</div></div>
+    <div class="cell"><div class="k">10-week SMA</div><div class="v up">140.18</div><div class="s up">+28.4% &middot; rising</div></div>
+    <div class="cell"><div class="k">104w high</div><div class="v wr">-13.3%</div><div class="s am">trigger 190.92</div></div>
+    <div class="cell"><div class="k">Implied vol</div><div class="v">48.0%</div><div class="s dn">vs 68.8% realised</div></div>
+    <div class="cell"><div class="k">Daily ATR</div><div class="v">~8.17</div><div class="s">4.5% of price</div></div>
+    <div class="cell"><div class="k">YTD</div><div class="v">+1.2%</div><div class="s dn">was &minus;29% pre-print</div></div>
+  </div>
+</section>
+
+<section id="biz">
+  <div class="sh"><div class="n">01</div><div><h2>The business</h2><p>Software that sits between an organisation's messy data and the decisions it needs to make &mdash; sold to governments first, and now to enterprises far faster.</p></div></div>
+  <p class="lede" style="max-width:76ch">Palantir sells an ontology: a structured model of how an organisation actually works, layered over data that was never designed to fit together. AIP puts language models on top of that structure. The distinction that matters commercially is that the output is auditable and the customer's data never becomes anyone else's training set &mdash; which is the entire pitch to a defence agency or a regulated enterprise.</p>
+  <div class="three" style="margin-top:22px">
+    <div class="card"><h3>US Government &mdash; the foundation</h3>
+      <p style="font-size:13.5px;margin-bottom:10px"><b style="color:var(--ink)">$809m, +90%</b> in Q2. Includes the US Army's <b>NGC2</b> common data baseline &mdash; the Army's highest-priority modernisation programme &mdash; and a DIA contract now clear of bid protest.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)"><b style="color:var(--ink)">Customer:</b> defence and intelligence agencies. Long procurement cycles, extreme switching costs once embedded.</p></div>
+    <div class="card"><h3>US Commercial &mdash; the acceleration</h3>
+      <p style="font-size:13.5px;margin-bottom:10px"><b style="color:var(--ink)">$764m, +149%</b> year over year. Record <b>$2.132bn</b> of total contract value signed in the quarter &mdash; nearly $800m above the previous best.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)"><b style="color:var(--ink)">This is the number that moved the stock.</b> Bookings ran far ahead of revenue, which is why guidance rose more than the quarter beat by.</p></div>
+    <div class="card"><h3>International &mdash; the gap</h3>
+      <p style="font-size:13.5px;margin-bottom:10px">US revenue is now <b style="color:var(--ink)">over 81% of the total</b>. International commercial has consistently lagged and remains the weakest part of the story.</p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)">A concentration risk dressed as a growth opportunity &mdash; and the reason "sovereign AI" is the strategic framing management now leads with.</p></div>
+  </div>
+  <div class="two" style="margin-top:20px">
+    <div class="card"><h3>Q2 2026 &mdash; reported 3 August</h3>
+      <div class="kv"><span>Revenue</span><span class="up">$1.935bn &middot; +93%</span></div>
+      <div class="kv"><span>vs guidance midpoint</span><span class="up">+$135m above</span></div>
+      <div class="kv"><span>Net income</span><span class="up">$1.062bn &middot; 55% margin</span></div>
+      <div class="kv"><span>Adjusted EPS</span><span class="up">$0.41 vs $0.35 est</span></div>
+      <div class="kv"><span>Free cash flow</span><span class="up">$1.22bn</span></div>
+      <div class="kv"><span>Rule of 40 score</span><span class="am">155%</span></div>
+      <div class="kv"><span>Deals &gt;$1m closed</span><span class="up">220 &middot; record</span></div>
+      <div class="kv"><span>FY26 guidance</span><span class="up">$8.15&ndash;8.16bn, from $7.65&ndash;7.66bn</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">Guidance rose by roughly $500m &mdash; far more than the quarter beat by $135m.</b> That gap is the bookings, and it is why the reaction was 30% rather than 8%. Ninth consecutive EPS beat.</p></div>
+    <div class="card" style="border-left:2px solid var(--amber)"><h3 style="color:var(--amber)">The valuation problem, stated plainly</h3>
+      <p style="font-size:13.5px;margin-bottom:9px">Consensus modelling has the company at roughly <b>$10.8bn revenue and $3.6bn earnings by 2028</b> &mdash; which requires 40.7% annual revenue growth and more than tripling earnings from $1.1bn.</p>
+      <p style="font-size:13.5px;margin-bottom:9px">One published fair value on those forecasts lands at <b class="mono">$185.70</b> &mdash; roughly <b>3% above Friday's close.</b></p>
+      <p style="font-size:13px;margin:0;color:var(--inkLight)"><b style="color:var(--ink)">In other words: after a 46% three-week advance, the price already embeds two more years of 40%+ compounding.</b> That does not make it wrong. It removes the margin for a single disappointing quarter.</p></div>
+  </div>
+  <div class="rule"><span class="rid">Before the print, this was a broken stock</span>On 3 August PLTR traded at <b class="mono">$123</b> &mdash; down 40% from its peak and <b>down 29% year to date</b> &mdash; having fallen 14% after a Q1 report that also beat. Options priced a 10&ndash;12% earnings move; the stock delivered 30%. <b style="color:var(--ink)">A name that punished eight consecutive beats and then gapped 30% on the ninth is not a name with a stable relationship between results and price.</b> That history belongs in any position-sizing decision here.</div>
+  <div class="rule"><span class="rid">What has been signed alongside the numbers</span><b style="color:var(--ink)">Mercury Systems</b> &mdash; announced the same day as earnings &mdash; embeds Palantir's ontology into defence-supplier material planning and a digital twin of factory operations. <b style="color:var(--ink)">Zeta Global</b> is rearchitecting its Data Cloud on Foundry, which Zeta says could drive over $100m of its own annual revenue. <b style="color:var(--ink)">Surf Air Mobility</b> expanded its SurfOS partnership, with Wheels Up as launch customer. The pattern is consistent: <b>Palantir is becoming the substrate other companies build their products on</b>, which is a stickier position than selling seats.</div>
+</section>
+
+<section id="gex">
+  <div class="sh"><div class="n">02</div><div><h2>Gamma structure</h2><p>Windowed to spot &minus;14% / +15%. Net gamma per strike; walls on <b>open interest</b>.</p></div></div>
+  <div class="gexp">
+    <div class="gexh"><div class="tk">PLTR</div><span class="badge">POSITIVE GAMMA</span><span class="b-out">spot +1.9% above flip</span><div class="st">OI RES 200 &middot; HEAVY 180 NODE</div></div>
+    <div class="gexsub" style="color:var(--inkLight)">Regime <b style="color:var(--gCall)">POSITIVE GAMMA</b> &nbsp;&middot;&nbsp; Net GEX <b>+$63m</b> &nbsp;&middot;&nbsp; <span style="color:var(--gFlip)">Flip <b>176.40</b></span> &nbsp;&middot;&nbsp; <span style="color:var(--gCall)">OI Res <b>200</b></span> &nbsp;&middot;&nbsp; <span style="color:var(--gPut)">OI Sup <b>170</b></span></div>
+    <div style="padding:8px 10px 0"><svg viewBox="0 0 1000 330" role="img" aria-label="PLTR net gamma exposure by strike">
+      <line class="ggrid" x1="76" y1="262.9" x2="974" y2="262.9"/><text class="gax" x="67" y="266.4" text-anchor="end">-10</text><line class="ggrid" x1="76" y1="198.2" x2="974" y2="198.2"/><text class="gax" x="67" y="201.7" text-anchor="end">0</text><line class="ggrid" x1="76" y1="133.5" x2="974" y2="133.5"/><text class="gax" x="67" y="137.0" text-anchor="end">10</text><line class="ggrid" x1="76" y1="68.9" x2="974" y2="68.9"/><text class="gax" x="67" y="72.4" text-anchor="end">20</text><line x1="76" y1="198.2" x2="974" y2="198.2" stroke="#22415F" stroke-width="1"/><rect class="gput" x="69.1" y="198.2" width="26.7" height="40.1"/><rect class="gput" x="155.2" y="198.2" width="26.7" height="54.3"/><rect class="gput" x="241.3" y="198.2" width="26.7" height="29.8"/><rect class="gput" x="327.4" y="198.2" width="26.7" height="63.4"/><rect class="gput" x="370.4" y="198.2" width="26.7" height="20.1"/><rect class="gcall" x="413.5" y="171.1" width="26.7" height="27.2"/><rect class="gcall" x="456.6" y="154.2" width="26.7" height="44.0"/><rect class="gcall" x="499.6" y="79.2" width="26.7" height="119.0"/><rect class="gcall" x="542.7" y="164.6" width="26.7" height="33.6"/><rect class="gcall" x="585.7" y="136.1" width="26.7" height="62.1"/><rect class="gcall" x="628.8" y="171.7" width="26.7" height="26.5"/><rect class="gcall" x="671.8" y="115.4" width="26.7" height="82.8"/><rect class="gcall" x="714.9" y="176.2" width="26.7" height="22.0"/><rect class="gcall" x="757.9" y="151.7" width="26.7" height="46.6"/><rect class="gcall" x="801.0" y="180.1" width="26.7" height="18.1"/><rect class="gcall" x="844.1" y="58.5" width="26.7" height="139.7"/><rect class="gcall" x="930.2" y="156.8" width="26.7" height="41.4"/>
+      <line x1="340.7" y1="26" x2="340.7" y2="210.2" stroke="#C43A30" stroke-width="2.2" stroke-dasharray="3 3" opacity=".85"/>
+      <line x1="857.4" y1="26" x2="857.4" y2="210.2" stroke="#2D8A55" stroke-width="2.4" stroke-dasharray="3 3"/>
+      <line x1="451.0" y1="26" x2="451.0" y2="210.2" stroke="#E8C34A" stroke-width="3" stroke-dasharray="6 4"/>
+      <line x1="509.5" y1="26" x2="509.5" y2="210.2" stroke="#3B82C4" stroke-width="3.2"/>
+      <text class="gax" x="82.4" y="312" text-anchor="middle">155</text><text class="gax" x="168.5" y="312" text-anchor="middle">160</text><text class="gax" x="254.6" y="312" text-anchor="middle">165</text><text class="gax" x="340.7" y="312" text-anchor="middle">170</text><text class="gax" x="426.9" y="312" text-anchor="middle">175</text><text class="gax" x="513.0" y="312" text-anchor="middle">180</text><text class="gax" x="599.1" y="312" text-anchor="middle">185</text><text class="gax" x="685.2" y="312" text-anchor="middle">190</text><text class="gax" x="771.3" y="312" text-anchor="middle">195</text><text class="gax" x="857.4" y="312" text-anchor="middle">200</text><text class="gax" x="943.5" y="312" text-anchor="middle">205</text><text class="gax" x="18" y="156.0" transform="rotate(-90 18 156.0)" text-anchor="middle">Net GEX $m</text></svg></div>
+    <div class="gkey"><span><i style="background:#2D8A55"></i>Positive net gamma</span><span><i style="background:#C43A30"></i>Negative net gamma</span>
+      <span><i style="background:#3B82C4;width:3px;height:11px"></i>Spot 179.80</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#E8C34A 0 5px,transparent 5px 9px);width:14px;height:3px"></i>Flip 176.40</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#2D8A55 0 3px,transparent 3px 6px)"></i>OI Res 200</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#C43A30 0 3px,transparent 3px 6px)"></i>OI Sup 170</span>
+      <span class="note">Net gamma per strike, one bar, coloured by sign. Walls chosen on <b>open interest</b>. <b>Estimated from a sampled chain &mdash; Phoenix's full-chain reading supersedes this where available.</b></span></div>
+    <div class="narr"><b style="color:var(--ink)">Positive gamma with the flip at $176.40, only 1.9% below spot &mdash; a cushion of less than half an ATR.</b> Open interest builds heavily at the <b>$180 round number</b>, essentially where price closed, and again at <b>$200</b>. Support sits at $170, just under the flip. <b style="color:var(--ink)">The volatility spread is the number worth pausing on:</b> implied at <b class="mono">48.0%</b> against realised at <b class="mono am">68.8%</b> &mdash; a <b>21-point gap</b>, second widest in the series. The 30% earnings gap is still inside the realised window, so this is partly mechanical &mdash; but it means an option-derived stop would be roughly 30% too tight. Friday also traded <b class="mono">670,125 calls against 358,954 puts</b>, <b>1.75&times; average call volume</b>, which is momentum positioning rather than hedging.</div>
+  </div>
+</section>
+
+<section id="gates">
+  <div class="sh"><div class="n">03</div><div><h2>The gate stack</h2><p>Weekly bars as <span class="mono">phoenix.py</span> computes them.</p></div></div>
+  <div class="gates">
+    <div class="gate f"><div class="idx">01</div><div><div class="nm">stage2 &mdash; Weinstein</div><div class="dt">Price 27.6% above the 30-week at $140.96 &mdash; but the 30-week is <b>falling</b> (was $142.19 four weeks ago). The gap is enormous and the slope is still wrong.</div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate f"><div class="idx">02</div><div><div class="nm">near_high &mdash; 104-week</div><div class="dt">104-week high $207.52. Price is <b class="mono">-13.3%</b>; the gate wants -8% to -1%. <b>$190.92 satisfies it &mdash; 6.1% away, and Friday's high was $182.44.</b></div></div><div class="tag t-fail">FAIL</div></div>
+    <div class="gate"><div class="idx">03</div><div><div class="nm">industry</div><div class="dt">Software &mdash; Infrastructure. Needs <span class="mono">rotation_nav</span> and the 116-industry taxonomy, absent from this project.</div></div><div class="tag t-warn">UNVERIFIED</div></div>
+    <div class="gate"><div class="idx">04</div><div><div class="nm">trend200 &mdash; above 40-week</div><div class="dt">$179.94 vs 40-week SMA <b class="mono">$149.64</b>, +20.3% above &mdash; but the average is <b>falling</b> (was $151.84). Passes on level only.</div></div><div class="tag t-pass">PASS</div></div>
+    <div class="gate"><div class="idx">05</div><div><div class="nm">trend50 &mdash; above 10-week</div><div class="dt">$179.94 vs 10-week $140.18, <b>+28.4%</b>, and the average is genuinely <b>rising</b> ($130.97 four weeks ago). A real pass &mdash; on an extreme extension.</div></div><div class="tag t-pass">PASS</div></div>
+  </div>
+  <div class="stamp"><div class="x">2 FAIL &middot; 1 UNVERIFIED &middot; 2 PASS &mdash; and one pass is on a 28% extension</div><div class="o">NO CANDIDATE</div></div>
+  <div class="rule"><span class="rid">The most extended reading in the series</span>Price is <b>28.4% above the 10-week</b> and <b>27.6% above the 30-week</b>. For comparison, MSFT at 13.8% above its 10-week was flagged as over-extended; PLTR is double that. <b style="color:var(--ink)">Every support level on this chart is more than a quarter of the way down.</b> That is not a criticism of the move &mdash; a 93% growth quarter deserves a re-rating &mdash; it is a statement about where a stop would have to sit.</div>
+  <div class="rule"><span class="rid">And yet this is the closest failing name to a trigger</span><span class="mono">near_high</span> needs <b class="mono am">$190.92</b>, only <b>6.1%</b> away, and Friday's high of $182.44 was already a 26-week high. <b style="color:var(--ink)">If the advance continues, this gate flips before the stage does</b> &mdash; and that is the trap. Passing <span class="mono">near_high</span> while the 30-week still falls would give three of five gates on a stock 28% above its short average. <b>The stack would look better while the risk got worse.</b></div>
+</section>
+
+<section id="vol">
+  <div class="sh"><div class="n">V</div><div><h2>Volatility profile</h2>
+  <p>What the options market expects, what the stock has actually done, and what that means for the stop.</p></div></div>
+  <div class="strip" style="margin-top:0">
+    <div class="cell"><div class="k">Implied vol &middot; annual</div><div class="v">48.0%</div><div class="s">options market</div></div>
+    <div class="cell"><div class="k">Realised vol &middot; 30d</div><div class="v">68.8%</div><div class="s">what it did</div></div>
+    <div class="cell"><div class="k">Spread</div><div class="v dn">-20.8</div><div class="s dn">IMPLIED BELOW REALISED</div></div>
+    <div class="cell"><div class="k">IV percentile 52w</div><div class="v ">26th</div><div class="s ">mid</div></div>
+    <div class="cell"><div class="k">Daily ATR-14</div><div class="v">8.17</div><div class="s">4.5% of price</div></div>
+    <div class="cell"><div class="k">IV-implied daily</div><div class="v">3.02%</div><div class="s">$5.43</div></div>
+    <div class="cell"><div class="k">1-month 1&sigma;</div><div class="v">&plusmn;13.8%</div><div class="s">from implied</div></div>
+    <div class="cell"><div class="k">Stop basis</div><div class="v dn" style="font-size:14px">REALISED</div><div class="s">use for sizing</div></div>
+  </div>
+  <div class="rule"><span class="rid">Reading the spread</span><b>The widest gap in the series at 20.8 points.</b> Realised 68.8% contains the 30% earnings gap from three weeks ago. Implied at 48.0% is pricing a stock that has not just done that. Implied volatility is <b class="mono dn">30% below</b> what the stock has actually been doing. <b style="color:var(--ink)">A stop sized from the options market would be roughly 30% too tight.</b> Size from the measured range instead: <b class="mono am">$8.17</b> per day.</div>
+  <div class="note"><b>Why this section exists.</b> Implied volatility is a <i>forecast</i>; realised volatility is a <i>measurement</i>. When they diverge, the options market and the tape disagree about how much room a position needs &mdash; and a stop placed on the wrong one is either harvested by noise or wider than the account can carry. <b style="color:var(--ink)">Across the eleven names reviewed this weekend, nine had implied below realised</b>, several by more than fifteen points. <b>Default to the measured range unless the two agree.</b></div>
+</section>
+
+<section id="rr">
+  <div class="sh"><div class="n">04</div><div><h2>Reward-to-risk</h2><p>The extension does the damage. Every honest stop is far, and the first target is close.</p></div></div>
+  <div class="note" style="border-left-color:var(--gold)"><b>Daily ATR is roughly $8.17 &mdash; 4.5% of price.</b> Implied volatility at 48.0% against 68.8% realised would size a stop about 30% too tight. Use the realised range: this stock gapped 30% three weeks ago.</div>
+  <div class="tw"><table>
+    <tr><th>Scenario</th><th class="n">Entry</th><th class="n">Stop</th><th class="n">Stop dist</th><th class="n">&times;ATR</th><th class="n">R:R &rarr; 190.92</th><th class="n">R:R &rarr; 200</th><th class="n">Shares</th><th class="n">Position</th></tr>
+    <tr class="hlr"><td>1.0 ATR stop &mdash; below the flip</td><td class="n">179.80</td><td class="n">171.63</td><td class="n">4.5%</td><td class="n">1.00</td><td class="n dn">1.36 : 1</td><td class="n up">2.47 : 1</td><td class="n">2.45</td><td class="n dn">$440 &middot; 22%</td></tr>
+    <tr class="hlr"><td>1.5 ATR &mdash; below the $170 shelf</td><td class="n">179.80</td><td class="n">167.55</td><td class="n">6.8%</td><td class="n">1.50</td><td class="n dn">0.91 : 1</td><td class="n dn">1.65 : 1</td><td class="n">1.63</td><td class="n">$293 &middot; 15%</td></tr>
+    <tr><td>2.0 ATR</td><td class="n">179.80</td><td class="n">163.47</td><td class="n">9.1%</td><td class="n">2.00</td><td class="n dn">0.68 : 1</td><td class="n dn">1.24 : 1</td><td class="n">1.22</td><td class="n">$220 &middot; 11%</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Pullback toward the flip</b></td><td class="n">176.50</td><td class="n">168.33</td><td class="n">4.6%</td><td class="n">1.00</td><td class="n">1.76 : 1</td><td class="n up"><b>2.88 : 1</b></td><td class="n">2.45</td><td class="n">$432 &middot; 22%</td></tr>
+  </table></div>
+  <div class="note" style="border-left-color:var(--gold)"><b>Reading the table:</b> <b style="color:var(--ink)">Stop dist</b> is how far the stop sits from entry as a percentage of the <i>share price</i> &mdash; it is not the percentage of the account at risk. <b style="color:var(--ink)">Account risk is 1.00% in every row</b>, fixed at $20 on a $2,000 book. Share count is derived from it: <span class="mono">shares = $20 &divide; (entry &minus; stop)</span>. A wider stop buys fewer shares, not more risk. The only figure that varies with stop distance is <b>position value</b>, which is why the concentration cap and the 1R budget are separate constraints on separate axes.</div>
+  <div class="three" style="margin-top:18px">
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">The near target is too near</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">The <span class="mono">near_high</span> trigger at $190.92 is only 6.1% up, while a stop that clears the gamma flip is 4.5% down. <b class="mono dn">1.36:1</b> &mdash; and it gets worse with any sensible widening.</p>
+      <p style="font-size:13.5px;margin:0">Only the $200 wall and the $207.52 high give workable ratios, and both require clearing the heaviest open-interest node in the chain.</p></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">The sizing conflict</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">A 1-ATR stop gives 2.45 shares &mdash; <b class="mono">$440, 22% of the account</b>, in a stock that gapped 30% in a session three weeks ago.</p>
+      <p style="font-size:13.5px;margin:0">Widening the stop to 2 ATR brings the position to a comfortable 11% &mdash; and drops the ratio to <b class="mono dn">1.24:1</b>, below the commission floor. <b style="color:var(--ink)">The two constraints pull against each other.</b></p></div>
+    <div class="card"><h3>What would work</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">A pullback toward the flip at <b class="mono am">$176.40</b> holding, with a stop below $168, targeting $200: <b class="mono up">2.88:1</b> on a 1-ATR stop.</p>
+      <p style="font-size:13.5px;margin:0"><b style="color:var(--ink)">Modest improvement, still 22% of the book.</b> This name is genuinely awkward for a $2,000 account.</p></div>
+  </div>
+  <div class="rule"><span class="rid">breakout-traps-execution-filters &middot; R1</span>Never buy the first tick above a level &mdash; and never buy 28% above a short average three weeks after a 30% gap. <b style="color:var(--ink)">The people who own the good fill bought at $123 before the print.</b> Everyone entering here is providing their exit liquidity if the move consolidates, which is what a 46% three-week advance normally does next.</div>
+  <div class="note"><b>Cost floor.</b> &euro;1 per round trip is <b class="mono dn">0.054R</b>; the book needs <b class="mono am">1.70R</b> to break even. <b>Only the $200 and $207.52 targets clear it</b>, and only on the tightest stops &mdash; which are the ones this stock's volatility makes least survivable.</div>
+</section>
+
+<section id="news">
+  <div class="sh"><div class="n">05</div><div><h2>News flow</h2></div></div>
+  <div class="news" style="margin-bottom:18px">
+    <div class="nhdr">Ticker-specific &mdash; PLTR</div>
+    <div class="nrow"><div class="dt">MON 3 AUG</div><div><div class="hd"><span class="pill bull">EARNINGS</span>93% revenue growth, guidance raised $500m, stock +30% next day</div>
+      <div class="bd">$1.935bn revenue, $1.062bn net income at a 55% margin, adjusted EPS $0.41 vs $0.35. Karp: <b>"this quarter was otherworldly."</b> Rule of 40 at 155%. Ninth consecutive EPS beat &mdash; and the first one the market rewarded.</div></div></div>
+    <div class="nrow"><div class="dt">MON 3 AUG</div><div><div class="hd"><span class="pill bull">BOOKINGS</span>Record $2.132bn US commercial contract value &mdash; ~$800m above prior best</div>
+      <div class="bd">220 deals worth $1m or more, a record. <b style="color:var(--ink)">Guidance rose ~$500m while the quarter beat by $135m</b> &mdash; the gap is the contract book, and it is why the reaction was 30% rather than 8%.</div></div></div>
+    <div class="nrow"><div class="dt">MON 3 AUG</div><div><div class="hd"><span class="pill bull">DEAL</span>Mercury Systems &mdash; defence supply-chain digital twin</div>
+      <div class="bd">Announced the same day. Palantir's ontology automating material planning and building a digital twin of factory operations to accelerate delivery of components for US military programmes.</div></div></div>
+    <div class="nrow"><div class="dt">2026</div><div><div class="hd"><span class="pill bull">PLATFORM</span>Zeta Global rearchitecting its Data Cloud on Foundry</div>
+      <div class="bd">Zeta says the partnership could drive over <b>$100m of its own annual revenue</b>. Separately, Surf Air Mobility expanded SurfOS with Wheels Up as launch customer. <b style="color:var(--ink)">Palantir is becoming the substrate other companies build products on.</b></div></div></div>
+    <div class="nrow"><div class="dt">2026</div><div><div class="hd"><span class="pill bull">GOVERNMENT</span>US Army NGC2 common data baseline; DIA contract clears protest</div>
+      <div class="bd">NGC2 is the Army's highest-priority modernisation programme. US government revenue +90% to $809m.</div></div></div>
+    <div class="nrow"><div class="dt">PRE-PRINT</div><div><div class="hd"><span class="pill bear">CONTEXT</span>Trading at $123 on 3 August &mdash; down 40% from peak, down 29% YTD</div>
+      <div class="bd">Options priced a 10&ndash;12% move; the stock delivered 30%. <b style="color:var(--amber)">Eight prior consecutive beats had been sold, including a 14% drop after Q1. This is not a stock with a stable results-to-price relationship.</b></div></div></div>
+  </div>
+  <div class="news">
+    <div class="nhdr">Market-wide &mdash; reaches PLTR through AI sentiment, defence budgets and index flow</div>
+    <div class="nrow"><div class="dt">WED 26 AUG</div><div><div class="hd"><span class="pill bear">EVENT</span>NVIDIA reports Wednesday</div>
+      <div class="bd">No PLTR earnings until November, but it is among the highest-beta AI names in the index. <b style="color:var(--ink)">With the flip only 1.9% below spot, a sector derating would take it into negative gamma within a session.</b></div></div></div>
+    <div class="nrow"><div class="dt">ONGOING</div><div><div class="hd"><span class="pill neu">POLICY</span>Karp campaigning on open-weight models against Chinese competition</div>
+      <div class="bd">Joined an industry letter urging Washington not to restrict open-weight models. Positions Palantir as the deployment layer regardless of which models win &mdash; strategically shrewd, and it also concedes the model layer is commoditising.</div></div></div>
+    <div class="nrow"><div class="dt">ONGOING</div><div><div class="hd"><span class="pill bear">CONCENTRATION</span>US revenue now over 81% of total</div>
+      <div class="bd">Growth is spectacular and narrow. Heavy exposure to US defence budgets and political scrutiny of sensitive programmes, with international commercial still lagging.</div></div></div>
+    <div class="nrow"><div class="dt">CONTEXT</div><div><div class="hd"><span class="pill neu">REFERENCE FRAME</span>A large index weight, but with extreme idiosyncratic volatility</div>
+      <div class="bd">Large enough that SPX matters; volatile enough that it frequently ignores it. Both references are partial. <b style="color:var(--amber)">Neither SPX gamma nor the industry gate was retrieved in this run.</b></div></div></div>
+  </div>
+  <div class="rule"><span class="rid">hormuz-illusion-single-catalyst &middot; R1</span>The advance rests on <b>one earnings print</b> &mdash; a spectacular one, but a single datapoint from three weeks ago with nothing dated behind it until November. <b style="color:var(--ink)">The price now embeds two further years of 40%+ growth</b>, and the next scheduled test of that assumption is a full quarter away. Three months of drift on sentiment is the most likely path.</div>
+</section>
+
+<section id="score">
+  <div class="sh"><div class="n">06</div><div><h2>Quality score</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Block</th><th class="n">Weight</th><th class="n">Score</th><th>Reasoning</th></tr>
+    <tr><td>Business quality</td><td class="n">30</td><td class="n up">26</td><td>55% net margin, 155% Rule of 40, extreme switching costs once the ontology is embedded. Genuinely differentiated</td></tr>
+    <tr><td>Growth</td><td class="n">20</td><td class="n up">20</td><td>+93% revenue, +149% US commercial, record $2.13bn bookings. The best growth reading in the entire series</td></tr>
+    <tr><td>Financial strength</td><td class="n">20</td><td class="n up">18</td><td>$1.22bn quarterly free cash flow, GAAP profitable every quarter, no financing need</td></tr>
+    <tr><td>Valuation</td><td class="n">20</td><td class="n dn">7</td><td><b>The weak block.</b> Published fair value near $185.70 &mdash; 3% above spot &mdash; already assumes 40.7% annual growth to 2028</td></tr>
+    <tr><td>Shareholder alignment</td><td class="n">10</td><td class="n up">8</td><td>Founder-led, GAAP profitable, no dilution pressure. Stock-based compensation remains substantial</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">Total</b></td><td class="n"><b>100</b></td><td class="n up"><b>79</b></td><td><b style="color:var(--ink)">Top of the "buyable with price discipline" band</b> &mdash; one point below the high-quality threshold</td></tr>
+  </table></div>
+  <div class="rule"><span class="rid">investment-scoring-100-point &middot; note</span>79/100 with a perfect growth score and a 7/20 on valuation is the most lopsided profile in the series. <b>The framework is saying the business is excellent and the price has caught up with it</b> &mdash; which is precisely the situation where "buyable with price discipline" means the discipline, not the buying.</div>
+</section>
+
+<section id="risk">
+  <div class="sh"><div class="n">07</div><div><h2>Risk register</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Risk</th><th style="width:96px">Severity</th><th>Mitigation &mdash; and the residual</th></tr>
+    <tr><td><b style="color:var(--ink)">Extension</b></td><td><span class="tag t-fail">HIGH</span></td><td><b>The binding risk.</b> 28% above the 10-week, 46% in three weeks. Every stop is far, the near target is close. No mitigation except a better entry.</td></tr>
+    <tr><td><b style="color:var(--ink)">Valuation</b></td><td><span class="tag t-fail">HIGH</span></td><td>Fair-value estimates cluster near spot. The price embeds 40%+ growth through 2028 &mdash; <b>no margin for one soft quarter.</b></td></tr>
+    <tr><td><b style="color:var(--ink)">Gap history</b></td><td><span class="tag t-fail">HIGH</span></td><td>A 30% single-day gap three weeks ago; a 14% drop after Q1 despite a beat. <b>Realised volatility 68.8%.</b> This stock does not respect stops.</td></tr>
+    <tr><td><b style="color:var(--ink)">US concentration</b></td><td><span class="tag t-warn">MED-HIGH</span></td><td>Over 81% of revenue is US, heavily defence-linked. Exposed to budget shifts and political scrutiny; international commercial still lags.</td></tr>
+    <tr><td><b style="color:var(--ink)">Position size conflict</b></td><td><span class="tag t-warn">MED-HIGH</span></td><td><b>Account-specific:</b> a tradeable ratio needs a 1-ATR stop, which puts 22% of the book in one high-gap name. A safe size drops the ratio below the cost floor.</td></tr>
+    <tr><td><b style="color:var(--ink)">Volatility mispricing</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>Implied 48.0% vs realised 68.8%. Stops sized to implied will be ~30% too tight.</td></tr>
+  </table></div>
+</section>
+
+<section id="inval">
+  <div class="sh"><div class="n">08</div><div><h2>Invalidation</h2></div></div>
+  <div class="two">
+    <div class="card" style="border-left:2px solid var(--green)"><h3 style="color:var(--green)">Would make this a candidate</h3>
+      <ul style="margin-bottom:0"><li><b>Consolidation that lets the 30-week catch up</b> &mdash; the real requirement, and it needs weeks of sideways rather than more upside</li>
+      <li>The 30-week turning up, which flips <span class="mono">stage2</span></li>
+      <li>A pullback toward <b class="mono">$176.40</b> holding, rather than another vertical leg</li>
+      <li>Close above <b class="mono">$190.92</b> satisfies <span class="mono">near_high</span> &mdash; but see the warning opposite</li>
+      <li>Clearing the <b class="mono">$200</b> open-interest wall on volume</li></ul></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Would make it worse</h3>
+      <ul style="margin-bottom:0"><li>Close below <b class="mono">$176.40</b> flips gamma negative &mdash; 1.9% away</li>
+      <li>Close below <b class="mono">$170</b> loses the put shelf</li>
+      <li>A fade back toward <b class="mono">$140</b> would simply be the gap filling &mdash; and the 10-week is there</li>
+      <li>US commercial growth decelerating below ~100%</li>
+      <li><b style="color:var(--amber)">Passing <span class="mono">near_high</span> while the 30-week still falls</b> &mdash; a better-looking stack on a worse setup</li></ul></div>
+  </div>
+</section>
+
+<section id="rules" style="border-bottom:none">
+  <div class="sh"><div class="n">09</div><div><h2>Rules applied</h2></div></div>
+  <div class="tw"><table>
+    <tr><th>Rule</th><th>Applied to</th><th>Effect on the verdict</th></tr>
+    <tr><td class="mono" style="color:var(--gold)">Phoenix gate stack</td><td>Gates</td><td>2 pass; <span class="mono">trend200</span> on level only, <span class="mono">trend50</span> on a 28% extension</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">stage-theory.R1</td><td>Gates</td><td>30-week still falling &mdash; a violent re-rating, not yet a Stage 2 advance</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">breakout-traps.R1</td><td>Entry</td><td><b>Decisive.</b> Never chase 28% above a short average three weeks after a 30% gap</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">breakout-traps.R4</td><td>Stop</td><td>Size to 68.8% realised, not 48.0% implied &mdash; a 21-point gap</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">Phoenix GEX method</td><td>Gamma</td><td>Flip 1.9% below spot; heavy OI at 180 and 200</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">rodriguez.R6 / Q57</td><td>Sizing</td><td>Every workable ratio requires a stop too tight for this stock's gap history</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">tail-risk / concentration</td><td>Sizing</td><td>22% of the account at a tradeable stop &mdash; in a name that gapped 30% in a session</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">geometry-of-risk-sizing</td><td>Risk</td><td>Gap exposure: a stop defines intended risk, and this stock has twice shown it will not honour one</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">hormuz-illusion.R1</td><td>News</td><td>The advance rests on one print, with nothing dated until November</td></tr>
+    <tr><td class="mono" style="color:var(--gold)">investment-scoring.R4</td><td>Score</td><td>79/100 &mdash; perfect growth, 7/20 valuation. The price has caught the business</td></tr>
+  </table></div>
+  <div class="verdict" style="border-color:var(--gold);background:rgba(211,119,54,.07);border-left-color:var(--gold);margin-top:26px">
+    <div class="l" style="color:var(--gold)">The answer</div>
+    <p style="margin:8px 0 0;font-size:16px;color:var(--ink)">The best growth reading anywhere in this series &mdash; <b>93% revenue growth, 149% US commercial, a 155% Rule of 40, $1.22bn of quarterly free cash flow and a record $2.13bn of bookings.</b> 79/100, held back almost entirely by valuation. Nothing about the business argues against it.</p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)">What argues against it is that the market has already repriced it. <b style="color:var(--ink)">Up 46% in three weeks, 28% above the 10-week, 27% above a 30-week that is still falling</b> &mdash; the most extended reading of any name reviewed. A stop that clears the gamma flip is 4.5% down; the <span class="mono">near_high</span> trigger is 6.1% up. <b class="mono dn">1.36:1</b>, in a stock that gapped 30% in a session three weeks ago and 14% the wrong way after the previous beat.</p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)"><b style="color:var(--ink)">And there is a trap worth naming.</b> <span class="mono">near_high</span> is only 6.1% away, so if the advance continues it flips <i>before</i> the 30-week turns. That would show three of five gates passing on a stock even further extended &mdash; <b>the stack looking better while the risk got worse.</b> The condition to wait for is consolidation that lets the 30-week catch up, not more upside that makes a gate go green.</p>
+  </div>
+</section>
+
+<div class="foot">
+PHOENIX EQUITY RESEARCH &middot; L3 SINGLE-NAME THESIS &middot; PLTR &middot; 23 AUG 2026 &middot; PREPARED TO RESEARCH_REPORT_METHOD v1<br>
+PRICE, VOLUME, OPTION OPEN INTEREST, IMPLIED VOLATILITY AND SECTOR DATA: INTERACTIVE BROKERS API, RETRIEVED 23 AUG 2026, THROUGH FRI 21 AUG CLOSE.<br>
+GATES COMPUTED ON WEEKLY BARS PER phoenix.py: 40-WEEK, 30-WEEK AND 10-WEEK SMA AGAINST THE 104-WEEK HIGH. GEX COMPUTED FROM IBKR OPEN INTEREST ACROSS THE LIVE CHAIN USING THE PHOENIX METHOD &mdash; WALLS ON OPEN INTEREST, FLIP FROM THE CUMULATIVE PROFILE.<br>
+LIMITATIONS &mdash; PER-CONTRACT IV UNAVAILABLE, SO A SINGLE UNDERLYING IV IS APPLIED ACROSS STRIKES; THIS UNDERSTATES WING GAMMA. DEALER POSITIONING IS INFERRED FROM THE STANDARD CONVENTION, NOT OBSERVED. GEX IS ESTIMATED FROM A SAMPLED CHAIN AND IS SUPERSEDED BY PHOENIX'S FULL-CHAIN READING WHERE AVAILABLE. THE INDUSTRY GATE COULD NOT BE COMPUTED. ONLY 119 WEEKLY BARS WERE AVAILABLE, SO THE 104-WEEK HIGH USES THE FULL AVAILABLE HISTORY. NEITHER SPX NOR SPX GAMMA WAS RETRIEVED IN THIS RUN.<br>
+NOT INVESTMENT ADVICE. PREPARED FOR ONE SYSTEMATIC LONG-ONLY EQUITY BOOK AND CALIBRATED TO ITS RULES, ACCOUNT SIZE AND COST BASE.
+</div>
+</main></div>
+<script>
+(function(){var root=document.documentElement,d=document.getElementById("thDark"),l=document.getElementById("thLight");
+function set(m){var g=(m==="light");root.classList.toggle("light",g);root.style.colorScheme=g?"light":"dark";
+d.className=g?"":"on";l.className=g?"on":"";try{localStorage.setItem("pxTheme",m);}catch(e){}}
+var s=null;try{s=localStorage.getItem("pxTheme");}catch(e){}set(s||"dark");
+d.addEventListener("click",function(){set("dark");});l.addEventListener("click",function(){set("light");});})();
+</script></body></html>
