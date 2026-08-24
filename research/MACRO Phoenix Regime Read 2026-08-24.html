@@ -1,0 +1,509 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>MACRO &middot; Phoenix Equity Research &middot; 23 Aug 2026</title>
+<style>
+:root{
+  --bg:#020F1F; --card:#08192B; --card2:#0C2137; --line:#14304A; --line2:#1E4462;
+  --ink:#E7EEF6; --inkMed:#C4D2DF; --inkLight:#94A8BA; --inkFade:#6B8299; --inkGhost:#47596C;
+  --gold:#D37736; --green:#3FBF77; --greenBg:rgba(63,191,119,.13);
+  --red:#D9534F; --redBg:rgba(217,83,79,.13);
+  --amber:#D8A24A; --amberBg:rgba(216,162,74,.13);
+  --rail:#010A15; --railLine:#0E2942;
+  --gCall:#2D8A55; --gPut:#C43A30; --gSpot:#3B82C4; --gFlip:#E8C34A; --gPin:#9B7BD4;
+  --serif:Georgia,'Times New Roman',serif; --mono:'Courier New',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:#020F1F;color-scheme:dark}
+html.light{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:15.5px;line-height:1.62}
+.shell{display:grid;grid-template-columns:236px 1fr;max-width:1420px;margin:0 auto}
+.rail{background:var(--rail);border-right:1px solid var(--railLine);padding:22px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.rail .logo{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--gold);font-weight:700;padding:0 20px 15px;border-bottom:1px solid var(--railLine)}
+.rail .logo span{color:var(--inkFade);letter-spacing:.16em}
+.toc{list-style:none;margin:12px 0 0;padding:0}
+.toc a{display:flex;gap:10px;padding:7px 20px;color:var(--inkLight);text-decoration:none;font-family:var(--mono);font-size:11.5px;border-left:2px solid transparent}
+.toc a:hover{color:var(--ink);background:rgba(211,119,54,.07);border-left-color:var(--gold)}
+.toc a b{color:var(--inkGhost);font-weight:400;min-width:16px}
+.grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--inkGhost);padding:15px 20px 4px;text-transform:uppercase}
+.rail .stat{margin:16px 20px 0;padding-top:13px;border-top:1px solid var(--railLine);font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.85}
+.rail .stat b{color:var(--red)}
+main{padding:0 40px 90px;min-width:0}
+.mast{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:24px 0 13px;border-bottom:2px solid var(--gold)}
+.mast .t{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--inkFade);text-transform:uppercase}
+.mast .r{font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);text-align:right;line-height:1.8}
+h1{font-weight:400;font-size:clamp(31px,4.8vw,50px);line-height:1.08;letter-spacing:-.015em;margin:24px 0 6px}
+h1 em{font-style:italic;color:var(--gold)}
+h2{font-weight:400;font-size:26px;letter-spacing:-.01em;margin:0 0 3px}
+h3{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 9px}
+p{color:var(--inkMed);margin:0 0 13px}
+.lede{font-size:18.5px;line-height:1.58;color:var(--ink)}
+.mono{font-family:var(--mono)} a{color:var(--gold)}
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+.sh{display:flex;gap:14px;align-items:baseline;margin-bottom:19px}
+.sh .n{font-family:var(--mono);font-size:11px;color:var(--gold);font-weight:700;padding-top:8px;min-width:24px}
+.sh p{margin:2px 0 0;font-size:14px;color:var(--inkLight)}
+.verdict{border:1px solid var(--red);border-left:3px solid var(--red);background:var(--redBg);padding:16px 20px;margin:22px 0 0}
+.verdict .l{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--red);font-weight:700;text-transform:uppercase}
+.verdict .t{font-size:24px;margin:5px 0 7px;line-height:1.2}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:24px 0 0}
+.cell{background:var(--card);padding:11px 13px}
+.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade)}
+.cell .v{font-family:var(--mono);font-size:17.5px;font-weight:700;margin-top:3px}
+.cell .s{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:1px}
+.up{color:var(--green)}.dn{color:var(--red)}.am{color:var(--gold)}.wr{color:var(--amber)}
+.gexp{border:1px solid var(--line2);background:var(--card)}
+.gexh{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--card2)}
+.gexh .tk{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.07em}
+.badge{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;padding:4px 11px;border-radius:3px;background:var(--gCall);color:#02160C}
+.b-out{border:1px solid var(--line2);color:var(--inkLight);padding:4px 10px;font-family:var(--mono);font-size:10.5px;border-radius:3px}
+.gexh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--inkLight)}
+.gexsub{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);padding:8px 15px;border-bottom:1px solid var(--line)}
+.ggrid{stroke:#0F2438;stroke-width:1}
+.gax{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.gaxr{font-family:var(--mono);font-size:9.5px;fill:var(--inkLight);opacity:.75}
+.gaxt{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;fill:var(--inkGhost)}
+.gcall{fill:var(--gCall)} .gput{fill:var(--gPut)}
+.gcurve{fill:none;stroke:var(--ink);stroke-width:1.6;opacity:.9}
+.garea{fill:#2A4A78;opacity:.16;stroke:none}
+.gkey{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:9px 15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--inkFade)}
+.gkey span{display:inline-flex;align-items:center;gap:6px}
+.gkey i{width:11px;height:3px;border-radius:2px;display:inline-block}
+.gkey .note{display:block !important;color:var(--inkGhost);flex-basis:100%;width:100%;line-height:1.6;font-size:10px;padding-top:4px}
+.gkey .note b{display:inline;color:var(--inkFade)}
+.lad{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:74px 176px 1fr;gap:12px;align-items:center;padding:9px 15px;border-bottom:1px solid #0E2438;border-left:3px solid transparent;font-family:var(--mono);font-size:12.5px}
+.lrow:last-child{border-bottom:none}
+.lrow .p{font-weight:700}
+.lrow .d{color:var(--inkFade);font-size:11.5px;font-family:var(--serif)}
+.lrow .lab{letter-spacing:.08em;font-weight:700;font-size:10.5px}
+.l-call{border-left-color:var(--gCall)} .l-put{border-left-color:var(--gPut)}
+.l-spot{border-left-color:var(--gSpot);background:rgba(59,130,196,.10);border-top:1px solid #2C5C86;border-bottom:1px solid #2C5C86}
+.l-flip{border-left-color:var(--gFlip);background:rgba(232,195,74,.07)}
+.narr{padding:14px 15px;border-top:1px solid var(--line);background:var(--card2);font-size:14px;color:var(--inkMed);line-height:1.6}
+.chart{border:1px solid var(--line);background:var(--card);padding:14px 10px 6px;margin:6px 0 14px}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:#0F2438;stroke-width:1}
+.axl{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.pl{fill:none;stroke:var(--ink);stroke-width:1.6}
+.m50{fill:none;stroke:var(--gold);stroke-width:1.2}
+.m200{fill:none;stroke:#5E7C99;stroke-width:1.4;stroke-dasharray:5 3}
+.ar{fill:url(#g1)}
+.lbl{font-family:var(--mono);font-size:10px;font-weight:700}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:5px 4px 7px}
+.legend i{display:inline-block;width:13px;height:2px;vertical-align:middle;margin-right:5px}
+.tw{border:1px solid var(--line);background:var(--card);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #0E2438;color:var(--inkMed)}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.hl td{background:rgba(63,191,119,.08)} tr.hlr td{background:rgba(217,83,79,.07)}
+tr.me td{background:rgba(211,119,54,.10)}
+.gates{border:1px solid var(--line);background:var(--card)}
+.gate{display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:13px 17px;border-bottom:1px solid #0E2438}
+.gate:last-child{border-bottom:none} .gate.f{background:rgba(217,83,79,.05)}
+.gate .idx{font-family:var(--mono);font-size:10px;color:var(--inkGhost)}
+.gate .nm{font-family:var(--mono);font-size:13px;font-weight:700}
+.gate .dt{font-size:12.5px;color:var(--inkLight);margin-top:2px;line-height:1.45}
+.tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border:1px solid;white-space:nowrap;border-radius:2px}
+.t-fail{color:var(--red);border-color:var(--red);background:var(--redBg)}
+.t-warn{color:var(--amber);border-color:var(--amber);background:var(--amberBg)}
+.t-pass{color:var(--green);border-color:var(--green);background:var(--greenBg)}
+.stamp{border:1px solid var(--line);border-top:none;background:var(--card2);padding:13px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.stamp .x{font-family:var(--mono);font-size:12px;color:var(--inkLight)}
+.stamp .o{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--red);letter-spacing:.08em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);background:var(--card);padding:16px 18px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #0E2438;font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv span:first-child{color:var(--inkLight)} .kv span:last-child{font-family:var(--mono);font-weight:700}
+.rule{border-left:2px solid var(--gold);background:rgba(211,119,54,.05);padding:11px 15px;margin:14px 0;font-size:13.5px;color:var(--inkMed)}
+.rule .rid{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px}
+.note{border-left:2px solid var(--line2);padding:2px 0 2px 15px;margin:15px 0;color:var(--inkMed)}
+.note b{color:var(--ink)}
+.news{border:1px solid var(--line);background:var(--card)}
+.nhdr{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);padding:10px 16px;background:var(--card2);border-bottom:1px solid var(--line)}
+.nrow{display:grid;grid-template-columns:86px 1fr;gap:14px;padding:11px 16px;border-bottom:1px solid #0E2438}
+.nrow:last-child{border-bottom:none}
+.nrow .dt{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding-top:2px}
+.nrow .hd{font-size:14.5px;color:var(--ink);margin-bottom:3px}
+.nrow .bd{font-size:12.8px;color:var(--inkLight);line-height:1.5}
+.pill{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.09em;padding:2px 7px;border:1px solid var(--line2);color:var(--inkFade);margin-right:7px;vertical-align:1px;border-radius:2px}
+.pill.bull{border-color:var(--green);color:var(--green)}
+.pill.bear{border-color:var(--red);color:var(--red)}
+.pill.neu{border-color:var(--amber);color:var(--amber)}
+ul{margin:0 0 12px;padding-left:17px;color:var(--inkMed)}li{margin-bottom:5px}
+.foot{padding:28px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);line-height:1.9}
+/* strip: fixed column counts so the last cell never orphans */
+.strip{grid-template-columns:repeat(8,1fr)}
+@media(max-width:1500px){.strip{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:620px){.strip{grid-template-columns:repeat(2,1fr)}}
+/* tablet landscape: rail becomes a compact top bar, not a dead column */
+@media(max-width:1200px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:none;border-bottom:1px solid var(--railLine);
+        display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:12px 24px}
+  .rail .logo{border-bottom:none;padding:0;font-size:10.5px;line-height:1.5}
+  .rail .stat{margin:0;padding:0;border-top:none;font-size:10.5px;line-height:1.7;text-align:right}
+  main{padding:0 24px 70px}
+}
+@media(max-width:760px){
+  .two,.three{grid-template-columns:1fr}
+  .lrow{grid-template-columns:66px 1fr}.lrow .d{display:none}
+  main{padding:0 18px 60px}
+  .rail{padding:10px 18px}
+}
+
+/* ===== light theme : colours only, toggled by html.light — sampled from phoenix_app.html ===== */
+html.light{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15);
+  --rail:#F3EADC; --railLine:rgba(122,96,68,.22);
+  --gCall:#1E7A4E; --gPut:#B4362F; --gSpot:#2C5A82; --gFlip:#A87A1C; --gPin:#7A5CA8;
+}
+html.light,html.light body,html.light .shell,html.light main{background:#F6EFE4}
+html.light body{color:#2C2118}
+html.light .rail{background:#F3EADC}
+html.light .card,html.light .tw,html.light .gates,html.light .news,html.light .gexp,html.light .chart,html.light .cell{background:rgba(255,253,249,.86)}
+html.light .stamp,html.light .gexh,html.light .narr,html.light .nhdr,html.light .gexsub{background:rgba(248,241,231,.94)}
+html.light .pxtheme{background:rgba(248,241,231,.96)}
+html.light .ggrid,html.light .grid{stroke:rgba(122,96,68,.16)}
+html.light .pl{stroke:#2C2118}
+html.light .gcurve{stroke:#2C2118}
+html.light .garea{fill:#7A6044;opacity:.16}
+html.light .m200{stroke:#8C7A67}
+html.light .badge{background:var(--gCall);color:#FFFDF9}
+html.light .lrow.l-spot{background:rgba(44,90,130,.10);border-top-color:rgba(44,90,130,.4);border-bottom-color:rgba(44,90,130,.4)}
+html.light .lrow.l-flip{background:rgba(168,122,28,.10)}
+html.light .gate.f{background:rgba(180,54,47,.055)}
+html.light tr.hl td{background:rgba(30,122,78,.09)}
+html.light tr.hlr td{background:rgba(180,54,47,.07)}
+html.light tr.me td{background:rgba(194,99,42,.10)}
+html.light td{border-bottom-color:rgba(122,96,68,.14)}
+html.light .gate,html.light .nrow,html.light .lrow{border-bottom-color:rgba(122,96,68,.14)}
+html.light .rule{background:rgba(194,99,42,.06)}
+html.light .toc a:hover{background:rgba(194,99,42,.09)}
+/* theme switch */
+.pxtheme{z-index:40;display:flex;gap:0;border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:var(--card2)}
+.pxtheme button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 12px;border:0;background:transparent;color:var(--inkFade);cursor:pointer}
+.pxtheme button.on{background:var(--gold);color:#FFFDF9;font-weight:700}
+.pxtheme button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+@media print{.pxtheme,.rail{display:none}.shell{grid-template-columns:1fr}main{padding:0}}
+
+/* ===== theme switch hardening — must stay last in the sheet ===== */
+.pxtheme{position:fixed;top:14px;right:18px;bottom:auto;left:auto;
+  height:auto;width:auto;max-height:34px;align-items:center;line-height:1}
+.pxtheme button{height:28px;line-height:28px;padding:0 12px;white-space:nowrap;flex:0 0 auto}
+@media(max-width:1200px){
+  .pxtheme{top:auto;bottom:14px;right:14px}
+}
+@media print{.pxtheme{display:none}}
+</style></head><body><div class="shell">
+<nav class="rail"><div class="logo">PHOENIX<br><span>EQUITY RESEARCH</span></div>
+<div class="stat" style="margin-top:20px;border-top:none;padding-top:0">MACRO &middot; $REGIME READ<br>MACRO READ<br>23 AUG 2026<br><br>GATES: <b>&mdash; FAIL</b><br>SCORE: &mdash;/100<br>VERDICT: <b>SEE §9</b></div></nav>
+<main>
+<div class="pxtheme" role="group" aria-label="Theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></div>
+<div class="mast"><div class="t">CROSS-ASSET : MACRO &middot; Dollar &middot; Oil &middot; Bonds &middot; Equities &middot; L3 single-name thesis</div>
+<div class="r">MON 24 AUG 2026 &middot; DATA THROUGH FRI 21 AUG CLOSE<br>IBKR LIVE &middot; TREASURY &middot; FX &middot; ENERGY &middot; PREPARED TO MACRO_DOCTRINE_v1</div></div>
+<section id="verdict">
+  <h1>Yields at a 20-month high.<br>The dollar at a <em>three-month low</em>.<br>Those two do not normally coexist.</h1>
+  <p class="lede" style="max-width:76ch;margin-top:18px">The single most important fact in this market is a broken correlation. Rising US yields normally pull capital in and lift the dollar. Right now the 10-year is at <b>4.74%</b>, a twenty-month high, while the dollar index sits near <b>98.8</b>, a three-month low, beneath a falling 200-day average. <b style="color:var(--ink)">When yields rise and the currency falls together, the yield rise is not a growth premium or a policy premium. It is a risk premium.</b> Investors are demanding more to hold dollar assets rather than competing to buy them.</p>
+  <div class="verdict" style="border-color:var(--amber);background:var(--amberBg);border-left-color:var(--amber)">
+    <div class="l" style="color:var(--amber)">Regime &middot; named divergence</div>
+    <div class="t">FISCAL / CREDIBILITY REPRICING &mdash; not a growth repricing</div>
+    <p style="margin:0;font-size:14px">The tradeable claim: <b style="color:var(--ink)">the market is priced for a Fed that holds and an equity multiple that survives 4.74% long rates.</b> Both assumptions rest on August CPI and PCE. Neither is priced with any margin. <b class="mono am">SPY implied volatility sits at the 21st percentile.</b></p></div>
+  <div class="strip">
+    <div class="cell"><div class="k">Fed funds</div><div class="v">3.50-3.75%</div><div class="s wr">held 9-3 &middot; 3 dissents to HIKE</div></div>
+    <div class="cell"><div class="k">2-year</div><div class="v">4.24%</div><div class="s wr">above the funds rate</div></div>
+    <div class="cell"><div class="k">10-year</div><div class="v dn">4.74%</div><div class="s dn">20-month high</div></div>
+    <div class="cell"><div class="k">30-year</div><div class="v dn">5.25%</div><div class="s dn">the 5% long bond</div></div>
+    <div class="cell"><div class="k">DXY</div><div class="v dn">~98.8</div><div class="s dn">3-month low</div></div>
+    <div class="cell"><div class="k">WTI crude</div><div class="v wr">~$80</div><div class="s wr">Iran sanctions</div></div>
+    <div class="cell"><div class="k">SPY</div><div class="v">762.87</div><div class="s">-2.1% off high</div></div>
+    <div class="cell"><div class="k">SPY implied vol</div><div class="v am">12.65%</div><div class="s am">21st percentile</div></div>
+  </div>
+</section>
+
+<section id="frame">
+  <div class="sh"><div class="n">01</div><div><h2>How to read this report</h2>
+  <p>A regime read is not a forecast. It is a statement about what is priced, and where the pricing and the mechanism disagree.</p></div></div>
+  <p class="lede" style="max-width:76ch">Macro edge does not come from being right about the economy. It comes from the <b>misalignment</b> between what a causal chain implies and what an asset is actually priced for. A macro view that agrees with current pricing is not tradeable, however correct it turns out to be. This report therefore does three things: establishes what each asset is priced for, traces the transmission between them, and then names the specific divergences worth acting on &mdash; or states plainly that there are none.</p>
+  <div class="rule"><span class="rid">The discipline this document is held to</span>Every regime read must terminate in <b>a named divergence or an explicit nothing-to-do</b>, and must carry written <b>invalidation conditions</b>. Without both, the read cannot be judged right or wrong afterwards &mdash; only liked or disliked. Section 09 contains the divergences; section 10 contains what would falsify them.</div>
+</section>
+
+<section id="fed">
+  <div class="sh"><div class="n">02</div><div><h2>The Fed &mdash; the axis everything turns on</h2>
+  <p>The policy debate in 2026 is about hiking. That single fact reframes every other asset.</p></div></div>
+  <div class="two">
+    <div class="card"><h3>Where policy actually stands</h3>
+      <div class="kv"><span>Target range</span><span>3.50&ndash;3.75%</span></div>
+      <div class="kv"><span>July decision</span><span class="wr">held, 9&ndash;3</span></div>
+      <div class="kv"><span>The three dissents</span><span class="dn">all for a HIKE</span></div>
+      <div class="kv"><span>Chair</span><span class="am">Kevin Warsh</span></div>
+      <div class="kv"><span>Forward guidance</span><span class="dn">abandoned</span></div>
+      <div class="kv"><span>Next meeting</span><span>15&ndash;16 September</span></div>
+      <div class="kv"><span>August CPI</span><span class="am">11 September</span></div>
+      <div class="kv"><span>July PCE</span><span class="am">Wednesday 26 August</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">Three dissents in favour of tightening is unusual and it matters.</b> A 9&ndash;3 hold is not a comfortable consensus to stand pat &mdash; it is a committee one data print away from moving.</p></div>
+    <div class="card" style="border-left:2px solid var(--amber)"><h3 style="color:var(--amber)">What is priced for September</h3>
+      <div class="kv"><span>Prediction markets, 24 Aug</span><span class="am">~31% hike</span></div>
+      <div class="kv"><span>Futures, earlier August</span><span class="wr">~65%</span></div>
+      <div class="kv"><span>Post-July-FOMC peak</span><span class="wr">~67%</span></div>
+      <div class="kv"><span>J.P. Morgan base case</span><span class="dn">25bp HIKE</span></div>
+      <div class="kv"><span>June dot plot</span><span>9 of 17 saw &ge;1 hike in 2026</span></div>
+      <div class="kv"><span>Full-year odds of any hike</span><span class="wr">~47.5%</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">The dispersion is the signal.</b> Odds have swung from 78.8% to 60.1% to 31% inside a month on data alone. That is not a market with a view &mdash; it is a market with a coin, and the coin lands on <b>11 September</b>.</p></div>
+  </div>
+  <div class="two" style="margin-top:18px">
+    <div class="card"><h3>The data that moved the odds down</h3>
+      <div class="kv"><span>July headline CPI</span><span class="up">3.4% y/y, cooling</span></div>
+      <div class="kv"><span>July core CPI</span><span class="up">2.5% y/y</span></div>
+      <div class="kv"><span>Nonfarm payrolls</span><span class="up">surprise decline</span></div>
+      <p style="font-size:13px;margin:9px 0 0;color:var(--inkLight)">Softer inflation and a weaker labour market are what took a September hike from likely to unlikely.</p></div>
+    <div class="card"><h3>The data that keeps the hike alive</h3>
+      <div class="kv"><span>ISM Manufacturing, July</span><span class="dn">55.6, rising</span></div>
+      <div class="kv"><span>Inflation vs 2% target</span><span class="dn">above, extended period</span></div>
+      <div class="kv"><span>Energy</span><span class="dn">WTI ~$80 on Iran</span></div>
+      <p style="font-size:13px;margin:9px 0 0;color:var(--inkLight)">A 55.6 manufacturing PMI is expansion, not slowdown. And <b style="color:var(--ink)">energy is the channel that turns a supply shock into core inflation.</b></p></div>
+  </div>
+  <div class="rule"><span class="rid">The new chair changes the mechanism, not just the personnel</span>Kevin Warsh has <b>abandoned forward guidance</b> and defended doing so, noting that nominal and real yields have risen across the curve and attributing that to markets focusing on data rather than on the Fed. His phrase &mdash; <b style="color:var(--ink)">"market participants are learning to play the ball and not the referee"</b> &mdash; is a deliberate policy choice with a direct market consequence: <b>without guidance, every data release carries more price impact than it used to.</b> That is why volatility around CPI and PCE prints should be expected to be higher in this regime than in the last one, and it is a structural reason to be flat into 11 September rather than positioned.</div>
+  <div class="rule"><span class="rid">Read both ends of the curve, not one rate</span>The short end prices <b>policy expectation</b>; the long end prices <b>inflation and growth</b>. The 2-year at 4.24% sits <i>above</i> the 3.50&ndash;3.75% funds rate &mdash; the short end is already carrying tightening. The 10-year at 4.74% and the 30-year at 5.25% are doing something different: <b style="color:var(--ink)">they are pricing term premium, issuance and fiscal risk.</b> A single-rate read would conflate the two and miss that the long end is rising for reasons the Fed does not control.</div>
+</section>
+
+<section id="bonds">
+  <div class="sh"><div class="n">03</div><div><h2>Bonds &mdash; where the stress actually is</h2>
+  <p>The long end is selling off, the Treasury is intervening, and the relief is temporary.</p></div></div>
+  <div class="two">
+    <div class="card"><h3>The curve today</h3>
+      <div class="kv"><span>2-year</span><span>4.24%</span></div>
+      <div class="kv"><span>10-year</span><span class="dn">4.74% &middot; 20-month high</span></div>
+      <div class="kv"><span>30-year</span><span class="dn">5.25%</span></div>
+      <div class="kv"><span>10s&ndash;2s spread</span><span class="up">~+50bp, steepening</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">A positively sloped, steepening curve with the long end leading is a bear steepener</b> &mdash; the least comfortable of the four curve shapes. It says the market wants more compensation for duration, not that it expects faster growth.</p></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Why the long end is under pressure</h3>
+      <ul style="font-size:13.5px;margin-bottom:0">
+        <li><b style="color:var(--ink)">AI capital spending is being debt-financed.</b> Alphabet alone raised $22.93bn in early August with maturities to 2066; Meta, Oracle and others have issued into the same window</li>
+        <li><b style="color:var(--ink)">Federal deficit spending</b> continues, though Treasury Secretary Bessent argues the deficit has peaked</li>
+        <li><b style="color:var(--ink)">Oil at $80</b> on Iran sanctions feeds directly into inflation expectations</li>
+      </ul>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)">The first of these is new and underappreciated. <b>Hyperscaler capex is now large enough to move the Treasury curve</b> &mdash; corporate issuance competing with government issuance for the same duration buyers.</p></div>
+  </div>
+  <div class="card" style="margin-top:18px;border-left:2px solid var(--amber)"><h3 style="color:var(--amber)">The authorities are already intervening &mdash; and it is not holding</h3>
+    <div class="two" style="gap:22px">
+      <div><p style="font-size:13.5px;margin-bottom:9px"><b style="color:var(--gold)">What has been done</b></p>
+        <ul style="font-size:13px;margin-bottom:0">
+          <li>Treasury to <b>at least double</b> buybacks of 10&ndash;30 year securities, to $4bn next quarter, with Bessent signalling it could exceed that</li>
+          <li>A request for the Fed to raise the limit on its <b>FIMA facility</b></li>
+          <li>A <b>joint intervention on the Japanese yen</b>, executed by selling euros</li>
+        </ul></div>
+      <div><p style="font-size:13.5px;margin-bottom:9px"><b style="color:var(--gold)">What it achieved</b></p>
+        <p style="font-size:13.5px;margin-bottom:8px">The 10-year fell, then <b style="color:var(--ink)">"more than erased the decline"</b> and returned to test 20-month highs within days.</p>
+        <p style="font-size:13.5px;margin:0"><b style="color:var(--red)">Three separate official actions to compress long yields, and the yield is higher after them than before.</b></p></div>
+    </div>
+    <p style="font-size:13px;margin:12px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">This is the most important paragraph in the report.</b> When authorities act to suppress a price and the price goes the other way, it is evidence about the size of the flow they are fighting. It does not mean intervention cannot work; it means the current scale is not sufficient. <b>Watch for escalation &mdash; a larger buyback programme, or an explicit yield objective &mdash; as the signal that the fiscal channel has become the dominant policy problem.</b></p></div>
+</section>
+
+<section id="dollar">
+  <div class="sh"><div class="n">04</div><div><h2>The dollar &mdash; the broken correlation</h2>
+  <p>Falling while yields rise. That combination has a specific meaning.</p></div></div>
+  <div class="two">
+    <div class="card"><h3>Where it is</h3>
+      <div class="kv"><span>DXY</span><span class="dn">~98.8&ndash;99.6</span></div>
+      <div class="kv"><span>Position</span><span class="dn">3-month low</span></div>
+      <div class="kv"><span>200-day MA</span><span class="dn">~102.4 &middot; declining</span></div>
+      <div class="kv"><span>RSI</span><span>~49 &middot; neutral</span></div>
+      <div class="kv"><span>Structure</span><span class="wr">rising channel support</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)">Below a <b>falling</b> long average, testing channel support. On the same weekly framework used for single names, the dollar would fail <span class="mono">trend200</span> on level and slope.</p></div>
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Why it matters that it is falling</h3>
+      <p style="font-size:13.5px;margin-bottom:9px"><b>The normal chain:</b> US yields rise &rarr; dollar assets pay more &rarr; foreign capital flows in &rarr; dollar strengthens. DXY and the 10-year are normally <b>positively correlated.</b></p>
+      <p style="font-size:13.5px;margin-bottom:9px"><b>What is happening instead:</b> the 10-year is at a twenty-month high and the dollar is at a three-month low.</p>
+      <p style="font-size:13.5px;margin:0"><b style="color:var(--ink)">The only coherent reading is that the yield rise is compensation for risk rather than reward for growth.</b> Reporting attributes the dollar's weakness explicitly to concerns over rising US government debt.</p></div>
+  </div>
+  <div class="rule"><span class="rid">The distinction that governs everything downstream</span><b style="color:var(--green)">A "good" yield rise</b> reflects stronger growth or a more hawkish central bank. It lifts the currency, and equities can absorb it because earnings are rising alongside. <b style="color:var(--red)">A "bad" yield rise</b> reflects term premium &mdash; investors demanding more to fund a deficit or absorb issuance. It weakens the currency, and equities cannot absorb it because the discount rate rises without the earnings. <b style="color:var(--ink)">The dollar is the tell that separates the two, and right now it is pointing at the second.</b></div>
+</section>
+
+<section id="oil">
+  <div class="sh"><div class="n">05</div><div><h2>Oil &mdash; the transmission channel</h2>
+  <p>Not an asset class here. The mechanism that turns geopolitics into a rate decision.</p></div></div>
+  <div class="two">
+    <div class="card"><h3>Where it is and why</h3>
+      <div class="kv"><span>WTI</span><span class="wr">~$80</span></div>
+      <div class="kv"><span>Driver</span><span class="dn">Iran sanctions</span></div>
+      <div class="kv"><span>Structural</span><span class="dn">Hormuz supply chains</span></div>
+      <p style="font-size:13.5px;margin:10px 0 0;color:var(--inkMed)">The US is preparing sweeping new economic sanctions against Iran. J.P. Morgan named a <b style="color:var(--ink)">"slower-than-expected normalisation of supply chains around the Strait of Hormuz"</b> as one of two reasons it moved to a September hike as base case.</p></div>
+    <div class="card"><h3>The chain, stated explicitly</h3>
+      <p style="font-size:13.5px;margin-bottom:0"><b class="mono am">Iran sanctions</b> &rarr; crude to $80 &rarr; headline inflation firms &rarr; <b>passes into core</b> through input costs &rarr; the three FOMC dissenters gain a data argument &rarr; September hike odds rise &rarr; short end sells off &rarr; <b class="mono">the whole curve reprices</b>.</p>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">This is why oil belongs in a rates report.</b> It is currently the single most direct link between a geopolitical event and the Fed's September decision.</p></div>
+  </div>
+  <div class="rule"><span class="rid">Two caveats that stop this becoming a one-way argument</span><b>First, seasonality.</b> A crude curve read as a stress signal without checking it against a seasonal norm is unreliable &mdash; in seasonal markets the curve often reports the calendar rather than the fundamentals. <b>Second, the demand side.</b> A supply-driven price rise into a softening labour market is not the same as a demand-driven one; it is more likely to be treated by the committee as a level shift than a trend. <b style="color:var(--ink)">The Fed's own framing in the minutes was about "understanding underlying inflation amid shocks" and the degree to which shocks are broadening.</b> That word &mdash; broadening &mdash; is what to watch in the PCE detail.</div>
+</section>
+
+<section id="equities">
+  <div class="sh"><div class="n">06</div><div><h2>Equities &mdash; priced for none of this</h2>
+  <p>Two percent off the high, with volatility in the 21st percentile.</p></div></div>
+  <div class="two">
+    <div class="card"><h3>The index</h3>
+      <div class="kv"><span>SPY</span><span>762.87</span></div>
+      <div class="kv"><span>From the 52-week high</span><span class="up">&minus;2.1%</span></div>
+      <div class="kv"><span>Year to date</span><span class="up">+12.2%</span></div>
+      <div class="kv"><span>One year</span><span class="up">+19.4%</span></div>
+      <div class="kv"><span>Implied volatility</span><span class="am">12.65%</span></div>
+      <div class="kv"><span>Realised volatility</span><span>11.54%</span></div>
+      <div class="kv"><span>IV percentile</span><span class="am">21st</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">The index is the only asset in this report where implied and realised volatility agree.</b> Every single stock reviewed this weekend showed implied well below realised. At the index level they match &mdash; which means the calm is real, not an artefact.</p></div>
+    <div class="card" style="border-left:2px solid var(--amber)"><h3 style="color:var(--amber)">What is moving underneath</h3>
+      <div class="kv"><span>SOXX, last week</span><span class="dn">&minus;5.5%</span></div>
+      <div class="kv"><span>XLK vs its 52w high</span><span class="up">98.4%</span></div>
+      <div class="kv"><span>XLF vs its 52w high</span><span class="up">98.4%</span></div>
+      <div class="kv"><span>IGV&ndash;SOXX correlation</span><span class="dn">0.17 &middot; lowest since 2002</span></div>
+      <p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">That last number is the most interesting statistic in this report.</b> Software and semiconductors have decoupled almost entirely &mdash; the market is treating enterprise hardware budgets and software budgets as <b>competing claims on the same pool of money</b> rather than as one technology cycle.</p></div>
+  </div>
+  <div class="rule"><span class="rid">The single-name evidence that supports the budget-rotation thesis</span>This is not a theory drawn from the index. It is what the individual reports found. <b style="color:var(--ink)">IBM fell 25% in a day</b> &mdash; its worst session since 1916 &mdash; on a 3.7% revenue miss its CEO attributed explicitly to clients redirecting late-June budgets toward servers, storage and memory. Three in five software stocks fell with it. Meanwhile <b style="color:var(--ink)">memory contract prices are up 78&ndash;83% quarter-on-quarter</b>, Apple guided to simultaneous supply constraints across iPhone, Mac and iPad, and NVIDIA carries a memory-cost margin risk into Wednesday's print. <b>One rotation, visible in five separate companies' disclosures.</b></div>
+  <div class="rule"><span class="rid">Why a 2% drawdown with 12.65% implied vol is the position, not the reassurance</span>Equities are not mispriced because they are high. <b>They are exposed because they are calm.</b> Implied volatility in the 21st percentile means options are cheap, hedges are cheap, and very little of the fiscal or policy risk described above is embedded in the index price. <b style="color:var(--ink)">That is the definition of an asymmetry:</b> the downside case requires a repricing that has not happened, while the upside case requires a continuation that is largely already in the price.</div>
+</section>
+
+<section id="scenarios">
+  <div class="sh"><div class="n">07</div><div><h2>Scenarios &mdash; what happens if</h2>
+  <p>Each with its transmission chain, not just its direction.</p></div></div>
+
+  <div class="card" style="margin-top:8px;border-left:2px solid var(--red)"><h3 style="color:var(--red)">Scenario A &mdash; The Fed hikes in September</h3>
+    <p style="font-size:13.5px;margin-bottom:10px"><b>Currently ~31% on prediction markets, and J.P. Morgan's base case.</b> Requires August CPI on 11 September to firm, most plausibly through energy passing into core.</p>
+    <div class="tw" style="border:none;background:transparent"><table style="font-size:13px">
+      <tr><th>Asset</th><th>Direction</th><th>Mechanism</th></tr>
+      <tr><td><b style="color:var(--ink)">Short rates</b></td><td class="dn">2-year to 4.50%+</td><td>Direct repricing; the front end already carries some of this at 4.24%</td></tr>
+      <tr><td><b style="color:var(--ink)">Long rates</b></td><td class="wr">ambiguous</td><td><b>The key nuance.</b> A credible hike can <i>lower</i> the 10-year by restoring inflation-fighting credibility &mdash; a bull flattener. If instead the long end rises with the short end, that says the market does not believe one hike is enough</td></tr>
+      <tr><td><b style="color:var(--ink)">Dollar</b></td><td class="up">higher</td><td>Restores the broken correlation &mdash; and this is the cleanest confirmation that the credibility problem was the driver</td></tr>
+      <tr><td><b style="color:var(--ink)">Equities</b></td><td class="dn">lower initially</td><td>Higher discount rate with no earnings offset. Long-duration and unprofitable names worst &mdash; PLTR, INTC, MP, TSLA</td></tr>
+      <tr><td><b style="color:var(--ink)">Oil</b></td><td class="wr">lower at the margin</td><td>Tighter policy is demand-negative, but supply is the driver here, so the effect is second-order</td></tr>
+    </table></div>
+    <p style="font-size:13px;margin:11px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">The counter-intuitive part worth holding onto:</b> a hike could be <i>bullish for bonds</i> and <i>bullish for the dollar</i> at the same time as being bearish for equities. Watch the 30-year: if it falls on a hike, the market is saying credibility was restored. If it rises, the market is saying one hike does not fix the fiscal problem &mdash; and that is the worse outcome.</p></div>
+
+  <div class="card" style="margin-top:18px;border-left:2px solid var(--gold)"><h3 style="color:var(--gold)">Scenario B &mdash; The dollar keeps falling</h3>
+    <p style="font-size:13.5px;margin-bottom:10px"><b>The current trend.</b> Below a falling 200-day, at a three-month low, on debt concerns. Continuation is the path of least resistance absent a hike.</p>
+    <div class="tw" style="border:none;background:transparent"><table style="font-size:13px">
+      <tr><th>Consequence</th><th>Direction</th><th>Mechanism</th></tr>
+      <tr><td><b style="color:var(--ink)">Commodities</b></td><td class="dn">higher</td><td>Priced in dollars. <b>A weaker dollar is inflationary through import and energy costs</b> &mdash; and feeds straight back into the hike case</td></tr>
+      <tr><td><b style="color:var(--ink)">Long yields</b></td><td class="dn">higher</td><td>The reflexive loop: weaker dollar &rarr; imported inflation &rarr; higher yields &rarr; more fiscal concern &rarr; weaker dollar</td></tr>
+      <tr><td><b style="color:var(--ink)">US large-cap earnings</b></td><td class="up">higher, reported</td><td>Roughly 40% of S&amp;P revenue is overseas. A weaker dollar mechanically flatters translated results</td></tr>
+      <tr><td><b style="color:var(--ink)">Gold and hard assets</b></td><td class="up">higher</td><td>The classic debasement expression, and the one most consistent with the fiscal reading</td></tr>
+      <tr><td><b style="color:var(--ink)">Foreign demand for Treasuries</b></td><td class="dn">weaker</td><td><b>The dangerous leg.</b> An overseas holder loses on the currency and the price simultaneously</td></tr>
+    </table></div>
+    <p style="font-size:13px;margin:11px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">This scenario is self-reinforcing, which is what makes it the one to respect.</b> A falling dollar raises inflation, which raises yields, which raises fiscal concern, which lowers the dollar. Breaking that loop requires either a hike or a credible fiscal announcement &mdash; and Bessent has signalled a forthcoming fiscal plan.</p></div>
+
+  <div class="card" style="margin-top:18px;border-left:2px solid var(--green)"><h3 style="color:var(--green)">Scenario C &mdash; The Fed holds and inflation keeps cooling</h3>
+    <p style="font-size:13.5px;margin-bottom:10px"><b>The ~69% case, and what equities are currently priced for.</b> July CPI at 3.4% headline and 2.5% core cooling, payrolls declining &mdash; the disinflation continues and the committee stays put.</p>
+    <div class="tw" style="border:none;background:transparent"><table style="font-size:13px">
+      <tr><th>Asset</th><th>Direction</th><th>Mechanism</th></tr>
+      <tr><td><b style="color:var(--ink)">Short rates</b></td><td class="up">lower</td><td>The 2-year gives back the tightening premium above the funds rate</td></tr>
+      <tr><td><b style="color:var(--ink)">Long rates</b></td><td class="wr">may not follow</td><td><b>The trap in this scenario.</b> Issuance and term premium are not a Fed problem. The 10-year can stay near 4.74% even as the 2-year falls &mdash; a steepener that keeps pressure on equity multiples</td></tr>
+      <tr><td><b style="color:var(--ink)">Dollar</b></td><td class="dn">lower</td><td>No rate support, fiscal concern intact &mdash; feeds Scenario B</td></tr>
+      <tr><td><b style="color:var(--ink)">Equities</b></td><td class="up">higher</td><td>Relief, led by the same long-duration names that would suffer most in Scenario A</td></tr>
+    </table></div>
+    <p style="font-size:13px;margin:11px 0 0;color:var(--inkLight)"><b style="color:var(--ink)">The important warning here:</b> a hold is only bullish for equities if the <i>long end</i> cooperates. If the 2-year falls and the 10-year does not, the market has told you the problem was never the Fed.</p></div>
+
+  <div class="card" style="margin-top:18px;border-left:2px solid var(--red)"><h3 style="color:var(--red)">Scenario D &mdash; The tail: a disorderly long end</h3>
+    <p style="font-size:13.5px;margin-bottom:10px"><b>Low probability, high consequence.</b> The 30-year is already at 5.25%. Three official interventions have failed to hold yields down.</p>
+    <p style="font-size:13.5px;margin-bottom:9px">The trigger would be a failed or badly-tailed long-bond auction, a further large AI-related debt issue landing into a weak bid, or an inflation print that forces the market to price several hikes at once. The consequence is a <b>simultaneous decline in bonds, equities and the dollar</b> &mdash; the configuration in which diversification stops working, because the common factor is the credibility of the issuer rather than the economic cycle.</p>
+    <p style="font-size:13px;margin:0;color:var(--inkLight)"><b style="color:var(--ink)">The diagnostic that distinguishes this from an ordinary risk-off:</b> in a normal equity selloff, long bonds <i>rise</i>. If equities fall and long bonds fall with them, the panic thesis is refuted and this is the scenario in progress. <b>That single check &mdash; do bonds rally? &mdash; is the most valuable real-time indicator in this report.</b> <i>Caveat: in an inflation shock both fall together, so this is a strong prior rather than a law.</i></p></div>
+</section>
+
+<section id="matrix">
+  <div class="sh"><div class="n">08</div><div><h2>The cross-asset matrix</h2><p>Everything in one place, with what each is priced for.</p></div></div>
+  <div class="tw"><table>
+    <tr><th>Asset</th><th class="n">Level</th><th>Position</th><th>Priced for</th><th>The risk to that</th></tr>
+    <tr><td><b style="color:var(--ink)">Fed funds</b></td><td class="n">3.50&ndash;3.75%</td><td>held 9&ndash;3</td><td>a hold in September (~69%)</td><td class="dn">Three dissenters and an oil-driven CPI</td></tr>
+    <tr><td><b style="color:var(--ink)">2-year</b></td><td class="n">4.24%</td><td>above funds rate</td><td>some tightening already</td><td class="up">Falls hard if inflation keeps cooling</td></tr>
+    <tr class="hlr"><td><b style="color:var(--ink)">10-year</b></td><td class="n">4.74%</td><td>20-month high</td><td>persistent issuance</td><td class="dn">Not a Fed problem &mdash; a fiscal one</td></tr>
+    <tr class="hlr"><td><b style="color:var(--ink)">30-year</b></td><td class="n">5.25%</td><td>above 5%</td><td>elevated term premium</td><td class="dn">Interventions have not held it</td></tr>
+    <tr class="hlr"><td><b style="color:var(--ink)">DXY</b></td><td class="n">~98.8</td><td>3-month low, below falling 200d</td><td>fiscal concern</td><td class="up">A hike would reverse it fast</td></tr>
+    <tr><td><b style="color:var(--ink)">WTI</b></td><td class="n">~$80</td><td>rising on sanctions</td><td>Iran supply disruption</td><td class="wr">Supply-driven, so demand data won't fix it</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">SPY</b></td><td class="n">762.87</td><td>&minus;2.1% off high</td><td>a hold and no multiple compression</td><td class="dn">Neither is priced with margin</td></tr>
+    <tr class="hl"><td><b style="color:var(--ink)">SPY IV</b></td><td class="n">12.65%</td><td>21st percentile</td><td>continued calm</td><td class="dn">Hedges are cheap for a reason worth using</td></tr>
+  </table></div>
+</section>
+
+<section id="divergence">
+  <div class="sh"><div class="n">09</div><div><h2>The named divergences</h2>
+  <p>Where pricing and mechanism disagree. This section is the point of the document.</p></div></div>
+
+  <div class="rule" style="border-left-width:3px"><span class="rid">Divergence 1 &mdash; the dollar is telling a different story from the bond market's own narrative</span>Bonds are selling off, which is conventionally read as a growth or hawkish-policy story. <b>If that were true the dollar would be rising.</b> It is at a three-month low. <b style="color:var(--ink)">The two markets cannot both be right, and the currency is usually the better witness because it is the cleanest expression of cross-border willingness to fund.</b> The tradeable implication: positioning that assumes "higher yields = stronger dollar = pressure on gold and commodities" is positioned against the actual mechanism. <b class="mono am">Watch: if a September hike lifts the dollar, the credibility reading was right.</b></div>
+
+  <div class="rule" style="border-left-width:3px"><span class="rid">Divergence 2 &mdash; equity volatility does not reflect rate volatility</span>SPY implied volatility sits at the <b>21st percentile</b> and matches realised. Meanwhile the 10-year is at a twenty-month high, the 30-year is above 5%, September hike odds have swung from 79% to 31% inside a month, and the Fed has <b>abandoned forward guidance</b> &mdash; which mechanically raises the market impact of every data release. <b style="color:var(--ink)">Rate uncertainty is elevated and equity-implied uncertainty is not.</b> That gap is either an opportunity to hedge cheaply or evidence that equities genuinely do not care about rates until a level is breached. <b class="mono am">Historically, that assumption survives until it does not, and the transition is abrupt.</b></div>
+
+  <div class="rule" style="border-left-width:3px"><span class="rid">Divergence 3 &mdash; the software/semiconductor decoupling is a budget signal, not a sector rotation</span>The IGV&ndash;SOXX correlation at <b>0.17, the lowest since 2002</b>, is being treated as sector rotation. The single-name evidence says it is something more structural: enterprise hardware spending is <b>consuming capital that previously funded software licences</b>. IBM lost a quarter of its value on that mechanism in a single session. <b style="color:var(--ink)">If it is a rotation, it mean-reverts. If it is a budget reallocation, it persists and software multiples are still too high.</b> <b class="mono am">Wednesday's NVIDIA print is a direct test:</b> strong hardware demand confirms the reallocation and is <i>structurally negative for enterprise software</i> even as it is positive for semis.</div>
+
+  <div class="rule" style="border-left-width:3px"><span class="rid">Divergence 4 &mdash; official intervention is failing and the market is not pricing escalation</span>Three separate actions &mdash; doubled buybacks, an FIMA request, a coordinated yen intervention &mdash; and the 10-year is higher than before them. <b style="color:var(--ink)">Markets are treating this as noise. It is information about the size of the flow the authorities are fighting.</b> The asymmetry: if the next step is a materially larger programme or an explicit yield objective, that is a regime change in how US duration is priced, and very little in current pricing anticipates it.</div>
+
+  <div class="note" style="border-left-color:var(--gold);margin-top:20px"><b>And the explicit nothing-to-do.</b> For a $2,000 systematic long-only breakout book, <b style="color:var(--ink)">none of these four divergences is directly tradeable.</b> They are not equity breakouts, they require instruments outside the mandate, and two of them resolve on a single data print three weeks away. <b>The correct use of this document is not to trade it. It is to explain why thirteen consecutive single-name reviews produced zero candidates</b> &mdash; and to time the next review around 11 September rather than before it.</div>
+</section>
+
+<section id="inval">
+  <div class="sh"><div class="n">10</div><div><h2>Invalidation</h2>
+  <p>What would prove this read wrong. Written before the event, not after.</p></div></div>
+  <div class="two">
+    <div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">This read is wrong if</h3>
+      <ul style="margin-bottom:0">
+        <li><b>The dollar rallies while yields keep rising.</b> That restores the normal correlation and refutes the risk-premium reading entirely &mdash; the single cleanest falsification</li>
+        <li>The 10-year falls below <b class="mono">4.40%</b> without a Fed cut, showing the issuance concern was overstated</li>
+        <li>August CPI on 11 September comes in soft <b>and</b> the long end rallies with the short end &mdash; a bull flattener would say fiscal risk was never the driver</li>
+        <li>The Treasury's buyback programme visibly caps the 30-year below 5% for a sustained period</li>
+        <li>IGV&ndash;SOXX correlation normalises above 0.5, making the decoupling a rotation rather than a reallocation</li>
+      </ul></div>
+    <div class="card" style="border-left:2px solid var(--green)"><h3 style="color:var(--green)">This read is confirmed if</h3>
+      <ul style="margin-bottom:0">
+        <li><b>Equities and long bonds fall together</b> on a risk-off day &mdash; the diagnostic from Scenario D</li>
+        <li>A September hike lifts the dollar sharply, confirming credibility was the binding constraint</li>
+        <li>The 30-year moves above <b class="mono">5.50%</b> despite further intervention</li>
+        <li>Gold makes new highs alongside a rising 10-year &mdash; the debasement expression</li>
+        <li>Another large enterprise-software company reports a hardware-budget-driven miss</li>
+        <li>The Treasury escalates to a materially larger buyback or an explicit yield objective</li>
+      </ul></div>
+  </div>
+  <div class="rule"><span class="rid">The three dates that resolve most of this</span><b class="mono am">Wed 26 August &mdash; July PCE</b>, the Fed's preferred gauge, and <b>NVIDIA earnings the same evening</b>. One print tests the inflation path, the other tests the budget-rotation thesis, on the same day. <b class="mono am">Fri 11 September &mdash; August CPI</b>, which decides September. <b class="mono am">Tue&ndash;Wed 15&ndash;16 September &mdash; FOMC</b>, with a Summary of Economic Projections that will reveal whether the dot plot has moved toward the dissenters. <b style="color:var(--ink)">Everything between now and 26 August is positioning, not information.</b></div>
+</section>
+
+<section id="book" style="border-bottom:none">
+  <div class="sh"><div class="n">11</div><div><h2>What this means for the book</h2>
+  <p>The specific consequences for a $2,000 systematic long-only breakout account.</p></div></div>
+  <div class="three">
+    <div class="card"><h3>1 &middot; The gate stack is doing its job</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">Thirteen single names reviewed, <b>zero full passes.</b> That is not bad luck or an over-strict filter.</p>
+      <p style="font-size:13.5px;margin:0"><b style="color:var(--ink)">It is a market where the index is 2% off its high while individual names are 10&ndash;40% below theirs.</b> Narrow leadership is exactly what a rising-discount-rate regime produces, and <span class="mono">near_high</span> is the gate that detects it.</p></div>
+    <div class="card"><h3>2 &middot; Be flat into 11 September</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">Without forward guidance, every data release carries more price impact. CPI on 11 September and the FOMC on 15&ndash;16 are two binary events inside four sessions.</p>
+      <p style="font-size:13.5px;margin:0"><b style="color:var(--ink)">On a book with a thin edge, a correlated gap across several positions is the fastest route to several R.</b> The calendar is the risk control here.</p></div>
+    <div class="card"><h3>3 &middot; Rank what to watch after</h3>
+      <p style="font-size:13.5px;margin-bottom:8px">If the hold arrives and the long end cooperates, the names that move first are the ones closest to their triggers.</p>
+      <p style="font-size:13.5px;margin:0"><b class="mono am">AMZN $264.22</b> &middot; <b class="mono am">NVDA $217.62</b> &middot; <b class="mono am">AAPL $317</b> &mdash; the three with three gates passing and short distances to the fourth.</p></div>
+  </div>
+  <div class="rule" style="margin-top:20px"><span class="rid">The one macro reading that changes a Phoenix rule</span>A rising-discount-rate regime with narrow leadership systematically penalises the <b>long-duration, unprofitable, story-driven</b> end of the market &mdash; PLTR, INTC, MP, TSLA in this series. It rewards <b>cash generation now</b> &mdash; AMZN, AAPL, MSFT. <b style="color:var(--ink)">The gate stack already encodes this indirectly through <span class="mono">stage2</span> and <span class="mono">near_high</span>, which is why the two lists came out the way they did.</b> No rule change is warranted; this is the engine working as designed, and the macro read explains <i>why</i> rather than instructing a change.</div>
+  <div class="verdict" style="border-color:var(--amber);background:var(--amberBg);border-left-color:var(--amber);margin-top:26px">
+    <div class="l" style="color:var(--amber)">The picture in five sentences</div>
+    <p style="margin:8px 0 0;font-size:16px;color:var(--ink)">The Fed is debating a <b>hike</b>, not a cut, with three dissenters already voting for one and a new chair who has removed forward guidance. Long yields are at twenty-month highs for reasons the Fed does not control &mdash; <b>issuance, deficits and AI-related corporate debt</b> &mdash; and three official interventions have failed to hold them down.</p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)">The dollar is falling <i>while</i> yields rise, which identifies this as a <b style="color:var(--ink)">risk premium rather than a growth premium</b> &mdash; the single most important observation in this report. Oil at $80 on Iran sanctions is the channel converting geopolitics into a rate decision.</p>
+    <p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)">And equities are two percent off their high with implied volatility in the 21st percentile, priced for a hold and no multiple compression, with <b style="color:var(--ink)">no margin in either assumption.</b> <b class="mono am">Nothing here is tradeable by this book &mdash; and that is the finding. Be flat into 11 September.</b></p>
+  </div>
+</section>
+
+<div class="foot">
+PHOENIX EQUITY RESEARCH &middot; MACRO REGIME READ &middot; MACRO REGIME READ &middot; 24 AUG 2026 &middot; PREPARED TO MACRO_DOCTRINE_v1 §3<br>
+PRICE, VOLUME, OPTION OPEN INTEREST, IMPLIED VOLATILITY AND SECTOR DATA: INTERACTIVE BROKERS API, RETRIEVED 24 AUG 2026, THROUGH FRI 21 AUG CLOSE.<br>
+GATES COMPUTED ON WEEKLY BARS PER phoenix.py: 40-WEEK, 30-WEEK AND 10-WEEK SMA AGAINST THE 104-WEEK HIGH. GEX COMPUTED FROM IBKR OPEN INTEREST ACROSS THE LIVE CHAIN USING THE PHOENIX METHOD &mdash; WALLS ON OPEN INTEREST, FLIP FROM THE CUMULATIVE PROFILE.<br>
+LIMITATIONS &mdash; PER-CONTRACT IV UNAVAILABLE, SO A SINGLE UNDERLYING IV IS APPLIED ACROSS STRIKES; THIS UNDERSTATES WING GAMMA. DEALER POSITIONING IS INFERRED FROM THE STANDARD CONVENTION, NOT OBSERVED. LEVELS AS OF FRI 21 AUG / MON 24 AUG 2026 AND SOURCED FROM PUBLISHED REPORTING AND THE IBKR FEED; TREASURY, DXY AND CRUDE LEVELS ARE FROM PUBLISHED MARKET COMMENTARY RATHER THAN A DIRECT FEED AND SHOULD BE TREATED AS APPROXIMATE TO WITHIN A FEW BASIS POINTS OR CENTS. FED PROBABILITIES ARE MARKET-IMPLIED AND HAVE MOVED SUBSTANTIALLY WITHIN THIS MONTH. NO POSITION IS RECOMMENDED AND NO POLITICAL VIEW IS EXPRESSED; POLICY AND GEOPOLITICAL EVENTS ARE DESCRIBED ONLY AS MARKET INPUTS.<br>
+NOT INVESTMENT ADVICE. PREPARED FOR ONE SYSTEMATIC LONG-ONLY EQUITY BOOK AND CALIBRATED TO ITS RULES, ACCOUNT SIZE AND COST BASE.
+</div>
+</main></div>
+<script>
+(function(){var root=document.documentElement,d=document.getElementById("thDark"),l=document.getElementById("thLight");
+function set(m){var g=(m==="light");root.classList.toggle("light",g);root.style.colorScheme=g?"light":"dark";
+d.className=g?"":"on";l.className=g?"on":"";try{localStorage.setItem("pxTheme",m);}catch(e){}}
+var s=null;try{s=localStorage.getItem("pxTheme");}catch(e){}set(s||"dark");
+d.addEventListener("click",function(){set("dark");});l.addEventListener("click",function(){set("light");});})();
+</script></body></html>
