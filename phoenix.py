@@ -2661,6 +2661,549 @@ def stock_engine_v2(stock_data, universe, quarterly=None, daily_ret=None,
 
 
 # ============================================================
+# TRADE METRICS — the measured book. Writes outputs/trade_metrics.json.
+#
+# WHY THIS EXISTS: run_trades() validates the book but measures nothing, so
+# every performance number lived in a chat transcript and died there. This
+# step makes the measurement a build artifact that the dashboard reads and
+# git tracks, so it is reproducible and cannot drift.
+#
+# THREE EXPECTANCIES, deliberately:
+#   E_price    (exit-entry)/(entry-initial_stop)   -> does the SETUP work
+#   E_account  dollar P&L / (risk_pct * equity)    -> did the ACCOUNT grow
+#   sizing_tax E_account - E_price                 -> the cost of the gap
+# They diverge when position size does not track stop width. Measured
+# 2026-08-21: E_price +0.115R, E_account -0.076R, sizing_tax -0.216R/trade.
+#
+# MAE/MFE degrade honestly. They need intraday high/low; stock_daily.csv is
+# close-only until build_stock_daily.ipynb is widened. Until then the fields
+# are null and "mae_source" says "unavailable" — never a silent zero.
+# ============================================================
+# 1R = risk_conservative x equity. Read from RISK, never re-declared here:
+# a second copy of the same constant is a second thing to forget to update.
+TM_RISK_PCT = RISK["risk_conservative"]
+TM_COMMISSION_R = 0.054     # round-trip commission in R (PAPER_TARGET.md)
+
+
+def _tm_ohlc(path="stock_daily.csv"):
+    """
+    {ticker: {date: (high, low, close)}} when the daily CSV carries high/low.
+
+    Returns ({}, reason) when it does not, so the caller can null the MAE/MFE
+    fields and say why instead of reporting zeros.
+    """
+    import csv, os, gzip, glob as _glob
+    stem = os.path.basename(path).rsplit(".", 1)[0]
+    cands = [path] + sorted(_glob.glob(f"{stem}*"))
+    for p in cands:
+        if not os.path.exists(p):
+            continue
+        try:
+            op = gzip.open if open(p, "rb").read(2) == b"\x1f\x8b" else open
+            with op(p, "rt") as f:
+                rd = csv.DictReader(f)
+                cols = {c.strip().lower() for c in (rd.fieldnames or [])}
+                if not {"high", "low"} <= cols:
+                    return {}, f"{os.path.basename(p)} has no high/low columns"
+                out = {}
+                for r in rd:
+                    try:
+                        out.setdefault(r["ticker"].strip().upper(), {})[r["date"].strip()] = (
+                            float(r["high"]), float(r["low"]), float(r["close"]))
+                    except (KeyError, ValueError, TypeError):
+                        continue
+                return out, f"{os.path.basename(p)} ({len(out)} tickers)"
+        except Exception as e:
+            return {}, f"{os.path.basename(p)} unreadable: {e}"
+    return {}, "stock_daily.csv not found"
+
+
+def _tm_excursions(t, ohlc):
+    """MAE, MFE and deepest recovered pullback for one closed trade, in R."""
+    tk = (t.get("ticker") or "").upper()
+    series = ohlc.get(tk)
+    if not series or not t.get("entry_date") or not t.get("exit_date"):
+        return None
+    risk = t["entry"] - t["initial_stop"]
+    if risk <= 0:
+        return None
+    win = sorted(d for d in series if t["entry_date"] <= d <= t["exit_date"])
+    if not win:
+        return None
+    hi = max(series[d][0] for d in win)
+    lo = min(series[d][1] for d in win)
+    run, cur, recovered = t["entry"], 0.0, []
+    for d in win:
+        h, l, _ = series[d]
+        if h > run:
+            if cur > 0:
+                recovered.append(cur)
+            run, cur = h, 0.0
+        cur = max(cur, (run - l) / risk)
+    return {
+        "mae_r": round((lo - t["entry"]) / risk, 3),
+        "mfe_r": round((hi - t["entry"]) / risk, 3),
+        "max_recovered_pullback_r": round(max(recovered), 3) if recovered else None,
+        "sessions_held": len(win),
+    }
+
+
+def compute_trade_metrics():
+    """Measure the committed book. Pure function — returns the payload."""
+    import statistics as _st
+    from datetime import datetime, timezone
+
+    rows = _load_trades()
+    ohlc, ohlc_src = _tm_ohlc()
+    per_trade, problems = [], []
+
+    for t in rows:
+        if t.get("status") != "closed":
+            continue
+        e, s, x = t.get("entry"), t.get("initial_stop"), t.get("exit_price")
+        if e is None or s is None or x is None:
+            problems.append(f"{t.get('id')}: missing entry/stop/exit")
+            continue
+        risk = e - s
+        if risk <= 0:
+            problems.append(f"{t.get('id')}: entry <= initial_stop (short or bad data)")
+            continue
+        equity = t.get("account_size")
+        if not equity:
+            problems.append(f"{t.get('id')}: no account_size — excluded from E_account")
+        unit = TM_RISK_PCT * equity if equity else None
+        qty = t.get("qty") or 0
+        rec = {
+            "id": t.get("id"), "account": t.get("account"), "ticker": t.get("ticker"),
+            "entry_date": t.get("entry_date"), "exit_date": t.get("exit_date"),
+            "r_price": round((x - e) / risk, 4),
+            "r_account": round(((x - e) * qty) / unit, 4) if unit else None,
+            "pnl_usd": round((x - e) * qty, 2),
+            "risk_per_share": round(risk, 4),
+            "dollar_risk": round(risk * qty, 2),
+            "sizing_multiple": round((risk * qty) / unit, 3) if unit else None,
+            "stop_pct_of_entry": round(risk / e * 100, 2),
+        }
+        exc = _tm_excursions(t, ohlc) if ohlc else None
+        rec.update(exc or {"mae_r": None, "mfe_r": None,
+                           "max_recovered_pullback_r": None, "sessions_held": None})
+        per_trade.append(rec)
+
+    def agg(sel, label):
+        rs = [r for r in per_trade if sel(r)]
+        if not rs:
+            return None
+        rp = [r["r_price"] for r in rs]
+        ra = [r["r_account"] for r in rs if r["r_account"] is not None]
+        W = [v for v in rp if v > 0]
+        L = [v for v in rp if v <= 0]
+        gw, gl = sum(W), -sum(L)
+        Ep = sum(rp) / len(rp)
+        Ea = (sum(ra) / len(ra)) if ra else None
+        sz = [r["sizing_multiple"] for r in rs if r["sizing_multiple"] is not None]
+        wins = sorted(W, reverse=True)
+        maeW = [r["mae_r"] for r in rs if r["mae_r"] is not None and r["r_price"] > 0]
+        return {
+            "label": label,
+            "n_closed": len(rs),
+            "n_wins": len(W), "n_losses": len(L),
+            "win_rate": round(len(W) / len(rs), 4),
+            "e_price": round(Ep, 4),
+            "e_price_after_commission": round(Ep - TM_COMMISSION_R, 4),
+            "e_account": round(Ea, 4) if Ea is not None else None,
+            "sizing_tax": round(Ea - Ep, 4) if Ea is not None else None,
+            "payoff": round((gw / len(W)) / (gl / len(L)), 3) if W and L else None,
+            "profit_factor": round(gw / gl, 3) if gl else None,
+            "net_r": round(sum(rp), 3),
+            "net_usd": round(sum(r["pnl_usd"] for r in rs), 2),
+            "breakeven_win_rate_real": round((1 + TM_COMMISSION_R) /
+                                             (1 + (gw / len(W)) / (gl / len(L))), 4) if W and L else None,
+            "winners_below_1r": round(sum(1 for v in W if v < 1.0) / len(W), 4) if W else None,
+            "top3_share_of_gross_profit": round(sum(wins[:3]) / gw, 4) if gw else None,
+            "sizing_multiple_median": round(_st.median(sz), 3) if sz else None,
+            "sizing_multiple_min": round(min(sz), 3) if sz else None,
+            "sizing_multiple_max": round(max(sz), 3) if sz else None,
+            "sizing_out_of_band": sum(1 for v in sz if v < 0.9 or v > 1.1),
+            "mae_winners_median": round(_st.median(maeW), 3) if maeW else None,
+            "sample_size_warning": len(rs) < 50,
+        }
+
+    accounts = sorted({r["account"] for r in per_trade if r.get("account")})
+    return {
+        "schema": "phoenix-trade-metrics/1",
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "risk_pct": TM_RISK_PCT,
+        "commission_r": TM_COMMISSION_R,
+        "mae_source": ohlc_src if ohlc else f"unavailable — {ohlc_src}",
+        "mae_available": bool(ohlc),
+        "problems": problems,
+        "overall": agg(lambda r: True, "all books"),
+        "by_account": {a: agg(lambda r, a=a: r["account"] == a, a) for a in accounts},
+        "trades": per_trade,
+    }
+
+
+def run_trade_metrics():
+    """Pipeline step: measure the book and write outputs/trade_metrics.json."""
+    p = compute_trade_metrics()
+    o = p.get("overall")
+    if not o:
+        print("[trade_metrics] no closed trades to measure")
+    else:
+        print(f"[trade_metrics] {o['n_closed']} closed · WR {o['win_rate']*100:.1f}% · "
+              f"E_price {o['e_price']:+.4f}R · E_account "
+              f"{('%+.4f' % o['e_account']) if o['e_account'] is not None else 'n/a'}R · "
+              f"sizing_tax {('%+.4f' % o['sizing_tax']) if o['sizing_tax'] is not None else 'n/a'}R")
+        print(f"[trade_metrics] MAE/MFE: {p['mae_source']}")
+        if o["sample_size_warning"]:
+            print(f"[trade_metrics] SAMPLE SIZE {o['n_closed']} < 50 — not decision-grade")
+    for w in p["problems"]:
+        print(f"[trade_metrics] WARN {w}")
+    write_json("trade_metrics", p)
+    return p
+
+
+# ============================================================
+# RESEARCH LIBRARY — indexes research/*.html into outputs/research_index.json
+#
+# TWO RULES, decided 2026-08-24:
+#
+# 1. SECTOR/INDUSTRY IS REPLACED, ALWAYS. The report may carry whatever
+#    taxonomy its sources used; Phoenix's universe.csv (20 sectors, 125
+#    industries) is the one the `industry` gate runs on. A card showing a
+#    different classification than the gate stack is reading the wrong peer
+#    group. Classification has no publication date, so refreshing it is
+#    correcting it, not rewriting history.
+#
+# 2. GEX IS FROZEN ON FIRST INDEX, NEVER AFTER. The report is a dated
+#    document: its gamma panel describes one session. Re-snapshotting on
+#    every run would put today's flip under an argument written weeks ago —
+#    the numbers would move and the reasoning would not. So the first run
+#    that sees a report copies Phoenix's per-ticker GEX into the index and
+#    stamps frozen_at; every later run leaves it alone. Same mechanic as
+#    _gex_freeze_levels. Set RESEARCH_REFREEZE=1 to force a re-snapshot.
+#
+# Reports should carry <script type="application/json" id="px-report-meta">.
+# Where they do not, the fields below are recovered from the fixed structure
+# the method mandates (filename, <title>, .stamp) and meta_source says so.
+# Nothing is guessed: unknown fields are null.
+# ============================================================
+RESEARCH_DIR = "research"
+
+
+def _rl_unescape(s):
+    """Strip tags to plain text. Tags become a SPACE, not nothing: <br> inside
+    a headline is a line break, and deleting it joins two sentences without
+    one ("works.The chart"). Collapse runs afterwards."""
+    import html as _h, re as _re
+    t = _h.unescape(_re.sub(r"<[^>]+>", " ", s or ""))
+    t = _re.sub(r"\s+", " ", t).strip()
+    return _re.sub(r"\s+([.,;:!?])", r"\1", t)   # no space before punctuation
+
+
+def _rl_parse_report(path):
+    """Pull what the report can be trusted to state about itself."""
+    import re, json, os
+    raw = open(path, "r", encoding="utf-8", errors="replace").read()
+    base = os.path.basename(path)
+
+    # 1 — the embedded block, if the report carries one
+    m = re.search(r'<script[^>]+id="px-report-meta"[^>]*>(.*?)</script>', raw, re.S)
+    if m:
+        try:
+            meta = json.loads(m.group(1))
+            meta["meta_source"] = "px-report-meta"
+            meta.setdefault("file", base)
+            return meta
+        except Exception as e:
+            print(f"[research] {base}: px-report-meta present but unparseable ({e})")
+
+    # 2 — recovered from the structure the method fixes
+    meta = {"file": base, "meta_source": "recovered"}
+    fm = re.match(r"([A-Z\.]+)_Phoenix_Research_(\d{4}-\d{2}-\d{2})\.html$", base)
+    if fm:
+        meta["ticker"], meta["date"] = fm.group(1), fm.group(2)
+    t = re.search(r"<title>(.*?)</title>", raw, re.S)
+    meta["title"] = _rl_unescape(t.group(1)) if t else base
+
+    h1 = re.search(r"<h1[^>]*>(.*?)</h1>", raw, re.S)
+    meta["headline"] = _rl_unescape(h1.group(1)) if h1 else None
+
+    mast = re.search(r'<div class="mast"><div class="t">(.*?)</div>', raw, re.S)
+    meta["masthead"] = _rl_unescape(mast.group(1)) if mast else None
+    d = re.search(r"\b(L1|L2|L3|R)\b[ &]", meta.get("masthead") or "")
+    meta["depth"] = d.group(1) if d else None
+
+    st = re.search(r'<div class="stamp"[^>]*>\s*<div class="x">(.*?)</div>\s*'
+                   r'<div class="o"[^>]*>(.*?)</div>', raw, re.S)
+    if st:
+        meta["gate_note"] = _rl_unescape(st.group(1))
+        meta["verdict"] = _rl_unescape(st.group(2))
+        counts = {}
+        for n, lab in re.findall(r"(\d+)\s+(PASS|FAIL|UNVERIFIED)", meta["gate_note"].upper()):
+            counts[lab.lower()] = int(n)
+        meta["gates"] = counts or None
+    else:
+        meta["gate_note"] = meta["verdict"] = meta["gates"] = None
+
+    meta["sections"] = sorted(set(re.findall(r'<section[^>]+id="([a-z0-9\-]+)"', raw)))
+    meta["bytes"] = len(raw.encode("utf-8"))
+    return meta
+
+
+# What KIND of report this is, as opposed to how deep it goes. The method's
+# depth tags (L1/L2/L3/R) only describe equity work; macro, asset and rates
+# pieces have no ticker and no depth tag, so they must declare themselves in
+# px-report-meta. Depth is the fallback, never the definition.
+RESEARCH_KINDS = {
+    "single-name": "Single name",
+    "sector":      "Sector",
+    "theme":       "Theme",
+    "rotation":    "Rotation",
+    "macro":       "Macro",
+    "asset":       "Asset",
+}
+_DEPTH_TO_KIND = {"L3": "single-name", "L2": "sector", "L1": "theme", "R": "rotation"}
+
+
+def _rl_kind(meta):
+    """Explicit kind wins. Depth is a fallback. Never guess from the prose."""
+    k = (meta.get("kind") or "").strip().lower()
+    if k in RESEARCH_KINDS:
+        return k, "declared"
+    d = (meta.get("depth") or "").upper()
+    if d in _DEPTH_TO_KIND:
+        return _DEPTH_TO_KIND[d], "from depth"
+    return None, "uncategorised"
+
+
+def _rl_universe():
+    """{TICKER: (sector, industry)} from universe.csv — Phoenix's taxonomy."""
+    import csv, os
+    for p in ("universe.csv", os.path.join("data", "universe.csv")):
+        if os.path.exists(p):
+            out = {}
+            with open(p, newline="", encoding="utf-8-sig", errors="replace") as f:
+                for r in csv.DictReader(f):
+                    tk = (r.get("ticker") or "").strip().upper()
+                    if tk:
+                        out[tk] = ((r.get("sector") or "").strip(),
+                                   (r.get("industry") or "").strip())
+            return out, f"{p} ({len(out)} tickers)"
+    return {}, "universe.csv not found"
+
+
+def _rl_gex_snapshot(ticker):
+    """Phoenix's own per-ticker GEX, or None if Phoenix does not cover it."""
+    import json, os
+    p = os.path.join(OUTPUTS_DIR, "gex_stocks", f"{ticker}.json")
+    if not os.path.exists(p):
+        return None
+    try:
+        g = json.load(open(p))
+    except Exception:
+        return None
+    pick = ("spot", "flip", "net_gex", "regime", "oi_res", "oi_sup",
+            "call_wall", "put_wall", "deep_magnet", "asof", "source",
+            "stock_validity")
+    snap = {k: g.get(k) for k in pick if g.get(k) is not None}
+    return snap or None
+
+
+def company_of(r):
+    """Company name out of the masthead line: 'NYSE : UBER - Uber Technologies, Inc. - L3'."""
+    parts = [p.strip() for p in (r.get("masthead") or "").split("\u00b7")]
+    return parts[1] if len(parts) > 1 else ""
+
+
+def _research_tickers():
+    """Tickers that have a report. Read from the index, else from filenames."""
+    import os, json, glob, re
+    try:
+        idx = json.load(open(os.path.join(OUTPUTS_DIR, "research_index.json")))
+        out = [r["ticker"] for r in idx.get("reports", []) if r.get("ticker")]
+        if out:
+            return out
+    except Exception:
+        pass
+    out = []
+    for p in glob.glob(os.path.join(RESEARCH_DIR, "*.html")):
+        m = re.match(r"([A-Z\.]+)_", os.path.basename(p))
+        if m:
+            out.append(m.group(1))
+    return out
+
+
+def _rl_gex_drift(frozen, live):
+    """
+    Has the gamma structure moved since the report argued from it?
+
+    The report is NOT repriced. Its prose is welded to its numbers - SOFI's
+    ladder reads "18.63 THE FLIP - only 1.5% below spot", and swapping 18.63
+    for today's value leaves the 1.5% behind and makes the sentence false.
+    That is worse than stale, because stale is at least dated.
+
+    So instead of overwriting, measure the gap and say what it means:
+      held     - structure intact, the report still describes the tape
+      moved    - a wall changed strike or spot crossed the flip
+      inverted - the regime changed sign; the report's mechanics are backwards
+    """
+    if not frozen or not live:
+        return None
+    out = {"checked_at": None, "state": "held", "notes": []}
+    fz_reg = (frozen.get("regime") or "").lower()
+    lv_reg = (live.get("regime") or "").lower()
+    if fz_reg and lv_reg and fz_reg != lv_reg:
+        out["state"] = "inverted"
+        out["notes"].append(f"regime {fz_reg} -> {lv_reg}")
+    for k, lab in (("flip", "flip"), ("oi_res", "OI resistance"), ("oi_sup", "OI support")):
+        a, b = frozen.get(k), live.get(k)
+        if a is None or b is None:
+            continue
+        try:
+            if abs(float(b) - float(a)) > max(0.005 * float(a), 0.01):
+                if out["state"] == "held":
+                    out["state"] = "moved"
+                out["notes"].append(f"{lab} {a} -> {b}")
+        except (TypeError, ValueError):
+            continue
+    # spot crossing the flip is the one that changes the mechanics
+    try:
+        fz_side = float(frozen["spot"]) >= float(frozen["flip"])
+        lv_side = float(live["spot"]) >= float(live["flip"])
+        if fz_side != lv_side:
+            out["state"] = "inverted"
+            out["notes"].append("spot crossed the flip")
+    except (KeyError, TypeError, ValueError):
+        pass
+    return out
+
+
+def compute_research_index():
+    import os, glob, json
+    from datetime import datetime, timezone
+
+    prev = {}
+    if os.environ.get("RESEARCH_REFREEZE") != "1":
+        try:
+            for r in json.load(open(os.path.join(OUTPUTS_DIR, "research_index.json")))["reports"]:
+                prev[r["file"]] = r
+        except Exception:
+            pass
+
+    uni, uni_src = _rl_universe()
+    files = sorted(glob.glob(os.path.join(RESEARCH_DIR, "*.html")))
+    reports, notes = [], []
+    frozen_new = frozen_kept = 0
+
+    for path in files:
+        r = _rl_parse_report(path)
+        tk = (r.get("ticker") or "").upper()
+        r["ticker"] = tk or None
+        r["url"] = f"{RESEARCH_DIR}/{r['file']}"
+
+        # --- rule 1: sector/industry always Phoenix's ---
+        sec, ind = uni.get(tk, ("", ""))
+        r["sector"] = sec or None
+        r["industry"] = ind or None
+        r["taxonomy_source"] = "universe.csv" if sec else "not in universe"
+        if tk and not sec:
+            notes.append(f"{tk}: not in universe.csv — sector/industry null")
+
+        # --- rule 2: GEX frozen on first index ---
+        old = prev.get(r["file"], {})
+        if old.get("phoenix_gex"):
+            r["phoenix_gex"] = old["phoenix_gex"]
+            r["gex_frozen_at"] = old.get("gex_frozen_at")
+            frozen_kept += 1
+        else:
+            snap = _rl_gex_snapshot(tk) if tk else None
+            r["phoenix_gex"] = snap
+            r["gex_frozen_at"] = (datetime.now(timezone.utc).isoformat(timespec="seconds")
+                                  if snap else None)
+            if snap:
+                frozen_new += 1
+            elif tk:
+                notes.append(f"{tk}: no outputs/gex_stocks/{tk}.json — GEX shows NOT COVERED")
+        r["gex_status"] = ("frozen" if r["phoenix_gex"] else "not covered")
+
+        # frozen stays frozen; the drift line says whether it still holds
+        live = _rl_gex_snapshot(tk) if tk else None
+        drift = _rl_gex_drift(r.get("phoenix_gex"), live)
+        if drift:
+            from datetime import datetime as _dt, timezone as _tz
+            drift["checked_at"] = _dt.now(_tz.utc).isoformat(timespec="seconds")
+            drift["live_flip"] = live.get("flip")
+            drift["live_spot"] = live.get("spot")
+            drift["live_regime"] = live.get("regime")
+        r["gex_drift"] = drift
+        if drift and drift["state"] == "inverted":
+            notes.append(f"{tk}: gamma INVERTED since publication "
+                         f"({'; '.join(drift['notes'])}) — reissue the report")
+
+        kind, how = _rl_kind(r)
+        r["kind"] = kind
+        r["kind_label"] = RESEARCH_KINDS.get(kind, "Uncategorised")
+        r["kind_source"] = how
+        if kind is None:
+            notes.append(f"{r['file']}: no kind and no depth tag — shows as Uncategorised")
+
+        # one lowercase blob the front end can substring-match without
+        # re-deriving the rules that built it
+        r["search"] = " ".join(str(x) for x in (
+            r.get("ticker"), company_of(r), r.get("headline"), r.get("sector"),
+            r.get("industry"), r.get("kind_label"), r.get("depth"), r.get("date")) if x).lower()
+        reports.append(r)
+
+    reports.sort(key=lambda x: (x.get("date") or "", x.get("ticker") or ""), reverse=True)
+    incomplete = [r["file"] for r in reports if r.get("meta_source") != "px-report-meta"]
+    if incomplete:
+        notes.append(f"{len(incomplete)} report(s) carry no px-report-meta block — "
+                     f"fields recovered from structure, some left null")
+
+    return {
+        "schema": "phoenix-research-index/1",
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "research_dir": RESEARCH_DIR,
+        "taxonomy": uni_src,
+        "counts": {"reports": len(reports),
+                   "gex_frozen_this_run": frozen_new,
+                   "gex_kept_frozen": frozen_kept,
+                   "gex_not_covered": sum(1 for r in reports if not r["phoenix_gex"]),
+                   "missing_meta_block": len(incomplete),
+                   "uncategorised": sum(1 for r in reports if not r.get("kind")),
+                   "gex_held": sum(1 for r in reports
+                                   if (r.get("gex_drift") or {}).get("state") == "held"),
+                   "gex_moved": sum(1 for r in reports
+                                    if (r.get("gex_drift") or {}).get("state") == "moved"),
+                   "gex_inverted": sum(1 for r in reports
+                                       if (r.get("gex_drift") or {}).get("state") == "inverted")},
+        "kinds": {k: {"label": v,
+                      "n": sum(1 for r in reports if r.get("kind") == k)}
+                  for k, v in RESEARCH_KINDS.items()},
+        "notes": notes,
+        "reports": reports,
+    }
+
+
+def run_research_library():
+    """Pipeline step: index research/*.html -> outputs/research_index.json."""
+    import os
+    if not os.path.isdir(RESEARCH_DIR):
+        print(f"[research] no {RESEARCH_DIR}/ directory — nothing to index")
+        return None
+    p = compute_research_index()
+    c = p["counts"]
+    print(f"[research] {c['reports']} reports · taxonomy {p['taxonomy']}")
+    print(f"[research] GEX: {c['gex_frozen_this_run']} newly frozen, "
+          f"{c['gex_kept_frozen']} kept, {c['gex_not_covered']} not covered")
+    for n in p["notes"]:
+        print(f"[research] NOTE {n}")
+    write_json("research_index", p)
+    return p
+
+
+# ============================================================
 # PROMOTION ENGINE — TRADE -> INVESTMENT_CORE eligibility (Part 3.5)
 # Evaluates open trades in outputs/trades.json against P1–P5 daily and
 # writes outputs/promotions.json. NEVER auto-promotes — it emits tickets.
@@ -4199,42 +4742,11 @@ MACRO_DAILY_INSTRUMENTS = [
     # key      yahoo/fred     label                    kind
     ("SPX",   "^GSPC",  "S&P 500",                  "candles"),
     ("NDX",   "^IXIC",  "Nasdaq Composite",         "candles"),
-    ("DOW",   "^DJI",   "Dow Jones Industrial",     "candles"),
-    ("RUT",   "^RUT",   "Russell 2000",             "candles"),
     ("GOLD",  "GC=F",   "Gold (front future)",      "candles"),
     ("OIL",   "CL=F",   "WTI crude (front future)", "candles"),
-    ("DXY",   "DX-Y.NYB", "Dollar index",           "candles"),
-    ("BTC",   "BTC-USD", "Bitcoin",                 "candles"),
-    ("US10Y", "^TNX",   "US 10Y yield",             "candles"),
-    ("TLT",   "TLT",    "Bonds \u00b7 20yr Treasury",    "candles"),
-    ("HYOAS", "BAMLH0A0HYM2", "Credit spread \u00b7 HY OAS", "line"),
+    ("TLT",   "TLT",    "Bonds · 20yr Treasury",    "candles"),
+    ("HYOAS", "BAMLH0A0HYM2", "Credit spread · HY OAS", "line"),
 ]
-
-# Yahoo's yield tickers have been quoted BOTH ways over the years: ^TNX as
-# 4.25 (percent) and as 42.5 (index = percent x10). The rest of the engine
-# assumes the x10 form (run_macro_series divides tnx by 10). Rather than bet
-# on either, normalise from the data: a 10Y or 30Y yield above 20% has not
-# happened since the early 1980s, so a median above that can only be the
-# index form. This is correct under either convention.
-# (Kept keyed by a set so a 30Y or 2Y can be added later without new logic.)
-MACRO_YIELD_KEYS = {"US10Y"}
-
-
-def _normalise_yield_bars(key, bars):
-    if key not in MACRO_YIELD_KEYS or not bars:
-        return bars
-    closes = sorted(b["c"] for b in bars if b.get("c") is not None)
-    if not closes:
-        return bars
-    median = closes[len(closes) // 2]
-    if median <= 20:
-        return bars                      # already quoted in percent
-    for b in bars:
-        for k in ("o", "h", "l", "c"):
-            if b.get(k) is not None:
-                b[k] = round(b[k] / 10.0, 3)
-    print(f"[macrod] {key}: median {median} -> index form, divided by 10")
-    return bars
 
 
 def run_macro_daily(period="1y"):
@@ -4294,7 +4806,6 @@ def run_macro_daily(period="1y"):
                 problems.append(f"{key}: only {len(bars)} bars")
                 continue
             bars = _yf_fill_last(sym, bars)
-            bars = _normalise_yield_bars(key, bars)
             instruments[key] = {"label": label, "kind": "candles",
                                 "symbol": sym, "bars": bars,
                                 "asof": bars[-1]["date"]}
@@ -7652,6 +8163,16 @@ def run_gex_stocks_cboe(tickers=None, limit=None):
             tickers += list(GEX_UNIVERSE.get("seed") or [])
         except Exception:
             pass
+        # Every name that has a research report gets a full-chain GEX, whether
+        # or not it made the hand-written seed. SOFI is the case that proved
+        # this: a full L3 report with a gamma panel, and no entry in seed or
+        # scan_2026_08, so nothing computed it. A report without Phoenix's own
+        # chain has to fall back to a sampled one, and the method doc measures
+        # that error at 19 points of flip on AAPL.
+        try:
+            tickers += _research_tickers()
+        except Exception as e:
+            print(f"[gexc] research tickers unavailable: {e}")
 
     seen, order = set(), []
     for t in tickers:
@@ -9771,6 +10292,8 @@ def run_full():
 
     # --- correctness gate: cheap, and everything downstream trusts the book --
     step("trades",         run_trades)
+    step("trade_metrics",  run_trade_metrics)
+    step("research",       run_research_library, optional=True)
 
     # --- core: what the dashboard reads first -------------------------------
     step("macro",          run_macro)
@@ -9830,6 +10353,10 @@ def run_engine(name):
         run_gex_best()
     elif name == "trades":
         run_trades()
+    elif name == "trademetrics":
+        run_trade_metrics()
+    elif name == "research":
+        run_research_library()
     elif name == "gexsweep":
         run_gex_sweep()
     elif name == "gexverify":
