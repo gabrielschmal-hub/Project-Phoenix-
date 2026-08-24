@@ -2685,7 +2685,7 @@ TM_RISK_PCT = RISK["risk_conservative"]
 TM_COMMISSION_R = 0.054     # round-trip commission in R (PAPER_TARGET.md)
 
 
-def _tm_ohlc(path="stock_daily.csv"):
+def _tm_ohlc(path="stock_daily.csv", only=None):
     """
     {ticker: {date: (high, low, close)}} when the daily CSV carries high/low.
 
@@ -2705,10 +2705,17 @@ def _tm_ohlc(path="stock_daily.csv"):
                 cols = {c.strip().lower() for c in (rd.fieldnames or [])}
                 if not {"high", "low"} <= cols:
                     return {}, f"{os.path.basename(p)} has no high/low columns"
+                # `only` matters: the daily file carries the whole universe,
+                # and the trade book needs about twenty names. Loading every
+                # ticker built a dict of hundreds of thousands of tuples for
+                # nothing, on a runner shared with the rest of the pipeline.
                 out = {}
                 for r in rd:
                     try:
-                        out.setdefault(r["ticker"].strip().upper(), {})[r["date"].strip()] = (
+                        tk = r["ticker"].strip().upper()
+                        if only is not None and tk not in only:
+                            continue
+                        out.setdefault(tk, {})[r["date"].strip()] = (
                             float(r["high"]), float(r["low"]), float(r["close"]))
                     except (KeyError, ValueError, TypeError):
                         continue
@@ -2754,7 +2761,8 @@ def compute_trade_metrics():
     from datetime import datetime, timezone
 
     rows = _load_trades()
-    ohlc, ohlc_src = _tm_ohlc()
+    _need = {(t.get("ticker") or "").upper() for t in rows if t.get("status") == "closed"}
+    ohlc, ohlc_src = _tm_ohlc(only=_need or None)
     per_trade, problems = [], []
 
     for t in rows:
@@ -4678,6 +4686,42 @@ def run_macro_series_daily():
         print("[macroday] no usable SPX history - keeping previous series")
         return None
 
+    # ---- carry any symbol Yahoo refused, PER SYMBOL --------------------------
+    # The guard above is all-or-nothing on SPX only. A run where SPX returns
+    # and ^DJI / ^RUT / DX-Y.NYB / ^TNX / BTC-USD do not still reaches the
+    # write below, and the write only emits keys present in `cols` - so five
+    # missing fetches silently replaced a complete macro_series.json with a
+    # partial one, and five asset cards went to "No data yet". Losing a fetch
+    # is normal; losing yesterday's data because of it is not.
+    prior = {}
+    try:
+        _p = json.load(open(os.path.join(OUTPUTS_DIR, "macro_series.json")))
+        for _r in (_p.get("series") or []):
+            _d = (_r or {}).get("date")
+            if not _d:
+                continue
+            for _k in SYMS:
+                if _r.get(_k) is not None:
+                    prior.setdefault(_k, {})[_d[:10]] = float(_r[_k])
+    except Exception as e:
+        print(f"[macroday] no previous series to carry from ({e})")
+
+    fetched = sorted(k for k in SYMS if cols.get(k))
+    carried, lost = [], []
+    for k in SYMS:
+        if cols.get(k):
+            continue
+        if prior.get(k):
+            cols[k] = prior[k]
+            carried.append(f"{k}({len(prior[k])}d)")
+        else:
+            lost.append(k)
+    print(f"[macroday] fetched {len(fetched)}/{len(SYMS)}: {', '.join(fetched)}")
+    if carried:
+        print(f"[macroday] CARRIED FORWARD (Yahoo returned nothing): {', '.join(carried)}")
+    if lost:
+        print(f"[macroday] NO DATA AT ALL, no history to carry: {', '.join(lost)}")
+
     # carry the weekly-only fields forward onto each trading day
     weekly = {}
     for fname in ("macro_series_weekly.json", "macro_series.json"):
@@ -4721,8 +4765,14 @@ def run_macro_series_daily():
         out.append(row)
 
     out = out[-260:]
+    have = {k for k in SYMS if any(k in r for r in out)}
+    if prior and len(have) < len(prior.keys() | set()):
+        print(f"[macroday] WARNING: writing {len(have)} symbols where the previous "
+              f"file had {len(prior)} - missing {sorted(set(prior) - have)}")
     write_json("macro_series", {"asof": _now(), "days": len(out),
-                                "cadence": "daily", "series": out})
+                                "cadence": "daily", "series": out,
+                                "symbols_fetched": fetched, "symbols_carried": carried,
+                                "symbols_missing": lost})
     print(f"[macroday] {len(out)} DAILY rows, {out[0]['date']} -> {out[-1]['date']}")
     return len(out)
 
@@ -5050,7 +5100,101 @@ def load_universe_from_csv(path="universe.csv"):
                 }
             except Exception:
                 continue
+
+    # ---- overrides ---------------------------------------------------------
+    # universe.csv is rebuilt upstream in Colab, so a hand-edit there is lost
+    # on the next export. This file is committed separately and merged on every
+    # load, which is why the repair survives.
+    #
+    # WHY IT EXISTS (2026-08-24): PLTR, UBER, SNOW and MSTR were absent from a
+    # 2,893-row universe despite being large, liquid US primary listings.
+    # SNOW is the one that matters - it is Gabriel's two largest winners, so
+    # the screener could never have surfaced the best trades in the book.
+    # Overrides restore sector/industry/market_cap ONLY. They do not create
+    # weekly bars, so the five gates still cannot run on a name until
+    # stock_weekly.csv carries it; run_universe_gaps() reports that separately.
+    import os as _os
+    ov = "universe_overrides.csv"
+    if _os.path.exists(ov):
+        added = 0
+        try:
+            with open(ov) as f:
+                for row in csv.DictReader(f):
+                    tk = (row.get("ticker") or "").strip().upper()
+                    if not tk:
+                        continue
+                    if tk in uni:
+                        continue          # the export wins; overrides only fill gaps
+                    uni[tk] = {"sector": (row.get("sector") or "").strip(),
+                               "industry": (row.get("industry") or "").strip(),
+                               "market_cap": float(row.get("market_cap") or 0),
+                               "name": (row.get("name") or "").strip()}
+                    added += 1
+            if added:
+                print(f"[universe] {ov}: filled {added} gap(s) the export missed")
+        except Exception as e:
+            print(f"[universe] {ov} unreadable: {e}")
     return uni
+
+
+def run_universe_gaps():
+    """
+    Name every ticker Phoenix already cares about that the universe does not
+    know, and say which capability each gap costs. Writes outputs/universe_gaps.json.
+
+    Two different gaps, two different fixes:
+      no_universe_row  -> sector/industry/cap missing. Fixable here, via
+                          universe_overrides.csv.
+      no_weekly_bars   -> the five gates (trend200/trend50/industry/near_high/
+                          stage2) run on WEEKLY closes and cannot be computed.
+                          Only the upstream stock_weekly.csv build can fix this.
+    """
+    import json, os
+    from datetime import datetime, timezone
+
+    uni = load_universe_from_csv()
+    wk = load_weekly_from_csv()
+    care, why = {}, {}
+
+    def note(tk, reason):
+        tk = (tk or "").strip().upper()
+        if not tk:
+            return
+        care[tk] = True
+        why.setdefault(tk, set()).add(reason)
+
+    for t in (_research_tickers() or []):
+        note(t, "research report")
+    try:
+        for t in (_held_and_planned_tickers() or []):
+            note(t, "traded or planned")
+    except Exception:
+        pass
+    for t in (GEX_UNIVERSE.get("seed") or []):
+        note(t, "GEX seed")
+
+    rows = []
+    for tk in sorted(care):
+        in_uni, n_wk = tk in uni, len(wk.get(tk) or [])
+        if in_uni and n_wk:
+            continue
+        rows.append({"ticker": tk, "because": sorted(why[tk]),
+                     "in_universe": in_uni, "weekly_bars": n_wk,
+                     "gap": ("no_universe_row" if not in_uni else "no_weekly_bars"),
+                     "costs": ("sector, industry, market cap, and the industry gate"
+                               if not in_uni else
+                               "all five gates - they are computed on weekly closes")})
+
+    payload = {"schema": "phoenix-universe-gaps/1",
+               "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+               "universe_rows": len(uni), "weekly_tickers": len(wk),
+               "checked": len(care), "gaps": len(rows), "rows": rows}
+    print(f"[unigaps] checked {len(care)} tickers Phoenix cares about - {len(rows)} gap(s)")
+    for r in rows:
+        print(f"[unigaps]   {r['ticker']:6s} {r['gap']:16s} ({', '.join(r['because'])})")
+    write_json("universe_gaps", payload)
+    return payload
+
 
 def load_weekly_from_csv(path="stock_weekly.csv"):
     """Load {ticker: [(date, close, volume), ...]} from a committed CSV."""
@@ -10294,6 +10438,7 @@ def run_full():
     step("trades",         run_trades)
     step("trade_metrics",  run_trade_metrics)
     step("research",       run_research_library, optional=True)
+    step("universe_gaps",  run_universe_gaps,    optional=True)
 
     # --- core: what the dashboard reads first -------------------------------
     step("macro",          run_macro)
@@ -10357,6 +10502,8 @@ def run_engine(name):
         run_trade_metrics()
     elif name == "research":
         run_research_library()
+    elif name == "unigaps":
+        run_universe_gaps()
     elif name == "gexsweep":
         run_gex_sweep()
     elif name == "gexverify":
