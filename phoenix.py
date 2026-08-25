@@ -4792,11 +4792,21 @@ MACRO_DAILY_INSTRUMENTS = [
     # key      yahoo/fred     label                    kind
     ("SPX",   "^GSPC",  "S&P 500",                  "candles"),
     ("NDX",   "^IXIC",  "Nasdaq Composite",         "candles"),
+    ("DOW",   "^DJI",   "Dow Jones Industrial",     "candles"),
+    ("RUT",   "^RUT",   "Russell 2000",             "candles"),
     ("GOLD",  "GC=F",   "Gold (front future)",      "candles"),
     ("OIL",   "CL=F",   "WTI crude (front future)", "candles"),
+    ("DXY",   "DX-Y.NYB", "Dollar index",           "candles"),
+    ("BTC",   "BTC-USD", "Bitcoin",                 "candles"),
+    ("US10Y", "^TNX",   "US 10Y yield",             "candles"),
     ("TLT",   "TLT",    "Bonds · 20yr Treasury",    "candles"),
     ("HYOAS", "BAMLH0A0HYM2", "Credit spread · HY OAS", "line"),
 ]
+
+# Yahoo's ^TNX quotes the 10-year at 10x the yield (43.2 == 4.32%).
+# Scale is applied at ingest so every bar downstream is already in
+# human units — including bars backfilled by _yf_fill_last.
+MACRO_SCALE = {"US10Y": 0.1}
 
 
 def run_macro_daily(period="1y"):
@@ -4812,6 +4822,7 @@ def run_macro_daily(period="1y"):
     for key, sym, label, kind in MACRO_DAILY_INSTRUMENTS:
         if kind == "line":
             continue
+        sc = MACRO_SCALE.get(key, 1.0)
         try:
             df = yf.download(sym, period=period, interval="1d",
                              auto_adjust=False, progress=False)
@@ -4831,7 +4842,7 @@ def run_macro_daily(period="1y"):
             for d in df.index:
                 def g(series, nd=2):
                     try:
-                        return round(float(series.loc[d]), nd)
+                        return round(float(series.loc[d]) * sc, nd)
                     except Exception:
                         return None
                 cv = g(cl)
@@ -4855,7 +4866,7 @@ def run_macro_daily(period="1y"):
             if len(bars) < 30:
                 problems.append(f"{key}: only {len(bars)} bars")
                 continue
-            bars = _yf_fill_last(sym, bars)
+            bars = _yf_fill_last(sym, bars, scale=sc)
             instruments[key] = {"label": label, "kind": "candles",
                                 "symbol": sym, "bars": bars,
                                 "asof": bars[-1]["date"]}
@@ -4918,7 +4929,7 @@ def run_macro_daily(period="1y"):
     return len(instruments)
 
 
-def _yf_fill_last(sym, bars, tries=3, pause=4.0):
+def _yf_fill_last(sym, bars, tries=3, pause=4.0, scale=1.0):
     """
     Yahoo under load returns the NEWEST bar as NaN. That single bad value
     cascades: the bar is dropped, the board shows the prior session, and the
@@ -4967,14 +4978,14 @@ def _yf_fill_last(sym, bars, tries=3, pause=4.0):
                 if ds in have:
                     continue
                 try:
-                    cv = float(cl.loc[ts])
+                    cv = float(cl.loc[ts]) * scale
                 except Exception:
                     continue
                 if math.isnan(cv) or math.isinf(cv):
                     continue
                 def g(s):
                     try:
-                        x = float(s.loc[ts])
+                        x = float(s.loc[ts]) * scale
                         return None if (math.isnan(x) or math.isinf(x)) else round(x, 2)
                     except Exception:
                         return None
