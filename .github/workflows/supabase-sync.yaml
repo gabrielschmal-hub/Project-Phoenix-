@@ -1,0 +1,53 @@
+name: Phoenix Supabase Sync
+
+# Deliberately standalone. daily.yml is NOT edited.
+#  - workflow_dispatch : run it by hand, any time, to test
+#  - push on outputs/** : fires automatically after the daily run commits
+#
+# Caveat worth knowing: if daily.yml commits using the default GITHUB_TOKEN,
+# GitHub suppresses the resulting push event to prevent workflow loops, and the
+# automatic trigger below will never fire. Manual dispatch always works. If the
+# auto-trigger stays silent after a daily run, that is the reason — the fix is a
+# workflow_run trigger keyed to daily.yml's exact `name:` value.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (write nothing)"
+        type: boolean
+        default: false
+      keep:
+        description: "Snapshots retained per file"
+        default: "5"
+  push:
+    paths:
+      - "outputs/**"
+
+concurrency:
+  group: phoenix-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: pip install --quiet requests
+
+      - name: Sync outputs to Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python phoenix_sync.py \
+            --kind ${{ github.event_name == 'workflow_dispatch' && 'manual' || 'full' }} \
+            --keep ${{ github.event.inputs.keep || '5' }} \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
