@@ -2367,7 +2367,19 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
 <script>
 (function(){
   "use strict";
-  var BASE = "https://gabrielschmal-hub.github.io/Project-Phoenix-/outputs/";
+  /* ---------- data layer config: Supabase first, GitHub Pages fallback ----------
+     The publishable key is DESIGNED to live in public HTML: it grants only what
+     Row Level Security allows (read-only selects). The secret/service key must
+     never appear in this file. */
+  var PAGES_BASE = "https://gabrielschmal-hub.github.io/Project-Phoenix-/outputs/";
+  var BASE = PAGES_BASE; // kept for any legacy references
+  var SUPA = {
+    url: "https://tinribrtctphlmfytgqo.supabase.co",
+    key: "sb_publishable_9c-C_QYAI-7BEZ_0-uw7SA_gHpVdQrd",
+    timeoutMs: 4000
+  };
+  var PX_SRC = {};      // provenance per file: {src:"supabase"|"pages", asof:<iso>|null}
+  var PX_FROZEN = false; // future lanes (Realtime prices etc.) must check this
   // Chart text and gridlines were hardcoded per theme: "#7E93A8" vanishes on
   // cream, "#6B6347" and "#1C1912" vanish on dark, and gridcolor rgba(0,0,0,.04)
   // is invisible on anything dark. Read the live tokens instead.
@@ -2384,8 +2396,256 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
              redBg:v("--redBg","rgba(217,83,79,.13)") };
   }
 
-  function url(name){ return (BASE||"") + name + ".json?t=" + Date.now(); }
-  function getJSON(name){ return fetch(url(name)).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); }); }
+  function url(name){ return (PAGES_BASE||"") + name + ".json?t=" + Date.now(); }
+
+  /* Supabase read: latest snapshot row for this file. Any failure whatsoever
+     (timeout, HTTP error, empty result, bad JSON) throws, and the caller falls
+     back to Pages. financials_all.json is never synced (size cap), so it takes
+     the Pages path automatically via the empty-result throw. */
+  function supaGet(name){
+    var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
+    var t = ctl ? setTimeout(function(){ ctl.abort(); }, SUPA.timeoutMs) : null;
+    function settle(v, err){ if(t) clearTimeout(t); if(err) throw err; return v; }
+    return fetch(SUPA.url + "/rest/v1/snapshots_latest"
+        + "?name=eq." + encodeURIComponent(name + ".json")
+        + "&select=payload,created_at",
+      { headers: { apikey: SUPA.key, Authorization: "Bearer " + SUPA.key },
+        signal: ctl ? ctl.signal : undefined })
+    .then(function(r){ if(!r.ok) throw new Error("supabase HTTP " + r.status); return r.json(); })
+    .then(function(rows){
+        if(!rows || !rows.length || rows[0] == null || rows[0].payload == null)
+          throw new Error("supabase: no snapshot for " + name);
+        PX_SRC[name] = { src: "supabase", asof: rows[0].created_at || null };
+        pxSrcBadge();
+        return settle(rows[0].payload);
+      },
+      function(e){ return settle(null, e); });
+  }
+
+  function pagesGet(name){
+    return fetch(url(name)).then(function(r){
+      if(!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function(j){
+      PX_SRC[name] = { src: "pages", asof: null };
+      pxSrcBadge();
+      return j;
+    });
+  }
+
+  /* The wedge. Same signature, same promise shape as before: every one of the
+     55 call sites behaves identically. Supabase down, paused, or half-migrated
+     can never blank the dashboard - Pages answers exactly as it did yesterday. */
+  function getJSON(name){
+    return supaGet(name).catch(function(){ return pagesGet(name); });
+  }
+
+  /* ---------- source badge: DB green when Supabase served, amber on fallback ---------- */
+  var pxSrcT = null;
+  function pxSrcBadge(){
+    if(pxSrcT) return;
+    pxSrcT = setTimeout(function(){
+      pxSrcT = null;
+      var el = document.getElementById("pxSrc");
+      if(!el){
+        var clock = document.getElementById("pxStClock");
+        if(!clock || !clock.parentNode) return;
+        el = document.createElement("span");
+        el.id = "pxSrc";
+        el.style.cssText = "margin-left:8px;padding:1px 7px;border-radius:9px;" +
+          "font-size:10px;letter-spacing:.4px;opacity:.9;" +
+          "border:1px solid var(--line,rgba(255,255,255,.2));";
+        clock.parentNode.insertBefore(el, clock);
+      }
+      var db = 0, pg = 0, k;
+      for(k in PX_SRC){ if(PX_SRC[k].src === "supabase") db++; else pg++; }
+      el.textContent = db > 0 ? ("DB " + db + (pg ? "+" + pg : "")) : ("Pages " + pg);
+      el.title = db + " file(s) from Supabase \u00B7 " + pg + " from GitHub Pages fallback";
+      el.style.color = db > 0 ? "var(--green,#3FBF77)" : "var(--gold,#D37736)";
+    }, 250);
+  }
+
+  /* ---------- freeze switch: poll system_state, show a loud banner ----------
+     Stale data that LOOKS live is the worst failure mode a trading dashboard
+     has, so frozen state overlays everything. If auto_resume_at has already
+     passed we render live immediately; pg_cron flips the row within a minute.
+     If Supabase is unreachable we assume live - no crying wolf. */
+  /* ---------- freeze toggle button: pause/resume from inside the app ----------
+     PIN-gated RPC (bcrypt server-side, rate-limited). The pause is SYSTEM-wide:
+     the Edge Function reads the same switch, so this stops the lane itself,
+     not just the display. Freeze defaults to 60 min; pg_cron auto-resumes. */
+  function pxFrzBtnEnsure(){
+    var b = document.getElementById("pxFrzBtn");
+    if(b) return b;
+    var host = document.querySelector("#pxstatus .r");
+    if(!host) return null;
+    b = document.createElement("b");
+    b.id = "pxFrzBtn";
+    b.style.cssText = "cursor:pointer;margin-right:10px;font-size:13px;opacity:.85;user-select:none;";
+    b.addEventListener("click", pxFrzToggle);
+    host.insertBefore(b, host.firstChild);
+    return b;
+  }
+
+  function pxFrzToggle(){
+    var pin = sessionStorage.getItem("pxPin") || window.prompt("Freeze PIN");
+    if(!pin) return;
+    fetch(SUPA.url + "/rest/v1/rpc/toggle_freeze", {
+      method: "POST",
+      headers: { apikey: SUPA.key, Authorization: "Bearer " + SUPA.key,
+                 "Content-Type": "application/json" },
+      body: JSON.stringify({ pin: pin, do_freeze: !PX_FROZEN,
+                             minutes: 60, reason: "manual (app)" })
+    }).then(function(r){ return r.json(); })
+    .then(function(j){
+      if(j && j.ok){ sessionStorage.setItem("pxPin", pin); pxFreezePoll(); }
+      else { sessionStorage.removeItem("pxPin");
+             window.alert((j && j.error) || "toggle failed"); }
+    }).catch(function(){ window.alert("Supabase unreachable"); });
+  }
+
+  function pxFreezeBanner(st){
+    if(st && st.mode === "frozen" && st.auto_resume_at &&
+       new Date(st.auto_resume_at) < new Date()){ st = null; }
+    var b = document.getElementById("pxFreeze");
+    if(st && st.mode === "frozen"){
+      if(!b){
+        b = document.createElement("div");
+        b.id = "pxFreeze";
+        b.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:99999;" +
+          "background:#8A4B1F;color:#FFF3E4;padding:8px 14px;text-align:center;" +
+          "font:600 12px/1.5 -apple-system,system-ui,sans-serif;" +
+          "box-shadow:0 2px 10px rgba(0,0,0,.35);";
+        document.body.appendChild(b);
+      }
+      function hm(x){ try{ return new Date(x).toLocaleTimeString("it-IT",
+        {hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } }
+      b.textContent = "\u23F8 FROZEN" +
+        (st.frozen_at ? " since " + hm(st.frozen_at) : "") +
+        " \u00B7 " + (st.reason || "maintenance") +
+        (st.auto_resume_at ? " \u00B7 auto-resume " + hm(st.auto_resume_at) : "") +
+        " \u00B7 showing last good data";
+      PX_FROZEN = true;
+    } else {
+      if(b && b.parentNode) b.parentNode.removeChild(b);
+      PX_FROZEN = false;
+    }
+    var btn = pxFrzBtnEnsure();
+    if(btn){
+      btn.textContent = PX_FROZEN ? "\u25B6" : "\u23F8";
+      btn.title = PX_FROZEN ? "Resume Phoenix (PIN)" : "Freeze Phoenix 60 min (PIN)";
+      btn.style.color = PX_FROZEN ? "#D37736" : "";
+    }
+  }
+
+  function pxFreezePoll(){
+    return fetch(SUPA.url + "/rest/v1/system_state?id=eq.1&select=mode,reason,frozen_at,auto_resume_at",
+      { headers: { apikey: SUPA.key, Authorization: "Bearer " + SUPA.key } })
+    .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(function(rows){ pxFreezeBanner(rows && rows[0] ? rows[0] : null); })
+    .catch(function(){ /* unreachable: leave current state, assume live */ });
+  }
+  setInterval(pxFreezePoll, 60000);
+  document.addEventListener("visibilitychange", function(){
+    if(document.visibilityState === "visible") pxFreezePoll();
+  });
+
+  /* ---------- live price strip: the 5-minute fast lane ----------
+     Compact chip row under the topbar: open positions first, then index
+     proxies. Every chip shows last, day change and a staleness dot (green
+     <7m, amber <20m, red beyond - a 5-minute lane that quietly stops MUST
+     look stopped). The strip renders only when rows exist: before the fast
+     lane's first run, or if it dies, there is simply no strip - never fake
+     zeros. Polling is 60s, paused while hidden or frozen. Daily-bar system:
+     this is position awareness, not a decision input. */
+  var PX_LIVE = {}, PX_WATCH = null, pxLiveTimer = null;
+
+  function supaRows(path){
+    return fetch(SUPA.url + path,
+      { headers: { apikey: SUPA.key, Authorization: "Bearer " + SUPA.key } })
+    .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
+  }
+
+  function pxStripEnsure(){
+    var s = document.getElementById("pxLive");
+    if(s) return s;
+    s = document.createElement("div");
+    s.id = "pxLive";
+    // same floating-glass language as #pxstatus, docked just above it.
+    // translateZ: same iOS fixed+backdrop-filter repaint issue as the status pill.
+    s.style.cssText = "position:fixed;left:22px;right:22px;z-index:64;" +
+      "display:flex;gap:16px;overflow-x:auto;white-space:nowrap;" +
+      "padding:9px 20px;border-radius:14px;" +
+      "background:rgba(18,22,28,.76);border:1px solid rgba(255,255,255,.085);" +
+      "backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);" +
+      "transform:translateZ(0);" +
+      "font:500 11.5px/1.6 ui-monospace,Menlo,monospace;letter-spacing:.2px;" +
+      "-webkit-overflow-scrolling:touch;scrollbar-width:none;";
+    document.body.appendChild(s);
+    function place(){
+      var ps = document.getElementById("pxstatus");
+      var h = ps ? ps.getBoundingClientRect().height : 48;
+      s.style.bottom = "calc(" + (16 + h + 10) + "px + env(safe-area-inset-bottom,0px))";
+    }
+    place();
+    window.addEventListener("resize", place);
+    return s;
+  }
+
+  function pxStripPaint(){
+    var keys = Object.keys(PX_LIVE);
+    if(!keys.length){ var old = document.getElementById("pxLive");
+      if(old && old.parentNode) old.parentNode.removeChild(old); return; }
+    var order = { position: 0, macro: 1, index_proxy: 2, watch: 3 };
+    keys.sort(function(a, b){
+      var oa = order[(PX_WATCH && PX_WATCH[a]) || "watch"],
+          ob = order[(PX_WATCH && PX_WATCH[b]) || "watch"];
+      if(oa == null) oa = 9; if(ob == null) ob = 9;
+      return oa !== ob ? oa - ob : (a < b ? -1 : 1);
+    });
+    var s = pxStripEnsure(), now = Date.now(), html = "";
+    keys.forEach(function(tk){
+      var q = PX_LIVE[tk];
+      var bk = (PX_WATCH && PX_WATCH[tk]) || "watch";
+      if(bk === "sector" || bk === "sp50") return;  // those feed rotation + heat, not the tape
+      var up = q.chg_pct != null && q.chg_pct >= 0;
+      // fixed palette, not theme tokens: the tape is dark glass in both themes
+      var col = q.chg_pct == null ? "#8A95A1" : up ? "#3FBF77" : "#D9534F";
+      var age = q.updated_at ? (now - new Date(q.updated_at).getTime()) / 60000 : 999;
+      var dot = age < 7 ? "#3FBF77" : age < 20 ? "#D37736" : "#D9534F";
+      html += '<span title="updated ' + Math.round(age) + 'm ago" style="display:inline-flex;align-items:center;gap:5px;">' +
+        '<i style="width:5px;height:5px;border-radius:50%;background:' + dot + ';display:inline-block;"></i>' +
+        '<b style="color:#E6EAEE;font-weight:600;">' + tk + '</b>' +
+        '<span style="color:#9AA6B2;">' + (q.last != null ? (+q.last).toFixed(2) : "\u2014") + '</span>' +
+        '<span style="color:' + col + ';">' +
+          (q.chg_pct != null ? ((up ? "+" : "") + (+q.chg_pct).toFixed(2) + "%") : "\u2014") +
+        '</span></span>';
+    });
+    s.innerHTML = html;
+  }
+
+  function pxLivePoll(){
+    if(PX_FROZEN || document.visibilityState === "hidden") return;
+    var pw = PX_WATCH ? Promise.resolve(null)
+      : supaRows("/rest/v1/watch_tickers?select=ticker,bucket&active=eq.true")
+          .then(function(rows){ PX_WATCH = {};
+            (rows || []).forEach(function(r){ PX_WATCH[r.ticker] = r.bucket; }); })
+          .catch(function(){ PX_WATCH = {}; });
+    pw.then(function(){
+      return supaRows("/rest/v1/prices_live?select=ticker,last,prev_close,chg_pct,quote_ts,updated_at");
+    }).then(function(rows){
+      PX_LIVE = {};
+      (rows || []).forEach(function(r){ PX_LIVE[r.ticker] = r; });
+      pxStripPaint();
+    }).catch(function(){ /* lane down or unreachable: strip ages out via dots */ });
+  }
+  pxLiveTimer = setInterval(pxLivePoll, 60000);
+  // startup order matters: know the freeze state BEFORE the tape's first pull,
+  // so loading a frozen system never starts the live lane at all.
+  pxFreezePoll().then(pxLivePoll, pxLivePoll);
+  document.addEventListener("visibilitychange", function(){
+    if(document.visibilityState === "visible") pxLivePoll();
+  });
 
   var NAV = [
     {id:"mission",  ico:"\u25CE", label:"Mission Control", live:true},
