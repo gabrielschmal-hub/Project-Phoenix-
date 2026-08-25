@@ -1,0 +1,34 @@
+name: Phoenix Supabase Deploy
+
+# The durable deploy path. Committing anything under supabase/functions/**
+# through the GitHub web UI deploys it — no terminal, no CLI on your side.
+# (I can also deploy from chat via MCP; this workflow means you never
+# depend on that.)
+
+on:
+  push:
+    paths:
+      - "supabase/functions/**"
+  workflow_dispatch:
+
+concurrency:
+  group: phoenix-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy all functions
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          supabase functions deploy \
+            --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
