@@ -2558,12 +2558,21 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
      lane's first run, or if it dies, there is simply no strip - never fake
      zeros. Polling is 60s, paused while hidden or frozen. Daily-bar system:
      this is position awareness, not a decision input. */
-  var PX_LIVE = {}, PX_WATCH = null, pxLiveTimer = null;
+  var PX_LIVE = {}, PX_WATCH = null, PX_HIST = {}, pxLiveTimer = null;
 
   function supaRows(path){
     return fetch(SUPA.url + path,
       { headers: { apikey: SUPA.key, Authorization: "Bearer " + SUPA.key } })
     .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
+  }
+
+  function pxTapeTickers(){
+    var out = [];
+    for(var k in PX_WATCH){
+      var b = PX_WATCH[k];
+      if(b === "position" || b === "macro" || b === "index_proxy" || b === "watch") out.push(k);
+    }
+    return out;
   }
 
   function pxStripEnsure(){
@@ -2619,9 +2628,36 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '<span style="color:#9AA6B2;">' + (q.last != null ? (+q.last).toFixed(2) : "\u2014") + '</span>' +
         '<span style="color:' + col + ';">' +
           (q.chg_pct != null ? ((up ? "+" : "") + (+q.chg_pct).toFixed(2) + "%") : "\u2014") +
-        '</span></span>';
+        '</span>' +
+        '<canvas data-tk="' + tk + '" width="44" height="14" ' +
+          'style="width:44px;height:14px;opacity:.9;"></canvas>' +
+        '</span>';
     });
     s.innerHTML = html;
+    // draw the intraday trail on each chip: min-max scaled, day-change color
+    Array.prototype.forEach.call(s.querySelectorAll("canvas[data-tk]"), function(cv){
+      var tk = cv.getAttribute("data-tk"), pts = PX_HIST[tk];
+      var ctx = cv.getContext("2d");
+      ctx.clearRect(0, 0, 44, 14);
+      if(!pts || pts.length < 2) return;
+      var lo = Infinity, hi = -Infinity, i;
+      for(i = 0; i < pts.length; i++){
+        if(pts[i][1] < lo) lo = pts[i][1];
+        if(pts[i][1] > hi) hi = pts[i][1];
+      }
+      var span = (hi - lo) || 1, t0 = pts[0][0], t1 = pts[pts.length - 1][0] || 1;
+      var q = PX_LIVE[tk];
+      ctx.strokeStyle = (q && q.chg_pct != null && q.chg_pct < 0) ? "#D9534F" : "#3FBF77";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for(i = 0; i < pts.length; i++){
+        var x = (t1 === t0) ? 44 * i / (pts.length - 1)
+                            : 44 * (pts[i][0] - t0) / (t1 - t0);
+        var y = 12.5 - 11 * (pts[i][1] - lo) / span;
+        if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    });
   }
 
   function pxLivePoll(){
@@ -2636,7 +2672,21 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     }).then(function(rows){
       PX_LIVE = {};
       (rows || []).forEach(function(r){ PX_LIVE[r.ticker] = r; });
-      pxStripPaint();
+      // intraday trail, tape tickers only — keeps the payload small
+      var tks = pxTapeTickers();
+      if(!tks.length){ pxStripPaint(); return; }
+      var since = new Date(Date.now() - 8 * 3600 * 1000).toISOString();
+      return supaRows("/rest/v1/prices_intraday?select=ticker,ts,last" +
+          "&ticker=in.(" + encodeURIComponent(tks.join(",")) + ")" +
+          "&ts=gte." + encodeURIComponent(since) + "&order=ts.asc")
+      .then(function(hrows){
+        PX_HIST = {};
+        (hrows || []).forEach(function(h){
+          (PX_HIST[h.ticker] = PX_HIST[h.ticker] || [])
+            .push([new Date(h.ts).getTime(), +h.last]);
+        });
+        pxStripPaint();
+      }, function(){ pxStripPaint(); });  // trail missing: chips render flat
     }).catch(function(){ /* lane down or unreachable: strip ages out via dots */ });
   }
   pxLiveTimer = setInterval(pxLivePoll, 60000);
@@ -5092,14 +5142,17 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           host.appendChild(el); return; }
         var bars=d.bars,n=bars.length,
             wbars=Math.min(MK_TFCARD[MK_TF],n-1), a=Math.max(0,n-1-wbars),
-            last=bars[n-1], base=bars[a],
-            chg=base.c?((last.c-base.c)/base.c*100):0,
+            last=bars[n-1], prev=(n>1?bars[n-2]:null),
+            // header % is vs the PREVIOUS bar of this timeframe (D: yesterday).
+            // The sparkline still spans the footnote window — the old code
+            // used the window for the % too, which read as a broken daily move.
+            chg=(prev&&prev.c)?((last.c-prev.c)/prev.c*100):0,
             inv=!!MK_INVERT[key], good=inv?(chg<0):(chg>=0);
         el.innerHTML='<div class="h"><span class="t">'+d.label+
           '</span><span class="chip">'+key+'</span></div>'+
           '<div class="m"><span class="px">'+mkFmt(last.c,d.dec)+'</span>'+
-          '<span class="pc" style="color:'+(good?K.green:K.red)+'">'+
-          (chg>=0?"+":"")+chg.toFixed(1)+'%</span></div><canvas></canvas>'+
+          '<span class="pc" title="vs previous close" style="color:'+(good?K.green:K.red)+'">'+
+          (chg>=0?"+":"")+chg.toFixed(2)+'%</span></div><canvas></canvas>'+
           '<div class="f"><span>'+MK_TFNOTE[MK_TF]+(d.line?" \u00b7 EMAs off":"")+
           (MK_INVERT[key]?" \u00b7 up = risk-off":"")+
           ((key==="SPX"&&MK_GEXON&&MK_GEXL&&MK_GEXL.flip!=null)?" \u00b7 flip":"")+
