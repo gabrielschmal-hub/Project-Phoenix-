@@ -1,0 +1,65 @@
+name: Phoenix Supabase Sync
+
+# v2 — the auto-trigger that actually fires.
+#
+# v1 listened for pushes to outputs/**. The daily engine commits with the
+# default GITHUB_TOKEN, and GitHub suppresses those push events to prevent
+# workflow loops — so the sync never heard anything. Confirmed in production
+# on the night of 25 Aug: daily green, sync silent, database a day stale.
+#
+# v2 listens for the daily WORKFLOW finishing instead. workflow_run events
+# are not suppressed. Manual dispatch stays for testing; the push trigger
+# stays as a harmless extra ear (it fires on manual outputs/ uploads, which
+# ARE real user pushes).
+
+on:
+  workflow_run:
+    workflows: ["Phoenix Daily Run"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (write nothing)"
+        type: boolean
+        default: false
+      keep:
+        description: "Snapshots retained per file"
+        default: "5"
+  push:
+    paths:
+      - "outputs/**"
+
+concurrency:
+  group: phoenix-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # after a daily run, only sync if that run succeeded — never publish
+    # the outputs of a failed engine run.
+    if: >
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main   # the daily run committed to main; read its result
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: pip install --quiet requests
+
+      - name: Sync outputs to Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python phoenix_sync.py \
+            --kind ${{ github.event_name == 'workflow_dispatch' && 'manual' || 'full' }} \
+            --keep ${{ github.event.inputs.keep || '5' }} \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
