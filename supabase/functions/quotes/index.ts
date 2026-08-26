@@ -80,7 +80,8 @@ Deno.serve(async (req: Request) => {
   }
 
   const { data: watch, error: werr } = await SB.from("watch_tickers")
-    .select("ticker,bucket").eq("active", true);
+    .select("ticker,bucket,ysym,px_scale").eq("active", true)
+    .neq("bucket", "screener");  // screener has its own staggered lane
   if (werr || !watch?.length) {
     await beat(false, `watch list: ${werr?.message ?? "empty"}`);
     return out({ error: "watch list unavailable" }, 500);
@@ -92,10 +93,45 @@ Deno.serve(async (req: Request) => {
   // priority order: tape buckets first, so positions and macro are the
   // freshest rows even if a later batch fails or the clock runs out.
   const PRIO: Record<string, number> = {
-    position: 0, macro: 1, index_proxy: 2, watch: 3, sector: 4, sp50: 5 };
-  const tickers = watch
-    .sort((a, b) => (PRIO[a.bucket] ?? 9) - (PRIO[b.bucket] ?? 9))
+    macro_index: 0, position: 1, macro: 2, index_proxy: 3, watch: 4,
+    sector: 5, sp50: 6 };
+  const sorted = [...watch]
+    .sort((a, b) => (PRIO[a.bucket] ?? 9) - (PRIO[b.bucket] ?? 9));
+  const yahooSyms = sorted.filter((w) => w.bucket === "macro_index");
+  const tickers = sorted.filter((w) => w.bucket !== "macro_index")
     .map((w) => w.ticker);
+
+  // ---- Yahoo branch: REAL index levels (SPX, BTC, DXY, VIX...) ----
+  // Same source the daily engine trusts; unofficial endpoint, so every
+  // failure lands in `failed` and shows as staleness — never silent.
+  for (const w of yahooSyms) {
+    try {
+      const r = await fetch(
+        "https://query1.finance.yahoo.com/v8/finance/chart/" +
+          encodeURIComponent(w.ysym) + "?interval=1d&range=2d",
+        { headers: { "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" } });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const j = await r.json();
+      const meta = j?.chart?.result?.[0]?.meta;
+      const px = meta?.regularMarketPrice;
+      const pc = meta?.chartPreviousClose ?? meta?.previousClose ?? null;
+      if (typeof px !== "number") throw new Error("no price in chart meta");
+      const sc = Number(w.px_scale) || 1;
+      rows.push({
+        ticker: w.ticker,
+        last: px * sc,
+        prev_close: pc == null ? null : pc * sc,
+        source: "yahoo",
+        quote_ts: meta?.regularMarketTime
+          ? new Date(meta.regularMarketTime * 1000).toISOString() : null,
+        updated_at: new Date().toISOString(),
+      });
+    } catch (e) {
+      failed.push(`${w.ticker}: ${(e as Error).message}`);
+    }
+    await new Promise((res) => setTimeout(res, 250));
+  }
 
   // pacing: 70 tickers vs Finnhub's 60 calls/min. Batches of 8 every 9s
   // ≈ 53/min sustained — under the limit with margin. ~80s wall for the
