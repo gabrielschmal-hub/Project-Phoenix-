@@ -2415,6 +2415,12 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     .then(function(rows){
         if(!rows || !rows.length || rows[0] == null || rows[0].payload == null)
           throw new Error("supabase: no snapshot for " + name);
+        // staleness ceiling: a dead sync must not silently freeze time.
+        // Snapshots older than 30h lose to Pages, which the engine still
+        // updates directly — fresh Pages beats stale DB, always.
+        if(rows[0].created_at &&
+           (Date.now() - new Date(rows[0].created_at).getTime()) > 30*3600*1000)
+          throw new Error("supabase: snapshot stale for " + name);
         PX_SRC[name] = { src: "supabase", asof: rows[0].created_at || null };
         pxSrcBadge();
         return settle(rows[0].payload);
@@ -2459,9 +2465,28 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       }
       var db = 0, pg = 0, k;
       for(k in PX_SRC){ if(PX_SRC[k].src === "supabase") db++; else pg++; }
-      el.textContent = db > 0 ? ("DB " + db + (pg ? "+" + pg : "")) : ("Pages " + pg);
-      el.title = db + " file(s) from Supabase \u00B7 " + pg + " from GitHub Pages fallback";
-      el.style.color = db > 0 ? "var(--green,#3FBF77)" : "var(--gold,#D37736)";
+      // human status: LIVE + lane time when the fast lane is fresh; else the
+      // source split. Full detail lives in the tooltip.
+      var hb = (typeof PX_HB !== "undefined" && PX_HB.fast) ? PX_HB.fast : null;
+      var age = hb ? (Date.now() - new Date(hb.ts).getTime())/60000 : null;
+      var sig = (typeof PX_SIG !== "undefined") ? PX_SIG.length : 0;
+      if(age != null && age < 7){
+        var hm; try{ hm = new Date(hb.ts).toLocaleTimeString("it-IT",
+          {hour:"2-digit",minute:"2-digit"}); }catch(e){ hm = ""; }
+        el.textContent = "LIVE " + hm + (sig ? " \u00B7 \u25B2" + sig : "");
+        el.style.color = "var(--green,#3FBF77)";
+      } else if(db > 0){
+        el.textContent = "DB " + db + (pg ? "+" + pg : "");
+        el.style.color = "var(--inkLight,#B6C7D6)";
+      } else {
+        el.textContent = "Pages " + pg;
+        el.style.color = "var(--gold,#D37736)";
+      }
+      el.title = db + " files from Supabase \u00B7 " + pg + " from Pages fallback" +
+        (hb ? " \u00B7 fast lane " + (hb.ok ? "\u2713 " : "\u2717 ") + (hb.note||"") : "") +
+        ((typeof PX_HB !== "undefined" && PX_HB.screener) ?
+          " \u00B7 screener " + (PX_HB.screener.ok ? "\u2713 " : "\u2717 ") + (PX_HB.screener.note||"") : "") +
+        (sig ? " \u00B7 " + sig + " breakout flag(s) today" : "");
     }, 250);
   }
 
@@ -2689,15 +2714,128 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       }, function(){ pxStripPaint(); });  // trail missing: chips render flat
     }).catch(function(){ /* lane down or unreachable: strip ages out via dots */ });
   }
-  // ---- tape retired by request: grids go live in the next build instead.
-  // The poller and sparkline code stay for S4 (grid rendering) but nothing
-  // starts here, and any stray #pxLive element is removed on sight.
-  (function(){ var s = document.getElementById("pxLive");
-    if(s && s.parentNode) s.parentNode.removeChild(s); })();
-  // pxLiveTimer = setInterval(pxLivePoll, 60000);       // re-enabled in S4
-  pxFreezePoll();                                         // freeze state still polls
+  /* ---------- THE LIVE BRIDGE ----------
+     Every poll: prices_live + today's breakout flags + lane heartbeats.
+     Fresh prices flow into trPrices (the map every P&L computation already
+     reads), then whichever live-aware surface is on screen repaints:
+     trades, portfolio, the Markets marquee and card headlines, an open
+     detail page. Daily bars stay daily; only prices and P&L move. */
+  var PX_SIG = [], PX_HB = {};
+
+  function pxActivePage(){
+    var p = document.querySelector(".page.active");
+    return p ? p.id.replace("page-","") : "";
+  }
+
+  function pxPatchCards(){
+    var nowMs = Date.now();
+    Object.keys(PX_LIVE).forEach(function(tk){
+      var q = PX_LIVE[tk];
+      if(!q || q.last == null || !q.updated_at) return;
+      if(nowMs - new Date(q.updated_at).getTime() > 30*60*1000) return;
+      var card = document.querySelector('.spx-mcard[data-mk="' + tk + '"]');
+      if(!card) return;
+      var px = card.querySelector(".px"), pc = card.querySelector(".pc"),
+          h  = card.querySelector(".h");
+      if(!px || !pc) return;
+      var dec = (typeof MK_DEC !== "undefined" && MK_DEC[tk] != null) ? MK_DEC[tk] : 2;
+      px.textContent = Number(q.last).toLocaleString(undefined,
+        {minimumFractionDigits: dec, maximumFractionDigits: dec});
+      var chg = (q.chg_pct != null) ? +q.chg_pct : null;
+      if(chg != null){
+        var inv = (typeof MK_INVERT !== "undefined" && MK_INVERT[tk]);
+        var good = inv ? (chg < 0) : (chg >= 0);
+        pc.textContent = (chg >= 0 ? "+" : "") + chg.toFixed(2) + "%";
+        pc.style.color = good ? "var(--green,#3FBF77)" : "var(--red,#D9534F)";
+      }
+      var chip = card.querySelector(".lvchip");
+      var ts; try{ ts = new Date(q.quote_ts || q.updated_at)
+        .toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}); }catch(e){ ts="now"; }
+      if(!chip && h){
+        chip = document.createElement("span");
+        chip.className = "chip lvchip";
+        chip.style.cssText = "color:var(--green,#3FBF77);border-color:var(--green,#3FBF77);";
+        h.insertBefore(chip, h.querySelector(".chip"));
+      }
+      if(chip) chip.textContent = "LIVE " + ts;
+    });
+  }
+
+  function pxPatchDetail(){
+    var el = document.querySelector('#dpPx[data-live-tk]');
+    if(!el) return;
+    var tk = el.getAttribute("data-live-tk"), q = PX_LIVE[tk];
+    if(!q || q.last == null) return;
+    if(Date.now() - new Date(q.updated_at).getTime() > 30*60*1000) return;
+    var chgEl = el.querySelector("#dpChg");
+    el.childNodes[0].nodeValue = Number(q.last).toFixed(2) + " ";
+    if(chgEl && q.chg_pct != null){
+      var up = q.chg_pct >= 0;
+      chgEl.textContent = (up ? "+" : "") + (+q.chg_pct).toFixed(2) + "% live";
+      chgEl.style.color = up ? "var(--green,#3FBF77)" : "var(--red,#D9534F)";
+    }
+  }
+
+  function pxApplyLive(){
+    var nowMs = Date.now(), touched = 0;
+    // 1) bridge into trPrices — the P&L engine's price map
+    Object.keys(PX_LIVE).forEach(function(tk){
+      var q = PX_LIVE[tk];
+      if(q && q.last != null && q.updated_at &&
+         (nowMs - new Date(q.updated_at).getTime()) < 30*60*1000){
+        if(typeof trPrices !== "undefined" && trPrices[tk] !== +q.last){
+          trPrices[tk] = +q.last; touched++;
+        }
+      }
+    });
+    // 2) repaint the surface on screen
+    var page = pxActivePage();
+    try{
+      if(page === "trades"   && touched && typeof trRender === "function") trRender();
+      if(page === "portfolio"&& touched && typeof pfRender === "function") pfRender();
+      if(page === "markets"){ pxMarquee(); pxPatchCards(); }
+      pxPatchDetail();
+    }catch(e){ /* a paint error must never kill the poll loop */ }
+    pxSrcBadge();
+  }
+
+  function pxSignalsPoll(){
+    var day = new Date(); day.setUTCHours(0,0,0,0);
+    return supaRows("/rest/v1/signals_intraday?select=ticker,ts,price,trigger" +
+        "&ts=gte." + encodeURIComponent(day.toISOString()) + "&order=ts.desc")
+      .then(function(rows){ PX_SIG = rows || []; })
+      .catch(function(){ /* keep last */ });
+  }
+  function pxHbPoll(){
+    return supaRows("/rest/v1/heartbeats?select=lane,ts,ok,note")
+      .then(function(rows){ PX_HB = {};
+        (rows || []).forEach(function(h){ PX_HB[h.lane] = h; }); })
+      .catch(function(){ /* keep last */ });
+  }
+
+  function pxTick(){
+    if(PX_FROZEN || document.visibilityState === "hidden") return;
+    Promise.all([pxHbPoll(), pxSignalsPoll()]).then(function(){
+      return supaRows("/rest/v1/prices_live?select=ticker,last,prev_close,chg_pct,quote_ts,updated_at");
+    }).then(function(rows){
+      PX_LIVE = {};
+      (rows || []).forEach(function(r){ PX_LIVE[r.ticker] = r; });
+      pxApplyLive();
+    }).catch(function(){ pxSrcBadge(); });
+  }
+
+  pxLiveTimer = setInterval(pxTick, 60000);
+  // card headlines re-render on every timeframe/view toggle and resize;
+  // a cheap standing DOM patch (no network) wins every such race.
+  setInterval(function(){
+    if(pxActivePage() === "markets"){
+      try{ pxPatchCards(); pxMarquee(); }catch(e){}
+    }
+  }, 2000);
+  // startup order: freeze state first, so a frozen system never starts the lane
+  pxFreezePoll().then(pxTick, pxTick);
   document.addEventListener("visibilitychange", function(){
-    if(document.visibilityState === "visible") pxFreezePoll();
+    if(document.visibilityState === "visible"){ pxFreezePoll(); pxTick(); }
   });
 
   var NAV = [
@@ -2745,6 +2883,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var n=NAV.filter(function(x){return x.id===id;})[0];
     (document.getElementById("tbSection")||{textContent:""}).textContent=(n?n.label:id);
     if(id==="markets") initMarkets();
+    // renders happen between poll ticks; re-apply the live layer right after
+    setTimeout(function(){ try{ pxApplyLive(); }catch(e){} }, 120);
     if(id==="screeners"){
       initScreener();
       setTimeout(function(){
@@ -5138,6 +5278,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       MK_ORDER.forEach(function(key){
         var d=mkSeries(key,MK_TF);
         var el=document.createElement("div"); el.className="spx-mcard";
+        el.setAttribute("data-mk", key);
         if(!d||!d.bars.length){
           el.innerHTML='<div class="h"><span class="t">'+(MK_LABELS[key]||key)+
             '</span><span class="chip">'+key+'</span></div>'+
@@ -5164,6 +5305,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           MK_INSTR=key; mkSetView("chart"); mkSyncPills();
           mkFit(""); mkHeader(""); mkReadout(mkSeries(MK_INSTR,MK_TF).bars.length-1,"");
           mkPaint(""); });
+      try{ pxPatchCards(); }catch(e){}
         host.appendChild(el);
         mkSpark(el.querySelector("canvas"),d,a,n-1,good,key==="SPX");
       });
@@ -6368,6 +6510,59 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     try{ trLoad(function(){ brfBook(el, S); }); }catch(e){ console.warn("[brief] book", e); }
   }
 
+  var pxMS = null;   // marquee base: {last, prev} rows of macro_series
+  // marquee defs shared with the live overlay
+  var PX_DEFS=[
+      ["spx","S&P 500",0,"",null,"SPX"],
+      ["ndx","Nasdaq",0,"",null,"NDX"],
+      ["dow","Dow",0,"",null,"DOW"],
+      ["rut","Russell 2K",0,"",null,"RUT"],
+      ["vix","VIX",2,"",null,"VIX"],
+      ["tnx","US 10Y",2,"","yield","US10Y"],
+      ["wti","WTI Oil",2,"$",null,"OIL"],
+      ["gold","Gold",0,"$",null,"GOLD"],
+      ["dxy","Dollar",2,"",null,"DXY"],
+      ["btc","Bitcoin",0,"$",null,"BTC"]
+  ];
+  function pxCell(name,val,chg,color,accent,liveTs){
+    return '<div class="asset-cell">'+(accent?'<div class="accent" style="background:'+accent+'"></div>':'')+
+      '<span class="an">'+name+(liveTs?' <i title="live '+liveTs+'" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green,#3FBF77);vertical-align:1px;"></i>':'')+'</span>'+
+      '<span class="av">'+val+'</span>'+
+      '<span class="ac" style="color:'+(color||"var(--inkLight)")+'">'+chg+'</span>'+
+    '</div>';
+  }
+  function pxMarquee(){
+    var band=document.getElementById("assetBand");
+    if(!band||!pxMS) return;
+    var last=pxMS.last, prev=pxMS.prev, nowMs=Date.now();
+    var cells=PX_DEFS.map(function(def){
+      var k=def[0], name=def[1], dp=def[2], pre=def[3], tf=def[4], LK=def[5];
+      var cur=last[k], pr=prev[k], liveTs=null;
+      // live overlay: fresh prices_live row for this instrument wins
+      var q=PX_LIVE[LK];
+      if(q && q.last!=null && q.updated_at &&
+         (nowMs - new Date(q.updated_at).getTime()) < 30*60*1000){
+        cur=+q.last; pr=(q.prev_close!=null?+q.prev_close:pr);
+        try{ liveTs=new Date(q.quote_ts||q.updated_at).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}); }catch(e){ liveTs="now"; }
+      }
+      if(cur===null||cur===undefined) return null;
+      // FRED series and Yahoo chart quote the 10Y in percent already; only a
+      // raw ^TNX x10 value (>20) still needs the division. The old
+      // unconditional /10 rendered 4.6% as 0.46% — fixed.
+      if(tf==="yield"){ if(cur>20)cur=cur/10; if(pr!=null&&pr>20)pr=pr/10; }
+      var chg=(pr!==null&&pr!==undefined&&pr!==0)?((cur-pr)/pr*100):null;
+      var invert=(k==="vix");
+      var pos=chg===null?null:(invert?chg<0:chg>=0);
+      var color=pos===null?"var(--inkLight)":(pos?"var(--green)":"var(--red)");
+      var accent=pos===null?"var(--inkFade)":(pos?"var(--greenSoft)":"var(--redSoft)");
+      var val=pre+Number(cur).toLocaleString(undefined,{minimumFractionDigits:dp,maximumFractionDigits:dp})+(tf==="yield"?"%":"");
+      var chgstr=chg===null?"":((chg>0?"+":"")+chg.toFixed(2)+"%");
+      return pxCell(name,val,chgstr,color,accent,liveTs);
+    }).filter(Boolean);
+    var track=cells.join("")+cells.join("");
+    band.innerHTML='<div class="marquee-track">'+track+'</div>';
+  }
+
   function loadAssets(){
     // [key, label, decimals, prefix, transform]
     var DEFS=[
@@ -6385,6 +6580,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     getJSON("macro_series").then(function(d){
       var s=(d&&d.series)||[];
       if(s.length<2){ document.getElementById("assetBand").innerHTML='<div class="loading">No series data yet.</div>'; return; }
+      pxMS = { last: s[s.length-1], prev: s[s.length-2] };
+      pxMarquee();
+      return;
       var last=s[s.length-1], prev=s[s.length-2];
       var cells=DEFS.map(function(def){
         var k=def[0], name=def[1], dp=def[2], pre=def[3], tf=def[4];
@@ -9367,12 +9565,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   }
 
   // ---------- live price ----------
-  // Prices come from the engine, in priority order:
-  //   1. this session's chart file (last daily close)
-  //   2. research_data.json quote (top ~150 names)
-  //   3. stocks.json levels.last (every screener candidate)
-  // There is no client-side live price — the browser cannot call Yahoo (CORS).
-  // Freshness is whatever the last engine run captured.
+  // Prices come from the engine files as the BASE, in priority order:
+  //   1. this session's chart file   2. research_data quote   3. stocks.json
+  // On top of that, the live bridge (pxApplyLive) overwrites trPrices from
+  // Supabase prices_live every poll during market hours — so open-position
+  // P&L, R and heat now move intraday. Engine files remain the fallback.
   function trFetchPrice(tk, cb){
     if(trPrices[tk]!=null){ cb(trPrices[tk]); return; }
     dpEnsureEnrich(function(){
@@ -10885,7 +11082,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
                 '<button class="w-chip wl" data-dpwatch="'+tk+'">\u2606 Watchlist</button>'+
               '</div>'+
               '<div class="w-facts">'+
-                '<div class="w-fact"><div class="k">Price</div><div class="v" id="dpPx">'+(cur!=null?fmtN(cur):"\u2014")+' <span class="chg" id="dpChg" style="font-size:12px;font-weight:400">'+chgHtml+'</span></div></div>'+
+                '<div class="w-fact"><div class="k">Price</div><div class="v" id="dpPx" data-live-tk="'+tk+'">'+(cur!=null?fmtN(cur):"\u2014")+' <span class="chg" id="dpChg" style="font-size:12px;font-weight:400">'+chgHtml+'</span></div></div>'+
                 '<div class="w-fact"><div class="k">Market cap</div><div class="v">'+(q.mcap_B!=null?capFmt(q.mcap_B):"\u2014")+'</div></div>'+
                 '<div class="w-fact"><div class="k">P/E</div><div class="v">'+(pe!=null?pe.toFixed(1):"\u2014")+'</div></div>'+
                 '<div class="w-fact"><div class="k">Exchange</div><div class="v" style="font-size:14px">'+(meta.exch||"\u2014")+'</div></div>'+
