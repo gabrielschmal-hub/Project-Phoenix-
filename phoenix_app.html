@@ -2689,12 +2689,15 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       }, function(){ pxStripPaint(); });  // trail missing: chips render flat
     }).catch(function(){ /* lane down or unreachable: strip ages out via dots */ });
   }
-  pxLiveTimer = setInterval(pxLivePoll, 60000);
-  // startup order matters: know the freeze state BEFORE the tape's first pull,
-  // so loading a frozen system never starts the live lane at all.
-  pxFreezePoll().then(pxLivePoll, pxLivePoll);
+  // ---- tape retired by request: grids go live in the next build instead.
+  // The poller and sparkline code stay for S4 (grid rendering) but nothing
+  // starts here, and any stray #pxLive element is removed on sight.
+  (function(){ var s = document.getElementById("pxLive");
+    if(s && s.parentNode) s.parentNode.removeChild(s); })();
+  // pxLiveTimer = setInterval(pxLivePoll, 60000);       // re-enabled in S4
+  pxFreezePoll();                                         // freeze state still polls
   document.addEventListener("visibilitychange", function(){
-    if(document.visibilityState === "visible") pxLivePoll();
+    if(document.visibilityState === "visible") pxFreezePoll();
   });
 
   var NAV = [
