@@ -1,8 +1,8 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "echo 'Phoenix is static - no build'",
-  "installCommand": "",
-  "outputDirectory": ".",
+  "version": 2,
+  "builds": [
+    { "src": "**/*", "use": "@vercel/static" }
+  ],
   "rewrites": [
     { "source": "/", "destination": "/phoenix_app.html" }
   ]
