@@ -2465,22 +2465,42 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       }
       var db = 0, pg = 0, k;
       for(k in PX_SRC){ if(PX_SRC[k].src === "supabase") db++; else pg++; }
-      // human status: LIVE + lane time when the fast lane is fresh; else the
-      // source split. Full detail lives in the tooltip.
+      // staleness engine. During market hours a lane that has stopped MUST
+      // say so loudly; outside them silence is normal and gets a calm label.
+      // States: LIVE hh:mm (green) / STALE Nm (red, alert) / CLOSED · hh:mm
+      // (neutral) / DB · Pages fallbacks when no heartbeat exists at all.
       var hb = (typeof PX_HB !== "undefined" && PX_HB.fast) ? PX_HB.fast : null;
       var age = hb ? (Date.now() - new Date(hb.ts).getTime())/60000 : null;
       var sig = (typeof PX_SIG !== "undefined") ? PX_SIG.length : 0;
+      var hm = "";
+      if(hb){ try{ hm = new Date(hb.ts).toLocaleTimeString("it-IT",
+        {hour:"2-digit",minute:"2-digit"}); }catch(e){} }
+      var open = pxMarketOpenNow();
       if(age != null && age < 7){
-        var hm; try{ hm = new Date(hb.ts).toLocaleTimeString("it-IT",
-          {hour:"2-digit",minute:"2-digit"}); }catch(e){ hm = ""; }
         el.textContent = "LIVE " + hm + (sig ? " \u00B7 \u25B2" + sig : "");
         el.style.color = "var(--green,#3FBF77)";
+        el.style.fontWeight = "";
+      } else if(open && age != null){
+        // the alert you asked for: updates should be flowing and they aren't
+        el.textContent = "STALE " + Math.round(age) + "m \u00B7 last " + hm;
+        el.style.color = "var(--red,#D9534F)";
+        el.style.fontWeight = "700";
+      } else if(open && hb == null && db > 0){
+        el.textContent = "STALE \u00B7 no lane heartbeat";
+        el.style.color = "var(--red,#D9534F)";
+        el.style.fontWeight = "700";
+      } else if(!open && hb != null){
+        el.textContent = "CLOSED \u00B7 " + hm;
+        el.style.color = "var(--inkFade,#6B8299)";
+        el.style.fontWeight = "";
       } else if(db > 0){
         el.textContent = "DB " + db + (pg ? "+" + pg : "");
         el.style.color = "var(--inkLight,#B6C7D6)";
+        el.style.fontWeight = "";
       } else {
         el.textContent = "Pages " + pg;
         el.style.color = "var(--gold,#D37736)";
+        el.style.fontWeight = "";
       }
       el.title = db + " files from Supabase \u00B7 " + pg + " from Pages fallback" +
         (hb ? " \u00B7 fast lane " + (hb.ok ? "\u2713 " : "\u2717 ") + (hb.note||"") : "") +
@@ -2499,6 +2519,13 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
      PIN-gated RPC (bcrypt server-side, rate-limited). The pause is SYSTEM-wide:
      the Edge Function reads the same switch, so this stops the lane itself,
      not just the display. Freeze defaults to 60 min; pg_cron auto-resumes. */
+  var PX_SVG_PAUSE = '<svg width="9" height="10" viewBox="0 0 9 10" fill="currentColor" aria-hidden="true">' +
+    '<rect x="0.6" y="0.4" width="2.7" height="9.2" rx="1.1"/>' +
+    '<rect x="5.7" y="0.4" width="2.7" height="9.2" rx="1.1"/></svg>';
+  var PX_SVG_PLAY = '<svg width="9" height="10" viewBox="0 0 9 10" fill="currentColor" aria-hidden="true">' +
+    '<path d="M1.2 0.9 C1.2 0.35 1.8 0.05 2.25 0.35 L8.1 4.45 C8.5 4.72 8.5 5.28 8.1 5.55 ' +
+    'L2.25 9.65 C1.8 9.95 1.2 9.65 1.2 9.1 Z"/></svg>';
+
   function pxFrzBtnEnsure(){
     var b = document.getElementById("pxFrzBtn");
     if(b) return b;
@@ -2506,7 +2533,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(!host) return null;
     b = document.createElement("b");
     b.id = "pxFrzBtn";
-    b.style.cssText = "cursor:pointer;margin-right:10px;font-size:13px;opacity:.85;user-select:none;";
+    // pill matching the DARK/LIGHT toggles: bordered, rounded, mono-height
+    b.style.cssText = "display:inline-flex;align-items:center;justify-content:center;" +
+      "width:30px;height:22px;border:1px solid var(--line2,rgba(255,255,255,.18));" +
+      "border-radius:11px;cursor:pointer;margin-right:10px;user-select:none;" +
+      "color:var(--inkLight,#B6C7D6);transition:color .12s,border-color .12s;";
     b.addEventListener("click", pxFrzToggle);
     host.insertBefore(b, host.firstChild);
     return b;
@@ -2557,9 +2588,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     }
     var btn = pxFrzBtnEnsure();
     if(btn){
-      btn.textContent = PX_FROZEN ? "\u25B6" : "\u23F8";
+      btn.innerHTML = PX_FROZEN ? PX_SVG_PLAY : PX_SVG_PAUSE;
+      btn.setAttribute("data-state", PX_FROZEN ? "frozen" : "live");
       btn.title = PX_FROZEN ? "Resume Phoenix (PIN)" : "Freeze Phoenix 60 min (PIN)";
-      btn.style.color = PX_FROZEN ? "#D37736" : "";
+      btn.style.color = PX_FROZEN ? "var(--gold,#D37736)" : "var(--inkLight,#B6C7D6)";
+      btn.style.borderColor = PX_FROZEN ? "var(--gold,#D37736)" : "var(--line2,rgba(255,255,255,.18))";
     }
   }
 
@@ -2722,6 +2755,22 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
      detail page. Daily bars stay daily; only prices and P&L move. */
   var PX_SIG = [], PX_HB = {};
 
+  function pxMarketOpenNow(){
+    if(window.__pxForceOpen === true)  return true;   // test hook
+    if(window.__pxForceOpen === false) return false;  // test hook
+    try{
+      var parts = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York",
+        weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false })
+        .formatToParts(new Date());
+      var get = function(t){ var p = parts.filter(function(x){return x.type===t;})[0];
+        return p ? p.value : ""; };
+      var dows = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+      var dow = dows.indexOf(get("weekday"));
+      var m = parseInt(get("hour"),10)*60 + parseInt(get("minute"),10);
+      return dow >= 1 && dow <= 5 && m >= 570 && m < 960;
+    }catch(e){ return false; }
+  }
+
   function pxActivePage(){
     var p = document.querySelector(".page.active");
     return p ? p.id.replace("page-","") : "";
@@ -2824,14 +2873,40 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     }).catch(function(){ pxSrcBadge(); });
   }
 
+  // deliberate debug handle: lets the verification harness (and a human on
+  // Safari's console) exercise the staleness engine without scope-poking.
+  window.__pxDebug = {
+    setHbTs: function(lane, ts){ if(PX_HB && PX_HB[lane]) PX_HB[lane].ts = ts; },
+    badge: function(){ pxSrcBadge(); },
+    state: function(){ return { hb: PX_HB, sig: PX_SIG.length, frozen: PX_FROZEN }; }
+  };
+
   pxLiveTimer = setInterval(pxTick, 60000);
   // card headlines re-render on every timeframe/view toggle and resize;
   // a cheap standing DOM patch (no network) wins every such race.
   setInterval(function(){
     if(pxActivePage() === "markets"){
-      try{ pxPatchCards(); pxMarquee(); }catch(e){}
+      try{ pxPatchCards(); pxMarquee(); pxPatchAsof(); }catch(e){}
     }
   }, 2000);
+
+  // "2026-08-26 · 15:40 live" — the last-update time rides next to the date,
+  // turning into a red "stale" the moment it stops flowing in market hours.
+  function pxPatchAsof(){
+    var el = document.getElementById("spxAsof");
+    if(!el || !el.textContent) return;
+    var base = el.textContent.split(" \u00B7 ")[0];
+    var hb = PX_HB && PX_HB.fast, open = pxMarketOpenNow();
+    if(!hb){ return; }
+    var age = (Date.now() - new Date(hb.ts).getTime())/60000, hm = "";
+    try{ hm = new Date(hb.ts).toLocaleTimeString("it-IT",
+      {hour:"2-digit",minute:"2-digit"}); }catch(e){}
+    var tail;
+    if(age < 7)      tail = '<span style="color:var(--green,#3FBF77)">' + hm + ' live</span>';
+    else if(open)    tail = '<span style="color:var(--red,#D9534F);font-weight:700">stale \u00B7 last ' + hm + '</span>';
+    else             tail = '<span style="color:var(--inkFade,#6B8299)">closed \u00B7 ' + hm + '</span>';
+    el.innerHTML = base + " \u00B7 " + tail;
+  }
   // startup order: freeze state first, so a frozen system never starts the lane
   pxFreezePoll().then(pxTick, pxTick);
   document.addEventListener("visibilitychange", function(){
