@@ -8653,6 +8653,15 @@ def run_gex_stocks_cboe(tickers=None, limit=None):
 
     if tickers is None:
         tickers = []
+        # ORDER MATTERS (27 Aug 2026): Elliott's list comes FIRST so all 27 are
+        # recomputed every day. Until today the seed list came after ~1,000
+        # screener rows sorted by trade score, so with the 150 cap the seed
+        # names were never reached unless they happened to be top-150 by
+        # score - PLTR and others showed yesterday's chain marked STALE.
+        try:
+            tickers += list(GEX_UNIVERSE.get("seed") or [])
+        except Exception:
+            pass
         try:
             tickers += [t for t in (_held_and_planned_tickers() or [])]
         except Exception:
@@ -8664,10 +8673,6 @@ def run_gex_stocks_cboe(tickers=None, limit=None):
             tickers += [r["ticker"] for r in rows if r.get("ticker")]
         except Exception as e:
             print(f"[gexc] stocks.json unreadable: {e}")
-        try:
-            tickers += list(GEX_UNIVERSE.get("seed") or [])
-        except Exception:
-            pass
         # Every name that has a research report gets a full-chain GEX, whether
         # or not it made the hand-written seed. SOFI is the case that proved
         # this: a full L3 report with a gamma panel, and no entry in seed or
@@ -8685,7 +8690,28 @@ def run_gex_stocks_cboe(tickers=None, limit=None):
         if t and t not in seen:
             seen.add(t); order.append(t)
     order = order[:limit]
-    print(f"[gexc] per-ticker GEX for {len(order)} names (cap {limit})")
+    print(f"[gexc] per-ticker GEX for {len(order)} names (cap {limit}) - Elliott's list first")
+    # A chain file for a name that is NOT on today's list is a leftover from a
+    # day when that name was a screener candidate; left in place it shows on
+    # the ticker page as STALE for weeks (BAC was the case). Remove leftovers
+    # older than 3 days; today's list overwrites its own files below, and a
+    # name whose fetch fails today keeps yesterday's file, honestly marked.
+    try:
+        import time as _time
+        keep = set(order) | {"SPY", "QQQ", "IWM"}
+        cutoff = _time.time() - 3 * 86400
+        gone = 0
+        for fn in os.listdir(out_dir):
+            if not fn.endswith(".json"):
+                continue
+            sym = fn[:-5]
+            fp = os.path.join(out_dir, fn)
+            if sym not in keep and os.path.getmtime(fp) < cutoff:
+                os.remove(fp); gone += 1
+        if gone:
+            print(f"[gexc] removed {gone} leftover chain file(s) for names no longer on the list")
+    except Exception as e:
+        print(f"[gexc] leftover sweep skipped: {e}")
 
     ok, thin, fail = 0, 0, 0
     for i, sym in enumerate(order):

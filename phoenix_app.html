@@ -332,8 +332,10 @@
   .sf-ibox dl{margin:0;display:grid;grid-template-columns:150px 1fr;gap:4px 14px}
   .sf-ibox dt{color:var(--ink);white-space:nowrap} .sf-ibox dd{margin:0;color:var(--inkLight)}
   .sf-ibox .src{margin-top:8px;color:var(--inkGhost);font-size:10.5px}
-  .scr-tr .tk .star{font-style:normal;cursor:pointer;color:var(--inkGhost);font-size:13px;margin-left:6px;font-family:var(--mono)}
+  .scr-tr .tk .star{font-style:normal;cursor:pointer;color:var(--inkGhost);font-size:18px;line-height:1;margin-left:2px;padding:6px 9px;border-radius:8px;font-family:var(--mono);display:inline-block;vertical-align:middle}
+  .scr-tr .tk .star:hover{background:var(--card2);color:var(--gold)}
   .scr-tr .tk .star.on{color:var(--gold)}
+  .scr-tr .tk .star.busy{opacity:.4;pointer-events:none}
   .pxcell .lv{font-size:9px;letter-spacing:.6px;color:var(--inkGhost);margin-left:4px;font-style:normal}
   .pxcell .lv.live{color:var(--green)}
   @media(max-width:1100px){ .sf-sel{grid-template-columns:repeat(4,minmax(120px,1fr))} }
@@ -3740,6 +3742,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   window.__PXT.epi=function(m,g){ return edEpigraph(m,g); };
   window.__PXT.setGetJSON=function(f){ getJSON=f; };
   window.__PXT.watch=function(){ return PX_WATCH; };
+  window.__PXT.trLog=function(){ return trLog; }; window.__PXT.trSave=function(){ trSave(); }; window.__PXT.trSrc=function(){ return trSrc; };
   window.__PXT.getJSON=function(){ return getJSON; };
   window.__PXT.trLoad=function(cb){ trLoad(cb); };
   window.__PXT.resetTrades=function(){ trLog=null; trLoadedFor=null; };
@@ -5898,14 +5901,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       return;
     }
     if(cw){
+      // 27 Aug 2026: one watchlist, in Supabase, shared with the screener star
       var tkw=cw.getAttribute("data-dpwatch");
-      try{
-        var L=JSON.parse(localStorage.getItem("px_watch")||"[]");
-        var i=L.indexOf(tkw);
-        if(i>=0){ L.splice(i,1); cw.classList.remove("on"); }
-        else { L.push(tkw); cw.classList.add("on"); }
-        localStorage.setItem("px_watch",JSON.stringify(L));
-      }catch(err){ cw.classList.toggle("on"); }
+      cw.disabled=true;
+      pxWatchToggle(tkw, function(ok){ cw.disabled=false; if(ok) cw.classList.toggle("on", sfWatched(tkw)); });
       return;
     }
     var g=e.target.closest?e.target.closest("[data-nvgo]"):null;
@@ -6905,6 +6904,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   var SF_SETUPS=[["breakout","\u25B2","Breakout"],["surge","\u26A1","Surge"],["nearhigh","\u2248","Near high"],["accum","\u25AE","Accumulating"]];
   var SF_RULES=[["passer","Gate passer (all gates)"],["near","Near-miss (one gate short)"],["mom","Momentum \u2265 60"],["val","Value \u2265 70"],["trade","Trade setup"],["invest","Investment"],["top","\u2605 Highest rated"]];
   var SF_LISTS=[["watch","\u2605 My watchlist"],["pos","Open positions"],["gex","GEX \u00b7 Elliott's list"]];
+  // Elliott's briefing scan (26 names, identical in all 22 briefings 2 Jul-13 Aug 2026) + SPY as the SPX proxy.
+  // The same list is GEX_UNIVERSE.seed in phoenix.py. The filter uses it directly so all 27 show even before
+  // the OCC sampler has confirmed a name.
+  var SF_GEX_LIST=["AAPL","ALAB","AMD","AMZN","ARM","AVGO","CRWD","GOOG","HOOD","IBIT","IBM","INTC","LRCX","META","MP","MRVL","MSFT","MU","NVDA","ORCL","PLTR","QCOM","SNDK","SNOW","SOFI","TSLA","SPY"];
   var SF_INFO={
     setup:{t:"Setups \u2014 what the engine flags on the latest bars",rows:[
       ["Breakout","a gate passer at its 2-year high (within 1%), 3-week volume \u2265 +70% vs the prior 10 weeks, volume state ACCUM, rising 10-week MA"],
@@ -6982,7 +6985,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     o.setup=SF_SETUPS.map(function(s){ return {v:s[0],l:s[1]+" "+s[2]}; });
     o.rule=SF_RULES.map(function(r){ return {v:r[0],l:r[1]}; });
     var nWatch=Object.keys(PX_WATCH||{}).filter(sfWatched).length;
-    o.list=[{v:"watch",l:SF_LISTS[0][1],n:nWatch},{v:"pos",l:SF_LISTS[1][1]},{v:"gex",l:SF_LISTS[2][1],n:Object.keys(window.__scrGexU||{}).length||null}];
+    o.list=[{v:"watch",l:SF_LISTS[0][1],n:nWatch},{v:"pos",l:SF_LISTS[1][1],n:(trLog||[]).filter(function(t){return t.status==="open"||t.status==="plan";}).length||null},{v:"gex",l:SF_LISTS[2][1],n:SF_GEX_LIST.length}];
     o.stop=Object.keys(SCR_STOPS).map(function(k){ return {v:k,l:SCR_STOPS[k]}; });
     return o;
   }
@@ -7016,7 +7019,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(M.rule.length&&!M.rule.every(function(u){ return (u==="passer"&&s.passer)||(u==="near"&&s.passer===false)||(u==="mom"&&(s.trade_score||0)>=60)||(u==="val"&&(s.fund_score||0)>=70)
          ||(u==="trade"&&(s.label==="TRADE"||s.label==="BOTH"))||(u==="invest"&&(s.label==="INVEST"||s.label==="BOTH"))||(u==="top"&&s.passer); })) return false;
     }
-    if(M.list.length&&!M.list.some(function(l){ return (l==="gex"&&window.__scrGexU&&window.__scrGexU[s.ticker])||(l==="watch"&&sfWatched(s.ticker))||(l==="pos"&&trHas(s.ticker)); })) return false;
+    if(M.list.length&&!M.list.some(function(l){ return (l==="gex"&&(SF_GEX_LIST.indexOf(s.ticker)>=0||(window.__scrGexU&&window.__scrGexU[s.ticker])))||(l==="watch"&&sfWatched(s.ticker))||(l==="pos"&&trHas(s.ticker)); })) return false;
     return true;
   }
   function sfRenderBlock(){
@@ -7053,16 +7056,23 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     box.innerHTML='<h4>'+I.t+'<span data-close="1">close \u2715</span></h4><dl>'+I.rows.map(function(r){ return '<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>'; }).join("")+'</dl><div class="src">'+I.src+'</div>';
   }
   // ---- watchlist: the star writes watch_tickers through a PIN-guarded RPC; the 5-minute Finnhub lane quotes bucket "watch" ----
-  function pxWatchToggle(tk){
+  function pxWatchLoad(cb){
+    if(typeof supaRows!=="function"){ if(cb) cb(); return; }
+    supaRows("/rest/v1/watch_tickers?select=ticker,bucket&active=eq.true")
+      .then(function(rows){ var m={}; (rows||[]).forEach(function(r){ m[r.ticker]=r.bucket; }); PX_WATCH=m; if(cb) cb(); })
+      .catch(function(){ if(cb) cb(); });
+  }
+  function pxWatchToggle(tk, done){
     var on=!(sfWatched(tk));
     var pin=sessionStorage.getItem("pxPin")||window.prompt("Phoenix PIN (same as the freeze switch)");
-    if(!pin) return;
+    if(!pin){ if(done) done(false); return; }
     fetch(SUPA.url+"/rest/v1/rpc/set_watch",{method:"POST",headers:{apikey:SUPA.key,Authorization:"Bearer "+SUPA.key,"Content-Type":"application/json"},
       body:JSON.stringify({pin:pin,p_ticker:tk,p_on:on})})
     .then(function(r){ return r.json(); }).then(function(j){
-      if(j&&j.ok){ sessionStorage.setItem("pxPin",pin); if(!PX_WATCH) PX_WATCH={}; if(on) PX_WATCH[tk]=j.bucket||"watch"; else delete PX_WATCH[tk]; renderScreener(); }
-      else { if(j&&/wrong PIN/.test(j.error||"")) sessionStorage.removeItem("pxPin"); window.alert((j&&j.error)||"watchlist update failed"); }
-    }).catch(function(){ window.alert("Supabase unreachable \u2014 the watchlist lives there"); });
+      if(j&&j.ok){ sessionStorage.setItem("pxPin",pin); if(!PX_WATCH) PX_WATCH={}; if(on) PX_WATCH[tk]=j.bucket||"watch"; else delete PX_WATCH[tk];
+        if(scrData) renderScreener(); if(done) done(true); }
+      else { if(j&&/wrong PIN/.test(j.error||"")) sessionStorage.removeItem("pxPin"); window.alert((j&&j.error)||"watchlist update failed"); if(done) done(false); }
+    }).catch(function(){ window.alert("Supabase unreachable \u2014 the watchlist lives there"); if(done) done(false); });
   }
   // ---- the 15-minute Yahoo lane: prices_universe for the rows on screen, rotation_intraday for the pickers ----
   var sfUniT=null;
@@ -7106,6 +7116,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       initPicks();
       renderScreener();
       renderPicks();
+      pxWatchLoad(renderScreener);
       // the EU + ETF lists come along up front now: the Market/Type chips need
       // their counts, and a scope switch must not wait on a fetch
       scrExtState="idle"; scrEnsureExt(renderScreener,true);
@@ -7266,6 +7277,31 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var arr=scrActiveList().slice();
     if(!scrScopeIsDefault()) arr=arr.filter(scrInScope);
     var inScope=arr.length;
+    // A list (watchlist, positions, Elliott's names) shows every name on it,
+    // whether or not it is a candidate today: the names that did not make the
+    // list come from the universe ledger as gate-only rows.
+    if(SF.list.length){
+      var have={}; arr.forEach(function(s){ have[s.ticker]=1; });
+      var want=[];
+      if(SF.list.indexOf("gex")>=0) want=want.concat(SF_GEX_LIST, Object.keys(window.__scrGexU||{}));
+      if(SF.list.indexOf("watch")>=0) want=want.concat(Object.keys(PX_WATCH||{}).filter(sfWatched));
+      if(SF.list.indexOf("pos")>=0) want=want.concat((trLog||[]).filter(function(t){return t.status==="open"||t.status==="plan";}).map(function(t){return t.ticker;}));
+      var missing=want.filter(function(t,i){ return t && !have[t] && want.indexOf(t)===i; });
+      if(missing.length){
+        var L=pxLedgerCache;
+        if(!L){ pxLedger(function(){ renderScreener(); }); }
+        else missing.forEach(function(t){
+          var r=L.rows&&L.rows[t]; if(!r) return;
+          var mk=r.mk||"US", at=r.at||"stock";
+          if(!(scrMk==="ALL"||mk===scrMk)) return; if(!(scrAt==="ALL"||at===scrAt)) return;
+          var gp=(r.gp!=null)?r.gp:null;
+          arr.push({ticker:t, name:r.nm||"", industry:r.ind||"", sector:r.sec||"", mcap_B:r.mc, mk:mk, at:at, ccy:r.ccy||"USD",
+                    focus:r.focus||"", gates_passed:gp, passer:(r.st==="passer"), missing_gate:(r.miss&&r.miss[0])||"",
+                    ledgerOnly:true, ledger_st:r.st, rank:null,
+                    setup:(r.st==="no_data"?"no data":r.st==="passer"?"passer":r.st==="near_miss"?"near-miss":r.st==="listed"?"listed":"not a candidate")});
+        });
+      }
+    }
     // the filter block
     arr=arr.filter(sfRowPasses);
     if(scrChg) arr=arr.filter(function(s){return s.daily_pct!=null && s.daily_pct>=+scrChg;});
@@ -7349,7 +7385,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var setup=s.setup||(s.breakout?"Breakout":s.surge?"Surge":s.near_high?"Near high":"\u2014");
       var setCls=setup==="Breakout"?"brk":setup==="Surge"?"srg":"";
       var im=s.industry_mom_3m;
-      var gexIn=!!(window.__scrGexU&&window.__scrGexU[s.ticker]);
+      var gexIn=!!((window.__scrGexU&&window.__scrGexU[s.ticker])||SF_GEX_LIST.indexOf(s.ticker)>=0);
       var pill=sc==null?"\u2014":'<span class="scr-pill '+pillCls+'">'+sc+'</span>';
       return '<div class="scr-tr'+(s.passer===false?' nearmiss':'')+'" data-row-tk="'+s.ticker+'">'+
         '<span class="rk">'+(s.rank||"\u2014")+'</span>'+
@@ -7380,7 +7416,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     el.innerHTML=head+rows;
     scrApplyLive();
     clearTimeout(sfUniT); sfUniT=setTimeout(sfPollUniverse, 250);
-    if(!el._starWired){ el._starWired=true; el.addEventListener("click",function(e){ var st=e.target.closest(".star"); if(st){ e.stopPropagation(); pxWatchToggle(st.getAttribute("data-star")); } }, true); }
+    if(!el._starWired){ el._starWired=true; el.addEventListener("click",function(e){ var st=e.target.closest(".star"); if(st){ e.stopPropagation(); e.preventDefault(); st.classList.add("busy"); pxWatchToggle(st.getAttribute("data-star"), function(){ st.classList.remove("busy"); }); } }, true); }
     // Tier 0: the search box found nothing among candidates — consult the
     // universe ledger so ANY name answers with its gate scorecard instead of
     // a silent empty table (the INTC case, 13 Aug).
@@ -9712,16 +9748,35 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   var trDirty = 0;             // unsaved edits this session
   var trMeta  = null;          // schema/accounts envelope from trades.json
 
+  // 27 Aug 2026: the book of record is the Supabase table trade_book. Every
+  // add / edit / close is written there the moment it happens (trPersist);
+  // the daily run rebuilds outputs/trades.json from the table before the
+  // engine starts. trades.json is only the fallback when the table is out
+  // of reach — and then the old Copy-JSON path still works.
+  var trSrc="", trSnap={}, trPersistT=null, trSaving=false, trLastSaved="";
+  function trSnapshot(){ trSnap={}; (trLog||[]).forEach(function(t){ if(t.id) trSnap[t.id]=JSON.stringify(trDenormalise(t)); }); }
   function trLoad(cb){
     if(trLog!==null){ cb(); return; }          // one book, no per-profile cache
-    getJSON("trades")
+    var fromTable = (typeof supaRows==="function")
+      ? supaRows("/rest/v1/trade_book?select=id,ord,body,deleted&deleted=eq.false&order=ord.asc&limit=5000")
+          .then(function(rows){
+            if(!rows||!rows.length) throw new Error("trade_book empty");
+            var meta=null, list=[];
+            rows.forEach(function(r){ if(r.id==="_meta") meta=r.body||{}; else if(r.body) list.push(r.body); });
+            if(!list.length && !meta) throw new Error("trade_book empty");
+            return Object.assign({}, meta||{}, {trades:list});
+          })
+      : Promise.reject(new Error("no supabase"));
+    fromTable
+      .then(function(d){ trSrc="supabase"; return d; })
+      .catch(function(e){ console.warn("[trades] table unavailable ("+e.message+") — falling back to trades.json"); trSrc="file"; return getJSON("trades"); })
       .then(function(d){
         trMeta = d || null;
         trLog  = (d && Array.isArray(d.trades)) ? d.trades : [];
         trLog.forEach(trNormalise);
         trLoadedFor = "shared";
-        trFixIds(); trDirty = 0; trBanner();
-        console.log("[trades] "+trLog.length+" rows from trades.json");
+        trFixIds(); trDirty = 0; trSnapshot(); trBanner();
+        console.log("[trades] "+trLog.length+" rows from "+(trSrc==="supabase"?"Supabase trade_book":"trades.json"));
       })
       .catch(function(e){
         // No silent empty book: an unreachable file must look like a failure,
@@ -9772,6 +9827,32 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     // would raise the unsaved banner just for opening a ticker page.
     if(dpStudy && trDetailId===dpStudy.id) return;
     trDirty++; trBanner();
+    if(trSrc==="supabase"){ clearTimeout(trPersistT); trPersistT=setTimeout(trPersist, 900); }
+  }
+  // Write what changed since the last snapshot: changed or new rows through
+  // save_trade, removed rows through delete_trade. PIN cached for the session.
+  function trPersist(){
+    if(trSaving||trSrc!=="supabase"||!trLog) return;
+    var pin=sessionStorage.getItem("pxPin")||window.prompt("Phoenix PIN to save the trade book (same as the freeze switch)");
+    if(!pin){ trBanner(); return; }
+    var by=(typeof pfActiveAcct==="function")?pfActiveAcct():"";
+    var now={}, ops=[];
+    (trLog||[]).forEach(function(t){ if(!t.id) return; var s=JSON.stringify(trDenormalise(t)); now[t.id]=s; if(trSnap[t.id]!==s) ops.push({fn:"save_trade",body:{pin:pin,p_id:t.id,p_body:JSON.parse(s),p_by:by},id:t.id,s:s}); });
+    Object.keys(trSnap).forEach(function(id){ if(!now[id]) ops.push({fn:"delete_trade",body:{pin:pin,p_id:id,p_by:by},id:id,s:null}); });
+    if(!ops.length){ trDirty=0; trBanner(); return; }
+    trSaving=true; trBanner();
+    var i=0, failed=null;
+    function next(){
+      if(i>=ops.length||failed){ trSaving=false;
+        if(failed){ if(/wrong PIN/.test(failed)) sessionStorage.removeItem("pxPin"); trBanner("Not saved to Supabase: "+failed+" — your edits are still on screen; try again, or Copy JSON."); return; }
+        sessionStorage.setItem("pxPin",pin); trDirty=0; trLastSaved=new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}); trBanner(); return; }
+      var op=ops[i++];
+      fetch(SUPA.url+"/rest/v1/rpc/"+op.fn,{method:"POST",headers:{apikey:SUPA.key,Authorization:"Bearer "+SUPA.key,"Content-Type":"application/json"},body:JSON.stringify(op.body)})
+        .then(function(r){ return r.json(); })
+        .then(function(j){ if(j&&j.ok){ if(op.s==null) delete trSnap[op.id]; else trSnap[op.id]=op.s; next(); } else { failed=(j&&j.error)||"RPC refused"; next(); } })
+        .catch(function(e){ failed="Supabase unreachable"; next(); });
+    }
+    next();
   }
 
   // ---------- the unsaved-changes banner ----------
@@ -9788,6 +9869,19 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(err){
       el.style.background="#B03030"; el.style.color="#fff";
       el.innerHTML='<span>'+err+'</span>'; el.style.display="flex"; return;
+    }
+    if(trSrc==="supabase"){
+      if(trSaving){ el.style.background="#0C2137"; el.style.color="#E7EEF6"; el.innerHTML='<span>Saving to Supabase\u2026</span>'; el.style.display="flex"; return; }
+      if(!trDirty){
+        if(trLastSaved){ el.style.background="#0C2137"; el.style.color="#3FBF77"; el.innerHTML='<span style="flex:1">Saved \u00b7 Supabase '+trLastSaved+' \u2014 the next daily run picks it up</span>'; el.style.display="flex";
+          clearTimeout(el._hideT); el._hideT=setTimeout(function(){ if(!trDirty&&!trSaving) el.style.display="none"; },4000); return; }
+        el.style.display="none"; return; }
+      el.style.background="#D37736"; el.style.color="#020F1F";
+      el.innerHTML='<span style="flex:1">'+trDirty+' change'+(trDirty===1?'':'s')+' \u2014 saving in a moment</span>'+
+        '<button id="trSaveNow" style="border:0;border-radius:4px;padding:7px 12px;font:inherit;background:#020F1F;color:#D37736">Save now</button>';
+      el.style.display="flex";
+      document.getElementById("trSaveNow").onclick=function(){ clearTimeout(trPersistT); trPersist(); };
+      return;
     }
     if(!trDirty){ el.style.display="none"; return; }
     el.style.background="#D37736"; el.style.color="#020F1F";
@@ -11470,7 +11564,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
                       '<b>sector</b>'+dpSector+'</span>'):'')+
                 (dpExch?'<button class="w-chip" data-dpexch="'+dpExch+'"><b>exchange</b>'+
                    dpExch+'</button>':'')+
-                '<button class="w-chip wl" data-dpwatch="'+tk+'">\u2606 Watchlist</button>'+
+                '<button class="w-chip wl'+(sfWatched(tk)?" on":"")+'" data-dpwatch="'+tk+'">'+(sfWatched(tk)?"\u2605":"\u2606")+' Watchlist</button>'+
               '</div>'+
               '<div class="w-facts">'+
                 '<div class="w-fact"><div class="k">Price</div><div class="v" id="dpPx" data-live-tk="'+tk+'">'+(cur!=null?fmtN(cur):"\u2014")+' <span class="chg" id="dpChg" style="font-size:12px;font-weight:400">'+chgHtml+'</span></div></div>'+
