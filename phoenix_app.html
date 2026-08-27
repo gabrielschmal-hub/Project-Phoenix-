@@ -272,6 +272,74 @@
   .scr-book:last-child{border-right:none;}
   .scr-book.on{background:var(--gold);color:#141210;font-weight:700;}
   .scr-book:active{transform:scale(.98);}
+  /* universe v3 scope: market x asset type. Two chip groups on one row. */
+  .scr-scope{display:flex;gap:10px;align-items:center;margin:-2px 0 10px;flex-wrap:wrap;flex-shrink:0;}
+  .scr-scope .lbl{font-family:var(--mono);font-size:10px;letter-spacing:1.2px;color:var(--inkFade);text-transform:uppercase;}
+  .scr-scope .scr-books{margin-bottom:0;}
+  .scr-scope .scr-book{padding:5px 12px;font-size:10.5px;}
+  .scr-tr .tk .atb{display:inline-block;margin-left:5px;padding:0 4px;border-radius:3px;font-size:9px;letter-spacing:.5px;vertical-align:middle;
+    background:var(--card2);color:var(--inkFade);border:1px solid var(--line2);font-weight:400;}
+  .scr-tr .tk .atb.eu{color:var(--gold);border-color:var(--gold);}
+  /* ---- screener filter block (27 Aug 2026, render C): chips for market/type, multi-select pickers for the rest ---- */
+  .sf{border:1px solid var(--line);border-radius:10px;background:var(--card2);padding:10px 14px 8px;margin-bottom:12px;flex-shrink:0;position:relative}
+  .sf-top{display:flex;gap:22px;flex-wrap:wrap;align-items:center;padding:2px 0 9px;border-bottom:1px dashed var(--line)}
+  .sf-grp{display:flex;align-items:center;gap:10px}
+  .sf-glbl{font-family:var(--mono);font-size:10px;letter-spacing:1.6px;color:var(--inkFade);text-transform:uppercase}
+  .sf-chips{display:flex;flex-wrap:wrap;gap:7px}
+  .sf-chip{font-family:var(--mono);font-size:11.5px;letter-spacing:.3px;padding:6px 12px;border:1px solid var(--line2);border-radius:20px;background:var(--card);color:var(--inkMed);cursor:pointer;display:inline-flex;align-items:center;gap:7px;user-select:none;white-space:nowrap}
+  .sf-chip:hover{border-color:var(--gold);color:var(--ink)}
+  .sf-chip.on{background:var(--gold);color:#141210;border-color:var(--gold);font-weight:700}
+  .sf-chip .n{color:var(--inkFade);font-size:10.5px} .sf-chip.on .n{color:#141210;opacity:.75}
+  .sf-view{margin-left:auto;display:flex;gap:0;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+  .sf-view button{font-family:var(--mono);font-size:10.5px;letter-spacing:.4px;padding:6px 12px;background:var(--card);color:var(--inkLight);border:none;border-right:1px solid var(--line2);cursor:pointer}
+  .sf-view button:last-child{border-right:none} .sf-view button.on{background:var(--gold);color:#141210;font-weight:700}
+  .sf-sel{display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:10px;padding:11px 0 6px}
+  .sf-ms{position:relative;display:flex;flex-direction:column;gap:5px;min-width:0}
+  .sf-ml{font-family:var(--mono);font-size:10px;letter-spacing:1.6px;color:var(--inkFade);text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .sf-ml small{letter-spacing:0;text-transform:none;color:var(--inkGhost)}
+  .sf-mb{width:100%;text-align:left;font-family:var(--mono);font-size:12px;padding:9px 28px 9px 10px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+  .sf-mb:after{content:"";position:absolute;right:11px;top:50%;width:7px;height:7px;border-right:1.6px solid var(--inkLight);border-bottom:1.6px solid var(--inkLight);transform:translateY(-70%) rotate(45deg)}
+  .sf-mb.set{border-color:var(--gold);color:var(--gold)} .sf-mb.set:after{border-color:var(--gold)}
+  .sf-mb:disabled{opacity:.45;cursor:default}
+  .sf-ms.one .sf-mb{border-color:var(--gold);color:var(--gold);background:transparent}
+  .sf-mp{display:none;position:absolute;top:100%;left:0;z-index:40;min-width:100%;width:max-content;max-width:min(380px,92vw);margin-top:6px;background:var(--card);border:1px solid var(--line2);border-radius:10px;box-shadow:0 14px 40px rgba(0,0,0,.5);padding:8px;max-height:340px;overflow:auto}
+  .sf-ms.open .sf-mp{display:block}
+  .sf-mh{display:flex;gap:8px;align-items:center;padding:2px 4px 8px;border-bottom:1px solid var(--line);margin-bottom:6px;font-family:var(--mono);font-size:10.5px;color:var(--inkFade)}
+  .sf-mh input{flex:1;font-family:var(--mono);font-size:11.5px;padding:6px 8px;border:1px solid var(--line2);border-radius:6px;background:var(--bg);color:var(--ink);min-width:0}
+  .sf-mh b{cursor:pointer;color:var(--gold);font-weight:400}
+  .sf-og{font-family:var(--mono);font-size:9.5px;letter-spacing:1.2px;color:var(--inkGhost);text-transform:uppercase;padding:8px 6px 3px}
+  .sf-mo{display:flex;align-items:center;gap:9px;padding:7px 6px;border-radius:6px;cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--inkMed);white-space:nowrap}
+  .sf-mo:hover{background:var(--card2);color:var(--ink)} .sf-mo.on{color:var(--ink)}
+  .sf-mo .bx{width:14px;height:14px;border:1px solid var(--line2);border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:#141210}
+  .sf-mo.on .bx{background:var(--gold);border-color:var(--gold)}
+  .sf-mo .n{margin-left:auto;color:var(--inkFade);font-size:10.5px;padding-left:10px}
+  .sf-mo .d{color:var(--inkGhost);font-size:10.5px;margin-left:4px}
+  .sf-mo .ld{font-size:10.5px;margin-left:6px;font-weight:700}
+  .sf-ms.one .sf-mo .bx{border-radius:50%}
+  .sf-info{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;border:1px solid var(--inkFade);color:var(--inkFade);font-style:normal;font-family:var(--serif);font-size:9.5px;cursor:pointer;text-transform:none;letter-spacing:0}
+  .sf-info:hover,.sf-info.on{border-color:var(--gold);color:var(--gold)}
+  .sf-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 0 2px;font-family:var(--mono);font-size:11.5px;color:var(--inkFade)}
+  .sf-bar .match{color:var(--ink);font-weight:700;font-size:13px}
+  .sf-pills{display:flex;gap:6px;flex-wrap:wrap}
+  .sf-pill{font-family:var(--mono);font-size:10.5px;padding:3px 8px;border-radius:12px;background:rgba(211,119,54,.14);color:var(--gold);border:1px solid rgba(211,119,54,.45);cursor:pointer}
+  .sf-pill:hover{background:rgba(217,83,79,.14);color:var(--red);border-color:var(--red)}
+  .sf-clear{margin-left:auto;font-family:var(--mono);font-size:11px;padding:6px 12px;border:1px solid var(--line2);border-radius:6px;background:transparent;color:var(--inkMed);cursor:pointer}
+  .sf-clear:hover{border-color:var(--red);color:var(--red)}
+  .sf-ibox{display:none;margin-top:10px;border:1px solid var(--line2);border-left:3px solid var(--gold);border-radius:8px;background:var(--card);padding:12px 14px;font-family:var(--mono);font-size:11.5px;color:var(--inkMed);line-height:1.55}
+  .sf-ibox.open{display:block}
+  .sf-ibox h4{margin:0 0 6px;font-family:var(--mono);font-size:10.5px;letter-spacing:1.6px;color:var(--gold);text-transform:uppercase;display:flex;align-items:center}
+  .sf-ibox h4 span{margin-left:auto;color:var(--inkFade);cursor:pointer;letter-spacing:0;text-transform:none;font-size:11px}
+  .sf-ibox dl{margin:0;display:grid;grid-template-columns:150px 1fr;gap:4px 14px}
+  .sf-ibox dt{color:var(--ink);white-space:nowrap} .sf-ibox dd{margin:0;color:var(--inkLight)}
+  .sf-ibox .src{margin-top:8px;color:var(--inkGhost);font-size:10.5px}
+  .scr-tr .tk .star{font-style:normal;cursor:pointer;color:var(--inkGhost);font-size:13px;margin-left:6px;font-family:var(--mono)}
+  .scr-tr .tk .star.on{color:var(--gold)}
+  .pxcell .lv{font-size:9px;letter-spacing:.6px;color:var(--inkGhost);margin-left:4px;font-style:normal}
+  .pxcell .lv.live{color:var(--green)}
+  @media(max-width:1100px){ .sf-sel{grid-template-columns:repeat(4,minmax(120px,1fr))} }
+  @media(max-width:700px){ .sf-sel{grid-template-columns:1fr 1fr} .sf-top{gap:10px} .sf-view{margin-left:0}
+    .sf-ibox dl{grid-template-columns:1fr} .sf-ibox dt{margin-top:6px}
+    .sf-mp{position:fixed;left:10px;right:10px;top:auto;bottom:12px;width:auto;min-width:0;max-width:none;max-height:62vh;box-shadow:0 -10px 40px rgba(0,0,0,.6)} }
   /* promotion watch */
   .promo-head{display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px;padding-top:12px;border-top:1px solid var(--line);flex-shrink:0;}
   .promo-head .ttl2{font-family:var(--mono);font-size:11.5px;letter-spacing:1.5px;color:var(--ink);text-transform:uppercase;}
@@ -2502,11 +2570,24 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         el.style.color = "var(--gold,#D37736)";
         el.style.fontWeight = "";
       }
+      // the two lanes, side by side, in the same badge: "5m 09:41 · 15m 09:35".
+      // Green while inside the lane's own cadence (+2m of slack), amber to
+      // twice that, red beyond; grey when the market is closed.
+      var y = (typeof PX_HB !== "undefined" && PX_HB.yahoo) ? PX_HB.yahoo : null;
+      function lane(lbl, h, cad){
+        if(!h) return '<i style="opacity:.55">' + lbl + ' \u2014</i>';
+        var a = (Date.now() - new Date(h.ts).getTime())/60000, t = "";
+        try{ t = new Date(h.ts).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}); }catch(e){}
+        var c = !open ? "var(--inkFade,#6B8299)" : a < cad + 2 ? "var(--green,#3FBF77)" : a < cad * 2 ? "var(--amber,#D8A24A)" : "var(--red,#D9534F)";
+        return '<i style="color:' + c + '">' + lbl + ' ' + t + (h.ok === false ? ' !' : '') + '</i>';
+      }
+      el.innerHTML = el.textContent + ' \u00B7 ' + lane("5m", hb, 5) + ' \u00B7 ' + lane("15m", y, 15);
       el.title = db + " files from Supabase \u00B7 " + pg + " from Pages fallback" +
         (hb ? " \u00B7 fast lane " + (hb.ok ? "\u2713 " : "\u2717 ") + (hb.note||"") : "") +
         ((typeof PX_HB !== "undefined" && PX_HB.screener) ?
           " \u00B7 screener " + (PX_HB.screener.ok ? "\u2713 " : "\u2717 ") + (PX_HB.screener.note||"") : "") +
-        (sig ? " \u00B7 " + sig + " breakout flag(s) today" : "");
+        (sig ? " \u00B7 " + sig + " breakout flag(s) today" : "") +
+        (y ? " \u00B7 15m lane " + (y.ok ? "\u2713 " : "\u2717 ") + (y.note||"") : " \u00B7 15m lane: no run yet");
     }, 250);
   }
 
@@ -2843,6 +2924,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(page === "trades"   && touched && typeof trRender === "function") trRender();
       if(page === "portfolio"&& touched && typeof pfRender === "function") pfRender();
       if(page === "markets"){ pxMarquee(); pxPatchCards(); }
+      if(page === "screeners" && typeof scrApplyLive === "function") scrApplyLive();
       pxPatchDetail();
     }catch(e){ /* a paint error must never kill the poll loop */ }
     pxSrcBadge();
@@ -3657,6 +3739,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   window.__PXT.setRP=function(d){ RP_DATA=d; rpDraw(); };
   window.__PXT.epi=function(m,g){ return edEpigraph(m,g); };
   window.__PXT.setGetJSON=function(f){ getJSON=f; };
+  window.__PXT.watch=function(){ return PX_WATCH; };
   window.__PXT.getJSON=function(){ return getJSON; };
   window.__PXT.trLoad=function(cb){ trLoad(cb); };
   window.__PXT.resetTrades=function(){ trLog=null; trLoadedFor=null; };
@@ -6775,27 +6858,35 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       '<div class="tile a-screener"><div class="thead">'+
         '<span class="ttl">Screener</span><span class="tnote" id="scrCount"></span>'+
       '</div>'+
-        // book + preset chips, one row
-        '<div class="scr-books" id="scrBooks">'+
-          '<button class="scr-book on" data-b="v1">Blend v1</button>'+
-          '<button class="scr-book" data-b="trade">Trade Book</button>'+
-          '<button class="scr-book" data-b="invest">Invest Book</button>'+
-          '<button class="scr-book" data-b="gexu">GEX Universe</button>'+
-          '<button class="scr-book" data-b="smart">Smart Money</button>'+
-        '</div>'+
-        '<div class="scr-presets" id="scrPresets">'+
-          '<button class="scr-preset" data-p="top"><span class="ic">\u2605</span>Highest Rated</button>'+
-          '<button class="scr-preset" data-p="breakout"><span class="ic">\u25B2</span>Breakouts</button>'+
-          '<button class="scr-preset" data-p="momentum"><span class="ic">\u26A1</span>Momentum</button>'+
-          '<button class="scr-preset" data-p="value"><span class="ic">\u25C9</span>Value</button>'+
-          '<button class="scr-preset" data-p="trade"><span class="ic">\u2197</span>Trade Setups</button>'+
-          '<button class="scr-preset" data-p="invest"><span class="ic">\u25B0</span>Investments</button>'+
+        // 27 Aug 2026: the book toggles (Blend / Trade / Invest) and the preset
+        // chips are gone. One filter block: chips for market and type, pickers
+        // for everything else, the definitions one tap away.
+        '<div class="sf" id="sf">'+
+          '<div class="sf-top">'+
+            '<div class="sf-grp"><span class="sf-glbl">Market</span><div class="sf-chips" id="sfMk"></div></div>'+
+            '<div class="sf-grp"><span class="sf-glbl">Type</span><div class="sf-chips" id="sfAt"></div></div>'+
+            '<div class="sf-view" id="sfView">'+
+              '<button class="on" data-v="screener">Screener</button>'+
+              '<button data-v="gexu">GEX universe</button>'+
+              '<button data-v="smart">Smart money</button>'+
+            '</div>'+
+          '</div>'+
+          '<div class="sf-sel" id="sfSel">'+
+            '<div class="sf-ms" data-k="sec"><span class="sf-ml" id="sfLsec">Sector</span><button class="sf-mb" id="sfBsec"></button><div class="sf-mp" id="sfPsec"></div></div>'+
+            '<div class="sf-ms" data-k="ind"><span class="sf-ml" id="sfLind">Industry</span><button class="sf-mb" id="sfBind"></button><div class="sf-mp" id="sfPind"></div></div>'+
+            '<div class="sf-ms" data-k="size"><span class="sf-ml">Size <small id="sfLsize">market cap</small></span><button class="sf-mb" id="sfBsize"></button><div class="sf-mp" id="sfPsize"></div></div>'+
+            '<div class="sf-ms" data-k="setup"><span class="sf-ml">Setup <i class="sf-info" data-i="setup">i</i></span><button class="sf-mb" id="sfBsetup"></button><div class="sf-mp" id="sfPsetup"></div></div>'+
+            '<div class="sf-ms" data-k="rule"><span class="sf-ml">Rules <i class="sf-info" data-i="rules">i</i></span><button class="sf-mb" id="sfBrule"></button><div class="sf-mp" id="sfPrule"></div></div>'+
+            '<div class="sf-ms" data-k="list"><span class="sf-ml">List</span><button class="sf-mb" id="sfBlist"></button><div class="sf-mp" id="sfPlist"></div></div>'+
+            '<div class="sf-ms one" data-k="stop"><span class="sf-ml">Your stop <i class="sf-info" data-i="stop">i</i></span><button class="sf-mb" id="sfBstop"></button><div class="sf-mp" id="sfPstop"></div></div>'+
+          '</div>'+
+          '<div class="sf-bar"><span class="match" id="sfMatch"></span><span class="sf-pills" id="sfPills"></span><button class="sf-clear" id="sfClear">\u2715 Clear all filters</button></div>'+
+          '<div class="sf-ibox" id="sfIbox"></div>'+
         '</div>'+
         '<div class="tbody"><div class="scr-table" id="scrTable"><div class="loading">\u2026</div></div></div>'+
         '<div class="scr-foot">'+
-          '<span>Tap a ticker for its page. Gates are the six inclusion rules \u2014 '+
-          'a name must clear all six to be a pick.</span>'+
-          '<span>The stop line is drawn on every pattern; change it in the header.</span>'+
+          '<span>Tap a ticker for its page. \u2606 adds it to your watchlist \u2014 the 5-minute tape follows it from then on.</span>'+
+          '<span>The stop line is drawn on every pattern; change it with Your stop.</span>'+
         '</div>'+
       '</div>'+
     '</div>';
@@ -6803,12 +6894,201 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   var scrData=null, scrMeta=null, scrFilter=null, scrSearch="", scrSort="rank", scrPreset=null;
   var scrGates="", scrExpanded=null;
   var scrMcap="", scrChg="";
-  // v2 two-book state (PHOENIX_REVIEW Part 3). scrData stays the v1 list —
-  // other pages (Mission Control, Markets, planner price fallback) depend on
-  // it — the screener just renders whichever book is active.
-  var scrBook="v1", scrV2={trade:[],invest:[],meta:{}}, scrGexu=null, scrGexuAsof="";
+  // scrData stays the v1 list — other pages (Mission Control, Markets, planner
+  // price fallback) depend on it. scrV2 keeps the two books loaded for the
+  // planner and the promotions panel; the screener itself shows the v1 list.
+  // scrView: "screener" (the filtered table) | "gexu" | "smart" (their own tables).
+  var scrBook="v1", scrView="screener", scrV2={trade:[],invest:[],meta:{}}, scrGexu=null, scrGexuAsof="";
+  // ---- the filter block (render C, 27 Aug 2026) ----
+  var SF={sec:[],ind:[],size:[],setup:[],rule:[],list:[]};       // multi-select: any-of within a picker, all-of across Rules
+  var SF_SIZES=[["small","Small","$1\u20132B"],["mid","Mid","$2\u201310B"],["large","Large","$10\u2013200B"],["mega","Mega","> $200B"]];
+  var SF_SETUPS=[["breakout","\u25B2","Breakout"],["surge","\u26A1","Surge"],["nearhigh","\u2248","Near high"],["accum","\u25AE","Accumulating"]];
+  var SF_RULES=[["passer","Gate passer (all gates)"],["near","Near-miss (one gate short)"],["mom","Momentum \u2265 60"],["val","Value \u2265 70"],["trade","Trade setup"],["invest","Investment"],["top","\u2605 Highest rated"]];
+  var SF_LISTS=[["watch","\u2605 My watchlist"],["pos","Open positions"],["gex","GEX \u00b7 Elliott's list"]];
+  var SF_INFO={
+    setup:{t:"Setups \u2014 what the engine flags on the latest bars",rows:[
+      ["Breakout","a gate passer at its 2-year high (within 1%), 3-week volume \u2265 +70% vs the prior 10 weeks, volume state ACCUM, rising 10-week MA"],
+      ["Surge","3-week average volume \u2265 +50% against the prior 10 weeks"],
+      ["Near high","last close within 8% of the 104-week (2-year) high"],
+      ["Accumulating","volume surge \u2265 +30% with price up over the last 4 weeks (ACCUM); the same surge with price flat or down is DISTRIB"]],
+      src:"phoenix.py \u00b7 STOCK.breakout_vol_surge_pct 70 \u00b7 accum_surge_pct 30 \u00b7 high_lookback_weeks 104"},
+    rules:{t:"Rules \u2014 the gates and the scores behind the list",rows:[
+      ["Gate passer","all five gates on the weekly bars: \u2460 close above the 40-week MA (~200-day) \u00b7 \u2461 close above the 10-week MA (~50-day) \u00b7 \u2462 industry gate: the cap-weighted industry index is above its rising 10-week MA \u00b7 \u2463 within 8% of the 2-year high \u00b7 \u2464 Weinstein stage 2: close above a rising 30-week MA \u2014 plus a market cap of at least $300M to be evaluated at all. (The trade book adds a sixth gate, tradability: cap \u2265 $1B and \u2265 $10M traded per day.)"],
+      ["Near-miss","exactly one of the five gates fails; the missing gate is named on the row"],
+      ["Momentum \u2265 60","trade score \u2265 60. Trade score = percentile ranks blended: 4-week relative strength .30 \u00b7 volume surge .25 \u00b7 tightness to the 10-week MA .20 \u00b7 12-week relative strength .15 \u00b7 base quality .10"],
+      ["Value \u2265 70","fundamentals score \u2265 70 = percentile ranks of revenue growth YoY .35 \u00b7 net margin .30 \u00b7 ROE .25, plus .10 for positive free cash flow. Needs fundamentals on file (cap \u2265 $2B)"],
+      ["Trade setup","label TRADE or BOTH: trade score \u2265 70"],
+      ["Investment","label INVEST or BOTH: invest score \u2265 70. Invest score = 52-week relative strength .35 \u00b7 durability (weeks in stage 2) .25 \u00b7 fundamentals .25 \u00b7 12-week RS .15"],
+      ["Highest rated","gate passers ranked by opportunity score = \u00bd trade + \u00bd invest, +2 for a full pass"]],
+      src:"phoenix.py \u00b7 stock_engine (the list on screen) \u00b7 every weight is ASSERTED until the Part 3.6 backtest flips validated"},
+    stop:{t:"Your stop \u2014 one line per row, drawn on every pattern",rows:[
+      ["2 \u00d7 ATR","last close minus twice the 14-day average true range (doctrine: 2.5\u00d7 ATR at entry, floor 1.5\u00d7, never a percentage)"],
+      ["50-day average","the 10-week / 50-day moving average"],
+      ["200-day average","the 40-week / 200-day moving average \u2014 needs the chart bars, so it shows only where a chart exists"],
+      ["Recent swing low","the lowest low of the last 4 weeks of daily bars"],
+      ["Gamma put wall","dealer put wall from the CBOE chain \u2014 only for the names Elliott's briefing scans"]],
+      src:"the column recomputes when you change the mode; the badge says whether price is above or below the line and by how much"}
+  };
+  var PX_UNI={};   // prices_universe rows (the 15-minute Yahoo lane), by ticker
+  // universe v3 scope. scrMk: "US" | "EU" | "ALL"; scrAt: "stock" | "etf" | "ALL".
+  // The US-stock lists live in stocks.json (loaded on every open, unchanged).
+  // EU stocks and ETFs live in stocks_ext.json, fetched once, the first time
+  // the scope leaves US x Stocks. A US row without tags is a US stock: the
+  // engine tags every row now, but a stale stocks.json must still render.
+  var scrMk="US", scrAt="stock", scrExt=null, scrExtState="idle";  // idle|loading|ready|failed
+  function scrRowMk(s){ return s.mk||"US"; }
+  function scrRowAt(s){ return s.at||"stock"; }
+  function scrInScope(s){
+    return (scrMk==="ALL"||scrRowMk(s)===scrMk) && (scrAt==="ALL"||scrRowAt(s)===scrAt);
+  }
+  function scrScopeIsDefault(){ return scrMk==="US"&&scrAt==="stock"; }
+  function scrEnsureExt(cb,eager){
+    if((scrScopeIsDefault()&&!eager)||scrExtState==="ready"||scrExtState==="failed"){ cb(); return; }
+    if(scrExtState==="loading") return;
+    scrExtState="loading";
+    getJSON("stocks_ext").then(function(d){
+      scrExt={stocks:(d&&d.stocks)||[], trade:(d&&d.trade_ranked)||[], invest:(d&&d.invest_ranked)||[],
+              etfs:(d&&d.etfs)||[], meta:(d&&d.meta)||{}, asof:(d&&d.asof)||""};
+      scrExtState="ready"; cb();
+    }).catch(function(){ scrExt=null; scrExtState="failed"; cb(); });
+  }
   function scrActiveList(){
-    return scrBook==="trade"?scrV2.trade:scrBook==="invest"?scrV2.invest:(scrData||[]);
+    var base=(scrData||[]);
+    if(scrScopeIsDefault()) return base;
+    // EU stocks follow the US rules, so they sit in the same list. ETFs are
+    // bare (no gates, no scores - decided 26 Aug 2026).
+    var eu=scrExt?scrExt.stocks:[];
+    var etfs=(scrExt&&scrAt!=="stock")?scrExt.etfs:[];
+    return (scrAt==="etf"?[]:base.concat(eu)).concat(etfs);
+  }
+  // ---- picker helpers ----
+  function sfN(x){ return x==null?"\u2014":x.toLocaleString("en-US"); }
+  function sfWatched(tk){ var w=(PX_WATCH||{})[tk]; return w==="watch"||w==="watch_eu"; }
+  function sfSizeOf(c){ return c==null?null:c<2?"small":c<10?"mid":c<200?"large":"mega"; }
+  function sfRowSector(s){ return scrRowAt(s)==="etf"?((s.focus||"").split(" \u00b7 ")[0]||""):(s.sector||sfSecOfInd[s.industry]||""); }
+  function sfRowInd(s){ return scrRowAt(s)==="etf"?((s.focus||"").split(" \u00b7 ")[1]||""):(s.industry||""); }
+  var sfSecOfInd={};   // industry -> sector, from industry.json (v1 rows carry only the industry)
+  function sfScopedRows(){ var arr=scrActiveList(); return scrScopeIsDefault()?arr:arr.filter(scrInScope); }
+  function sfRotChg(scope,key){ var r=(PX_ROT[scope]||{})[key]; return r==null?null:r; }
+  var PX_ROT={sector:{},industry:{},asof:null};   // rotation_intraday latest (the 15-minute lane)
+  function sfOptions(){
+    var isEtf=(scrAt==="etf"), rows=sfScopedRows(), o={};
+    var secs={}, inds={}, indSec={};
+    rows.forEach(function(s){ var sc=sfRowSector(s), ind=sfRowInd(s); if(sc) secs[sc]=(secs[sc]||0)+1; if(ind){ inds[ind]=(inds[ind]||0)+1; indSec[ind]=sc; } });
+    o.sec=Object.keys(secs).sort().map(function(s){ return {v:s,l:s,n:secs[s],ld:isEtf?null:sfRotChg("sector",s)}; });
+    var secList=SF.sec.length?SF.sec:Object.keys(secs).sort();
+    o.ind=[]; secList.forEach(function(sc){ Object.keys(inds).filter(function(i){return indSec[i]===sc;}).sort().forEach(function(i){ o.ind.push({v:i,l:i,n:inds[i],g:sc,ld:isEtf?null:sfRotChg("industry",i)}); }); });
+    o.size=SF_SIZES.map(function(z){ return {v:z[0],l:z[1],d:z[2],n:rows.filter(function(s){return sfSizeOf(s.mcap_B)===z[0];}).length}; });
+    o.setup=SF_SETUPS.map(function(s){ return {v:s[0],l:s[1]+" "+s[2]}; });
+    o.rule=SF_RULES.map(function(r){ return {v:r[0],l:r[1]}; });
+    var nWatch=Object.keys(PX_WATCH||{}).filter(sfWatched).length;
+    o.list=[{v:"watch",l:SF_LISTS[0][1],n:nWatch},{v:"pos",l:SF_LISTS[1][1]},{v:"gex",l:SF_LISTS[2][1],n:Object.keys(window.__scrGexU||{}).length||null}];
+    o.stop=Object.keys(SCR_STOPS).map(function(k){ return {v:k,l:SCR_STOPS[k]}; });
+    return o;
+  }
+  function sfBtnText(k,o){
+    if(k==="stop") return SCR_STOPS[SCR_STOP]||SCR_STOP;
+    var sel=SF[k], isEtf=(scrAt==="etf");
+    var all={sec:(isEtf?"All asset classes":"All sectors"),ind:(isEtf?"All focuses":"All industries"),size:"Any size",setup:"Any setup",rule:"Any",list:"All names"}[k];
+    if(!sel.length) return all;
+    if(sel.length===1){ var m=o[k].filter(function(x){return x.v===sel[0];})[0]; return m?m.l:sel[0]; }
+    return sel.length+" selected";
+  }
+  function sfPanel(k,o){
+    var list=o[k], multi=(k!=="stop"), inp=document.querySelector("#sfP"+k+" input"), q=inp?inp.value:"";
+    var h="";
+    if(multi) h+='<div class="sf-mh">'+(list.length>8?'<input placeholder="search\u2026" value="'+q.replace(/"/g,"")+'">':'<span>'+(SF[k].length||"none")+' selected</span>')+'<b data-a="all">all</b><b data-a="none">none</b></div>';
+    var lastG=null;
+    list.forEach(function(x){ if(q&&x.l.toLowerCase().indexOf(q.toLowerCase())<0) return;
+      if(x.g&&x.g!==lastG){ h+='<div class="sf-og">'+x.g+'</div>'; lastG=x.g; }
+      var on=multi?SF[k].indexOf(x.v)>=0:SCR_STOP===x.v;
+      var ld=(x.ld!=null)?'<span class="ld" style="color:'+(x.ld>=0?"var(--green)":"var(--red)")+'">'+(x.ld>=0?"+":"")+(+x.ld).toFixed(1)+'%</span>':"";
+      h+='<div class="sf-mo'+(on?" on":"")+'" data-v="'+x.v.replace(/"/g,"&quot;")+'"><span class="bx">'+(on?"\u2713":"")+'</span>'+x.l+(x.d?'<span class="d">'+x.d+'</span>':'')+ld+(x.n!=null?'<span class="n">'+sfN(x.n)+'</span>':'')+'</div>'; });
+    return h;
+  }
+  function sfRowPasses(s){
+    var M=SF, at=scrRowAt(s);
+    if(M.sec.length&&M.sec.indexOf(sfRowSector(s))<0) return false;
+    if(M.ind.length&&M.ind.indexOf(sfRowInd(s))<0) return false;
+    if(M.size.length&&M.size.indexOf(sfSizeOf(s.mcap_B))<0) return false;
+    if(at!=="etf"){
+      if(M.setup.length&&!M.setup.some(function(x){ return (x==="breakout"&&s.breakout)||(x==="surge"&&(s.surge||0)>=50)||(x==="nearhigh"&&s.pos_vs_high!=null&&s.pos_vs_high>=-8)||(x==="accum"&&s.vol_state==="ACCUM"); })) return false;
+      if(M.rule.length&&!M.rule.every(function(u){ return (u==="passer"&&s.passer)||(u==="near"&&s.passer===false)||(u==="mom"&&(s.trade_score||0)>=60)||(u==="val"&&(s.fund_score||0)>=70)
+         ||(u==="trade"&&(s.label==="TRADE"||s.label==="BOTH"))||(u==="invest"&&(s.label==="INVEST"||s.label==="BOTH"))||(u==="top"&&s.passer); })) return false;
+    }
+    if(M.list.length&&!M.list.some(function(l){ return (l==="gex"&&window.__scrGexU&&window.__scrGexU[s.ticker])||(l==="watch"&&sfWatched(s.ticker))||(l==="pos"&&trHas(s.ticker)); })) return false;
+    return true;
+  }
+  function sfRenderBlock(){
+    var el=document.getElementById("sf"); if(!el) return;
+    var cs=scrData||[], ce=scrExt||{stocks:[],etfs:[]};
+    var nUS=cs.length, nEU=(ce.stocks||[]).length, nETFus=(ce.etfs||[]).filter(function(r){return r.mk==="US";}).length, nETFeu=(ce.etfs||[]).filter(function(r){return r.mk==="EU";}).length;
+    function chip(id,lbl,cnt,on){ return '<span class="sf-chip'+(on?" on":"")+'" data-v="'+id+'">'+lbl+(cnt!=null?' <span class="n">'+sfN(cnt)+'</span>':'')+'</span>'; }
+    document.getElementById("sfMk").innerHTML=chip("ALL","All",null,scrMk==="ALL")+chip("US","\uD83C\uDDFA\uD83C\uDDF8 US",nUS+nETFus,scrMk==="US")+chip("EU","\uD83C\uDDEA\uD83C\uDDFA EU",nEU+nETFeu,scrMk==="EU");
+    var stN=(scrMk==="ALL"?nUS+nEU:scrMk==="US"?nUS:nEU), etN=(scrMk==="ALL"?nETFus+nETFeu:scrMk==="US"?nETFus:nETFeu);
+    document.getElementById("sfAt").innerHTML=chip("stock","Stocks",stN,scrAt==="stock")+chip("etf","ETFs",etN,scrAt==="etf")+chip("ALL","Both",stN+etN,scrAt==="ALL");
+    var isEtf=(scrAt==="etf");
+    document.getElementById("sfLsec").textContent=isEtf?"Asset class":(scrAt==="ALL"?"Sector / class":"Sector");
+    document.getElementById("sfLind").textContent=isEtf?"Focus":(scrAt==="ALL"?"Industry / focus":"Industry");
+    document.getElementById("sfLsize").textContent=isEtf?"AUM":(scrAt==="ALL"?"cap / AUM":"market cap");
+    var o=sfOptions();
+    ["sec","ind","size","setup","rule","list","stop"].forEach(function(k){
+      var b=document.getElementById("sfB"+k); if(!b) return;
+      b.textContent=sfBtnText(k,o); b.classList.toggle("set",k!=="stop"&&SF[k].length>0);
+      b.disabled=isEtf&&(k==="setup"||k==="rule");
+      document.getElementById("sfP"+k).innerHTML=sfPanel(k,o);
+    });
+    document.querySelectorAll("#sfView button").forEach(function(x){ x.classList.toggle("on",x.dataset.v===scrView); });
+    document.getElementById("sfSel").style.display=scrView==="screener"?"grid":"none";
+    document.querySelector("#sf .sf-bar").style.display=scrView==="screener"?"flex":"none";
+    var pills=[]; ["sec","ind","size","setup","rule","list"].forEach(function(k){ SF[k].forEach(function(v){ var m=o[k].filter(function(x){return x.v===v;})[0]; pills.push([k,v,m?m.l:v]); }); });
+    document.getElementById("sfPills").innerHTML=pills.length?pills.map(function(p){ return '<span class="sf-pill" data-k="'+p[0]+'" data-v="'+p[1].replace(/"/g,"&quot;")+'">'+p[2]+' \u2715</span>'; }).join(""):
+      '<span style="color:var(--inkGhost)">no filters \u2014 the full '+(scrAt==="etf"?"ETF list":"list")+' for '+(scrMk==="ALL"?"all markets":scrMk)+'</span>';
+  }
+  function sfShowInfo(key){
+    var box=document.getElementById("sfIbox"); if(!box) return;
+    if(!key||box.dataset.k===key){ box.classList.remove("open"); box.dataset.k=""; document.querySelectorAll(".sf-info").forEach(function(i){i.classList.remove("on");}); return; }
+    var I=SF_INFO[key]; box.dataset.k=key; box.classList.add("open");
+    document.querySelectorAll(".sf-info").forEach(function(i){ i.classList.toggle("on",i.dataset.i===key); });
+    box.innerHTML='<h4>'+I.t+'<span data-close="1">close \u2715</span></h4><dl>'+I.rows.map(function(r){ return '<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>'; }).join("")+'</dl><div class="src">'+I.src+'</div>';
+  }
+  // ---- watchlist: the star writes watch_tickers through a PIN-guarded RPC; the 5-minute Finnhub lane quotes bucket "watch" ----
+  function pxWatchToggle(tk){
+    var on=!(sfWatched(tk));
+    var pin=sessionStorage.getItem("pxPin")||window.prompt("Phoenix PIN (same as the freeze switch)");
+    if(!pin) return;
+    fetch(SUPA.url+"/rest/v1/rpc/set_watch",{method:"POST",headers:{apikey:SUPA.key,Authorization:"Bearer "+SUPA.key,"Content-Type":"application/json"},
+      body:JSON.stringify({pin:pin,p_ticker:tk,p_on:on})})
+    .then(function(r){ return r.json(); }).then(function(j){
+      if(j&&j.ok){ sessionStorage.setItem("pxPin",pin); if(!PX_WATCH) PX_WATCH={}; if(on) PX_WATCH[tk]=j.bucket||"watch"; else delete PX_WATCH[tk]; renderScreener(); }
+      else { if(j&&/wrong PIN/.test(j.error||"")) sessionStorage.removeItem("pxPin"); window.alert((j&&j.error)||"watchlist update failed"); }
+    }).catch(function(){ window.alert("Supabase unreachable \u2014 the watchlist lives there"); });
+  }
+  // ---- the 15-minute Yahoo lane: prices_universe for the rows on screen, rotation_intraday for the pickers ----
+  var sfUniT=null;
+  function sfPollUniverse(){
+    if(typeof supaRows!=="function") return;
+    var tks=Array.prototype.map.call(document.querySelectorAll("#scrTable .scr-tr[data-row-tk]"),function(r){ return r.getAttribute("data-row-tk"); }).slice(0,200);
+    if(!tks.length) return;
+    supaRows("/rest/v1/prices_universe?select=ticker,last,chg_pct,updated_at&ticker=in.("+encodeURIComponent(tks.join(","))+")")
+      .then(function(rows){ (rows||[]).forEach(function(r){ PX_UNI[r.ticker]=r; }); scrApplyLive(); }).catch(function(){});
+    supaRows("/rest/v1/rotation_intraday?select=asof,scope,key,chg_pct&order=asof.desc&limit=400")
+      .then(function(rows){ if(!rows||!rows.length) return; var top=rows[0].asof; PX_ROT={sector:{},industry:{},asof:top};
+        rows.filter(function(r){return r.asof===top;}).forEach(function(r){ PX_ROT[r.scope][r.key]=+r.chg_pct; }); }).catch(function(){});
+  }
+  function scrApplyLive(){
+    var now=Date.now();
+    document.querySelectorAll("#scrTable .scr-tr[data-row-tk]").forEach(function(row){
+      var tk=row.getAttribute("data-row-tk"), q=PX_LIVE[tk], u=PX_UNI[tk], src=null, chg=null, last=null, age=null;
+      if(q&&q.updated_at&&(now-new Date(q.updated_at).getTime())<30*60*1000){ src="live"; chg=q.chg_pct; last=q.last; age=now-new Date(q.updated_at).getTime(); }
+      else if(u&&u.updated_at&&(now-new Date(u.updated_at).getTime())<6*3600*1000){ src="15m"; chg=u.chg_pct; last=u.last; age=now-new Date(u.updated_at).getTime(); }
+      if(!src||chg==null) return;
+      var b=row.querySelector(".pxcell b"), em=row.querySelector(".pxcell em"); if(!b) return;
+      var c=+chg; b.textContent=(c>=0?"+":"")+c.toFixed(1)+"%"; b.style.color=c>=0?"var(--green)":"var(--red)";
+      var mins=Math.round(age/60000);
+      if(em&&!em.querySelector(".lv")) em.insertAdjacentHTML("beforeend",'<i class="lv"></i>');
+      var lv=em&&em.querySelector(".lv"); if(lv){ lv.className="lv"+(src==="live"?" live":""); lv.textContent=(src==="live"?"5m":"15m")+(mins>1?" \u00b7 "+mins+"m ago":""); }
+    });
   }
   function scrLookup(tk){
     var s=scrActiveList().filter(function(x){return x.ticker===tk;})[0];
@@ -6819,10 +7099,17 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     getJSON("stocks").then(function(d){
       scrData=(d&&d.stocks)||[]; scrMeta=(d&&d.meta)||{};
       scrV2={trade:(d&&d.trade_ranked)||[], invest:(d&&d.invest_ranked)||[], meta:(d&&d.v2_meta)||{}};
-      getJSON("gex_universe").then(function(g){ scrGexu=(g&&g.universe)||[]; scrGexuAsof=(g&&g.asof)||""; if(scrBook==="gexu") renderScreener(); }).catch(function(){ scrGexu=[]; });
+      getJSON("gex_universe").then(function(g){ scrGexu=(g&&g.universe)||[]; scrGexuAsof=(g&&g.asof)||"";
+        var m={}; scrGexu.forEach(function(r){ if(r&&r.ticker) m[r.ticker]=r; }); window.__scrGexU=m; renderScreener(); }).catch(function(){ scrGexu=[]; });
+      // the industry -> sector map for the Sector picker (v1 rows carry the industry only)
+      getJSON("industry").then(function(j){ ((j&&j.industries)||[]).forEach(function(r){ if(r.industry&&r.sector) sfSecOfInd[r.industry]=r.sector; }); renderScreener(); }).catch(function(){});
       initPicks();
       renderScreener();
       renderPicks();
+      // the EU + ETF lists come along up front now: the Market/Type chips need
+      // their counts, and a scope switch must not wait on a fetch
+      scrExtState="idle"; scrEnsureExt(renderScreener,true);
+      sfPollUniverse();
     }).catch(function(e){
       document.getElementById("scrTable").innerHTML=errHTML("stocks.json",e.message);
       (document.getElementById("picksScroll")||{}).innerHTML=errHTML("stocks.json",e.message);
@@ -6831,32 +7118,34 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(si) si.addEventListener("input",function(){
       scrSearch=this.value.toLowerCase().trim(); renderScreener();
     });
-    (document.getElementById("scrMcap")||{addEventListener:function(){}}).addEventListener("change",function(){ scrMcap=this.value; renderScreener(); });
-    (document.getElementById("scrChg")||{addEventListener:function(){}}).addEventListener("change",function(){ scrChg=this.value; renderScreener(); });
-    // preset chips: each sets a filter + sort in one tap
-    document.querySelectorAll(".scr-preset").forEach(function(btn){
-      btn.addEventListener("click",function(){
-        var p=this.dataset.p;
-        if(scrPreset===p){ scrPreset=null; this.classList.remove("on"); }
-        else { scrPreset=p; document.querySelectorAll(".scr-preset").forEach(function(x){x.classList.toggle("on",x===btn);}); }
-        renderScreener();
+    var sf=document.getElementById("sf");
+    if(sf&&!sf._wired){ sf._wired=true;
+      sf.addEventListener("click",function(e){
+        var t=e.target; e.sfInside=true;   // a re-render may detach the target before the document listener sees it
+        if(t.closest(".sf-info")){ sfShowInfo(t.closest(".sf-info").dataset.i); return; }
+        if(t.closest("[data-close]")){ sfShowInfo(null); return; }
+        var vb=t.closest("#sfView button"); if(vb){ scrView=vb.dataset.v; scrExpanded=null; if(scrView==="smart") dpEnsureSmart(function(){ renderScreener(); }); renderScreener(); return; }
+        var c=t.closest(".sf-chip"); if(c){ var g=c.parentNode.id, v=c.dataset.v;
+          if(g==="sfMk") scrMk=v; else { scrAt=v; SF.sec=[]; SF.ind=[]; if(v==="etf"){ SF.setup=[]; SF.rule=[]; } }
+          scrExpanded=null;
+          if(!scrScopeIsDefault()&&scrSort==="rank") scrSort=(scrAt==="etf"?"mcap_B":"opp_score");
+          if(scrScopeIsDefault()&&scrSort!=="rank") scrSort="rank";
+          scrEnsureExt(renderScreener); renderScreener(); return; }
+        var p=t.closest(".sf-pill"); if(p){ var k=p.dataset.k; SF[k]=SF[k].filter(function(x){return x!==p.dataset.v;}); if(k==="sec"){ var ok=sfOptions().ind.map(function(x){return x.v;}); SF.ind=SF.ind.filter(function(x){return ok.indexOf(x)>=0;}); } renderScreener(); return; }
+        var mb=t.closest(".sf-mb"); if(mb){ var ms=mb.parentNode, was=ms.classList.contains("open"); document.querySelectorAll(".sf-ms.open").forEach(function(x){x.classList.remove("open");}); if(!was&&!mb.disabled) ms.classList.add("open"); return; }
+        var mo=t.closest(".sf-mo"); if(mo){ var ms2=mo.closest(".sf-ms"), k2=ms2.dataset.k, v2=mo.dataset.v;
+          if(k2==="stop"){ SCR_STOP=v2; ms2.classList.remove("open"); renderScreener(); return; }
+          var i=SF[k2].indexOf(v2); if(i>=0) SF[k2].splice(i,1); else SF[k2].push(v2);
+          if(k2==="sec"){ var ok2=sfOptions().ind.map(function(x){return x.v;}); SF.ind=SF.ind.filter(function(x){return ok2.indexOf(x)>=0;}); }
+          renderScreener(); ms2.classList.add("open"); return; }
+        var ah=t.closest(".sf-mh b"); if(ah){ var ms3=ah.closest(".sf-ms"), k3=ms3.dataset.k; SF[k3]=(ah.dataset.a==="all")?sfOptions()[k3].map(function(x){return x.v;}):[]; renderScreener(); ms3.classList.add("open"); return; }
+        if(t.closest(".sf-mp")) return;
+        document.querySelectorAll(".sf-ms.open").forEach(function(x){x.classList.remove("open");});
       });
-    });
-    // v2 book toggle: presets belong to v1's blended list, so switching books
-    // clears them; the preset bar hides on the Invest book (its entries have
-    // no passer/breakout/label fields for presets to filter on).
-    document.querySelectorAll(".scr-book").forEach(function(btn){
-      btn.addEventListener("click",function(){
-        scrBook=this.dataset.b;
-        document.querySelectorAll(".scr-book").forEach(function(x){x.classList.toggle("on",x===btn);});
-        scrPreset=null; scrSort="rank"; scrExpanded=null;
-        document.querySelectorAll(".scr-preset").forEach(function(x){x.classList.remove("on");});
-        var pb=document.getElementById("scrPresets");
-        if(pb) pb.style.display=(scrBook==="invest"||scrBook==="gexu"||scrBook==="smart")?"none":"flex";
-        if(scrBook==="smart") dpEnsureSmart(function(){ renderSmartMoney(); });
-        renderScreener();
-      });
-    });
+      sf.addEventListener("input",function(e){ if(e.target.matches(".sf-mh input")){ var ms=e.target.closest(".sf-ms"), k=ms.dataset.k, v=e.target.value; ms.querySelector(".sf-mp").innerHTML=sfPanel(k,sfOptions()); var inp=ms.querySelector(".sf-mh input"); if(inp){ inp.value=v; inp.focus(); inp.setSelectionRange(v.length,v.length); } } });
+      document.getElementById("sfClear").addEventListener("click",function(){ SF={sec:[],ind:[],size:[],setup:[],rule:[],list:[]}; scrMk="US"; scrAt="stock"; scrSearch=""; scrSort="rank"; renderScreener(); });
+      document.addEventListener("click",function(e){ if(e.sfInside) return; if(!e.target.closest("#sf")) document.querySelectorAll(".sf-ms.open").forEach(function(x){x.classList.remove("open");}); });
+    }
     renderPromotions();
   }
 
@@ -6897,6 +7186,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     return '<span class="lblchip" style="background:'+bg+';color:'+c+'">'+lbl+'</span>';
   }
   function capFmt(v){ return v==null?"\u2014":(v>=1000?(v/1000).toFixed(1)+"T":Math.round(v)+"B"); }
+  // universe v3: prices come in the listing currency (LSE lines already in pounds, not pence)
+  function ccySym(c){ return ({USD:"$",EUR:"\u20ac",GBP:"\u00a3",CHF:"CHF ",SEK:"kr ",DKK:"kr ",NOK:"kr ",PLN:"z\u0142 "})[c||"USD"]||((c||"")+" "); }
 
   // The GEX universe table. Reads outputs/gex_universe.json (scrGexu) — the
   // ~50 rule-tested names, NOT the 2,900-name screener universe. Every row
@@ -6969,46 +7260,39 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
 
   function renderScreener(){
     if(!scrData) return;
-    if(scrBook==="gexu"){ renderGexUniverse(); return; }
-    if(scrBook==="smart"){ renderSmartMoney(); return; }
+    sfRenderBlock();
+    if(scrView==="gexu"){ renderGexUniverse(); return; }
+    if(scrView==="smart"){ renderSmartMoney(); return; }
     var arr=scrActiveList().slice();
-    // preset chips — each is a curated filter + sort
-    if(scrPreset==="top"){ arr=arr.filter(function(s){return s.passer;}); scrSort="opp_score"; }
-    else if(scrPreset==="breakout"){ arr=arr.filter(function(s){return s.breakout;}); scrSort="opp_score"; }
-    else if(scrPreset==="momentum"){ arr=arr.filter(function(s){return (s.trade_score||0)>=60;}); scrSort="trade_score"; }
-    else if(scrPreset==="value"){ arr=arr.filter(function(s){return (s.fund_score||0)>=70;}); scrSort="fund_score"; }
-    else if(scrPreset==="trade"){ arr=arr.filter(function(s){return s.label==="TRADE"||s.label==="BOTH";}); scrSort="trade_score"; }
-    else if(scrPreset==="invest"){ arr=arr.filter(function(s){return s.label==="INVEST"||s.label==="BOTH";}); scrSort="invest_score"; }
-    // dropdown filters
-    if(scrMcap) arr=arr.filter(function(s){return (s.mcap_B||0)>=+scrMcap;});
+    if(!scrScopeIsDefault()) arr=arr.filter(scrInScope);
+    var inScope=arr.length;
+    // the filter block
+    arr=arr.filter(sfRowPasses);
     if(scrChg) arr=arr.filter(function(s){return s.daily_pct!=null && s.daily_pct>=+scrChg;});
-    if(scrGates) arr=arr.filter(function(s){
-      var g=(s.gates_passed!=null)?s.gates_passed:(s.passer?6:5);
-      return g >= +scrGates;
-    });
     // search: ticker OR name OR industry
     if(scrSearch) arr=arr.filter(function(s){
       return (s.ticker||"").toLowerCase().indexOf(scrSearch)>=0
         || (s.name||"").toLowerCase().indexOf(scrSearch)>=0
-        || (s.industry||"").toLowerCase().indexOf(scrSearch)>=0;
+        || (s.industry||"").toLowerCase().indexOf(scrSearch)>=0
+        || (s.focus||"").toLowerCase().indexOf(scrSearch)>=0;
     });
     // sort — rank ascending, everything else descending
     if(scrSort==="rank") arr.sort(function(a,b){return (a.rank||9999)-(b.rank||9999);});
     else arr.sort(function(a,b){return (b[scrSort]!=null?b[scrSort]:-999)-(a[scrSort]!=null?a[scrSort]:-999);});
+    var mEl=document.getElementById("sfMatch");
+    if(mEl) mEl.textContent=arr.length+" of "+sfN(inScope)+" in scope";
     var cEl=document.getElementById("scrCount");
     if(cEl){
       var m=(scrMeta||{});
       var fresh=m.data_is_fresh, cov=m.daily_coverage_pct, bar=m.latest_bar;
-      var txt=arr.length+" stocks";
-      if(scrBook==="trade"){
-        var vm=scrV2.meta||{};
-        txt=arr.length+' shown \u00B7 '+(vm.trade_candidates||0)+' passers, '+(vm.trade_near_misses||0)+' near, '+
-            (vm.trade_breakouts||0)+' brk'+(vm.ext_hard_capped?', '+vm.ext_hard_capped+' ext-capped':'');
-      } else if(scrBook==="invest"){
-        txt=arr.length+' candidates \u00B7 gates I1\u2013I6 \u00B7 weights unvalidated';
-      }
+      var scopeTxt=(scrMk==="ALL"?"all markets":scrMk)+" \u00b7 "+(scrAt==="ALL"?"stocks + ETFs":scrAt==="etf"?"ETFs":"stocks");
+      var txt=scopeTxt+" \u00b7 stop: "+(SCR_STOPS[SCR_STOP]||SCR_STOP);
+      if(scrAt!=="stock") txt+=" \u00b7 ETFs listed bare: no gates, no scores yet";
+      if(scrExtState==="loading") txt+=" \u00b7 loading EU / ETF lists\u2026";
+      else if(scrExtState==="failed"&&!scrScopeIsDefault()) txt+=" \u00b7 stocks_ext.json not published yet";
       if(fresh===false) txt+=' \u00B7 STALE: no fresh bars last run';
-      else if(cov!=null&&scrBook==="v1") txt+=' \u00B7 '+cov+'% refreshed'+(bar?' \u00B7 '+bar:'');
+      else if(cov!=null) txt+=' \u00B7 '+cov+'% refreshed'+(bar?' \u00B7 '+bar:'');
+      if(PX_ROT.asof) txt+=' \u00B7 sectors '+new Date(PX_ROT.asof).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
       cEl.textContent=txt;
       cEl.style.color = (fresh===false) ? "var(--red)" : (cov!=null&&cov<90) ? "var(--amber)" : "var(--inkFade)";
     }
@@ -7019,41 +7303,49 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     }
     var head='<div class="scr-th">'+th("#","rank")+th("Ticker","ticker")+
       '<span>Pattern</span><span>Setup</span>'+th("Score","opp_score")+
-      '<span>Gates</span>'+th("Day","daily_pct")+'<span>Industry</span>'+
-      th("Cap","mcap_B")+'<span>Your stop</span></div>'+
+      '<span>Gates</span>'+th("Day","daily_pct")+'<span>'+(scrAt==="etf"?"Focus":"Industry")+'</span>'+
+      th((scrAt==="etf"?"AUM":"Cap"),"mcap_B")+'<span>Your stop</span></div>'+
       // filters live inside the table, the way Heartbeat does it
       '<div class="scr-tf"><span></span>'+
-        '<span><input id="fTk" placeholder="Filter" value="'+(scrSearch||"")+'"></span>'+
-        '<span></span><span></span><span></span>'+
-        '<span><select id="fGates"><option value="">All gates</option>'+
-          '<option value="6"'+(scrGates==="6"?" selected":"")+'>6 of 6</option>'+
-          '<option value="5"'+(scrGates==="5"?" selected":"")+'>5 or more</option></select></span>'+
+        '<span><input id="fTk" placeholder="Filter \u00b7 ticker, name, industry" value="'+(scrSearch||"")+'"></span>'+
+        '<span></span><span></span><span></span><span></span>'+
         '<span><select id="fChg"><option value="">Any move</option>'+
           '<option value="0"'+(scrChg==="0"?" selected":"")+'>Up today</option>'+
           '<option value="2"'+(scrChg==="2"?" selected":"")+'>&gt; +2%</option>'+
           '<option value="5"'+(scrChg==="5"?" selected":"")+'>&gt; +5%</option></select></span>'+
-        '<span></span>'+
-        '<span><select id="fMcap"><option value="">Any cap</option>'+
-          '<option value="200"'+(scrMcap==="200"?" selected":"")+'>&gt; $200B</option>'+
-          '<option value="50"'+(scrMcap==="50"?" selected":"")+'>&gt; $50B</option>'+
-          '<option value="10"'+(scrMcap==="10"?" selected":"")+'>&gt; $10B</option>'+
-          '<option value="1"'+(scrMcap==="1"?" selected":"")+'>&gt; $1B</option></select></span>'+
-        '<span><select id="scrStop" class="stopsel">'+
-          Object.keys(SCR_STOPS).map(function(k){
-            return '<option value="'+k+'"'+(SCR_STOP===k?" selected":"")+'>'+SCR_STOPS[k]+'</option>';
-          }).join("")+'</select></span>'+
+        '<span></span><span></span><span></span>'+
       '</div>';
+    function pct(v){ return v==null?"\u2014":((v>=0?"+":"")+(+v).toFixed(1)+"%"); }
     var rows=arr.slice(0,200).map(function(s){
       var dp=s.daily_pct, dps=(dp==null)?"\u2014":((dp>=0?"+":"")+dp.toFixed(1)+"%");
       var dpc=dp==null?"var(--inkFade)":(dp>=0?"var(--green)":"var(--red)");
+      if(scrRowAt(s)==="etf"){
+        // bare ETF row (26 Aug 2026): no gates, no score, no stop - the rules
+        // for ETFs (costs, holdings) are not written yet, so nothing is implied
+        var mkb='<i class="atb'+(scrRowMk(s)!=="US"?' eu':'')+'">'+(scrRowMk(s)!=="US"?scrRowMk(s)+' ':'')+'ETF</i>';
+        return '<div class="scr-tr" data-row-tk="'+s.ticker+'">'+
+          '<span class="rk">\u2014</span>'+
+          '<span class="nmcell"><span class="tk">'+s.ticker+mkb+'<i class="star'+(sfWatched(s.ticker)?" on":"")+'" data-star="'+s.ticker+'" title="watchlist">'+(sfWatched(s.ticker)?"\u2605":"\u2606")+'</i></span><span class="co">'+(s.name||"")+'</span></span>'+
+          '<span class="patcell"></span>'+
+          '<span><span class="scr-setup">'+(s.expense!=null?'TER '+(+s.expense).toFixed(2)+'%':'\u2014')+'</span></span>'+
+          '<span class="scorecell"><b>\u2014</b><em>1w '+pct(s.r5)+' \u00b7 1m '+pct(s.r21)+' \u00b7 3m '+pct(s.r63)+'</em></span>'+
+          '<span class="gatecell"><em>not gated</em></span>'+
+          '<span class="pxcell"><b style="color:'+dpc+'">'+dps+'</b><em>'+(s.price!=null?ccySym(s.ccy)+(+s.price).toFixed(2):"")+'</em></span>'+
+          '<span class="indcell">'+(s.pos_vs_high!=null?'<span class="indmom '+(s.pos_vs_high>-8?"up":"dn")+'">'+pct(s.pos_vs_high)+' vs 52w</span>':'')+
+            '<span class="indnm">'+(s.focus||"\u2014")+'</span></span>'+
+          '<span class="capcell">'+capFmt(s.mcap_B)+'</span>'+
+          '<span class="stopcell">\u2014</span></div>';
+      }
       var inR=trHas(s.ticker), inT=trHasReady(s.ticker);
       var nm=s.name||s.industry||"";
       // headline score pill: opp_score, colored by strength (Winston's badge)
-      var sc=scrBook==="trade"?s.trade_score:scrBook==="invest"?s.invest_score:
-             (s.opp_score!=null?Math.round(s.opp_score):(s.invest_score!=null?Math.max(s.trade_score||0,s.invest_score||0):null));
+      var sc=(s.opp_score!=null?Math.round(s.opp_score):(s.invest_score!=null?Math.max(s.trade_score||0,s.invest_score||0):null));
       var pillCls=sc==null?"s-lo":sc>=75?"s-hi":sc>=55?"s-mid":"s-lo";
-      var gp=(s.gates_passed!=null)?s.gates_passed:(s.passer?6:5);
-      var dots=""; for(var g=0;g<6;g++) dots+='<i class="'+(g<gp?"ok":"")+'"></i>';
+      // the v1 list has five gates, the v2 books six: draw the number this row was actually judged on
+      var nG=(s.gates&&s.gates.tradability!==undefined)?6:(s.gates_passed!=null&&s.gates_passed>5?6:5);
+      var gp=(s.gates_passed!=null)?s.gates_passed:(s.passer?nG:nG-1);
+      var dots=""; for(var g=0;g<nG;g++) dots+='<i class="'+(g<gp?"ok":"")+'"></i>';
+      var starOn=sfWatched(s.ticker);
       var setup=s.setup||(s.breakout?"Breakout":s.surge?"Surge":s.near_high?"Near high":"\u2014");
       var setCls=setup==="Breakout"?"brk":setup==="Surge"?"srg":"";
       var im=s.industry_mom_3m;
@@ -7062,7 +7354,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       return '<div class="scr-tr'+(s.passer===false?' nearmiss':'')+'" data-row-tk="'+s.ticker+'">'+
         '<span class="rk">'+(s.rank||"\u2014")+'</span>'+
         '<span class="nmcell"><span class="tk">'+s.ticker+
-          (gexIn?'<i class="gexb">GEX</i>':'')+'</span>'+
+          (gexIn?'<i class="gexb">GEX</i>':'')+
+          ((scrRowAt(s)==="etf"||scrRowMk(s)!=="US")?'<i class="atb'+(scrRowMk(s)!=="US"?' eu':'')+'">'+
+            [scrRowMk(s)!=="US"?scrRowMk(s):"",scrRowAt(s)==="etf"?"ETF":""].filter(Boolean).join(" ")+'</i>':'')+
+          '<i class="star'+(starOn?" on":"")+'" data-star="'+s.ticker+'" title="watchlist">'+(starOn?"\u2605":"\u2606")+'</i></span>'+
           '<span class="co">'+(nm||"")+'</span></span>'+
         '<span class="patcell" data-pat="'+s.ticker+'"></span>'+
         '<span><span class="scr-setup '+setCls+'">'+setup+'</span></span>'+
@@ -7071,18 +7366,21 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           '<em>trade '+(s.trade_score!=null?s.trade_score:"\u2014")+
           ' \u00b7 invest '+(s.invest_score!=null?s.invest_score:"\u2014")+'</em></span>'+
         '<span class="gatecell"><span class="gdots">'+dots+'</span>'+
-          '<em>'+gp+'/6'+(s.missing_gate?' \u00b7 '+s.missing_gate:'')+'</em></span>'+
+          '<em>'+gp+'/'+nG+(s.missing_gate?' \u00b7 '+s.missing_gate:'')+'</em></span>'+
         '<span class="pxcell"><b style="color:'+dpc+'">'+dps+'</b>'+
-          '<em>'+(s.price!=null?"$"+(+s.price).toFixed(2):"")+'</em></span>'+
+          '<em>'+(s.price!=null?ccySym(s.ccy)+(+s.price).toFixed(2):"")+'</em></span>'+
         '<span class="indcell">'+
           (im!=null?'<span class="indmom '+(im>=0?"up":"dn")+'">'+
             (im>=0?"\u25b2 +":"\u25bc \u2212")+Math.abs(im).toFixed(1)+'%</span>':'')+
-          '<span class="indnm">'+(s.industry||"\u2014")+'</span></span>'+
+          '<span class="indnm">'+(s.industry||s.focus||"\u2014")+'</span></span>'+
         '<span class="capcell">'+capFmt(s.mcap_B)+'</span>'+
         '<span class="stopcell" data-stop="'+s.ticker+'">\u2026</span></div>';
     }).join("");
     var el=document.getElementById("scrTable");
     el.innerHTML=head+rows;
+    scrApplyLive();
+    clearTimeout(sfUniT); sfUniT=setTimeout(sfPollUniverse, 250);
+    if(!el._starWired){ el._starWired=true; el.addEventListener("click",function(e){ var st=e.target.closest(".star"); if(st){ e.stopPropagation(); pxWatchToggle(st.getAttribute("data-star")); } }, true); }
     // Tier 0: the search box found nothing among candidates — consult the
     // universe ledger so ANY name answers with its gate scorecard instead of
     // a silent empty table (the INTC case, 13 Aug).
@@ -7091,6 +7389,13 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       el.innerHTML=head+'<div class="loading" style="padding:26px 14px">Checking the universe ledger for '+q+'\u2026</div>';
       pxLedger(function(L){
         var r=L&&L.rows&&(L.rows[q]||null);
+        // universe v3: EU and ETF keys carry a venue suffix (ASML.AS, CSPX.L);
+        // "ASML" should still find them, primaries first
+        if(!r&&L&&L.rows&&q.length>=2){
+          var ks=Object.keys(L.rows).filter(function(k){ return k.slice(0,q.length+1)===q+"." || k.slice(0,q.length+1)===q+"-"; });
+          ks.sort(function(a,b){ var ra=L.rows[a]||{}, rb=L.rows[b]||{}; return ((ra.st==="secondary")?1:0)-((rb.st==="secondary")?1:0)||a.localeCompare(b); });
+          if(ks.length){ q=ks[0]; r=L.rows[q]; }
+        }
         var inner;
         if(r){
           inner='<div style="padding:18px 10px 6px">'+pxGateCardHTML(q,r)+
@@ -7105,24 +7410,31 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         el.innerHTML=head+inner;
         var b=el.querySelector(".scr-open-tk");
         if(b) b.addEventListener("click",function(){ scrOpenTicker(this.getAttribute("data-tk")); });
+        wireScrFilters();
       });
     }
     // inline filters live inside the table now
-    var fTk=el.querySelector("#fTk");
-    if(fTk) fTk.addEventListener("input",function(){
-      scrSearch=this.value.trim().toLowerCase(); var v=this.value;
-      renderScreener();
-      var n=document.querySelector("#fTk"); if(n){ n.focus(); n.value=v;
-        n.setSelectionRange(v.length,v.length); }
-    });
-    [["fGates","scrGates"],["fChg","scrChg"],["fMcap","scrMcap"]].forEach(function(p){
-      var e=el.querySelector("#"+p[0]);
-      if(e) e.addEventListener("change",function(){ window[p[1]]=this.value;
-        if(p[1]==="scrGates") scrGates=this.value;
-        if(p[1]==="scrChg") scrChg=this.value;
-        if(p[1]==="scrMcap") scrMcap=this.value;
-        renderScreener(); });
-    });
+    // The inline filters are re-created with every innerHTML write, so they
+    // are wired by a function that is called after EVERY write - including
+    // the asynchronous ledger card above, which used to leave a dead box.
+    function wireScrFilters(){
+      var fTk=el.querySelector("#fTk");
+      if(fTk&&!fTk._wired){ fTk._wired=true; fTk.addEventListener("input",function(){
+        scrSearch=this.value.trim().toLowerCase(); var v=this.value;
+        renderScreener();
+        var n=document.querySelector("#fTk"); if(n){ n.focus(); n.value=v;
+          n.setSelectionRange(v.length,v.length); }
+      }); }
+      [["fChg","scrChg"]].forEach(function(p){
+        var e=el.querySelector("#"+p[0]);
+        if(e&&!e._wired){ e._wired=true; e.addEventListener("change",function(){ window[p[1]]=this.value;
+          if(p[1]==="scrGates") scrGates=this.value;
+          if(p[1]==="scrChg") scrChg=this.value;
+          if(p[1]==="scrMcap") scrMcap=this.value;
+          renderScreener(); }); }
+      });
+    }
+    wireScrFilters();
     var ss=el.querySelector("#scrStop");
     if(ss) ss.addEventListener("change",function(){ SCR_STOP=this.value; scrFillPatterns(); });
     el.querySelectorAll(".scr-th span[data-s]").forEach(function(h){
@@ -10574,14 +10886,18 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       return '<span class="c" style="border-color:var(--red)">'+lbl+by+'</span>';
     }).join("");
     var stTxt=r.st==="passer"?"PASSER":r.st==="near_miss"?"NEAR-MISS":
-              r.st==="no_data"?"NO DATA":"DROPPED";
+              r.st==="no_data"?"NO DATA":r.st==="secondary"?"SHARE CLASS":r.st==="listed"?"LISTED \u00b7 NOT GATED":"DROPPED";
+    if(r.st==="secondary"||r.st==="listed") col="var(--inkFade)";
     return '<div class="mcds" data-scorecard="'+tk+'">'+
       '<span class="n" style="color:'+col+';font-size:20px">'+(r.gp!=null?r.gp+"/6":"\u2014")+'</span>'+
       '<span class="v" style="color:'+col+'">'+stTxt+'</span>'+
       '<span class="chips">'+
         (r.last!=null?'<span class="c">last <b>'+r.last+'</b></span>':'')+
         (r.pvh!=null?'<span class="c">vs 2y high <b>'+r.pvh+'%</b></span>':'')+
-        (r.ind?'<span class="c">'+r.ind+'</span>':'')+
+        (r.ind?'<span class="c">'+r.ind+'</span>':(r.focus?'<span class="c">'+r.focus+'</span>':''))+
+        ((r.mk&&r.mk!=="US")||(r.at&&r.at!=="stock")?'<span class="c">'+(r.mk||"US")+' '+(r.at==="etf"?"ETF":"stock")+(r.ccy&&r.ccy!=="USD"?" \u00b7 "+r.ccy:"")+'</span>':'')+
+        (r.st==="secondary"&&r.primary?'<span class="c">same instrument as <b>'+r.primary+'</b></span>':'')+
+        (r.nm?'<span class="c">'+r.nm+'</span>':'')+
         missBits+'</span>'+
       '<span class="wn">Gate verdict from the last engine run \u00b7 the default screener list stays passers and near-misses; this card is the search-anything surface.</span>'+
     '</div>';
