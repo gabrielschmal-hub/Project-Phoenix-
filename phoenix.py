@@ -1794,6 +1794,29 @@ def _pct_rank(sorted_arr, v):
         return 50.0
     return 100.0 * sum(1 for x in sorted_arr if x <= v) / len(sorted_arr)
 
+def _cap_weight(info):
+    """
+    The weight a ticker carries in a cap-weighted index: its market cap on the
+    issuer's primary line, ZERO on a secondary share class (universe v3
+    cap_primary=0). Before this, GOOG and GOOGL each carried Alphabet's full
+    cap, so Alphabet was 2x its true weight in Internet software/Services, and
+    101 preferreds with Yahoo bars did the same for their parents (+69% on
+    that industry, +13% on Major banks, measured 25 Aug 2026 on the weekly
+    index; 3x / 2x on the daily rotation panel). A universe without the column
+    (the old 4-column file) weights every line as before.
+    """
+    if not info:
+        return 0.0
+    if not info.get("cap_primary", True):
+        return 0.0
+    return float(info.get("market_cap") or 0)
+
+
+def _is_etf(info):
+    """An ETF has no industry: the industry gate is not applicable, not failed."""
+    return bool(info) and (info.get("asset_type") == "etf")
+
+
 def _cap_weighted_index(series_list, caps_now, bars=60):
     """
     Cap-weighted index with TIME-VARYING weights.
@@ -1862,7 +1885,7 @@ def compute_sector_performance(stock_data, universe, daily_ret=None):
         series, weights, d1s, d1w, inds = [], [], [], [], set()
         for tk in tickers:
             closes = [x[1] for x in stock_data[tk]]
-            mc = universe[tk].get("market_cap") or 0
+            mc = _cap_weight(universe[tk])   # 0 on a secondary share class
             if len(closes) < 60 or mc <= 0:
                 continue
             series.append(closes[-60:]); weights.append(mc)
@@ -1919,7 +1942,7 @@ def compute_industry_performance(stock_data, universe, daily_ret=None):
         series, weights, d1s, d1w = [], [], [], []
         for tk in tickers:
             closes = [x[1] for x in stock_data[tk]]
-            mc = universe[tk]["market_cap"]
+            mc = _cap_weight(universe[tk])   # 0 on a secondary share class
             if len(closes) < 60 or mc <= 0:
                 continue
             series.append(closes[-60:]); weights.append(mc)
@@ -1999,7 +2022,7 @@ def compute_industry_scores(stock_data, universe):
         series, weights = [], []
         for tk in tickers:
             closes = [x[1] for x in stock_data[tk]]
-            mc = universe[tk]["market_cap"]
+            mc = _cap_weight(universe[tk])   # 0 on a secondary share class
             if len(closes) < 60 or mc <= 0:
                 continue
             series.append(closes[-60:]); weights.append(mc)
@@ -2059,6 +2082,8 @@ def stock_engine(stock_data, universe, fundamentals=None, daily_ret=None):
         g1 = last > ma40
         g2 = last > ma10
         g3 = ind in passing               # industry above rising MA
+        if _is_etf(universe[tk]):
+            g3 = True                      # an ETF is its own industry: T3 is n/a, not failed
         g6 = stage2                        # Weinstein stage 2
         win = closes[-STOCK["high_lookback_weeks"]:] if len(closes) >= STOCK["high_lookback_weeks"] else closes
         hi = max(win)
@@ -2301,6 +2326,8 @@ def compute_industry_breadth(stock_data, universe):
     scores, passing_v1 = compute_industry_scores(stock_data, universe)
     tot, above = defaultdict(int), defaultdict(int)
     for tk, info in universe.items():
+        if not info.get("cap_primary", True):
+            continue          # one vote per issuer: GOOG must not second GOOGL
         bars = stock_data.get(tk)
         if not bars or len(bars) < 60:
             continue
@@ -2451,7 +2478,7 @@ def stock_engine_v2(stock_data, universe, quarterly=None, daily_ret=None,
         gates = {
             "trend_long": last > ma40,
             "trend_med": last > ma10 and ma10_rising,
-            "industry": ind in passing_v2,
+            "industry": True if _is_etf(universe[tk]) else (ind in passing_v2),
             "near_high": pos_vs_high >= tg["near_high_floor"],
             "stage2": stage2,
             "tradability": mc >= tg["min_mcap"] and (dv or 0) >= tg["min_dollar_vol"],
@@ -5079,12 +5106,32 @@ def run_spx_daily(period="1y"):
 # STOCK DATA FETCH — the heavy one. Needs universe + weekly history + fundamentals.
 # This is where the automated pipeline meets reality (see notes in run_stocks).
 # ============================================================
-def load_universe_from_csv(path="universe.csv"):
-    """Load ticker -> {sector, industry, market_cap} from a committed CSV.
+_UNIVERSE_SLICE_LOGGED = set()
+
+
+def load_universe_from_csv(path="universe.csv", markets=("US",), asset_types=("stock",)):
+    """Load ticker -> {sector, industry, market_cap, name, ...} from a committed CSV.
     PROVENANCE (B4, closed 2026-07-20): sector/industry labels are exported
     from TradingView and confirmed correct by Gabriel. The industry gate (T3)
     is load-bearing; if the universe is ever re-exported from a different
-    source, re-confirm the label taxonomy before trusting Layer 2."""
+    source, re-confirm the label taxonomy before trusting Layer 2.
+
+    UNIVERSE v3 (2026-08-26): one file now carries US stocks, EU stocks and
+    ETFs (columns asset_type / market / cap_primary / currency / isin ... after
+    the original four). The defaults select US stocks only, so every existing
+    caller - the ledger, the charts, the indices, the smart-money joins -
+    behaves exactly as before. EU names and ETFs are opt-in per caller:
+    markets=("US","EU"), asset_types=("stock","etf"). run_stocks asks for them
+    and scores them as separate books (see _score_ext_books). A file without
+    the new columns (the old 4-column universe) loads exactly as it always did.
+
+    cap_primary: 1 on an issuer's primary line, 0 on a second share class
+    (GOOG next to GOOGL, FOX next to FOXA, an ETF's Dist class next to its Acc
+    class). market_cap stays the true issuer cap on EVERY line - the
+    tradability gate and mcap_B display are unchanged - while the cap-weighted
+    index builders take their weight from _cap_weight(), which is 0 on a
+    secondary line. That is what stops Alphabet counting twice.
+    """
     import csv, os
     if not os.path.exists(path):
         # the repo has shipped this file under a few names over time; try them
@@ -5099,18 +5146,36 @@ def load_universe_from_csv(path="universe.csv"):
                   f"universe.csv, universe_2.csv, macroflow_universe.csv). "
                   f"Ticker filters that depend on it will be DISABLED.")
             return {}
-    uni = {}
-    with open(path) as f:
+    uni, outside = {}, 0
+    with open(path, encoding="utf-8-sig") as f:
         for row in csv.DictReader(f):
             try:
+                market = (row.get("market") or "US").strip() or "US"
+                atype = (row.get("asset_type") or "stock").strip() or "stock"
+                if market not in markets or atype not in asset_types:
+                    outside += 1
+                    continue
                 uni[row["ticker"]] = {
-                    "sector": row.get("sector", ""),
-                    "industry": row.get("industry", ""),
+                    "sector": row.get("sector", "") or "",
+                    "industry": row.get("industry", "") or "",
                     "market_cap": float(row.get("market_cap") or 0),
-                    "name": row.get("name", "") or row.get("longName", ""),
+                    "name": row.get("name", "") or row.get("longName", "") or "",
+                    "cap_primary": str(row.get("cap_primary", "1") or "1").strip() != "0",
+                    "primary_ticker": (row.get("primary_ticker") or "").strip(),
+                    "market": market, "asset_type": atype,
+                    "currency": (row.get("currency") or "USD").strip() or "USD",
+                    "exchange": (row.get("exchange") or "").strip(),
+                    "isin": (row.get("isin") or "").strip(),
+                    "focus": " \u00b7 ".join(x for x in ((row.get("etf_asset_class") or "").strip(),
+                                                        (row.get("etf_focus") or "").strip()) if x),
+                    "expense": float(row.get("expense_ratio") or 0) or None,
                 }
             except Exception:
                 continue
+    if outside and (path, markets, asset_types) not in _UNIVERSE_SLICE_LOGGED:
+        _UNIVERSE_SLICE_LOGGED.add((path, markets, asset_types))   # once per run, not once per caller
+        print(f"[universe] {len(uni)} rows loaded from {path}; {outside} rows outside "
+              f"markets={list(markets)} asset_types={list(asset_types)} left for their own engines")
 
     # ---- overrides ---------------------------------------------------------
     # universe.csv is rebuilt upstream in Colab, so a hand-edit there is lost
@@ -5139,7 +5204,10 @@ def load_universe_from_csv(path="universe.csv"):
                     uni[tk] = {"sector": (row.get("sector") or "").strip(),
                                "industry": (row.get("industry") or "").strip(),
                                "market_cap": float(row.get("market_cap") or 0),
-                               "name": (row.get("name") or "").strip()}
+                               "name": (row.get("name") or "").strip(),
+                               "cap_primary": True, "primary_ticker": "", "market": "US",
+                               "asset_type": "stock", "currency": "USD", "exchange": "",
+                               "isin": "", "focus": ""}
                     added += 1
             if added:
                 print(f"[universe] {ov}: filled {added} gap(s) the export missed")
@@ -5443,6 +5511,8 @@ def compute_rotation_series_daily(daily_data, universe, min_members=3):
     for tk, info in universe.items():
         if tk not in closes or len(closes[tk]) < 2:
             continue
+        if not info.get("cap_primary", True):
+            continue          # a second share class must not carry the issuer's cap again
         sh = float(info.get("shares") or 0)
         if sh <= 0:
             mc = float(info.get("market_cap") or 0)
@@ -6419,6 +6489,211 @@ def run_sectors():
     return len(out)
 
 
+# ---------------------------------------------------------------------------
+# UNIVERSE v3 EXTENSION BOOKS (2026-08-26): EU stocks and ETFs
+#
+# universe.csv now carries 7,068 instruments. The US-stock book is untouched:
+# same loader default, same pull, same stocks.json lists, same tiles. The
+# other 4,534 rows are pulled in the SAME run (two years of daily bars - they
+# have no committed weekly history, so their weekly bars are built from the
+# pull by _merge_daily_into_weekly) and scored as two separate books:
+#   EU  - EU stocks, primary lines only, with their OWN industry indices, so a
+#         European semiconductor is judged against European semiconductors and
+#         never blends into the US index.
+#   ETF - US- and EU-listed ETFs, primary share class only, BARE: no gates,
+#         no scores (decided 26 Aug 2026 - ETF rules will be their own, built
+#         on costs and holdings). Each ETF row is facts only: last price,
+#         day / week / month / quarter change, distance from the 52-week
+#         high, AUM, expense ratio, focus. The industry-gate bypass in the
+#         engines stays in place for the day ETF rules are written.
+# Results ship in outputs/stocks_ext.json (their own file, so stocks.json stays
+# the size the dashboard loads on every open) and in the universe ledger,
+# tagged mk/at/ccy; the app's screener scope filter (US/EU x stocks/ETFs)
+# reads those tags.
+# The signal log (the backtest clock) stays US-stocks-only on purpose.
+# ---------------------------------------------------------------------------
+EXT_PERIOD = "2y"
+# Yahoo quotes LSE sterling lines in pence and every other venue in its local
+# unit. Returns are currency-free; only the $-volume gate needs dollars.
+FX_STATIC_FALLBACK = {"EUR": 1.10, "GBP": 1.30, "CHF": 1.20, "SEK": 0.10,
+                      "DKK": 0.15, "NOK": 0.095, "PLN": 0.26}
+
+
+def _fx_usd_rates():
+    """{'EUR': 1.09, ...} = USD per one unit, from Yahoo's =X pairs pulled in
+    this run. Falls back to a static table per currency and SAYS which."""
+    out, missing = {}, []
+    pairs = {c: f"{c}USD=X" for c in FX_STATIC_FALLBACK}
+    bars = {}
+    try:
+        _pull_daily_batch(list(pairs.values()), "5d", bars)
+    except Exception:
+        pass
+    for c, sym in pairs.items():
+        rows = bars.get(sym) or []
+        px = rows[-1][4] if rows else None
+        if px and px > 0:
+            out[c] = float(px)
+        else:
+            out[c] = FX_STATIC_FALLBACK[c]
+            missing.append(c)
+    out["USD"] = 1.0
+    source = ("yahoo" if not missing else
+              "static_fallback" if len(missing) == len(pairs) else
+              "yahoo, static for " + ",".join(missing))
+    return out, source
+
+
+def _score_ext_books(universe_ext, ohlcv_ext, fx):
+    """
+    Score the EU-stock and ETF books from the bars pulled this run. PURE apart
+    from the inputs. Mutates ohlcv_ext in place for GBX lines (pence -> pounds)
+    so the chart writer draws pounds too.
+
+    Returns {"stocks": [...v1 rows...], "trade_ranked": [...], "invest_ranked": [...],
+             "ledger": {tk: row}, "meta": {...}} with every row tagged
+             mk ("US"/"EU"), at ("stock"/"etf"), ccy, and focus for ETFs.
+    """
+    from collections import defaultdict
+    daily, dollar_vol, atr14, daily_ret, ccy_of = {}, {}, {}, {}, {}
+    for tk, bars in list(ohlcv_ext.items()):
+        info = universe_ext.get(tk)
+        if not info or not bars:
+            continue
+        ccy = info.get("currency") or "USD"
+        if ccy == "GBX":
+            bars = [(d, (o or 0) / 100.0, (h or 0) / 100.0, (lo or 0) / 100.0, (c or 0) / 100.0, v)
+                    for (d, o, h, lo, c, v) in bars]
+            ohlcv_ext[tk] = bars
+            ccy = "GBP"
+        ccy_of[tk] = ccy
+        rate = fx.get(ccy, 1.0)
+        daily[tk] = [(d, c, v) for (d, _o, _h, _l, c, v) in bars]
+        tail = bars[-20:]
+        dv = [c * v for (_d, _o, _h, _l, c, v) in tail if c and v]
+        if dv:
+            dollar_vol[tk] = (sum(dv) / len(dv)) * rate
+        trs, prev_c = [], None
+        for (_d, _o, h, l, c, _v) in bars[-15:]:
+            if h is None or l is None or c is None:
+                prev_c = c if c is not None else prev_c
+                continue
+            tr = (h - l) if prev_c is None else max(h - l, abs(h - prev_c), abs(l - prev_c))
+            trs.append(tr)
+            prev_c = c
+        last_c = bars[-1][4] if bars and bars[-1][4] else None
+        if trs and last_c:
+            atr14[tk] = round(sum(trs[-14:]) / len(trs[-14:]) / last_c * 100, 2)
+        cs = [c for (_d, c, _v) in daily[tk] if c]
+        if len(cs) >= 2 and cs[-2]:
+            daily_ret[tk] = round((cs[-1] / cs[-2] - 1) * 100, 2)
+
+    weekly = _merge_daily_into_weekly({}, daily)
+    books = {
+        "EU":  {tk: v for tk, v in universe_ext.items()
+                if v.get("market") == "EU" and v.get("asset_type") == "stock" and v.get("cap_primary", True)},
+    }
+    etf_uni = {tk: v for tk, v in universe_ext.items()
+               if v.get("asset_type") == "etf" and v.get("cap_primary", True)}
+    out = {"stocks": [], "trade_ranked": [], "invest_ranked": [], "etfs": [], "ledger": {}, "meta": {}}
+
+    # ---- ETFs: bare rows, facts only, no verdict ----------------------------
+    def _chg(cs, n):
+        return round((cs[-1] / cs[-1 - n] - 1) * 100, 2) if len(cs) > n and cs[-1 - n] else None
+    for tk, info in etf_uni.items():
+        bars = daily.get(tk) or []
+        cs = [c for (_d, c, _v) in bars if c]
+        row = {"ticker": tk, "name": info.get("name", ""), "mk": info.get("market", "US"), "at": "etf",
+               "ccy": ccy_of.get(tk, info.get("currency") or "USD"), "focus": info.get("focus", ""),
+               "mcap_B": round((info.get("market_cap") or 0) / 1e9, 2), "expense": info.get("expense"),
+               "isin": info.get("isin", ""), "exchange": info.get("exchange", "")}
+        led = {"st": "listed", "gp": None, "miss": [], "sec": "", "ind": "",
+               "mc": row["mcap_B"], "mk": row["mk"], "at": "etf", "ccy": row["ccy"],
+               "focus": row["focus"], "nm": row["name"]}
+        if cs:
+            hi = max(cs[-252:])
+            row.update({"price": round(cs[-1], 4), "daily_pct": daily_ret.get(tk),
+                        "r5": _chg(cs, 5), "r21": _chg(cs, 21), "r63": _chg(cs, 63),
+                        "pos_vs_high": round((cs[-1] / hi - 1) * 100, 1) if hi else None,
+                        "dollar_vol_M": round((dollar_vol.get(tk) or 0) / 1e6, 2), "bars": len(cs)})
+            led.update({"last": round(cs[-1], 2), "pvh": row["pos_vs_high"]})
+        else:
+            led["st"] = "no_data"
+        out["etfs"].append(row)
+        out["ledger"][tk] = led
+    out["etfs"].sort(key=lambda r: -(r.get("mcap_B") or 0))
+    out["meta"]["etf"] = {"universe": len(etf_uni), "with_bars": sum(1 for r in out["etfs"] if r.get("bars")),
+                          "rules": "none - bare rows (facts only) until ETF rules exist"}
+    print(f"[ext:ETF] {out['meta']['etf']['with_bars']} of {len(etf_uni)} ETFs have bars \u00b7 listed bare, no rules")
+
+    def _tag(row, uni):
+        info = uni.get(row.get("ticker")) or {}
+        row["mk"] = info.get("market", "US")
+        row["at"] = info.get("asset_type", "stock")
+        row["ccy"] = ccy_of.get(row.get("ticker"), info.get("currency") or "USD")
+        if _is_etf(info):
+            row["focus"] = info.get("focus", "")
+            row["industry_mom_3m"] = None      # an ETF has no industry line
+        return row
+
+    for name, uni in books.items():
+        wk = {tk: bars for tk, bars in weekly.items() if tk in uni}
+        try:
+            v1 = stock_engine(wk, uni, {}, daily_ret=daily_ret)
+        except Exception as e:
+            print(f"[ext:{name}] v1 FAILED (non-fatal): {e}")
+            v1 = {"stocks": [], "meta": {}}
+        try:
+            v2 = stock_engine_v2(wk, uni, quarterly={}, daily_ret=daily_ret,
+                                 dollar_vol=dollar_vol, atr14=atr14)
+        except Exception as e:
+            print(f"[ext:{name}] v2 FAILED (non-fatal): {e}")
+            v2 = {"ledger": {}, "trade_ranked": [], "invest_ranked": [], "meta": {}}
+        for r in v1.get("stocks") or []:
+            out["stocks"].append(_tag(r, uni))
+        for r in v2.get("trade_ranked") or []:
+            out["trade_ranked"].append(_tag(r, uni))
+        for r in v2.get("invest_ranked") or []:
+            out["invest_ranked"].append(_tag(r, uni))
+        led = dict(v2.get("ledger") or {})
+        for tk, info in uni.items():
+            row = led.get(tk)
+            if row is None:
+                row = {"st": "no_data", "gp": 0, "miss": [], "sec": info.get("sector", ""),
+                       "ind": info.get("industry", ""),
+                       "mc": round((info.get("market_cap") or 0) / 1e9, 2)}
+            row["mk"], row["at"] = info.get("market", "US"), info.get("asset_type", "stock")
+            row["ccy"] = ccy_of.get(tk, info.get("currency") or "USD")
+            if _is_etf(info):
+                row["focus"] = info.get("focus", "")
+            row["nm"] = info.get("name", "")
+            out["ledger"][tk] = row
+        out["meta"][name.lower()] = {
+            "scored": len(wk), "universe": len(uni),
+            "gate_passers": (v1.get("meta") or {}).get("gate_passers"),
+            "breakouts": (v1.get("meta") or {}).get("breakouts"),
+            "industries_passing": (v1.get("meta") or {}).get("industries_passing"),
+            "trade_candidates": (v2.get("meta") or {}).get("trade_candidates"),
+            "trade_near_misses": (v2.get("meta") or {}).get("trade_near_misses"),
+            "trade_breakouts": (v2.get("meta") or {}).get("trade_breakouts"),
+            "invest_candidates": (v2.get("meta") or {}).get("invest_candidates"),
+        }
+        print(f"[ext:{name}] {len(wk)} scored of {len(uni)} \u00b7 v1 {out['meta'][name.lower()]['gate_passers']} passers, "
+              f"{out['meta'][name.lower()]['breakouts']} breakouts \u00b7 v2 {out['meta'][name.lower()]['trade_candidates']} "
+              f"trade candidates, {out['meta'][name.lower()]['trade_near_misses']} near")
+    # secondary share classes: listed, never scored, pointing at their primary
+    for tk, info in universe_ext.items():
+        if info.get("cap_primary", True) or tk in out["ledger"]:
+            continue
+        out["ledger"][tk] = {"st": "secondary", "gp": 0, "miss": [], "sec": info.get("sector", ""),
+                             "ind": info.get("industry", ""),
+                             "mc": round((info.get("market_cap") or 0) / 1e9, 2),
+                             "mk": info.get("market", "US"), "at": info.get("asset_type", "stock"),
+                             "ccy": info.get("currency") or "USD", "nm": info.get("name", ""),
+                             "primary": info.get("primary_ticker", "")}
+    return out
+
+
 def run_stocks(auto_pull=True):
     """
     Run the stock engine and write stocks.json.
@@ -6477,6 +6752,45 @@ def run_stocks(auto_pull=True):
         except Exception as e:
             note = f"auto-pull failed: {e}"
             print(f"[stocks] {note}; trying committed daily_recent.csv")
+
+    # --- universe v3: EU stocks + ETFs, pulled and scored as their own books ---
+    # Separate pull (2y, they have no committed weekly history), separate
+    # scoring, separate output key. The US book above never sees them.
+    ext, ohlcv_ext, universe_ext = None, {}, {}
+    try:
+        universe_all = load_universe_from_csv(markets=("US", "EU"), asset_types=("stock", "etf"))
+        universe_ext = {tk: v for tk, v in universe_all.items() if tk not in universe}
+    except Exception as e:
+        print(f"[ext] universe load failed (non-fatal): {e}")
+    if auto_pull and universe_ext:
+        try:
+            ext_tickers = [tk for tk, v in universe_ext.items() if v.get("cap_primary", True)]
+            if ext_tickers:
+                print(f"[ext] pulling {EXT_PERIOD} daily OHLC for {len(ext_tickers)} EU stocks + ETFs "
+                      f"({len(universe_ext) - len(ext_tickers)} secondary share classes skipped)...")
+                ohlcv_ext, ext_unusable, ext_got, ext_failed = fetch_daily_bars_yfinance(ext_tickers, period=EXT_PERIOD)
+                ext_cov = round(ext_got / len(ext_tickers) * 100, 1)
+                print(f"[ext] pull: {ext_got} ok, {ext_failed} failed ({ext_cov}% coverage)")
+                fx, fx_source = _fx_usd_rates()
+                print(f"[ext] FX for the $-volume gate: {fx_source} \u00b7 " +
+                      ", ".join(f"{k} {v:.3f}" for k, v in sorted(fx.items()) if k != "USD"))
+                if ext_unusable:
+                    print(f"[ext] pull unusable ({ext_got}/{len(ext_tickers)}) \u2014 ext books skipped this run")
+                    ohlcv_ext = {}
+                else:
+                    ext = _score_ext_books(universe_ext, ohlcv_ext, fx)
+                    missing = sorted(t for t in ext_tickers if t not in ohlcv_ext)
+                    ext["meta"]["pull"] = {"period": EXT_PERIOD, "requested": len(ext_tickers),
+                                           "got": ext_got, "coverage_pct": ext_cov,
+                                           "missing_n": len(missing), "missing": missing[:600],
+                                           "fx_source": fx_source,
+                                           "fx": {k: round(v, 4) for k, v in fx.items()}}
+                    if missing:
+                        print(f"[ext] {len(missing)} symbols returned no bars (derived Yahoo symbols to fix "
+                              f"in universe.csv): {' '.join(missing[:40])}{' ...' if len(missing) > 40 else ''}")
+        except Exception as e:
+            print(f"[ext] FAILED (non-fatal, US book unaffected): {e}")
+            ext, ohlcv_ext = None, {}
 
     # collapse OHLCV -> (date, close, vol) for the scoring engine, which only
     # needs closes and volume. The full OHLC stays in `ohlcv` for the charts.
@@ -6552,6 +6866,23 @@ def run_stocks(auto_pull=True):
         result["trade_ranked"] = v2["trade_ranked"]
         result["invest_ranked"] = v2["invest_ranked"]
         result["v2_meta"] = v2["meta"]
+        # universe v3: every row says what it is, so the screener scope filter
+        # can read one field instead of guessing from the ticker
+        for _lst in (result.get("stocks") or [], result["trade_ranked"], result["invest_ranked"]):
+            for _r in _lst:
+                _r["mk"], _r["at"], _r["ccy"] = "US", "stock", "USD"
+        if ext:
+            # its own file: stocks.json stays the 2 MB the dashboard loads on
+            # every open; the screener fetches stocks_ext.json only when the
+            # scope leaves "US stocks"
+            write_json("stocks_ext", {"asof": _now(), "stocks": ext["stocks"],
+                                      "trade_ranked": ext["trade_ranked"],
+                                      "invest_ranked": ext["invest_ranked"],
+                                      "etfs": ext.get("etfs") or [], "meta": ext["meta"]})
+            result["ext_meta"] = ext["meta"]
+            print(f"[ext] wrote outputs/stocks_ext.json: EU {len(ext['stocks'])} v1 rows, "
+                  f"{len(ext['trade_ranked'])} trade rows, {len(ext['invest_ranked'])} invest rows \u00b7 "
+                  f"{len(ext.get('etfs') or [])} bare ETF rows")
         # ---- THE UNIVERSE LEDGER (Tier 0): every name, every run ----------
         # The screener's default view stays passers + near-misses; this file
         # is the search-anything surface behind it. Names the engine could not
@@ -6565,6 +6896,24 @@ def run_stocks(auto_pull=True):
                                  "sec": universe[_tk].get("sector", ""),
                                  "ind": universe[_tk].get("industry", ""),
                                  "mc": round((universe[_tk].get("market_cap") or 0)/1e9, 2)}
+            for _tk, _row in _led.items():
+                _row["mk"], _row["at"], _row["ccy"] = "US", "stock", "USD"
+                _row["nm"] = (universe.get(_tk) or {}).get("name", "")
+            if ext:
+                for _tk, _row in (ext.get("ledger") or {}).items():
+                    _led.setdefault(_tk, _row)
+            # the ledger is the search-anything surface: every EU / ETF row is
+            # listed even on a run where the ext pull did not happen
+            for _tk, _info in universe_ext.items():
+                if _tk in _led:
+                    continue
+                _led[_tk] = {"st": ("secondary" if not _info.get("cap_primary", True) else "no_data"),
+                             "gp": 0, "miss": [], "sec": _info.get("sector", ""),
+                             "ind": _info.get("industry", ""),
+                             "mc": round((_info.get("market_cap") or 0) / 1e9, 2),
+                             "mk": _info.get("market", "US"), "at": _info.get("asset_type", "stock"),
+                             "ccy": _info.get("currency") or "USD", "nm": _info.get("name", ""),
+                             "primary": _info.get("primary_ticker", "")}
             _cnt = {}
             for _r in _led.values():
                 _cnt[_r["st"]] = _cnt.get(_r["st"], 0) + 1
@@ -6613,9 +6962,22 @@ def run_stocks(auto_pull=True):
             keep = {c["ticker"] for c in result.get("stocks", [])}
             keep |= _pinned_tickers()
             keep |= _gex_universe_tickers()   # every Phoenix ticker gets a chart
-            keep &= set(ohlcv.keys())
-            write_charts(ohlcv, weekly_csv=weekly_raw, tickers=sorted(keep),
-                         universe=universe, quarterly=quarterly)
+            _all_ohlcv, _all_uni = dict(ohlcv), dict(universe)
+            if ext and ohlcv_ext:
+                # EU / ETF candidates get their chart from the ext pull
+                _all_ohlcv.update(ohlcv_ext)
+                try:
+                    _all_uni.update({tk: v for tk, v in load_universe_from_csv(
+                        markets=("US", "EU"), asset_types=("stock", "etf")).items() if tk not in _all_uni})
+                except Exception:
+                    pass
+                keep |= {c["ticker"] for c in ext.get("stocks", []) if c.get("passer")}
+                keep |= {c["ticker"] for c in ext.get("trade_ranked", []) if c.get("passer")}
+                # ETFs have no passers: the 150 largest by AUM get a chart file
+                keep |= {c["ticker"] for c in (ext.get("etfs") or [])[:150]}
+            keep &= set(_all_ohlcv.keys())
+            write_charts(_all_ohlcv, weekly_csv=weekly_raw, tickers=sorted(keep),
+                         universe=_all_uni, quarterly=quarterly)
         except Exception as e:
             print(f"[charts] FAILED (non-fatal): {e}")
     else:
@@ -7144,19 +7506,20 @@ def run_alerts():
 # empty result thanks to the publish gate.
 # ============================================================
 GEX_UNIVERSE = {
-    # Seed list: only ~30-80 names in the whole market can pass Rule 2's
-    # 100k-contracts floor, so scanning 2,898 tickers is pointless.
-    # IBKR-verified 2026-07-20: TSLA NVDA TSM MU AMD pass Rules 1-2; WDC fails.
-    "seed": ["TSLA", "NVDA", "AAPL", "AMD", "META", "MSFT", "AMZN", "GOOGL",
-             "PLTR", "MU", "COIN", "MSTR", "NFLX", "AVGO", "SMCI", "INTC",
-             "HOOD", "UBER", "TSM", "ORCL", "QCOM", "BA", "SNOW", "BABA",
-             "SPY", "QQQ", "IWM"],
-    # Elliott's briefing scan names observed Aug 2026 that are NOT in seed —
-    # candidates by demonstration (his scan covers them daily). The OCC rules
-    # below still confirm or reject each with data; this list only nominates.
-    "scan_2026_08": ["GOOG", "MP", "SNDK", "IBM", "CRWD"],
-    # Stock cap for the whole GEX universe (indices SPY/QQQ/IWM ride outside
-    # the cap). Top-mcap universe names fill remaining slots; Rules 1-3 gate.
+    # THE GEX UNIVERSE IS ELLIOTT'S SCAN AND NOTHING ELSE (Gabriel, 27 Aug 2026).
+    # Extracted from all 22 GEX Daily Briefings in the project (2 Jul - 13 Aug
+    # 2026): the same 26 tickers appear in every single briefing. SPY rides
+    # along as the SPX proxy - the briefing's regime instrument. No hand-picked
+    # seed, no top-market-cap fill, no QQQ/IWM. To add a name, Elliott's
+    # briefing has to carry it first; then it goes here. The OCC Rules 1-3
+    # below still confirm or reject each name with data; this list nominates.
+    "seed": ["AAPL", "ALAB", "AMD", "AMZN", "ARM", "AVGO", "CRWD", "GOOG",
+             "HOOD", "IBIT", "IBM", "INTC", "LRCX", "META", "MP", "MRVL",
+             "MSFT", "MU", "NVDA", "ORCL", "PLTR", "QCOM", "SNDK", "SNOW",
+             "SOFI", "TSLA",
+             "SPY"],
+    "seed_source": "GEX Daily Briefing 2026-07-02 .. 2026-08-13 (22 briefings, 26 tickers each)",
+    # kept as a ceiling only; the list above is 26 and there is no fill
     "stock_cap": 50,
     "rule1_min_ratio_pct": 10.0,     # options share-equivalents / shares volume
     "rule2_min_contracts": 100_000,  # avg daily options contracts
@@ -7171,32 +7534,19 @@ GEX_UNIVERSE = {
 
 def _gex_candidates(cfg=None):
     """
-    The GEX-universe candidate list (Tier 2): verified seed first, then
-    Elliott's scanned names, then top-market-cap universe names, capped at
-    cfg["stock_cap"] stocks (+ SPY/QQQ/IWM outside the cap). Nomination only —
-    run_gex_universe's OCC Rules 1-3 still confirm or reject every name.
+    The GEX-universe candidate list (Tier 2) = Elliott's briefing scan, in
+    order, plus SPY as the SPX proxy. No other source (27 Aug 2026: the
+    top-market-cap fill and the hand-picked seed are gone - a name is in the
+    GEX universe because the briefing scans it, or it is not in). Nomination
+    only: run_gex_universe's OCC Rules 1-3 still confirm or reject every name.
     """
     cfg = cfg or GEX_UNIVERSE
     idx = [s for s in cfg["seed"] if s in ("SPY", "QQQ", "IWM")]
     out, seen = [], set()
-    def _add(sym):
-        if sym and sym not in seen and sym not in ("SPY", "QQQ", "IWM"):
-            seen.add(sym); out.append(sym)
     for s in cfg["seed"]:
-        _add(s)
-    for s in cfg.get("scan_2026_08", []):
-        _add(s)
+        if s and s not in seen and s not in ("SPY", "QQQ", "IWM"):
+            seen.add(s); out.append(s)
     cap = int(cfg.get("stock_cap", 50))
-    if len(out) < cap:
-        try:
-            uni = load_universe_from_csv()
-            for tk, _v in sorted(uni.items(),
-                                 key=lambda kv: -(kv[1].get("market_cap") or 0)):
-                if len(out) >= cap:
-                    break
-                _add(tk)
-        except Exception as e:
-            print(f"[gexu] top-mcap fill skipped: {e}")
     return out[:cap] + idx
 
 
@@ -7366,7 +7716,7 @@ def run_gex_universe():
     import time
     _gex_cands = _gex_candidates(cfg)   # computed ONCE per run (reads universe.csv)
     print(f"[gexu] {len(_gex_cands)} candidates "
-          f"(seed + briefing scan + top-mcap fill, cap {cfg.get('stock_cap')})")
+          f"(Elliott's briefing scan only - {cfg.get('seed_source', 'see GEX_UNIVERSE')})")
     for sym in _gex_cands:
         if samples.get(sym, {}).get(rd) is not None:
             continue   # already sampled today
@@ -9803,8 +10153,12 @@ def run_institutional_13f(identity=None, quarters=5):
     print(f"[13f] identity={identity!r} — reading SEC EDGAR over HTTP")
 
     universe = load_universe_from_csv()
+    # secondary classes share the issuer's name; iterate them first so the
+    # primary line (cap_primary) overwrites and wins the map
     universe_by_name = {_norm_name(v.get("name")): tk
-                        for tk, v in universe.items() if v.get("name")}
+                        for tk, v in sorted(universe.items(),
+                                            key=lambda kv: bool(kv[1].get("cap_primary", True)))
+                        if v.get("name")}
     # universe.csv carries no company name, so this map is normally empty.
     # SEC's own registrant list is the reliable source; keep universe entries
     # on top of it where they exist.
@@ -10321,7 +10675,10 @@ def run_oge_disclosures():
         return None
 
     universe = load_universe_from_csv()
-    by_name = {_norm_name(v.get("name")): tk for tk, v in universe.items() if v.get("name")}
+    by_name = {_norm_name(v.get("name")): tk
+               for tk, v in sorted(universe.items(),
+                                   key=lambda kv: bool(kv[1].get("cap_primary", True)))
+               if v.get("name")}      # primary line wins a shared issuer name
     # universe.csv carries no company-name column, so by_name is normally empty
     # and every asset string fails to resolve - that is why the last run said
     # "29 assets outside the universe". SEC's registrant list fixes it, exactly
