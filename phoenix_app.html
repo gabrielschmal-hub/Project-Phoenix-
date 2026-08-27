@@ -337,6 +337,59 @@
   .scr-tr .tk .star.on{color:var(--gold)}
   .scr-tr .tk .star.busy{opacity:.4;pointer-events:none}
   .pxcell .lv{font-size:9px;letter-spacing:.6px;color:var(--inkGhost);margin-left:4px;font-style:normal}
+  /* ---- compare (27 Aug 2026) ---- */
+  .scr-tr .tk .cmpb{font-style:normal;cursor:pointer;color:var(--inkGhost);font-size:15px;line-height:1;padding:6px 8px;border-radius:8px;font-family:var(--mono);display:inline-block;vertical-align:middle}
+  .scr-tr .tk .cmpb:hover{background:var(--card2);color:var(--gold)} .scr-tr .tk .cmpb.on{color:var(--gold)}
+  .cmp-tray{position:fixed;left:0;right:0;bottom:0;z-index:9000;background:rgba(8,25,43,.97);border-top:1px solid var(--line2);backdrop-filter:blur(8px);padding:9px 16px;display:none;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--mono)}
+  .cmp-tray.open{display:flex} body.px-cmp-open{padding-bottom:72px}
+  .cmp-tray .lbl{font-size:10px;letter-spacing:1.4px;color:var(--inkFade);text-transform:uppercase;margin-right:4px}
+  .cmp-tray .chip{font-size:12px;padding:5px 10px;border:1px solid var(--gold);border-radius:16px;color:var(--gold);background:rgba(211,119,54,.12);cursor:pointer}
+  .cmp-tray .cnt{margin-left:auto;font-size:11px;color:var(--inkFade)} .cmp-tray .cnt u{cursor:pointer;color:var(--inkLight)}
+  .cmp-tray .go{font-size:12px;padding:8px 14px;border:1px solid var(--gold);border-radius:8px;background:var(--gold);color:#141210;font-weight:700;cursor:pointer}
+  .cmp-tray .go:disabled{opacity:.4;cursor:default}
+  .cmp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+  .cmp-card{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;position:relative;font-family:var(--mono)}
+  .cmp-card.best{border-color:var(--gold)} .cmp-card .pick{position:absolute;right:12px;top:12px;font-size:9.5px;letter-spacing:.8px;padding:2px 8px;border-radius:10px;background:var(--gold);color:#141210;font-weight:700}
+  .cmp-card .t{font-family:var(--serif);font-size:22px;font-weight:700;cursor:pointer} .cmp-card .n{font-family:var(--sans);font-size:12.5px;color:var(--inkMed);min-height:32px}
+  .cmp-card .p{font-size:15px;margin:8px 0 10px} .cmp-card .p em{font-style:normal;font-size:12px;margin-left:6px}
+  .cmp-card dl{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;font-size:11.5px} .cmp-card dt{color:var(--inkFade)} .cmp-card dd{margin:0;color:var(--ink);text-align:right}
+  .cmp-card .sec{margin-top:10px;font-size:10px;color:var(--inkFade);letter-spacing:1px;text-transform:uppercase}
+  .cmp-card .mb{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:6px;background:var(--line)} .cmp-card .mb i{display:block;height:100%}
+  .cmp-card ol{margin:8px 0 0;padding-left:18px;font-size:11.5px;color:var(--inkMed)} .cmp-card ol li b{float:right;color:var(--ink)}
+  .cmp-card .rm{position:absolute;right:12px;bottom:10px;font-size:11px;color:var(--inkGhost);cursor:pointer} .cmp-card .rm:hover{color:var(--red)}
+  .cmp-h{font-family:var(--mono);font-size:11px;letter-spacing:1.6px;color:var(--inkFade);text-transform:uppercase;margin:18px 0 10px;display:flex;gap:10px;align-items:center}
+  .cmp-h .src{margin-left:auto;font-size:9.5px;letter-spacing:.8px;color:var(--inkGhost);text-transform:none;border:1px solid var(--line);border-radius:10px;padding:2px 8px}
+  .cmp-fee .row{display:grid;grid-template-columns:110px 1fr 190px;gap:12px;align-items:center;font-family:var(--mono);font-size:12px;color:var(--inkMed);padding:6px 0}
+  .cmp-fee .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden} .cmp-fee .bar u{display:block;height:100%;background:var(--green)} .cmp-fee .val{text-align:right;color:var(--green);font-weight:700}
+  .cmp-ov{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px} .cmp-ov div{border:1px solid rgba(217,83,79,.4);background:var(--redBg);border-radius:10px;padding:12px 14px;font-family:var(--mono);font-size:12px;color:var(--inkMed)} .cmp-ov b{float:right;color:var(--red);font-size:16px}
+  .cmp-note{font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);margin-top:10px;line-height:1.5}
+  /* ---- ETF page ---- */
+  .ep{max-width:1180px;margin:0 auto;padding:0 0 100px}
+  .ep .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+  .ep .ttl{font-family:var(--mono);font-size:11px;letter-spacing:1.6px;color:var(--inkFade);text-transform:uppercase;margin:0 0 12px;display:flex;align-items:center;gap:10px}
+  .ep .ttl .src{margin-left:auto;font-size:9.5px;letter-spacing:.8px;color:var(--inkGhost);text-transform:none;border:1px solid var(--line);border-radius:10px;padding:2px 8px}
+  .ep .hd{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start}
+  .ep .hd .tk{font-family:var(--serif);font-size:36px;font-weight:700;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .ep .hd .px{font-family:var(--mono);font-size:22px} .ep .hd .chg{font-family:var(--mono);font-size:14px}
+  .ep .hd .nm{font-family:var(--sans);font-size:19px;color:var(--inkMed);margin-top:4px} .ep .hd .meta{font-family:var(--mono);font-size:11px;color:var(--inkFade);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap}
+  .ep .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .ep .btn{font-family:var(--mono);font-size:12px;padding:9px 14px;border:1px solid var(--line2);border-radius:8px;background:var(--card2);color:var(--ink);cursor:pointer} .ep .btn.on{border-color:var(--gold);color:var(--gold)} .ep .btn.pri{background:var(--gold);color:#141210;border-color:var(--gold);font-weight:700}
+  .ep .read{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start} .ep .read .ph{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#F0A05A,#8D4A18);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;color:#141210;font-size:18px}
+  .ep .read h3{margin:0 0 6px;font-family:var(--sans);font-size:18px;font-weight:600} .ep .read p{margin:0;font-family:var(--sans);font-size:14.5px;line-height:1.55;color:var(--inkMed)}
+  .ep .tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:14px;border:1px solid var(--amber);color:var(--amber);background:var(--amberBg);margin-bottom:8px} .ep .tag.g{border-color:var(--green);color:var(--green);background:var(--greenBg)}
+  .ep .tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:10px} .ep .tile{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .ep .tile .l{font-family:var(--sans);font-size:13px;color:var(--inkMed)} .ep .tile .s{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;color:var(--inkGhost);text-transform:uppercase;margin-top:2px} .ep .tile .v{font-family:var(--mono);font-size:19px;color:var(--ink);margin-top:8px;font-weight:700}
+  .ep .co{display:grid;grid-template-columns:1fr 1fr;gap:12px} .ep .call{border:1px solid var(--line2);border-left:3px solid var(--green);border-radius:10px;padding:14px 16px;background:var(--card);display:flex;gap:14px;align-items:center} .ep .call.warn{border-left-color:var(--amber)}
+  .ep .call b{font-family:var(--sans);font-size:14.5px;display:block} .ep .call span{font-family:var(--mono);font-size:11.5px;color:var(--inkLight)} .ep .call .tw{color:var(--gold);cursor:pointer}
+  .ep .chart svg{width:100%;height:210px;display:block} .ep .chart .h{display:flex;align-items:baseline;gap:10px;font-family:var(--sans);font-size:14px;color:var(--inkMed)} .ep .chart .h .r{margin-left:auto;font-family:var(--mono);font-size:16px;font-weight:700}
+  .ep .perf{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:8px} .ep .two{display:grid;grid-template-columns:1fr 1fr;gap:14px} .ep .mix{display:grid;grid-template-columns:190px 1fr;gap:18px;align-items:center} .ep .mix svg{width:190px;height:190px}
+  .ep .rows{font-family:var(--mono);font-size:12.5px;color:var(--inkMed)} .ep .rows div{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line)} .ep .rows div:last-child{border-bottom:none} .ep .rows i{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
+  .ep .rows .n{margin-left:auto;color:var(--ink);font-weight:700} .ep .rows .bar{flex:1;height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin:0 8px} .ep .rows .bar u{display:block;height:100%;background:var(--gold)}
+  .ep .hold .t{font-weight:700;color:var(--ink);width:70px;cursor:pointer} .ep .hold .nm{font-family:var(--sans);font-size:13px;color:var(--inkMed)} .ep .ptag{font-family:var(--mono);font-size:9px;letter-spacing:.5px;padding:1px 5px;border-radius:3px;border:1px solid var(--line2);color:var(--inkFade)} .ep .ptag.gex{color:var(--gold);border-color:var(--gold)} .ep .ptag.passer{color:var(--green);border-color:var(--green)}
+  .ep .foot{font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);line-height:1.6;margin-top:6px}
+  .dp-perf{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:10px 12px} .dp-perf .tile{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 10px} .dp-perf .l{font-family:var(--mono);font-size:9.5px;letter-spacing:1px;color:var(--inkFade);text-transform:uppercase} .dp-perf .v{font-family:var(--mono);font-size:15px;font-weight:700;margin-top:4px}
+  @media(max-width:900px){ .ep .tiles{grid-template-columns:repeat(3,1fr)} .ep .perf{grid-template-columns:repeat(3,1fr)} .ep .two{grid-template-columns:1fr} .ep .co{grid-template-columns:1fr} }
+  @media(max-width:600px){ .ep .tiles{grid-template-columns:1fr 1fr} .ep .hd{grid-template-columns:1fr} .ep .hd .tk{font-size:28px} .ep .mix{grid-template-columns:1fr} .ep .mix svg{margin:0 auto} .dp-perf{grid-template-columns:repeat(3,1fr)} .cmp-fee .row{grid-template-columns:70px 1fr 130px} }
   .pxcell .lv.live{color:var(--green)}
   @media(max-width:1100px){ .sf-sel{grid-template-columns:repeat(4,minmax(120px,1fr))} }
   @media(max-width:700px){ .sf-sel{grid-template-columns:1fr 1fr} .sf-top{gap:10px} .sf-view{margin-left:0}
@@ -2966,6 +3019,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   };
 
   pxLiveTimer = setInterval(pxTick, 60000);
+  try{ cmpTray(); }catch(e){}
   // card headlines re-render on every timeframe/view toggle and resize;
   // a cheap standing DOM patch (no network) wins every such race.
   setInterval(function(){
@@ -6868,6 +6922,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
               '<button class="on" data-v="screener">Screener</button>'+
               '<button data-v="gexu">GEX universe</button>'+
               '<button data-v="smart">Smart money</button>'+
+              '<button data-v="compare" id="sfViewCmp">Compare</button>'+
             '</div>'+
           '</div>'+
           '<div class="sf-sel" id="sfSel">'+
@@ -7043,6 +7098,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     });
     document.querySelectorAll("#sfView button").forEach(function(x){ x.classList.toggle("on",x.dataset.v===scrView); });
     document.getElementById("sfSel").style.display=scrView==="screener"?"grid":"none";
+    var vc=document.getElementById("sfViewCmp"); if(vc) vc.textContent="Compare"+(CMP.length?" ("+CMP.length+")":"");
     document.querySelector("#sf .sf-bar").style.display=scrView==="screener"?"flex":"none";
     var pills=[]; ["sec","ind","size","setup","rule","list"].forEach(function(k){ SF[k].forEach(function(v){ var m=o[k].filter(function(x){return x.v===v;})[0]; pills.push([k,v,m?m.l:v]); }); });
     document.getElementById("sfPills").innerHTML=pills.length?pills.map(function(p){ return '<span class="sf-pill" data-k="'+p[0]+'" data-v="'+p[1].replace(/"/g,"&quot;")+'">'+p[2]+' \u2715</span>'; }).join(""):
@@ -7160,6 +7216,175 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     renderPromotions();
   }
 
+  // =====================================================================
+  // COMPARE (27 Aug 2026): a tray that collects up to 6 names from any row
+  // or page, and a side-by-side view. Stocks compare on gates and scores,
+  // ETFs on fee / size / holdings / mix, a mixed set on the shared fields.
+  // =====================================================================
+  var CMP=[]; try{ CMP=JSON.parse(sessionStorage.getItem("pxCmp")||"[]"); }catch(e){ CMP=[]; }
+  var CMP_MAX=6, ETF_PROF={};
+  function cmpHas(tk){ return CMP.indexOf(tk)>=0; }
+  function cmpToggle(tk){
+    var i=CMP.indexOf(tk); if(i>=0) CMP.splice(i,1); else { if(CMP.length>=CMP_MAX){ window.alert("Compare holds "+CMP_MAX+" names — remove one first"); return; } CMP.push(tk); }
+    sessionStorage.setItem("pxCmp",JSON.stringify(CMP)); cmpTray();
+    if(scrData&&document.getElementById("scrTable")&&document.getElementById("page-screeners")&&document.getElementById("page-screeners").classList.contains("active")) renderScreener();
+    document.querySelectorAll("[data-cmp='"+tk+"']").forEach(function(b){ b.classList.toggle("on",cmpHas(tk)); if(b.classList.contains("cmpb")) b.textContent=cmpHas(tk)?"\u2611":"\u229E"; if(b.classList.contains("btn")) b.textContent=(cmpHas(tk)?"\u2611 In compare":"\u229E Compare"); });
+  }
+  function cmpTray(){
+    var t=document.getElementById("pxCmpTray");
+    if(!t){ t=document.createElement("div"); t.id="pxCmpTray"; t.className="cmp-tray"; document.body.appendChild(t);
+      t.addEventListener("click",function(e){ var c=e.target.closest(".chip"); if(c){ cmpToggle(c.dataset.tk); return; }
+        if(e.target.closest("[data-clear]")){ CMP=[]; sessionStorage.setItem("pxCmp","[]"); cmpTray(); if(scrData) renderScreener(); return; }
+        if(e.target.closest(".go")){ cmpOpen(); } }); }
+    t.classList.toggle("open",CMP.length>0); document.body.classList.toggle("px-cmp-open",CMP.length>0);
+    t.innerHTML='<span class="lbl">Compare</span>'+CMP.map(function(k){ return '<span class="chip" data-tk="'+k+'">'+k+' \u2715</span>'; }).join("")+
+      '<span class="cnt">'+CMP.length+'/'+CMP_MAX+' \u00b7 <u data-clear="1">clear</u></span><button class="go"'+(CMP.length<2?" disabled":"")+'>Compare \u203a</button>';
+  }
+  function cmpOpen(){ scrView="compare"; if(document.body.classList.contains("px-detail")){ dpReturnTo=null; try{ trBackFromDetail(); }catch(e){} } go("screeners"); setTimeout(function(){ if(scrData) renderScreener(); },80); }
+  function etfProfile(tk, cb){
+    if(ETF_PROF[tk]!==undefined){ cb(ETF_PROF[tk]); return; }
+    getJSON("etf/"+tk.replace(/[\/.]/g,"-")).then(function(d){ ETF_PROF[tk]=d||null; cb(ETF_PROF[tk]); }).catch(function(){ ETF_PROF[tk]=null; cb(null); });
+  }
+  function cmpFacts(tk){
+    var r=scrLookup(tk)||{}, L=(pxLedgerCache&&pxLedgerCache.rows&&pxLedgerCache.rows[tk])||{}, q=PX_LIVE[tk], u=PX_UNI[tk];
+    var f={ticker:tk, at:r.at||L.at||"stock", mk:r.mk||L.mk||"US", name:r.name||L.nm||"", ccy:r.ccy||L.ccy||"USD",
+      price:(q&&q.last)||(u&&u.last)||r.price||(r.levels&&r.levels.last)||L.last||null, day:(q&&q.chg_pct!=null)?q.chg_pct:(u&&u.chg_pct!=null)?u.chg_pct:r.daily_pct,
+      r21:r.r21, r63:r.r63, r126:r.r126, r252:r.r252, r756:r.r756, r1260:r.r1260, hi:r.pos_vs_high!=null?r.pos_vs_high:L.pvh, cap:r.mcap_B!=null?r.mcap_B:L.mc, dv:r.dollar_vol_M,
+      industry:r.industry||L.ind||"", focus:r.focus||L.focus||"", expense:r.expense, gates:r.gates_passed, passer:r.passer, opp:r.opp_score, trade:r.trade_score, invest:r.invest_score, setup:r.setup||(r.breakout?"Breakout":r.surge>=50?"Surge":""), indmom:r.industry_mom_3m};
+    var P=ETF_PROF[tk]; if(P){ var pf=P.perf||{}, pr=P.profile||{}; f.r21=f.r21!=null?f.r21:pf.r1m; f.r63=f.r63!=null?f.r63:pf.r3m; f.r252=f.r252!=null?f.r252:pf.r1y; f.r756=f.r756!=null?f.r756:pf.r3y; f.r1260=f.r1260!=null?f.r1260:pf.r5y;
+      f.holdings=pr.top_holdings||[]; f.sectors=pr.sectors||[]; f.category=pr.category; f.family=pr.family; if(f.expense==null) f.expense=P.expense; }
+    return f;
+  }
+  function cmpFmtPct(v){ return v==null?"\u2014":((v>=0?"+":"")+(+v).toFixed(1)+"%"); }
+  function cmpFmtCap(v){ return v==null?"\u2014":(v>=1000?(v/1000).toFixed(2)+"T":v>=1?Math.round(v)+"B":Math.round(v*1000)+"M"); }
+  function cmpRender(el){
+    if(!el) return;
+    if(CMP.length<2){ el.innerHTML='<div class="ed-note" style="margin:18px 10px">Pick two to six names with the \u229E on any row or the Compare button on a ticker page, then come back here.</div>'; return; }
+    var need=CMP.filter(function(t){ return sfIsEtf(t)&&ETF_PROF[t]===undefined; });
+    if(need.length){ var left=need.length; need.forEach(function(t){ etfProfile(t,function(){ if(--left===0) cmpRender(el); }); }); }
+    if(!pxLedgerCache){ pxLedger(function(){ cmpRender(el); }); }
+    var F=CMP.map(cmpFacts), etfs=F.filter(function(f){return f.at==="etf";}), stocks=F.filter(function(f){return f.at!=="etf";});
+    var mixed=etfs.length&&stocks.length;
+    var best=null; if(etfs.length===F.length){ var withFee=etfs.filter(function(f){return f.expense!=null;}); if(withFee.length) best=withFee.sort(function(a,b){ return a.expense-b.expense||(b.cap||0)-(a.cap||0); })[0].ticker; }
+    var SECC=["#2F6BFF","#1D8A99","#3FBF77","#D8A24A","#D9534F","#8B6CD9","#D354A0","#6B8299","#47596C","#94A8BA","#C4D2DF"];
+    var h='<div class="cmp-h">Compare \u00b7 '+F.length+' names<span class="src">'+(mixed?"mixed set: only the fields every name has":etfs.length?"funds: fee, size, holdings, mix":"stocks: gates, scores, setup")+'</span></div><div class="cmp-grid">';
+    F.forEach(function(f){
+      var dayc=f.day==null?"var(--inkFade)":(f.day>=0?"var(--green)":"var(--red)");
+      h+='<div class="cmp-card'+(f.ticker===best?" best":"")+'">'+(f.ticker===best?'<span class="pick">cheapest \u00b7 deepest</span>':'')+
+        '<div class="t" data-open="'+f.ticker+'">'+f.ticker+' <span class="badge etf" style="font-size:9px;font-family:var(--mono);border:1px solid var(--line2);border-radius:3px;padding:0 4px;color:'+(f.at==="etf"?"var(--gold)":"var(--inkFade)")+'">'+f.mk+' '+(f.at==="etf"?"ETF":"stock")+'</span></div><div class="n">'+(f.name||"")+'</div>'+
+        '<div class="p">'+(f.price!=null?ccySym(f.ccy)+(+f.price).toFixed(2):"\u2014")+'<em style="color:'+dayc+'">'+cmpFmtPct(f.day)+'</em></div><dl>';
+      if(!mixed&&f.at==="etf"){ h+='<dt>Yearly fee</dt><dd>'+(f.expense!=null?(+f.expense).toFixed(2)+"%":"\u2014")+'</dd><dt>Fund size</dt><dd>$'+cmpFmtCap(f.cap)+'</dd><dt>Category</dt><dd style="font-size:10px">'+(f.category||f.focus||"\u2014")+'</dd><dt>$ / day</dt><dd>'+(f.dv!=null?(f.dv>=1000?(f.dv/1000).toFixed(1)+"B":Math.round(f.dv)+"M"):"\u2014")+'</dd>'; }
+      if(!mixed&&f.at!=="etf"){ h+='<dt>Gates</dt><dd>'+(f.gates!=null?f.gates+"/5":"\u2014")+(f.passer?" \u2713":"")+'</dd><dt>Score</dt><dd>'+(f.opp!=null?Math.round(f.opp):"\u2014")+'</dd><dt>Trade / invest</dt><dd>'+(f.trade!=null?f.trade:"\u2014")+' / '+(f.invest!=null?f.invest:"\u2014")+'</dd><dt>Setup</dt><dd>'+(f.setup||"\u2014")+'</dd><dt>Industry</dt><dd style="font-size:10px">'+(f.industry||"\u2014")+'</dd><dt>Ind. 3m</dt><dd>'+cmpFmtPct(f.indmom)+'</dd><dt>Cap</dt><dd>$'+cmpFmtCap(f.cap)+'</dd>'; }
+      if(mixed){ h+='<dt>'+(f.at==="etf"?"AUM":"Cap")+'</dt><dd>$'+cmpFmtCap(f.cap)+'</dd><dt>$ / day</dt><dd>'+(f.dv!=null?(f.dv>=1000?(f.dv/1000).toFixed(1)+"B":Math.round(f.dv)+"M"):"\u2014")+'</dd>'; }
+      h+='<dt>1M</dt><dd>'+cmpFmtPct(f.r21)+'</dd><dt>3M</dt><dd>'+cmpFmtPct(f.r63)+'</dd><dt>1Y</dt><dd>'+cmpFmtPct(f.r252)+'</dd>';
+      if(f.at==="etf") h+='<dt>3Y</dt><dd>'+cmpFmtPct(f.r756)+'</dd><dt>5Y</dt><dd>'+cmpFmtPct(f.r1260)+'</dd>';
+      h+='<dt>vs 52w high</dt><dd>'+cmpFmtPct(f.hi)+'</dd></dl>';
+      if(!mixed&&f.at==="etf"&&f.sectors&&f.sectors.length){ h+='<div class="sec">Sector mix</div><div class="mb">'+f.sectors.slice(0,10).map(function(s,i){ return '<i style="width:'+s.pct+'%;background:'+SECC[i%SECC.length]+'" title="'+s.sector+' '+s.pct+'%"></i>'; }).join("")+'</div>'; }
+      if(!mixed&&f.at==="etf"&&f.holdings&&f.holdings.length){ h+='<div class="sec">Top holdings</div><ol>'+f.holdings.slice(0,4).map(function(x){ return '<li>'+x.ticker+'<b>'+(+x.pct).toFixed(1)+'%</b></li>'; }).join("")+'</ol>'; }
+      if(!mixed&&f.at==="etf"&&!f.holdings){ h+='<div class="sec" style="color:var(--inkGhost)">profile not computed yet \u2014 star it to include it in the next run</div>'; }
+      h+='<span class="rm" data-rm="'+f.ticker+'">remove \u2715</span></div>';
+    });
+    h+='</div>';
+    if(etfs.length>=2&&!mixed){
+      var wf=etfs.filter(function(f){return f.expense!=null;}).sort(function(a,b){return a.expense-b.expense;});
+      if(wf.length>=2){ var lo=wf[0], base=100000, g=0.07;
+        h+='<div class="cmp-h">Fee impact<span class="src">7% gross on $100,000, fee drag compounded</span></div><div class="cmp-fee">';
+        wf.slice(1).forEach(function(f){ h+='<div style="font-family:var(--sans);font-size:13px;color:var(--inkMed);margin:8px 0 2px">What <b style="color:var(--gold)">'+f.ticker+'</b> ('+f.expense.toFixed(2)+'%) costs you more than <b style="color:var(--green)">'+lo.ticker+'</b> ('+lo.expense.toFixed(2)+'%)</div>';
+          var rows=[10,20,30].map(function(y){ return [y, base*Math.pow(1+g-lo.expense/100,y)-base*Math.pow(1+g-f.expense/100,y)]; }), mx=rows[2][1]||1;
+          rows.forEach(function(r){ h+='<div class="row"><span>'+r[0]+' years</span><span class="bar"><u style="width:'+Math.max(2,r[1]/mx*100).toFixed(0)+'%"></u></span><span class="val">$'+Math.round(r[1]).toLocaleString("en-US")+' less with '+lo.ticker+'</span></div>'; }); });
+        h+='</div>'; }
+      var withH=etfs.filter(function(f){return f.holdings&&f.holdings.length;});
+      if(withH.length>=2){ h+='<div class="cmp-h">Holdings overlap<span class="src">top-10 only \u2014 a full holdings feed does not exist yet</span></div><div class="cmp-ov">';
+        for(var a=0;a<withH.length;a++) for(var b=a+1;b<withH.length;b++){ var A=withH[a].holdings.slice(0,10).map(function(x){return x.ticker;}), B=withH[b].holdings.slice(0,10).map(function(x){return x.ticker;}); var sh=A.filter(function(x){return B.indexOf(x)>=0;});
+          h+='<div>'+withH[a].ticker+' vs '+withH[b].ticker+'<b>'+Math.round(sh.length/Math.max(A.length,1)*100)+'%</b><br><span style="font-size:11px;color:var(--inkFade)">'+sh.length+'/'+A.length+' shared'+(sh.length?' \u00b7 '+sh.slice(0,3).join(", "):"")+'</span></div>'; }
+        h+='</div>'; }
+    }
+    h+='<div class="cmp-note">'+(mixed?"A stock next to an ETF: only price, day, 1M / 3M / 1Y, distance from the 52-week high, cap or AUM and $ volume are shown. Gates and scores stay on stock rows; fee, holdings and mix on fund rows.":"Facts from universe.csv and the daily run; ETF holdings and mix from the weekly profile step; 3Y / 5Y from a five-year history where it exists.")+'</div>';
+    el.innerHTML=h;
+    if(!el._cmpWired){ el._cmpWired=true; el.addEventListener("click",function(e){ var rm=e.target.closest("[data-rm]"); if(rm){ cmpToggle(rm.dataset.rm); return; } var op=e.target.closest("[data-open]"); if(op){ scrOpenTicker(op.dataset.open); } }); }
+  }
+
+  // =====================================================================
+  // ETF PAGE (27 Aug 2026) - the standard layout: facts, a plain read,
+  // twins, the year, performance, fee, mix, country, holdings, compare.
+  // Rendered into the Trade page container like the ticker page is.
+  // =====================================================================
+  function etfOpen(tk){
+    dpReturnTo="screeners"; go("trades");
+    setTimeout(function(){
+      var page=document.getElementById("page-trades"); if(!page) return;
+      document.body.classList.add("px-detail"); trDetailTk=tk;
+      page.innerHTML='<div class="ep" id="ep"><div class="crumb" style="font-family:var(--mono);font-size:11px;letter-spacing:1.2px;color:var(--inkFade);text-transform:uppercase;margin:0 0 12px;display:flex;gap:10px;align-items:center"><a href="#" id="epBack" style="color:var(--gold);text-decoration:none">\u2039 Screeners</a> \u00b7 ETF page</div><div class="card"><div class="loading">Loading '+tk+'\u2026</div></div></div>';
+      document.getElementById("epBack").addEventListener("click",function(e){ e.preventDefault(); trBackFromDetail(); });
+      var done=0, need=2, P=null, bars=null;
+      function fin(){ if(++done<need) return; etfRender(tk, P, bars); }
+      etfProfile(tk,function(d){ P=d; fin(); });
+      dpFetchBars(tk,"daily",function(b){ bars=b||[]; fin(); });
+      if(!pxLedgerCache) pxLedger(function(){});
+    },60);
+  }
+  function etfRender(tk, P, bars){
+    var ep=document.getElementById("ep"); if(!ep) return;
+    var f=cmpFacts(tk), pr=(P&&P.profile)||{}, perf=(P&&P.perf)||{}, tw=(P&&P.twins)||{cheaper:[],eu:[]};
+    var price=f.price, day=f.day, dayc=day==null?"var(--inkFade)":(day>=0?"var(--green)":"var(--red)");
+    var q=PX_LIVE[tk], u=PX_UNI[tk], lv=q&&q.updated_at?"5m":(u&&u.updated_at?"15m":"");
+    var aum=f.cap, fee=f.expense, hn=(pr.top_holdings||[]).length?(pr.holdings_count||null):null;
+    var r1m=f.r21!=null?f.r21:perf.r1m, r3m=f.r63!=null?f.r63:perf.r3m, r1y=f.r252!=null?f.r252:perf.r1y, r3y=f.r756!=null?f.r756:perf.r3y, r5y=f.r1260!=null?f.r1260:perf.r5y, hi=f.hi!=null?f.hi:perf.pos_vs_high;
+    var tag=(aum>=100?"Flagship":aum>=10?"Large":aum>=1?"Mid-sized":"Small")+" \u00b7 "+(fee!=null?(fee<=0.1?"cheapest tier":fee<=0.3?"low cost":fee<=0.6?"average cost":"expensive"):"fee unknown");
+    var readH=aum>=100?"A core fund. Not a trade \u2014 a place to park the exposure.":aum>=1?"A mid-sized fund. Worth knowing what it actually holds.":"A small or specialist fund. Check the basket before treating it as a core position.";
+    var readP=(aum!=null?"$"+cmpFmtCap(aum)+" in this share class":"size unknown")+(fee!=null?", "+fee.toFixed(2)+"% a year":"")+(pr.category?", "+pr.category:"")+(pr.family?" by "+pr.family:"")+". Phoenix keeps ETFs bare \u2014 no gates, no score, no stop line \u2014 until fund rules (cost, holdings, tracking) are written. These are facts, not a verdict.";
+    var euTwins=(tw.eu||[]).filter(function(x){return x.ticker!==tk;}), chTwins=(tw.cheaper||[]);
+    var h='<div class="crumb" style="font-family:var(--mono);font-size:11px;letter-spacing:1.2px;color:var(--inkFade);text-transform:uppercase;margin:0 0 12px;display:flex;gap:10px;align-items:center"><a href="#" id="epBack" style="color:var(--gold);text-decoration:none">\u2039 Screeners</a> \u00b7 ETF page</div>';
+    h+='<div class="card"><div class="hd"><div><div class="tk">'+tk+' <span class="atb eu" style="font-size:10px;font-family:var(--mono);border:1px solid var(--gold);border-radius:3px;padding:0 5px;color:var(--gold);vertical-align:middle">ETF \u00b7 '+f.mk+'</span> <span class="px">'+(price!=null?ccySym(f.ccy)+(+price).toFixed(2):"")+'</span><span class="chg" style="color:'+dayc+'">'+cmpFmtPct(day)+(lv?' <span class="lv" style="font-size:9px;border:1px solid currentColor;border-radius:3px;padding:1px 4px">'+lv+'</span>':'')+'</span></div>'+
+      '<div class="nm">'+(f.name||"")+'</div><div class="meta">'+(pr.family?'<span>'+pr.family+'</span>':'')+'<span>'+((scrLookup(tk)||{}).exchange||"")+(f.ccy?" \u00b7 "+f.ccy:"")+'</span>'+((scrLookup(tk)||{}).isin?'<span>'+(scrLookup(tk)||{}).isin+'</span>':'')+'<span>'+(f.focus||"")+'</span>'+(f.dv!=null?'<span>$'+(f.dv>=1000?(f.dv/1000).toFixed(2)+"B":Math.round(f.dv)+"M")+' traded / day</span>':'')+'</div></div>'+
+      '<div class="acts"><button class="btn'+(sfWatched(tk)?" on":"")+'" id="epStar">'+(sfWatched(tk)?"\u2605":"\u2606")+' Watchlist</button><button class="btn'+(cmpHas(tk)?" on":"")+'" data-cmp="'+tk+'" id="epCmp">'+(cmpHas(tk)?"\u2611 In compare":"\u229E Compare")+'</button>'+(CMP.length>=2?'<button class="btn pri" id="epCmpGo">Compare '+CMP.length+' \u203a</button>':'')+'</div></div></div>';
+    h+='<div class="card"><div class="read"><div class="ph">\u03A6</div><div><span class="tag g">'+tag+'</span><h3>'+readH+'</h3><p>'+readP+'</p>'+
+      (f.mk==="US"?'<p style="margin-top:8px;color:var(--amber)">From an EU account a US-domiciled ETF is not buyable (PRIIPs). '+(euTwins.length?'The same exposure with a KID: '+euTwins.map(function(x){ return '<b class="tw" data-open="'+x.ticker+'" style="cursor:pointer">'+x.ticker+'</b>'+(x.expense!=null?' '+(+x.expense).toFixed(2)+'%':''); }).join(" \u00b7 "):'No UCITS twin found by index name in the universe.')+'</p>':'')+'</div></div></div>';
+    h+='<div class="card"><div class="ttl">The facts<span class="src">universe.csv \u00b7 Yahoo bars'+(P?' \u00b7 profile '+String(pr.asof||"").slice(0,10):'')+'</span></div><div class="tiles">'+
+      '<div class="tile"><div class="l">Yearly fee</div><div class="s">expense</div><div class="v">'+(fee!=null?fee.toFixed(2)+"%":"\u2014")+'</div></div>'+
+      '<div class="tile"><div class="l">Fund size</div><div class="s">AUM \u00b7 this share class</div><div class="v">$'+cmpFmtCap(aum)+'</div></div>'+
+      '<div class="tile"><div class="l">Category</div><div class="s">Yahoo</div><div class="v" style="font-size:13px">'+(pr.category||"\u2014")+'</div></div>'+
+      '<div class="tile"><div class="l">Started</div><div class="s">inception</div><div class="v">'+(pr.inception?String(pr.inception).slice(0,4):"\u2014")+'</div></div>'+
+      '<div class="tile"><div class="l">From 52-week high</div><div class="s">distance</div><div class="v" style="color:'+(hi==null?"var(--ink)":hi>-8?"var(--green)":"var(--red)")+'">'+cmpFmtPct(hi)+'</div></div>'+
+      '<div class="tile"><div class="l">Daily range</div><div class="s">ATR 14</div><div class="v">'+((scrLookup(tk)||{}).atr14_pct!=null?(scrLookup(tk).atr14_pct).toFixed(1)+"%":"\u2014")+'</div></div></div></div>';
+    h+='<div class="co"><div class="call"><div><b>Is there a near-identical, cheaper fund?</b><span>'+(P?(chTwins.length?chTwins.map(function(x){ return '<b class="tw" data-open="'+x.ticker+'">'+x.ticker+'</b> '+(+x.expense).toFixed(2)+'% \u00b7 $'+cmpFmtCap((x.aum_usd||0)/1e9); }).join("  \u00b7  "):"None cheaper on the same index in the universe"):"needs the profile step")+'</span></div></div>'+
+      '<div class="call warn"><div><b>Twins in Europe (UCITS)</b><span>'+(P?(euTwins.length?euTwins.map(function(x){ return '<b class="tw" data-open="'+x.ticker+'">'+x.ticker+'</b> '+(x.expense!=null?(+x.expense).toFixed(2)+'%':'')+' \u00b7 $'+cmpFmtCap((x.aum_usd||0)/1e9); }).join("  \u00b7  "):"none found by index name"):"needs the profile step")+'</span></div></div></div>';
+    // chart: 52 weeks from the profile, else the daily bars we have
+    var cs=(P&&P.chart&&P.chart.c&&P.chart.c.length)?P.chart.c:(bars||[]).map(function(b){return b.c;}).filter(function(c){return c;}).slice(-252);
+    var svg="", ret=null;
+    if(cs.length>5){ var mn=Math.min.apply(null,cs)*0.985, mx=Math.max.apply(null,cs)*1.01, W=900,H=210; ret=(cs[cs.length-1]/cs[0]-1)*100;
+      var d=cs.map(function(v,i){ return (i?"L":"M")+(i/(cs.length-1)*W).toFixed(1)+" "+((1-(v-mn)/(mx-mn))*H).toFixed(1); }).join(" "); var col=ret>=0?"#3FBF77":"#D9534F";
+      svg='<svg viewBox="0 0 900 210" preserveAspectRatio="none"><defs><linearGradient id="epg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+col+'" stop-opacity=".35"/><stop offset="1" stop-color="'+col+'" stop-opacity="0"/></linearGradient></defs><path d="'+d+' L900 210 L0 210 Z" fill="url(#epg)"/><path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2"/></svg>'; }
+    h+='<div class="card"><div class="ttl">Last 12 months<span class="src">'+(P&&P.chart&&P.chart.c&&P.chart.c.length?"Yahoo weekly closes":"daily bars from the run")+'</span></div><div class="chart"><div class="h"><b>'+(P&&P.chart&&P.chart.t&&P.chart.t.length?"from "+P.chart.t[0]:"")+'</b><span class="r" style="color:'+(ret==null?"var(--inkFade)":ret>=0?"var(--green)":"var(--red)")+'">'+cmpFmtPct(ret)+'</span></div>'+(svg||'<div class="ed-note">No bars yet for this name.</div>')+'</div>'+
+      '<div class="perf">'+[["1 month","1M",r1m],["3 months","3M",r3m],["Past year","1Y",r1y],["Past 3 years","3Y \u00b7 cumulative",r3y],["Past 5 years","5Y \u00b7 cumulative",r5y]].map(function(x){ return '<div class="tile"><div class="l">'+x[0]+'</div><div class="s">'+x[1]+'</div><div class="v" style="color:'+(x[2]==null?"var(--inkFade)":x[2]>=0?"var(--green)":"var(--red)")+'">'+cmpFmtPct(x[2])+'</div></div>'; }).join("")+'</div>'+
+      '<div class="foot">Price return. 3Y / 5Y come from the profile step (five-year history for the largest names, the watchlist and anything held) or from etf_weekly.csv.gz for every row once the Colab build is uploaded.</div></div>';
+    if(fee!=null){ var c10=Math.round(10000*(Math.pow(1.07,10)-Math.pow(1.07-fee/100,10)));
+      h+='<div class="card"><div class="read"><div class="ph">\u03A6</div><div><span class="tag g">'+Math.round(fee*100)+' cents per $100'+(fee<=0.1?" \u2014 as cheap as it gets":fee<=0.3?" \u2014 low":fee<=0.6?" \u2014 average":" \u2014 expensive for what it does")+'</span><p>'+fee.toFixed(2)+'% a year. On $10,000 held ten years at 7% that is about $'+c10.toLocaleString("en-US")+' given up to fees.'+(f.dv!=null?' It trades $'+(f.dv>=1000?(f.dv/1000).toFixed(1)+"B":Math.round(f.dv)+"M")+' a day \u2014 a cheaper fund with thinner trading loses the difference in the spread.':'')+'</p></div></div></div>'; }
+    var SECC=["#2F6BFF","#1D8A99","#3FBF77","#D8A24A","#D9534F","#8B6CD9","#D354A0","#6B8299","#47596C","#94A8BA","#C4D2DF"];
+    var secs=pr.sectors||[], cty=(P&&P.country_derived)||[];
+    h+='<div class="two"><div class="card"><div class="ttl">Sector mix<span class="src">Yahoo funds data</span></div>';
+    if(secs.length){ var r=70,cx=95,cy=95,a=-Math.PI/2,dh=""; secs.slice(0,11).forEach(function(x,i){ var fr=Math.max(0,x.pct)/100*2*Math.PI; if(fr<=0) return; var x1=cx+r*Math.cos(a),y1=cy+r*Math.sin(a),x2=cx+r*Math.cos(a+fr-0.0001),y2=cy+r*Math.sin(a+fr-0.0001); dh+='<path d="M'+x1+' '+y1+' A'+r+' '+r+' 0 '+(fr>Math.PI?1:0)+' 1 '+x2+' '+y2+'" fill="none" stroke="'+SECC[i%SECC.length]+'" stroke-width="24"/>'; a+=fr; });
+      h+='<div class="mix"><svg viewBox="0 0 190 190">'+dh+'</svg><div class="rows">'+secs.slice(0,11).map(function(x,i){ return '<div><i style="background:'+SECC[i%SECC.length]+'"></i>'+x.sector+'<span class="n">'+(+x.pct).toFixed(1)+'%</span></div>'; }).join("")+'</div></div>'+
+        '<div class="read" style="margin-top:14px"><div class="ph">\u03A6</div><div><span class="tag">'+secs[0].sector+' is the biggest slice ('+Math.round(secs[0].pct)+'%)</span><p>'+(secs[0].pct>=35?'One sector is more than a third of the fund: when it leads, the fund leads; when it lags, so does the fund.':'No single sector dominates.')+'</p></div></div>'; }
+    else h+='<div class="ed-note">'+(P?'No sector data from Yahoo for this fund.':'Profile not computed yet \u2014 the largest 100 per market, the watchlist and anything held get one daily. Star this fund to include it in the next run.')+'</div>';
+    h+='</div><div class="card"><div class="ttl">Country exposure<span class="src">derived from the top-10 holdings \u2014 not a full breakdown</span></div>';
+    if(cty.length){ h+='<div class="rows">'+cty.map(function(x){ return '<div>'+x.country+'<span class="bar"><u style="width:'+Math.max(2,x.pct)+'%"></u></span><span class="n">'+(+x.pct).toFixed(1)+'%</span></div>'; }).join("")+'</div><div class="read" style="margin-top:14px"><div class="ph">\u03A6</div><div><span class="tag">'+Math.round(cty[0].pct)+'% '+cty[0].country+'</span><p>'+(cty[0].pct>=90?'Effectively one country. Fine on its own; zero exposure elsewhere.':'Spread across countries \u2014 read the list, not the label.')+' Derived from the ten largest holdings only; a full breakdown needs a holdings feed Phoenix does not have yet.</p></div></div>'; }
+    else h+='<div class="ed-note">Needs the profile\u2019s top holdings.</div>';
+    h+='</div></div>';
+    var th=pr.top_holdings||[]; var top=th.reduce(function(s,x){return s+(+x.pct||0);},0);
+    h+='<div class="card"><div class="ttl">Top holdings<span class="src">Yahoo funds data \u00b7 top 10 \u00b7 Phoenix tags from today\u2019s run</span></div>';
+    if(th.length){ h+='<div class="rows hold">'+th.map(function(x){ return '<div><span class="t" data-open="'+x.ticker+'">'+x.ticker+'</span><span class="nm">'+(x.name||"")+'</span>'+(x.tags||[]).map(function(t){ return '<span class="ptag '+t+'">'+(t==="gex"?"GEX":"PASSER")+'</span>'; }).join("")+'<span class="n">'+(+x.pct).toFixed(1)+'%</span></div>'; }).join("")+'</div>'+
+      '<div class="read" style="margin-top:14px"><div class="ph">\u03A6</div><div><span class="tag">'+(top>=50?"Concentrated":top>=30?"Decently spread":"Widely spread")+' \u2014 top 10 is '+top.toFixed(1)+'%</span><p>Tags: <b style="color:var(--gold)">GEX</b> = on Elliott\u2019s list; <b style="color:var(--green)">PASSER</b> = a gate passer in today\u2019s screener. '+(function(){ var g=th.filter(function(x){return (x.tags||[]).indexOf("gex")>=0;}).length; return g?g+" of the top "+th.length+" are names Elliott scans daily.":"None of the top holdings is on Elliott\u2019s list."; })()+'</p></div></div>'; }
+    else h+='<div class="ed-note">'+(P?'No holdings from Yahoo for this fund.':'Profile not computed yet.')+'</div>';
+    h+='</div><div class="foot">ETFs stay bare: no gates, no score, no stop. Facts from universe.csv (TradingView export); profile from Yahoo funds data, refreshed weekly; performance from Yahoo history; country exposure derived from the top-10 holdings only.</div>';
+    ep.innerHTML=h;
+    document.getElementById("epBack").addEventListener("click",function(e){ e.preventDefault(); trBackFromDetail(); });
+    document.getElementById("epStar").addEventListener("click",function(){ var b=this; b.disabled=true; pxWatchToggle(tk,function(ok){ b.disabled=false; if(ok){ b.classList.toggle("on",sfWatched(tk)); b.textContent=(sfWatched(tk)?"\u2605":"\u2606")+" Watchlist"; } }); });
+    document.getElementById("epCmp").addEventListener("click",function(){ cmpToggle(tk); });
+    var go2=document.getElementById("epCmpGo"); if(go2) go2.addEventListener("click",cmpOpen);
+    ep.addEventListener("click",function(e){ var o=e.target.closest("[data-open]"); if(o&&o.dataset.open!==tk){ scrOpenTicker(o.dataset.open); } });
+  }
+
   // ---- Promotion Watch (Part 3.5): reads outputs/promotions.json ----
   function renderPromotions(){
     var el=document.getElementById("promoList"), nEl=document.getElementById("promoN");
@@ -7274,6 +7499,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     sfRenderBlock();
     if(scrView==="gexu"){ renderGexUniverse(); return; }
     if(scrView==="smart"){ renderSmartMoney(); return; }
+    if(scrView==="compare"){ cmpRender(document.getElementById("scrTable")); return; }
     var arr=scrActiveList().slice();
     if(!scrScopeIsDefault()) arr=arr.filter(scrInScope);
     var inScope=arr.length;
@@ -7361,7 +7587,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         var mkb='<i class="atb'+(scrRowMk(s)!=="US"?' eu':'')+'">'+(scrRowMk(s)!=="US"?scrRowMk(s)+' ':'')+'ETF</i>';
         return '<div class="scr-tr" data-row-tk="'+s.ticker+'">'+
           '<span class="rk">\u2014</span>'+
-          '<span class="nmcell"><span class="tk">'+s.ticker+mkb+'<i class="star'+(sfWatched(s.ticker)?" on":"")+'" data-star="'+s.ticker+'" title="watchlist">'+(sfWatched(s.ticker)?"\u2605":"\u2606")+'</i></span><span class="co">'+(s.name||"")+'</span></span>'+
+          '<span class="nmcell"><span class="tk">'+s.ticker+mkb+'<i class="star'+(sfWatched(s.ticker)?" on":"")+'" data-star="'+s.ticker+'" title="watchlist">'+(sfWatched(s.ticker)?"\u2605":"\u2606")+'</i><i class="cmpb'+(cmpHas(s.ticker)?" on":"")+'" data-cmp="'+s.ticker+'" title="compare">'+(cmpHas(s.ticker)?"\u2611":"\u229E")+'</i></span><span class="co">'+(s.name||"")+'</span></span>'+
           '<span class="patcell"></span>'+
           '<span><span class="scr-setup">'+(s.expense!=null?'TER '+(+s.expense).toFixed(2)+'%':'\u2014')+'</span></span>'+
           '<span class="scorecell"><b>\u2014</b><em>1w '+pct(s.r5)+' \u00b7 1m '+pct(s.r21)+' \u00b7 3m '+pct(s.r63)+'</em></span>'+
@@ -7393,7 +7619,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           (gexIn?'<i class="gexb">GEX</i>':'')+
           ((scrRowAt(s)==="etf"||scrRowMk(s)!=="US")?'<i class="atb'+(scrRowMk(s)!=="US"?' eu':'')+'">'+
             [scrRowMk(s)!=="US"?scrRowMk(s):"",scrRowAt(s)==="etf"?"ETF":""].filter(Boolean).join(" ")+'</i>':'')+
-          '<i class="star'+(starOn?" on":"")+'" data-star="'+s.ticker+'" title="watchlist">'+(starOn?"\u2605":"\u2606")+'</i></span>'+
+          '<i class="star'+(starOn?" on":"")+'" data-star="'+s.ticker+'" title="watchlist">'+(starOn?"\u2605":"\u2606")+'</i>'+
+          '<i class="cmpb'+(cmpHas(s.ticker)?" on":"")+'" data-cmp="'+s.ticker+'" title="compare">'+(cmpHas(s.ticker)?"\u2611":"\u229E")+'</i></span>'+
           '<span class="co">'+(nm||"")+'</span></span>'+
         '<span class="patcell" data-pat="'+s.ticker+'"></span>'+
         '<span><span class="scr-setup '+setCls+'">'+setup+'</span></span>'+
@@ -7416,7 +7643,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     el.innerHTML=head+rows;
     scrApplyLive();
     clearTimeout(sfUniT); sfUniT=setTimeout(sfPollUniverse, 250);
-    if(!el._starWired){ el._starWired=true; el.addEventListener("click",function(e){ var st=e.target.closest(".star"); if(st){ e.stopPropagation(); e.preventDefault(); st.classList.add("busy"); pxWatchToggle(st.getAttribute("data-star"), function(){ st.classList.remove("busy"); }); } }, true); }
+    if(!el._starWired){ el._starWired=true; el.addEventListener("click",function(e){
+      var st=e.target.closest(".star"); if(st){ e.stopPropagation(); e.preventDefault(); st.classList.add("busy"); pxWatchToggle(st.getAttribute("data-star"), function(){ st.classList.remove("busy"); }); return; }
+      var cb=e.target.closest(".cmpb"); if(cb){ e.stopPropagation(); e.preventDefault(); cmpToggle(cb.getAttribute("data-cmp")); }
+    }, true); }
     // Tier 0: the search box found nothing among candidates — consult the
     // universe ledger so ANY name answers with its gate scorecard instead of
     // a silent empty table (the INTC case, 13 Aug).
@@ -7704,8 +7934,14 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // panels change, and there is a button to turn it into a real plan.
   function scrOpenTicker(tk){
     dpReturnTo="screeners";   // back button returns HERE (book tab persists via scrBook)
+    if(sfIsEtf(tk)){ etfOpen(tk); return; }
     go("trades");
     setTimeout(function(){ trOpenTicker(tk); }, 60);
+  }
+  function sfIsEtf(tk){
+    var r=scrLookup(tk); if(r&&r.at) return r.at==="etf";
+    var L=pxLedgerCache&&pxLedgerCache.rows&&pxLedgerCache.rows[tk]; if(L&&L.at) return L.at==="etf";
+    return false;
   }
 
   var dpStudy=null;           // the ephemeral record, if we are studying
@@ -11403,6 +11639,18 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     window.open(url,"_blank","noopener");
   }
 
+  function dpPerfStrip(tk){
+    var tile=document.getElementById("dpPerfTile"), box=document.getElementById("dpPerf"); if(!tile||!box) return;
+    dpFetchBars(tk,"daily",function(bars){
+      var cs=(bars||[]).map(function(b){return b.c;}).filter(function(c){return c;});
+      if(cs.length<25){ tile.style.display="none"; return; }
+      function r(n){ return cs.length>n&&cs[cs.length-1-n]?((cs[cs.length-1]/cs[cs.length-1-n]-1)*100):null; }
+      var hi=Math.max.apply(null,cs.slice(-252)), vsHi=hi?((cs[cs.length-1]/hi-1)*100):null;
+      var items=[["1M",r(21)],["3M",r(63)],["6M",r(126)],["1Y",cs.length>252?r(252):null],["vs 52w high",vsHi]];
+      box.innerHTML=items.map(function(x){ return '<div class="tile"><div class="l">'+x[0]+'</div><div class="v" style="color:'+(x[1]==null?"var(--inkFade)":x[1]>=0?"var(--green)":"var(--red)")+'">'+cmpFmtPct(x[1])+'</div></div>'; }).join("");
+      tile.style.display="";
+    });
+  }
   var dpReturnTo=null;   // "screeners" when the detail page was opened from a screener/GEX row
   function trBackFromDetail(){
     trDetailTk=null; trDetailId=null;
@@ -11618,6 +11866,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
             '</div>'+
             '<div class="w-card-b" style="padding:10px 12px"><div class="dp-chart-body"><div class="plot" id="dpPlot"><div class="loading">Fetching chart\u2026</div></div></div></div>'+
           '</div>'+
+          // PERFORMANCE — the same 1M / 3M / 6M / 1Y strip the ETF page carries (27 Aug 2026)
+          '<div class="w-card" id="dpPerfTile" style="display:none"><div class="w-card-h"><span class="w-card-t">Performance</span><span class="tnote" style="font-size:10px">price return \u00b7 from the chart bars</span></div><div class="dp-perf" id="dpPerf"></div></div>'+
           // WHERE IT SITS — its industry and its sector, side by side
           '<div class="w-card" id="dpGroupTile" style="display:none">'+
             '<div class="w-card-h"><span class="w-card-t">Where it sits '+
@@ -11714,7 +11964,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     dpLoadGex(tk);
     dpLoadSmart(tk);
     var tvb=document.getElementById("dpTvBtn");
-    if(tvb) tvb.onclick=function(){ tvOpen(tk); };
+    if(tvb){ tvb.onclick=function(){ tvOpen(tk); };
+      // Compare button next to TradingView (27 Aug 2026)
+      if(!document.getElementById("dpCmpBtn")){ var cb=document.createElement("button"); cb.className="tv-btn"; cb.id="dpCmpBtn"; cb.setAttribute("data-cmp",tk);
+        cb.textContent=cmpHas(tk)?"\u2611 In compare":"\u229E Compare"; cb.onclick=function(){ cmpToggle(tk); }; tvb.parentNode.insertBefore(cb, tvb); } }
+    dpPerfStrip(tk);
     var segEl=document.getElementById("dpSeg");
     if(segEl) segEl.onclick=function(ev){
       var b=ev.target.closest("button"); if(!b) return;

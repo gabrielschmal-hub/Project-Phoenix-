@@ -66,6 +66,19 @@ def main():
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=1)
     os.replace(tmp, OUT)
+    # the watchlist rides along: outputs/watchlist.json feeds the ETF profile set
+    # (a starred ETF gets a profile next run) and anything else the engine wants
+    try:
+        r2 = requests.get(SUPA_URL + "/rest/v1/watch_tickers?select=ticker,bucket&active=eq.true&bucket=in.(watch,watch_eu)",
+                          headers=h, timeout=30)
+        r2.raise_for_status()
+        wl = sorted({w["ticker"] for w in r2.json()})
+        wp = os.path.join(os.path.dirname(OUT) or ".", "watchlist.json")
+        with open(wp, "w", encoding="utf-8") as f:
+            json.dump({"asof": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "count": len(wl), "tickers": wl}, f, indent=1)
+        print(f"[trades] outputs/watchlist.json <- {len(wl)} watched names")
+    except Exception as e:
+        print(f"[trades] watchlist skipped ({e})")
     latest = max((row.get("updated_at") or "" for row in rows), default="")
     from collections import Counter
     st = Counter(t.get("status") for t in trades)

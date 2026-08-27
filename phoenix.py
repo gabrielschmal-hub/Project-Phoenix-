@@ -5166,6 +5166,8 @@ def load_universe_from_csv(path="universe.csv", markets=("US",), asset_types=("s
                     "currency": (row.get("currency") or "USD").strip() or "USD",
                     "exchange": (row.get("exchange") or "").strip(),
                     "isin": (row.get("isin") or "").strip(),
+                    "country": (row.get("country") or "").strip(),
+                    "expense": (row.get("expense_ratio") or "").strip() or None,
                     "focus": " \u00b7 ".join(x for x in ((row.get("etf_asset_class") or "").strip(),
                                                         (row.get("etf_focus") or "").strip()) if x),
                     "expense": float(row.get("expense_ratio") or 0) or None,
@@ -6544,6 +6546,40 @@ def _fx_usd_rates():
     return out, source
 
 
+_ETF_LONG_HISTORY = {}   # ticker -> weekly closes (oldest first), filled by _load_etf_long_history()
+
+
+def _load_etf_long_history():
+    """
+    etf_weekly.csv.gz (ticker,date,close) - a one-off Colab build of five years
+    of weekly closes for every ETF in universe.csv, so 3Y / 5Y can sit on every
+    ETF row without 3,000 extra Yahoo requests a day. Optional: absent file,
+    absent numbers, never a failure. iOS renames extensions, so .csv and
+    .gz.csv are accepted too.
+    """
+    import csv, gzip
+    global _ETF_LONG_HISTORY
+    cands = ["etf_weekly.csv.gz", "etf_weekly.gz.csv", "etf_weekly.csv"]
+    path = next((p for p in cands if os.path.exists(p)), None)
+    if not path:
+        return 0
+    try:
+        opener = gzip.open if path.endswith(".gz") or path.endswith(".gz.csv") else open
+        with opener(path, "rt", encoding="utf-8") as f:
+            rows = {}
+            for r in csv.DictReader(f):
+                try:
+                    rows.setdefault(r["ticker"], []).append((r["date"], float(r["close"])))
+                except Exception:
+                    continue
+        _ETF_LONG_HISTORY = {tk: [c for _d, c in sorted(v)] for tk, v in rows.items()}
+        print(f"[ext] etf long history: {len(_ETF_LONG_HISTORY)} tickers from {path}")
+        return len(_ETF_LONG_HISTORY)
+    except Exception as e:
+        print(f"[ext] etf long history unreadable ({e}) - 3Y/5Y left blank")
+        return 0
+
+
 def _score_ext_books(universe_ext, ohlcv_ext, fx):
     """
     Score the EU-stock and ETF books from the bars pulled this run. PURE apart
@@ -6589,6 +6625,8 @@ def _score_ext_books(universe_ext, ohlcv_ext, fx):
             daily_ret[tk] = round((cs[-1] / cs[-2] - 1) * 100, 2)
 
     weekly = _merge_daily_into_weekly({}, daily)
+    if not _ETF_LONG_HISTORY:
+        _load_etf_long_history()
     books = {
         "EU":  {tk: v for tk, v in universe_ext.items()
                 if v.get("market") == "EU" and v.get("asset_type") == "stock" and v.get("cap_primary", True)},
@@ -6614,8 +6652,13 @@ def _score_ext_books(universe_ext, ohlcv_ext, fx):
             hi = max(cs[-252:])
             row.update({"price": round(cs[-1], 4), "daily_pct": daily_ret.get(tk),
                         "r5": _chg(cs, 5), "r21": _chg(cs, 21), "r63": _chg(cs, 63),
+                        "r126": _chg(cs, 126), "r252": _chg(cs, 252),
                         "pos_vs_high": round((cs[-1] / hi - 1) * 100, 1) if hi else None,
                         "dollar_vol_M": round((dollar_vol.get(tk) or 0) / 1e6, 2), "bars": len(cs)})
+            lh = _ETF_LONG_HISTORY.get(tk)   # weekly closes from etf_weekly.csv.gz (Colab), if present
+            if lh:
+                row["r756"] = _chg(lh, 156) if len(lh) > 156 else None    # 3Y, weekly bars
+                row["r1260"] = _chg(lh, 260) if len(lh) > 260 else None   # 5Y
             led.update({"last": round(cs[-1], 2), "pvh": row["pos_vs_high"]})
         else:
             led["st"] = "no_data"
@@ -8098,6 +8141,231 @@ def run_detail_bundle():
 
 # Tickers that must be refreshed on EVERY run, no matter what the rotation
 # thinks. Add anything you care about; env EARNINGS_FORCE="A,B,C" appends to it.
+# ---------------------------------------------------------------------------
+# ETF PROFILES (27 Aug 2026) - the ETF page's facts: holdings, sector mix,
+# category, family, five-year returns, derived country exposure, twins.
+# Source: Yahoo funds data (one request per ETF, refreshed weekly) plus a
+# five-year weekly history (one request, daily). Set: the 100 largest by AUM
+# per market, plus anything watched, held or planned, plus the GEX list ETFs.
+# Output: outputs/etf/<TK>.json per fund and outputs/etf_profiles.json index.
+# ---------------------------------------------------------------------------
+ETF_PROFILE = {"per_market_top": 100, "refresh_days": 7, "history_period": "5y", "budget_s": 660}
+
+_ETF_INDEX_PATTERNS = [
+    ("sp500", r"s&p\s*500|s and p 500|500 (index|core)"), ("nasdaq100", r"nasdaq[\s-]*100|qqq"),
+    ("msci_world", r"msci world(?! small)"), ("acwi", r"all[\s-]?country|acwi|all[\s-]world|ftse all-world"),
+    ("em", r"emerging markets|msci em\b|ftse emerging"), ("europe", r"stoxx europe 600|msci europe|euro stoxx 50|eurostoxx"),
+    ("ftse100", r"ftse 100"), ("dax", r"\bdax\b"), ("russell2000", r"russell 2000"), ("gold", r"physical gold|gold trust|gold shares|\bgold\b"),
+    ("silver", r"physical silver|silver trust|\bsilver\b"), ("treasury_long", r"20\+ year|long treasury|20 year treasury"),
+    ("treasury_short", r"1-3 year|short treasury|0-1 year|0-3 month|treasury bill"), ("ig_corp", r"investment grade corporate|corporate bond"),
+    ("high_yield", r"high yield"), ("bitcoin", r"bitcoin"), ("semis", r"semiconductor"), ("sp500_ew", r"equal weight"),
+]
+
+
+def _etf_index_key(name):
+    """A coarse 'what does it track' key from the fund name, for twins. Equal weight
+    wins over plain S&P 500 so an equal-weight fund is not a twin of VOO."""
+    import re as _re
+    n = (name or "").lower()
+    if _re.search(r"equal weight", n):
+        return "sp500_ew" if _re.search(r"s&p\s*500", n) else "equal_weight"
+    # a sector / factor / hedged / leveraged slice of an index is not a twin of the plain index
+    variant = bool(_re.search(r"sector|information technology|health ?care|financials|energy|utilities|industrials|"
+                              r"consumer|materials|real estate|communication|value|growth|dividend|momentum|quality|"
+                              r"low vol|min(imum)? vol|hedged|\b[23]x\b|short|inverse|leveraged|esg|sri|islamic|screened|"
+                              r"capped|top ?\d+|small ?cap|mid ?cap", n))
+    for key, pat in _ETF_INDEX_PATTERNS:
+        if _re.search(pat, n):
+            return key + ("|variant" if variant else "")
+    return None
+
+
+def _etf_profile_set(etfs):
+    """Which ETFs get a profile today."""
+    chosen = []
+    for mk in ("US", "EU"):
+        rows = sorted((tk for tk, v in etfs.items() if v.get("market") == mk),
+                      key=lambda t: -(etfs[t].get("market_cap") or 0))
+        chosen += rows[:int(ETF_PROFILE["per_market_top"])]
+    try:
+        for t in (_held_and_planned_tickers() or []):
+            if t in etfs and t not in chosen:
+                chosen.append(t)
+    except Exception:
+        pass
+    try:
+        wl = json.load(open(os.path.join(OUTPUTS_DIR, "watchlist.json"))).get("tickers") or []
+        for t in wl:
+            if t in etfs and t not in chosen:
+                chosen.append(t)
+    except Exception:
+        pass
+    for t in GEX_UNIVERSE.get("seed") or []:
+        if t in etfs and t not in chosen:
+            chosen.append(t)
+    return chosen
+
+
+def _safe_fname(tk):
+    return tk.replace("/", "-").replace(".", "-")
+
+
+def run_etf_profiles():
+    import time as _time
+    t0 = _time.time()
+    try:
+        import yfinance as yf
+    except Exception as e:
+        print(f"[etfp] yfinance unavailable ({e}) - step skipped"); return
+    universe_all = load_universe_from_csv(markets=("US", "EU"), asset_types=("stock", "etf"))
+    etfs = {tk: v for tk, v in universe_all.items() if v.get("asset_type") == "etf" and v.get("cap_primary", True)}
+    if not etfs:
+        print("[etfp] no ETFs in universe.csv"); return
+    out_dir = os.path.join(OUTPUTS_DIR, "etf"); os.makedirs(out_dir, exist_ok=True)
+    chosen = _etf_profile_set(etfs)
+    # country of a holding: EU rows carry a registration country; a US-listed row is United States
+    country_of = {}
+    for tk, v in universe_all.items():
+        if v.get("asset_type") == "stock":
+            country_of[tk] = "United States" if v.get("market") == "US" else (v.get("country") or "Other")
+    gex_set = set(GEX_UNIVERSE.get("seed") or [])
+    passers = set()
+    try:
+        st = json.load(open(os.path.join(OUTPUTS_DIR, "stocks.json")))
+        passers = {r["ticker"] for r in (st.get("stocks") or []) if r.get("passer")}
+    except Exception:
+        pass
+    by_key = {}
+    for tk, v in etfs.items():
+        k = _etf_index_key(v.get("name"))
+        if k:
+            by_key.setdefault(k, []).append(tk)
+    now = datetime.now(timezone.utc)
+    # unprofiled names first, so a budget cut leaves the oldest profiles for tomorrow, not the same ones every day
+    def _age(tk):
+        p = os.path.join(out_dir, _safe_fname(tk) + ".json")
+        try:
+            return _time.time() - os.path.getmtime(p)
+        except Exception:
+            return 1e12
+    chosen.sort(key=lambda t: -_age(t))
+    index, done, skipped, failed = {}, 0, 0, 0
+    for tk in chosen:
+        if _time.time() - t0 > ETF_PROFILE["budget_s"]:
+            skipped += 1; continue
+        info = etfs[tk]
+        p = os.path.join(out_dir, _safe_fname(tk) + ".json")
+        old = None
+        try:
+            old = json.load(open(p))
+        except Exception:
+            pass
+        prof = (old or {}).get("profile") or {}
+        prof_fresh = bool(prof) and prof.get("asof") and \
+            (now - datetime.fromisoformat(prof["asof"].replace("Z", "+00:00"))).days < ETF_PROFILE["refresh_days"]
+        try:
+            T = yf.Ticker(tk)
+            if not prof_fresh:
+                prof = {"asof": now.isoformat(), "top_holdings": [], "sectors": [], "category": None, "family": None,
+                        "inception": None, "description": None, "expense_yahoo": None, "total_assets": None}
+                try:
+                    fd = T.funds_data
+                    th = getattr(fd, "top_holdings", None)
+                    if th is not None and len(th):
+                        for sym, r in th.iterrows():
+                            prof["top_holdings"].append({"ticker": str(sym), "name": str(r.get("Name") or ""),
+                                                         "pct": round(float(r.get("Holding Percent") or 0) * 100, 2)})
+                    sw = getattr(fd, "sector_weightings", None) or {}
+                    prof["sectors"] = sorted(({"sector": k.replace("_", " ").title(), "pct": round(float(v) * 100, 1)}
+                                              for k, v in sw.items()), key=lambda x: -x["pct"])
+                    fo = getattr(fd, "fund_overview", None) or {}
+                    prof["category"] = fo.get("categoryName"); prof["family"] = fo.get("family")
+                    prof["description"] = (getattr(fd, "description", None) or "")[:600] or None
+                except Exception as e:
+                    prof["funds_data_error"] = str(e)[:120]
+                try:
+                    inf = T.info or {}
+                    ts = inf.get("fundInceptionDate")
+                    if ts:
+                        prof["inception"] = datetime.fromtimestamp(int(ts), tz=timezone.utc).strftime("%Y-%m-%d")
+                    prof["expense_yahoo"] = inf.get("annualReportExpenseRatio") or inf.get("netExpenseRatio")
+                    prof["total_assets"] = inf.get("totalAssets")
+                    if not prof.get("category"):
+                        prof["category"] = inf.get("category")
+                    if not prof.get("family"):
+                        prof["family"] = inf.get("fundFamily")
+                except Exception:
+                    pass
+            # five years of weekly closes: returns, 52-week high, the 12-month chart
+            h = T.history(period=ETF_PROFILE["history_period"], interval="1wk", auto_adjust=False)
+            cs = [float(x) for x in h["Close"].dropna().tolist()] if h is not None and len(h) else []
+            ds = [d.strftime("%Y-%m-%d") for d in h.index] if h is not None and len(h) else []
+            perf = {}
+            if cs:
+                def _r(n):
+                    return round((cs[-1] / cs[-1 - n] - 1) * 100, 2) if len(cs) > n and cs[-1 - n] else None
+                perf = {"r1m": _r(4), "r3m": _r(13), "r6m": _r(26), "r1y": _r(52), "r3y": _r(156), "r5y": _r(260),
+                        "pos_vs_high": round((cs[-1] / max(cs[-52:]) - 1) * 100, 1), "last": round(cs[-1], 4),
+                        "bars_weekly": len(cs)}
+            chart = {"t": ds[-52:], "c": [round(c, 4) for c in cs[-52:]]}
+            # derived country exposure from the top holdings (labelled as such)
+            cty = {}
+            for hld in prof.get("top_holdings") or []:
+                c = country_of.get(hld["ticker"], "Other" if "." in hld["ticker"] else "United States")
+                cty[c] = cty.get(c, 0) + hld["pct"]
+            top_pct = sum(h_["pct"] for h_ in prof.get("top_holdings") or [])
+            country = [{"country": k, "pct": round(v / top_pct * 100, 1)} for k, v in sorted(cty.items(), key=lambda kv: -kv[1])] if top_pct else []
+            for hld in prof.get("top_holdings") or []:
+                hld["tags"] = [t for t, on in (("gex", hld["ticker"] in gex_set), ("passer", hld["ticker"] in passers)) if on]
+            key = _etf_index_key(info.get("name"))
+            same = [t for t in by_key.get(key, []) if t != tk] if key else []
+            cheaper = sorted((t for t in same if etfs[t].get("market") == info.get("market") and
+                              _fnum_or_none(etfs[t].get("expense")) is not None and _fnum_or_none(info.get("expense")) is not None and
+                              float(etfs[t]["expense"]) < float(info["expense"])), key=lambda t: float(etfs[t]["expense"]))[:3]
+            eu = sorted((t for t in same if etfs[t].get("market") == "EU"), key=lambda t: -(etfs[t].get("market_cap") or 0))[:4]
+            doc = {"ticker": tk, "asof": now.isoformat(), "name": info.get("name"), "market": info.get("market"),
+                   "exchange": info.get("exchange"), "currency": info.get("currency"), "isin": info.get("isin"),
+                   "focus": info.get("focus"), "expense": _fnum_or_none(info.get("expense")),
+                   "aum_usd": info.get("market_cap"), "index_key": key,
+                   "profile": prof, "perf": perf, "chart": chart, "country_derived": country,
+                   "twins": {"cheaper": [{"ticker": t, "expense": _fnum_or_none(etfs[t].get("expense")), "aum_usd": etfs[t].get("market_cap"), "name": etfs[t].get("name")} for t in cheaper],
+                             "eu": [{"ticker": t, "expense": _fnum_or_none(etfs[t].get("expense")), "aum_usd": etfs[t].get("market_cap"), "name": etfs[t].get("name")} for t in eu]},
+                   "sources": {"facts": "universe.csv (TradingView export)", "profile": "Yahoo funds data, refreshed weekly",
+                               "performance": "Yahoo weekly closes, 5y", "country": "derived from the top-10 holdings only"}}
+            json.dump(doc, open(p, "w"), separators=(",", ":"))
+            index[tk] = {"name": doc["name"], "mk": doc["market"], "expense": doc["expense"], "aum_usd": doc["aum_usd"],
+                         "holdings_n": len(prof.get("top_holdings") or []), "category": prof.get("category"),
+                         "family": prof.get("family"), "r1m": perf.get("r1m"), "r3m": perf.get("r3m"), "r1y": perf.get("r1y"),
+                         "r3y": perf.get("r3y"), "r5y": perf.get("r5y"), "top": [h_["ticker"] for h_ in (prof.get("top_holdings") or [])[:10]],
+                         "index_key": key}
+            done += 1
+        except Exception as e:
+            failed += 1
+            print(f"[etfp] {tk}: {str(e)[:100]}")
+    # keep yesterday's index entries for names skipped by the budget
+    try:
+        prev = json.load(open(os.path.join(OUTPUTS_DIR, "etf_profiles.json"))).get("etfs") or {}
+        for tk, row in prev.items():
+            if tk in etfs and tk not in index and os.path.exists(os.path.join(out_dir, _safe_fname(tk) + ".json")):
+                index[tk] = row
+    except Exception:
+        pass
+    write_json("etf_profiles", {"asof": _now(), "count": len(index), "selected": len(chosen), "done_today": done,
+                                "skipped_budget": skipped, "failed": failed,
+                                "note": "top 100 by AUM per market + watched + held + GEX list; profile weekly, prices daily",
+                                "etfs": index})
+    print(f"[etfp] {done} profiled ({skipped} left for tomorrow by the {ETF_PROFILE['budget_s']}s budget, {failed} failed) "
+          f"in {_time.time()-t0:.0f}s -> outputs/etf/*.json + etf_profiles.json ({len(index)} in index)")
+
+
+def _fnum_or_none(x):
+    try:
+        v = float(x)
+        return v if v == v else None
+    except Exception:
+        return None
+
+
 def _held_and_planned_tickers():
     """Best effort: tickers the engine knows we care about (portfolio seed)."""
     import json, os
@@ -10856,6 +11124,7 @@ def run_full():
 
     # --- smart money: cheap, and it was starving at the end of the run ------
     step("perf_series",    run_perf_series)   # needs industry.json from stocks
+    step("etf_profiles",   run_etf_profiles, optional=True)   # ETF pages: holdings, mix, 5y returns
     step("rotation_daily", run_rotation_daily, optional=True)
     step("rotation_nav",   run_rotation_nav,  optional=True)
     step("congress",       run_congress_trades)
@@ -10950,6 +11219,8 @@ def run_engine(name):
         run_gex_universe()
     elif name == "gexbriefing":
         run_gex_from_briefing(sys.argv[3] if len(sys.argv) > 3 else None)
+    elif name == "etfprofiles":
+        run_etf_profiles()
     elif name == "gexstocks":
         run_gex_stocks()
     elif name == "vixterm":
