@@ -1,0 +1,54 @@
+name: Phoenix Fast Lane (Yahoo, 15 min)
+
+# The 15-minute universe lane: every row of universe.csv gets a last price and
+# day change from Yahoo, plus a cap-weighted intraday change per sector and
+# industry, written to Supabase (prices_universe, rotation_intraday) with a
+# heartbeat on lane 'yahoo'. The 5-minute Finnhub lane in Supabase stays for
+# positions, macro, Elliott's list and the watchlist.
+#
+# Upload this file as .github/workflows/phoenix-fast.yaml (type the folder
+# path in the file name box on GitHub's "Add file" page). Uses the same two
+# secrets as the Supabase sync workflow.
+#
+# Actions cron is not punctual: expect runs 5-15 minutes late under load and
+# the odd one skipped. The row timestamp in the app is the truth.
+
+on:
+  schedule:
+    - cron: "*/15 13-21 * * 1-5"    # 09:00-17:45 ET across DST; the script itself skips outside 09:25-16:10 ET
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Run even when the market is closed"
+        type: boolean
+        default: false
+
+concurrency:
+  group: phoenix-fast
+  cancel-in-progress: true          # a late run must not pile onto the next one
+
+jobs:
+  fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            universe.csv
+            phoenix_fast.py
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: pip install --quiet requests yfinance pandas
+
+      - name: Universe prices -> Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PHOENIX_FORCE: ${{ github.event.inputs.force == 'true' && '1' || '' }}
+        run: python phoenix_fast.py
