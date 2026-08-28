@@ -635,7 +635,7 @@
   .tr-modal-actions .cancel{background:var(--card2);color:var(--inkMed);}
 
   /* ===== DETAIL PAGE (chart-first, levels beside) ===== */
-  .dp-wrap{height:100%;display:flex;flex-direction:column;overflow:hidden;}
+  .dp-wrap{height:auto;display:flex;flex-direction:column;overflow:visible;}
   .dp-top{display:flex;align-items:flex-start;gap:14px;padding:11px 16px;border-bottom:1px solid var(--line2);flex-shrink:0;flex-wrap:wrap;}
   .dp-back{font-family:var(--mono);font-size:11.5px;color:var(--ink);cursor:pointer;padding:4px 9px;border:1px solid var(--line2);border-radius:6px;background:var(--card2);align-self:center;}
   .dp-id{display:flex;flex-direction:column;gap:2px;min-width:0;}
@@ -1069,7 +1069,7 @@ body{background:var(--bg)!important;font-family:'Plus Jakarta Sans',-apple-syste
    inside the rail instead of letting it anchor to the viewport. The rail no
    longer slides, so the compositing hint bought nothing. */
 #pxnav.hide{transform:none;opacity:1;pointer-events:auto}
-:root{--railW:178px}
+:root{--railW:198px}
 .pxbrand{display:flex;align-items:center;gap:9px;padding:0 8px 22px}
 .pxbrand::after{content:"Phoenix";font-family:var(--serif);font-size:20px;font-weight:800;
   letter-spacing:-.035em;color:var(--ink)}
@@ -1083,21 +1083,32 @@ body{background:var(--bg)!important;font-family:'Plus Jakarta Sans',-apple-syste
 .pxlinks a .ic{width:16px;height:16px;flex:none;color:var(--inkFade);display:block}
 .pxlinks a.on .ic{color:var(--gold)}
 .rfoot{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:14px}
-.mstat{min-width:0;padding:10px;border-radius:12px;background:var(--card);
+.mstat{min-width:0;padding:11px 12px 12px;border-radius:12px;background:var(--card);
   border:1px solid var(--line);box-shadow:0 1px 2px rgba(45,40,34,.05)}
 .mstat .lb{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   color:var(--inkFade);white-space:nowrap}
-#pxLiveHost{display:flex;flex-direction:column;gap:6px;margin-top:6px}
-#pxLiveCl{display:flex!important;flex-direction:column;align-items:flex-start!important;
-  gap:6px!important;margin-right:0!important}
-#pxLState{font-size:9.5px}
-#pxLTime{font-size:10px;line-height:1.3;white-space:normal;word-break:break-word}
-#pxAutoTg{font-size:9px!important}
+#pxLiveHost{display:block;margin-top:9px}
+/* The cluster is authored for a horizontal bar. Stacked in the rail it needs
+   real leading, or LIVE / timestamp / AUTO collapse into one grey smudge. */
+#pxLiveCl{display:flex!important;flex-direction:column;align-items:stretch!important;
+  gap:9px!important;margin-right:0!important}
+#pxLState{font-size:10.5px!important;letter-spacing:1.1px!important;padding:4px 9px!important;
+  align-self:flex-start;border-width:1.5px!important;border-radius:5px!important}
+#pxLTime{font-size:10.5px!important;line-height:1.45!important;white-space:normal!important;
+  word-break:normal;overflow-wrap:anywhere;letter-spacing:0!important}
+#pxAutoTg{font-size:9.5px!important;padding-top:1px;border-top:1px solid var(--line);
+  padding-top:9px!important}
 .thsw{display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(128,128,128,.12)}
 .thsw b{flex:1;border-radius:999px;padding:7px 4px;cursor:pointer;text-align:center;
   font-size:11.5px;font-weight:600;color:var(--inkFade);transition:.15s;white-space:nowrap;user-select:none}
 .thsw b.on{background:var(--ink);color:var(--bg)}
-.pxaccts .pxacct{width:32px;height:32px}
+/* profile row and theme row are a matched pair at the foot of the rail */
+.rfoot .pxaccts{padding:4px;justify-content:space-between}
+.rfoot .pxacct{flex:1;width:auto;height:30px;border-radius:999px;font-size:12.5px}
+@media(max-width:1000px){
+  .rfoot .pxaccts{flex-direction:column;gap:4px}
+  .rfoot .pxacct{width:100%}
+}
 .pxlinks::-webkit-scrollbar{display:none}
 .pxlinks a{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;color:var(--railInk);
   padding:8px 9px;border-radius:9px;position:relative;white-space:nowrap;overflow:hidden;
@@ -1108,7 +1119,7 @@ body{background:var(--bg)!important;font-family:'Plus Jakarta Sans',-apple-syste
 .pxlinks a.on{color:var(--ink);font-weight:700;background:var(--card);
   border:1px solid var(--line);box-shadow:0 1px 2px rgba(45,40,34,.05);padding:7px 8px}
 .pxlinks a.on::after{transform:translateY(-50%) scale(1)}
-.pxaccts{position:fixed;top:14px;right:22px;z-index:66;display:flex;gap:8px;
+.pxaccts{position:static;z-index:auto;display:flex;gap:8px;justify-content:stretch;
   padding:5px;border-radius:999px;background:var(--card);border:1px solid var(--line);
   box-shadow:0 2px 10px rgba(0,0,0,.10)}
 .pxacct{width:32px;height:32px;border-radius:50%;border:1px solid var(--line2);display:flex;
@@ -1298,6 +1309,13 @@ h1.hero-h em{font-style:italic;font-weight:700;color:#E0642B}
    rule because the block above sets display:flex after the opening brace. */
 #pxstatus{display:none!important}
 
+/* The calendar now shares a row with the VIX curve, so its strip wraps into
+   the narrower column instead of running as one long line. */
+.mkt-row.r-vix{grid-template-columns:1.55fr 1fr}
+.a-cal .tbody{overflow-y:auto}
+#calStrip{display:flex;flex-wrap:wrap;gap:8px}
+@media(max-width:1000px){ .mkt-row.r-vix{grid-template-columns:1fr} }
+
 /* ===== slimmer status bar, theme switch inside it, room for the add-trade button ===== */
 #pxstatus{padding:9px 18px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;left:calc(var(--railW) + 14px)!important;right:14px!important;
   font-size:12.5px!important;border-radius:13px!important}
@@ -1362,19 +1380,16 @@ h1.hero-h em{font-style:italic;font-weight:700;color:#E0642B}
 .tr-statnote{font-family:var(--mono);font-size:11px;color:var(--green);border:1px solid var(--line2);
   background:var(--card2);border-radius:8px;padding:9px 10px}
 
-/* ===== ticker detail opens as a focused overlay ===== */
-body.px-detail{overflow:hidden!important}
-body.px-detail #pxnav,body.px-detail #pxstatus{filter:blur(2px);opacity:.5;pointer-events:none}
-body.px-detail .app::after{content:"";position:fixed;inset:0;z-index:410;background:rgba(6,10,16,.55);
-  backdrop-filter:blur(11px);-webkit-backdrop-filter:blur(11px)}
-body.px-detail .dp-wrap{position:fixed!important;inset:2vh 1.2vw 1.5vh!important;z-index:420!important;
-  overflow-y:auto!important;background:var(--card2)!important;border:1px solid var(--line2);
-  border-radius:18px;box-shadow:0 30px 90px rgba(0,0,0,.55);padding:0 0 18px!important}
-html.light body.px-detail .app::after{background:rgba(250,246,238,.5)}
-html.light body.px-detail .dp-wrap{box-shadow:0 30px 90px rgba(92,70,44,.22)}
-@media(max-width:1000px){
-  body.px-detail .dp-wrap{inset:2vh 2vw 2vh!important;border-radius:14px}
-}
+/* ===== ticker (and ETF) detail is a page, not an overlay =====
+   It used to mount as a fixed sheet over a blurred, scrim-covered app: the
+   rail went dead, the body scroll locked, and the content was trapped in a
+   100%-height flex column. It now renders in normal flow in the content
+   column, so it scrolls with the page and the rail stays live. ETFs use this
+   same view - there was never a separate ETF sheet to fix. */
+body.px-detail{overflow:visible!important}
+body.px-detail .dp-wrap{position:static!important;inset:auto!important;z-index:auto!important;
+  height:auto!important;overflow:visible!important;background:transparent!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;padding:0 0 18px!important}
 
 /* ===== drag & drop layout mode ===== */
 .pxdragbtn{margin-top:9px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.24);color:#DDE4EB;
@@ -1404,8 +1419,8 @@ html.light .pxevent.today{background:rgba(184,85,32,.16);color:#6B3C1C;border-co
 @media(max-width:1000px){.pxevent{font-size:11.5px;padding:6px 12px;margin-bottom:14px}}
 
 /* the overlay is fixed; the page underneath simply stops scrolling and never moves */
-body.px-detail{overflow:hidden!important}
-html:has(body.px-detail){overflow:hidden}
+body.px-detail{overflow:visible!important}
+html:has(body.px-detail){overflow:auto}
 
 /* ===== dark theme: every text node is white, no exceptions =====
    The ink scale still had four grey steps, and on the Trade and Portfolio
@@ -2551,10 +2566,10 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
       <div class="lb">Live data</div>
       <div id="pxLiveHost"></div>
     </div>
+    <div class="pxaccts"><div class="pxacct on" id="pxG">G</div><div class="pxacct" id="pxA">A</div></div>
     <div class="thsw"><b id="thLight">Light</b><b id="thDark">Dark</b></div>
   </div>
 </nav>
-<div class="pxaccts"><div class="pxacct on" id="pxG">G</div><div class="pxacct" id="pxA">A</div></div>
 
 <div class="app">
   <div class="pxhidden">
@@ -3360,7 +3375,8 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
     '<div class="rs-wrap">'+
       '<div class="rs-panel"><div class="rs-head">'+
         '<div class="rs-kick">RESEARCH LIBRARY</div>'+
-        '<h1 id="rsTitle">Research</h1>'+
+        /* The page header above already says "Research"; a second <h1> saying
+           the same word twelve pixels below it was pure duplication. */
         '<p class="rs-dek">Single-file equity reports built to RESEARCH_REPORT_METHOD.md. Sector and industry come from Phoenix\u2019s universe. Gamma is Phoenix\u2019s, frozen at publication.</p>'+
       '</div>'+
       '<div class="rs-finder">'+
@@ -3572,12 +3588,6 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
       // in the same place. loadBoard() still RUNS — it is what fills mktSeries
       // and triggers mktBrief(), so deleting it would silently break the brief.
 
-      // ── the macro calendar strip ──
-      '<div class="mkt-row r-1"><div class="tile a-cal">'+
-        '<div class="thead"><span class="ttl">Calendar</span>'+
-          '<span class="tnote" id="calNote"></span></div>'+
-        '<div class="tbody"><div id="calStrip"><div class="loading">\u2026</div></div></div></div>'+
-
       // ── the macro chart: candles or cards, 1D/1W/1M, EMAs, SPX gamma levels ──
       '<div class="mkt-row r-1"><div class="tile tall a-spx">'+
         '<div class="thead"><span class="ttl" id="spxTitle">S&P 500 \u00B7 Daily</span>'+
@@ -3640,10 +3650,16 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
         '<div class="tbody"><div class="gexh-scroll"><div class="gex-histo" id="mGexPlot"></div></div>'+
         '<div class="gexh-key" id="gexHKey"></div></div></div></div>'+
 
-      // ── VIX term: full width so the curve reads ──
-      '<div class="mkt-row r-1 r-vix"><div class="tile tall a-vix">'+
+      // ── VIX term + the macro calendar, side by side ──
+      //    The curve never used the full width; the calendar was eating the
+      //    top of the page for a strip that is usually one or two rows.
+      '<div class="mkt-row r-2 r-vix"><div class="tile tall a-vix">'+
         '<div class="thead"><span class="ttl">VIX Term Structure</span><span class="tnote" id="vixNote"></span></div>'+
-        '<div class="tbody"><div class="plot" id="vixPlot"></div></div></div></div>'+
+        '<div class="tbody"><div class="plot" id="vixPlot"></div></div></div>'+
+        '<div class="tile tall a-cal">'+
+        '<div class="thead"><span class="ttl">Calendar</span>'+
+          '<span class="tnote" id="calNote"></span></div>'+
+        '<div class="tbody"><div id="calStrip"><div class="loading">\u2026</div></div></div></div></div>'+
 
       // ── ROTATION: winners and losers as lines, against SPX ──
       '<div class="mkt-row r-1"><div class="tile tall a-rperf">'+
@@ -11031,6 +11047,11 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
   function trOpenDetail(id){
     try{ document.body.classList.add("px-detail"); }catch(e){}
     var t=trGet(id); if(!t) return;
+    /* The detail paints into #page-trades. That node now lives inside the
+       Portfolio page as a tab, so opening a ticker from Mission Control or a
+       screener has to route there first or the render lands out of sight. */
+    try{ go("trades"); }catch(e){}
+    try{ window.scrollTo(0,0); }catch(e){}
     trDetailId=id; trDetailTk=t.ticker; dpTf="daily";
     var page=document.getElementById("page-trades");
     page.innerHTML='<div class="loading" style="padding:50px 20px">Loading '+t.ticker+'\u2026</div>';
