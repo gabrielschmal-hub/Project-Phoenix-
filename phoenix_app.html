@@ -2310,6 +2310,16 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   .rs-grid{grid-template-columns:1fr}
 }
 
+
+  /* ---- Portfolio sub-navigation (Trade merged in) ---- */
+  .pf-subnav{display:flex;gap:3px;padding:4px;border-radius:999px;background:rgba(128,128,128,.10);
+    width:max-content;margin:0 0 18px}
+  .pf-subnav button{border:0;background:transparent;border-radius:999px;padding:8px 18px;cursor:pointer;
+    font-family:var(--serif);font-size:13px;font-weight:600;color:var(--inkLight);transition:.15s;white-space:nowrap}
+  .pf-subnav button.on{background:var(--ink);color:var(--bg)}
+  .pf-subnav button:hover:not(.on){color:var(--ink)}
+  .pf-sub{display:none}
+  .pf-sub.on{display:block}
 </style>
 <style id="px-additions">
   /* staleness: data from a previous day must LOOK different */
@@ -2333,6 +2343,16 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     background:var(--card2);font:12.5px/1.6 Georgia,serif;color:var(--inkMed);}
   .w-policy b{font-family:'Courier New',monospace;font-size:11px;letter-spacing:1px;
     color:var(--gold);text-transform:uppercase;}
+
+  /* ---- Portfolio sub-navigation (Trade merged in) ---- */
+  .pf-subnav{display:flex;gap:3px;padding:4px;border-radius:999px;background:rgba(128,128,128,.10);
+    width:max-content;margin:0 0 18px}
+  .pf-subnav button{border:0;background:transparent;border-radius:999px;padding:8px 18px;cursor:pointer;
+    font-family:var(--serif);font-size:13px;font-weight:600;color:var(--inkLight);transition:.15s;white-space:nowrap}
+  .pf-subnav button.on{background:var(--ink);color:var(--bg)}
+  .pf-subnav button:hover:not(.on){color:var(--ink)}
+  .pf-sub{display:none}
+  .pf-sub.on{display:block}
 </style>
 </head>
 <body>
@@ -2987,7 +3007,6 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     {id:"mission",  ico:"\u25CE", label:"Mission Control", live:true},
     {id:"markets",  ico:"\u25C8", label:"Markets",   live:true},
     {id:"screeners",ico:"\u25A6", label:"Screeners", live:true},
-    {id:"trades",   ico:"\u21C4", label:"Trades",    live:true},
     {id:"portfolio",ico:"\u25A4", label:"Portfolio", live:true},
     {id:"research", ico:"\u25AD", label:"Research",  live:true},
     {id:"news",     ico:"\u25B0", label:"News",      live:false, need:"News + institutional-flow APIs"},
@@ -11923,14 +11942,23 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
      initialise so the Mission Control tile and the screener flags see them. */
   function pxBootAll(){
   // ---------- boot: Phoenix as a single scrolling page ----------
+  /* Trade folded into Portfolio: it is the same subject at two zoom levels,
+     and production already owns both renderers. The sub-nav below switches
+     between them without either page being rewritten. */
+  /* PXS both BUILDS the page sections and drives the nav, so "trades" must
+     stay here or the Trade page is never constructed. It is filtered out of
+     the link bar below instead, because it now lives as a tab inside
+     Portfolio. */
   var PXS=[["mission","Mission Control"],["markets","Markets"],["screeners","Screeners"],
            ["trades","Trade"],["portfolio","Portfolio"],["research","Research"]];
+  var PX_HIDE_LINK={trades:1};
 
   PXS.forEach(function(p){ try{ go(p[0]); }catch(e){ console.warn("init "+p[0],e); } });
   Array.prototype.forEach.call(document.querySelectorAll(".page"),function(p){p.classList.add("active");});
 
   var pxLinks=document.getElementById("pxlinks");
   PXS.forEach(function(p,i){
+    if(PX_HIDE_LINK[p[0]]) return;
     var a=document.createElement("a");
     a.textContent=p[1]; a.id="pxl_"+p[0]; if(i===0) a.className="on";
     a.addEventListener("click",function(){
@@ -12379,4 +12407,61 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   <div class="ed-colophon">Phoenix OS v1.0 · not investment advice</div>
 </div></div>
 </body>
+
+<script>
+/* ============================================================
+   Portfolio + Trade merge.
+   Both sections keep their own markup and renderers untouched; they are
+   simply re-parented under one page and switched by a sub-nav. Nothing
+   about how either one draws itself changes.
+   ============================================================ */
+(function(){
+  function init(){
+    var pf=document.getElementById("page-portfolio"), tr=document.getElementById("page-trades");
+    if(!pf||!tr||document.getElementById("pfSubnav")) return;
+
+    // everything already inside Portfolio becomes one tab body
+    var body=document.createElement("div");
+    body.className="pf-sub on"; body.dataset.sub="portfolio";
+    while(pf.firstChild) body.appendChild(pf.firstChild);
+
+    var nav=document.createElement("div");
+    nav.className="pf-subnav"; nav.id="pfSubnav";
+    nav.innerHTML='<button class="on" data-sub="portfolio">Portfolio</button>'+
+                  '<button data-sub="trades">Trades</button>';
+
+    // the Trade page moves in as the second tab, markup intact
+    var tw=document.createElement("div");
+    tw.className="pf-sub"; tw.dataset.sub="trades";
+    tr.parentNode.removeChild(tr);
+    tr.style.display="block";
+    tw.appendChild(tr);
+
+    pf.appendChild(nav); pf.appendChild(body); pf.appendChild(tw);
+
+    nav.addEventListener("click",function(e){
+      var b=e.target.closest("button[data-sub]"); if(!b) return;
+      nav.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on",x===b); });
+      pf.querySelectorAll(".pf-sub").forEach(function(p){
+        p.classList.toggle("on", p.dataset.sub===b.dataset.sub);
+      });
+      // let any chart inside the revealed tab re-measure now it has width
+      window.dispatchEvent(new Event("resize"));
+    });
+
+    // a stale #pxl_trades link would scroll to a node that has moved
+    var old=document.getElementById("pxl_trades");
+    if(old&&old.parentNode) old.parentNode.removeChild(old);
+  }
+  /* Production builds its page sections asynchronously via buildPage(), so
+     the nodes may not exist at load. Poll until both are present, then stop. */
+  var tries=0;
+  var poll=setInterval(function(){
+    tries++;
+    if(document.getElementById("page-portfolio")&&document.getElementById("page-trades")){
+      init(); clearInterval(poll);
+    } else if(tries>60){ clearInterval(poll); }
+  },250);
+})();
+</script>
 </html>
