@@ -2320,6 +2320,86 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   .pf-subnav button:hover:not(.on){color:var(--ink)}
   .pf-sub{display:none}
   .pf-sub.on{display:block}
+
+/* ============================================================
+   NEW UI SKIN — applied to production's EXISTING components.
+   No markup added, no renderer touched, no new component invented.
+   Only the card language, type weights and control shapes change.
+   ============================================================ */
+/* --- containers --- */
+.pxcard,.tile{border-radius:14px!important;border:1px solid var(--line)!important;
+  background:var(--card)!important;box-shadow:0 1px 2px rgba(45,40,34,.05),0 12px 32px -14px rgba(45,40,34,.16)!important}
+.clabel,.mlabel,.scr-th,.pf-per,.sec-tog{font-family:var(--serif)!important;font-size:10px!important;
+  font-weight:700!important;letter-spacing:.09em!important;text-transform:uppercase!important;color:var(--inkFade)!important}
+.pxbig,.mval,.pf-bal,.pf-gauge-v{font-weight:800!important;letter-spacing:-.04em!important}
+
+/* --- screener: filter bar + controls --- */
+.scr-controls{background:var(--card)!important;border:1px solid var(--line)!important;
+  border-radius:14px!important;padding:16px 18px!important;box-shadow:0 1px 2px rgba(45,40,34,.04)!important}
+.scr-sel,.scr-search input,.scr-search{border-radius:10px!important;border:1px solid var(--line2)!important;
+  background:var(--bg)!important;font-family:var(--serif)!important;font-size:13px!important;font-weight:500!important;
+  color:var(--ink)!important;padding:9px 12px!important;transition:border-color .14s!important}
+.scr-sel:hover{border-color:var(--gold)!important}
+.scr-pill,.scr-preset,.scr-tf button,.scr-book{border-radius:999px!important;border:1px solid var(--line2)!important;
+  background:transparent!important;font-family:var(--serif)!important;font-size:12px!important;font-weight:600!important;
+  padding:7px 15px!important;color:var(--inkLight)!important;transition:.14s!important}
+.scr-pill.on,.scr-preset.on,.scr-tf button.on,.scr-book.on{background:var(--gold)!important;
+  border-color:var(--gold)!important;color:#fff!important}
+.scr-books{gap:3px!important;padding:4px!important;border-radius:999px!important;
+  background:rgba(128,128,128,.09)!important;border:0!important}
+.scr-books .scr-book{border:0!important}
+.scr-books .scr-book.on{background:var(--ink)!important;color:var(--bg)!important}
+
+/* --- screener: results table --- */
+.scr-table{border-collapse:separate!important;border-spacing:0!important}
+.scr-th{padding:12px 10px!important;border-bottom:1px solid var(--line)!important;background:transparent!important}
+.scr-tr td{padding:14px 10px!important;border-bottom:1px solid var(--line)!important;font-size:13.5px!important}
+.scr-tr:hover{background:rgba(128,128,128,.045)!important}
+.scr-setup{border-radius:999px!important;font-family:var(--serif)!important;font-size:10.5px!important;
+  font-weight:700!important;letter-spacing:.04em!important;padding:4px 11px!important}
+.scr-bar-track{border-radius:3px!important;background:rgba(128,128,128,.14)!important;height:5px!important}
+.scr-bar-fill{border-radius:3px!important;background:var(--gold)!important}
+.scr-met{font-family:var(--mono)!important;font-variant-numeric:tabular-nums!important}
+.scr-exp{border-radius:14px!important;border:1px solid var(--line)!important;background:var(--card)!important}
+
+/* --- sectors / industries / rotation --- */
+.sec-row{padding:9px 0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important}
+.sec-row:hover{background:rgba(128,128,128,.045)!important}
+.sec-bar-wrap,.sec-bar{border-radius:3px!important}
+.sec-bar-wrap{background:rgba(128,128,128,.12)!important}
+.sec-val{font-family:var(--mono)!important;font-variant-numeric:tabular-nums!important;font-weight:600!important}
+.sec-car{border-radius:14px!important;border:1px solid var(--line)!important;background:var(--card)!important;
+  box-shadow:0 1px 2px rgba(45,40,34,.05)!important;transition:transform .14s,border-color .14s!important}
+.sec-car:hover{transform:translateY(-2px)!important;border-color:var(--line2)!important}
+.nv-row{border-bottom:1px solid var(--line)!important;padding:10px 0!important}
+.nv-row:hover{background:rgba(128,128,128,.045)!important}
+.nv-rs{border-radius:999px!important;font-family:var(--mono)!important;font-size:10.5px!important;font-weight:600!important;
+  padding:3px 9px!important;border:1px solid var(--line2)!important}
+.nv-srch,.nv-srch input{border-radius:10px!important;border:1px solid var(--line2)!important;background:var(--bg)!important}
+.nv-strip{border-radius:12px!important;border:1px solid var(--line)!important;background:var(--card)!important}
+
+/* --- portfolio --- */
+.pf-grid,.pf-mgrid{gap:14px!important}
+.pf-cell,.pf-m{border-radius:14px!important;border:1px solid var(--line)!important;background:var(--card)!important;
+  box-shadow:0 1px 2px rgba(45,40,34,.05)!important;padding:18px 19px!important}
+.pf-seg,.pf-tf,.pf-toggle,.pf-tog,.pf-switch{border-radius:999px!important}
+.pf-seg{border:1px solid var(--line2)!important;background:transparent!important;font-family:var(--serif)!important;
+  font-size:12px!important;font-weight:600!important;padding:7px 15px!important;color:var(--inkLight)!important}
+.pf-seg.on{background:var(--ink)!important;border-color:var(--ink)!important;color:var(--bg)!important}
+.pf-goalbar,.pf-goalrow{border-radius:6px!important}
+.pf-strip{border-radius:14px!important;border:1px solid var(--line)!important;background:var(--card)!important}
+.pf-note,.pf-warn,.pf-lesson,.mc-lesson{border-radius:11px!important;border-left:3px solid var(--gold)!important;
+  background:rgba(128,128,128,.05)!important;padding:14px 16px!important}
+.pf-prose,.pf-expsay{font-size:14.5px!important;line-height:1.68!important}
+.pf-conc-row{border-radius:8px!important}
+.mc-row,.mc-irow,.mc-mrow{border-bottom:1px solid var(--line)!important}
+.mc-grid{gap:12px!important}
+.mc-v,.mc-verdict{font-weight:800!important;letter-spacing:-.035em!important}
+.mcv-chip{border-radius:999px!important;font-family:var(--serif)!important;font-weight:600!important}
+
+/* --- every table in the app picks up the new rhythm --- */
+table th{font-family:var(--serif)!important;font-size:10px!important;font-weight:700!important;
+  letter-spacing:.09em!important;text-transform:uppercase!important;color:var(--inkFade)!important}
 </style>
 <style id="px-additions">
   /* staleness: data from a previous day must LOOK different */
