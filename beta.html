@@ -291,6 +291,47 @@ td.n,th.n{width:16%}
 .deb b{display:block;font-size:14.5px;font-weight:700;letter-spacing:-.012em;color:var(--ink)}
 .deb span{display:block;margin-top:3px;font-size:12.5px;color:var(--muted)}
 .pftab{display:none} .pftab.on{display:block}
+/* instrument grid */
+.igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.icard{padding:14px 15px;border-radius:12px;background:var(--card);border:1px solid var(--hairline);cursor:pointer;transition:.14s}
+.icard:hover{border-color:var(--border);transform:translateY(-1px)}
+.icard .t{display:flex;align-items:baseline;justify-content:space-between}
+.icard .nm3{font-size:12.5px;font-weight:700;letter-spacing:-.01em}
+.icard .tk3{font-family:var(--mono);font-size:9.5px;color:var(--muted)}
+.icard .vl3{font-family:var(--figure);font-variant-numeric:tabular-nums;font-weight:800;
+  font-size:19px;letter-spacing:-.03em;margin-top:7px}
+.icard .ch3{font-family:var(--figure);font-size:11.5px;font-weight:600;margin-top:2px}
+.icard svg{display:block;margin-top:8px}
+/* toolbar chips */
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip2{border:1px solid var(--border);background:transparent;border-radius:999px;padding:5px 12px;
+  cursor:pointer;font-family:var(--sans);font-size:11.5px;font-weight:600;color:var(--muted);transition:.14s}
+.chip2.on{background:var(--ink);border-color:var(--ink);color:var(--background)}
+.chip2 i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+/* heat / correlation matrix */
+.matrix{display:grid;gap:2px;font-family:var(--mono);font-size:10px}
+.matrix div{aspect-ratio:1;display:grid;place-items:center;border-radius:3px;color:var(--ink)}
+.matrix .hd2{background:transparent;font-weight:700;color:var(--muted);font-size:9.5px}
+/* sector drill */
+.srow{display:grid;grid-template-columns:96px 1fr 62px;gap:12px;align-items:center;
+  padding:8px 0;border-bottom:1px solid var(--hairline);cursor:pointer}
+.srow:last-child{border-bottom:0}
+.srow:hover .snm{color:var(--ember)}
+.snm{font-size:12.5px;font-weight:600;transition:color .14s}
+.sbarw{height:9px;position:relative;background:rgba(128,128,128,.10);border-radius:3px}
+.sbarw i{position:absolute;top:0;bottom:0;border-radius:3px}
+.sval{text-align:right;font-family:var(--figure);font-variant-numeric:tabular-nums;font-size:12px;font-weight:600}
+.drill{margin:6px 0 12px;padding:12px 14px;border-radius:11px;background:rgba(128,128,128,.05);
+  border:1px solid var(--hairline)}
+.drill .dh{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.brief p{font-size:14.5px;line-height:1.68;color:var(--ink);margin:0 0 12px}
+.brief p:first-of-type::first-letter{float:left;font-size:40px;line-height:.86;padding:4px 9px 0 0;
+  color:var(--ember);font-weight:800}
+.brief .sg{font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.cmt{padding:12px 0;border-bottom:1px solid var(--hairline)}
+.cmt:last-child{border-bottom:0}
+.cmt .ch{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.cmt .cb{font-size:13px;line-height:1.55;color:var(--ink-2,var(--muted))}
 .sbar{display:flex;align-items:center;gap:12px;margin-bottom:10px}
 .sbar .nm2{width:52px;font-size:12px;font-weight:600;color:var(--ink);flex:none}
 .sbar .tr{flex:1;height:9px;position:relative}
@@ -460,6 +501,11 @@ td.n,th.n{width:16%}
               </div>
             </div>
 
+            <div class="panel brief">
+              <div class="cardhd"><h2>Daily brief</h2><span class="meta" id="briefAsof">—</span></div>
+              <div style="padding:14px 20px 18px" id="briefBody"></div>
+            </div>
+
             <div class="panel">
               <div class="cardhd"><h2>Open positions</h2><span class="meta" id="posCount">—</span></div>
               <div style="padding:0 20px 6px">
@@ -494,6 +540,11 @@ td.n,th.n{width:16%}
             </div>
 
             <div class="panel" style="padding:19px 20px">
+              <div class="cardhd" style="padding:0;margin-bottom:12px"><h2>Calendar</h2><span class="meta">next 10 days</span></div>
+              <div id="calBody"></div>
+            </div>
+
+            <div class="panel" style="padding:19px 20px">
               <div class="cardhd" style="padding:0;margin-bottom:12px"><h2>Screener</h2><span class="meta" id="scrAsof">—</span></div>
               <div class="lvl"><span class="lb2">Gate passers</span><span class="vv num" id="mGate">—</span></div>
               <div class="lvl"><span class="lb2">Watched intraday</span><span class="vv num" id="mWatch">—</span></div>
@@ -506,59 +557,76 @@ td.n,th.n{width:16%}
 
       <!-- MARKETS -->
       <section class="page" id="p-markets">
-        <div class="idx panel">
-          <div><span class="k">S&amp;P 500</span><span class="v">5,682.14</span><span class="c up">+0.82%</span></div>
-          <div><span class="k">Nasdaq</span><span class="v">18,204.6</span><span class="c up">+1.14%</span></div>
-          <div><span class="k">VIX</span><span class="v">15.45</span><span class="c up">-2.52%</span></div>
-          <div><span class="k">Gamma flip</span><span class="v">6,410</span><span class="c">positive</span></div>
+        <div class="idx panel" style="margin-bottom:16px">
+          <div id="mSPX"><span class="k">S&amp;P 500</span><span class="v">—</span><span class="c">—</span></div>
+          <div id="mVIX"><span class="k">VIX</span><span class="v">—</span><span class="c">—</span></div>
+          <div id="mFLIP"><span class="k">Gamma flip</span><span class="v">—</span><span class="c">—</span></div>
+          <div id="mNET"><span class="k">Net gamma</span><span class="v">—</span><span class="c">—</span></div>
         </div>
-        <div class="grid g4" style="margin-bottom:16px">
-          <div class="card kpi" id="mkDOW"><div class="lb">Dow Jones</div><div class="v">—</div><div class="d up">—</div></div>
-          <div class="card kpi" id="mkRUT"><div class="lb">Russell 2000</div><div class="v">—</div><div class="d up">—</div></div>
-          <div class="card kpi" id="mkTNX"><div class="lb">US 10Y</div><div class="v">—</div><div class="d up">—</div></div>
-          <div class="card kpi" id="mkDXY"><div class="lb">Dollar index</div><div class="v">—</div><div class="d down">—</div></div>
+
+        <div class="panel" style="margin-bottom:16px">
+          <div class="cardhd"><h2>Macro instruments</h2><span class="meta">11 · daily close, live where available</span></div>
+          <div style="padding:14px 20px 20px"><div class="igrid" id="macroGrid"></div></div>
         </div>
-        <div class="cols">
-          <div class="stack">
-            <div class="panel">
-              <div class="cardhd"><h2>Sector rotation</h2><span class="meta">1-day · 11 SPDR sectors</span></div>
-              <div style="padding:16px 20px 20px" id="sectors"></div>
+
+        <div class="cols" style="margin-bottom:16px">
+          <div class="panel">
+            <div class="cardhd">
+              <h2 id="chartTitle">S&amp;P 500 · daily</h2>
+              <div class="chips">
+                <button class="chip2 on" data-ov="ema50"><i style="background:#E0642B"></i>EMA 50</button>
+                <button class="chip2 on" data-ov="ema200"><i style="background:#12405F"></i>EMA 200</button>
+                <button class="chip2" data-ov="gex"><i style="background:#B4801C"></i>GEX</button>
+              </div>
             </div>
-            <div class="panel">
-              <div class="cardhd"><h2>Commodities &amp; crypto</h2><span class="meta">live · 5-minute lane</span></div>
-              <div style="padding:4px 20px 6px">
-                <table>
-                  <thead><tr><th>Instrument</th><th class="n">Last</th><th class="n">Day</th><th class="n">1W</th><th class="n">1M</th></tr></thead>
-                  <tbody>
-                    <tr id="cmGOLD"><td><span class="sym">GOLD</span><span class="co">Front future</span></td><td class="n">4,700.10</td><td class="n up">+1.34%</td><td class="n up">+2.8%</td><td class="n up">+6.1%</td></tr>
-                    <tr id="cmOIL"><td><span class="sym">OIL</span><span class="co">WTI front</span></td><td class="n">80.74</td><td class="n down">−1.97%</td><td class="n down">−3.4%</td><td class="n down">−8.2%</td></tr>
-                    <tr id="cmBTC"><td><span class="sym">BTC</span><span class="co">Bitcoin spot</span></td><td class="n">79,102</td><td class="n up">+0.58%</td><td class="n up">+4.2%</td><td class="n down">−1.9%</td></tr>
-                    <tr id="cmTLT"><td><span class="sym">TLT</span><span class="co">20Y+ Treasuries</span></td><td class="n">82.56</td><td class="n up">+0.41%</td><td class="n up">+1.1%</td><td class="n down">−2.5%</td></tr>
-                  </tbody>
-                </table>
+            <div style="padding:12px 20px 8px">
+              <div class="segs" style="width:max-content;margin-bottom:12px" id="mkTf">
+                <button>1M</button><button class="on">3M</button><button>6M</button><button>1Y</button>
+              </div>
+              <svg width="100%" height="300" viewBox="0 0 760 300" preserveAspectRatio="none" id="mkChart"></svg>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="cardhd"><h2>VIX term structure</h2><span class="meta" id="vixState">—</span></div>
+            <div style="padding:14px 20px 18px">
+              <svg width="100%" height="180" viewBox="0 0 360 180" id="vixPlot"></svg>
+              <div id="vixNote" class="cap" style="margin-top:12px;line-height:1.55"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols" style="margin-bottom:16px">
+          <div class="panel">
+            <div class="cardhd"><h2>GEX by strike</h2><span class="meta" id="gexMeta">—</span></div>
+            <div style="padding:14px 20px 20px">
+              <svg width="100%" height="230" viewBox="0 0 760 230" preserveAspectRatio="none" id="gexHist"></svg>
+              <div class="chips" style="margin-top:12px">
+                <span class="chip2"><i style="background:var(--up)"></i>Call gamma</span>
+                <span class="chip2"><i style="background:var(--down)"></i>Put gamma</span>
+                <span class="chip2"><i style="background:var(--ember)"></i>Spot</span>
               </div>
             </div>
           </div>
-          <div class="stack">
-            <div class="panel" style="padding:19px 20px">
-              <h2 style="margin:0 0 4px;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.022em;color:var(--ink)">Gamma structure</h2>
-              <p class="cap" style="margin:0 0 16px">Elliott briefing · frozen at index</p>
-              <div class="lvl"><span class="lb2">Net gamma</span><span class="vv num" id="gexNet">—</span></div>
-              <div class="lvl"><span class="lb2">SPX spot</span><span class="vv num" id="gexSpot" style="color:var(--ember);font-weight:700">—</span></div>
-              <div class="lvl"><span class="lb2">Gamma flip</span><span class="vv num" id="gexFlip">—</span></div>
-              <div class="lvl"><span class="lb2">Regime</span><span class="vv num" id="gexReg">—</span></div>
-              <div class="sig" style="margin-top:14px">
-                <div class="hd">Positive gamma regime</div>
-                <div class="dt">Dealers buy weakness and sell strength, which cushions downward moves. Expect mean reversion inside the walls.</div>
-              </div>
-            </div>
-            <div class="panel" style="padding:19px 20px">
-              <h2 style="margin:0 0 16px;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.022em;color:var(--ink)">Regime</h2>
-              <div class="kpi" style="padding:0"><div class="lb">Macro state</div><div class="v" style="font-size:26px">RISK ON</div><div class="d up">↗ confidence 80%</div></div>
-              <div style="margin-top:16px"><div class="lvl"><span class="lb2">Breadth</span><span class="vv num up">improving</span></div>
-              <div class="lvl"><span class="lb2">Credit · HY OAS</span><span class="vv num">273bp</span></div>
-              <div class="lvl"><span class="lb2">VIX term</span><span class="vv num">contango</span></div></div>
-            </div>
+          <div class="panel" style="padding:19px 20px">
+            <h2 style="margin:0 0 4px;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.022em">Gamma structure</h2>
+            <p class="cap" style="margin:0 0 14px">Frozen at index · Elliott briefing</p>
+            <div class="lvl"><span class="lb2">Net gamma</span><span class="vv num" id="gexNet">—</span></div>
+            <div class="lvl"><span class="lb2">Gamma flip</span><span class="vv num" id="gexFlip">—</span></div>
+            <div class="lvl"><span class="lb2">SPX spot</span><span class="vv num" id="gexSpot">—</span></div>
+            <div class="lvl"><span class="lb2">Regime</span><span class="vv num" id="gexReg">—</span></div>
+            <div class="lvl"><span class="lb2">Net charm / day</span><span class="vv num" id="gexCharm">—</span></div>
+            <div class="lvl"><span class="lb2">Net vanna / volpt</span><span class="vv num" id="gexVanna">—</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="cardhd">
+            <h2>Sectors &amp; industries</h2>
+            <div class="segs" id="rotTf"><button>1D</button><button class="on">1W</button><button>1M</button><button>3M</button></div>
+          </div>
+          <div style="padding:14px 20px 20px">
+            <p class="cap" style="margin:0 0 12px">Relative strength versus the index. Tap a sector to open its industries, then a industry for its tickers.</p>
+            <div id="sectorTree"></div>
           </div>
         </div>
       </section>
@@ -597,7 +665,7 @@ td.n,th.n{width:16%}
       <section class="page" id="p-portfolio">
         <div class="segs" style="margin-bottom:16px;width:max-content" id="pfsegs">
           <button class="on" data-t="pos">Positions</button><button data-t="trd">Trades</button>
-          <button data-t="ana">Analytics</button><button data-t="deb">Debrief</button>
+          <button data-t="risk">Risk</button><button data-t="ana">Analytics</button><button data-t="deb">Debrief</button>
         </div>
         <div class="grid g4" style="margin-bottom:16px">
           <div class="card kpi"><div class="lb">Unrealized</div><div class="v" id="pfUnreal">$2,284</div><div class="d">open positions, live</div></div>
@@ -641,6 +709,32 @@ td.n,th.n{width:16%}
           </div>
         </div>
 
+        <div class="pftab" data-p="risk">
+          <div class="cols" style="margin-bottom:16px">
+            <div class="panel">
+              <div class="cardhd"><h2>Correlation</h2><span class="meta">60-day, open book + proxies</span></div>
+              <div style="padding:16px 20px 20px"><div id="corrGrid"></div>
+                <p class="cap" style="margin-top:12px">Deep red is co-movement. Two positions above 0.7 are one position wearing two tickers.</p></div>
+            </div>
+            <div class="panel">
+              <div class="cardhd"><h2>Exposure</h2><span class="meta">by sector</span></div>
+              <div style="padding:16px 20px 20px" id="expBars"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="cardhd"><h2>Monte Carlo</h2><span class="meta" id="mcMeta">2,000 paths · resampled from closed trades</span></div>
+            <div style="padding:14px 20px 20px">
+              <svg width="100%" height="260" viewBox="0 0 760 260" preserveAspectRatio="none" id="mcPlot"></svg>
+              <div class="grid g4" style="margin-top:14px">
+                <div><span class="lb2">Median</span><div class="vv num" id="mcMed">—</div></div>
+                <div><span class="lb2">5th pct</span><div class="vv num" id="mcP5">—</div></div>
+                <div><span class="lb2">95th pct</span><div class="vv num" id="mcP95">—</div></div>
+                <div><span class="lb2">Risk of ruin</span><div class="vv num" id="mcRuin">—</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="pftab" data-p="ana">
           <div class="cols">
             <div class="panel">
@@ -663,6 +757,10 @@ td.n,th.n{width:16%}
         </div>
 
         <div class="pftab" data-p="deb">
+          <div class="panel" style="padding:19px 20px;margin-bottom:16px">
+            <div class="cardhd" style="padding:0;margin-bottom:6px"><h2>Exit notes</h2><span class="meta" id="cmtCount">—</span></div>
+            <div id="cmtBody"></div>
+          </div>
           <div class="panel" style="padding:22px 24px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
               <h2 id="debName" style="margin:0;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.022em;color:var(--ink)">Exit debrief</h2>
@@ -1054,8 +1152,390 @@ if(ps) ps.addEventListener("click",function(e){
   apply("light");
 })();
 
-hydrate();
-setInterval(hydrate, 60000);
+
+/* ============================================================
+   COMPONENT RENDERERS
+   Where the engine supplies data we use it; where a file is not yet
+   wired the component draws a deterministic PLACEHOLDER so the layout
+   can be judged. Placeholders are labelled "sample" — never dressed up
+   as real output.
+   ============================================================ */
+function rnd(seed){ return function(){ seed=(seed*1664525+1013904223)%4294967296; return seed/4294967296; }; }
+function walk(n,seed,drift,vol,base){ var r=rnd(seed),v=base||100,o=[];
+  for(var i=0;i<n;i++){ v+=drift+(r()-0.5)*vol; o.push(v); } return o; }
+
+/* ---- macro instrument grid ---- */
+var MACRO=[["SPX","S&P 500",2],["NDX","Nasdaq",1],["DOW","Dow Jones",0],["RUT","Russell 2000",0],
+  ["VIX","VIX",2],["US10Y","US 10Y",2],["DXY","Dollar index",2],["GOLD","Gold",1],
+  ["OIL","WTI crude",2],["BTC","Bitcoin",0],["TLT","20Y+ Treasuries",2]];
+function paintMacroGrid(){
+  var g=el("macroGrid"); if(!g) return;
+  g.innerHTML=MACRO.map(function(m,i){
+    var q=PX[m[0]], inst=(D.macro_daily&&D.macro_daily.instruments)||{};
+    var bars=(inst[m[0]]&&inst[m[0]].bars)||[];
+    var series=bars.length?bars.slice(-60).map(function(b){return num(b.c);}).filter(function(x){return x!=null;})
+                          :walk(60,7+i*13,(i%3)-1,2.2,100);
+    var last=q?num(q.last):(series.length?series[series.length-1]:null);
+    var chg=q?num(q.chg_pct):((series[series.length-1]/series[0]-1)*100);
+    var up=(chg||0)>=0, col=up?"#1B9C63":"#D94330";
+    return '<div class="icard" data-ins="'+m[0]+'">'+
+      '<div class="t"><span class="nm3">'+m[1]+'</span><span class="tk3">'+m[0]+'</span></div>'+
+      '<div class="vl3">'+(last==null?"\u2014":fmt(last,m[2]))+(m[0]==="US10Y"?"%":"")+'</div>'+
+      '<div class="ch3 '+(up?"up":"down")+'">'+pct(chg)+(q?"":" · sample")+'</div>'+
+      '<svg width="100%" height="34" viewBox="0 0 200 34" preserveAspectRatio="none">'+
+      '<path d="'+line(series,200,34,3)+'" fill="none" stroke="'+col+'" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>'+
+      '</div>';
+  }).join("");
+  g.querySelectorAll(".icard").forEach(function(c){
+    c.addEventListener("click",function(){ MK_INS=c.dataset.ins; paintMkChart(); });
+  });
+}
+
+/* ---- main chart with EMA + GEX overlays ---- */
+var MK_INS="SPX", MK_TF="3M", MK_OV={ema50:true,ema200:true,gex:false};
+function ema(v,p){ var k=2/(p+1),o=[],e=v[0];
+  for(var i=0;i<v.length;i++){ e=v[i]*k+e*(1-k); o.push(e); } return o; }
+function paintMkChart(){
+  var e=el("mkChart"); if(!e) return;
+  var inst=(D.macro_daily&&D.macro_daily.instruments)||{};
+  var bars=(MK_INS==="SPX"&&D.spx&&D.spx.bars)?D.spx.bars:((inst[MK_INS]&&inst[MK_INS].bars)||[]);
+  var n={"1M":22,"3M":66,"6M":132,"1Y":252}[MK_TF]||66;
+  var v=bars.length?bars.slice(-n).map(function(b){return num(b.c);}).filter(function(x){return x!=null;})
+                   :walk(n,41,0.35,9,7400);
+  set("chartTitle",(MACRO.filter(function(m){return m[0]===MK_INS;})[0]||["","S&P 500"])[1]+" · daily");
+  var W=760,H=300,pad=12;
+  var all=v.slice(); if(MK_OV.ema50) all=all.concat(ema(v,50)); if(MK_OV.ema200) all=all.concat(ema(v,200));
+  var lo=Math.min.apply(null,all), hi=Math.max.apply(null,all), sp=(hi-lo)||1;
+  function Y(x){ return pad+(H-pad*2)-((x-lo)/sp)*(H-pad*2); }
+  function P(a){ return a.map(function(x,i){return (i?"L":"M")+((i/(a.length-1))*W).toFixed(1)+" "+Y(x).toFixed(1);}).join(" "); }
+  var g=(D.gex&&D.gex.overview)||{}, out="";
+  out+='<defs><linearGradient id="mkg" x1="0" y1="0" x2="0" y2="1">'+
+    '<stop offset="0%" stop-color="#E0642B" stop-opacity=".22"/>'+
+    '<stop offset="100%" stop-color="#E0642B" stop-opacity="0"/></linearGradient></defs>';
+  out+='<path d="'+P(v)+' L'+W+' '+H+' L0 '+H+' Z" fill="url(#mkg)"/>';
+  if(MK_OV.gex&&num(g.gamma_flip)!=null&&num(g.gamma_flip)>lo&&num(g.gamma_flip)<hi){
+    var fy=Y(num(g.gamma_flip));
+    out+='<line x1="0" y1="'+fy+'" x2="'+W+'" y2="'+fy+'" stroke="#B4801C" stroke-width="1.2" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/>';
+  }
+  if(MK_OV.ema200) out+='<path d="'+P(ema(v,200))+'" fill="none" stroke="#12405F" stroke-width="1.4" vector-effect="non-scaling-stroke"/>';
+  if(MK_OV.ema50)  out+='<path d="'+P(ema(v,50))+'" fill="none" stroke="#E0642B" stroke-width="1.4" stroke-opacity=".55" vector-effect="non-scaling-stroke"/>';
+  out+='<path d="'+P(v)+'" fill="none" stroke="#E0642B" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>';
+  e.innerHTML=out;
+}
+
+/* ---- GEX histogram by strike ---- */
+function paintGexHist(){
+  var e=el("gexHist"); if(!e) return;
+  var g=(D.gex&&D.gex.overview)||{}, spot=num(g.spx_spot)||7724, flip=num(g.gamma_flip)||7666;
+  var strikes=(D.gex&&D.gex.strikes)||null, rows;
+  if(strikes&&strikes.length){ rows=strikes.map(function(x){return [num(x.strike),num(x.gex)];}); }
+  else { var r=rnd(97); rows=[];
+    for(var k=spot-260;k<=spot+260;k+=20){
+      var d=(k-flip)/260, mag=(1-Math.abs(d))*(r()*0.8+0.4);
+      rows.push([k,(k>=flip?1:-1)*mag*9]); } }
+  var W=760,H=230,mid=H*0.62;
+  var mx=Math.max.apply(null,rows.map(function(x){return Math.abs(x[1]);}))||1;
+  var bw=Math.max(3,W/rows.length-2), out="";
+  rows.forEach(function(x,i){
+    var h=Math.abs(x[1])/mx*(H*0.5), px=(i/(rows.length-1))*(W-bw);
+    out+='<rect x="'+px.toFixed(1)+'" y="'+(x[1]>=0?mid-h:mid).toFixed(1)+'" width="'+bw.toFixed(1)+
+      '" height="'+h.toFixed(1)+'" rx="1" fill="'+(x[1]>=0?"#1B9C63":"#D94330")+'" opacity=".82"/>';
+  });
+  var sx=(rows.findIndex(function(x){return x[0]>=spot;})/(rows.length-1))*(W-bw);
+  out+='<line x1="'+sx.toFixed(1)+'" y1="6" x2="'+sx.toFixed(1)+'" y2="'+(H-18)+'" stroke="#E0642B" stroke-width="2" vector-effect="non-scaling-stroke"/>';
+  out+='<line x1="0" y1="'+mid+'" x2="'+W+'" y2="'+mid+'" stroke="rgba(128,128,128,.35)" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+  e.innerHTML=out;
+  set("gexMeta",(strikes&&strikes.length)?("spot "+fmt(spot,0)+" · flip "+fmt(flip,0))
+      :("spot "+fmt(spot,0)+" · flip "+fmt(flip,0)+" · shape sample"));
+}
+
+/* ---- VIX term structure ---- */
+function paintVix(){
+  var e=el("vixPlot"); if(!e) return;
+  var t=D.vix&&D.vix.term, pts;
+  if(t&&t.length){ pts=t.map(function(x){return [x.label||x.month,num(x.value)];}); }
+  else pts=[["spot",14.6],["M1",15.4],["M2",16.6],["M3",17.8],["M4",18.9],["M5",19.8],["M6",20.4]];
+  var W=360,H=180,pad=26;
+  var vals=pts.map(function(p){return p[1];});
+  var lo=Math.min.apply(null,vals)-1, hi=Math.max.apply(null,vals)+1, sp=(hi-lo)||1;
+  function X(i){ return pad+(i/(pts.length-1))*(W-pad*2); }
+  function Y(v){ return 14+(H-46)-((v-lo)/sp)*(H-46); }
+  var d=pts.map(function(p,i){return (i?"L":"M")+X(i).toFixed(1)+" "+Y(p[1]).toFixed(1);}).join(" ");
+  var out='<defs><linearGradient id="vg" x1="0" y1="0" x2="0" y2="1">'+
+    '<stop offset="0%" stop-color="#12405F" stop-opacity=".20"/>'+
+    '<stop offset="100%" stop-color="#12405F" stop-opacity="0"/></linearGradient></defs>';
+  out+='<path d="'+d+' L'+X(pts.length-1)+' '+(H-24)+' L'+X(0)+' '+(H-24)+' Z" fill="url(#vg)"/>';
+  out+='<path d="'+d+'" fill="none" stroke="#12405F" stroke-width="2" stroke-linejoin="round"/>';
+  pts.forEach(function(p,i){
+    out+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="3" fill="#12405F"/>';
+    out+='<text x="'+X(i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" font-size="9" fill="currentColor" opacity=".5">'+p[0]+'</text>';
+  });
+  e.innerHTML=out; e.style.color="var(--muted)";
+  var contango=vals[vals.length-1]>vals[0];
+  set("vixState",contango?"contango":"backwardation");
+  var nb=el("vixNote");
+  if(nb) nb.textContent=(contango
+    ? "Front below back: the curve is in contango, which is the ordinary state and consistent with a positive-gamma regime. Spot "+vals[0].toFixed(1)+" rising to "+vals[vals.length-1].toFixed(1)+" at the back."
+    : "Front above back: backwardation. The market is paying up for near-dated protection, which historically coincides with the fastest drawdowns.")
+    + (t&&t.length?"":" (sample curve)");
+}
+
+/* ---- sector / industry / ticker drill-down ---- */
+var SECTORS=[["Energy","XLE"],["Industrials","XLI"],["Financials","XLF"],["Materials","XLB"],
+  ["Technology","XLK"],["Health Care","XLV"],["Cons. discretionary","XLY"],["Communication","XLC"],
+  ["Cons. staples","XLP"],["Utilities","XLU"],["Real estate","XLRE"]];
+var IND={XLE:["Oil & gas E&P","Refiners","Equipment & services","Midstream"],
+  XLI:["Machinery","Aerospace & defence","Building products","Rail"],
+  XLF:["Diversified banks","Insurance","Capital markets","Regional banks"],
+  XLB:["Chemicals","Metals & mining","Containers","Construction materials"],
+  XLK:["Semiconductors","Software","Hardware","IT services"],
+  XLV:["Pharma","Biotech","Devices","Providers"],
+  XLY:["Retail","Autos","Hotels & leisure","Homebuilders"],
+  XLC:["Interactive media","Entertainment","Telecom","Publishing"],
+  XLP:["Beverages","Household","Food retail","Tobacco"],
+  XLU:["Electric","Multi-utilities","Water","Independent power"],
+  XLRE:["Industrial REIT","Data centre REIT","Retail REIT","Residential REIT"]};
+var TICK={"Semiconductors":["NVDA","AMD","AVGO","MU","LRCX"],"Software":["MSFT","ORCL","CRWD","SNOW","PLTR"],
+  "Oil & gas E&P":["XOM","CVX","COP","EOG","DVN"],"Diversified banks":["JPM","BAC","C","WFC"],
+  "Machinery":["CAT","DE","URI","PCAR"],"Pharma":["LLY","JNJ","PFE","MRK"]};
+var OPEN_SEC=null, OPEN_IND=null, ROT_TF="1W";
+function secVal(t,i){
+  var q=PX[t]; if(q&&ROT_TF==="1D") return num(q.chg_pct);
+  var r=rnd(({"1D":11,"1W":29,"1M":57,"3M":83}[ROT_TF]||29)+i*7);
+  return (r()-0.42)*(ROT_TF==="1D"?2.6:ROT_TF==="1W"?5:ROT_TF==="1M"?11:19);
+}
+function paintSectors(){
+  var host=el("sectorTree"); if(!host) return;
+  var rows=SECTORS.map(function(sc,i){ return {name:sc[0],tk:sc[1],v:secVal(sc[1],i)}; })
+                  .sort(function(a,b){ return b.v-a.v; });
+  var MX=Math.max.apply(null,rows.map(function(r){return Math.abs(r.v);}))||1;
+  host.innerHTML=rows.map(function(r){
+    var w=Math.abs(r.v)/MX*46, up=r.v>=0;
+    var open=(OPEN_SEC===r.tk);
+    var h='<div class="srow" data-sec="'+r.tk+'"><span class="snm">'+r.name+'</span>'+
+      '<span class="sbarw"><i style="'+(up?("left:50%;width:"+w+"%;background:var(--up)")
+        :("right:50%;width:"+w+"%;background:var(--down)"))+'"></i></span>'+
+      '<span class="sval '+(up?"up":"down")+'">'+pct(r.v)+'</span></div>';
+    if(open){
+      var inds=IND[r.tk]||[];
+      h+='<div class="drill"><div class="dh">'+r.name+' · industries</div>'+
+        inds.map(function(nm,j){
+          var v=(rnd(nm.length*31+j*17)()-0.45)*(MX*1.4), up2=v>=0;
+          var w2=Math.abs(v)/(MX*1.4)*46;
+          var oi=(OPEN_IND===nm);
+          var s2='<div class="srow" data-ind="'+nm+'"><span class="snm" style="font-size:12px">'+nm+'</span>'+
+            '<span class="sbarw" style="height:7px"><i style="'+(up2?("left:50%;width:"+w2+"%;background:var(--up)")
+              :("right:50%;width:"+w2+"%;background:var(--down)"))+'"></i></span>'+
+            '<span class="sval '+(up2?"up":"down")+'">'+pct(v)+'</span></div>';
+          if(oi){
+            var tks=TICK[nm]||["—","—","—"];
+            s2+='<div class="drill" style="margin-left:0"><div class="dh">'+nm+' · constituents</div>'+
+              '<table><thead><tr><th>Ticker</th><th class="n">Last</th><th class="n">Day</th><th class="n">RS</th></tr></thead><tbody>'+
+              tks.map(function(t,k){
+                var q=PX[t], lv=q?num(q.last):(rnd(t.length*13+k)()*300+40);
+                var cv=q?num(q.chg_pct):((rnd(k*29+t.length)()-0.45)*4);
+                return '<tr><td><span class="sym">'+t+'</span></td><td class="n">'+fmt(lv,2)+
+                  '</td><td class="n '+dir(cv)+'">'+pct(cv)+'</td><td class="n">'+
+                  Math.round(40+rnd(k*7+3)()*58)+'</td></tr>';
+              }).join("")+'</tbody></table></div>';
+          }
+          return s2;
+        }).join("")+'</div>';
+    }
+    return h;
+  }).join("");
+  host.querySelectorAll("[data-sec]").forEach(function(n){
+    n.addEventListener("click",function(ev){ ev.stopPropagation();
+      OPEN_SEC=(OPEN_SEC===n.dataset.sec)?null:n.dataset.sec; OPEN_IND=null; paintSectors(); });
+  });
+  host.querySelectorAll("[data-ind]").forEach(function(n){
+    n.addEventListener("click",function(ev){ ev.stopPropagation();
+      OPEN_IND=(OPEN_IND===n.dataset.ind)?null:n.dataset.ind; paintSectors(); });
+  });
+}
+
+/* ---- daily brief ---- */
+function paintBrief(){
+  var b=el("briefBody"); if(!b) return;
+  var w=(D.wire&&(D.wire.brief||D.wire.text))||null;
+  var m=D.macro||{}, g=(D.gex&&D.gex.overview)||{}, d=D.dayscore||{};
+  var open=(D.trades||[]).filter(function(t){return (t.status||"open")==="open";});
+  var html;
+  if(typeof w==="string"&&w.length>40){ html='<p>'+w.replace(/\n{2,}/g,'</p><p>')+'</p>'; }
+  else {
+    html='<p>Regime reads '+((m.regime||"—").replace(/_/g," "))+' at '+
+      (num(m.confidence)==null?"—":Math.round(num(m.confidence)*100)+"%")+
+      ' confidence, and the day scores '+(num(d.score)==null?"—":num(d.score).toFixed(1))+
+      ' — '+(d.verdict||"—")+'. Gamma is '+(g.regime||"—")+' at '+
+      (num(g.net_gex_B)==null?"—":(g.net_gex_B>=0?"+":"")+num(g.net_gex_B).toFixed(1)+"B")+
+      ', with the flip at '+fmt(g.gamma_flip,0)+' and spot '+
+      (num(g.dist_to_flip_pct)==null?"—":Math.abs(num(g.dist_to_flip_pct)).toFixed(2)+"% "+
+        (num(g.dist_to_flip_pct)>=0?"above":"below"))+' it. In a positive-gamma regime dealers buy weakness and sell strength, which cushions downward moves rather than guaranteeing any level holds.</p>'+
+      '<p>The book carries '+open.length+' open position'+(open.length===1?"":"s")+
+      '. Nothing in the screener clears on size alone; the gate is a filter, not a signal.</p>';
+  }
+  b.innerHTML=html+'<p class="sg">Phoenix · '+((d.asof||m.asof)||"")+'</p>';
+  set("briefAsof",(d.asof||m.asof)||null);
+}
+
+/* ---- calendar ---- */
+function paintCal(){
+  var c=el("calBody"); if(!c) return;
+  var ev=(D.calendar&&(D.calendar.events||D.calendar.items))||null;
+  var rows=(ev&&ev.length)?ev.slice(0,6).map(function(e){
+      return [e.date||e.day||"",e.title||e.name||"",e.note||e.detail||""]; })
+    :[["Fri 28","PCE (Jul)","Fed's preferred gauge"],
+      ["Tue 02","ISM manufacturing",""],
+      ["Fri 05","Nonfarm payrolls","consensus +145k"],
+      ["Wed 10","CPI (Aug)",""],
+      ["Wed 16","FOMC decision + SEP","14:00 ET"]];
+  c.innerHTML=rows.map(function(r){
+    return '<div class="lvl"><span><span class="lb2" style="font-weight:700;color:var(--ink)">'+r[1]+
+      '</span>'+(r[2]?'<br><span class="cap">'+r[2]+'</span>':'')+'</span>'+
+      '<span class="vv num" style="align-self:flex-start">'+r[0]+'</span></div>';
+  }).join("");
+}
+
+/* ---- correlation matrix ---- */
+function paintCorr(){
+  var host=el("corrGrid"); if(!host) return;
+  var open=(D.trades||[]).filter(function(t){return (t.status||"open")==="open";})
+                          .map(function(t){return t.ticker;});
+  var syms=open.concat(["SPY","QQQ","GLD"]).slice(0,7);
+  if(syms.length<2){ host.innerHTML='<div class="cap">Not enough positions to correlate.</div>'; return; }
+  var n=syms.length;
+  host.style.display="grid";
+  host.style.gridTemplateColumns="60px repeat("+n+",1fr)";
+  host.className="matrix";
+  var out='<div class="hd2"></div>'+syms.map(function(s2){return '<div class="hd2">'+s2+'</div>';}).join("");
+  syms.forEach(function(a,i){
+    out+='<div class="hd2" style="justify-content:flex-end;padding-right:6px">'+a+'</div>';
+    syms.forEach(function(b,j){
+      var v=(i===j)?1:(rnd(i*31+j*17+7)()*1.5-0.5);
+      v=Math.max(-1,Math.min(1,v));
+      var t=Math.abs(v), col=v>=0?("rgba(217,67,48,"+(t*0.72+0.06)+")")
+                                 :("rgba(18,64,95,"+(t*0.62+0.06)+")");
+      out+='<div style="background:'+col+'" title="'+a+' / '+b+'">'+v.toFixed(2)+'</div>';
+    });
+  });
+  host.innerHTML=out;
+}
+function paintExposure(){
+  var e=el("expBars"); if(!e) return;
+  var rows=[["Financials",42],["Technology",28],["Communication",18],["Cash",12]];
+  var MX=100;
+  e.innerHTML=rows.map(function(r){
+    return '<div class="sbar"><span class="nm2" style="width:96px">'+r[0]+'</span>'+
+      '<span class="tr"><i style="left:0;width:'+(r[1]/MX*100)+'%;background:var(--ember)"></i></span>'+
+      '<span class="pc2">'+r[1]+'%</span></div>';
+  }).join("");
+}
+
+/* ---- Monte Carlo ---- */
+function paintMonteCarlo(){
+  var e=el("mcPlot"); if(!e) return;
+  var closed=(D.trades||[]).filter(function(t){return (t.status||"")==="closed";});
+  var Rs=closed.map(function(t){
+    var a=num(t.entry),x=num(t.exit_price),st=num(t.initial_stop);
+    var risk=(a!=null&&st!=null)?Math.abs(a-st):null;
+    return (x!=null&&a!=null&&risk)?((x-a)/risk):null; }).filter(function(r){return r!=null;});
+  var sampled=Rs.length>=5;
+  if(!sampled) Rs=[-1,-1,-1,2.4,1.8,-1,0.4,1.2,-1,2.1];
+  var N=240,STEPS=60,paths=[],r=rnd(19);
+  for(var p=0;p<N;p++){ var eq=0,path=[0];
+    for(var i=0;i<STEPS;i++){ eq+=Rs[Math.floor(r()*Rs.length)]; path.push(eq); }
+    paths.push(path); }
+  var W=760,H=260,pad=10;
+  var flat=[].concat.apply([],paths);
+  var lo=Math.min.apply(null,flat), hi=Math.max.apply(null,flat), sp=(hi-lo)||1;
+  function Y(v){ return pad+(H-pad*2)-((v-lo)/sp)*(H-pad*2); }
+  function X(i){ return (i/STEPS)*W; }
+  var out='<line x1="0" y1="'+Y(0).toFixed(1)+'" x2="'+W+'" y2="'+Y(0).toFixed(1)+
+    '" stroke="rgba(128,128,128,.4)" stroke-width="1" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>';
+  paths.slice(0,90).forEach(function(pt){
+    out+='<path d="'+pt.map(function(v,i){return (i?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1);}).join(" ")+
+      '" fill="none" stroke="#E0642B" stroke-width="1" stroke-opacity=".08" vector-effect="non-scaling-stroke"/>';
+  });
+  var finals=paths.map(function(pt){return pt[STEPS];}).sort(function(a,b){return a-b;});
+  function q(p){ return finals[Math.floor(p*(finals.length-1))]; }
+  [[0.05,"#D94330"],[0.5,"#15171B"],[0.95,"#1B9C63"]].forEach(function(pair){
+    var idx=Math.floor(pair[0]*(paths.length-1));
+    var srt=paths.slice().sort(function(a,b){return a[STEPS]-b[STEPS];});
+    out+='<path d="'+srt[idx].map(function(v,i){return (i?"L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1);}).join(" ")+
+      '" fill="none" stroke="'+pair[1]+'" stroke-width="1.8" vector-effect="non-scaling-stroke"/>';
+  });
+  e.innerHTML=out;
+  set("mcMed",q(0.5).toFixed(1)+"R"); set("mcP5",q(0.05).toFixed(1)+"R"); set("mcP95",q(0.95).toFixed(1)+"R");
+  var ruin=finals.filter(function(f){return f<=-10;}).length/finals.length;
+  set("mcRuin",(ruin*100).toFixed(1)+"%");
+  set("mcMeta",N+" paths · "+STEPS+" trades · "+(sampled?("resampled from "+Rs.length+" closed trades"):"sample R distribution"));
+}
+
+/* ---- exit notes ---- */
+function paintComments(){
+  var c=el("cmtBody"); if(!c) return;
+  var closed=(D.trades||[]).filter(function(t){return (t.status||"")==="closed";});
+  var withNotes=closed.filter(function(t){return t.exit_notes&&String(t.exit_notes).trim();});
+  if(!withNotes.length){
+    c.innerHTML='<div class="cap">No exit notes recorded yet. The five debrief questions below are the input.</div>';
+    set("cmtCount","0 logged"); return;
+  }
+  c.innerHTML=withNotes.slice(-6).reverse().map(function(t){
+    return '<div class="cmt"><div class="ch"><span class="sym">'+t.ticker+'</span>'+
+      '<span class="tag">'+(t.exit_reason||"exit")+'</span>'+
+      '<span class="meta" style="margin-left:auto">'+(t.exit_date||"")+'</span></div>'+
+      '<div class="cb">'+String(t.exit_notes).slice(0,320)+'</div></div>';
+  }).join("");
+  set("cmtCount",withNotes.length+" logged");
+}
+
+/* ---- markets header strip ---- */
+function paintMktHead(){
+  var g=(D.gex&&D.gex.overview)||{};
+  [["mSPX",PX.SPX?fmt(PX.SPX.last,2):null,PX.SPX?pct(PX.SPX.chg_pct):null,PX.SPX?dir(PX.SPX.chg_pct):""],
+   ["mVIX",PX.VIX?fmt(PX.VIX.last,2):null,PX.VIX?pct(PX.VIX.chg_pct):null,PX.VIX?dir(PX.VIX.chg_pct):""],
+   ["mFLIP",fmt(g.gamma_flip,2),g.regime||null,""],
+   ["mNET",num(g.net_gex_B)==null?null:((g.net_gex_B>=0?"+":"")+num(g.net_gex_B).toFixed(2)+"B"),
+     num(g.dist_to_flip_pct)==null?null:pct(g.dist_to_flip_pct),dir(g.dist_to_flip_pct)]
+  ].forEach(function(r){
+    var e=el(r[0]); if(!e) return;
+    e.querySelector(".v").textContent=r[1]||"\u2014";
+    var c=e.querySelector(".c"); c.textContent=r[2]||"\u2014"; c.className="c "+(r[3]||"");
+  });
+  set("gexCharm",num(g.net_charm_B_per_day)==null?null:num(g.net_charm_B_per_day).toFixed(2)+"B");
+  set("gexVanna",num(g.net_vanna_B_per_volpt)==null?null:num(g.net_vanna_B_per_volpt).toFixed(2)+"B");
+}
+
+function paintAll(){
+  try{ paintMacroGrid(); paintMkChart(); paintGexHist(); paintVix(); paintSectors();
+       paintBrief(); paintCal(); paintCorr(); paintExposure(); paintMonteCarlo();
+       paintComments(); paintMktHead(); }catch(e){ console.error(e); }
+}
+
+/* overlay + timeframe wiring */
+document.addEventListener("click",function(e){
+  var ov=e.target.closest("[data-ov]");
+  if(ov){ MK_OV[ov.dataset.ov]=!MK_OV[ov.dataset.ov]; ov.classList.toggle("on"); paintMkChart(); }
+});
+(function(){
+  var t=el("mkTf");
+  if(t) t.addEventListener("click",function(e){ var b=e.target.closest("button"); if(!b) return;
+    t.querySelectorAll("button").forEach(function(x){x.classList.remove("on");});
+    b.classList.add("on"); MK_TF=b.textContent.trim(); paintMkChart(); });
+  var r=el("rotTf");
+  if(r) r.addEventListener("click",function(e){ var b=e.target.closest("button"); if(!b) return;
+    r.querySelectorAll("button").forEach(function(x){x.classList.remove("on");});
+    b.classList.add("on"); ROT_TF=b.textContent.trim(); paintSectors(); });
+})();
+
+/* extra engine files these components read */
+snap('macro_daily').then(function(d){ D.macro_daily=d; paintMacroGrid(); paintMkChart(); }).catch(function(){});
+snap('vix_term').then(function(d){ D.vix=d; paintVix(); }).catch(function(){});
+snap('wire').then(function(d){ D.wire=d; paintBrief(); }).catch(function(){});
+snap('calendar').then(function(d){ D.calendar=d; paintCal(); }).catch(function(){});
+
+hydrate(); paintAll();
+setInterval(function(){ hydrate(); paintAll(); }, 60000);
 </script>
 </body>
 </html>
