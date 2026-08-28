@@ -6,7 +6,7 @@
 <title>Phoenix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300..500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    PHOENIX — tokens from phoenix-design-blueprint.md §2
@@ -26,12 +26,15 @@
   --hairline:rgba(45,40,34,.08);
   --radius:.875rem;
   --shadow:0 1px 2px rgba(45,40,34,.06), 0 12px 32px -12px rgba(45,40,34,.18);
-  --serif:"Instrument Serif",ui-serif,Georgia,serif;
-  --sans:"DM Sans",-apple-system,system-ui,sans-serif;
+  /* One geometric family doing all the work; hierarchy comes from WEIGHT and
+     SIZE, not from swapping typefaces. Smooth low-contrast forms, soft joins,
+     no calligraphic tilt. */
+  --serif:"Plus Jakarta Sans",-apple-system,system-ui,sans-serif;
+  --sans:"Plus Jakarta Sans",-apple-system,system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
   /* display figures use the sans with tabular numerals: smoother than mono
      while still keeping columns from jittering as values tick */
-  --figure:"DM Sans",-apple-system,system-ui,sans-serif;
+  --figure:"Plus Jakarta Sans",-apple-system,system-ui,sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;width:100%;overflow-x:hidden}
@@ -54,26 +57,26 @@ body{background:var(--background);color:var(--foreground);font-family:var(--sans
   display:flex;align-items:center;gap:26px;padding:7px 7px 7px 19px;border-radius:999px;
   width:min(1060px,calc(100vw - 40px));box-shadow:0 4px 20px rgba(60,50,44,.08)}
 .hbrand{display:flex;align-items:center;gap:11px;flex:none}
-.hbrand span{font-family:var(--serif);font-size:18px;letter-spacing:-.01em;color:var(--ink)}
+.hbrand span{font-family:var(--serif);font-size:19px;font-weight:800;letter-spacing:-.03em;color:var(--ink)}
 .hlinks{display:flex;gap:24px;flex:1}
-.hlinks a{font-size:13.5px;color:#4A443C;text-decoration:none;cursor:pointer;transition:color .15s}
+.hlinks a{font-size:13.5px;font-weight:500;color:#4A443C;text-decoration:none;cursor:pointer;transition:color .15s}
 .hlinks a:hover{color:var(--ember)}
-.hlogin{font-size:13.5px;color:#4A443C;cursor:pointer;margin-right:2px}
+.hlogin{font-size:13.5px;font-weight:500;color:#4A443C;cursor:pointer;margin-right:2px}
 .pill-ink{border:0;border-radius:999px;background:var(--ink);color:#FFF;font-family:var(--sans);
   font-size:13px;font-weight:500;padding:9px 18px;cursor:pointer;transition:.15s}
 .pill-ink:hover{background:#1B1814}
 .hero{position:relative;z-index:3;height:100%;display:flex;flex-direction:column;
   align-items:center;justify-content:center;text-align:center;padding:96px 24px 120px;gap:0}
 .hbadge{display:inline-flex;align-items:center;gap:9px;padding:8px 17px;border-radius:999px;
-  font-size:14px;color:#3A342D;margin-bottom:40px}
+  font-size:13.5px;font-weight:500;color:#3A342D;margin-bottom:34px}
 .hbadge i{width:7px;height:7px;border-radius:50%;background:var(--ember);flex:none}
-h1.hero-h{margin:0;font-family:var(--serif);font-weight:400;color:var(--ink);
-  font-size:clamp(38px,5.2vw,74px);line-height:1.06;letter-spacing:-.012em;max-width:min(96vw,1040px)}
-h1.hero-h em{font-style:italic;color:var(--ember)}
-.hero-sub{margin:30px 0 0;max-width:36rem;font-size:16.5px;line-height:1.6;color:rgba(45,40,34,.70)}
+h1.hero-h{margin:0;font-family:var(--serif);font-weight:800;color:var(--ink);
+  font-size:clamp(36px,5.0vw,70px);line-height:1.08;letter-spacing:-.038em;max-width:min(96vw,1040px)}
+h1.hero-h em{font-style:italic;font-weight:700;color:var(--ember)}
+.hero-sub{margin:26px 0 0;max-width:35rem;font-size:16px;font-weight:400;line-height:1.62;color:rgba(45,40,34,.66)}
 .hero-cta{display:flex;gap:14px;margin-top:38px;flex-wrap:wrap;justify-content:center}
 .cta-ink{border:0;border-radius:999px;background:var(--ink);color:#FFF;font-family:var(--sans);
-  font-size:15.5px;font-weight:500;padding:16px 30px;cursor:pointer;display:inline-flex;align-items:center;gap:11px;
+  font-size:15px;font-weight:600;padding:16px 30px;cursor:pointer;display:inline-flex;align-items:center;gap:11px;
   box-shadow:0 10px 30px rgba(40,34,28,.26);transition:.15s}
 .cta-ink:hover{background:#1B1814}
 .cta-glass{border-radius:999px;font-family:var(--sans);font-size:15.5px;font-weight:500;
@@ -87,17 +90,22 @@ h1.hero-h em{font-style:italic;color:var(--ember)}
    the type into the clear sky above it. Declared after the base rules so it
    actually wins on source order. */
 @media (orientation:portrait){
-  .dawn{background-position:58% 68%}
-  .hero{justify-content:flex-start;padding:104px 24px 60px}
+  /* The peak sits at the horizontal centre of the source image, so 50% keeps
+     it centred; 82% lifts the summit up the frame to close the empty band
+     that opened between the CTA and the mountain. */
+  .dawn{background-position:50% 82%}
+  .hero{justify-content:flex-start;padding:96px 24px 40px}
+  .hero-sub{margin-top:22px}
+  .hero-cta{margin-top:30px}
 }
 
 /* ================= APP SHELL ================= */
-.shell{display:grid;grid-template-columns:196px minmax(0,1fr);min-height:100vh;width:100%}
-.rail{position:fixed;top:0;bottom:0;left:0;width:196px;padding:18px 11px 14px;
+.shell{display:grid;grid-template-columns:172px minmax(0,1fr);min-height:100vh;width:100%}
+.rail{position:fixed;top:0;bottom:0;left:0;width:172px;padding:20px 10px 14px;
   border-right:1px solid var(--hairline);display:flex;flex-direction:column;background:var(--background);z-index:20}
-.rbrand{display:flex;align-items:center;gap:9px;padding:0 7px 16px}
+.rbrand{display:flex;align-items:center;gap:8px;padding:0 6px 22px}
 .rbrand svg,.hbrand svg{flex:none}
-.rbrand span{font-family:var(--serif);font-size:17.5px;color:var(--ink)}
+.rbrand span{font-family:var(--serif);font-size:21px;font-weight:800;letter-spacing:-.035em;color:var(--ink)}
 .userchip{display:flex;align-items:center;gap:9px;padding:8px;border-radius:var(--radius);
   background:var(--card);border:1px solid var(--hairline);box-shadow:0 1px 2px rgba(45,40,34,.05);cursor:pointer}
 .userchip .av{width:30px;height:30px;border-radius:8px;background:var(--ink);color:#fff;flex:none;
@@ -107,29 +115,34 @@ h1.hero-h em{font-style:italic;color:var(--ember)}
 .userchip .rl{font-size:10.5px;color:var(--muted)}
 .userchip .cv{margin-left:auto;color:var(--muted);flex:none}
 .navsec{margin:18px 0 6px;padding:0 9px}
-.navsec span{font-family:var(--sans);font-size:10.5px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.navsec span{font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
 .nav{display:flex;flex-direction:column;gap:2px}
-.nav a{display:flex;align-items:center;gap:10px;padding:8px 9px;border-radius:9px;
-  color:#4E463D;text-decoration:none;font-size:13.5px;cursor:pointer;transition:.15s}
+.nav a{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:9px;
+  color:#4E463D;text-decoration:none;font-size:13px;font-weight:500;cursor:pointer;transition:.15s;
+  white-space:nowrap;overflow:hidden}
 .nav a:hover{background:rgba(45,40,34,.045)}
 .nav a.on{background:var(--card);border:1px solid var(--hairline);
-  box-shadow:0 1px 2px rgba(45,40,34,.05);color:var(--ink);font-weight:500}
+  box-shadow:0 1px 2px rgba(45,40,34,.05);color:var(--ink);font-weight:700}
 .nav a.on .ic{color:var(--ember)}
 .nav .ic{width:16px;flex:none;color:var(--muted)}
 .nav a.on::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--ember);margin-left:auto}
-.rfoot{margin-top:auto}
-.mstat{padding:11px;border-radius:var(--radius);background:var(--card);
+.rfoot{margin-top:auto;display:flex;align-items:stretch;gap:8px}
+.avbtn{align-self:flex-end;flex:none;width:36px;height:36px;border-radius:10px;border:1px solid var(--hairline);
+  background:var(--ink);color:#fff;font-family:var(--sans);font-size:11.5px;font-weight:700;
+  letter-spacing:.04em;cursor:pointer;display:grid;place-items:center;transition:.15s}
+.avbtn:hover{transform:translateY(-1px)}
+.mstat{flex:1;min-width:0;padding:9px 10px;border-radius:var(--radius);background:var(--card);
   border:1px solid var(--hairline);box-shadow:0 1px 2px rgba(45,40,34,.05)}
-.mstat .lb{font-family:var(--sans);font-size:10.5px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
-.mstat .vl{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px}
+.mstat .lb{font-family:var(--sans);font-size:8.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.mstat .vl{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;font-weight:600;white-space:nowrap}
 .mstat i{width:7px;height:7px;border-radius:50%;background:var(--up);flex:none}
 
 .body{grid-column:2;min-width:0}
 .topbar{position:sticky;top:0;z-index:15;display:flex;align-items:center;gap:18px;
   padding:13px 26px;border-bottom:1px solid var(--hairline);
   background:rgba(251,249,245,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.topbar h1{margin:0;font-family:var(--serif);font-size:20px;font-weight:400;letter-spacing:-.004em;color:var(--ink);line-height:1.15}
-.topbar .sub{margin:1px 0 0;font-size:11.5px;color:var(--muted)}
+.topbar h1{margin:0;font-family:var(--serif);font-size:27px;font-weight:800;letter-spacing:-.035em;color:var(--ink);line-height:1.1}
+.topbar .sub{margin:3px 0 0;font-size:12.5px;font-weight:400;color:var(--muted)}
 .tb-right{margin-left:auto;display:flex;align-items:center;gap:11px}
 .search{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;
   background:var(--card);border:1px solid var(--hairline);color:var(--muted);font-size:12.5px;min-width:210px}
@@ -143,37 +156,43 @@ h1.hero-h em{font-style:italic;color:var(--ember)}
 /* index strip */
 .idx{display:flex;gap:34px;padding:16px 22px;margin-bottom:18px;flex-wrap:wrap}
 .idx div{display:flex;align-items:baseline;gap:11px}
-.idx .k{font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
-.idx .v{font-family:var(--figure);font-variant-numeric:tabular-nums;font-weight:500;font-size:17px;color:var(--ink);letter-spacing:-.02em}
-.idx .c{font-family:var(--figure);font-weight:500;font-size:12.5px}
+.idx .k{font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.idx .v{font-family:var(--figure);font-variant-numeric:tabular-nums;font-weight:700;font-size:17px;color:var(--ink);letter-spacing:-.03em}
+.idx .c{font-family:var(--figure);font-weight:600;font-size:12.5px}
 
 .cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:18px;align-items:start}
+.grid{display:grid;gap:16px;align-items:start}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{min-width:0;background:var(--card);border:1px solid var(--hairline);
+  border-radius:var(--radius);box-shadow:var(--shadow)}
 .stack{display:flex;flex-direction:column;gap:18px;min-width:0}
 .kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
 .kpi{padding:19px 20px}
-.kpi .lb{font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
-.kpi .v{font-family:var(--figure);font-variant-numeric:tabular-nums;font-weight:500;
-  font-size:28px;color:var(--ink);margin-top:10px;letter-spacing:-.028em}
-.kpi .d{font-family:var(--figure);font-size:12.5px;margin-top:6px;display:flex;align-items:center;gap:5px}
+.kpi .lb{font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font-family:var(--figure);font-variant-numeric:tabular-nums;font-weight:800;
+  font-size:31px;color:var(--ink);margin-top:9px;letter-spacing:-.04em;line-height:1}
+.kpi .d{font-family:var(--figure);font-size:12.5px;font-weight:600;margin-top:9px;display:flex;align-items:center;gap:5px}
 .kpi svg{display:block;margin-top:14px}
 
 .cardhd{display:flex;align-items:center;justify-content:space-between;padding:19px 20px 0}
-.cardhd h2{margin:0;font-family:var(--serif);font-size:17.5px;font-weight:400;color:var(--ink)}
-.cardhd .meta{font-size:12.5px;color:var(--muted)}
+.cardhd h2{margin:0;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.022em;color:var(--ink)}
+.cardhd .meta{font-size:12.5px;font-weight:500;color:var(--muted)}
 .segs{display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(45,40,34,.05)}
 .segs button{border:0;background:transparent;border-radius:999px;padding:6px 15px;cursor:pointer;
-  font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.02em;color:var(--muted);transition:.15s}
+  font-family:var(--sans);font-weight:600;font-size:12px;letter-spacing:.01em;color:var(--muted);transition:.15s}
 .segs button.on{background:var(--ink);color:#fff}
 
 table{width:100%;border-collapse:collapse;table-layout:fixed}
-thead th{font-family:var(--sans);font-size:10.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;
+thead th{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
   color:var(--muted);text-align:left;padding:14px 10px 11px 0;border-bottom:1px solid var(--hairline)}
 thead th.n{text-align:right}
 tbody td{padding:14px 10px 14px 0;border-bottom:1px solid var(--hairline);font-size:14px}
 tbody tr:last-child td{border-bottom:0}
 td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;padding-right:0}
 th.n:last-child,td.n:last-child{padding-right:0}
-.sym{font-family:var(--mono);font-size:13.5px;font-weight:500;color:var(--ink)}
+.sym{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--ink)}
 .co{color:var(--muted);font-size:13px;margin-left:9px}
 td:first-child,th:first-child{width:36%}
 td.n,th.n{width:16%}
@@ -186,14 +205,14 @@ td.n,th.n{width:16%}
 .sig{padding:15px 16px;border-radius:11px;background:rgba(45,40,34,.028);border:1px solid var(--hairline)}
 .sig+.sig{margin-top:11px}
 .sig .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.tag{font-family:var(--sans);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;
+.tag{font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   padding:4px 9px;border-radius:6px;background:rgba(45,40,34,.07);color:var(--muted)}
 .tag.u{background:rgba(27,156,99,.12);color:var(--up)}
 .tag.d{background:rgba(217,67,48,.11);color:var(--down)}
 .tag.e{background:rgba(224,100,43,.12);color:var(--ember)}
 .sig .ts{font-family:var(--figure);font-size:11.5px;color:var(--muted)}
-.sig .hd{font-size:14px;font-weight:500;color:var(--ink);line-height:1.4}
-.sig .dt{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.5}
+.sig .hd{font-size:14.5px;font-weight:700;letter-spacing:-.012em;color:var(--ink);line-height:1.38}
+.sig .dt{font-size:12.5px;font-weight:400;color:var(--muted);margin-top:6px;line-height:1.52}
 
 .mv{display:flex;align-items:center;gap:12px;margin-bottom:11px}
 .mv .s{display:block;font-family:var(--figure);font-size:12px;color:var(--muted);width:44px;text-align:right;flex:none}
@@ -207,10 +226,35 @@ td.n,th.n{width:16%}
 .wl .c{font-family:var(--mono);font-size:12.5px;width:64px;text-align:right}
 
 /* iPad Pro portrait 1024 keeps the two-column grid; below that it stacks */
+/* level rows, research cards, debrief list, portfolio tabs */
+.lvl{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--hairline)}
+.lvl:last-child{border-bottom:0}
+.lb2{font-size:13px;font-weight:500;color:var(--muted)}
+.vv{font-family:var(--figure);font-variant-numeric:tabular-nums;font-size:13.5px;font-weight:600;color:var(--ink)}
+.rcard{padding:19px 20px;display:flex;flex-direction:column;gap:0}
+.rtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.rcard h3{margin:0 0 8px;font-family:var(--serif);font-size:17px;font-weight:700;letter-spacing:-.024em;color:var(--ink);line-height:1.25}
+.rcard p{margin:0 0 16px;font-size:13px;line-height:1.55;color:var(--muted)}
+.rfoot{margin-top:auto;display:flex;align-items:center;justify-content:space-between}
+.deb{margin:0;padding:0;list-style:none;counter-reset:d}
+.deb li{counter-increment:d;padding:13px 0 13px 40px;border-bottom:1px solid var(--hairline);position:relative}
+.deb li:last-child{border-bottom:0}
+.deb li::before{content:counter(d);position:absolute;left:0;top:12px;width:24px;height:24px;border-radius:7px;
+  background:var(--ember);color:#fff;font-size:11.5px;font-weight:700;display:grid;place-items:center}
+.deb b{display:block;font-size:14.5px;font-weight:700;letter-spacing:-.012em;color:var(--ink)}
+.deb span{display:block;margin-top:3px;font-size:12.5px;color:var(--muted)}
+.pftab{display:none} .pftab.on{display:block}
+.sbar{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.sbar .nm2{width:52px;font-size:12px;font-weight:600;color:var(--ink);flex:none}
+.sbar .tr{flex:1;height:9px;position:relative}
+.sbar .tr i{position:absolute;top:0;bottom:0;border-radius:2px}
+.sbar .pc2{width:52px;text-align:right;font-family:var(--figure);font-variant-numeric:tabular-nums;
+  font-size:12px;font-weight:600;flex:none}
 @media (max-width:1120px){
   .cols{grid-template-columns:minmax(0,1fr)}
-  .shell{grid-template-columns:178px minmax(0,1fr)}
-  .rail{width:178px}
+  .g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .shell{grid-template-columns:162px minmax(0,1fr)}
+  .rail{width:162px}
 }
 @media (max-width:860px){
   .shell{grid-template-columns:74px minmax(0,1fr)}
@@ -224,6 +268,7 @@ td.n,th.n{width:16%}
   .mstat{padding:9px;text-align:center} .mstat .lb{display:none}
   .mstat .vl{justify-content:center;font-size:0} .mstat i{width:8px;height:8px}
   .kpis{grid-template-columns:minmax(0,1fr)}
+  .g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}
   .canvas,.topbar{padding-left:16px;padding-right:16px}
   .search{display:none}
   .idx{gap:20px}
@@ -276,11 +321,6 @@ td.n,th.n{width:16%}
       <svg class="" width="27" height="21" viewBox="0 0 89 69" fill="none" aria-hidden="true"><path fill="#E0642B" fill-rule="evenodd" d="M3.90 3.70 L5.00 9.40 L9.20 17.70 L23.60 27.30 L22.60 27.80 L11.50 22.00 L10.90 23.10 L14.20 30.80 L17.10 33.70 L28.70 40.30 L30.60 42.70 L29.60 42.80 L22.60 38.10 L21.00 38.50 L22.20 41.80 L25.10 45.70 L35.80 51.60 L36.10 54.60 L38.80 55.30 L39.00 57.40 L43.40 64.70 L44.70 63.80 L45.10 61.50 L48.70 56.80 L49.30 54.10 L51.60 53.80 L52.60 51.10 L61.80 46.70 L64.70 43.80 L67.00 39.10 L65.30 37.60 L65.50 37.00 L71.70 32.80 L74.90 27.40 L76.00 22.70 L75.00 22.30 L70.70 25.60 L65.10 28.20 L60.70 31.60 L57.10 33.20 L53.20 36.60 L54.30 33.20 L60.50 28.10 L63.80 27.70 L75.80 19.70 L79.70 15.80 L84.00 5.10 L84.00 3.70 L83.20 3.20 L77.70 7.60 L64.10 16.20 L61.30 19.80 L57.10 21.20 L53.10 24.20 L47.20 30.10 L44.90 34.80 L45.80 39.40 L43.40 41.50 L41.30 38.50 L42.00 34.80 L40.90 31.50 L34.80 24.20 L27.90 19.30 L26.00 19.40 L24.70 17.20 L10.20 7.60 L6.80 4.20 L4.70 3.20 Z M49.70 42.30 L47.60 47.70 L45.90 49.70 L47.60 52.30 L46.90 52.90 L43.30 50.80 L43.00 49.90 L45.30 46.20 Z M24.30 28.30 L26.40 28.10 L29.70 30.30 L33.60 34.20 L33.80 35.50 Z M64.60 38.20 L63.70 39.60 L54.70 45.60 L53.30 45.70 L59.20 40.30 Z"/></svg>
       <span>Phoenix</span>
     </div>
-    <div class="userchip" onclick="signout()">
-      <span class="av">GS</span>
-      <span><span class="nm">Gabriel Schmal</span><br><span class="rl">Pro account</span></span>
-      <svg class="cv" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
-    </div>
 
     <div class="navsec"><span>Workspace</span></div>
     <nav class="nav" id="nav">
@@ -302,8 +342,9 @@ td.n,th.n{width:16%}
     <div class="rfoot">
       <div class="mstat">
         <div class="lb">Market status</div>
-        <div class="vl"><i></i>Open · 3h 12m left</div>
+        <div class="vl"><i></i>Open · 3h 12m</div>
       </div>
+      <button class="avbtn" onclick="signout()" title="Gabriel Schmal · Pro account · sign out">GS</button>
     </div>
   </aside>
 
@@ -382,7 +423,7 @@ td.n,th.n{width:16%}
             <div class="panel" style="padding:19px 20px">
               <div style="display:flex;align-items:center;gap:9px;margin-bottom:16px">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#E0642B" stroke-width="1.6"><path d="M8 1.6v3.2M8 11.2v3.2M14.4 8h-3.2M4.8 8H1.6M12.5 3.5l-2.3 2.3M5.8 10.2l-2.3 2.3M12.5 12.5l-2.3-2.3M5.8 5.8 3.5 3.5"/></svg>
-                <h2 style="margin:0;font-family:var(--serif);font-size:17.5px;font-weight:400;color:var(--ink)">Signals</h2>
+                <h2 style="margin:0;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.022em;color:var(--ink)">Signals</h2>
               </div>
               <div class="sig">
                 <div class="top"><span class="tag u">Earnings</span><span class="ts">12m</span></div>
@@ -402,13 +443,13 @@ td.n,th.n{width:16%}
             </div>
 
             <div class="panel" style="padding:19px 20px">
-              <h2 style="margin:0 0 18px;font-family:var(--serif);font-size:17.5px;font-weight:400;color:var(--ink)">Movers</h2>
+              <h2 style="margin:0 0 18px;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.022em;color:var(--ink)">Movers</h2>
               <div id="movers"></div>
             </div>
 
             <div class="panel" style="padding:19px 20px">
               <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px">
-                <h2 style="margin:0;font-family:var(--serif);font-size:17.5px;font-weight:400;color:var(--ink)">Watchlist</h2>
+                <h2 style="margin:0;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.022em;color:var(--ink)">Watchlist</h2>
                 <span class="meta" style="font-size:12.5px;color:var(--muted)">Core</span>
               </div>
               <div id="watch"></div>
@@ -417,10 +458,214 @@ td.n,th.n{width:16%}
         </div>
       </section>
 
-      <section class="page" id="p-markets"><div class="panel" style="padding:40px;text-align:center;color:var(--muted)">Markets — heatmap-first screen, reusing the panel + mono system.</div></section>
-      <section class="page" id="p-screener"><div class="panel" style="padding:40px;text-align:center;color:var(--muted)">Screener — light filter rail inside the canvas, results table.</div></section>
-      <section class="page" id="p-portfolio"><div class="panel" style="padding:40px;text-align:center;color:var(--muted)">Portfolio — positions, exposure, risk limits, attribution.</div></section>
-      <section class="page" id="p-research"><div class="panel" style="padding:40px;text-align:center;color:var(--muted)">Research — filings, transcripts, notes, deep dives.</div></section>
+      <!-- MARKETS -->
+      <section class="page" id="p-markets">
+        <div class="idx panel">
+          <div><span class="k">S&amp;P 500</span><span class="v">5,682.14</span><span class="c up">+0.82%</span></div>
+          <div><span class="k">Nasdaq</span><span class="v">18,204.6</span><span class="c up">+1.14%</span></div>
+          <div><span class="k">VIX</span><span class="v">15.45</span><span class="c up">-2.52%</span></div>
+          <div><span class="k">Gamma flip</span><span class="v">6,410</span><span class="c">positive</span></div>
+        </div>
+        <div class="grid g4" style="margin-bottom:16px">
+          <div class="card kpi"><div class="lb">Dow Jones</div><div class="v">53,577</div><div class="d up">↗ +0.30%</div></div>
+          <div class="card kpi"><div class="lb">Russell 2000</div><div class="v">3,010</div><div class="d up">↗ +0.50% · leading</div></div>
+          <div class="card kpi"><div class="lb">US 10Y</div><div class="v">4.61%</div><div class="d up">↘ −3bp</div></div>
+          <div class="card kpi"><div class="lb">Dollar index</div><div class="v">98.92</div><div class="d down">↘ −0.08%</div></div>
+        </div>
+        <div class="cols">
+          <div class="stack">
+            <div class="panel">
+              <div class="cardhd"><h2>Sector rotation</h2><span class="meta">1-day · 11 SPDR sectors</span></div>
+              <div style="padding:16px 20px 20px" id="sectors"></div>
+            </div>
+            <div class="panel">
+              <div class="cardhd"><h2>Commodities &amp; crypto</h2><span class="meta">live · 5-minute lane</span></div>
+              <div style="padding:4px 20px 6px">
+                <table>
+                  <thead><tr><th>Instrument</th><th class="n">Last</th><th class="n">Day</th><th class="n">1W</th><th class="n">1M</th></tr></thead>
+                  <tbody>
+                    <tr><td><span class="sym">GOLD</span><span class="co">Front future</span></td><td class="n">4,700.10</td><td class="n up">+1.34%</td><td class="n up">+2.8%</td><td class="n up">+6.1%</td></tr>
+                    <tr><td><span class="sym">OIL</span><span class="co">WTI front</span></td><td class="n">80.74</td><td class="n down">−1.97%</td><td class="n down">−3.4%</td><td class="n down">−8.2%</td></tr>
+                    <tr><td><span class="sym">BTC</span><span class="co">Bitcoin spot</span></td><td class="n">79,102</td><td class="n up">+0.58%</td><td class="n up">+4.2%</td><td class="n down">−1.9%</td></tr>
+                    <tr><td><span class="sym">TLT</span><span class="co">20Y+ Treasuries</span></td><td class="n">82.56</td><td class="n up">+0.41%</td><td class="n up">+1.1%</td><td class="n down">−2.5%</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="stack">
+            <div class="panel" style="padding:19px 20px">
+              <h2 style="margin:0 0 4px;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.022em;color:var(--ink)">Gamma structure</h2>
+              <p class="cap" style="margin:0 0 16px">Elliott briefing · frozen at index</p>
+              <div class="lvl"><span class="lb2">Call wall</span><span class="vv num">5,750</span></div>
+              <div class="lvl"><span class="lb2">Spot</span><span class="vv num" style="color:var(--ember);font-weight:700">5,682</span></div>
+              <div class="lvl"><span class="lb2">Gamma flip</span><span class="vv num">6,410</span></div>
+              <div class="lvl"><span class="lb2">Put wall</span><span class="vv num">5,600</span></div>
+              <div class="sig" style="margin-top:14px">
+                <div class="hd">Positive gamma regime</div>
+                <div class="dt">Dealers buy weakness and sell strength, which cushions downward moves. Expect mean reversion inside the walls.</div>
+              </div>
+            </div>
+            <div class="panel" style="padding:19px 20px">
+              <h2 style="margin:0 0 16px;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.022em;color:var(--ink)">Regime</h2>
+              <div class="kpi" style="padding:0"><div class="lb">Macro state</div><div class="v" style="font-size:26px">RISK ON</div><div class="d up">↗ confidence 80%</div></div>
+              <div style="margin-top:16px"><div class="lvl"><span class="lb2">Breadth</span><span class="vv num up">improving</span></div>
+              <div class="lvl"><span class="lb2">Credit · HY OAS</span><span class="vv num">273bp</span></div>
+              <div class="lvl"><span class="lb2">VIX term</span><span class="vv num">contango</span></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREENER -->
+      <section class="page" id="p-screener">
+        <div class="grid g4" style="margin-bottom:16px">
+          <div class="card kpi"><div class="lb">Gate passers</div><div class="v">58</div><div class="d">of 2,898 scanned</div></div>
+          <div class="card kpi"><div class="lb">Crossed today</div><div class="v up">3</div><div class="d up">↗ live resistance breaks</div></div>
+          <div class="card kpi"><div class="lb">Within 1%</div><div class="v">4</div><div class="d">approaching trigger</div></div>
+          <div class="card kpi"><div class="lb">Median ATR</div><div class="v">3.4%</div><div class="d">of the passer set</div></div>
+        </div>
+        <div class="panel">
+          <div class="cardhd">
+            <h2>Watchers</h2>
+            <div class="segs"><button class="on">NEAR TRIGGER</button><button>ALL</button><button>CROSSED</button></div>
+          </div>
+          <div style="padding:4px 20px 6px">
+            <table>
+              <thead><tr><th>Symbol</th><th class="n">Last</th><th class="n">Trigger</th><th class="n">Dist</th><th class="n">ATR%</th><th class="n">Score</th><th class="n">State</th></tr></thead>
+              <tbody>
+                <tr><td><span class="sym">HAL</span><span class="co">Energy</span></td><td class="n">28.71</td><td class="n">28.40</td><td class="n up">+1.1%</td><td class="n">3.2</td><td class="n">81</td><td class="n"><span class="tag u">15:52</span></td></tr>
+                <tr><td><span class="sym">URI</span><span class="co">Industrials</span></td><td class="n">818.00</td><td class="n">812.50</td><td class="n up">+0.7%</td><td class="n">2.8</td><td class="n">78</td><td class="n"><span class="tag u">16:20</span></td></tr>
+                <tr><td><span class="sym">CNX</span><span class="co">Energy</span></td><td class="n">42.12</td><td class="n">41.90</td><td class="n up">+0.5%</td><td class="n">3.9</td><td class="n">74</td><td class="n"><span class="tag u">17:05</span></td></tr>
+                <tr><td><span class="sym">FLR</span><span class="co">Industrials</span></td><td class="n">61.20</td><td class="n">61.85</td><td class="n down">−1.1%</td><td class="n">3.4</td><td class="n">77</td><td class="n"><span class="tag">watching</span></td></tr>
+                <tr><td><span class="sym">SNOW</span><span class="co">Technology</span></td><td class="n">218.40</td><td class="n">223.00</td><td class="n down">−2.1%</td><td class="n">4.1</td><td class="n">72</td><td class="n"><span class="tag">watching</span></td></tr>
+                <tr><td><span class="sym">TPR</span><span class="co">Cons. disc.</span></td><td class="n">104.90</td><td class="n">107.60</td><td class="n down">−2.5%</td><td class="n">3.0</td><td class="n">69</td><td class="n"><span class="tag">watching</span></td></tr>
+                <tr><td><span class="sym">MP</span><span class="co">Materials</span></td><td class="n">61.44</td><td class="n">63.10</td><td class="n down">−2.6%</td><td class="n">5.2</td><td class="n">68</td><td class="n"><span class="tag">watching</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PORTFOLIO -->
+      <section class="page" id="p-portfolio">
+        <div class="segs" style="margin-bottom:16px;width:max-content" id="pfsegs">
+          <button class="on" data-t="pos">Positions</button><button data-t="trd">Trades</button>
+          <button data-t="ana">Analytics</button><button data-t="deb">Debrief</button>
+        </div>
+        <div class="grid g4" style="margin-bottom:16px">
+          <div class="card kpi"><div class="lb">Balance</div><div class="v">$2,284</div><div class="d up">↗ +14.2% since start</div></div>
+          <div class="card kpi"><div class="lb">Open risk</div><div class="v">1.40<span style="font-size:16px;color:var(--muted)">R</span></div><div class="d">3 positions · cap 3.00R</div></div>
+          <div class="card kpi"><div class="lb">Expectancy · price</div><div class="v up">+0.120<span style="font-size:16px">R</span></div><div class="d">23 closed trades</div></div>
+          <div class="card kpi"><div class="lb">Expectancy · account</div><div class="v down">−0.096<span style="font-size:16px">R</span></div><div class="d down">↘ sizing tax −0.216R</div></div>
+        </div>
+
+        <div class="pftab on" data-p="pos">
+          <div class="panel">
+            <div class="cardhd"><h2>Open positions</h2><span class="meta">live · 17:45</span></div>
+            <div style="padding:4px 20px 6px">
+              <table>
+                <thead><tr><th>Symbol</th><th class="n">Entry</th><th class="n">Last</th><th class="n">Stop</th><th class="n">Day</th><th class="n">R</th><th class="n">P&amp;L</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="sym">BAC</span><span class="co">Rate steepener</span></td><td class="n">50.00</td><td class="n">62.33</td><td class="n">48.00</td><td class="n up">+1.04%</td><td class="n up">+0.82</td><td class="n up">+$164</td></tr>
+                  <tr><td><span class="sym">INTC</span><span class="co">Foundry turnaround</span></td><td class="n">90.10</td><td class="n">87.26</td><td class="n">84.90</td><td class="n down">−3.12%</td><td class="n down">−0.31</td><td class="n down">−$62</td></tr>
+                  <tr><td><span class="sym">GOOG</span><span class="co">Managed · Fineco</span></td><td class="n">328.00</td><td class="n">344.59</td><td class="n muted">—</td><td class="n up">+0.83%</td><td class="n muted">—</td><td class="n up">+$182</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="pftab" data-p="trd">
+          <div class="panel">
+            <div class="cardhd"><h2>Trade log</h2><span class="meta">measured against E − 0.054R</span></div>
+            <div style="padding:4px 20px 6px">
+              <table>
+                <thead><tr><th>Symbol</th><th class="n">Closed</th><th class="n">Reason</th><th class="n">R price</th><th class="n">R acct</th><th class="n">Debrief</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="sym">SNOW</span></td><td class="n">22 Aug</td><td class="n">strength</td><td class="n up">+2.41</td><td class="n up">+1.62</td><td class="n"><span class="tag u">logged</span></td></tr>
+                  <tr><td><span class="sym">MP</span></td><td class="n">19 Aug</td><td class="n">stop</td><td class="n down">−1.00</td><td class="n down">−0.71</td><td class="n"><span class="tag u">logged</span></td></tr>
+                  <tr><td><span class="sym">SOFI</span></td><td class="n">14 Aug</td><td class="n">relief</td><td class="n up">+0.38</td><td class="n up">+0.22</td><td class="n"><span class="tag e">pending</span></td></tr>
+                  <tr><td><span class="sym">UBER</span></td><td class="n">11 Aug</td><td class="n">breakeven</td><td class="n">0.00</td><td class="n down">−0.05</td><td class="n"><span class="tag u">logged</span></td></tr>
+                  <tr><td><span class="sym">PLTR</span></td><td class="n">6 Aug</td><td class="n">strength</td><td class="n up">+1.85</td><td class="n up">+1.20</td><td class="n"><span class="tag u">logged</span></td></tr>
+                  <tr><td><span class="sym">AMD</span></td><td class="n">1 Aug</td><td class="n">stop</td><td class="n down">−1.00</td><td class="n down">−0.68</td><td class="n"><span class="tag u">logged</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="pftab" data-p="ana">
+          <div class="cols">
+            <div class="panel">
+              <div class="cardhd"><h2>R distribution</h2><span class="meta">23 closed trades</span></div>
+              <div style="padding:16px 20px 20px" id="rdist"></div>
+            </div>
+            <div class="panel" style="padding:19px 20px">
+              <h2 style="margin:0 0 16px;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.022em;color:var(--ink)">Where the edge leaks</h2>
+              <div class="lvl"><span class="lb2">Win rate</span><span class="vv num">43%</span></div>
+              <div class="lvl"><span class="lb2">Avg winner</span><span class="vv num up">+1.64R</span></div>
+              <div class="lvl"><span class="lb2">Avg loser</span><span class="vv num down">−0.98R</span></div>
+              <div class="lvl"><span class="lb2">Winners cut below +1R</span><span class="vv num down">44.4%</span></div>
+              <div class="lvl"><span class="lb2">Sizing tax</span><span class="vv num down">−0.216R</span></div>
+              <div class="sig" style="margin-top:14px">
+                <div class="hd">Exits, not entries</div>
+                <div class="dt">Price-R is positive while account-R is not. The gap is position sizing, and nearly half of winners are closed before +1R.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pftab" data-p="deb">
+          <div class="panel" style="padding:22px 24px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <h2 style="margin:0;font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-.022em;color:var(--ink)">Exit debrief · SOFI</h2>
+              <span class="tag e">1 pending</span>
+            </div>
+            <p class="cap" style="margin:0 0 18px">Answer within 24 hours of the exit, while the feeling is still accurate.</p>
+            <ol class="deb">
+              <li><b>When did the urge to exit first hit?</b><span>Before or after the position moved?</span></li>
+              <li><b>What kept you in?</b><span>Name the specific thing.</span></li>
+              <li><b>Analysis or relief — honestly?</b><span>Relief is a valid answer. It is the useful one.</span></li>
+              <li><b>What did the stop do?</b><span>Did it move, and did you move it for a reason?</span></li>
+              <li><b>Next time I'm +1R I will…</b><span>One sentence, written before the next entry.</span></li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESEARCH -->
+      <section class="page" id="p-research">
+        <div class="segs" style="margin-bottom:16px;width:max-content">
+          <button class="on">All</button><button>Single name</button><button>Macro</button><button>GEX</button>
+        </div>
+        <div class="grid g3">
+          <div class="panel rcard"><div class="rtop"><span class="tag e">Single name</span><span class="meta">23 Aug</span></div>
+            <h3>NVDA · the capex question</h3>
+            <p>Whether negative free cash flow from the AI buildout marks a marginal business or an investing decision. Operating cash flow says investing.</p>
+            <div class="rfoot"><span class="tag u">Thesis held</span><span class="meta">+18.4% since</span></div></div>
+          <div class="panel rcard"><div class="rtop"><span class="tag">Macro</span><span class="meta">23 Aug</span></div>
+            <h3>Rotation without the index</h3>
+            <p>Breadth has led price by roughly a week in this regime. What that implies for sizing into September.</p>
+            <div class="rfoot"><span class="tag u">Thesis held</span><span class="meta">breadth confirming</span></div></div>
+          <div class="panel rcard"><div class="rtop"><span class="tag">GEX</span><span class="meta">13 Aug</span></div>
+            <h3>Elliott briefing · 13 Aug</h3>
+            <p>Flip at 6,410 with walls thinning above. Frozen at index — the argument is deliberately not repriced.</p>
+            <div class="rfoot"><span class="tag e">Level moved</span><span class="meta">spot now 5,682</span></div></div>
+          <div class="panel rcard"><div class="rtop"><span class="tag e">Single name</span><span class="meta">21 Aug</span></div>
+            <h3>INTC · foundry or foundering</h3>
+            <p>The turnaround needs external customers, not internal transfers. Two quarters of evidence, neither conclusive.</p>
+            <div class="rfoot"><span class="tag">Under review</span><span class="meta">−3.1% since</span></div></div>
+          <div class="panel rcard"><div class="rtop"><span class="tag">Macro</span><span class="meta">18 Aug</span></div>
+            <h3>The sizing tax, measured</h3>
+            <p>Price-R and account-R have diverged by 0.216R across 23 trades. Where the gap comes from and what closes it.</p>
+            <div class="rfoot"><span class="tag u">Actionable</span><span class="meta">method note</span></div></div>
+          <div class="panel rcard"><div class="rtop"><span class="tag e">Single name</span><span class="meta">16 Aug</span></div>
+            <h3>BAC · steepener carry</h3>
+            <p>The position is a rates expression wearing a bank's clothes. What breaks it, and the level where the thesis fails.</p>
+            <div class="rfoot"><span class="tag u">Thesis held</span><span class="meta">+3.3% since</span></div></div>
+        </div>
+      </section>
     </div>
   </main>
 </div>
@@ -496,10 +741,10 @@ document.getElementById("watch").innerHTML=WL.map(function(w){
 
 /* nav */
 var TITLES={mission:["Mission Control","Friday, 28 August · Demo data for layout reference"],
-  markets:["Markets","Indices, sectors, rates, FX and crypto"],
-  screener:["Screener","Factor filters, saved screens, results"],
-  portfolio:["Portfolio","Positions, exposure, risk limits, attribution"],
-  research:["Research","Filings, transcripts, notes, deep dives"]};
+  markets:["Markets","Indices, sectors, rates and crypto · live 5-minute lane"],
+  screener:["Screener","58 gate passers watched against the engine's own levels"],
+  portfolio:["Portfolio","Gabriel · paper account · since 12 May 2026"],
+  research:["Research","14 reports · GEX frozen at first index"]};
 function show(p){
   document.querySelectorAll(".nav a").forEach(function(a){ a.classList.toggle("on", a.dataset.p===p && a.textContent.trim().toLowerCase().indexOf(p.slice(0,4))>-1); });
   document.querySelectorAll(".page").forEach(function(s){ s.classList.remove("on"); });
@@ -514,6 +759,38 @@ function signout(){ document.getElementById("home").classList.remove("gone"); }
   var n=document.getElementById(id); if(!n) return;
   n.addEventListener("click",function(e){ var a=e.target.closest("a[data-p]"); if(a) show(a.dataset.p); });
 });
+// portfolio tabs
+var pfs=document.getElementById("pfsegs");
+if(pfs) pfs.addEventListener("click",function(e){
+  var b=e.target.closest("button[data-t]"); if(!b) return;
+  pfs.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on", x===b); });
+  document.querySelectorAll(".pftab").forEach(function(t){ t.classList.toggle("on", t.dataset.p===b.dataset.t); });
+});
+// sector rotation — diverging bars around a shared centre
+var SECT=[["XLE",2.4],["XLI",1.6],["XLF",1.1],["XLB",0.7],["XLK",0.4],["XLV",0.1],
+          ["XLY",-0.3],["XLC",-0.6],["XLP",-0.9],["XLU",-1.4],["XLRE",-1.8]];
+(function(){
+  var el=document.getElementById("sectors"); if(!el) return;
+  var MAX=2.6;
+  el.innerHTML=SECT.map(function(m){
+    var w=Math.abs(m[1])/MAX*46, up=m[1]>=0;
+    var st=up?("left:50%;width:"+w+"%;background:#1B9C63"):("right:50%;width:"+w+"%;background:#D94330");
+    return '<div class="sbar"><span class="nm2">'+m[0]+'</span><span class="tr"><i style="'+st+'"></i></span>'+
+      '<span class="pc2 '+(up?"up":"down")+'">'+(up?"+":"")+m[1].toFixed(1)+'%</span></div>';
+  }).join("");
+})();
+// R distribution histogram
+(function(){
+  var el=document.getElementById("rdist"); if(!el) return;
+  var B=[["-2R",1],["-1R",9],["0R",3],["+1R",4],["+2R",4],["+3R",2]];
+  var MAX=9;
+  el.innerHTML=B.map(function(b){
+    var w=b[1]/MAX*100, neg=b[0].charAt(0)==="-";
+    return '<div class="sbar"><span class="nm2">'+b[0]+'</span><span class="tr">'+
+      '<i style="left:0;width:'+w+'%;background:'+(neg?"#D94330":"#1B9C63")+'"></i></span>'+
+      '<span class="pc2">'+b[1]+'</span></div>';
+  }).join("");
+})();
 document.getElementById("perfsegs").addEventListener("click",function(e){
   var b=e.target.closest("button"); if(!b) return;
   this.querySelectorAll("button").forEach(function(x){x.classList.remove("on");});
