@@ -1046,10 +1046,6 @@
     .page-title{font-size:24px;}
   }
 
-/* ===== Phoenix one-page shell : background + chrome only, grids untouched ===== */
-html,body{height:auto!important;overflow:visible!important}
-body{background:transparent!important;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Arial,sans-serif}
-:root{--card:rgba(7,17,30,.76);--card2:rgba(11,25,42,.82)}
 
 /* ===== Phoenix one-page shell : background + chrome only, grids untouched ===== */
 html,body{height:auto!important;overflow:visible!important}
@@ -1094,11 +1090,13 @@ body{background:transparent!important;font-family:-apple-system,BlinkMacSystemFo
   align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--inkMed);cursor:pointer}
 .pxacct.on{border-color:#E8792B;color:#FFFFFF}
 
-.pxs{height:calc(100vh - 78px);position:relative;scroll-snap-align:start}
-html{scroll-snap-type:y proximity;scroll-behavior:smooth}
-.page-host{overflow:visible!important;height:auto!important;flex:none!important}
-.page{display:block!important;height:calc(100vh - 78px);padding-top:68px;box-sizing:border-box;scroll-snap-align:start}
-.page.pad{overflow-y:auto}
+.pxs{position:relative}
+html{scroll-behavior:auto}
+.page-host{overflow:visible;height:auto;flex:none}
+/* One section at a time. .active is set by the router, never by the boot loop. */
+.page{display:none;height:auto;box-sizing:border-box}
+.page.active{display:block}
+.page.pad{overflow:visible}
 
 .pxhero{display:flex;flex-direction:column;justify-content:center;padding:90px 34px 30px;box-sizing:border-box}
 .hero-row{display:grid;grid-template-columns:1fr minmax(320px,560px) 1fr;gap:28px;align-items:center;max-width:1400px;margin:0 auto;width:100%}
@@ -1165,16 +1163,24 @@ html{scroll-snap-type:y proximity;scroll-behavior:smooth}
   .page{padding-top:58px}
 }
 
-/* ===== one continuous scroll: no nested scrollers, no snap, fixed background ===== */
-html{scroll-snap-type:none!important}
-.pxs{height:auto!important;scroll-snap-align:none!important}
-.pxhero{min-height:calc(100vh - 96px);height:auto!important}
+/* ===== paged shell: the hero is Mission Control's header, not a landing ===== */
+.pxs{height:auto}
+.pxhero{min-height:0;height:auto;display:none;padding:78px 34px 12px}
+.pxhero.active{display:flex}
 #pxnav{background:var(--rail);
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 #pxnav.hide{transform:none!important;opacity:1!important;pointer-events:auto!important}
 
-.page{height:auto!important;min-height:0!important;padding:78px 0 54px!important;overflow:visible!important;
-  scroll-snap-align:none!important;scroll-margin-top:0}
+/* min-height keeps a short page (Screeners, Research) from collapsing behind
+   the fixed status bar; bottom padding clears it. */
+.page{min-height:calc(100vh - 200px);padding:8px 0 96px;overflow:visible;scroll-margin-top:0}
+
+/* ===== page header: which page am I on (Mission uses the hero instead) ===== */
+#pxhead{display:none;max-width:1400px;margin:0 auto;padding:84px 34px 4px;width:100%;box-sizing:border-box}
+#pxhead.on{display:block}
+#pxhead h1{font-family:var(--serif);font-weight:800;letter-spacing:-.035em;font-size:34px;
+  line-height:1.1;margin:0;color:var(--ink)}
+#pxhead p{margin:7px 0 0;font-size:14.5px;line-height:1.5;color:var(--inkLight)}
 
 /* every inner scroll container flows into the page instead of scrolling itself */
 .page-host,.mkt-grid,.mc-grid,.scr-grid,.pf-grid,.watch-grid,.cal-grid,
@@ -1198,7 +1204,11 @@ html{scroll-snap-type:none!important}
 @media(max-width:1000px){
   .mc-grid{grid-template-rows:none!important;grid-auto-rows:minmax(200px,auto)!important}
   .scr-grid{grid-auto-rows:minmax(260px,auto)!important}
-  .page{padding:70px 0 46px!important}
+  .page{padding:6px 0 88px}
+  .pxhero{padding:70px 16px 10px}
+  #pxhead{padding:70px 16px 2px}
+  #pxhead h1{font-size:25px}
+  #pxhead p{font-size:13.5px}
 }
 
 /* ===== the screener table gets its own scroll so Trade stays close ===== */
@@ -2318,8 +2328,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     font-family:var(--serif);font-size:13px;font-weight:600;color:var(--inkLight);transition:.15s;white-space:nowrap}
   .pf-subnav button.on{background:var(--ink);color:var(--bg)}
   .pf-subnav button:hover:not(.on){color:var(--ink)}
-  .pf-sub{display:none}
-  .pf-sub.on{display:block}
+  .pf-tabpane{display:none}
+  .pf-tabpane.on{display:block}
 
 /* ============================================================
    NEW UI SKIN — applied to production's EXISTING components.
@@ -2431,8 +2441,8 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
     font-family:var(--serif);font-size:13px;font-weight:600;color:var(--inkLight);transition:.15s;white-space:nowrap}
   .pf-subnav button.on{background:var(--ink);color:var(--bg)}
   .pf-subnav button:hover:not(.on){color:var(--ink)}
-  .pf-sub{display:none}
-  .pf-sub.on{display:block}
+  .pf-tabpane{display:none}
+  .pf-tabpane.on{display:block}
 </style>
 </head>
 <body>
@@ -2450,6 +2460,8 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
     <nav class="navpanel" id="navPanel"><div class="rail-nav" id="railNav"></div></nav>
     <div class="topbar"><div class="tb-sec" id="tbSection"></div><div class="asof" id="stripAsof"></div></div>
   </div>
+
+  <header id="pxhead"><h1 id="pxhTitle">Mission Control</h1><p id="pxhSub"></p></header>
 
   <section class="pxs pxhero" id="px-hero">
     <div class="hero-row">
@@ -3120,7 +3132,26 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
   });
 
   var host=document.getElementById("pageHost");
-  function go(id){
+  var PX_BOOTING=true;   // cleared once every page has been mounted
+  /* Trade was folded into Portfolio as a sub-tab, so #page-trades is no longer
+     a standalone section. Every caller still asking for "trades" — Mission
+     Control tiles, the screener's open-ticker jump, the edition jump links —
+     means that tab. Handled here so no caller has to know. */
+  function pxTradesTab(){
+    var nav=document.getElementById("pfSubnav"); if(!nav) return;
+    var b=nav.querySelector('button[data-sub="trades"]'); if(b) b.click();
+  }
+  function pxTradesMerged(){
+    var t=document.getElementById("page-trades");
+    return !!(t&&t.closest&&t.closest("#page-portfolio"));
+  }
+
+  /* fromHash is set only by the hash/popstate router: the address bar has
+     already moved, so the entry is corrected in place instead of pushed. */
+  function go(id,fromHash){
+    if(id==="trades"&&pxTradesMerged()){
+      go("portfolio",fromHash); pxTradesTab(); return;
+    }
     if(!built[id]){ buildPage(id); built[id]=true; }
     Array.prototype.forEach.call(document.querySelectorAll(".page"),function(p){p.classList.toggle("active",p.id==="page-"+id);});
     Array.prototype.forEach.call(document.querySelectorAll(".nav-item"),function(it){it.classList.toggle("active",it.dataset.page===id);});
@@ -3143,9 +3174,57 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
     if(id==="portfolio") initPortfolio();
     if(id==="mission") initMC();
     if(id==="research") initResearch();
+
+    /* The hero is Mission Control's own header, so it travels with that page
+       instead of sitting above every section. */
+    var hero=document.getElementById("px-hero");
+    if(hero) hero.classList.toggle("active",id==="mission");
+
+    /* Page header: title + one line of orientation. Mission is exempt because
+       the hero already says where you are. */
+    var hd=document.getElementById("pxhead"), T=PX_TITLES[id];
+    if(hd){
+      hd.classList.toggle("on",id!=="mission"&&!!T);
+      if(T){
+        var ht=document.getElementById("pxhTitle"), hs=document.getElementById("pxhSub");
+        if(ht) ht.textContent=T[0];
+        if(hs) hs.textContent=T[1];
+      }
+    }
+
+    if(window.PXS_IDS) window.PXS_IDS.forEach(function(k){
+      var a=document.getElementById("pxl_"+k); if(a) a.className=(k===id?"on":"");
+    });
+
+    var st=document.getElementById("pxStText");
+    if(st&&T) st.textContent=(typeof PX_STATUS!=="undefined"&&PX_STATUS?PX_STATUS:"All systems nominal")+" \u00B7 "+T[0];
+
     closeNav();
-    try{location.hash=id;}catch(e){}
+    /* replaceState, not location.hash: six pushed entries would break the back
+       button. Suppressed entirely while the boot loop is mounting pages,
+       otherwise it overwrites the very hash the router is about to read. */
+    if(!PX_BOOTING){
+      var want="#"+id;
+      try{
+        if(location.hash!==want){
+          if(fromHash) history.replaceState(null,"",want);
+          else history.pushState(null,"",want);   // back button walks the sections
+        }
+      }catch(e){}
+    }
+    try{ window.scrollTo(0,0); }catch(e){}
   }
+
+  /* Title + subtitle per page. Kept next to the router so a new page cannot be
+     added to NAV without someone noticing it has no header text. */
+  var PX_TITLES={
+    mission:["Mission Control","Everything that matters today, one screen"],
+    markets:["Markets","Indices, sectors, rates, volatility and dealer gamma"],
+    screeners:["Screeners","Gate passers watched against the engine\u2019s own levels"],
+    trades:["Trade","The open book, entries and exits"],
+    portfolio:["Portfolio","Positions, expectancy, risk and debrief"],
+    research:["Research","Reports, theses and GEX briefings"]
+  };
 
   function buildPage(id){
     var p=document.createElement("div"); p.id="page-"+id;
@@ -3899,18 +3978,12 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
 
   // jump links: close the edition, then switch page
   function edGo(id){
-    // Phoenix is a single scrolling document - every page is already active, so
-    // go(id) only sets a hash and nothing moves. Scroll to the section instead,
-    // which is what the top nav does.
+    // Phoenix is paged again, so these are real navigations. The old version
+    // scrolled to the section's offset, which resolves to 0 once only one page
+    // is mounted at a time — every jump link landed on the same screen.
     edClose();
     setTimeout(function(){
-      try{
-        var t=(id==="mission")?document.getElementById("px-hero")
-                              :document.getElementById("page-"+id);
-        if(!t){ try{ go(id); }catch(e){} return; }
-        var y=(id==="mission")?0:(t.getBoundingClientRect().top+window.pageYOffset-8);
-        window.scrollTo({top:y,behavior:"smooth"});
-      }catch(e){ console.warn("[ed] jump",e); }
+      try{ go(id); }catch(e){ console.warn("[ed] jump",e); }
     },120);
   }
   window.PX_ED_GO=edGo;
@@ -12033,38 +12106,48 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
            ["trades","Trade"],["portfolio","Portfolio"],["research","Research"]];
   var PX_HIDE_LINK={trades:1};
 
+  window.PXS_IDS = PXS.map(function(p){ return p[0]; });
+
+  /* Build each section once so its renderers have a DOM to write into. The
+     line that used to follow this loop added .active to all six, which is the
+     whole reason the app was still one 6,000px scroll. It is gone. */
   PXS.forEach(function(p){ try{ go(p[0]); }catch(e){ console.warn("init "+p[0],e); } });
-  Array.prototype.forEach.call(document.querySelectorAll(".page"),function(p){p.classList.add("active");});
+  PX_BOOTING=false;
 
   var pxLinks=document.getElementById("pxlinks");
-  PXS.forEach(function(p,i){
+  PXS.forEach(function(p){
     if(PX_HIDE_LINK[p[0]]) return;
     var a=document.createElement("a");
-    a.textContent=p[1]; a.id="pxl_"+p[0]; if(i===0) a.className="on";
-    a.addEventListener("click",function(){
-      var t=(p[0]==="mission")?document.getElementById("px-hero"):document.getElementById("page-"+p[0]);
-      if(t) window.scrollTo({top:(p[0]==="mission")?0:(t.getBoundingClientRect().top+window.pageYOffset-8),behavior:"smooth"});
-    });
+    a.textContent=p[1]; a.id="pxl_"+p[0];
+    a.addEventListener("click",function(){ go(p[0]); });
     pxLinks.appendChild(a);
   });
 
-  /* the background stays put and the nav stays visible - one page, one scroll */
+  /* ---------- hash router ----------
+     #research is now a real address: it survives reload and the back button,
+     instead of being whatever page the boot loop happened to finish on. */
+  function pxFromHash(){
+    var h=(location.hash||"").replace(/^#/,"").trim().toLowerCase();
+    var ok=PXS.some(function(p){ return p[0]===h; });
+    var id=ok?h:"mission";
+    /* Already there: returning would re-run that page's init for nothing, and
+       both listeners below can fire for a single back/forward step. */
+    var cur=document.getElementById("page-"+id);
+    if(cur&&cur.classList.contains("active")&&location.hash==="#"+id) return;
+    go(id,true);
+  }
+  /* Both, deliberately. Hash-only history entries fire hashchange in every
+     current browser, but pushState entries are popstate's job, and Safari has
+     been inconsistent about which it sends. pxFromHash is idempotent. */
+  window.addEventListener("hashchange",pxFromHash);
+  window.addEventListener("popstate",pxFromHash);
+  pxFromHash();
 
   var PX_STATUS="All systems nominal";
-  (function(){
-    var io=new IntersectionObserver(function(es){
-      es.forEach(function(e){
-        if(!e.isIntersecting) return;
-        var id=e.target.id.replace("page-","").replace("px-hero","mission");
-        PXS.forEach(function(p){ var a=document.getElementById("pxl_"+p[0]); if(a) a.className=(p[0]===id?"on":""); });
-        var lab=(PXS.filter(function(p){return p[0]===id;})[0]||["",""])[1];
-        var t=document.getElementById("pxStText"); if(t&&lab) t.textContent=PX_STATUS+" \u00B7 "+lab;
-      });
-    },{rootMargin:'-45% 0px -50% 0px',threshold:0});
-    var els=[document.getElementById("px-hero")];
-    PXS.forEach(function(p){ els.push(document.getElementById("page-"+p[0])); });
-    els.forEach(function(el){ if(el) io.observe(el); });
-  })();
+  /* The scroll-spy that used to live here inferred the current section from
+     what was on screen. With one page mounted at a time it can only ever
+     re-assert what the router just set, so it has been removed rather than
+     left to race with it. */
 
   (function pxClock(){
     var c=document.getElementById("pxStClock");
@@ -12502,7 +12585,7 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
 
     // everything already inside Portfolio becomes one tab body
     var body=document.createElement("div");
-    body.className="pf-sub on"; body.dataset.sub="portfolio";
+    body.className="pf-tabpane on"; body.dataset.sub="portfolio";
     while(pf.firstChild) body.appendChild(pf.firstChild);
 
     var nav=document.createElement("div");
@@ -12512,7 +12595,7 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
 
     // the Trade page moves in as the second tab, markup intact
     var tw=document.createElement("div");
-    tw.className="pf-sub"; tw.dataset.sub="trades";
+    tw.className="pf-tabpane"; tw.dataset.sub="trades";
     tr.parentNode.removeChild(tr);
     tr.style.display="block";
     tw.appendChild(tr);
@@ -12522,7 +12605,7 @@ table th{font-family:var(--serif)!important;font-size:10px!important;font-weight
     nav.addEventListener("click",function(e){
       var b=e.target.closest("button[data-sub]"); if(!b) return;
       nav.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on",x===b); });
-      pf.querySelectorAll(".pf-sub").forEach(function(p){
+      pf.querySelectorAll(".pf-tabpane").forEach(function(p){
         p.classList.toggle("on", p.dataset.sub===b.dataset.sub);
       });
       // let any chart inside the revealed tab re-measure now it has width
