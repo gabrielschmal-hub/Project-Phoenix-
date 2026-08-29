@@ -1437,16 +1437,23 @@ html{scroll-behavior:auto}
 .mckv .v{font-family:var(--mono);font-weight:700}
 .mcnote{margin:13px 0 0;font-size:12.5px;line-height:1.55;color:var(--inkLight)}
 
-/* calendar */
-.mcday{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;
-  color:var(--inkFade);margin:12px 0 5px}
-.mcday:first-child{margin-top:0}
-.mcev{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;background:var(--card2);
-  border-left:3px solid var(--line2);margin-bottom:2px}
-.mcev.hi{border-left-color:var(--gold)}
-.mcev .t{font-family:var(--mono);font-size:11px;color:var(--inkFade);flex:none;min-width:42px}
-.mcev .nm{flex:1;min-width:0;font-size:13px;font-weight:500}
-.mcev .nm small{display:block;font-weight:400;font-size:11px;color:var(--inkFade)}
+/* calendar - one line per event */
+.mccal{display:flex;flex-direction:column}
+.mcrow{display:grid;grid-template-columns:4.4rem 1fr auto;align-items:baseline;gap:10px;
+  padding:7px 0;border-bottom:1px solid var(--line)}
+.mcrow:last-child{border-bottom:0}
+.mcrow .dt{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--inkFade)}
+.mcrow .lb{font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mcrow .tm{font-family:var(--mono);font-size:10.5px;color:var(--inkFade)}
+.mcrow.td .dt{color:var(--gold);font-weight:700}
+.mcrow.td .lb{font-weight:700}
+.mcrow.hi .lb{font-weight:700}
+.mcrow.hi .dt::after{content:"\2022";color:var(--gold);margin-left:5px}
+
+/* sparklines on the macro cards */
+.mcspk{display:block;width:100%;height:26px;margin-top:7px;overflow:visible}
+.mcfeatspk{flex:0 0 100%;margin-top:10px}
+.mcfeatspk .mcspk{height:56px}
 
 /* debrief */
 .mcc.debrief{border-color:var(--gold)}
@@ -1475,7 +1482,7 @@ html{scroll-behavior:auto}
 .mcfeat .chg{font-family:var(--mono);font-size:15px;font-weight:700}
 .mcfeat .rel{font-size:12.5px;color:var(--inkLight);margin-left:auto;text-align:right;max-width:15rem}
 .mcagrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px}
-.mcacard{padding:10px 11px;border-radius:10px;background:var(--card2);border:1px solid var(--line)}
+.mcacard{padding:10px 11px 9px;border-radius:10px;background:var(--card2);border:1px solid var(--line)}
 .mcacard .k{font-family:var(--mono);font-size:8.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--inkFade)}
 .mcacard .v{font-family:var(--mono);font-size:15px;font-weight:700;margin-top:4px}
 .mcacard .c{font-family:var(--mono);font-size:10.5px;margin-top:1px}
@@ -8462,15 +8469,12 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '<div class="col">'+
           '<div class="mcc" id="mcBudget"></div>'+
           '<div class="mcc" id="mcBook"></div>'+
+          '<div class="mcc" id="mcGates"></div>'+
         '</div>'+
         '<div class="col">'+
           '<div class="mcc" id="mcCal"></div>'+
-          '<div id="mcDebriefHost"></div>'+
+          '<div class="mcc" id="mcBookHealth"></div>'+
         '</div>'+
-      '</div>'+
-      '<div class="mc2">'+
-        '<div class="col"><div class="mcc" id="mcGates"></div></div>'+
-        '<div class="col"><div class="mcc" id="mcBookHealth"></div></div>'+
       '</div>'+
     '</div>' 
 
@@ -8512,14 +8516,32 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // A marquee reads as decoration; cards let you compare levels at a glance,
   // which is what the page is for. SPX leads because every other read on this
   // screen - gamma, regime, the book - is quoted against it.
+  /* The full series, not just last/prev: the cards draw a shape now, and a
+     two-point shape is a straight line that says nothing. */
+  var MC_SER=null;
   function mcSeries(cb){
-    if(typeof pxMS!=="undefined"&&pxMS&&pxMS.last){ cb(pxMS); return; }
+    if(MC_SER){ cb({last:MC_SER[MC_SER.length-1],prev:MC_SER[MC_SER.length-2],all:MC_SER}); return; }
     getJSON("macro_series").then(function(d){
       var ser=(d&&d.series)||[];
       if(ser.length<2){ cb(null); return; }
+      MC_SER=ser;
       try{ pxMS={last:ser[ser.length-1],prev:ser[ser.length-2]}; }catch(e){}
-      cb({last:ser[ser.length-1],prev:ser[ser.length-2]});
+      cb({last:ser[ser.length-1],prev:ser[ser.length-2],all:ser});
     }).catch(function(){ cb(null); });
+  }
+  // Reuses edSpark's geometry; stroke colour follows the move so the grid reads
+  // green/red at a glance without having to parse the number.
+  function mcSpark(ser,key,up,w,h){
+    if(!ser||ser.length<3) return "";
+    var v=[];
+    for(var i=Math.max(0,ser.length-45); i<ser.length; i++) if(ser[i][key]!=null) v.push(+ser[i][key]);
+    if(v.length<3) return "";
+    var lo=Math.min.apply(null,v), hi=Math.max.apply(null,v), rng=(hi-lo)||1, p=[];
+    v.forEach(function(x,i){ p.push((i/(v.length-1)*w).toFixed(1)+","+(h-(x-lo)/rng*(h-4)-2).toFixed(1)); });
+    var col=up==null?"var(--inkGhost)":(up?"var(--green)":"var(--red)");
+    return '<svg class="mcspk" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" aria-hidden="true">'+
+      '<polyline points="'+p.join(" ")+'" fill="none" stroke="'+col+'" stroke-width="1.4" '+
+      'stroke-linejoin="round" stroke-linecap="round"/></svg>';
   }
   function mcNumFmt(v,dp,pre,kind){
     return (pre||"")+(+v).toLocaleString(undefined,{minimumFractionDigits:dp,maximumFractionDigits:dp})+(kind==="yield"?"%":"");
@@ -8544,13 +8566,15 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(k==="spx"){ feat={lab:lab,v:v,dp:dp,pre:pre,kind:kind,ch:ch,chTxt:chTxt}; return; }
       cards.push('<div class="mcacard"><div class="k">'+lab+'</div>'+
         '<div class="v">'+mcNumFmt(v,dp,pre,kind)+'</div>'+
-        '<div class="c '+(ch==null?"":mcCls(ch))+'">'+chTxt+'</div></div>');
+        '<div class="c '+(ch==null?"":mcCls(ch))+'">'+chTxt+'</div>'+
+        mcSpark(rows.all,k,(ch==null?null:ch>=0),96,26)+'</div>');
     });
     if(feat){
       out+='<div class="mcfeat"><div><div class="lbl">'+feat.lab+'</div>'+
         '<div class="big">'+mcNumFmt(feat.v,feat.dp,feat.pre,feat.kind)+'</div></div>'+
         '<div class="chg '+(feat.ch==null?"":mcCls(feat.ch))+'">'+feat.chTxt+'</div>'+
-        '<div class="rel" id="mcSpxRel"></div></div>';
+        '<div class="rel" id="mcSpxRel"></div>'+
+        '<div class="mcfeatspk">'+mcSpark(rows.all,"spx",(feat.ch==null?null:feat.ch>=0),300,56)+'</div></div>';
     }
     out+= cards.length ? '<div class="mcagrid">'+cards.join("")+'</div>'
                        : '<div class="mcna">No other series in <code>macro_series.json</code>.</div>';
@@ -8677,70 +8701,45 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   }
 
   // ---- calendar ----
-  // events.json currently carries date / label / time only. Impact ratings and
-  // prev/est are NOT in the feed, so they are not drawn. When the engine starts
-  // writing them this renderer picks them up without further change.
+  // Compact: one line per event with the date as a left gutter, so ten days
+  // fit in the height the old card spent on four. events.json carries date,
+  // label and time only - impact and prev/est are drawn the moment the engine
+  // starts writing them.
   function mcCal(){
     var host=document.getElementById("mcCal"); if(!host) return;
     var h=mcHead("Calendar \u00b7 next 10 days","Markets","PX_MC_GO('markets')");
     getJSON("events").then(function(d){
       var evts=(d&&(d.events||d))||[];
       if(!evts.length){ host.innerHTML=h+'<div class="mcna">No upcoming events in <code>events.json</code>.</div>'; return; }
-      var today=pfToday(), byDay={}, order=[];
+      var today=pfToday(), keep=[];
       evts.forEach(function(e){
         var dt=e.date||e.day; if(!dt) return;
-        if(pfDayDiff(today,dt)<0||pfDayDiff(today,dt)>10) return;
-        if(!byDay[dt]){ byDay[dt]=[]; order.push(dt); }
-        byDay[dt].push(e);
+        var dd=pfDayDiff(today,dt);
+        if(dd<0||dd>10) return;
+        keep.push({dt:dt,e:e,dd:dd});
       });
-      if(!order.length){ host.innerHTML=h+'<div class="mcna">Nothing scheduled in the next ten days.</div>'; return; }
-      order.sort();
-      var out=h;
-      order.forEach(function(dt){
-        var lbl=(dt===today)?"Today \u00b7 "+dt:dt;
-        out+='<div class="mcday">'+lbl+'</div>';
-        byDay[dt].forEach(function(e){
-          var imp=(e.impact||"").toString().toLowerCase();
-          var hi=(imp==="high"||imp==="3"||e.high===true);
-          out+='<div class="mcev'+(hi?" hi":"")+'">'+
-            '<span class="t">'+(e.time_et||e.time||"\u2014")+'</span>'+
-            '<span class="nm">'+(e.label||e.name||"\u2014")+
-              (e.note?'<small>'+e.note+'</small>':'')+'</span></div>';
-        });
+      if(!keep.length){ host.innerHTML=h+'<div class="mcna">Nothing scheduled in the next ten days.</div>'; return; }
+      keep.sort(function(a,b){ return a.dt<b.dt?-1:(a.dt>b.dt?1:0); });
+      var out=h+'<div class="mccal">', lastDt=null;
+      keep.forEach(function(x){
+        var e=x.e, imp=String(e.impact||"").toLowerCase();
+        var hi=(imp==="high"||imp==="3"||e.high===true);
+        var day=(x.dt===today)?"TODAY":mcDayShort(x.dt);
+        var showDay=(x.dt!==lastDt); lastDt=x.dt;
+        out+='<div class="mcrow'+(hi?" hi":"")+(x.dt===today?" td":"")+'">'+
+          '<span class="dt">'+(showDay?day:"")+'</span>'+
+          '<span class="lb">'+(e.label||e.name||"\u2014")+'</span>'+
+          '<span class="tm">'+(e.time_et||e.time||"")+'</span></div>';
       });
-      out+='<p class="mcnote" style="font-family:var(--mono);font-size:10px">Impact ratings and prev/est are not in <code>events.json</code> yet.</p>';
+      out+='</div>';
       host.innerHTML=out;
     }).catch(function(){ host.innerHTML=h+mcMissing("calendar","events.json"); });
   }
-
-  // ---- exit debrief owed ----
-  // Doctrine card: after every exit the five questions get answered before the
-  // next trade. Fires on the most recent close whose exit_notes are empty.
-  var MC_Q=["When did the urge to exit first hit?","What kept you in?",
-            "Analysis or relief \u2014 honestly?","What did the stop do?",
-            "Next time I'm +1R I will\u2026"];
-  function mcDebrief(st){
-    var host=document.getElementById("mcDebriefHost"); if(!host) return;
-    if(!st||!st.closed||!st.closed.length){ host.innerHTML=""; return; }
-    var owed=null;
-    (trLog||[]).forEach(function(t){
-      if(t.status!=="closed"||!edMine(t)) return;
-      var notes=t.exit_notes;
-      var empty = !notes || (typeof notes==="string" && !notes.trim()) ||
-                  (typeof notes==="object" && !Object.keys(notes).filter(function(k){
-                     return notes[k]&&String(notes[k]).trim(); }).length);
-      if(!empty) return;
-      if(!owed || String(t.exitDate||t.exit_date||"") > String(owed.exitDate||owed.exit_date||"")) owed=t;
-    });
-    if(!owed){ host.innerHTML=""; return; }
-    var rec=st.closed.filter(function(r){return r.ticker===owed.ticker;}).pop();
-    var when=owed.exitDate||owed.exit_date||"";
-    host.innerHTML='<div class="mcc debrief">'+
-      mcHead("Exit debrief owed","Trade","PX_MC_GO('trades')")+
-      '<p style="margin:0 0 4px;font-size:13.5px"><b>'+owed.ticker+' closed'+(when?" "+when:"")+
-        (rec&&rec.R?" at "+mcSign(rec.R,1)+"R":"")+'.</b> Five questions still unanswered.</p>'+
-      MC_Q.map(function(q,i){ return '<div class="mcq"><i>'+(i+1)+'</i><span>'+q+'</span></div>'; }).join("")+
-      '<button class="mcbtn" onclick="PX_MC_TICKER('+JSON.stringify(owed.ticker).replace(/"/g,"&quot;")+')">Write the debrief</button></div>';
+  function mcDayShort(dt){
+    try{
+      var d=new Date(dt+"T00:00:00");
+      return ["SUN","MON","TUE","WED","THU","FRI","SAT"][d.getDay()]+" "+String(d.getDate()).padStart(2,"0");
+    }catch(e){ return dt; }
   }
 
   // ---- book health ----
@@ -8867,7 +8866,6 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       try{ mcGates(); }catch(e){}
       try{ mcRegime(); }catch(e){}
       try{ mcCal(); }catch(e){}
-      try{ mcDebrief(mstate); }catch(e){ console.warn("mcDebrief",e); }
       try{ mcHealth(mstate); }catch(e){}
     }
     if(!document.getElementById("mcVerdict")) return;
