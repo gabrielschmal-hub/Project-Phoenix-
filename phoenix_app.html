@@ -1255,7 +1255,17 @@ h1.hero-h em{font-style:italic;font-weight:700;color:#E0642B}
 .hero-cta{display:flex;gap:14px;margin-top:38px;flex-wrap:wrap;justify-content:center}
 .cta-ink{border:0;border-radius:999px;background:#2A2621;color:#FFF;font:inherit;font-size:15px;font-weight:600;
   padding:16px 30px;cursor:pointer;display:inline-flex;align-items:center;gap:11px;box-shadow:0 10px 30px rgba(40,34,28,.26)}
-@media(max-width:900px){ .hlinks,.hlogin{display:none} }
+/* home tape */
+.htape{margin-top:44px;display:flex;gap:0;border-radius:14px;overflow-x:auto;scrollbar-width:none;
+  max-width:min(1060px,calc(100vw - 40px));box-shadow:0 4px 20px rgba(60,50,44,.08)}
+.htape::-webkit-scrollbar{display:none}
+.htape>div{flex:1;min-width:104px;padding:11px 15px;border-right:1px solid rgba(255,255,255,.34);text-align:left}
+.htape>div:last-child{border-right:0}
+.htape .k{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:rgba(45,40,34,.62)}
+.htape .v{font-family:var(--mono);font-size:15px;font-weight:700;margin-top:4px;color:#2A2621}
+.htape .c{font-family:var(--mono);font-size:10.5px;margin-top:1px}
+.htape .up{color:#177A4E} .htape .dn{color:#B8351F}
+@media(max-width:900px){ .hlinks,.hlogin{display:none} .htape{margin-top:30px} }
 @media(orientation:portrait){ .dawn{background-position:50% 82%} .hero{justify-content:flex-start;padding:96px 24px 40px} }
 
 /* ===== paged shell: one section at a time ===== */
@@ -1346,7 +1356,11 @@ html{scroll-behavior:auto}
 
 /* ================= MISSION CONTROL ================= */
 #page-mission .mcw{max-width:1400px;margin:0 auto;padding:0 34px}
-.mc2{display:grid;grid-template-columns:1.62fr 1fr;gap:16px;align-items:start;margin-top:18px}
+.mc2{display:grid;grid-template-columns:1.62fr 1fr;gap:16px;align-items:stretch;margin-top:18px}
+/* Paired cards match height: a short card beside a tall one left a ragged gap
+   in the page rather than whitespace inside the card, which read as a bug. */
+.mc2 .col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.mc2 .col>.mcc:only-child{flex:1}
 .mc2 .col{display:flex;flex-direction:column;gap:16px;min-width:0}
 .mcc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px 19px 19px;min-width:0}
 .mch{display:flex;align-items:center;gap:10px;margin-bottom:14px}
@@ -1443,9 +1457,50 @@ html{scroll-behavior:auto}
 .mcgates{display:inline-flex;gap:2.5px}
 .mcgates i{width:6px;height:6px;border-radius:50%;background:var(--green)}
 .mcgates i.off{background:var(--line2)}
+/* daily brief: full width, longer preview, room to actually read */
+.mcbrief-wide{margin-top:18px}
+.mcbrief-wide #mcBrief{font-size:15.5px;line-height:1.72;color:var(--inkMed)}
+.mcbrief-wide #mcBrief p{margin:0 0 13px}
+.mcbrief-wide #mcBrief p:last-child{margin-bottom:0}
+.mcbrief-wide #mcBrief b{color:var(--ink);font-weight:700}
+.mcbrief-wide #mcBrief .lead::first-letter{float:left;font-size:46px;line-height:.86;font-weight:800;
+  margin:4px 10px 0 0;color:var(--gold)}
+.mc2{margin-top:16px}
+
+/* macro: a featured SPX card plus a grid of the rest */
+.mcfeat{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;padding:2px 0 16px;
+  border-bottom:1px solid var(--line);margin-bottom:14px}
+.mcfeat .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade)}
+.mcfeat .big{font-family:var(--mono);font-size:38px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.mcfeat .chg{font-family:var(--mono);font-size:15px;font-weight:700}
+.mcfeat .rel{font-size:12.5px;color:var(--inkLight);margin-left:auto;text-align:right;max-width:15rem}
+.mcagrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px}
+.mcacard{padding:10px 11px;border-radius:10px;background:var(--card2);border:1px solid var(--line)}
+.mcacard .k{font-family:var(--mono);font-size:8.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--inkFade)}
+.mcacard .v{font-family:var(--mono);font-size:15px;font-weight:700;margin-top:4px}
+.mcacard .c{font-family:var(--mono);font-size:10.5px;margin-top:1px}
+
+/* GEX: a price ladder, because the levels are the tradeable part */
+.mclad{display:flex;flex-direction:column;gap:0;margin-top:4px}
+.mclvl{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;gap:12px;
+  padding:10px 0;border-bottom:1px solid var(--line)}
+.mclvl:last-child{border-bottom:0}
+.mclvl .px{font-family:var(--mono);font-size:15px;font-weight:700;min-width:4.6rem}
+.mclvl .nm{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--inkFade)}
+.mclvl .nm b{display:block;font-family:var(--sans);font-size:12px;font-weight:400;letter-spacing:0;
+  text-transform:none;color:var(--inkLight);margin-top:3px;line-height:1.45}
+.mclvl .dst{font-family:var(--mono);font-size:11px;color:var(--inkFade);white-space:nowrap}
+.mclvl.spot{background:var(--card2);border-radius:9px;padding:10px 11px;border-bottom:0;margin:3px 0}
+.mclvl.spot .px{color:var(--gold)}
+.mclvl.spot .nm{color:var(--gold)}
+.mcgexfoot{margin-top:12px;font-size:12.5px;line-height:1.55;color:var(--inkLight)}
+.mcgexfoot .ng{font-family:var(--mono);font-size:11px;color:var(--inkFade);display:block;margin-top:7px}
+
 @media(max-width:1100px){
   .mc2{grid-template-columns:1fr}
   #page-mission .mcw{padding:0 16px}
+  .mcfeat .big{font-size:30px}
+  .mcfeat .rel{margin-left:0;max-width:none;text-align:left}
 }
 
 /* screener search */
@@ -2636,6 +2691,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5"/></svg>
       </button>
     </div>
+    <!-- The tape lives here now. On Mission Control it was decoration you had
+         to read sideways; on the way in it is the one glance that belongs. -->
+    <div class="htape hglass" id="hTape" hidden></div>
   </div>
 </div>
 
@@ -8387,25 +8445,32 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
      Every card carries a link to the page that owns its data. Every value is
      read from the same JSON the dedicated pages use - a card with no data
      says so rather than showing a plausible number. */
+  /* Paired rows rather than two tall columns. A single grid let the right
+     column run on while the left ran out, which is what left that half-screen
+     void; imbalance is now contained to one row at a time. */
   var MC_HTML =
     '<div class="mcw">'+
-      '<div class="mctape" id="mcTape"></div>'+
+      '<div class="mcc mcbrief-wide">'+
+        '<div class="mch"><h2>Daily brief</h2>'+
+          '<button class="mcgo" onclick="PX_OPEN_EDITION()">Open the full read \u2192</button></div>'+
+        '<div id="mcBrief" class="mcna">loading\u2026</div></div>'+
+      '<div class="mc2">'+
+        '<div class="col"><div class="mcc" id="mcMacro"></div></div>'+
+        '<div class="col"><div class="mcc" id="mcRegime"></div></div>'+
+      '</div>'+
       '<div class="mc2">'+
         '<div class="col">'+
           '<div class="mcc" id="mcBudget"></div>'+
           '<div class="mcc" id="mcBook"></div>'+
-          '<div class="mcc">'+
-            '<div class="mch"><h2>Daily brief</h2>'+
-              '<button class="mcgo" onclick="PX_OPEN_EDITION()">Open the full read \u2192</button></div>'+
-            '<div id="mcBrief" class="mcna">loading\u2026</div></div>'+
-          '<div class="mcc" id="mcGates"></div>'+
         '</div>'+
         '<div class="col">'+
-          '<div class="mcc" id="mcRegime"></div>'+
           '<div class="mcc" id="mcCal"></div>'+
           '<div id="mcDebriefHost"></div>'+
-          '<div class="mcc" id="mcBookHealth"></div>'+
         '</div>'+
+      '</div>'+
+      '<div class="mc2">'+
+        '<div class="col"><div class="mcc" id="mcGates"></div></div>'+
+        '<div class="col"><div class="mcc" id="mcBookHealth"></div></div>'+
       '</div>'+
     '</div>' 
 
@@ -8443,27 +8508,61 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function mcCls(v){ return v>0?"up":(v<0?"dn":""); }
   function mcSign(v,dp){ return (v>0?"+":"")+(+v).toFixed(dp==null?2:dp); }
 
-  // ---- index tape: same instruments as the Markets marquee ----
-  function mcTape(){
-    var host=document.getElementById("mcTape"); if(!host) return;
+  // ---- macro: SPX featured, the rest as cards ----
+  // A marquee reads as decoration; cards let you compare levels at a glance,
+  // which is what the page is for. SPX leads because every other read on this
+  // screen - gamma, regime, the book - is quoted against it.
+  function mcSeries(cb){
+    if(typeof pxMS!=="undefined"&&pxMS&&pxMS.last){ cb(pxMS); return; }
+    getJSON("macro_series").then(function(d){
+      var ser=(d&&d.series)||[];
+      if(ser.length<2){ cb(null); return; }
+      try{ pxMS={last:ser[ser.length-1],prev:ser[ser.length-2]}; }catch(e){}
+      cb({last:ser[ser.length-1],prev:ser[ser.length-2]});
+    }).catch(function(){ cb(null); });
+  }
+  function mcNumFmt(v,dp,pre,kind){
+    return (pre||"")+(+v).toLocaleString(undefined,{minimumFractionDigits:dp,maximumFractionDigits:dp})+(kind==="yield"?"%":"");
+  }
+  function mcChange(v,pv,kind){
+    if(pv==null||v==null) return null;
+    return kind==="yield" ? (v-pv) : (pv?(v/pv-1)*100:null);
+  }
+  function mcMacro(){
+    var host=document.getElementById("mcMacro"); if(!host) return;
+    var h=mcHead("Macro \u00b7 last close","Markets","PX_MC_GO('markets')");
     var defs=(typeof PX_DEFS!=="undefined"&&PX_DEFS)?PX_DEFS:null;
-    var rows=(typeof pxMS!=="undefined"&&pxMS)?pxMS:null;
-    if(!defs||!rows||!rows.last){ host.innerHTML='<div style="padding:14px" class="mcna">Tape waiting on <code>macro_series.json</code>.</div>'; return; }
-    var out=[], L=rows.last, P=rows.prev||{};
-    defs.slice(0,9).forEach(function(d){
+    if(!defs){ host.innerHTML=h+mcMissing("macro series","macro_series.json"); return; }
+    mcSeries(function(rows){
+    if(!rows||!rows.last){ host.innerHTML=h+mcMissing("macro series","macro_series.json"); return; }
+    var L=rows.last, P=rows.prev||{}, out=h, feat=null, cards=[];
+    defs.forEach(function(d){
       var k=d[0], lab=d[1], dp=d[2]||0, pre=d[3]||"", kind=d[4];
-      var v=L[k], pv=P[k];
-      if(v==null) return;
-      // yields move in points, not percent - a 4.73% -> 4.78% step is +0.05,
-      // and showing it as +1.06% would misread the day.
-      var ch=(pv==null)?null:(kind==="yield"?(v-pv):(pv?(v/pv-1)*100:null));
+      var v=L[k]; if(v==null) return;
+      var ch=mcChange(v,P[k],kind);
       var chTxt=(ch==null)?"\u2014":(kind==="yield"?mcSign(ch,2):mcSign(ch)+"%");
-      out.push('<div><div class="k">'+lab+'</div>'+
-        '<div class="v">'+pre+(+v).toLocaleString(undefined,{minimumFractionDigits:dp,maximumFractionDigits:dp})+
-          (kind==="yield"?"%":"")+'</div>'+
+      if(k==="spx"){ feat={lab:lab,v:v,dp:dp,pre:pre,kind:kind,ch:ch,chTxt:chTxt}; return; }
+      cards.push('<div class="mcacard"><div class="k">'+lab+'</div>'+
+        '<div class="v">'+mcNumFmt(v,dp,pre,kind)+'</div>'+
         '<div class="c '+(ch==null?"":mcCls(ch))+'">'+chTxt+'</div></div>');
     });
-    host.innerHTML = out.length?out.join(""):'<div style="padding:14px" class="mcna">No series in <code>macro_series.json</code> yet.</div>';
+    if(feat){
+      out+='<div class="mcfeat"><div><div class="lbl">'+feat.lab+'</div>'+
+        '<div class="big">'+mcNumFmt(feat.v,feat.dp,feat.pre,feat.kind)+'</div></div>'+
+        '<div class="chg '+(feat.ch==null?"":mcCls(feat.ch))+'">'+feat.chTxt+'</div>'+
+        '<div class="rel" id="mcSpxRel"></div></div>';
+    }
+    out+= cards.length ? '<div class="mcagrid">'+cards.join("")+'</div>'
+                       : '<div class="mcna">No other series in <code>macro_series.json</code>.</div>';
+    host.innerHTML=out;
+    // spot vs the flip, filled once gex.json lands
+    getJSON("gex").then(function(g){
+      var ov=(g||{}).overview||{}; var el=document.getElementById("mcSpxRel");
+      if(!el||ov.gamma_flip==null||feat==null) return;
+      var d=(feat.v/ov.gamma_flip-1)*100;
+      el.innerHTML=(d>=0?"Above":"Below")+" the gamma flip by <b>"+Math.abs(d).toFixed(2)+"%</b>";
+    }).catch(function(){});
+    });
   }
 
   // ---- SIGNATURE: the risk budget ----
@@ -8529,47 +8628,49 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       '<tbody>'+rows+'</tbody></table>';
   }
 
-  // ---- regime + dealer gamma ----
+  // ---- regime + GEX levels ----
+  // Net gamma is a scale reading, not a decision: it tells you the sign of
+  // dealer positioning but not where anything happens. The levels do, so they
+  // lead and the aggregate is demoted to a footnote.
   function mcRegime(){
     var host=document.getElementById("mcRegime"); if(!host) return;
-    var h=mcHead("Regime &amp; dealer gamma","Markets","PX_MC_GO('markets')");
+    var h=mcHead("Regime &amp; GEX levels","Markets","PX_MC_GO('markets')");
     Promise.all([getJSON("macro").catch(function(){return null;}),
                  getJSON("gex").catch(function(){return null;})]).then(function(r){
       var mac=r[0]||null, ov=((r[1]||{}).overview)||null;
       if(!mac&&!ov){ host.innerHTML=h+mcMissing("regime or gamma read","macro.json / gex.json"); return; }
       var out=h;
       if(mac){
-        out+='<div class="mcreg">'+(mac.regime||mac.label||"\u2014")+'</div>'+
-             '<div class="mcconf">'+(mac.confidence!=null?Math.round(mac.confidence*(mac.confidence<=1?100:1))+"% confidence":"confidence \u2014")+
+        var conf=(mac.confidence!=null)?Math.round(mac.confidence*(mac.confidence<=1?100:1)):null;
+        out+='<div class="mcreg">'+String(mac.regime||mac.label||"\u2014").replace(/_/g," ")+'</div>'+
+             '<div class="mcconf">'+(conf!=null?conf+"% confidence":"confidence \u2014")+
              (mac.asof?" \u00b7 as of "+mac.asof:"")+'</div>';
       }
-      if(ov&&ov.gamma_flip!=null&&ov.spot!=null){
-        // Spot placed relative to the flip on a +/-2% window, clamped so a big
-        // dislocation still renders inside the track instead of off the card.
-        var pct=(ov.spot/ov.gamma_flip-1)*100;
-        var pos=Math.max(4,Math.min(96,50+pct/2*50));
-        var col=(ov.net_gex_B>=0)?"var(--green)":"var(--red)";
-        out+='<div class="mcrule"><div class="trk"></div>'+
-          '<div class="flp" style="left:50%"><b>FLIP '+Math.round(ov.gamma_flip).toLocaleString()+'</b></div>'+
-          '<div class="spt" style="left:'+pos+'%;background:'+col+'"><b style="color:'+col+'">'+
-            Math.round(ov.spot).toLocaleString()+'</b></div></div>'+
-          '<div class="mcrlab"><span>negative gamma</span><span>positive gamma</span></div>';
+      if(!ov){ host.innerHTML=out+mcMissing("dealer gamma","gex.json"); return; }
+      var spot=(ov.spot!=null?ov.spot:ov.spx_spot);
+      var lv=[];
+      function add(px,name,why){ if(px!=null) lv.push({px:+px,name:name,why:why}); }
+      add(ov.call_wall,"Call wall","Dealers are short calls above here \u2014 rallies meet supply.");
+      add(ov.pin!=null?ov.pin:ov.magnet,"Pin / magnet","Where the largest open interest wants price to settle.");
+      add(ov.gamma_flip,"Gamma flip","Below this, dealer hedging amplifies moves instead of damping them.");
+      add(ov.put_wall,"Put wall","Dealers are long puts here \u2014 the cushion on a downward move.");
+      if(spot!=null) lv.push({px:+spot,name:"Spot",why:null,isSpot:true});
+      lv.sort(function(a,b){ return b.px-a.px; });
+      if(lv.length){
+        out+='<div class="mclad">'+lv.map(function(l){
+          var d=(spot!=null&&!l.isSpot)?((l.px/spot-1)*100):null;
+          return '<div class="mclvl'+(l.isSpot?" spot":"")+'">'+
+            '<span class="px">'+Math.round(l.px).toLocaleString()+'</span>'+
+            '<span class="nm">'+l.name+(l.why?'<b>'+l.why+'</b>':'')+'</span>'+
+            '<span class="dst">'+(d==null?"":mcSign(d)+"%")+'</span></div>';
+        }).join("")+'</div>';
       }
-      if(ov){
-        out+='<div style="margin-top:16px">';
-        if(ov.net_gex_B!=null) out+='<div class="mckv"><span class="k">Net gamma</span><span class="v '+mcCls(ov.net_gex_B)+'">'+mcSign(ov.net_gex_B)+'B</span></div>';
-        if(ov.gamma_flip!=null&&ov.spot!=null) out+='<div class="mckv"><span class="k">Distance to flip</span><span class="v">'+mcSign((ov.spot/ov.gamma_flip-1)*100)+'%</span></div>';
-        if(ov.call_wall!=null) out+='<div class="mckv"><span class="k">Call wall</span><span class="v">'+Math.round(ov.call_wall).toLocaleString()+'</span></div>';
-        if(ov.put_wall!=null) out+='<div class="mckv"><span class="k">Put wall</span><span class="v">'+Math.round(ov.put_wall).toLocaleString()+'</span></div>';
-        if(ov.pin!=null||ov.magnet!=null) out+='<div class="mckv"><span class="k">Pin / magnet</span><span class="v">'+Math.round(ov.pin!=null?ov.pin:ov.magnet).toLocaleString()+'</span></div>';
-        out+='</div>';
-        if(ov.net_gex_B!=null){
-          out+= ov.net_gex_B>=0
-            ? '<p class="mcnote">Spot sits above the flip, so dealers are long gamma: they buy weakness and sell strength. That cushions a downward move \u2014 it does not promise the level holds.</p>'
-            : '<p class="mcnote">Dealers are short gamma: they sell weakness and buy strength, which amplifies moves rather than damping them. Expect wider ranges.</p>';
-        }
-      } else {
-        out+=mcMissing("dealer gamma","gex.json");
+      if(ov.net_gex_B!=null&&ov.gamma_flip!=null&&spot!=null){
+        var above=spot>=ov.gamma_flip;
+        out+='<div class="mcgexfoot">'+(above
+          ? "Spot is above the flip, so dealers are long gamma: they buy weakness and sell strength. That cushions a downward move \u2014 it does not promise the level holds."
+          : "Spot is below the flip, so dealers are short gamma: they sell weakness and buy strength, which widens the range in both directions.")+
+          '<span class="ng">net gamma '+mcSign(ov.net_gex_B)+'B \u00b7 scale only, the levels above are the tradeable part</span></div>';
       }
       host.innerHTML=out;
     }).catch(function(){ host.innerHTML=h+mcMissing("regime or gamma read","macro.json / gex.json"); });
@@ -8683,39 +8784,63 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       '<th>Gates</th><th class="n">Day</th></tr></thead><tbody>'+body+'</tbody></table>';
   }
 
-  // ---- daily brief precis ----
+  // ---- daily brief ----
+  // Full width now, so it carries the whole read-through: regime, what the
+  // gamma structure implies, the state of the book, and the next event.
   function mcBrief(st){
     var host=document.getElementById("mcBrief"); if(!host) return;
     Promise.all([getJSON("macro").catch(function(){return null;}),
                  getJSON("gex").catch(function(){return null;}),
-                 getJSON("dayscore").catch(function(){return null;})]).then(function(r){
-      var mac=r[0]||{}, ov=((r[1]||{}).overview)||{}, ds=r[2]||{};
+                 getJSON("dayscore").catch(function(){return null;}),
+                 getJSON("events").catch(function(){return null;})]).then(function(r){
+      var mac=r[0]||{}, ov=((r[1]||{}).overview)||{}, ds=r[2]||{}, evd=r[3]||null;
+      var P=[];
       var bits=[];
-      if(mac.regime) bits.push('Regime reads <b>'+mac.regime+'</b>'+
+      if(mac.regime) bits.push('Regime reads <b>'+String(mac.regime).replace(/_/g," ")+'</b>'+
         (mac.confidence!=null?" at "+Math.round(mac.confidence*(mac.confidence<=1?100:1))+"% confidence":""));
       if(ds.score!=null) bits.push('the day scores <b>'+Math.round(ds.score)+'</b>'+(ds.verdict?" \u00b7 "+ds.verdict:""));
       var p1=bits.length?bits.join(", ")+".":"";
-      if(ov.net_gex_B!=null){
-        p1+=' Gamma is <b>'+(ov.net_gex_B>=0?"positive":"negative")+'</b> at '+mcSign(ov.net_gex_B)+'B'+
-            (ov.gamma_flip!=null?', with the flip at '+Math.round(ov.gamma_flip).toLocaleString():'')+'. '+
-            (ov.net_gex_B>=0
-              ? 'Dealers buy weakness and sell strength, which cushions downward moves rather than guaranteeing any level holds.'
-              : 'Dealers sell weakness and buy strength, which amplifies moves in both directions.');
+      var spot=(ov.spot!=null?ov.spot:ov.spx_spot);
+      if(ov.gamma_flip!=null&&spot!=null){
+        var above=spot>=ov.gamma_flip;
+        var dist=Math.abs((spot/ov.gamma_flip-1)*100).toFixed(2);
+        p1+=' Spot is <b>'+dist+'% '+(above?"above":"below")+'</b> the gamma flip at '+
+            Math.round(ov.gamma_flip).toLocaleString()+'. '+
+            (above ? 'Dealers are long gamma, buying weakness and selling strength, which cushions a downward move rather than guaranteeing any level holds.'
+                   : 'Dealers are short gamma, selling weakness and buying strength, which widens the range in both directions.');
       }
-      var p2="";
+      if(p1) P.push('<p class="lead">'+p1+'</p>');
+      if(ov.call_wall!=null||ov.put_wall!=null){
+        var w=[];
+        if(ov.call_wall!=null) w.push('supply builds into '+Math.round(ov.call_wall).toLocaleString());
+        if(ov.put_wall!=null) w.push('the cushion sits at '+Math.round(ov.put_wall).toLocaleString());
+        P.push('<p>Structurally, '+w.join(" and ")+
+          (ov.pin!=null||ov.magnet!=null?', with open interest pulling toward '+Math.round(ov.pin!=null?ov.pin:ov.magnet).toLocaleString():'')+
+          '. Those are the levels worth watching; the aggregate gamma number only tells you the sign.</p>');
+      }
       if(st&&st.open){
-        p2='The book carries <b>'+st.open.length+' open position'+(st.open.length===1?"":"s")+
-           ' and '+(st.openRiskR||0).toFixed(2)+'R of committed risk</b>.';
         var live=st.open.filter(function(x){ return !x.managed && x.stop<x.entry; });
+        var p2='The book carries <b>'+st.open.length+' open position'+(st.open.length===1?"":"s")+
+               ' and '+(st.openRiskR||0).toFixed(2)+'R of committed risk</b> against a '+
+               RULES.maxHeatR.toFixed(2)+'R cap.';
         if(st.open.length&&!live.length) p2+=' Every stop is at or above entry, so no initial risk is live.';
         else if(live.length) p2+=' Live risk sits in '+live.map(function(x){return x.ticker;}).join(", ")+'.';
+        if(st.openRiskR>RULES.maxHeatR) p2+=' <b>That is over the cap</b> \u2014 the next decision should reduce heat, not add to it.';
+        P.push('<p>'+p2+'</p>');
       }
-      var html="";
-      if(p1) html+='<p style="margin:0 0 11px">'+p1+'</p>';
-      if(p2) html+='<p style="margin:0">'+p2+'</p>';
-      host.className = html?"":"mcna";
-      host.innerHTML = html || 'Brief unavailable. Waiting on <code>macro.json</code> and <code>gex.json</code>.';
-      host.style.fontSize="14.5px"; host.style.lineHeight="1.68";
+      // next scheduled event, if the feed has one
+      if(evd){
+        var evts=(evd.events||evd)||[], today=pfToday(), nxt=null;
+        (evts||[]).forEach(function(e){
+          var dt=e.date||e.day; if(!dt||pfDayDiff(today,dt)<0) return;
+          if(!nxt||String(dt)<String(nxt.date||nxt.day)) nxt=e;
+        });
+        if(nxt) P.push('<p>Next on the calendar: <b>'+(nxt.label||nxt.name||"an event")+'</b>'+
+          ((nxt.date||nxt.day)===today?" today":" on "+(nxt.date||nxt.day))+
+          (nxt.time_et||nxt.time?" at "+(nxt.time_et||nxt.time):"")+'.</p>');
+      }
+      host.className="";
+      host.innerHTML = P.length?P.join("") : '<span class="mcna">Brief unavailable. Waiting on <code>macro.json</code> and <code>gex.json</code>.</span>';
     }).catch(function(){
       host.className="mcna";
       host.innerHTML='Brief unavailable. Waiting on <code>macro.json</code> and <code>gex.json</code>.';
@@ -8735,7 +8860,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(document.getElementById("mcBudget")){
       var mstate=null;
       try{ mstate=pfCompute(); }catch(e){ mstate=null; }
-      try{ mcTape(); }catch(e){}
+      try{ mcMacro(); }catch(e){ console.warn("mcMacro",e); }
       try{ mcBudget(mstate); }catch(e){ console.warn("mcBudget",e); }
       try{ mcBook(mstate); }catch(e){ console.warn("mcBook",e); }
       try{ mcBrief(mstate); }catch(e){}
@@ -13198,6 +13323,42 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     go(id||pxCurrentRoute());
   };
   window.PX_HOMESCREEN=function(){ if(PX_HOME){ PX_HOME.classList.remove("gone"); window.scrollTo(0,0); } };
+
+  /* Home tape. Stays hidden until there is something real to show - an empty
+     row of dashes under the hero would look broken rather than loading. */
+  function pxHomeTape(){
+    var el=document.getElementById("hTape"); if(!el) return;
+    var defs=(typeof PX_DEFS!=="undefined"&&PX_DEFS)?PX_DEFS:null;
+    var rows=(typeof pxMS!=="undefined"&&pxMS)?pxMS:null;
+    if(!defs){ el.hidden=true; return; }
+    if(!rows||!rows.last){
+      if(typeof mcSeries==="function") mcSeries(function(r){ if(r&&r.last) pxHomeTape(); });
+      el.hidden=true; return;
+    }
+    var L=rows.last, P=rows.prev||{}, out=[];
+    defs.slice(0,7).forEach(function(d){
+      var k=d[0], lab=d[1], dp=d[2]||0, pre=d[3]||"", kind=d[4];
+      var v=L[k]; if(v==null) return;
+      var pv=P[k], ch=(pv==null)?null:(kind==="yield"?(v-pv):(pv?(v/pv-1)*100:null));
+      var t=(ch==null)?"\u2014":(kind==="yield"?((ch>0?"+":"")+ch.toFixed(2)):((ch>0?"+":"")+ch.toFixed(2)+"%"));
+      out.push('<div><div class="k">'+lab+'</div><div class="v">'+
+        pre+(+v).toLocaleString(undefined,{minimumFractionDigits:dp,maximumFractionDigits:dp})+(kind==="yield"?"%":"")+
+        '</div><div class="c '+(ch==null?"":(ch>0?"up":(ch<0?"dn":"")))+'">'+t+'</div></div>');
+    });
+    if(!out.length){ el.hidden=true; return; }
+    el.innerHTML=out.join(""); el.hidden=false;
+  }
+  window.PX_HOME_TAPE=pxHomeTape;
+  // macro_series arrives async; poll briefly rather than block the gate on it
+  (function(){
+    var tries=0;
+    var t=setInterval(function(){
+      tries++;
+      try{ pxHomeTape(); }catch(e){}
+      var el=document.getElementById("hTape");
+      if((el&&!el.hidden)||tries>40) clearInterval(t);
+    },500);
+  })();
   pxFromHash();
 
   var pxMark=document.querySelector("#pxnav .pxbrand");
