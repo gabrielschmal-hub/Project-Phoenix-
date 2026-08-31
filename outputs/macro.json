@@ -1,34 +1,95 @@
 {
- "asof": "2026-08-31 11:25 UTC",
- "regime": "NO_CLEAR",
- "confidence": 0.0,
+ "asof": "2026-08-31 20:15 UTC",
+ "regime": "POLICY_TIGHTENING",
+ "confidence": 36.5,
  "confidence_note": "regime score, not a calibrated probability (A4)",
- "scores": {},
- "secondary_tag": null,
+ "scores": {
+  "POLICY_TIGHTENING": 36.5
+ },
+ "secondary_tag": "INFLATIONARY",
  "inputs": {
-  "wti_12m": 30.29,
-  "wti_3m": -4.53,
-  "wti_vs_2yr": 16.63,
+  "wti_12m": 38.89,
+  "wti_3m": -5.09,
+  "wti_vs_2yr": 19.88,
   "cpi_yoy": 3.3,
-  "cpi_chg_3m": -0.87,
-  "spx_3m": 1.74,
-  "spx_1m": 2.96,
-  "dd": -0.95,
-  "trail_dd": -0.95,
-  "spx_off_low": 0.49,
+  "cpi_chg_3m": -0.16,
+  "spx_3m": 4.1,
+  "spx_1m": -0.92,
+  "dd": -1.28,
+  "trail_dd": -1.28,
+  "spx_off_low": 0.15,
   "fresh_high": true,
-  "us02_3m": 11.0,
-  "real_3m": 23.0,
-  "vix": 14.43,
-  "vix_3m_chg": -5.81,
-  "hy": 273.0
+  "us02_3m": 20.0,
+  "real_3m": 27.0,
+  "vix": 14.92,
+  "vix_3m_chg": -30.64,
+  "hy": 266.0
  },
  "explain": {
-  "regime": "NO_CLEAR",
+  "regime": "POLICY_TIGHTENING",
   "held_weeks": 1,
-  "since": "2026-08-24",
-  "drivers": [],
-  "watch": [],
+  "since": "2026-08-31",
+  "drivers": [
+   {
+    "key": "cpi_yoy",
+    "label": "CPI y/y",
+    "value": 3.3,
+    "op": ">",
+    "threshold": 2.5,
+    "clear_by": 0.8,
+    "ok": true
+   },
+   {
+    "key": "real_3m",
+    "label": "Real 10Y 3m change (bp)",
+    "value": 27.0,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 2.0,
+    "ok": true
+   },
+   {
+    "key": "dd",
+    "label": "Drawdown",
+    "value": -1.28,
+    "op": ">",
+    "threshold": -12,
+    "clear_by": 10.72,
+    "ok": true
+   },
+   {
+    "key": "us02_3m",
+    "label": "2Y yield 3m change (bp)",
+    "value": 20.0,
+    "op": ">",
+    "threshold": 40,
+    "clear_by": -20.0,
+    "ok": false
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI y/y falls below 2.5",
+    "now": 3.3,
+    "threshold": 2.5,
+    "distance": 0.8,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   },
+   {
+    "if": "Real 10Y 3m change (bp) falls below 25",
+    "now": 27.0,
+    "threshold": 25,
+    "distance": 2.0,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   },
+   {
+    "if": "Drawdown falls below -12",
+    "now": -1.28,
+    "threshold": -12,
+    "distance": 10.72,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   }
+  ],
   "runner_up": {
    "regime": "ENERGY_GRIND",
    "score": null,
@@ -37,7 +98,7 @@
     {
      "label": "CPI 3m change",
      "need": "> 0.3",
-     "now": -0.8700000000000001
+     "now": -0.16000000000000014
     }
    ]
   }
