@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html class="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Phoenix Weekly · Aldemar</title><style>
+:root{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenSoft:#269360; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redSoft:#C4452B; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15); --blue:#2C5A82;
+  --serif:Georgia,'Times New Roman',serif;
+  --mono:'Courier New',ui-monospace,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--serif);
+  -webkit-font-smoothing:antialiased}
+.ed-wrap{background:var(--bg)}
+.ed-page{max-width:1180px;margin:0 auto;padding:30px 30px 60px;position:relative}
+.ed-x{position:absolute;top:18px;right:26px;z-index:5;background:var(--card);
+  border:1px solid var(--line2);border-radius:99px;padding:7px 15px;cursor:pointer;
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--inkLight);
+  text-decoration:none}
+.ed-x:hover{color:var(--gold);border-color:var(--gold)}
+.ed-mast{text-align:center;border-bottom:2px solid var(--line2);padding-bottom:15px}
+.ed-meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--inkFade);padding-right:130px}
+.ed-meta span:last-child{text-align:right}
+.ed-brand{display:flex;align-items:center;justify-content:center;gap:14px;margin:10px 0 4px}
+.ed-mark{width:52px;height:40px;flex:0 0 auto;display:block}
+.ed-brand .ed-name{font-family:var(--serif);font-size:56px;line-height:1;letter-spacing:-.02em}
+.ed-sub{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--inkLight)}
+.ed-sub-gamma{position:relative}
+.ed-sub-gamma::after{content:"· gamma";font-family:var(--mono);font-style:normal;
+  font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+  margin-left:9px;vertical-align:middle}
+.ed-hello{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--inkFade);margin-top:11px}
+.ed-verdict{border-bottom:1px solid var(--line);padding:20px 0 18px}
+.ed-call{font-family:var(--serif);font-size:33px;line-height:1.12}
+.ed-call em{font-style:normal;color:var(--gold)}
+.ed-vwhy{font-size:14.5px;color:var(--inkLight);margin-top:9px;line-height:1.6}
+.ed-sec{border-bottom:1px solid var(--line);padding:24px 0}
+.ed-sec:last-of-type{border-bottom:0}
+.ed-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--inkFade);display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.ed-n{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--inkLight);
+  text-transform:none;letter-spacing:0}
+.ed-hl{font-family:var(--serif);font-size:30px;line-height:1.16;margin:9px 0 13px;
+  letter-spacing:-.01em}
+.ed-hl.sm{font-size:25px}
+.ed-body{font-size:15px;line-height:1.68;color:var(--inkMed);margin:0 0 12px}
+.ed-pos{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px 16px;
+  align-items:baseline;font-family:var(--mono);font-size:13px;padding:10px 0;
+  border-bottom:1px solid var(--line)}
+.ed-pos .tk{font-family:var(--serif);font-size:18px;font-weight:700}
+.ed-pos .nt{font-family:var(--sans);font-size:12.5px;color:var(--inkFade)}
+.ed-tape{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.ed-ins{border:1px solid var(--line);border-radius:3px;padding:11px 12px 6px;
+  background:var(--card);overflow:hidden}
+.ed-ins.lead{border-color:var(--gold);border-left-width:3px}
+.ed-ins .i-k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--inkFade);display:flex;justify-content:space-between}
+.ed-ins .i-sig{color:var(--gold)}
+.ed-ins .i-v{font-family:var(--mono);font-size:19px;font-weight:700;margin-top:4px}
+.ed-ins .i-c{font-family:var(--mono);font-size:12px}
+.ed-sk{width:100%;height:44px;display:block;margin-top:5px}
+.ed-sk .ar{fill:currentColor;opacity:.12;stroke:none}
+.ed-sk .ln{fill:none;stroke:currentColor;stroke-width:1.6}
+.ed-sk.g{color:var(--green)}.ed-sk.r{color:var(--red)}
+.ed-rot{margin:8px 0 12px}
+.ed-rr{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:baseline;
+  padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ed-rr:last-child{border-bottom:0}
+.ed-rr .bar{width:110px;height:5px;background:var(--line);border-radius:3px;overflow:hidden;
+  justify-self:end}
+.ed-rr .bar b{display:block;height:100%}
+.ed-rr .pc{font-family:var(--mono);font-size:13px;min-width:70px;text-align:right}
+.ed-rr .yours{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--gold);
+  border:1px solid var(--gold);border-radius:2px;padding:1px 5px;margin-left:7px}
+.ed-smart{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;margin:8px 0 12px}
+.ed-sm{padding:11px 0;border-bottom:1px solid var(--line)}
+.ed-sm .sm-t{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--inkFade);margin-bottom:5px}
+.ed-sm .sm-l{font-size:13.5px;line-height:1.55;color:var(--inkMed)}
+.ed-setups{margin:10px 0 14px}
+.ed-su{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px 16px;
+  align-items:baseline;padding:11px 0;border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:13px}
+.ed-su:last-child{border-bottom:0}
+.ed-su .tk{font-family:var(--serif);font-size:17px;font-weight:700}
+.ed-su .nt{font-family:var(--sans);font-size:12.5px;color:var(--inkFade)}
+.ed-su .badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:2px 7px;
+  border:1px solid var(--line2);border-radius:2px;color:var(--inkLight)}
+.ed-su .badge.hot{border-color:var(--gold);color:var(--gold)}
+.ed-map{border:1px solid var(--line);border-radius:3px;background:var(--card);padding:8px;
+  margin:8px 0 14px;position:relative}
+.ed-gexh .ed-map{height:auto}
+.gexh-scroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+  padding-bottom:4px}
+.gex-svg{display:block;margin-top:6px}
+.gexh-key{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;padding:10px 2px 2px;
+  font-family:var(--mono);font-size:11.5px;color:var(--inkLight)}
+.gexh-key span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.gexh-key i{width:13px;height:4px;border-radius:2px;display:inline-block;flex:0 0 auto}
+.gexh-key b{font-weight:700;letter-spacing:.02em}
+.gexh-key em{font-style:normal}
+.gexh-key u{text-decoration:none;color:var(--inkFade);font-size:10.5px}
+.gexh-key s{text-decoration:none;color:var(--inkFade);font-style:italic;font-size:10.5px}
+.gexh-key .k-note{opacity:.8;font-style:italic;white-space:normal;flex-basis:100%;
+  line-height:1.5}
+.gexh-key .lv.off i{opacity:.45}
+.ed-chartk{font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--inkFade);display:flex;justify-content:space-between;
+  align-items:baseline;gap:14px;margin:6px 0}
+.ed-vix{border:1px solid var(--line);border-radius:3px;background:var(--card);height:250px;
+  position:relative;padding:8px;margin-bottom:14px}
+.ed-vix .vix-svg{position:absolute;inset:8px;width:calc(100% - 16px);
+  height:calc(100% - 16px)}
+.ed-note{font-size:13px;line-height:1.6;color:var(--inkFade);border-left:2px solid var(--line2);
+  padding:8px 0 8px 12px;margin:10px 0 4px;font-style:italic}
+.ed-cals{margin:10px 0 14px}
+.ed-cal{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px 14px;
+  align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ed-cal:last-child{border-bottom:0}
+.ed-cal.hot{border-left:3px solid var(--gold);padding-left:11px;margin-left:-14px}
+.ed-cal .c-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:2px 7px;
+  border-radius:2px;border:1px solid var(--line2);color:var(--inkLight)}
+.ed-cal .c-fomc{border-color:var(--red);color:var(--red)}
+.ed-cal .c-cpi{border-color:var(--gold);color:var(--gold)}
+.ed-cal .c-opex{border-color:var(--amber);color:var(--amber)}
+.ed-cal .c-w{font-family:var(--mono);font-size:12px;color:var(--inkLight);white-space:nowrap}
+.ed-cal .c-w.hot{color:var(--gold);font-weight:700}
+.ed-cal .c-d{font-family:var(--mono);font-size:11px;color:var(--inkFade);white-space:nowrap}
+.ed-w{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;
+  font-size:13.5px;padding:9px 0;border-bottom:1px solid var(--line)}
+.ed-w:last-child{border-bottom:0}
+.ed-w .w-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;padding:2px 7px;
+  border-radius:2px;background:var(--gold);color:#FFFDF9}
+.ed-w .w-tag.low{background:var(--line2);color:var(--ink)}
+.ed-w .w-when{font-family:var(--mono);font-size:11.5px;color:var(--inkFade);white-space:nowrap}
+.brief-watch{background:rgba(211,119,54,.10);border:1px solid rgba(211,119,54,.38);
+  border-radius:7px;padding:10px 13px;margin-top:11px;font-size:13.5px;line-height:1.6}
+.brief-watch .k{font-family:var(--mono);font-size:11px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--ink);display:block;margin-bottom:4px}
+.ed-jump{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:26px}
+.ed-jump a{display:block;text-align:center;padding:14px 8px;border:1px solid var(--line2);
+  border-radius:3px;color:var(--ink);font-family:var(--mono);font-size:11.5px;
+  letter-spacing:.14em;text-transform:uppercase;background:var(--card);cursor:pointer;
+  text-decoration:none}
+.ed-jump a:hover{border-color:var(--gold);color:var(--gold)}
+.ed-colophon{margin-top:20px;text-align:center;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--inkFade)}
+.ed-cond{margin-top:2px}
+@media(max-width:820px){
+  .ed-page{padding:20px 16px 50px}
+  .ed-brand .ed-name{font-size:36px}.ed-mark{width:38px;height:29px}
+  .ed-meta{padding-right:96px}
+  .ed-call{font-size:25px}
+  .ed-hl{font-size:23px}.ed-hl.sm{font-size:20px}
+  .ed-tape{grid-template-columns:1fr 1fr}.ed-jump{grid-template-columns:1fr 1fr}
+  .ed-smart{grid-template-columns:1fr;gap:0}
+  .ed-pos,.ed-su{grid-template-columns:auto 1fr;gap:3px 12px}
+  .ed-cal{grid-template-columns:auto 1fr;gap:3px 10px}
+  .ed-cal .c-w,.ed-cal .c-d{grid-column:span 2;font-size:11.5px}
+  .ed-vix{height:240px}
+}
+
+.pos-strip{margin:2px 0 4px;border-top:1px solid var(--line)}
+.pos-line{display:flex;gap:14px;align-items:baseline;padding:9px 0;
+  border-bottom:1px solid var(--line);font-family:var(--mono);font-size:13px}
+.pos-line:last-child{border-bottom:0}
+.pos-line .tk{font-family:var(--serif);font-size:17px;font-weight:700}
+.ed-w .w-tag.war-strike{background:var(--red);color:#FFFDF9}
+.ed-w .w-tag.war-oil{background:var(--amber);color:#FFFDF9}
+.ed-w .w-tag.war-talks{background:var(--green);color:#FFFDF9}
+.ed-w .w-tag.war-politics,.ed-w .w-tag.war-military{background:var(--line2);color:var(--ink)}
+</style></head><body><div class="ed-wrap"><div class="ed-page"><a class="ed-x" href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">CLOSE ✕</a><div class="ed-mast"><div class="ed-meta"><span>Phoenix Weekly</span><span>Weekend edition · Rome</span></div><div class="ed-brand"><svg class="ed-mark" viewBox="0 0 89 69" aria-hidden="true"><path fill="var(--gold)" fill-rule="evenodd" d="M3.90 3.70 L5.00 9.40 L9.20 17.70 L23.60 27.30 L22.60 27.80 L11.50 22.00 L10.90 23.10 L14.20 30.80 L17.10 33.70 L28.70 40.30 L30.60 42.70 L29.60 42.80 L22.60 38.10 L21.00 38.50 L22.20 41.80 L25.10 45.70 L35.80 51.60 L36.10 54.60 L38.80 55.30 L39.00 57.40 L43.40 64.70 L44.70 63.80 L45.10 61.50 L48.70 56.80 L49.30 54.10 L51.60 53.80 L52.60 51.10 L61.80 46.70 L64.70 43.80 L67.00 39.10 L65.30 37.60 L65.50 37.00 L71.70 32.80 L74.90 27.40 L76.00 22.70 L75.00 22.30 L70.70 25.60 L65.10 28.20 L60.70 31.60 L57.10 33.20 L53.20 36.60 L54.30 33.20 L60.50 28.10 L63.80 27.70 L75.80 19.70 L79.70 15.80 L84.00 5.10 L84.00 3.70 L83.20 3.20 L77.70 7.60 L64.10 16.20 L61.30 19.80 L57.10 21.20 L53.10 24.20 L47.20 30.10 L44.90 34.80 L45.80 39.40 L43.40 41.50 L41.30 38.50 L42.00 34.80 L40.90 31.50 L34.80 24.20 L27.90 19.30 L26.00 19.40 L24.70 17.20 L10.20 7.60 L6.80 4.20 L4.70 3.20 Z M49.70 42.30 L47.60 47.70 L45.90 49.70 L47.60 52.30 L46.90 52.90 L43.30 50.80 L43.00 49.90 L45.30 46.20 Z M24.30 28.30 L26.40 28.10 L29.70 30.30 L33.60 34.20 L33.80 35.50 Z M64.60 38.20 L63.70 39.60 L54.70 45.60 L53.30 45.70 L59.20 40.30 Z"/></svg><span class="ed-name">Phoenix</span></div><div class="ed-sub ed-sub-gamma">The regime boundary is not a level to trade. It is a level to watch.</div><div class="ed-hello">Good morning Aldemar · week of 24–28 August 2026</div></div><div class="ed-verdict"><div><div class="ed-call">The war stopped setting the price and the Fed started — <em>and the AI audit closed</em></div><div class="ed-vwhy">Three things resolved in five sessions. Washington launched its "economic D-Day" sanctions on Monday and crude fell, because the barrels were already blockaded. Iran and Oman then put an actual reopening mechanism on the table — a joint corridor plus mine clearance, permanent route inside 30 to 60 days — and oil finished the week down 4.05%. Nvidia answered the AI financing question with $96.2bn of revenue and a $108bn guide, ending the audit that had run all August. Then on Friday the Fed chair walked into Jackson Hole and doubled September hike odds to 57%. The book ends the week with one closed trade, both BAC positions recovered off Thursday's break, two new names added — PLTR on Thursday and AAPL on Friday, both still provisional — and a new question: rates, not war.</div></div></div><div class="ed-sec"><div class="ed-k"><span>The week in numbers</span><span class="ed-n">2026-08-24 → 2026-08-28</span></div><div class="ed-tape"><div class="ed-ins lead"><div class="i-k"><span>WTI crude</span><span class="i-sig">week</span></div><div class="i-v">83.53</div><div class="i-c"><span style="color:var(--red);font-weight:700">−4.05%</span></div><svg class="ed-sk r" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,41.0 L4.9,38.0 L9.7,33.0 L14.6,35.3 L19.5,36.4 L24.4,25.6 L29.2,23.7 L34.1,23.2 L39.0,24.3 L43.8,18.6 L48.7,17.4 L53.6,14.7 L58.5,11.6 L63.3,3.0 L68.2,7.6 L73.1,18.4 L77.9,23.8 L82.8,15.4 L87.7,16.8 L92.6,15.1 L97.4,22.0 L102.3,29.4 L107.2,30.3 L112.1,27.0 L116.9,25.5 L121.8,19.2 L126.7,17.5 L131.5,17.3 L136.4,20.6 L141.3,18.7 L146.2,15.4 L151.0,14.7 L155.9,13.2 L160.8,10.0 L165.6,11.2 L170.5,14.5 L175.4,18.8 L180.3,19.0 L185.1,16.9 L190.0,16.9 L190,44 L0,44 Z" class="ar"/><path d="M0.0,41.0 L4.9,38.0 L9.7,33.0 L14.6,35.3 L19.5,36.4 L24.4,25.6 L29.2,23.7 L34.1,23.2 L39.0,24.3 L43.8,18.6 L48.7,17.4 L53.6,14.7 L58.5,11.6 L63.3,3.0 L68.2,7.6 L73.1,18.4 L77.9,23.8 L82.8,15.4 L87.7,16.8 L92.6,15.1 L97.4,22.0 L102.3,29.4 L107.2,30.3 L112.1,27.0 L116.9,25.5 L121.8,19.2 L126.7,17.5 L131.5,17.3 L136.4,20.6 L141.3,18.7 L146.2,15.4 L151.0,14.7 L155.9,13.2 L160.8,10.0 L165.6,11.2 L170.5,14.5 L175.4,18.8 L180.3,19.0 L185.1,16.9 L190.0,16.9" class="ln"/></svg></div><div class="ed-ins"><div class="i-k"><span>VIX</span><span class="i-sig">week</span></div><div class="i-v">14.52</div><div class="i-c"><span style="color:var(--red);font-weight:700">−4.03%</span></div><svg class="ed-sk r" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,33.2 L4.9,29.9 L9.7,25.3 L14.6,31.6 L19.5,36.4 L24.4,23.7 L29.2,27.7 L34.1,32.6 L39.0,26.3 L43.8,14.2 L48.7,14.9 L53.6,24.4 L58.5,26.8 L63.3,14.6 L68.2,15.3 L73.1,14.8 L77.9,17.5 L82.8,3.0 L87.7,24.2 L92.6,30.7 L97.4,31.5 L102.3,27.7 L107.2,31.8 L112.1,35.7 L116.9,37.1 L121.8,33.8 L126.7,34.9 L131.5,39.2 L136.4,38.7 L141.3,41.0 L146.2,35.4 L151.0,31.6 L155.9,37.2 L160.8,30.6 L165.6,35.8 L170.5,31.5 L175.4,33.9 L180.3,35.3 L185.1,39.5 L190.0,39.4 L190,44 L0,44 Z" class="ar"/><path d="M0.0,33.2 L4.9,29.9 L9.7,25.3 L14.6,31.6 L19.5,36.4 L24.4,23.7 L29.2,27.7 L34.1,32.6 L39.0,26.3 L43.8,14.2 L48.7,14.9 L53.6,24.4 L58.5,26.8 L63.3,14.6 L68.2,15.3 L73.1,14.8 L77.9,17.5 L82.8,3.0 L87.7,24.2 L92.6,30.7 L97.4,31.5 L102.3,27.7 L107.2,31.8 L112.1,35.7 L116.9,37.1 L121.8,33.8 L126.7,34.9 L131.5,39.2 L136.4,38.7 L141.3,41.0 L146.2,35.4 L151.0,31.6 L155.9,37.2 L160.8,30.6 L165.6,35.8 L170.5,31.5 L175.4,33.9 L180.3,35.3 L185.1,39.5 L190.0,39.4" class="ln"/></svg></div><div class="ed-ins"><div class="i-k"><span>Gold</span><span class="i-sig">week</span></div><div class="i-v">4,526</div><div class="i-c"><span style="color:var(--red);font-weight:700">−2.13%</span></div><svg class="ed-sk r" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,31.2 L4.9,31.7 L9.7,36.1 L14.6,32.6 L19.5,34.1 L24.4,40.3 L29.2,36.6 L34.1,37.6 L39.0,41.0 L43.8,39.4 L48.7,39.6 L53.6,36.0 L58.5,31.6 L63.3,37.5 L68.2,36.2 L73.1,35.8 L77.9,38.1 L82.8,38.2 L87.7,34.4 L92.6,37.3 L97.4,38.2 L102.3,34.6 L107.2,25.9 L112.1,26.1 L116.9,20.4 L121.8,19.2 L126.7,18.0 L131.5,16.4 L136.4,19.1 L141.3,18.1 L146.2,15.9 L151.0,18.9 L155.9,11.8 L160.8,10.2 L165.6,4.0 L170.5,3.0 L175.4,3.2 L180.3,5.5 L185.1,4.8 L190.0,9.7 L190,44 L0,44 Z" class="ar"/><path d="M0.0,31.2 L4.9,31.7 L9.7,36.1 L14.6,32.6 L19.5,34.1 L24.4,40.3 L29.2,36.6 L34.1,37.6 L39.0,41.0 L43.8,39.4 L48.7,39.6 L53.6,36.0 L58.5,31.6 L63.3,37.5 L68.2,36.2 L73.1,35.8 L77.9,38.1 L82.8,38.2 L87.7,34.4 L92.6,37.3 L97.4,38.2 L102.3,34.6 L107.2,25.9 L112.1,26.1 L116.9,20.4 L121.8,19.2 L126.7,18.0 L131.5,16.4 L136.4,19.1 L141.3,18.1 L146.2,15.9 L151.0,18.9 L155.9,11.8 L160.8,10.2 L165.6,4.0 L170.5,3.0 L175.4,3.2 L180.3,5.5 L185.1,4.8 L190.0,9.7" class="ln"/></svg></div><div class="ed-ins"><div class="i-k"><span>Dollar</span><span class="i-sig">week</span></div><div class="i-v">99.68</div><div class="i-c"><span style="color:var(--green);font-weight:700">+0.89%</span></div><svg class="ed-sk g" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,12.3 L4.9,8.2 L9.7,9.5 L14.6,11.0 L19.5,10.6 L24.4,6.2 L29.2,11.0 L34.1,17.2 L39.0,13.9 L43.8,13.7 L48.7,10.3 L53.6,7.6 L58.5,8.2 L63.3,4.1 L68.2,3.6 L73.1,3.0 L77.9,4.8 L82.8,13.0 L87.7,24.0 L92.6,27.0 L97.4,24.7 L102.3,25.7 L107.2,28.5 L112.1,24.6 L116.9,29.8 L121.8,26.8 L126.7,26.7 L131.5,24.0 L136.4,24.7 L141.3,28.8 L146.2,29.2 L151.0,29.1 L155.9,40.6 L160.8,39.6 L165.6,41.0 L170.5,38.2 L175.4,39.3 L180.3,35.8 L185.1,36.0 L190.0,28.6 L190,44 L0,44 Z" class="ar"/><path d="M0.0,12.3 L4.9,8.2 L9.7,9.5 L14.6,11.0 L19.5,10.6 L24.4,6.2 L29.2,11.0 L34.1,17.2 L39.0,13.9 L43.8,13.7 L48.7,10.3 L53.6,7.6 L58.5,8.2 L63.3,4.1 L68.2,3.6 L73.1,3.0 L77.9,4.8 L82.8,13.0 L87.7,24.0 L92.6,27.0 L97.4,24.7 L102.3,25.7 L107.2,28.5 L112.1,24.6 L116.9,29.8 L121.8,26.8 L126.7,26.7 L131.5,24.0 L136.4,24.7 L141.3,28.8 L146.2,29.2 L151.0,29.1 L155.9,40.6 L160.8,39.6 L165.6,41.0 L170.5,38.2 L175.4,39.3 L180.3,35.8 L185.1,36.0 L190.0,28.6" class="ln"/></svg></div></div></div><div class="ed-sec"><div class="ed-k"><span>The book</span><span class="ed-n">week · entry-to-date</span></div><h2 class="ed-hl sm">PLTR led the book at +1.2%, AAPL lagged at −0.4%</h2><div><div class="ed-pos"><span class="tk">BAC</span><span class="nt">entered 2026-08-14 at 64.16 · stop 59.65 · target 75.00</span><span>-0.4R</span><span><span style="color:var(--green);font-weight:700">+1.0%</span></span><span><span style="color:var(--red);font-weight:700">−2.9%</span></span></div><div class="ed-pos"><span class="tk">PLTR</span><span class="nt">opened 2026-08-27 at 184.00  · NEW</span><span>—</span><span><span style="color:var(--green);font-weight:700">+1.2%</span></span><span><span style="color:var(--green);font-weight:700">+1.2%</span></span></div><div class="ed-pos"><span class="tk">AAPL</span><span class="nt">opened 2026-08-28 at 321.00  · NEW</span><span>—</span><span><span style="color:var(--red);font-weight:700">−0.4%</span></span><span><span style="color:var(--red);font-weight:700">−0.4%</span></span></div></div><div><p class="ed-body">3 positions open into the weekend, -0.4R of open risk in aggregate, against an S&P that moved <span style="color:var(--green);font-weight:700">+0.41%</span> on the week. The percentage column is the week for names held into it and entry-to-date for names opened inside it; the last column is always against entry.</p></div></div><div class="ed-sec"><div class="ed-k"><span>What actually mattered</span><span class="ed-n">five sessions, filtered</span></div><h2 class="ed-hl sm">Sanctions that lowered oil, a corridor with a clock, an AI verdict, and a hawkish Fed</h2><div><div class="ed-w"><span class="w-tag">FED</span><span><b>Jackson Hole: September hike odds go from 35% to 57% in one speech</b>. "Inflation is running above our 2% target… the Fed's predominant focus right now should be on prices." The 2-year jumped 8bp, gold fell 2.88%, and small caps dropped 1.39%. This is the single most consequential development of the week for a book that is long a bank — and it arrives seventeen days before the meeting.</span><span class="w-when">Yahoo Finance · 28 Aug</span></div><div class="ed-w"><span class="w-tag">WAR</span><span><b>From "economic D-Day" to a drawn corridor: sanctions on Monday, a reopening framework by Wednesday, oil −4% on the week</b>. Operation Economic Outcast hit 60+ entities and crude fell 2.4% the same day — proof the strait's closure was already fully priced. Then Munir's Tehran visit produced "significant progress" and Iran–Oman put a temporary maritime lane and mine-clearance project on the table. The war's marginal power over the tape has collapsed.</span><span class="w-when">Al Jazeera · Rigzone · TheStreet · 24–26 Aug</span></div><div class="ed-w"><span class="w-tag">TECH</span><span><b>Nvidia closes the AI financing audit: $96.2bn revenue (+106%), $108bn Q3 guide, stock +8.6%</b>. August's dominant question was whether the datacentre build-out earns anything. The bellwether answered, and the complex repriced in a session — Salesforce +22.6%, CrowdStrike +20.5%. It also drained everything else: Thursday's rally was funded by selling cyclicals and megacap tech alike, which is exactly when BAC broke its level.</span><span class="w-when">Kiplinger · Trading Economics · 26–27 Aug</span></div><div class="ed-w"><span class="w-tag">DATA</span><span><b>Core PCE unchanged at 3.3%; Conference Board confidence 89.4, lowest since January</b>. Sticky inflation with a weakening consumer — the combination that gives the Fed a reason to hike and gives a bank's credit book a reason to worry. Both sit directly under the BAC thesis, pulling opposite ways.</span><span class="w-when">TheStreet · Conference Board · 25–26 Aug</span></div><div class="ed-w"><span class="w-tag low">NOISE</span><span><b>Filed and ignored: analyst target trims tracking Intel's share count, Nvidia pre-earnings prediction pieces, chart-pattern notes</b>. A week of commentary that followed prices rather than led them. None of it changed a thesis, a level or a size.</span><span class="w-when">various · 24–28 Aug</span></div></div><p class="ed-body">The book's ledger for the week: Aldemar's INTC exited on the 24th at 86.26 for −0.79R, on a stop that had been raised from 81.10 to 86.26 mid-drawdown — two sessions before Nvidia's print lifted the sector, with INTC now trading above that exit. That is the week's real lesson, and it is not that the exit was wrong: a stop honoured is always right. It is that tightening a stop mid-trade converts a wide-stop thesis position into a tight-stop tactical one, and the trade you end up in is not the trade you sized. Gabriel's INTC also closed cleanly at −1.00R on the 18th. Both accounts now carry BAC into a Fed meeting, and Gabriel holds GOOG at +0.84R. Two positions were also opened this week and both books now hold them: PLTR around 184 into Thursday's breakout and AAPL around 321 into Friday's strength. Neither has a stop or target recorded yet, which is the one piece of housekeeping worth doing before Monday's open — every read in this brief is built on the distance between price and a level you chose in advance, and two of the five positions currently have no such level.</p></div><div class="ed-sec"><div class="ed-k"><span>The war · the week</span><span class="ed-n">de-escalating · framework without a date · oil range-bound</span></div><h2 class="ed-hl sm">The week the pressure campaign and the peace track ran at the same time</h2><div><div class="ed-w"><span class="w-tag war-politics">POLITICS</span><span><b>Monday: Bessent launches "Operation Economic Outcast" — 60+ entities across shipping, gold, aviation, tech and digital assets, secondary sanctions threatening dollar-system exclusion</b>. Iran's rial hit a record 2.02m per dollar. Crude fell 2.4% anyway, which told you the supply story was already fully in the price.</span><span class="w-when">24 Aug</span></div><div class="ed-w"><span class="w-tag war-talks">TALKS</span><span><b>Tuesday: Munir meets Pezeshkian in Tehran; Islamabad reports "significant progress"</b>. The mediator who brokered the June framework returned to rebuild it. Oil fell 4.9% on the day — the largest single-session drain of the war premium since the deadline lapsed.</span><span class="w-when">25 Aug</span></div><div class="ed-w"><span class="w-tag war-shipping">SHIPPING</span><span><b>Wednesday: Iran and Oman propose a temporary joint maritime corridor plus mine clearance, permanent route targeted in 30–60 days</b>. Plumbing rather than atmospherics — corridor administration, information exchange, maritime security services. Still no start date for the technical talks, which is the one thing left to watch.</span><span class="w-when">26 Aug</span></div><div class="ed-w"><span class="w-tag war-oil">OIL</span><span><b>Friday: crude flat at 83.40, finishing the week down 4.05%</b>. A quiet Friday after three weeks of daily headline repricing. The market has moved the war from event risk to background condition.</span><span class="w-when">28 Aug</span></div></div><p class="ed-body">The war de-escalated meaningfully for the first time since the memorandum lapsed, and the oil market believed it. But Friday proved the transmission has changed: the Fed chair set the rate path without reference to energy, and hike odds nearly doubled on a day crude did nothing. Watch for a start date on the Iran–Oman technical talks — that is the remaining catalyst — but the war is no longer what prices your book.</p></div><div class="ed-sec"><div class="ed-k"><span>The week ahead</span><span class="ed-n">what to watch</span></div><h2 class="ed-hl sm">A shortened week into a Fed meeting that is now genuinely live</h2><div class="ed-cals"><div class="ed-cal"><span class="c-tag c-cpi">CPI</span><span class="c-l"><b>CPI release</b> — 08:30 ET. The regime's tightest gate is CPI y/y.</span><span class="c-w">in 11 days</span><span class="c-d">2026-09-11</span></div></div><div><div class="ed-w"><span class="w-tag">FED</span><span><b>September FOMC on the 16th, with hike odds at 57% and CPI on the 11th</b>. Two weeks ago this meeting was a formality. It is now the event that decides both BAC positions — a hike confirms the margin story the front end just priced; a hold with hawkish language keeps the flattener grinding. CPI on the 11th sets the odds going in.</span><span class="w-when">11 &amp; 16 Sep</span></div><div class="ed-w"><span class="w-tag">BOOK</span><span><b>PLTR and AAPL need stops and targets recorded</b>. Both are live and unsized in risk terms. PLTR's Thursday range was 178.01–186.86 and AAPL's Friday range 315.45–322.37 — those extremes are the natural reference points for where a stop belongs. Until they are set, neither position can be reported in R and neither has a defined exit.</span><span class="w-when">before Mon open</span></div><div class="ed-w"><span class="w-tag">LEVELS</span><span><b>BAC: 62 reclaimed, stops at 60.39 and 59.65</b>. The level has now broken and been recovered inside two sessions, which makes 61.10 — Thursday's low — the line that matters more than 62 itself. Gabriel's stop sits 3.2% below the close, Aldemar's 4.5%. Both survived the week's test; neither position has yet been right.</span><span class="w-when">Mon 31 Aug</span></div><div class="ed-w"><span class="w-tag low">TAPE</span><span><b>Month-end Monday, then a US holiday-shortened first week of September</b>. Dealer gamma sits positive at +$25.5bn with spot above the 7,670 flip, so the tape should dampen rather than amplify — the opposite of the post-OPEX week. Thin holiday liquidity into a live Fed meeting is the combination to size for.</span><span class="w-when">week of 31 Aug</span></div></div><p class="ed-body">The book enters September lighter than it entered August: two INTC positions closed, both BAC trades in modest drawdown with stops well clear, and GOOG the one position actually working. Nothing needs doing before CPI on the 11th — the levels are set and the next real information is scheduled.</p></div><div class="ed-jump"><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Markets</a><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Screeners</a><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Trade</a><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Portfolio</a></div><div class="ed-colophon">Phoenix OS v1.0 · not investment advice</div></div></div></body></html>
