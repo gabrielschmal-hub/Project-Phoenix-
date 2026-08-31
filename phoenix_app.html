@@ -282,7 +282,7 @@
   .scr-tr .tk .atb.eu{color:var(--gold);border-color:var(--gold);}
   /* ---- screener filter block (27 Aug 2026, render C): chips for market/type, multi-select pickers for the rest ---- */
   .sf{border:1px solid var(--line);border-radius:10px;background:var(--card2);padding:10px 14px 8px;margin-bottom:12px;flex-shrink:0;position:relative}
-  .sf-top{display:flex;gap:22px;flex-wrap:wrap;align-items:center;padding:2px 0 9px;border-bottom:1px dashed var(--line)}
+  .sf-top{display:flex;gap:18px 26px;flex-wrap:wrap;align-items:center;padding:4px 0 13px;border-bottom:1px dashed var(--line)}
   .sf-grp{display:flex;align-items:center;gap:10px}
   .sf-glbl{font-family:var(--mono);font-size:10px;letter-spacing:1.6px;color:var(--inkFade);text-transform:uppercase}
   .sf-chips{display:flex;flex-wrap:wrap;gap:7px}
@@ -290,10 +290,12 @@
   .sf-chip:hover{border-color:var(--gold);color:var(--ink)}
   .sf-chip.on{background:var(--gold);color:#141210;border-color:var(--gold);font-weight:700}
   .sf-chip .n{color:var(--inkFade);font-size:10.5px} .sf-chip.on .n{color:#141210;opacity:.75}
-  .sf-view{margin-left:auto;display:flex;gap:0;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+  /* The view switcher was pushed to the far right while Market and Type sat on
+     the left, so one row of filters read as two unrelated groups. */
+  .sf-view{margin-left:0;display:flex;gap:0;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
   .sf-view button{font-family:var(--mono);font-size:10.5px;letter-spacing:.4px;padding:6px 12px;background:var(--card);color:var(--inkLight);border:none;border-right:1px solid var(--line2);cursor:pointer}
   .sf-view button:last-child{border-right:none} .sf-view button.on{background:var(--gold);color:#141210;font-weight:700}
-  .sf-sel{display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:10px;padding:11px 0 6px}
+  .sf-sel{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;padding:15px 0 8px}
   .sf-ms{position:relative;display:flex;flex-direction:column;gap:5px;min-width:0}
   .sf-ml{font-family:var(--mono);font-size:10px;letter-spacing:1.6px;color:var(--inkFade);text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:6px}
   .sf-ml small{letter-spacing:0;text-transform:none;color:var(--inkGhost)}
@@ -445,7 +447,10 @@
   .scr-tr .rk{color:var(--inkFade);font-size:11px;text-align:center;}
   .scr-tr .nmcell{overflow:hidden;}
   .scr-tr .tk{font-weight:700;color:var(--ink);font-size:15px;}
-  .scr-tr .nm{color:var(--inkLight);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;margin-top:1px;}
+  /* The company name was clipped to "SELLA..." in a column too narrow to read.
+     Two wrapped lines instead of one truncated one. */
+  .scr-tr .nm{color:var(--inkLight);font-size:12px;margin-top:2px;line-height:1.35;
+    white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
   .scr-tr .num{text-align:right;font-size:13px;}
   .scr-tr.nearmiss{opacity:.55;}
   .scr-tr.nearmiss .tk::after{content:" \25CB";color:var(--ink);font-size:11.5px;}
@@ -1173,7 +1178,7 @@ body{background:var(--bg)!important;font-family:'Plus Jakarta Sans',-apple-syste
 .pxhidden{display:none!important}
 .app{position:relative;z-index:5;display:block;height:auto}
 
-:root{--railW:198px;--rail:var(--card);--railInk:var(--inkMed);--railLine:var(--line)}
+:root{--railW:172px;--rail:var(--card);--railInk:var(--inkMed);--railLine:var(--line)}
 .app{padding-left:var(--railW)}
 #pxnav{position:fixed;top:0;bottom:0;left:0;width:var(--railW);z-index:60;display:flex;flex-direction:column;
   padding:20px 12px 14px;box-sizing:border-box;border-right:1px solid var(--line);background:var(--bg)}
@@ -1343,6 +1348,30 @@ html{scroll-behavior:auto}
 
 .page{min-height:calc(100vh - 200px);padding:8px 0 48px;overflow:visible;scroll-margin-top:0}
 #pxstatus{display:none!important}
+
+/* one profile control instead of two chips */
+.pxprof{display:flex;align-items:center;gap:8px;width:100%;padding:6px 8px;border-radius:999px;
+  background:var(--card);border:1px solid var(--line);color:var(--ink);cursor:pointer;text-align:left}
+.pxprof .av{width:24px;height:24px;border-radius:50%;flex:none;display:flex;align-items:center;
+  justify-content:center;font-size:11.5px;font-weight:700;background:var(--gold);color:#fff}
+.pxprof .nm{flex:1;min-width:0;font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pxprof .cv{font-size:10px;color:var(--inkFade)}
+#pxProfPop{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.42)}
+#pxProfPop.on{display:flex}
+#pxProfPop .bx{background:var(--card2);border:1px solid var(--line2);border-radius:16px;padding:20px;
+  width:min(300px,88vw);box-shadow:0 22px 60px rgba(0,0,0,.4)}
+#pxProfPop h4{margin:0 0 3px;font-size:16px;font-weight:800;letter-spacing:-.02em}
+#pxProfPop p{margin:0 0 14px;font-size:12.5px;color:var(--inkLight)}
+#pxProfPop button.opt{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;margin-bottom:8px;
+  border-radius:11px;background:var(--card);border:1px solid var(--line);color:var(--ink);cursor:pointer;text-align:left}
+#pxProfPop button.opt.on{border-color:var(--gold)}
+#pxProfPop button.opt i{width:26px;height:26px;border-radius:50%;flex:none;display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:700;font-style:normal;background:var(--gold);color:#fff}
+#pxProfPop button.opt b{flex:1;font-size:13.5px}
+#pxProfPop .cx{width:100%;margin-top:4px;padding:9px;border-radius:999px;background:none;
+  border:1px solid var(--line);color:var(--inkLight);cursor:pointer;font-size:12.5px}
+@media(max-width:1000px){ .pxprof .nm,.pxprof .cv{display:none} .pxprof{justify-content:center} }
 
 /* ================= MISSION CONTROL ================= */
 #page-mission .mcw{max-width:1400px;margin:0 auto;padding:0 34px}
@@ -2696,7 +2725,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   <div class="pxlinks" id="pxlinks"></div>
   <div class="rfoot">
     <div class="mstat"><div class="lb">Live data</div><div id="pxLiveHost"></div></div>
-    <div class="pxaccts"><div class="pxacct on" id="pxG">G</div><div class="pxacct" id="pxA">A</div></div>
+    <button class="pxprof" id="pxProf" aria-haspopup="dialog">
+      <span class="av" id="pxProfAv">G</span><span class="nm" id="pxProfNm">Gabriel</span><span class="cv">&#9662;</span>
+    </button>
+    <div class="pxaccts" hidden><div class="pxacct on" id="pxG">G</div><div class="pxacct" id="pxA">A</div></div>
     <div class="thsw"><b id="thLight">Light</b><b id="thDark">Dark</b></div>
   </div>
 </nav>
@@ -7449,14 +7481,14 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   }
   function pxWatchToggle(tk, done){
     var on=!(sfWatched(tk));
-    var pin=sessionStorage.getItem("pxPin")||window.prompt("Phoenix PIN (same as the freeze switch)");
-    if(!pin){ if(done) done(false); return; }
+    /* set_watch takes no PIN - it is not a destructive write. Sending one made
+       the argument set unmatchable and PostgREST answered 404. */
     fetch(SUPA.url+"/rest/v1/rpc/set_watch",{method:"POST",headers:{apikey:SUPA.key,Authorization:"Bearer "+SUPA.key,"Content-Type":"application/json"},
-      body:JSON.stringify({pin:pin,p_ticker:tk,p_on:on})})
+      body:JSON.stringify({p_ticker:tk,p_on:on})})
     .then(function(r){ return r.json(); }).then(function(j){
-      if(j&&j.ok){ sessionStorage.setItem("pxPin",pin); if(!PX_WATCH) PX_WATCH={}; if(on) PX_WATCH[tk]=j.bucket||"watch"; else delete PX_WATCH[tk];
+      if(j&&j.ok){ if(!PX_WATCH) PX_WATCH={}; if(on) PX_WATCH[tk]=j.bucket||"watch"; else delete PX_WATCH[tk];
         if(scrData) renderScreener(); if(done) done(true); }
-      else { if(j&&/wrong PIN/.test(j.error||"")) sessionStorage.removeItem("pxPin"); window.alert((j&&j.error)||"watchlist update failed"); if(done) done(false); }
+      else { window.alert(pxRpcErr(j,"watchlist update failed")); if(done) done(false); }
     }).catch(function(){ window.alert("Supabase unreachable \u2014 the watchlist lives there"); if(done) done(false); });
   }
   // ---- the 15-minute Yahoo lane: prices_universe for the rows on screen, rotation_intraday for the pickers ----
@@ -10811,6 +10843,40 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(trSrc==="supabase"){ clearTimeout(trPersistT); trPersistT=setTimeout(trPersist, 900); }
   }
   // Write what changed since the last snapshot: changed or new rows through
+  /* PostgREST rejections carry {code,message,details,hint}; our own functions
+     return {ok:false,error}. Reading only the latter collapsed every
+     gateway-level failure into the word "RPC refused", which said nothing. */
+  function pxRpcErr(j,fallback){
+    if(!j) return fallback;
+    if(j.error) return j.error;
+    var bits=[];
+    if(j.message) bits.push(j.message);
+    if(j.hint) bits.push("hint: "+j.hint);
+    if(j.details) bits.push(j.details);
+    if(j.code) bits.push("["+j.code+"]");
+    return bits.length ? bits.join(" \u00b7 ") : fallback;
+  }
+  /* Retitles the page header to the instrument, so a deep dive stops reading as
+     "Trade - the open book, entries and exits" standing over one company. */
+  function pxHeadInstrument(name,tk){
+    try{
+      var hd=document.getElementById("pxhead"); if(!hd) return;
+      hd.classList.add("on");
+      var ht=document.getElementById("pxhTitle"), hs=document.getElementById("pxhSub");
+      if(ht) ht.textContent=name||tk||"Instrument";
+      if(hs) hs.textContent=(tk?tk+" \u00b7 ":"")+"deep dive";
+    }catch(e){}
+  }
+  function pxHeadRestore(id){
+    try{
+      var T=(typeof PX_TITLES!=="undefined")&&PX_TITLES[id||"trades"];
+      if(!T) return;
+      var ht=document.getElementById("pxhTitle"), hs=document.getElementById("pxhSub");
+      if(ht) ht.textContent=T[0];
+      if(hs) hs.textContent=T[1];
+    }catch(e){}
+  }
+
   // save_trade, removed rows through delete_trade. PIN cached for the session.
   function trPersist(){
     if(trSaving||trSrc!=="supabase"||!trLog) return;
@@ -10830,7 +10896,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var op=ops[i++];
       fetch(SUPA.url+"/rest/v1/rpc/"+op.fn,{method:"POST",headers:{apikey:SUPA.key,Authorization:"Bearer "+SUPA.key,"Content-Type":"application/json"},body:JSON.stringify(op.body)})
         .then(function(r){ return r.json(); })
-        .then(function(j){ if(j&&j.ok){ if(op.s==null) delete trSnap[op.id]; else trSnap[op.id]=op.s; next(); } else { failed=(j&&j.error)||"RPC refused"; next(); } })
+        .then(function(j){ if(j&&j.ok){ if(op.s==null) delete trSnap[op.id]; else trSnap[op.id]=op.s; next(); }
+          else { failed=pxRpcErr(j,"RPC refused ("+op.fn+")"); next(); } })
         .catch(function(e){ failed="Supabase unreachable"; next(); });
     }
     next();
@@ -11758,6 +11825,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function initTrades(){
     trDetailTk=null;
     try{ document.body.classList.remove("px-detail"); }catch(e){}
+    pxHeadRestore("trades");
     trLoad(function(){
       var watching=trByStatus("open").concat(trByStatus("plan"));
       trFetchAll(watching, function(){ trRender(); trWire(); });
@@ -12080,6 +12148,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     try{ document.body.classList.add("px-detail"); }catch(e){}
     var t=trGet(id); if(!t) return;
     trDetailId=id; trDetailTk=t.ticker; dpTf="daily";
+    pxHeadInstrument(t.name,t.ticker);
     var page=document.getElementById("page-trades");
     page.innerHTML='<div class="loading" style="padding:50px 20px">Loading '+t.ticker+'\u2026</div>';
     dpEnsureEnrich(function(){
@@ -12400,6 +12469,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function trBackFromDetail(){
     trDetailTk=null; trDetailId=null;
     try{ document.body.classList.remove("px-detail"); }catch(e){}
+    pxHeadRestore(dpReturnTo==="screeners"?"screeners":"trades");
     if(dpReturnTo==="screeners"){
       dpReturnTo=null;
       go("screeners");   // scrBook is preserved, so this lands on the same tab (Blend/Trade/Invest/GEX)
@@ -13320,6 +13390,41 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   };
   window.PX_HOMESCREEN=function(){ if(PX_HOME){ PX_HOME.classList.remove("gone"); window.scrollTo(0,0); } };
   pxFromHash();
+
+  /* One profile control. The two chips stay in the DOM (hidden) because
+     setProfile writes their classes; the popup drives them rather than
+     duplicating the switch logic. */
+  (function(){
+    var NAMES={G:"Gabriel",A:"Aldemar"};
+    var pop=document.createElement("div");
+    pop.id="pxProfPop";
+    pop.innerHTML='<div class="bx" role="dialog" aria-label="Switch profile">'+
+      '<h4>Switch profile</h4><p>Each book is separate \u2014 positions, heat and history.</p>'+
+      '<button class="opt" data-p="G"><i>G</i><b>Gabriel</b></button>'+
+      '<button class="opt" data-p="A"><i>A</i><b>Aldemar</b></button>'+
+      '<button class="cx">Cancel</button></div>';
+    document.body.appendChild(pop);
+    function paint(){
+      var p=(window.PHOENIX_PROFILE||"G");
+      var av=document.getElementById("pxProfAv"), nm=document.getElementById("pxProfNm");
+      if(av) av.textContent=p;
+      if(nm) nm.textContent=NAMES[p]||p;
+      Array.prototype.forEach.call(pop.querySelectorAll(".opt"),function(b){
+        b.classList.toggle("on", b.getAttribute("data-p")===p);
+      });
+    }
+    function close(){ pop.classList.remove("on"); }
+    window.PX_PROFILE_POPUP=function(){ paint(); pop.classList.add("on"); };
+    var btn=document.getElementById("pxProf");
+    if(btn) btn.addEventListener("click",function(e){ e.stopPropagation(); window.PX_PROFILE_POPUP(); });
+    pop.addEventListener("click",function(e){
+      var o=e.target.closest&&e.target.closest(".opt");
+      if(o){ var t=document.getElementById("px"+o.getAttribute("data-p")); if(t) t.click(); close(); setTimeout(paint,400); return; }
+      if(e.target===pop||(e.target.classList&&e.target.classList.contains("cx"))) close();
+    });
+    document.addEventListener("keydown",function(e){ if(e.key==="Escape") close(); });
+    paint();
+  })();
 
   var pxMark=document.querySelector("#pxnav .pxbrand");
   if(pxMark){
