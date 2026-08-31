@@ -282,7 +282,11 @@
   .scr-tr .tk .atb.eu{color:var(--gold);border-color:var(--gold);}
   /* ---- screener filter block (27 Aug 2026, render C): chips for market/type, multi-select pickers for the rest ---- */
   .sf{border:1px solid var(--line);border-radius:10px;background:var(--card2);padding:10px 14px 8px;margin-bottom:12px;flex-shrink:0;position:relative}
-  .sf-top{display:flex;gap:18px 26px;flex-wrap:wrap;align-items:center;padding:4px 0 13px;border-bottom:1px dashed var(--line)}
+  /* One left-aligned row. The switcher previously sat on its own line pushed
+     right, so Market/Type and the view modes read as two unrelated groups. */
+  .sf-top{display:flex;gap:14px 22px;flex-wrap:wrap;align-items:center;justify-content:flex-start;
+    padding:4px 0 13px;border-bottom:1px dashed var(--line)}
+  .sf-top>*{margin-left:0!important}
   .sf-grp{display:flex;align-items:center;gap:10px}
   .sf-glbl{font-family:var(--mono);font-size:10px;letter-spacing:1.6px;color:var(--inkFade);text-transform:uppercase}
   .sf-chips{display:flex;flex-wrap:wrap;gap:7px}
@@ -437,20 +441,35 @@
   .scr-search::placeholder{color:var(--inkFade);}
   .scr-sel{font-family:var(--mono);font-size:11px;padding:8px 11px;border:1px solid var(--line2);border-radius:8px;background:var(--card2);color:var(--inkMed);cursor:pointer;max-width:150px;}
   /* Winston-style table: bigger text, taller rows, breathing room */
-  .scr-table{overflow-y:auto;height:100%;}
-  .scr-th,.scr-tr{display:grid;grid-template-columns:34px 2fr 82px 66px 52px 52px 72px 76px;align-items:center;gap:10px;font-family:var(--mono);font-size:13px;}
+  /* Ten columns need ~950px. Below that the table scrolls sideways rather than
+     crushing the ticker to 46px, which is what the old eight-column template
+     effectively did at every width. */
+  .scr-table{overflow-y:auto;overflow-x:auto;height:100%;}
+  .scr-table .scr-th,.scr-table .scr-tr{min-width:950px}
+  /* The header renders ten cells - #, Ticker, Pattern, Setup, Score, Gates,
+     Day, Industry, Cap, Your stop - but this template only declared eight.
+     The last two fell into implicit auto tracks, which squeezed the 2fr ticker
+     column while leaving slack on the right. All ten are now declared. */
+  .scr-th,.scr-tr{display:grid;
+    grid-template-columns:28px minmax(178px,1.6fr) 92px 78px 70px 62px 62px minmax(88px,.9fr) 50px 88px;
+    align-items:center;gap:12px;font-family:var(--mono);font-size:13px;}
   .scr-th{position:sticky;top:0;background:var(--card);color:var(--inkFade);font-size:11.5px;letter-spacing:.8px;text-transform:uppercase;padding:8px 0;border-bottom:1px solid var(--line2);z-index:2;}
   .scr-th span{cursor:pointer;}
   .scr-th span:hover{color:var(--ink);}
-  .scr-tr{padding:11px 0;border-bottom:1px solid var(--line);transition:background .1s;}
+  .scr-tr{padding:13px 0;border-bottom:1px solid var(--line);transition:background .1s;}
   .scr-tr:hover{background:var(--card2);}
   .scr-tr .rk{color:var(--inkFade);font-size:11px;text-align:center;}
   .scr-tr .nmcell{overflow:hidden;}
   .scr-tr .tk{font-weight:700;color:var(--ink);font-size:15px;}
   /* The company name was clipped to "SELLA..." in a column too narrow to read.
      Two wrapped lines instead of one truncated one. */
-  .scr-tr .nm{color:var(--inkLight);font-size:12px;margin-top:2px;line-height:1.35;
-    white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  /* Two full lines, never an ellipsis. The ticker cell also gets its own
+     min-width so the grid cannot shrink it below something readable. */
+  .scr-tr .nm{color:var(--inkLight);font-size:12px;margin-top:3px;line-height:1.4;
+    white-space:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;
+    -webkit-box-orient:vertical;overflow:hidden;}
+  .scr-tr>span:nth-child(2),.scr-th>span:nth-child(2){min-width:0}
+  .scr-tr>span:nth-child(2) b{font-size:15px;letter-spacing:-.01em}
   .scr-tr .num{text-align:right;font-size:13px;}
   .scr-tr.nearmiss{opacity:.55;}
   .scr-tr.nearmiss .tk::after{content:" \25CB";color:var(--ink);font-size:11.5px;}
@@ -10858,17 +10877,19 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   }
   /* Retitles the page header to the instrument, so a deep dive stops reading as
      "Trade - the open book, entries and exits" standing over one company. */
-  function pxHeadInstrument(name,tk){
+  /* The deep dive already names the instrument in its own masthead
+     ("Tesla, Inc. TSLA"), so retitling the page header just repeated it one
+     line above. The header is hidden outright while a detail is open. */
+  function pxHeadInstrument(){
     try{
-      var hd=document.getElementById("pxhead"); if(!hd) return;
-      hd.classList.add("on");
-      var ht=document.getElementById("pxhTitle"), hs=document.getElementById("pxhSub");
-      if(ht) ht.textContent=name||tk||"Instrument";
-      if(hs) hs.textContent=(tk?tk+" \u00b7 ":"")+"deep dive";
+      var hd=document.getElementById("pxhead");
+      if(hd) hd.classList.remove("on");
     }catch(e){}
   }
   function pxHeadRestore(id){
     try{
+      var hd=document.getElementById("pxhead");
+      if(hd) hd.classList.add("on");
       var T=(typeof PX_TITLES!=="undefined")&&PX_TITLES[id||"trades"];
       if(!T) return;
       var ht=document.getElementById("pxhTitle"), hs=document.getElementById("pxhSub");
@@ -10888,16 +10909,27 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     Object.keys(trSnap).forEach(function(id){ if(!now[id]) ops.push({fn:"delete_trade",body:{pin:pin,p_id:id,p_by:by},id:id,s:null}); });
     if(!ops.length){ trDirty=0; trBanner(); return; }
     trSaving=true; trBanner();
-    var i=0, failed=null;
+    var i=0, failed=null, failedIds=[], okCount=0;
     function next(){
       if(i>=ops.length||failed){ trSaving=false;
-        if(failed){ if(/wrong PIN/.test(failed)) sessionStorage.removeItem("pxPin"); trBanner("Not saved to Supabase: "+failed+" — your edits are still on screen; try again, or Copy JSON."); return; }
+        if(failed){ if(/wrong PIN/.test(failed)) sessionStorage.removeItem("pxPin");
+          /* Name the row that broke. One bad trade used to abort the batch with
+             a message that identified nothing, so there was no way to tell which
+             of forty rows was the problem. */
+          var who=failedIds.length?(" on "+failedIds.join(", ")):"";
+          var saved=okCount?(" "+okCount+" other row"+(okCount===1?"":"s")+" saved."):"";
+          trBanner("Not saved"+who+": "+failed+"."+saved+" Your edits are still on screen \u2014 try again, or Copy JSON.");
+          return; }
         sessionStorage.setItem("pxPin",pin); trDirty=0; trLastSaved=new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}); trBanner(); return; }
       var op=ops[i++];
       fetch(SUPA.url+"/rest/v1/rpc/"+op.fn,{method:"POST",headers:{apikey:SUPA.key,Authorization:"Bearer "+SUPA.key,"Content-Type":"application/json"},body:JSON.stringify(op.body)})
-        .then(function(r){ return r.json(); })
-        .then(function(j){ if(j&&j.ok){ if(op.s==null) delete trSnap[op.id]; else trSnap[op.id]=op.s; next(); }
-          else { failed=pxRpcErr(j,"RPC refused ("+op.fn+")"); next(); } })
+        .then(function(r){ op.status=r.status; return r.json().catch(function(){ return {message:"HTTP "+r.status+" with no JSON body"}; }); })
+        .then(function(j){ if(j&&j.ok){ okCount++; if(op.s==null) delete trSnap[op.id]; else trSnap[op.id]=op.s; next(); }
+          else {
+            failed=pxRpcErr(j,"RPC refused ("+op.fn+", HTTP "+(op.status||"?")+")");
+            var t=trGet(op.id); failedIds.push((t&&t.ticker)||op.id);
+            next();
+          } })
         .catch(function(e){ failed="Supabase unreachable"; next(); });
     }
     next();
@@ -12148,7 +12180,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     try{ document.body.classList.add("px-detail"); }catch(e){}
     var t=trGet(id); if(!t) return;
     trDetailId=id; trDetailTk=t.ticker; dpTf="daily";
-    pxHeadInstrument(t.name,t.ticker);
+    pxHeadInstrument();
     var page=document.getElementById("page-trades");
     page.innerHTML='<div class="loading" style="padding:50px 20px">Loading '+t.ticker+'\u2026</div>';
     dpEnsureEnrich(function(){
