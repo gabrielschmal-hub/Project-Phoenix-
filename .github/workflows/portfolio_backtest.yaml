@@ -1,0 +1,66 @@
+# .github/workflows/portfolio_backtest.yml
+# THIS is the file that makes a job appear in the Actions tab.
+# A .py in the repo root is just a script — Actions only lists workflows
+# defined under .github/workflows/*.yml
+name: Phoenix Portfolio Backtest
+
+on:
+  workflow_dispatch:          # manual "Run workflow" button
+    inputs:
+      contribution:
+        description: "Monthly EUR contribution to both sleeves (0 = lump sum only)"
+        required: false
+        default: "0"
+  schedule:
+    - cron: "30 5 * * 1"      # Mondays 07:30 Rome (05:30 UTC) — weekly refresh
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Selftest (fails fast on a broken build)
+        run: python portfolio_backtest.py --selftest
+
+      - name: Run backtest
+        run: |
+          python portfolio_backtest.py --run \
+            --contribution "${{ github.event.inputs.contribution || 0 }}"
+
+      - name: Show headline result in the log
+        run: |
+          python - <<'EOF'
+          import json
+          d = json.load(open("outputs/portfolio_backtest.json"))
+          for p in d["portfolios"]:
+              b = p["baseline_zero_alpha"]
+              print(f"\n=== {p['name']} ===")
+              print(f"  CAGR nominal EUR : {b.get('cagr_nominal_eur')}")
+              print(f"  CAGR real EUR    : {b.get('cagr_real_eur')}")
+              print(f"  max drawdown     : {b.get('max_drawdown')}")
+              print(f"  final EUR        : {b.get('final_eur')}")
+              bs = p.get("bootstrap", {})
+              print(f"  P(CAGR >= 15%)   : {bs.get('prob_beat_15pct')}")
+              print("  --- satellite alpha sweep ---")
+              for r in p["satellite_alpha_sweep"]:
+                  print(f"    alpha {r['satellite_alpha']:+.0%} -> "
+                        f"total {r['cagr_nominal_eur']}  maxDD {r['max_drawdown']}")
+          for n in d["panel_notes"]:
+              print("  [panel]", n)
+          EOF
+
+      - name: Commit outputs
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add outputs/portfolio_backtest.json
+          git diff --staged --quiet || git commit -m "portfolio backtest $(date -u +%Y-%m-%d)"
+          git push
