@@ -44,8 +44,23 @@ jobs:
           u = os.environ.get("SUPABASE_URL",""); k = os.environ.get("SUPABASE_SERVICE_ROLE_KEY","")
           if not u or not k: sys.exit("missing SUPABASE_URL or service-role key secret")
           if u != u.strip() or k != k.strip(): sys.exit("a secret has a trailing newline — re-paste it")
-          if len(k) < 100: sys.exit("key too short — this is not the service_role key")
-          print("secrets ok ·", u.strip())
+          # Two valid formats: new "sb_secret_…" keys, or legacy JWTs whose role is service_role.
+          import base64, json
+          if k.startswith("sb_secret_"):
+              kind = "sb_secret"
+          elif k.startswith("sb_publishable_"):
+              sys.exit("this is the PUBLISHABLE key (anon-equivalent). Use the sb_secret_… key from Supabase → Settings → API Keys")
+          elif k.startswith("eyJ"):
+              try:
+                  pl = k.split(".")[1]; pl += "=" * (-len(pl) % 4)
+                  role = json.loads(base64.urlsafe_b64decode(pl)).get("role")
+              except Exception:
+                  sys.exit("could not decode JWT key")
+              if role != "service_role": sys.exit(f"this JWT has role '{role}', not service_role")
+              kind = "legacy service_role JWT"
+          else:
+              sys.exit("unrecognised key format — expected sb_secret_… or a service_role JWT")
+          print("secrets ok ·", u.strip(), "·", kind)
           EOF
 
       - name: Smoke test — 30 symbols, dry, no writes
