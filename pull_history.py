@@ -64,6 +64,8 @@ def extract_close(df, sym):
         s = df[sym]["Close"] if isinstance(df.columns, pd.MultiIndex) else df["Close"]
     except KeyError:
         return None
+    if isinstance(s, pd.DataFrame): s = s.squeeze("columns")
+    if not isinstance(s, pd.Series): return None
     s = s.dropna()
     return s if len(s) >= 12 else None
 
@@ -83,6 +85,7 @@ def main():
     FX = {}
     for c, pair in (("USD","EURUSD=X"), ("CHF","EURCHF=X")):      # units of c per 1 EUR
         f = yf.download(pair, period=f"{a.years+1}y", interval="1mo", auto_adjust=True, progress=False)["Close"]
+        f = f.squeeze("columns") if isinstance(f, pd.DataFrame) else f     # 1-col DataFrame -> Series
         f = f.dropna(); f.index = f.index.to_period("M"); FX[c] = f
         log(f"fx {pair}: {len(f)} months")
 
@@ -101,6 +104,7 @@ def main():
                 failed.append(sym); continue
             if ccy in FX:
                 s = (s / FX[ccy].reindex(s.index)).dropna()   # native → EUR
+            if not isinstance(s, pd.Series) or len(s) < 12: failed.append(sym); continue
             ret = s.pct_change()
             disp = EXTRA.get(sym, sym)
             for per, px in s.items():
@@ -113,9 +117,12 @@ def main():
 
     out = pd.DataFrame(rows)
     log(f"rows: {len(out):,}  tickers: {out.ticker.nunique()}  failed: {len(failed)}")
-    out.to_parquet("prices_history.parquet", index=False)
+    try:
+        out.to_parquet("prices_history.parquet", index=False); backup = "prices_history.parquet"
+    except ImportError:
+        out.to_csv("prices_history.csv", index=False); backup = "prices_history.csv"
     pd.Series(failed).to_csv("pull_failed.csv", index=False, header=["symbol"])
-    log("wrote prices_history.parquet + pull_failed.csv")
+    log(f"wrote {backup} + pull_failed.csv")
     if a.dry: return
 
     from supabase import create_client
