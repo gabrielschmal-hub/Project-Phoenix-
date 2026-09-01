@@ -1,0 +1,240 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Phoenix — Portfolio</title>
+<style>
+/* PHOENIX PALETTE — ivory F3F5E7 · sage 9CA889 · khaki B7A78C · moss 464704 · brown 423926
+   ember E0511B (accent) · slate 12405F (chrome). Cards white. Green/red = financial direction only.
+   Type: serif titles, mono numerics + badges — matches the Markets/ticker cards. */
+:root{--ivory:#F3F5E7;--cream:#FAF7EE;--sage:#9CA889;--khaki:#B7A78C;--moss:#464704;--brown:#423926;
+--ember:#E0511B;--slate:#12405F;--up:#1B7F4B;--dn:#B3261E;--ink:#1a1a17;--mut:#6f6e62;
+--serif:Georgia,"Times New Roman",serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--cream);color:var(--ink);
+font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,sans-serif;
+padding:0 0 calc(24px + env(safe-area-inset-bottom))}
+.top{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--khaki);
+padding:calc(8px + env(safe-area-inset-top)) 12px 0}
+.brand{font:700 10px var(--mono);letter-spacing:.3em;text-transform:uppercase;color:var(--ember)}
+.tabs{display:flex;gap:2px;overflow-x:auto;padding:7px 0 0;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;padding:7px 11px 9px;font:12.5px var(--mono);color:var(--mut);
+border-bottom:3px solid transparent;white-space:nowrap;cursor:pointer;letter-spacing:.02em}
+.tab.on{color:var(--slate);border-bottom-color:var(--ember)}
+.tab small{display:block;font:10px var(--mono);color:var(--mut)}
+main{padding:12px 12px 0}
+.card{background:#fff;border:1px solid var(--khaki);border-radius:10px;padding:0;margin-bottom:11px;overflow:hidden}
+.ch{display:flex;justify-content:space-between;align-items:baseline;padding:11px 14px 8px;
+border-bottom:1px solid var(--ivory)}
+.ct{font:600 17px/1.2 var(--serif);color:var(--ink)}
+.ct .sub{font:11px var(--mono);color:var(--mut);margin-left:6px;font-weight:400}
+.cn{font:10.5px var(--mono);color:var(--mut);letter-spacing:.04em}
+.cb{padding:11px 14px 13px}
+.badge{display:inline-block;font:10px var(--mono);letter-spacing:.06em;padding:2px 7px;
+border:1px solid var(--khaki);border-radius:4px;color:var(--moss);background:#fff;vertical-align:1px}
+.badge.n{color:var(--mut)}.badge.warn{border-color:var(--ember);color:var(--ember)}
+.badge.ok{border-color:var(--up);color:var(--up)}
+.hdr{background:linear-gradient(158deg,#FEFCF6,#FAF6E9 55%,#F7EFE2);border-top:4px solid var(--ember)}
+.hdr .own{font:700 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ember)}
+.hdr h1{font:700 24px/1.15 var(--serif);margin:2px 0 3px;color:var(--slate)}
+.hdr .meta{font:11.5px var(--mono);color:var(--mut)}
+.hdr .val{font:700 32px/1.1 var(--mono);color:var(--slate);margin-top:9px;letter-spacing:-.02em}
+.hdr .val small{font:11px var(--mono);color:var(--mut);margin-left:6px;font-weight:400;letter-spacing:0}
+.rul{font:14.5px/1.5 var(--serif);color:var(--ink)}
+.rul b{color:var(--slate)}
+.rul p{margin:0 0 7px}.rul p:last-child{margin:0}
+.proj{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:8px 0 4px}
+.pj{background:var(--ivory);border-radius:8px;padding:9px 6px;text-align:center;border-top:2px solid var(--sage)}
+.pj b{display:block;font:600 16px var(--mono);color:var(--slate);line-height:1.15}
+.pj i{display:block;font:10px var(--mono);color:var(--mut);font-style:normal;margin-top:3px}
+.pj.hi{border-top-color:var(--ember)}
+.seg{display:flex;background:var(--ivory);border-radius:8px;padding:3px;margin:8px 0 2px}
+.seg span{flex:1;text-align:center;font:11.5px var(--mono);padding:6px 4px;border-radius:6px;color:var(--mut);cursor:pointer}
+.seg span.on{background:var(--ember);color:#fff}
+.note{font:11px var(--mono);color:var(--mut);margin:7px 0 0;line-height:1.45}
+.alloc{display:flex;gap:12px;align-items:center}
+.donut{flex:0 0 118px}
+.donut svg{width:118px;height:118px;display:block}
+.legend{flex:1;min-width:0}
+.line{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--ivory)}
+.line:last-child{border-bottom:none}
+.dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.line .l{flex:1;min-width:0}
+.line .l b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.line .l i{display:block;font:10px var(--mono);color:var(--mut);font-style:normal}
+.line .r{text-align:right;flex-shrink:0;font:var(--mono)}
+.line .r b{display:block;font:600 13.5px var(--mono)}
+.line .r i{display:block;font:10px var(--mono);color:var(--mut);font-style:normal}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.pa{border-bottom:1px solid var(--ivory);padding:9px 0}.pa:last-child{border-bottom:none}
+.pa .h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.pa .h b{font:600 14px var(--serif)}.pa .h span{font:10.5px var(--mono);color:var(--mut)}
+.spark{display:flex;gap:2px;align-items:flex-end;height:34px}
+.spark i{flex:1;border-radius:2px 2px 0 0;min-height:2px}
+.spark i.u{background:var(--up);opacity:.85}.spark i.d{background:var(--dn);opacity:.85}
+.yrl{display:flex;gap:2px;margin-top:2px}.yrl i{flex:1;font:8px var(--mono);color:var(--mut);text-align:center;font-style:normal}
+.kpi{display:flex;gap:5px;margin-top:6px}
+.kpi span{flex:1;font:10px var(--mono);color:var(--mut);background:var(--ivory);border-radius:6px;padding:4px 4px;text-align:center}
+.kpi span b{display:block;font:600 12.5px var(--mono);color:var(--ink)}
+table{width:100%;border-collapse:collapse;font:12.5px var(--mono)}
+th{text-align:left;font:9.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);
+border-bottom:1.5px solid var(--khaki);padding:5px 4px}
+td{padding:6px 4px;border-bottom:1px solid var(--ivory)}td.n,th.n{text-align:right}
+tr.tot td{border-top:2px solid var(--khaki);border-bottom:none;font-weight:600}
+.sug{border-left:3px solid var(--sage);background:var(--ivory);padding:9px 11px;border-radius:0 8px 8px 0;margin-bottom:8px;font-size:13px}
+.sug.warn{border-left-color:var(--ember);background:#FFF6F2}.sug.info{border-left-color:var(--khaki)}
+.sug b{display:block;font:600 13px var(--serif);color:var(--slate);margin-bottom:2px}.sug.warn b{color:var(--ember)}
+.rb{display:flex;justify-content:space-between;align-items:center;font:12.5px var(--mono);padding:6px 0;border-bottom:1px solid var(--ivory)}
+.rb:last-child{border-bottom:none}.rb .a{color:var(--mut);font-size:11.5px}
+.ev{display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--ivory);font-size:13px}
+.ev:last-child{border-bottom:none}.ev .d{font:11px var(--mono);color:var(--mut);flex:0 0 58px}
+
+.bld .row{display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid var(--ivory)}
+.bld .row:last-child{border-bottom:none}
+.bld .nm{flex:1;min-width:0}.bld .nm b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bld .nm i{display:block;font:10px var(--mono);color:var(--mut);font-style:normal}
+.stp{display:flex;align-items:center;gap:3px;flex-shrink:0}
+.stp button{width:28px;height:28px;border:1px solid var(--khaki);background:#fff;border-radius:6px;font:600 14px var(--mono);color:var(--slate);padding:0}
+.stp input{width:44px;height:28px;border:1px solid var(--khaki);border-radius:6px;text-align:center;font:600 13px var(--mono);color:var(--slate);padding:0;-moz-appearance:textfield}
+.stp input::-webkit-inner-spin-button{display:none}
+.x{width:26px;height:26px;border:none;background:none;color:var(--dn);font:16px var(--mono);padding:0;flex-shrink:0}
+.pick{display:flex;gap:6px;margin-top:9px}
+.pick select,.pick button,.fld input{height:34px;border:1px solid var(--khaki);border-radius:7px;font:12.5px var(--mono);background:#fff;color:var(--ink);padding:0 8px}
+.pick select{flex:1;min-width:0}.pick button{background:var(--ember);color:#fff;border-color:var(--ember);padding:0 12px;font-weight:600}
+.fld{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+.fld label{font:9.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);display:block;margin-bottom:3px}
+.fld input{width:100%}
+.tpl{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding:2px 0}
+.tpl::-webkit-scrollbar{display:none}
+.tpl span{flex:0 0 auto;font:11px var(--mono);padding:5px 9px;border:1px solid var(--khaki);border-radius:14px;color:var(--moss);background:#fff;white-space:nowrap}
+.tpl span.on{background:var(--slate);color:#fff;border-color:var(--slate)}
+.own2{display:flex;gap:5px}.own2 span{flex:1;text-align:center;font:600 12px var(--mono);padding:6px;border:1px solid var(--khaki);border-radius:7px;color:var(--mut);background:#fff}
+.own2 span.on{border-color:var(--ember);color:var(--ember)}
+.sum{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font:12px var(--mono)}
+.sum button{height:28px;border:1px solid var(--khaki);border-radius:6px;background:#fff;font:11px var(--mono);color:var(--slate);padding:0 10px}
+.io textarea{width:100%;height:70px;font:10.5px var(--mono);border:1px solid var(--khaki);border-radius:7px;padding:6px;margin-top:6px;resize:vertical}
+.sgl{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}.sgl span{font:11px var(--mono);padding:4px 8px;border:1px solid var(--khaki);border-radius:12px;background:#fff;color:var(--slate)}.sgl span i{color:var(--mut);font-style:normal}
+</style></head><body>
+<div class="top"><div class="brand">Phoenix · Portfolio Builder</div><div class="tabs" id="tabs"></div></div>
+<main id="main"></main>
+<script>
+const SUPA_URL="https://tinribrtctphlmfytgqo.supabase.co";
+const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpbnJpYnJ0Y3RwaGxtZnl0Z3FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMzMzNzYsImV4cCI6MjEwMjgwOTM3Nn0.tYGrB8Nf134hdNhNhrw_je-cdIHULcoijQR5bTrLWdc";          // same anon key phoenix_app.html already uses
+const FALLBACK={"schema":"phoenix.builder/2","asof":"2026-09-01","series":{"VWCE":{"monthly":{"2016-01":-0.04986,"2016-02":-0.01641,"2016-03":0.0261,"2016-04":0.00701,"2016-05":0.03221,"2016-06":-0.01127,"2016-07":0.0313,"2016-08":0.00502,"2016-09":0.00165,"2016-10":0.00437,"2016-11":0.0478,"2016-12":0.01634,"2017-01":0.00307,"2017-02":0.04652,"2017-03":0.00611,"2017-04":-0.00642,"2017-05":-0.00948,"2017-06":-0.01912,"2017-07":-0.00876,"2017-08":-0.00172,"2017-09":0.02697,"2017-10":0.03633,"2017-11":-0.00191,"2017-12":-0.00272,"2018-01":0.02163,"2018-02":-0.02756,"2018-03":-0.02538,"2018-04":0.02454,"2018-05":0.03774,"2018-06":-0.01618,"2018-07":0.03026,"2018-08":0.01475,"2018-09":0.00599,"2018-10":-0.0505,"2018-11":0.01536,"2018-12":-0.09236,"2019-01":0.08132,"2019-02":0.03152,"2019-03":0.02967,"2019-04":0.03444,"2019-05":-0.05684,"2019-06":0.03269,"2019-07":0.02769,"2019-08":-0.01465,"2019-09":0.03121,"2019-10":0.00401,"2019-11":0.03569,"2019-12":0.00399,"2020-01":-0.00323,"2020-02":-0.06936,"2020-03":-0.13465,"2020-04":0.10611,"2020-05":0.03676,"2020-06":0.009,"2020-07":0.00475,"2020-08":0.04638,"2020-09":-0.01166,"2020-10":-0.01612,"2020-11":0.09144,"2020-12":0.01422,"2021-01":0.00359,"2021-02":0.02812,"2021-03":0.05861,"2021-04":0.01725,"2021-05":-0.0023,"2021-06":0.03659,"2021-07":0.00818,"2021-08":0.02691,"2021-09":-0.02344,"2021-10":0.05583,"2021-11":-0.00403,"2021-12":0.02478,"2022-01":-0.03343,"2022-02":-0.02911,"2022-03":0.03332,"2022-04":-0.03492,"2022-05":-0.01341,"2022-06":-0.06789,"2022-07":0.09767,"2022-08":-0.02721,"2022-09":-0.07065,"2022-10":0.05486,"2022-11":0.02876,"2022-12":-0.07934,"2023-01":0.05899,"2023-02":-0.00704,"2023-03":0.00799,"2023-04":-0.00088,"2023-05":0.02021,"2023-06":0.0258,"2023-07":0.02791,"2023-08":-0.01533,"2023-09":-0.0184,"2023-10":-0.02546,"2023-11":0.05752,"2023-12":0.02387,"2024-01":0.02335,"2024-02":0.04633,"2024-03":0.0339,"2024-04":-0.02409,"2024-05":0.02826,"2024-06":0.02464,"2024-07":0.00477,"2024-08":0.00453,"2024-09":0.01382,"2024-10":0.00169,"2024-11":0.07047,"2024-12":-0.01469,"2025-01":0.03068,"2025-02":-0.00412,"2025-03":-0.07578,"2025-04":-0.04036,"2025-05":0.05518,"2025-06":0.00123,"2025-07":0.04353,"2025-08":0.00303,"2025-09":0.03171,"2025-10":0.0404,"2025-11":-0.00471,"2025-12":-0.01217,"2026-01":0.01886,"2026-02":0.0162,"2026-03":-0.04013,"2026-04":0.07852,"2026-05":0.05263,"2026-06":0.01068,"2026-07":-0.0123,"2026-08":0.02335}},"SGLD":{"monthly":{"2016-01":0.05764,"2016-02":0.10489,"2016-03":-0.05261,"2016-04":0.04448,"2016-05":-0.03438,"2016-06":0.09217,"2016-07":0.01355,"2016-08":-0.03102,"2016-09":-0.00083,"2016-10":-0.0062,"2016-11":-0.04959,"2016-12":-0.01323,"2017-01":0.02756,"2017-02":0.05338,"2017-03":-0.0115,"2017-04":-0.0053,"2017-05":-0.03209,"2017-06":-0.03718,"2017-07":-0.01281,"2017-08":0.03604,"2017-09":-0.02595,"2017-10":0.00692,"2017-11":-0.01819,"2017-12":0.01306,"2018-01":-0.00221,"2018-02":-0.00313,"2018-03":-0.00432,"2018-04":0.01068,"2018-05":0.02051,"2018-06":-0.03561,"2018-07":-0.0228,"2018-08":-0.01381,"2018-09":-0.00671,"2018-10":0.04749,"2018-11":0.0029,"2018-12":0.03666,"2019-01":0.02972,"2019-02":0.00055,"2019-03":-0.0025,"2019-04":-0.00644,"2019-05":0.02177,"2019-06":0.06056,"2019-07":0.02707,"2019-08":0.08735,"2019-09":-0.02568,"2019-10":0.0023,"2019-11":-0.02043,"2019-12":0.01824,"2020-01":0.05682,"2020-02":-0.00041,"2020-03":-0.00286,"2020-04":0.08025,"2020-05":0.01205,"2020-06":0.01553,"2020-07":0.05655,"2020-08":-0.01628,"2020-09":-0.0241,"2020-10":0.00106,"2020-11":-0.07623,"2020-12":0.0448,"2021-01":-0.02576,"2021-02":-0.05777,"2021-03":0.01747,"2021-04":0.01059,"2021-05":0.05873,"2021-06":-0.04264,"2021-07":0.02437,"2021-08":0.00429,"2021-09":-0.0132,"2021-10":0.01662,"2021-11":0.01245,"2021-12":0.02956,"2022-01":-0.00438,"2022-02":0.06285,"2022-03":0.02654,"2022-04":0.02804,"2022-05":-0.04983,"2022-06":0.00774,"2022-07":-0.00133,"2022-08":-0.01276,"2022-09":-0.00391,"2022-10":-0.0258,"2022-11":0.03023,"2022-12":0.00112,"2023-01":0.04179,"2023-02":-0.02806,"2023-03":0.05271,"2023-04":-0.00783,"2023-05":0.01718,"2023-06":-0.04215,"2023-07":0.01493,"2023-08":0.0012,"2023-09":-0.02333,"2023-10":0.0737,"2023-11":-0.00421,"2023-12":-0.00121,"2024-01":0.00602,"2024-02":0.00577,"2024-03":0.08802,"2024-04":0.04209,"2024-05":-0.00081,"2024-06":0.01124,"2024-07":0.04265,"2024-08":0.00057,"2024-09":0.04251,"2024-10":0.06707,"2024-11":-0.00317,"2024-12":0.00673,"2025-01":0.06711,"2025-02":0.01704,"2025-03":0.05012,"2025-04":0.00651,"2025-05":-0.00221,"2025-06":-0.03341,"2025-07":0.02628,"2025-08":0.02559,"2025-09":0.11299,"2025-10":0.05327,"2025-11":0.04827,"2025-12":0.00916,"2026-01":0.11238,"2026-02":0.09072,"2026-03":-0.09061,"2026-04":-0.03039,"2026-05":-0.00938,"2026-06":-0.09849,"2026-07":-0.00039,"2026-08":0.09365}},"AGGH":{"monthly":{"2017-12":0.0016,"2018-01":-0.01079,"2018-02":-0.00657,"2018-03":0.00763,"2018-04":-0.00575,"2018-05":0.00081,"2018-06":0.00101,"2018-07":-0.00223,"2018-08":0.00061,"2018-09":-0.00649,"2018-10":-0.00398,"2018-11":0.00164,"2018-12":0.01034,"2019-01":0.00871,"2019-02":-0.00211,"2019-03":0.01651,"2019-04":-0.00198,"2019-05":0.00992,"2019-06":0.01287,"2019-07":0.00475,"2019-08":0.02018,"2019-09":-0.01107,"2019-10":-0.00019,"2019-11":-0.00375,"2019-12":-0.00296,"2020-01":0.01472,"2020-02":0.00657,"2020-03":-0.01121,"2020-04":0.00668,"2020-05":0.00444,"2020-06":0.0077,"2020-07":0.00715,"2020-08":-0.00896,"2020-09":0.00165,"2020-10":0.00109,"2020-11":0.00621,"2020-12":0.00045,"2021-01":-0.00487,"2021-02":-0.02144,"2021-03":0.00019,"2021-04":0.00076,"2021-05":0.00126,"2021-06":0.00457,"2021-07":0.01088,"2021-08":-0.00255,"2021-09":-0.01124,"2021-10":-0.00224,"2021-11":0.0056,"2021-12":-0.00516,"2022-01":-0.01821,"2022-02":-0.01211,"2022-03":-0.02135,"2022-04":-0.03063,"2022-05":-0.00294,"2022-06":-0.0178,"2022-07":0.02647,"2022-08":-0.0298,"2022-09":-0.04038,"2022-10":-0.00166,"2022-11":0.01649,"2022-12":-0.01155,"2023-01":0.02003,"2023-02":-0.01857,"2023-03":0.02,"2023-04":0.00283,"2023-05":-0.00655,"2023-06":-0.00236,"2023-07":-0.00122,"2023-08":-0.00309,"2023-09":-0.01772,"2023-10":-0.00913,"2023-11":0.03173,"2023-12":0.02967,"2024-01":-0.00302,"2024-02":-0.00773,"2024-03":0.00749,"2024-04":-0.01749,"2024-05":0.00651,"2024-06":0.0085,"2024-07":0.01571,"2024-08":0.0115,"2024-09":0.00858,"2024-10":-0.01584,"2024-11":0.01222,"2024-12":-0.00983,"2025-01":0.00247,"2025-02":0.00966,"2025-03":-0.00499,"2025-04":0.00811,"2025-05":-0.008,"2025-06":0.00782,"2025-07":-0.00063,"2025-08":0.00229,"2025-09":0.00623,"2025-10":0.00561,"2025-11":-0.00061,"2025-12":-0.00022,"2026-01":-0.00158,"2026-02":0.01273,"2026-03":-0.02089,"2026-04":0.00229,"2026-05":0.00507,"2026-06":0.00276,"2026-07":-0.0137,"2026-08":0.00266}},"BTCE":{"monthly":{"2020-07":0.1682,"2020-08":0.01538,"2020-09":-0.05443,"2020-10":0.26336,"2020-11":0.38318,"2020-12":0.38601,"2021-01":0.29557,"2021-02":0.33414,"2021-03":0.28638,"2021-04":-0.0657,"2021-05":-0.36194,"2021-06":-0.04496,"2021-07":0.13467,"2021-08":0.21684,"2021-09":-0.06651,"2021-10":0.44105,"2021-11":-0.06175,"2021-12":-0.17789,"2022-01":-0.19435,"2022-02":0.08188,"2022-03":0.14232,"2022-04":-0.1192,"2022-05":-0.20336,"2022-06":-0.37994,"2022-07":0.27363,"2022-08":-0.15225,"2022-09":0.02928,"2022-10":0.00696,"2022-11":-0.20874,"2022-12":-0.06383,"2023-01":0.38428,"2023-02":0.03895,"2023-03":0.18182,"2023-04":0.00452,"2023-05":-0.0446,"2023-06":0.08772,"2023-07":-0.03595,"2023-08":-0.06056,"2023-09":0.01306,"2023-10":0.28089,"2023-11":0.05619,"2023-12":0.10166,"2024-01":0.05213,"2024-02":0.43145,"2024-03":0.14203,"2024-04":-0.13709,"2024-05":0.09067,"2024-06":-0.08558,"2024-07":0.07678,"2024-08":-0.14499,"2024-09":0.08813,"2024-10":0.13403,"2024-11":0.43056,"2024-12":-0.04102,"2025-01":0.12463,"2025-02":-0.20471,"2025-03":-0.03883,"2025-04":0.06885,"2025-05":0.12385,"2025-06":-0.02072,"2025-07":0.127,"2025-08":-0.10329,"2025-09":0.03876,"2025-10":-0.01277,"2025-11":-0.17617,"2025-12":-0.05257,"2026-01":-0.06628,"2026-02":-0.20139,"2026-03":0.03648,"2026-04":0.12154,"2026-05":-0.03498,"2026-06":-0.19138,"2026-07":0.06365,"2026-08":0.25479}}},"universe":[{"t":"VWCE","label":"Global equity (ACWI proxy)","cls":"equity","tax":0.26},{"t":"SGLD","label":"Gold","cls":"gold","tax":0.26,"offsettable":true},{"t":"AGGH","label":"Global aggregate bond","cls":"bond","tax":0.26},{"t":"BTCE","label":"Bitcoin ETP","cls":"crypto","tax":0.26},{"t":"CSSPX","label":"S&P 500","cls":"equity","tax":0.26},{"t":"SWDA","label":"MSCI World","cls":"equity","tax":0.26},{"t":"IEGA","label":"Euro govt bond","cls":"bond","tax":0.125},{"t":"XEON","label":"Cash / overnight","cls":"cash","tax":0.26},{"t":"AAPL","label":"Apple","cls":"stock","tax":0.26,"offsettable":true},{"t":"GOOG","label":"Alphabet","cls":"stock","tax":0.26,"offsettable":true},{"t":"PLTR","label":"Palantir","cls":"stock","tax":0.26,"offsettable":true},{"t":"BAC","label":"Bank of America","cls":"stock","tax":0.26,"offsettable":true},{"t":"TSM","label":"TSMC","cls":"stock","tax":0.26,"offsettable":true},{"t":"LQDA","label":"Liquidia","cls":"stock","tax":0.26,"offsettable":true},{"t":"ENEL.MI","label":"Enel","cls":"stock","tax":0.26,"offsettable":true},{"t":"ASML.AS","label":"ASML","cls":"stock","tax":0.26,"offsettable":true}],"templates":[{"id":"A","owner":"G","name":"Trading","capital":5000,"monthly":0,"target":0,"target_years":5,"lines":[]},{"id":"B","owner":"G","name":"Medium Term","capital":7000,"monthly":0,"target":15000,"target_years":5,"lines":[{"t":"VWCE","w":0.65},{"t":"AGGH","w":0.1},{"t":"SGLD","w":0.08},{"t":"BTCE","w":0.05}]},{"id":"C","owner":"G","name":"Long Term","capital":18000,"monthly":0,"target":0,"target_years":5,"lines":[{"t":"VWCE","w":0.6},{"t":"SGLD","w":0.08},{"t":"BTCE","w":0.07}]},{"id":"D","owner":"A","name":"Long Term","capital":10000,"monthly":300,"target":0,"target_years":5,"lines":[{"t":"VWCE","w":0.6},{"t":"AGGH","w":0.34},{"t":"SGLD","w":0.06}]}]};                      // 4 real series shipped inline: works before the pull lands
+const DATA={series:{...FALLBACK.series},universe:FALLBACK.universe.slice(),templates:[]};
+const H={apikey:SUPA_KEY,Authorization:"Bearer "+SUPA_KEY,"Content-Type":"application/json"};
+const ONLINE={ok:null,msg:"checking"};
+const PENDING=new Set();
+async function sb(path,opt={}){const r=await fetch(SUPA_URL+"/rest/v1/"+path,{...opt,headers:{...H,...(opt.headers||{})}});if(!r.ok)throw new Error(r.status+" "+await r.text());return r.status===204?null:r.json();}
+// fetch monthly returns for tickers not yet in DATA.series; re-render when they land
+async function ensureSeries(tickers){const need=tickers.filter(t=>!DATA.series[t]&&!PENDING.has(t));if(!need.length||ONLINE.ok===false)return;
+  need.forEach(t=>PENDING.add(t));
+  try{const rows=await sb(`prices_history?select=ticker,month,ret&ticker=in.(${need.map(encodeURIComponent).join(",")})&order=month.asc`);
+    const by={};rows.forEach(r=>{if(r.ret==null)return;(by[r.ticker]=by[r.ticker]||{})[r.month.slice(0,7)]=+r.ret;});
+    Object.entries(by).forEach(([t,m])=>{if(Object.keys(m).length>=12)DATA.series[t]={monthly:m};});
+    ONLINE.ok=true;ONLINE.msg="supabase";}
+  catch(e){ONLINE.ok=false;ONLINE.msg="offline · inline data only";}
+  finally{need.forEach(t=>PENDING.delete(t));render();}}
+async function loadPortfolios(){try{const rows=await sb(`portfolios?select=*&owner=eq.${PROFILE}&order=updated_at.desc`);
+    DATA.templates=rows.map(r=>({id:r.id,owner:r.owner,name:r.name,capital:+r.capital_eur,monthly:+r.monthly_eur,target:+(r.target_eur||0),target_years:r.target_years||5,confirmed:r.confirmed,lines:r.lines}));
+    ONLINE.ok=true;ONLINE.msg="supabase";}
+  catch(e){ONLINE.ok=false;ONLINE.msg="offline · inline data only";DATA.templates=FALLBACK.templates.filter(t=>t.owner===PROFILE);}
+  const T0=DATA.templates.slice().sort((a,b)=>b.lines.length-a.lines.length)[0];load(T0||null);}
+const COL={equity:'#12405F',stock:'#12405F',bond:'#B7A78C',gold:'#E0511B',crypto:'#464704',cash:'#9CA889'};
+const pct=v=>(v*100).toFixed(0)+'%',pp1=v=>(v*100).toFixed(1)+'%',eur=v=>'€'+Math.round(v).toLocaleString('en-US');
+const BAND=.05,N_FLOOR=5;
+// PROFILE comes from the app rail (G/A). Prototype reads ?profile=G|A or defaults G.
+const PROFILE=(location.search.match(/profile=([GA])/)||[])[1]||'G';
+const NAME={G:'Gabriel',A:'Aldemar'};
+let S={name:'New portfolio',capital:10000,monthly:0,target:0,target_years:5,lines:[]},TPL=null;
+const U=t=>DATA.universe.find(u=>u.t===t)||{t,label:t,cls:'stock',tax:.26,offsettable:true};
+// ---------- series → stats (all derived from monthly returns, the prices_history shape) ----------
+function mret(t){const s=DATA.series[t];return s?s.monthly:null;}
+function st(t){const m=mret(t);if(!m)return null;const ms=Object.keys(m).sort();
+  const years={};ms.forEach(k=>{const y=k.slice(0,4);years[y]=(years[y]||1)*(1+m[k]);});
+  const full=Object.keys(years).filter(y=>ms.filter(k=>k.startsWith(y)).length>=12);  // complete years only
+  const yr={};full.forEach(y=>yr[y]=years[y]-1);const ys=Object.keys(yr).sort(),n=ys.length;
+  const arith=ys.reduce((a,y)=>a+yr[y],0)/n,geo=Math.pow(ys.reduce((a,y)=>a*(1+yr[y]),1),1/n)-1;
+  const sd=Math.sqrt(ys.reduce((a,y)=>a+(yr[y]-arith)**2,0)/n);
+  let v=1,peak=1,mdd=0;const lv=[1];ms.forEach(k=>{v*=1+m[k];lv.push(v);peak=Math.max(peak,v);mdd=Math.min(mdd,v/peak-1);});
+  const r12=[];for(let i=12;i<lv.length;i++)r12.push(lv[i]/lv[i-12]-1);
+  return {years:yr,ys,n,arith,geo,sd,drag:arith-geo,mdd,best:Math.max(...r12),worst:Math.min(...r12),last:yr[ys[n-1]],ms};}
+function corr(a,b){const A=mret(a),B=mret(b);if(!A||!B)return null;const ks=Object.keys(A).filter(k=>k in B);if(ks.length<12)return null;
+  const ma=ks.reduce((q,k)=>q+A[k],0)/ks.length,mb=ks.reduce((q,k)=>q+B[k],0)/ks.length;let sab=0,sa=0,sb=0;
+  ks.forEach(k=>{const x=A[k]-ma,y=B[k]-mb;sab+=x*y;sa+=x*x;sb+=y*y;});return {r:sab/Math.sqrt(sa*sb),n:ks.length};}
+function total(){return S.lines.reduce((a,l)=>a+l.w,0);}
+function measured(){return S.lines.filter(l=>st(l.t));}
+function blended(){let g=0,a=0,w=0;measured().forEach(l=>{const x=st(l.t);g+=l.w*x.geo;a+=l.w*x.arith;w+=l.w;});return w?{geo:g/w,arith:a/w,w}:null;}
+function project(P,r,m,mo){const q=Math.pow(1+r,1/12)-1;let v=P;for(let i=0;i<m;i++)v=v*(1+q)+mo;return v;}
+// ---------- actions ----------
+function load(t){TPL=t?t.id:null;S=t?{id:t.confirmed?t.id:undefined,name:t.name,capital:t.capital,monthly:t.monthly,target:t.target,target_years:t.target_years,lines:t.lines.map(l=>({t:l.t||l.ticker,w:l.w!=null?l.w:l.weight}))}
+  :{name:'New portfolio',capital:10000,monthly:0,target:0,target_years:5,lines:[]};render();}
+function add(t){t=(t||document.getElementById('q').value).trim().toUpperCase();if(!t||S.lines.some(l=>l.t===t))return;S.lines.push({t,w:0});render();}
+function rm(i){S.lines.splice(i,1);render();}
+function setw(i,v){S.lines[i].w=Math.max(0,Math.min(1,(+v||0)/100));render();}
+function bump(i,d){setw(i,S.lines[i].w*100+d);}
+function norm(){const t=total();if(t>0)S.lines.forEach(l=>l.w=l.w/t);render();}
+function eq(){if(S.lines.length)S.lines.forEach(l=>l.w=1/S.lines.length);render();}
+function setf(f,v){S[f]=f==='name'?v:(+v||0);render();}
+function sugg(){const q=document.getElementById('q').value.trim().toUpperCase();const box=document.getElementById('sg');if(!q){box.innerHTML='';return;}
+  const hits=DATA.universe.filter(u=>!S.lines.some(l=>l.t===u.t)&&(u.t.includes(q)||u.label.toUpperCase().includes(q))).slice(0,6);
+  box.innerHTML=hits.map(u=>`<span onclick="add('${u.t}')">${u.t} <i>${u.label}${mret(u.t)?'':' · no data'}</i></span>`).join('')||`<span onclick="add('${q}')">${q} <i>add anyway (unmeasured)</i></span>`;}
+function exportJ(){document.getElementById('io').value=JSON.stringify({owner:PROFILE,...S},null,1);}
+function importJ(){try{const o=JSON.parse(document.getElementById('io').value);if(o&&o.lines){S=o;delete S.owner;TPL=null;render();}}catch(e){alert('Invalid JSON');}}
+async function confirmP(){if(!S.lines.length||Math.abs(total()-1)>.005){alert("Weights must sum to 100% first.");return;}
+  const row={owner:PROFILE,name:S.name,capital_eur:S.capital,monthly_eur:S.monthly,target_eur:S.target||null,target_years:S.target_years,lines:S.lines.map(l=>({ticker:l.t,weight:+l.w.toFixed(4)})),confirmed:true};
+  try{if(S.id){await sb(`portfolios?id=eq.${S.id}`,{method:"PATCH",body:JSON.stringify(row),headers:{Prefer:"return=minimal"}});}
+      else{const r=await sb("portfolios",{method:"POST",body:JSON.stringify(row),headers:{Prefer:"return=representation"}});S.id=r[0].id;}
+      await loadPortfolios();alert("Saved. "+S.lines.length+" tickers are now on the 5-min lane.");}
+  catch(e){alert("Save failed: "+e.message);}}
+// ---------- cards ----------
+const card=(t,sub,n,b)=>`<div class="card"><div class="ch"><span class="ct">${t}${sub?`<span class="sub">${sub}</span>`:''}</span><span class="cn">${n||''}</span></div><div class="cb">${b}</div></div>`;
+function donut(){const R=50,r=32,C=2*Math.PI*R,t=total()||1;let off=0,s='';
+  S.lines.forEach(l=>{const len=(l.w/t)*C;s+=`<circle r="${R}" cx="59" cy="59" fill="none" stroke="${COL[U(l.t).cls]}" stroke-width="${R-r}" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 59 59)"/>`;off+=len;});
+  const risk=S.lines.filter(l=>['equity','stock','crypto'].includes(U(l.t).cls)).reduce((a,l)=>a+l.w,0)/t;
+  return `<svg viewBox="0 0 118 118">${s||`<circle r="${R}" cx="59" cy="59" fill="none" stroke="#F3F5E7" stroke-width="${R-r}"/>`}<text x="59" y="55" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="15" font-weight="600" fill="#12405F">${S.lines.length?pct(risk):'—'}</text><text x="59" y="68" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="8" fill="#6f6e62">RISK ASSETS</text></svg>`;}
+function corrCard(){const M=measured();if(M.length<2)return '';const ts=M.map(l=>l.t);let rows='',sum=0,cnt=0,hi=[];
+  ts.forEach((a,i)=>{rows+=`<tr><td><b>${a}</b></td>`;ts.forEach((b,j)=>{if(j<=i){rows+=`<td class="n" style="color:#C9C6B4">${i===j?'—':''}</td>`;return;}
+    const c=corr(a,b);if(!c){rows+='<td class="n">·</td>';return;}sum+=c.r;cnt++;if(c.r>.7)hi.push(`${a}–${b} ${c.r.toFixed(2)}`);
+    const col=c.r>.7?'var(--dn)':c.r<.3?'var(--up)':'var(--ink)';rows+=`<td class="n" style="color:${col};font-weight:${Math.abs(c.r)>.7?600:400}">${c.r.toFixed(2)}</td>`;});rows+='</tr>';});
+  const avg=cnt?sum/cnt:0;const wsum=M.reduce((a,l)=>a+l.w,0);const hhi=M.reduce((a,l)=>a+(l.w/wsum)**2,0);
+  const neff=(1/hhi)/(1+avg*(1/hhi-1));   // effective independent bets, correlation-adjusted
+  return card('Correlation risk','monthly returns',`<span class="badge ${avg>.6?'warn':'n'}">avg ρ ${avg.toFixed(2)}</span>`,
+   `<div style="overflow-x:auto"><table><tr><th></th>${ts.map(t=>`<th class="n">${t}</th>`).join('')}</tr>${rows}</table></div>
+    <div class="proj" style="grid-template-columns:1fr 1fr;margin-top:8px"><div class="pj"><b>${M.length}</b><i>LINES HELD</i></div><div class="pj ${neff<M.length*.6?'hi':''}"><b>${neff.toFixed(1)}</b><i>INDEPENDENT BETS</i></div></div>
+    <p class="note">${hi.length?`Above 0.7: ${hi.join(' · ')}. Those move together — holding both is one position sized twice.`:'No pair above 0.7. The lines genuinely diversify each other.'} Independent bets = 1/HHI adjusted for average correlation.</p>`);}
+function suggestions(){const O=[],M=measured(),t=total();const tot=M.reduce((a,l)=>a+l.w*st(l.t).geo,0);
+  if(S.lines.length&&Math.abs(t-1)>.005)O.push({t:'warn',h:`Weights sum to ${pct(t)}`,b:'Normalize or Equal-weight. Nothing above is reliable until this is 100%.'});
+  const um=S.lines.filter(l=>!st(l.t));if(um.length)O.push({t:'warn',h:`${um.map(l=>l.t).join(', ')} unmeasured`,b:`No 10-year series yet — run pull_history.py and they light up. Excluded from every statistic; the projection covers only the measured ${pct(M.reduce((a,l)=>a+l.w,0)/(t||1))}.`});
+  M.forEach(l=>{const x=st(l.t),sh=tot>0?l.w*x.geo/tot:0;if(l.w>=.1&&sh<l.w*.5)O.push({t:'warn',h:`${U(l.t).label} isn't earning its weight`,b:`${pct(l.w)} of the book, ${pct(sh)} of the return. ${pp1(x.geo)}/yr, ${pct(Math.abs(x.mdd))} drawdown.`});});
+  const held=M.filter(l=>st(l.t).years['2022']>0).map(l=>U(l.t).label);if(M.length)O.push({t:held.length?'ok':'warn',h:'2022 stress test',b:held.length?`Only ${held.join(', ')} rose when equity fell.`:'Every measured line fell together.'});
+  S.lines.forEach(l=>{const u=U(l.t);if(u.cls==='bond'&&u.tax>.125)O.push({t:'warn',h:`${l.t} taxed at 26%`,b:'Mostly corporate. IEGA or a BTP ladder is 12.5% on the qualifying share.'});
+    const x=st(l.t);if(x&&x.mdd<-.5)O.push({t:'info',h:`${u.label} capped where a wipeout is survivable`,b:`Max DD ${pct(Math.abs(x.mdd))}. At ${pct(l.w)} that's ${eur(S.capital*l.w*Math.abs(x.mdd))}.`});});
+  const stocks=S.lines.filter(l=>U(l.t).cls==='stock');const big=stocks.filter(l=>l.w>.05);
+  if(big.length)O.push({t:'warn',h:`${big.map(l=>l.t).join(', ')} above 5% single-name cap`,b:'Position rule: max 5% per name. Trim or add names.'});
+  const off=S.lines.filter(l=>U(l.t).offsettable).reduce((a,l)=>a+l.w,0);if(S.lines.length)O.push({t:off<.15?'warn':'info',h:'Loss-offset capacity',b:`${pct(off)} is redditi diversi (stocks, ETCs, bonds held direct) — the only gains minusvalenze can shelter. ETF gains cannot be offset.`});
+  if(S.target>S.capital){const m=.08/12,n=S.target_years*12,fv=project(S.capital,.08,n,0);const mo=fv>=S.target?0:(S.target-fv)*m/(Math.pow(1+m,n)-1);O.push({t:'ok',h:`Reaching ${eur(S.target)} in ${S.target_years} yr`,b:`Needs ${pp1(Math.pow(S.target/S.capital,1/S.target_years)-1)}/yr on returns alone; <b>${eur(mo)}/month</b> gets there at 8%.`});}
+  return O;}
+function ruling(b){if(!S.lines.length)return '<p><b>Empty.</b> Search a ticker below to start.</p>';if(!b)return '<p><b>Nothing measured yet.</b> None of these lines has a series. Run the history pull, or add VWCE / AGGH / SGLD / BTCE to see numbers now.</p>';
+  const M=measured(),tot=M.reduce((a,l)=>a+l.w*st(l.t).geo,0),drag=M.filter(l=>l.w>=.1&&l.w*st(l.t).geo/tot<l.w*.5),held=M.filter(l=>st(l.t).years['2022']>0);const e=st('VWCE');
+  return `<p><b>${pp1(b.geo)} a year, geometric, on the ${pct(b.w/(total()||1))} that is measured.</b> Arithmetic ${pp1(b.arith)} — the gap is volatility drag.</p><p>${drag.length?`<b>${drag.map(l=>U(l.t).label).join(' and ')} not earning weight.</b>`:'<b>No measured line is dead weight.</b>'}</p><p>${held.length?`Only <b>${held.map(l=>U(l.t).label).join(', ')}</b> rose in 2022. `:''}${e?`A ${pct(Math.abs(e.mdd))} equity drawdown is inside this sample.`:''}</p>`;}
+function render(){ensureSeries(S.lines.map(l=>l.t));const b=blended(),t=total(),P=S.capital,mo=S.monthly,e=st('VWCE');
+  let h=`<div class="card hdr"><div class="cb"><div class="own">${NAME[PROFILE]} · profile ${PROFILE}</div><h1>${S.name}</h1><div class="meta">${S.id?'saved':'unsaved'} · ${ONLINE.msg}${mo?` · +${eur(mo)}/mo`:''}</div><div class="val">${eur(P)}<small>CAPITAL</small></div></div></div>`;
+  h+=card('Build','any ticker · any mix',`<span class="badge ${Math.abs(t-1)<.005?'ok':'warn'}">Σ ${pct(t)}</span>`,
+   `<div class="tpl">${DATA.templates.map(x=>`<span class="${TPL===x.id?'on':''}" onclick="load(DATA.templates.find(q=>q.id==='${x.id}'))">${x.confirmed?'✓ ':''}${x.name}</span>`).join('')}<span onclick="load(null)">+ blank</span></div>
+    <div class="pick" style="position:relative"><input id="q" placeholder="Search ticker or name — AAPL, GOOG, ENEL.MI, VWCE…" oninput="sugg()" onkeydown="if(event.key==='Enter')add()" style="flex:1;height:34px;border:1px solid var(--khaki);border-radius:7px;font:12.5px var(--mono);padding:0 8px"><button onclick="add()">Add</button></div><div id="sg" class="sgl"></div>
+    <div class="fld"><div><label>Name</label><input value="${S.name}" onchange="setf('name',this.value)"></div><div><label>Capital €</label><input type="number" inputmode="numeric" value="${P}" onchange="setf('capital',this.value)"></div><div><label>Monthly €</label><input type="number" inputmode="numeric" value="${mo}" onchange="setf('monthly',this.value)"></div><div><label>Target € / yrs</label><div style="display:flex;gap:4px"><input type="number" inputmode="numeric" value="${S.target||''}" placeholder="—" onchange="setf('target',this.value)"><input type="number" inputmode="numeric" value="${S.target_years}" style="width:52px" onchange="setf('target_years',this.value)"></div></div></div>
+    <div class="bld" style="margin-top:8px">${S.lines.map((l,i)=>{const u=U(l.t),x=st(l.t);return `<div class="row"><span class="dot" style="background:${COL[u.cls]}"></span><div class="nm"><b>${l.t}</b><i>${u.label} · ${pct(u.tax)}${x?` · geo ${pp1(x.geo)}`:' · <span style="color:var(--ember)">unmeasured</span>'}</i></div><div class="stp"><button onclick="bump(${i},-5)">−</button><input type="number" inputmode="numeric" value="${Math.round(l.w*100)}" onchange="setw(${i},this.value)"><button onclick="bump(${i},5)">+</button></div><button class="x" onclick="rm(${i})">×</button></div>`;}).join('')||'<p class="note">No lines yet.</p>'}</div>
+    <div class="sum"><span>${S.lines.length} lines · measured ${pct(measured().reduce((a,l)=>a+l.w,0)/(t||1))}</span><span><button onclick="eq()">Equal</button> <button onclick="norm()">Normalize</button></span></div>`);
+  h+=card('✦ Ruling','executive summary',b?`<span class="badge n">n=${e?e.n:'?'}y</span>`:'<span class="badge warn">unmeasured</span>',`<div class="rul">${ruling(b)}</div>`);
+  if(b){const r=b.geo;h+=card('If you continue like this','',`<span class="badge">${pp1(r)}/yr</span>`,`<div class="seg">${[0,150,300].map(v=>`<span class="${v===mo?'on':''}" onclick="setf('monthly',${v})">€${v}/mo</span>`).join('')}</div><div class="proj">${[[12,'12 MO'],[36,'3 YR'],[60,'5 YR']].map(([m,l])=>`<div class="pj ${m===60?'hi':''}"><b>${eur(project(P,r,m,mo))}</b><i>${l}</i></div>`).join('')}</div><div class="proj" style="grid-template-columns:1fr 1fr"><div class="pj"><b>${eur(project(P,r,120,mo))}</b><i>10 YR</i></div><div class="pj"><b>${eur(project(P,r,120,mo)-P-mo*120)}</b><i>OF WHICH GROWTH</i></div></div><p class="note">Geometric rate on the measured share; a ${e?pct(Math.abs(e.mdd)):'—'} equity year is inside the sample.</p>`);}
+  h+=card('Allocation','',`<span class="badge n">${S.lines.length} lines</span>`,`<div class="alloc"><div class="donut">${donut()}</div><div class="legend">${S.lines.map(l=>{const u=U(l.t);return `<div class="line"><span class="dot" style="background:${COL[u.cls]}"></span><div class="l"><b>${l.t}</b><i>${u.label}</i></div><div class="r"><b>${pct(l.w)}</b><i>${eur(P*l.w)}</i></div></div>`;}).join('')||'<p class="note">Empty.</p>'}</div></div>`);
+  h+=corrCard();
+  const M=measured();if(M.length){h+=card('Performance by asset','annual %, EUR','<span class="badge n">real series</span>',M.map(l=>{const u=U(l.t),x=st(l.t),mx=Math.max(...x.ys.map(y=>Math.abs(x.years[y])));return `<div class="pa"><div class="h"><b>${l.t}</b><span>${x.ys[0].slice(2)}–${x.ys[x.n-1].slice(2)} · geo <b class="${x.geo>0?'up':'dn'}">${pp1(x.geo)}</b> <span class="badge ${x.n<N_FLOOR?'warn':'n'}">n=${x.n}</span></span></div><div class="spark">${x.ys.map(y=>{const v=x.years[y];return `<i class="${v>0?'u':'d'}" style="height:${Math.max(6,Math.abs(v)/mx*100)}%"></i>`;}).join('')}</div><div class="yrl">${x.ys.map(y=>`<i>${y.slice(2)}</i>`).join('')}</div><div class="kpi"><span>LAST<b class="${x.last>0?'up':'dn'}">${pp1(x.last)}</b></span><span>BEST 12M<b class="up">${pct(x.best)}</b></span><span>WORST 12M<b class="dn">${pct(x.worst)}</b></span><span>MAX DD<b class="dn">${pct(x.mdd)}</b></span></div></div>`;}).join(''));
+   h+=card('Risk','geometry of risk','<span class="badge n">doctrine v2</span>',`<table><tr><th>Line</th><th class="n">Arith</th><th class="n">Geo</th><th class="n">Drag</th><th class="n">Vol</th></tr>${M.map(l=>{const x=st(l.t);return `<tr><td>${l.t}</td><td class="n">${pp1(x.arith)}</td><td class="n"><b>${pp1(x.geo)}</b></td><td class="n dn">−${pp1(x.drag)}</td><td class="n">${pct(x.sd)}</td></tr>`;}).join('')}</table><div style="display:flex;gap:10px;margin-top:10px"><div style="flex:1"><table><tr><th>Drawdown</th><th class="n">To recover</th></tr>${[.1,.2,.3,.5].map(d=>`<tr><td>−${pct(d)}</td><td class="n">+${pct(d/(1-d))}</td></tr>`).join('')}</table></div><div style="flex:1.3;font-size:12.5px;padding-top:4px"><b style="font-family:var(--serif)">Geometric ≈ mean − variance/2.</b> The drag column is what volatility costs even in a flat market.</div></div>`);}
+  h+=card('How to improve','',`<span class="badge n">${suggestions().length} rules</span>`,suggestions().map(s=>`<div class="sug ${s.t==='warn'?'warn':s.t==='info'?'info':''}"><b>${s.h}</b>${s.b}</div>`).join('')||'<p class="note">Add lines to get a review.</p>');
+  h+=card('Confirm','save to Phoenix',`<span class="badge n">profile ${PROFILE}</span>`,`<div class="io"><div class="pick"><button onclick="confirmP()" style="flex:1.4">Confirm portfolio</button><button onclick="exportJ()" style="flex:1;background:var(--slate);border-color:var(--slate)">Export</button><button onclick="importJ()" style="flex:1;background:#fff;color:var(--slate)">Import</button></div><textarea id="io" placeholder="Confirm writes to Supabase portfolios table under your profile and puts every ticker on the 5-min lane. Export/Import passes a build between G and A."></textarea></div>`);
+  document.getElementById('main').innerHTML=h;}
+document.getElementById('tabs').innerHTML=`<div class="tab on">Builder</div><div class="tab" style="color:var(--mut)">Profile ${PROFILE} · ${NAME[PROFILE]}</div>`;
+loadPortfolios();
+
+</script></body></html>
