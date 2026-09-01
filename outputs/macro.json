@@ -1,5 +1,5 @@
 {
- "asof": "2026-08-31 20:15 UTC",
+ "asof": "2026-09-01 09:48 UTC",
  "regime": "POLICY_TIGHTENING",
  "confidence": 36.5,
  "confidence_note": "regime score, not a calibrated probability (A4)",
@@ -8,9 +8,9 @@
  },
  "secondary_tag": "INFLATIONARY",
  "inputs": {
-  "wti_12m": 38.89,
-  "wti_3m": -5.09,
-  "wti_vs_2yr": 19.88,
+  "wti_12m": 42.1,
+  "wti_3m": -2.89,
+  "wti_vs_2yr": 22.62,
   "cpi_yoy": 3.3,
   "cpi_chg_3m": -0.16,
   "spx_3m": 4.1,
@@ -19,10 +19,10 @@
   "trail_dd": -1.28,
   "spx_off_low": 0.15,
   "fresh_high": true,
-  "us02_3m": 20.0,
-  "real_3m": 27.0,
-  "vix": 14.92,
-  "vix_3m_chg": -30.64,
+  "us02_3m": 23.0,
+  "real_3m": 28.0,
+  "vix": 15.88,
+  "vix_3m_chg": -26.17,
   "hy": 266.0
  },
  "explain": {
@@ -42,10 +42,10 @@
    {
     "key": "real_3m",
     "label": "Real 10Y 3m change (bp)",
-    "value": 27.0,
+    "value": 28.0,
     "op": ">",
     "threshold": 25,
-    "clear_by": 2.0,
+    "clear_by": 3.0,
     "ok": true
    },
    {
@@ -60,10 +60,10 @@
    {
     "key": "us02_3m",
     "label": "2Y yield 3m change (bp)",
-    "value": 20.0,
+    "value": 23.0,
     "op": ">",
     "threshold": 40,
-    "clear_by": -20.0,
+    "clear_by": -17.0,
     "ok": false
    }
   ],
@@ -77,9 +77,9 @@
    },
    {
     "if": "Real 10Y 3m change (bp) falls below 25",
-    "now": 27.0,
+    "now": 28.0,
     "threshold": 25,
-    "distance": 2.0,
+    "distance": 3.0,
     "then": "POLICY_TIGHTENING no longer qualifies"
    },
    {
