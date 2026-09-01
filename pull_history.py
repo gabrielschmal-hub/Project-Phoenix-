@@ -17,6 +17,7 @@ Re-runnable: upsert on (ticker, month). Run monthly to extend.
 """
 import argparse, os, sys, time, math
 import pandas as pd
+import numpy as np
 import yfinance as yf
 
 YEARS_DEFAULT = 10
@@ -116,6 +117,16 @@ def main():
         time.sleep(SLEEP_BETWEEN)
 
     out = pd.DataFrame(rows)
+    # JSON cannot carry inf/NaN. A zero print (delisting, bad tick) makes the next return inf.
+    before = len(out)
+    out = out.replace([np.inf, -np.inf], np.nan)
+    out = out[out.close_eur.notna() & (out.close_eur > 0)]
+    out["ret"] = out["ret"].where(out["ret"].notna(), None)
+    out["ret"] = out["ret"].astype(object).where(out["ret"].notna(), None)
+    bad = out[out.ret.notna() & (out.ret.astype(float).abs() > 20)]     # >2000%/month is a data error, not a return
+    if len(bad): log(f"  dropping {len(bad)} absurd returns (|ret|>20x): {bad.ticker.unique()[:8].tolist()}")
+    out = out.drop(bad.index)
+    log(f"sanitised: {before:,} -> {len(out):,} rows")
     log(f"rows: {len(out):,}  tickers: {out.ticker.nunique()}  failed: {len(failed)}")
     try:
         out.to_parquet("prices_history.parquet", index=False); backup = "prices_history.parquet"
@@ -130,15 +141,34 @@ def main():
     key = os.environ["SUPABASE_SERVICE_ROLE_KEY"].strip()
     sb = create_client(url, key)
     recs = out.to_dict("records"); CH = 2000
+    def clean(r):   # final guard at the boundary: nothing non-finite leaves this process
+        r = dict(r)
+        for k in ("close_eur","ret"):
+            v = r.get(k)
+            if v is None: continue
+            try: v = float(v)
+            except Exception: r[k] = None; continue
+            r[k] = None if (math.isnan(v) or math.isinf(v)) else v
+        return r
+    recs = [clean(r) for r in recs]
+    recs = [r for r in recs if r["close_eur"] is not None]
+    skipped = 0
     for j in range(0, len(recs), CH):
+        chunk = recs[j:j+CH]
         for attempt in range(RETRIES):
             try:
-                sb.table("prices_history").upsert(recs[j:j+CH], on_conflict="ticker,month").execute(); break
+                sb.table("prices_history").upsert(chunk, on_conflict="ticker,month").execute(); break
             except Exception as e:
-                if attempt == RETRIES-1: log(f"  upsert chunk {j} FAILED: {e}"); sys.exit(1)
-                time.sleep(2*(attempt+1))
+                if attempt < RETRIES-1: time.sleep(2*(attempt+1)); continue
+                # last resort: write the chunk one ticker at a time so one bad symbol cannot sink the run
+                log(f"  chunk {j} failed ({str(e)[:80]}) — retrying per ticker")
+                by = {}
+                for r in chunk: by.setdefault(r["ticker"], []).append(r)
+                for t, rr in by.items():
+                    try: sb.table("prices_history").upsert(rr, on_conflict="ticker,month").execute()
+                    except Exception as e2: skipped += len(rr); log(f"    skipped {t} ({len(rr)} rows): {str(e2)[:60]}")
         if (j//CH) % 20 == 0: log(f"  upserted {min(j+CH,len(recs)):,}/{len(recs):,}")
-    log("done")
+    log(f"done · skipped rows: {skipped}")
 
 if __name__ == "__main__":
     main()
