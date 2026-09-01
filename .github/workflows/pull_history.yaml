@@ -1,0 +1,81 @@
+# .github/workflows/pull_history.yml
+# Fills Supabase `prices_history` (10y monthly, EUR) for the whole universe.
+# Run manually the first time, then it refreshes on the 1st of every month.
+name: Phoenix History Pull
+
+on:
+  workflow_dispatch:
+    inputs:
+      years:
+        description: "Years of history"
+        default: "10"
+      limit:
+        description: "First N symbols only (0 = all). Use 50 for a quick test."
+        default: "0"
+  schedule:
+    - cron: "15 4 1 * *"        # 1st of month, 06:15 Rome — extends the series by a month
+
+concurrency:
+  group: history-pull
+  cancel-in-progress: false
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      # accepts either secret name — whichever the fast lane already uses
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: pip install -q yfinance supabase pandas pyarrow
+
+      - name: Guard — secrets present and clean (the %0a lesson)
+        run: |
+          python - <<'EOF'
+          import os, sys
+          u = os.environ.get("SUPABASE_URL",""); k = os.environ.get("SUPABASE_SERVICE_ROLE_KEY","")
+          if not u or not k: sys.exit("missing SUPABASE_URL or service-role key secret")
+          if u != u.strip() or k != k.strip(): sys.exit("a secret has a trailing newline — re-paste it")
+          if len(k) < 100: sys.exit("key too short — this is not the service_role key")
+          print("secrets ok ·", u.strip())
+          EOF
+
+      - name: Smoke test — 30 symbols, dry, no writes
+        run: python pull_history.py --universe universe.csv --years 3 --limit 30 --dry
+
+      - name: Full pull → Supabase
+        run: |
+          LIMIT="${{ github.event.inputs.limit || '0' }}"
+          YEARS="${{ github.event.inputs.years || '10' }}"
+          if [ "$LIMIT" != "0" ]; then
+            python pull_history.py --universe universe.csv --years "$YEARS" --limit "$LIMIT"
+          else
+            python pull_history.py --universe universe.csv --years "$YEARS"
+          fi
+
+      - name: Summary
+        run: |
+          python - <<'EOF'
+          import pandas as pd
+          df = pd.read_parquet("prices_history.parquet"); f = pd.read_csv("pull_failed.csv")
+          print(f"tickers {df.ticker.nunique():,} · rows {len(df):,} · {df.month.min()} → {df.month.max()} · failed {len(f)}")
+          for t in ["VWCE","AGGH","SGLD","BTCE","AAPL","GOOG","PLTR","BAC","TSM"]:
+              s = df[df.ticker==t]; print(f"  {t:6s} {len(s):4d} months")
+          EOF
+
+      - name: Keep parquet + failure list as artifacts (30 days)
+        uses: actions/upload-artifact@v4
+        with:
+          name: prices-history-${{ github.run_number }}
+          path: |
+            prices_history.parquet
+            pull_failed.csv
+          retention-days: 30
