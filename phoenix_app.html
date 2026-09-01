@@ -10287,12 +10287,17 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       coolRemaining:coolRemaining,riskPct:curRiskPct()};
   }
 
+  window.PX_OPEN_BUILDER=function(){var p=null;if(document.querySelector("#pxA.on"))p="A";else if(document.querySelector("#pxG.on"))p="G";if(!p){try{p=(JSON.parse(localStorage.getItem("phoenix.prefs")||"{}")).profile;}catch(e){}}location.href="portfolio_builder.html?profile="+(p||"G");};
   var PORTFOLIO_HTML =
     '<div class="pf-grid"><div class="dp-col">'+
       // account switcher + headline stats
       '<div class="pf-switch" id="pfSwitch"></div>'+
       '<div class="w-card"><div class="pf-strip sm-stats" id="pfStrip">'+
         '<div class="loading" style="grid-column:1/-1;padding:14px">\u2026</div></div></div>'+
+      // PORTFOLIO BUILDER — separate page (portfolio_builder.html); profile passed in the URL
+      '<div class="w-card" style="border-top:3px solid var(--ember,#E0511B);cursor:pointer" onclick="PX_OPEN_BUILDER()">'+
+        '<div class="w-card-h"><span class="w-card-t">Portfolio Builder <span class="sub">\u00b7 construct \u00b7 test \u00b7 confirm</span></span>'+
+          '<span class="w-card-n">open \u2192</span></div></div>'+
       // EXECUTIVE SUMMARY — the verdict leads, everything below is the evidence
       '<div class="w-card pf-lead">'+
         '<div class="w-card-h pf-tog" data-sec="chair"><span class="w-card-t">\u2726 Chairman\'s ruling <span class="sub">\u00b7 executive summary</span></span>'+
