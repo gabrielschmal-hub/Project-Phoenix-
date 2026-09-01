@@ -80,7 +80,9 @@ jobs:
         run: |
           python - <<'EOF'
           import pandas as pd
-          df = pd.read_parquet("prices_history.parquet"); f = pd.read_csv("pull_failed.csv")
+          import os
+          df = pd.read_parquet("prices_history.parquet") if os.path.exists("prices_history.parquet") else pd.read_csv("prices_history.csv")
+          f = pd.read_csv("pull_failed.csv")
           print(f"tickers {df.ticker.nunique():,} · rows {len(df):,} · {df.month.min()} → {df.month.max()} · failed {len(f)}")
           for t in ["VWCE","AGGH","SGLD","BTCE","AAPL","GOOG","PLTR","BAC","TSM"]:
               s = df[df.ticker==t]; print(f"  {t:6s} {len(s):4d} months")
@@ -92,5 +94,7 @@ jobs:
           name: prices-history-${{ github.run_number }}
           path: |
             prices_history.parquet
+            prices_history.csv
             pull_failed.csv
+          if-no-files-found: warn
           retention-days: 30
