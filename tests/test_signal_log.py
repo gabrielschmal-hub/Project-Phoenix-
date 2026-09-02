@@ -255,3 +255,81 @@ def test_target_policy_pays_2R_when_the_target_came_first():
     assert g["E_tp3_R"] == -1.0                              # 3R never reached: stopped instead
 
 
+
+
+# ---------------------------------------------------------------- lenses: snapshot join, target days, SPX latch
+
+def _snap_full(tmp_path, day, cands, market=None):
+    d = tmp_path / "outputs" / "history"; d.mkdir(parents=True, exist_ok=True)
+    doc = {"date": day, "context": {"market": market or {}}, "trade": cands, "invest": []}
+    (d / f"signals_{day}.json").write_text(json.dumps(doc))
+    return str(d)
+
+
+def test_lens_fields_come_from_the_signals_own_day_snapshot(tmp_path):
+    hd = _snap_full(tmp_path, "2026-09-01",
+                    [{"ticker": "AAPL", "mcap_B": 3200.5, "breakout": True, "days_on_list": 1,
+                      "pos_vs_high": -1.2, "surge": 44, "industry_mom_3m": 6.1, "dollar_vol_M": 900.0, "trade_score": 71}],
+                    market={"regime": "ENERGY_SHOCK", "regime_held_weeks": 3, "gex_regime": "Negative Gamma",
+                            "spx_close": 6400.0, "spx_vs_50d_pct": 0.8, "spx_vs_200d_pct": 3.2, "vix": 18.4})
+    snap = S.load_snapshots(history_dir=hd)
+    r = S.build_rows([trig("AAPL", asof="2026-09-01T20:00:00Z")], [], T, {}, {}, snap=snap)[0]
+    assert r["mcap_B"] == 3200.5 and r["breakout"] is True and r["days_on_list"] == 1
+    assert r["regime"] == "ENERGY_SHOCK" and r["gex_regime"] == "Negative Gamma" and r["vix"] == 18.4
+    assert r["spx_vs_200d_pct"] == 3.2
+
+
+def test_regime_is_not_reconstructed_when_the_snapshot_lacked_it(tmp_path):
+    """The six days before the engine fix: context.regime was null. It stays null."""
+    hd = _snap_full(tmp_path, "2026-08-25", [{"ticker": "X", "mcap_B": 5.0}], market={})
+    snap = S.load_snapshots(history_dir=hd)
+    r = S.build_rows([trig("X", asof="2026-08-25T20:00:00Z")], [], T, {}, {}, snap=snap)[0]
+    assert r["mcap_B"] == 5.0 and "regime" not in r and "spx_close" not in r
+
+
+def test_legacy_context_keys_still_read(tmp_path):
+    d = tmp_path / "outputs" / "history"; d.mkdir(parents=True)
+    (d / "signals_2026-09-03.json").write_text(json.dumps(
+        {"date": "2026-09-03", "context": {"regime": "GOLDILOCKS", "spx_close": 6500}, "trade": [], "invest": []}))
+    m = S.load_snapshots(history_dir=str(d))["market"]["2026-09-03"]
+    assert m["regime"] == "GOLDILOCKS" and m["spx_close"] == 6500
+
+
+def test_target_days_are_recorded_for_time_in_trade():
+    px = bars([100.0, 108.0, 112.0, 116.0],
+              highs=[100.0, 108.0, 112.0, 116.0], lows=[100.0, 100.0, 105.0, 110.0])
+    m = S.mark_row({"close": None, "atr_pct": 2.0}, px)          # 2.5x: risk 5 -> tp2 110, tp3 115
+    assert m["stop25_tp2_day"] == 2 and m["stop25_tp3_day"] == 3 and m["stop25_day"] is None
+    assert m["stop15_tp2_day"] == 1                              # 1.5x: risk 3 -> tp2 106, hit on day 1
+
+
+def test_spx_state_latches_only_when_missing():
+    idx = pd.date_range("2025-06-01", periods=260, freq="B")
+    spx = pd.DataFrame({"Close": [6000 + i for i in range(260)]}, index=idx)
+    day = idx[-1].date().isoformat()
+    st = S.spx_state(spx, day)
+    assert st["spx_close"] == 6259 and st["spx_vs_50d_pct"] > 0 and st["spx_vs_200d_pct"] > 0
+    px = bars([100.0, 101.0], start=day)
+    m = S.mark_row({"close": None, "atr_pct": 2.0, "spx_close": None, "date": day}, px, spx=spx)
+    assert m["spx_close"] == 6259, "missing SPX state is latched from the series"
+    m2 = S.mark_row({"close": None, "atr_pct": 2.0, "spx_close": 6100.0, "date": day}, px, spx=spx)
+    assert "spx_close" not in m2, "present SPX state must not be rewritten"
+    assert S.spx_state(spx, "2020-01-01") == {}
+
+
+def test_lenses_cut_by_group_and_flag_thin_cells():
+    rows = ([_row(sector="Tech", mcap_B=50.0, regime="GOLDILOCKS", stop25_r=1.5, stop25_day=None)] * 25
+            + [_row(sector="Energy", mcap_B=1.0, regime="ENERGY_SHOCK", stop25_r=-1.0, stop25_hit=True, stop25_day=2)] * 5)
+    L = S.lenses(rows)
+    sec = {c["group"]: c for c in L["sector"]}
+    assert sec["Tech"]["n"] == 25 and sec["Tech"]["thin"] is False and sec["Tech"]["E_stop_R"] == 1.5
+    assert sec["Energy"]["n"] == 5 and sec["Energy"]["thin"] is True and sec["Energy"]["stop_hit"] == 1.0
+    assert {c["group"] for c in L["mcap"]} == {">50B", "<2B"}
+    assert {c["group"] for c in L["time_in_trade"]} == {"held 20", "stopped d1-3"}
+    assert "regime" in L and "spx_vs_200d" in L and "days_on_list" in L
+
+
+def test_scorecard_publishes_lenses_even_while_insufficient():
+    sc = S.scorecard([_row(sector="Tech")] * 5)
+    assert sc["verdict"] == "INSUFFICIENT" and "lenses" in sc and sc["lenses"]["sector"][0]["thin"] is True
+    assert sc["min_cell"] == S.MIN_CELL and sc["logged_new"] == 5
