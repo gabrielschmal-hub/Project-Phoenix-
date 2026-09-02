@@ -504,7 +504,45 @@ def _signal_row(c, book):
     return row
 
 
-def write_signal_log(v2, regime=None, spx=None):
+def _signal_market_context():
+    """The market state on the day the signal was generated, read from outputs already
+    written earlier in the same run (macro, spx_daily, gex all run before stocks).
+
+    2 Sep 2026: every snapshot since the log began carried regime=null and spx_close=null,
+    because run_stocks passed result.get("regime") and the stocks result never had that key.
+    A regime cut over old signals is impossible to reconstruct honestly, so this is read at
+    signal time and frozen in the file. A day not captured is gone.
+    """
+    import os, json
+    def _read(name):
+        try:
+            return json.load(open(os.path.join(OUTPUTS_DIR, name + ".json")))
+        except Exception:
+            return {}
+    macro, spx, gex = _read("macro"), _read("spx_daily"), _read("gex")
+    bars = spx.get("bars") or []
+    last = bars[-1] if bars else {}
+    prev = bars[-2] if len(bars) > 1 else {}
+    closes = [b.get("close") for b in bars if b.get("close") is not None]
+    def _ma(n):
+        return (sum(closes[-n:]) / n) if len(closes) >= n else None
+    c = last.get("close"); ma50, ma200 = _ma(50), _ma(200)
+    ov = gex.get("overview") or {}
+    return {
+        "regime": macro.get("regime"),
+        "regime_held_weeks": macro.get("held_weeks"),
+        "spx_close": c, "spx_date": last.get("date"),
+        "spx_chg_pct": (round((c / prev["close"] - 1) * 100, 2)
+                        if c and prev.get("close") else None),
+        "spx_vs_50d_pct": (round((c / ma50 - 1) * 100, 2) if c and ma50 else None),
+        "spx_vs_200d_pct": (round((c / ma200 - 1) * 100, 2) if c and ma200 else None),
+        "gex_regime": ov.get("regime"), "gex_net_B": ov.get("net_gex_B"),
+        "gex_dist_to_flip_pct": ov.get("dist_to_flip_pct"),
+        "vix": (macro.get("inputs") or {}).get("vix") if isinstance(macro.get("inputs"), dict) else None,
+    }
+
+
+def write_signal_log(v2, regime=None, spx=None, market=None):
     """
     Append today's ranked screener output to outputs/history/signals_<date>.json.
 
@@ -535,6 +573,8 @@ def write_signal_log(v2, regime=None, spx=None):
         "context": {
             "regime": (regime or {}).get("regime") if isinstance(regime, dict) else regime,
             "spx_close": spx,
+            # everything the signal_log needs to cut results by market state, frozen today
+            "market": market or {},
             "gates": {k: meta.get(k) for k in
                       ("trade_candidates", "trade_near_misses", "trade_breakouts",
                        "ext_hard_capped", "invest_candidates")},
@@ -6982,8 +7022,9 @@ def run_stocks(auto_pull=True):
         # The signal log. Non-fatal: a screener that scored fine must still
         # publish even if the log write fails.
         try:
-            write_signal_log(v2, regime=result.get("regime"),
-                             spx=result.get("spx_close"))
+            _mkt = _signal_market_context()
+            write_signal_log(v2, regime=_mkt.get("regime"),
+                             spx=_mkt.get("spx_close"), market=_mkt)
             run_signals_index()
         except Exception as e:
             print(f"[signals] FAILED (non-fatal): {e}")

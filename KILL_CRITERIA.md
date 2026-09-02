@@ -47,3 +47,15 @@ the forward returns. The provisional `entry_ref` shown in the app is never used 
 **Signal date.** `screener_triggers` accumulates across days. Rows are now dated by their own asof,
 not by the day the log ran. The 163 rows appended on 2 Sep with the wrong date are to be deleted and
 re-appended; nothing had been marked.
+
+**Lenses (added the same day, still n marked = 0).** The nightly report now cuts the marked
+signals eleven ways: sector, industry, profitability, market cap, ATR width, engine regime, GEX
+regime, SPX vs its 200-day mean, breakout, days on list, time in trade. Cells under n = 20 are
+flagged thin. None of this is a decision variable. A cell that looks good is a hypothesis; the path
+to a rule is the one written above: a dated entry naming the cut, then a fresh sample logged after
+that date. The signals that suggested the cut can never be the ones that confirm it.
+
+**Regime provenance.** The engine's snapshot carried a null regime on every day before 2 Sep 2026
+because the stocks step passed a key that never existed. Fixed at the source. The six earlier days
+keep a null engine regime — not reconstructed. Their SPX state (close, distance to the 50- and
+200-day means) is latched by the mark step from the ^GSPC series, which is objective.

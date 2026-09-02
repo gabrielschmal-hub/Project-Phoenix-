@@ -112,6 +112,56 @@ def load_profitability(history_dir="outputs/history", stocks_path="outputs/stock
     return {"by_date": by_date, "latest": latest}
 
 
+CAND_FIELDS = ("mcap_B", "breakout", "days_on_list", "pos_vs_high", "surge",
+               "industry_mom_3m", "dollar_vol_M", "trade_score")
+MARKET_FIELDS = ("regime", "regime_held_weeks", "gex_regime", "spx_close",
+                 "spx_vs_50d_pct", "spx_vs_200d_pct", "vix")
+
+
+def load_snapshots(history_dir="outputs/history"):
+    """The engine's per-day snapshot, for the research lenses.
+
+    Returns {"cand": {(date, ticker): {CAND_FIELDS...}}, "market": {date: {MARKET_FIELDS...}}}.
+    The market block is null on every snapshot before 2 Sep 2026 (engine passed a key that never
+    existed); those rows keep null regime. SPX fields for them are latched later by the mark step
+    from the ^GSPC series, which is objective; the engine regime is not reconstructed.
+    """
+    cand, market = {}, {}
+    if not os.path.isdir(history_dir):
+        return {"cand": cand, "market": market}
+    for fn in sorted(f for f in os.listdir(history_dir) if f.startswith("signals_") and f.endswith(".json")):
+        try:
+            d = json.load(open(os.path.join(history_dir, fn)))
+        except Exception:
+            continue
+        day = d.get("date") or fn[len("signals_"):-len(".json")]
+        ctx = d.get("context") or {}
+        mk = dict(ctx.get("market") or {})
+        if mk.get("regime") is None and ctx.get("regime"):
+            mk["regime"] = ctx["regime"]
+        if mk.get("spx_close") is None and ctx.get("spx_close") is not None:
+            mk["spx_close"] = ctx["spx_close"]
+        market[day] = {k: mk.get(k) for k in MARKET_FIELDS if mk.get(k) is not None}
+        for r in (d.get("trade") or []) + (d.get("invest") or []):
+            t = r.get("ticker")
+            if not t:
+                continue
+            key = (day, str(t).strip())
+            if key in cand:                         # trade book wins over invest for the same name
+                continue
+            cand[key] = {k: r.get(k) for k in CAND_FIELDS if r.get(k) is not None}
+    return {"cand": cand, "market": market}
+
+
+def snapshot_fields(snap, day, ticker):
+    """Lens fields for one signal: candidate fields for its own day + market state of that day."""
+    if not snap:
+        return {}
+    out = dict((snap.get("cand") or {}).get((day, ticker)) or {})
+    out.update((snap.get("market") or {}).get(day) or {})
+    return out
+
+
 def profit_lookup(profit, day, ticker):
     """State for one signal: the snapshot of its own day, else the latest known. None if unseen."""
     if not profit:
@@ -143,7 +193,7 @@ def _asof_day(asof, fallback):
 
 
 def build_rows(triggers, prior, today, universe, profit, now=None,
-               engine="screener_triggers", live=None):
+               engine="screener_triggers", live=None, snap=None):
     """Pure function: trigger rows + prior log -> signal_log rows, dated by their own asof."""
     now = now or dt.datetime.utcnow()
     live = live or {}
@@ -196,6 +246,7 @@ def build_rows(triggers, prior, today, universe, profit, now=None,
                "profitability": profit_lookup(profit, d.isoformat(), tk),
                "data_asof": asof, "data_age_min": age_min, "engine": engine}
         row["profitable_ocf"] = profit_bool(row["profitability"])
+        row.update(snapshot_fields(snap, d.isoformat(), tk))     # lens fields, frozen today
 
         # entry_ref: provisional price for the UI so a signal is visible the evening it fires.
         # Only accepted when the live quote is from the signal day itself. Never enters the
@@ -238,6 +289,28 @@ def enrich_profitability(s, profit):
     return n
 
 
+def enrich_lenses(s, snap):
+    """Fill lens fields still null on logged rows. Latched columns: fill once, never change."""
+    if not snap or not snap.get("cand"):
+        return 0
+    try:
+        rows = (s.table("signal_log").select("date,ticker," + ",".join(CAND_FIELDS + MARKET_FIELDS))
+                .is_("mcap_B", "null").limit(5000).execute().data)
+    except Exception as e:
+        print(f"[signal_log] lens enrich skipped ({e})"); return 0
+    n = 0
+    for r in rows:
+        f = snapshot_fields(snap, r["date"], r["ticker"])
+        upd = {k: v for k, v in f.items() if r.get(k) is None}   # never touch a value already there
+        if not upd:
+            continue
+        s.table("signal_log").update(upd).eq("date", r["date"]).eq("ticker", r["ticker"]).execute()
+        n += 1
+    if rows:
+        print(f"[signal_log] lens fields filled on {n}/{len(rows)} rows")
+    return n
+
+
 def cmd_append():
     s = sb()
     today = dt.date.today()
@@ -255,9 +328,13 @@ def cmd_append():
     print(f"[signal_log] profitability: {len(profit['by_date'])} (date,ticker) states across snapshots, "
           f"{len(profit['latest'])} tickers latest"
           + ("  <-- EMPTY: outputs/history/signals_*.json not in the checkout" if not profit["latest"] else ""))
+    snap = load_snapshots()
+    print(f"[signal_log] snapshots: {len(snap['cand'])} candidate-days, "
+          f"{sum(1 for m in snap['market'].values() if m.get('regime'))}/{len(snap['market'])} days with a regime")
     enrich_profitability(s, profit)
+    enrich_lenses(s, snap)
 
-    rows = build_rows(trig, prior, today, load_universe(), profit, live=live)
+    rows = build_rows(trig, prior, today, load_universe(), profit, live=live, snap=snap)
     if not rows:
         print(f"[signal_log] {today}: nothing new to append ({len(trig)} triggers, all already logged)")
         return
@@ -299,11 +376,36 @@ def walk_path(bars, entry, atr_pct, mult):
     r = -1.0 if hit_day else (bars[-1][2] - entry) / risk
     k = mkey(mult)
     return {k + "_hit": hit_day is not None, k + "_day": hit_day,
-            k + "_tp2": tp2_day is not None, k + "_tp3": tp3_day is not None,
+            k + "_tp2": tp2_day is not None, k + "_tp2_day": tp2_day,
+            k + "_tp3": tp3_day is not None, k + "_tp3_day": tp3_day,
             k + "_r": round(r, 4)}
 
 
-def mark_row(row, px):
+def spx_state(spx, day):
+    """SPX close and distance to its 50/200-day means on `day`, from a daily ^GSPC series.
+
+    Objective and reproducible, so it may be latched onto rows whose snapshot lacked it (the six
+    days before the engine fix). The engine's own regime label is NOT reconstructed this way.
+    """
+    if spx is None or not len(spx):
+        return {}
+    try:
+        c = spx["Close"].astype(float)
+        upto = c[c.index <= pd.Timestamp(day)]
+        if not len(upto):
+            return {}
+        last = float(upto.iloc[-1])
+        out = {"spx_close": round(last, 2)}
+        if len(upto) >= 50:
+            out["spx_vs_50d_pct"] = round((last / float(upto.iloc[-50:].mean()) - 1) * 100, 2)
+        if len(upto) >= 200:
+            out["spx_vs_200d_pct"] = round((last / float(upto.iloc[-200:].mean()) - 1) * 100, 2)
+        return out
+    except Exception:
+        return {}
+
+
+def mark_row(row, px, spx=None):
     """px: daily OHLC from the signal date INCLUSIVE (index = date).
 
     Bar 0 is the signal day; its close is the entry, which is why `close` no longer has to come
@@ -335,6 +437,8 @@ def mark_row(row, px):
         out.update(walk_path(bars, entry, atr, m))
     # legacy column kept so anything already reading it does not break: 2.5x is hit_stop_20d
     out["hit_stop_20d"] = out.get(mkey(STOP_ATR) + "_hit")
+    if row.get("spx_close") is None:                        # latch once; the guard refuses a change
+        out.update(spx_state(spx, row.get("date")))
     return out
 
 
@@ -348,6 +452,15 @@ def cmd_mark():
     if not due:
         print("[signal_log] nothing to mark")
         return
+    spx = None
+    if any(r.get("spx_close") is None for r in due):
+        try:
+            spx = yf.download("^GSPC", start=(pd.Timestamp(due[0]["date"]) - pd.Timedelta(days=320)).date().isoformat(),
+                              interval="1d", auto_adjust=True, progress=False)
+            if isinstance(spx.columns, pd.MultiIndex):
+                spx.columns = spx.columns.get_level_values(0)
+        except Exception as e:
+            print(f"[signal_log] ^GSPC unavailable ({e}); SPX state stays null this run")
     ok = skipped = 0
     for row in due:
         start = pd.Timestamp(row["date"])                    # INCLUSIVE: bar 0 is the entry bar
@@ -361,7 +474,7 @@ def cmd_mark():
         except Exception:
             skipped += 1
             continue
-        m = mark_row(row, px)
+        m = mark_row(row, px, spx=spx)
         if not m:
             skipped += 1
             continue
@@ -402,7 +515,10 @@ def scorecard(rows):
     n = len(marked)
     if n < MIN_SAMPLE:
         return {"n": n, "verdict": "INSUFFICIENT", "need": MIN_SAMPLE - n,
-                "decision_variable": f"{STOP_ATR}x ATR, stop only, {HORIZON} bars"}
+                "decision_variable": f"{STOP_ATR}x ATR, stop only, {HORIZON} bars",
+                "logged_new": sum(1 for r in rows if r.get("is_new")),
+                "lenses": lenses(marked), "min_cell": MIN_CELL,
+                "asof": dt.datetime.utcnow().isoformat(timespec="minutes")}
     df = pd.DataFrame(marked)
     grid = {}
     for m in STOP_MULTS:
@@ -441,9 +557,83 @@ def scorecard(rows):
             "verdict": "STOP" if fails else "CONTINUE",
             "decision_variable": f"{STOP_ATR}x ATR, stop only, {HORIZON} bars",
             "atr_grid": grid,
+            "lenses": lenses(marked), "min_cell": MIN_CELL,
+            "logged_new": sum(1 for r in rows if r.get("is_new")),
+            "asof": dt.datetime.utcnow().isoformat(timespec="minutes"),
             "note": "1.5x and 2.0x and the target policies are descriptive. The pre-registered "
                     "verdict is the 2.5x stop-only column; choosing the best cell after the fact "
                     "is not a result."}
+
+
+MIN_CELL = 20            # a lens cell below this is shown greyed: not a finding, not even a hint
+
+
+def _bucket_mcap(v):
+    if v is None: return None
+    v = float(v)
+    return "<2B" if v < 2 else "2-10B" if v < 10 else "10-50B" if v < 50 else ">50B"
+
+
+def _bucket_atr(v):
+    if v is None: return None
+    v = float(v)
+    return "<2%" if v < 2 else "2-4%" if v < 4 else "4-7%" if v < 7 else ">7%"
+
+
+def _bucket_tit(row):
+    """Sessions in trade under the 2.5x stop-only rule: the stop day, else the horizon."""
+    d = row.get(mkey(STOP_ATR) + "_day")
+    if d is None:
+        return f"held {HORIZON}" if row.get("r_20d") is not None else None
+    return "stopped d1-3" if d <= 3 else "stopped d4-10" if d <= 10 else f"stopped d11-{HORIZON}"
+
+
+LENSES = {
+    "sector":        lambda r: r.get("sector"),
+    "industry":      lambda r: r.get("industry"),
+    "profitability": lambda r: r.get("profitability"),
+    "mcap":          lambda r: _bucket_mcap(r.get("mcap_B")),
+    "atr":           lambda r: _bucket_atr(r.get("atr_pct")),
+    "regime":        lambda r: r.get("regime"),
+    "gex_regime":    lambda r: r.get("gex_regime"),
+    "spx_vs_200d":   lambda r: (None if r.get("spx_vs_200d_pct") is None
+                                else ("above 200d" if float(r["spx_vs_200d_pct"]) >= 0 else "below 200d")),
+    "breakout":      lambda r: (None if r.get("breakout") is None else ("breakout" if r["breakout"] else "no breakout")),
+    "days_on_list":  lambda r: (None if r.get("days_on_list") is None
+                                else ("day 1" if int(r["days_on_list"]) <= 1 else "2-5" if int(r["days_on_list"]) <= 5 else "6+")),
+    "time_in_trade": _bucket_tit,
+}
+
+
+def lenses(marked):
+    """Descriptive cuts of the marked, new signals on the 2.5x stop-only column.
+
+    Every cell carries its n and a `thin` flag below MIN_CELL. Nine lenses over one sample means
+    some cell will look brilliant by chance; a cell is a hypothesis, and becomes a rule only
+    through a dated entry in KILL_CRITERIA.md and a fresh sample logged after that date.
+    """
+    k = mkey(STOP_ATR)
+    out = {}
+    for name, fn in LENSES.items():
+        groups = {}
+        for r in marked:
+            g = fn(r)
+            if g is None or r.get(k + "_r") is None:
+                continue
+            groups.setdefault(str(g), []).append(r)
+        cells = []
+        for g, rs in groups.items():
+            n = len(rs)
+            risk = [float(r["atr_pct"]) * STOP_ATR / 100 for r in rs if r.get("atr_pct")]
+            mfe = sorted(float(r["mfe_20d"]) / rk for r, rk in zip(rs, risk) if r.get("mfe_20d") is not None and rk > 0)
+            cells.append({"group": g, "n": n, "thin": n < MIN_CELL,
+                          "E_stop_R": round(sum(float(r[k + "_r"]) for r in rs) / n, 3),
+                          "stop_hit": round(sum(1 for r in rs if r.get(k + "_hit")) / n, 3),
+                          "tp2_first": round(sum(1 for r in rs if r.get(k + "_tp2")) / n, 3),
+                          "median_mfe_R": round(mfe[len(mfe) // 2], 2) if mfe else None})
+        cells.sort(key=lambda c: -c["n"])
+        out[name] = cells
+    return out
 
 
 def cmd_report():

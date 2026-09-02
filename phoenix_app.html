@@ -738,6 +738,16 @@
   .sl-badges .tr-chip{margin-left:0;}
   .chip-ghost{background:transparent;border:1px dashed var(--line2);color:var(--inkFade);}
   .sl-note{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);margin-bottom:10px;line-height:1.5;}
+  /* Screener book tables (Portfolio -> Screener). Mono numbers, serif nowhere: this is a ledger. */
+  .pf-scr-tbl{overflow-x:auto;margin-bottom:8px;}
+  .pf-scr-tbl table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px;}
+  .pf-scr-tbl th{font-size:9.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--inkFade);font-weight:600;text-align:right;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .pf-scr-tbl td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line2);white-space:nowrap;color:var(--ink);}
+  .pf-scr-tbl th:first-child,.pf-scr-tbl td:first-child{text-align:left;}
+  .pf-scr-tbl td.dim{color:var(--inkFade);}
+  .pf-scr-tbl tr.pre td{background:var(--ground,rgba(0,0,0,.03));font-weight:700;}
+  .pf-scr-tbl tr.thin td{color:var(--inkGhost);}
+  .pf-scr-tbl .tag{font-size:9px;letter-spacing:.6px;text-transform:uppercase;color:var(--ember,#E0642B);margin-left:6px;}
   .tr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;}
   .tr-cell{background:var(--card2);border:1px solid var(--line);border-radius:4px;padding:5px 7px;}
   .tr-cell.miss{border-style:dashed;border-color:var(--line2);}
@@ -10298,6 +10308,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     '<div class="pf-grid"><div class="dp-col">'+
       // account switcher + headline stats
       '<div class="pf-switch" id="pfSwitch"></div>'+
+      '<div id="pfScr" style="display:none"></div>'+
       '<div class="w-card"><div class="pf-strip sm-stats" id="pfStrip">'+
         '<div class="loading" style="grid-column:1/-1;padding:14px">\u2026</div></div></div>'+
       // PORTFOLIO BUILDER — separate page (portfolio_builder.html); profile passed in the URL
@@ -10373,8 +10384,184 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     });
   }
 
+  // ================= SCREENER AS A BOOK (Portfolio -> Screener) =================
+  // The research view of signal_log. Three parallel paper books, one per ATR multiple, sized at
+  // 1% and 2% risk as overlay columns (same R stream, so every dollar figure is arithmetic on it;
+  // what differs between the two is survival, shown as drawdown). Expectancy comes from the
+  // nightly Python report so this page cannot drift from the pre-registered numbers; sizing,
+  // composition and time in trade compute here from the rows. Lens cells under MIN_CELL are
+  // greyed. A cell is a hypothesis; a rule needs a dated entry and a fresh sample.
+  var pfScrSc=null, pfScrScErr="", pfScrLens="sector", pfScrEq=null;
+  var PF_SCR_MULTS=[{k:"stop15",m:1.5},{k:"stop20",m:2.0},{k:"stop25",m:2.5}];
+  var PF_SCR_LENSES=[["sector","Sector"],["industry","Industry"],["profitability","Profitability"],["mcap","Market cap"],
+                     ["atr","ATR"],["regime","Engine regime"],["gex_regime","GEX regime"],["spx_vs_200d","SPX vs 200d"],
+                     ["breakout","Breakout"],["days_on_list","Days on list"],["time_in_trade","Time in trade"]];
+
+  function pfScrLoad(cb){
+    var need=2, done=function(){ if(--need===0 && cb) cb(); };
+    if(typeof slLoad==="function") slLoad(done); else done();
+    if(pfScrSc!==null){ done(); return; }
+    fetch("outputs/signal_scorecard.json",{cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(j){ pfScrSc=j; pfScrScErr=""; })
+      .catch(function(e){ pfScrSc={}; pfScrScErr=(e&&e.message)||"unreachable"; })
+      .then(done);
+  }
+
+  // ---- the same bucket rules as signal_log.py (kept identical on purpose) ----
+  function pfScrBucketMcap(v){ if(v==null) return null; v=+v; return v<2?"<2B":v<10?"2-10B":v<50?"10-50B":">50B"; }
+  function pfScrBucketAtr(v){ if(v==null) return null; v=+v; return v<2?"<2%":v<4?"2-4%":v<7?"4-7%":">7%"; }
+  function pfScrGroup(r, lens){
+    switch(lens){
+      case "sector": return r.sector||null;
+      case "industry": return r.industry||null;
+      case "profitability": return r.profitability||null;
+      case "mcap": return pfScrBucketMcap(r.mcap_B);
+      case "atr": return pfScrBucketAtr(r.atr_pct);
+      case "regime": return r.regime||null;
+      case "gex_regime": return r.gex_regime||null;
+      case "spx_vs_200d": return r.spx_vs_200d_pct==null?null:(+r.spx_vs_200d_pct>=0?"above 200d":"below 200d");
+      case "breakout": return r.breakout==null?null:(r.breakout?"breakout":"no breakout");
+      case "days_on_list": return r.days_on_list==null?null:(+r.days_on_list<=1?"day 1":+r.days_on_list<=5?"2-5":"6+");
+      case "time_in_trade":
+        if(r.stop25_day!=null) return r.stop25_day<=3?"stopped d1-3":r.stop25_day<=10?"stopped d4-10":"stopped d11-20";
+        return r.r_20d!=null?"held 20":null;
+    }
+    return null;
+  }
+
+  // time in trade for one marked row under one multiple and one exit policy
+  function pfScrTit(r,k,pol){
+    if(pol==="tp2"&&r[k+"_tp2"]) return r[k+"_tp2_day"];
+    if(pol==="tp3"&&r[k+"_tp3"]) return r[k+"_tp3_day"];
+    if(r[k+"_hit"]) return r[k+"_day"];
+    return r.r_20d!=null?20:null;
+  }
+  function pfScrMedian(a){ a=a.filter(function(x){return x!=null&&isFinite(x);}).sort(function(x,y){return x-y;}); return a.length?a[Math.floor(a.length/2)]:null; }
+  function pfScrFmtR(v){ return v==null?"\u2014":(v>=0?"+":"")+(+v).toFixed(2)+"R"; }
+  function pfScrPct(v,dp){ return v==null?"\u2014":(+v*100).toFixed(dp==null?0:dp)+"%"; }
+
+  // fixed-fractional equity path over the R sequence in signal order: the only thing 1% vs 2% changes
+  function pfScrDD(rows,k,risk){
+    var eq=1, peak=1, dd=0, seq=rows.slice().sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:0; });
+    var n=0;
+    seq.forEach(function(r){ var R=r[k+"_r"]; if(R==null) return; n++; eq*=1+risk*(+R); if(eq>peak) peak=eq; var d=1-eq/peak; if(d>dd) dd=d; });
+    return n?{ret:eq-1, dd:dd, n:n}:null;
+  }
+
+  function pfScrStrip(rows, sc){
+    // at horizon (counts for the kill criteria) / stopped before the horizon / still running.
+    // A stopped signal keeps being marked until 20 bars exist, so it moves from the middle
+    // bucket to the first — never both at once.
+    var marked=rows.filter(function(r){ return r.r_20d!=null; }).length;
+    var stopped=rows.filter(function(r){ return r.stop25_hit===true && r.r_20d==null; }).length;
+    var open=rows.length-marked-stopped;
+    var v=(sc&&sc.verdict)||"INSUFFICIENT", col=v==="STOP"?"var(--red)":v==="CONTINUE"?"var(--green)":"var(--inkFade)";
+    function cell(n,val,sub,c){ return '<div class="sm-stat"><div class="k">'+n+'</div><div class="v"'+(c?' style="color:'+c+'"':'')+'>'+val+'</div><div class="d">'+(sub||'&nbsp;')+'</div></div>'; }
+    return cell("Verdict", v, v==="INSUFFICIENT"?("need "+Math.max(0,30-marked)+" more at horizon"):"pre-registered on 2.5x", col)+
+      cell("Signals", rows.length, "new events logged")+
+      cell("Open", open, stopped+" stopped, awaiting horizon")+
+      cell("Sample", marked+"/30", "marked at horizon");
+  }
+
+  function pfScrGridCard(rows, sc){
+    var g=(sc&&sc.atr_grid)||{};
+    var head='<div class="pf-scr-tbl"><table><thead><tr><th>Stop</th><th>n</th><th>E stop</th><th>E 2:1</th><th>E 3:1</th><th>Stop hit</th><th>2R first</th><th>Med MFE</th><th>Med days</th></tr></thead><tbody>';
+    var body=PF_SCR_MULTS.map(function(v){
+      var c=g[v.m.toFixed(1)+"x"]||null, pre=v.m===2.5;
+      var tit=pfScrMedian(rows.map(function(r){ return pfScrTit(r,v.k,"stop"); }));
+      return '<tr'+(pre?' class="pre"':'')+'><td>'+v.m.toFixed(1)+'\u00d7 ATR'+(pre?' <span class="tag">decision</span>':'')+'</td>'+
+        '<td>'+(c?c.n:"\u2014")+'</td><td>'+(c?pfScrFmtR(c.E_stop_R):"\u2014")+'</td><td>'+(c?pfScrFmtR(c.E_tp2_R):"\u2014")+'</td><td>'+(c?pfScrFmtR(c.E_tp3_R):"\u2014")+'</td>'+
+        '<td>'+(c?pfScrPct(c.stop_hit):"\u2014")+'</td><td>'+(c?pfScrPct(c.tp2_first):"\u2014")+'</td><td>'+(c&&c.median_mfe_R!=null?c.median_mfe_R.toFixed(2)+"R":"\u2014")+'</td>'+
+        '<td>'+(tit!=null?tit:"\u2014")+'</td></tr>';
+    }).join("");
+    var note=sc&&sc.verdict&&sc.verdict!=="INSUFFICIENT"
+      ? 'Verdict computed on the 2.5\u00d7 stop-only column, the variable pre-registered in KILL_CRITERIA.md. The other cells are descriptive and cannot change it.'
+      : 'Nothing marked yet: expectancy fills as the nightly mark accumulates 20 bars per signal. The 25\u201328 Aug cohort reaches the horizon around 23\u201326 Sep.';
+    return '<div class="w-card"><div class="w-card-h"><span class="w-card-t">Three-ATR scorecard <span class="sub">\u00b7 from signal_log.py report'+(sc&&sc.asof?' \u00b7 '+sc.asof.replace("T"," ")+'Z':'')+'</span></span>'+
+      '<span class="w-card-n">'+(pfScrScErr?'report unreachable':'nightly')+'</span></div>'+
+      '<div class="w-card-b">'+head+body+'</tbody></table></div><div class="sl-note">'+note+'</div></div></div>';
+  }
+
+  function pfScrSizingCard(rows){
+    var eq=pfScrEq!=null?pfScrEq:(typeof pfAcct==="function"&&pfAcct().startingBalance)||10000;
+    var cap=RULES.maxPosPct;
+    var withAtr=rows.filter(function(r){ return r.atr_pct!=null&&+r.atr_pct>0; });
+    var head='<div class="pf-scr-tbl"><table><thead><tr><th>Stop</th><th>Med stop</th><th colspan="2">Position @1%</th><th colspan="2">Position @2%</th><th>Over '+(cap*100)+'% cap</th><th>Return \u00b7 DD @1%</th><th>Return \u00b7 DD @2%</th></tr></thead><tbody>';
+    var body=PF_SCR_MULTS.map(function(v){
+      var stops=withAtr.map(function(r){ return +r.atr_pct*v.m; });
+      var med=pfScrMedian(stops);
+      var pos1=med!=null?0.01/(med/100):null, pos2=med!=null?0.02/(med/100):null;
+      var over1=stops.filter(function(sp){ return 0.01/(sp/100)>cap; }).length;
+      var over2=stops.filter(function(sp){ return 0.02/(sp/100)>cap; }).length;
+      var d1=pfScrDD(rows,v.k,0.01), d2=pfScrDD(rows,v.k,0.02);
+      function money(x){ return x==null?"\u2014":"$"+Math.round(eq*x).toLocaleString(); }
+      function ddtxt(d){ return d?((d.ret>=0?"+":"")+(d.ret*100).toFixed(1)+"% \u00b7 \u2212"+(d.dd*100).toFixed(1)+"%"):"\u2014"; }
+      return '<tr'+(v.m===2.5?' class="pre"':'')+'><td>'+v.m.toFixed(1)+'\u00d7 ATR</td><td>'+(med!=null?med.toFixed(1)+"%":"\u2014")+'</td>'+
+        '<td>'+(pos1!=null?(pos1*100).toFixed(0)+"%":"\u2014")+'</td><td class="dim">'+money(pos1)+'</td>'+
+        '<td>'+(pos2!=null?(pos2*100).toFixed(0)+"%":"\u2014")+'</td><td class="dim">'+money(pos2)+'</td>'+
+        '<td'+(over1?' style="color:var(--red)"':'')+'>'+over1+' / '+over2+'</td><td>'+ddtxt(d1)+'</td><td>'+ddtxt(d2)+'</td></tr>';
+    }).join("");
+    var floor1=(0.01/cap*100).toFixed(1), floor2=(0.02/cap*100).toFixed(1);
+    return '<div class="w-card"><div class="w-card-h"><span class="w-card-t">Sizing <span class="sub">\u00b7 1% and 2% risk on the same R stream</span></span>'+
+      '<span class="w-card-n">equity <input class="pf-bal" type="number" id="pfScrEq" value="'+eq+'" inputmode="numeric"></span></div>'+
+      '<div class="w-card-b">'+head+body+'</tbody></table></div>'+
+      '<div class="sl-note">Position = risk \u00f7 stop width. \u201cOver cap\u201d counts signals whose stop is narrower than '+floor1+'% (at 1%) or '+floor2+'% (at 2%), so the '+(cap*100)+'% position cap cannot be honoured: that is the ATR floor question as a number. Return and drawdown are fixed-fractional on the marked R sequence in signal order; 2% is not a second experiment, it is the same one with deeper drawdowns.</div></div></div>';
+  }
+
+  function pfScrLensCard(rows, sc){
+    var L=(sc&&sc.lenses)||{}, minCell=(sc&&sc.min_cell)||20;
+    var chips='<div class="pf-switch" style="flex-wrap:wrap;margin:0 0 10px">'+PF_SCR_LENSES.map(function(l){
+      return '<button class="pf-seg'+(pfScrLens===l[0]?" on":"")+'" data-lens="'+l[0]+'">'+l[1]+'</button>'; }).join("")+'</div>';
+    // composition now (from the rows), results when marked (from the report)
+    var comp={}; rows.forEach(function(r){ var g=pfScrGroup(r,pfScrLens); if(g==null) return; comp[g]=(comp[g]||0)+1; });
+    var res={}; (L[pfScrLens]||[]).forEach(function(c){ res[c.group]=c; });
+    var groups=Object.keys(comp).sort(function(a,b){ return comp[b]-comp[a]; });
+    (L[pfScrLens]||[]).forEach(function(c){ if(groups.indexOf(c.group)<0) groups.push(c.group); });
+    var unknown=rows.length-groups.reduce(function(a,g){ return a+(comp[g]||0); },0);
+    var head='<div class="pf-scr-tbl"><table><thead><tr><th>'+(PF_SCR_LENSES.filter(function(l){return l[0]===pfScrLens;})[0]||["",""])[1]+'</th><th>Signals</th><th>Marked</th><th>E stop</th><th>Stop hit</th><th>2R first</th><th>Med MFE</th></tr></thead><tbody>';
+    var body=groups.slice(0,24).map(function(g){
+      var c=res[g], thin=!c||c.thin;
+      return '<tr'+(thin?' class="thin"':'')+'><td>'+g+'</td><td>'+(comp[g]||0)+'</td><td>'+(c?c.n:0)+'</td>'+
+        '<td>'+(c?pfScrFmtR(c.E_stop_R):"\u2014")+'</td><td>'+(c?pfScrPct(c.stop_hit):"\u2014")+'</td><td>'+(c?pfScrPct(c.tp2_first):"\u2014")+'</td>'+
+        '<td>'+(c&&c.median_mfe_R!=null?c.median_mfe_R.toFixed(2)+"R":"\u2014")+'</td></tr>';
+    }).join("");
+    var nullNote=unknown>0?unknown+' signals have no value for this lens'+(pfScrLens==="regime"||pfScrLens==="gex_regime"?' \u2014 the engine recorded no regime before 2 Sep and it is not reconstructed':'')+'. ':'';
+    return '<div class="w-card"><div class="w-card-h"><span class="w-card-t">Lenses <span class="sub">\u00b7 what the screener gives, and what it did</span></span>'+
+      '<span class="w-card-n">cells under n='+minCell+' greyed</span></div>'+
+      '<div class="w-card-b">'+chips+head+body+'</tbody></table></div>'+
+      '<div class="sl-note">'+nullNote+'Signals = composition today. Marked and the result columns come from the nightly report on the 2.5\u00d7 stop-only rule. Eleven lenses over one sample: some cell will look brilliant by chance. A cell is a hypothesis. It becomes a rule with a dated entry in KILL_CRITERIA.md and a fresh sample logged after that date \u2014 never on the signals that suggested it.</div></div></div>';
+  }
+
+  function pfScrRender(){
+    var el=document.getElementById("pfScr"); if(!el) return;
+    if(typeof slRows==="undefined"||slRows===null||pfScrSc===null){
+      el.innerHTML='<div class="w-card"><div class="w-card-b"><div class="loading">Loading the signal log\u2026</div></div></div>';
+      pfScrLoad(function(){ pfRender(); }); return;
+    }
+    var rows=slRows||[];
+    if(typeof slErr!=="undefined"&&slErr){ el.innerHTML='<div class="w-card"><div class="w-card-b"><div class="tr-empty">Signal log unreachable ('+slErr+').<span>Unknown, not zero.</span></div></div></div>'; return; }
+    var sc=pfScrSc||{};
+    el.innerHTML='<div class="w-card"><div class="pf-strip sm-stats">'+pfScrStrip(rows,sc)+'</div></div>'+
+      pfScrGridCard(rows,sc)+pfScrSizingCard(rows)+pfScrLensCard(rows,sc);
+    el.querySelectorAll("button[data-lens]").forEach(function(b){ b.onclick=function(){ pfScrLens=this.dataset.lens; pfScrRender(); }; });
+    var eq=document.getElementById("pfScrEq"); if(eq) eq.onchange=function(){ pfScrEq=parseFloat(this.value)||null; pfScrRender(); };
+  }
+
+  var pfView="book";                       // "book" = an account; "screener" = the paper book
+  function pfShowView(){
+    var col=document.querySelector("#page-portfolio .pf-grid > .dp-col"); if(!col) return;
+    var scr=pfView==="screener";
+    Array.prototype.forEach.call(col.children,function(ch){
+      if(ch.id==="pfSwitch") return;
+      ch.style.display = ch.id==="pfScr" ? (scr?"":"none") : (scr?"none":"");
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("#page-portfolio .pf-grid > *:not(.dp-col)"),function(ch){ ch.style.display=scr?"none":""; });
+  }
   function pfRender(){
     if(!document.getElementById("pfStrip")) return;
+    pfShowView();
+    if(pfView==="screener"){ pfRenderSwitch(); pfScrRender(); return; }
     // collapsible section headers (same interaction as the ticker page)
     document.querySelectorAll("#page-portfolio .pf-tog").forEach(function(h){
       if(h.dataset.wired) return; h.dataset.wired="1";
@@ -10465,10 +10652,16 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       }).length;
       return '<button class="pf-seg'+(k===pfCfg.active?" on":"")+'" data-acc="'+k+'">'+
              (a.label||k)+'<span class="sn">'+n+'</span></button>';
-    }).join("")+'<button class="pf-seg pf-addacc" data-addacc="1" title="Add another account">+</button>';
+    }).join("")+
+      (elId==="pfSwitch" ? '<button class="pf-seg'+(pfView==="screener"?" on":"")+'" data-scr="1" title="The screener as a paper book">Screener<span class="sn">'+((typeof slRows!=="undefined"&&slRows)?slRows.length:"\u2026")+'</span></button>' : '')+
+      '<button class="pf-seg pf-addacc" data-addacc="1" title="Add another account">+</button>';
+    if(elId==="pfSwitch" && pfView!=="screener") el.querySelectorAll("button[data-acc]").forEach(function(b){ if(b.getAttribute("data-acc")===pfCfg.active) b.classList.add("on"); });
+    if(elId==="pfSwitch" && pfView==="screener") el.querySelectorAll("button[data-acc]").forEach(function(b){ b.classList.remove("on"); });
     el.querySelectorAll("button").forEach(function(b){
       b.onclick=function(){
         if(this.getAttribute("data-addacc")){ pfAddAccount(after); return; }
+        if(this.getAttribute("data-scr")){ pfView="screener"; if(typeof after==="function") after(); return; }
+        pfView="book";
         pfCfg.active=this.getAttribute("data-acc");
         if(typeof pfSaveCfg==="function") pfSaveCfg();
         if(typeof after==="function") after();
@@ -11476,10 +11669,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(slRows!==null || slLoading){ if(cb) cb(); return; }
     slLoading=true;
     var cols="date,ticker,age_days,trigger,close,entry_ref,atr_pct,stop_pct,sector,industry,"+
-             "opp_score,rank,r_20d,mfe_20d,mae_20d,bars_marked,data_age_min,profitable_ocf,"+
-             "stop15_hit,stop15_day,stop15_tp2,stop15_tp3,stop15_r,"+
-             "stop20_hit,stop20_day,stop20_tp2,stop20_tp3,stop20_r,"+
-             "stop25_hit,stop25_day,stop25_tp2,stop25_tp3,stop25_r";
+             "opp_score,rank,r_20d,mfe_20d,mae_20d,bars_marked,data_age_min,profitable_ocf,profitability,"+
+             "mcap_B,breakout,days_on_list,regime,gex_regime,spx_vs_200d_pct,vix,"+
+             "stop15_hit,stop15_day,stop15_tp2,stop15_tp2_day,stop15_tp3,stop15_tp3_day,stop15_r,"+
+             "stop20_hit,stop20_day,stop20_tp2,stop20_tp2_day,stop20_tp3,stop20_tp3_day,stop20_r,"+
+             "stop25_hit,stop25_day,stop25_tp2,stop25_tp2_day,stop25_tp3,stop25_tp3_day,stop25_r";
     (typeof supaRows==="function"
       ? supaRows("/rest/v1/signal_log?select="+cols+"&is_new=eq.true&order=date.desc,rank.asc&limit=500")
       : Promise.reject(new Error("no supabase")))
@@ -11540,7 +11734,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       else if(c.head.rNow>=2) chip("chip-ghost","2R now");
       if(c.head.breachedNow) chip("chip-loss","Below 2.5x stop");
     }
-    if(r.profitable_ocf===false) chip("chip-loss","OCF negative");
+    // the engine's own word: marginal = profit without operating cash or inconsistent quarters,
+    // lossmaking = negative margins and negative OCF, investing = OCF positive but capex > OCF
+    if(r.profitability==="marginal"||r.profitability==="lossmaking") chip("chip-loss",r.profitability);
+    else if(r.profitability==="investing") chip("chip-idea","investing");
     return out.length?'<div class="sl-badges">'+out.join("")+'</div>':"";
   }
 
@@ -11596,7 +11793,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(c.entry==null) noEntry++;
       if(c.status==="marked") marked++; else if(c.status==="stopped") stopped++; else open++;
       if(r.stop25_tp2) tp2++; });
-    var need=Math.max(0,30-(marked+stopped));
+    var need=Math.max(0,30-marked);      // the pre-registered sample counts signals at the horizon
     return '<div class="sl-note">'+
       '<b>'+rows.length+'</b> new signals logged \u00b7 <b>'+open+'</b> open \u00b7 <b>'+stopped+'</b> stopped \u00b7 <b>'+marked+'</b> marked \u00b7 <b>'+tp2+'</b> reached 2R before the stop.'+
       (noEntry?' <span style="color:var(--amber)">'+noEntry+' still without an entry price \u2014 they fill on the next mark.</span>':'')+
