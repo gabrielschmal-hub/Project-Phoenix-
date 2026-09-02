@@ -70,38 +70,65 @@ def load_universe(path="universe.csv"):
     return out
 
 
-def load_profitability(path="outputs/earnings_state.json"):
-    """True/False per ticker from the OCF classifier; None when unknown. Never guessed.
+PROFIT_TRUE = ("profitable", "investing")      # earning AND operating-cash positive
+PROFIT_FALSE = ("marginal", "lossmaking")      # thin/inconsistent, or profit without cash, or losing
 
-    Day one returned null on all 163 rows. The file shape varies by pipeline version, so every
-    known shape is tried and the count is printed by cmd_append — a silent zero is the failure
-    mode that hid this for a day.
+
+def load_profitability(history_dir="outputs/history", stocks_path="outputs/stocks.json"):
+    """(date, ticker) -> engine profitability state, from the engine's own daily snapshots.
+
+    Day one was null on all 163 rows because the loader read outputs/earnings_state.json, which
+    is a cursor of next-earnings dates and never held a classifier. The classifier
+    (phoenix.profitability_flag, OCF not FCF) is written per candidate into
+    outputs/history/signals_<date>.json and outputs/stocks.json. Read those.
+
+    Returns {"by_date": {(date, ticker): state}, "latest": {ticker: state}}. States are the
+    engine's own strings; "unknown" is a real answer and stays distinct from missing.
     """
-    if not os.path.exists(path):
-        return {}
-    try:
-        d = json.load(open(path))
-    except Exception:
-        return {}
-    for node in ("tickers", "state", "rows", "data"):
-        if isinstance(d, dict) and isinstance(d.get(node), (dict, list)):
-            d = d[node]
-            break
-    it = d.items() if isinstance(d, dict) else ((r.get("ticker"), r) for r in d if isinstance(r, dict))
-    out = {}
-    for t, r in it:
-        if not t:
+    by_date, latest = {}, {}
+    files = []
+    if os.path.isdir(history_dir):
+        files = sorted(f for f in os.listdir(history_dir) if f.startswith("signals_") and f.endswith(".json"))
+    for fn in files:
+        try:
+            d = json.load(open(os.path.join(history_dir, fn)))
+        except Exception:
             continue
-        if isinstance(r, bool):
-            out[str(t).strip()] = r
-            continue
-        if not isinstance(r, dict):
-            continue
-        for k in ("profitable", "profitable_ocf", "ocf_positive", "is_profitable"):
-            if k in r and r[k] is not None:
-                out[str(t).strip()] = bool(r[k])
-                break
-    return out
+        day = d.get("date") or fn[len("signals_"):-len(".json")]
+        for r in (d.get("trade") or []) + (d.get("invest") or []):
+            t, st = r.get("ticker"), r.get("profitability")
+            if t and st:
+                by_date[(day, str(t).strip())] = st
+                latest[str(t).strip()] = st                  # files are sorted: last write wins
+    if os.path.exists(stocks_path):
+        try:
+            d = json.load(open(stocks_path))
+            for r in (d.get("trade_ranked") or []) + (d.get("stocks") or []):
+                t, st = r.get("ticker"), r.get("profitability")
+                if t and st and str(t).strip() not in latest:
+                    latest[str(t).strip()] = st
+        except Exception:
+            pass
+    return {"by_date": by_date, "latest": latest}
+
+
+def profit_lookup(profit, day, ticker):
+    """State for one signal: the snapshot of its own day, else the latest known. None if unseen."""
+    if not profit:
+        return None
+    if isinstance(profit, dict) and "by_date" in profit:
+        st = profit["by_date"].get((day, ticker))
+        return st if st is not None else profit["latest"].get(ticker)
+    v = profit.get(ticker)                                   # legacy flat {ticker: bool} map
+    return None if v is None else ("profitable" if v else "lossmaking")
+
+
+def profit_bool(state):
+    if state in PROFIT_TRUE:
+        return True
+    if state in PROFIT_FALSE:
+        return False
+    return None                                              # unknown or missing: never guessed
 
 
 def _asof_day(asof, fallback):
@@ -166,8 +193,9 @@ def build_rows(triggers, prior, today, universe, profit, now=None,
                "stop_pct": round(STOP_ATR * atr, 4) if atr is not None else None,
                "opp_score": t.get("opp_score"), "rank": t.get("rank"),
                "sector": u.get("sector"), "industry": u.get("industry"),
-               "profitable_ocf": profit.get(tk), "data_asof": asof, "data_age_min": age_min,
-               "engine": engine}
+               "profitability": profit_lookup(profit, d.isoformat(), tk),
+               "data_asof": asof, "data_age_min": age_min, "engine": engine}
+        row["profitable_ocf"] = profit_bool(row["profitability"])
 
         # entry_ref: provisional price for the UI so a signal is visible the evening it fires.
         # Only accepted when the live quote is from the signal day itself. Never enters the
@@ -187,6 +215,29 @@ def build_rows(triggers, prior, today, universe, profit, now=None,
     return out
 
 
+def enrich_profitability(s, profit):
+    """Fill profitability on logged rows that are still null. Idempotent; runs every append.
+
+    profitability is not a signal field, so the append-only guard permits this. A row that the
+    engine has never classified stays null: filling is not guessing.
+    """
+    try:
+        rows = s.table("signal_log").select("date,ticker").is_("profitability", "null").limit(5000).execute().data
+    except Exception as e:
+        print(f"[signal_log] enrich skipped ({e})"); return 0
+    n = 0
+    for r in rows:
+        st = profit_lookup(profit, r["date"], r["ticker"])
+        if st is None:
+            continue
+        s.table("signal_log").update({"profitability": st, "profitable_ocf": profit_bool(st)}) \
+         .eq("date", r["date"]).eq("ticker", r["ticker"]).execute()
+        n += 1
+    if rows:
+        print(f"[signal_log] profitability filled on {n}/{len(rows)} rows that were null")
+    return n
+
+
 def cmd_append():
     s = sb()
     today = dt.date.today()
@@ -201,8 +252,10 @@ def cmd_append():
         live = {}
 
     profit = load_profitability()
-    print(f"[signal_log] profitability map: {len(profit)} tickers"
-          + ("  <-- EMPTY: check outputs/earnings_state.json is in the checkout" if not profit else ""))
+    print(f"[signal_log] profitability: {len(profit['by_date'])} (date,ticker) states across snapshots, "
+          f"{len(profit['latest'])} tickers latest"
+          + ("  <-- EMPTY: outputs/history/signals_*.json not in the checkout" if not profit["latest"] else ""))
+    enrich_profitability(s, profit)
 
     rows = build_rows(trig, prior, today, load_universe(), profit, live=live)
     if not rows:
