@@ -1,0 +1,36 @@
+name: Phoenix Signal Log
+on:
+  workflow_run:
+    workflows: ["Phoenix Daily Run"]
+    types: [completed]
+  schedule:
+    - cron: "30 3 * * 2-6"      # 05:30 Rome Tue-Sat: mark forward returns for rows that are due
+  workflow_dispatch:
+    inputs:
+      mode: { description: "append | mark | report", default: "report" }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -q pandas supabase yfinance
+      - name: append (after daily run)
+        if: github.event_name == 'workflow_run'
+        run: python signal_log.py append
+      - name: mark (nightly)
+        if: github.event_name == 'schedule'
+        run: python signal_log.py mark && python signal_log.py report
+      - name: manual
+        if: github.event_name == 'workflow_dispatch'
+        run: python signal_log.py ${{ github.event.inputs.mode }}
+      - name: commit the git twin of the log
+        run: |
+          git config user.name phoenix-bot && git config user.email bot@phoenix
+          git add -A outputs/signal_log.jsonl outputs/signal_scorecard.json 2>/dev/null || true
+          git diff --cached --quiet || (git commit -m "signal log: ${{ github.event_name }}" && git push)
