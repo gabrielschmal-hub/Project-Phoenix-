@@ -43,11 +43,54 @@ def test_stop_pct_is_2_5_atr_and_freshness_recorded():
     assert r["stop_pct"] == 5.0 and r["data_age_min"] == 30.0
 
 
-def test_sector_and_profitability_join_never_guess():
+def test_sector_join_never_guesses():
     r = S.build_rows([trig("AAPL"), trig("ZZZ")], [], T,
-                     {"AAPL": {"sector": "Tech", "industry": "HW"}}, {"AAPL": True})
-    assert r[0]["sector"] == "Tech" and r[0]["profitable_ocf"] is True
+                     {"AAPL": {"sector": "Tech", "industry": "HW"}}, {})
+    assert r[0]["sector"] == "Tech"
     assert r[1]["sector"] is None and r[1]["profitable_ocf"] is None      # unknown stays unknown
+
+
+def _snap(tmp_path, day, rows):
+    d = tmp_path / "outputs" / "history"; d.mkdir(parents=True, exist_ok=True)
+    (d / f"signals_{day}.json").write_text(json.dumps({"date": day, "trade": rows, "invest": []}))
+
+
+def test_profitability_reads_engine_snapshots_not_earnings_state(tmp_path):
+    """Day one: null on all 163 rows because the loader read earnings_state.json (a cursor file)."""
+    _snap(tmp_path, "2026-09-01", [{"ticker": "AAPL", "profitability": "profitable"},
+                                   {"ticker": "META", "profitability": "investing"},
+                                   {"ticker": "RIVN", "profitability": "lossmaking"},
+                                   {"ticker": "THIN", "profitability": "marginal"},
+                                   {"ticker": "NODATA", "profitability": "unknown"}])
+    P = S.load_profitability(history_dir=str(tmp_path / "outputs" / "history"),
+                             stocks_path=str(tmp_path / "outputs" / "stocks.json"))
+    rows = S.build_rows([trig(t, asof="2026-09-01T20:00:00Z") for t in ("AAPL", "META", "RIVN", "THIN", "NODATA", "NEVER")],
+                        [], T, {}, P)
+    by = {r["ticker"]: (r["profitability"], r["profitable_ocf"]) for r in rows}
+    assert by["AAPL"] == ("profitable", True)
+    assert by["META"] == ("investing", True), "OCF positive with heavy capex is profitable, not marginal"
+    assert by["RIVN"] == ("lossmaking", False) and by["THIN"] == ("marginal", False)
+    assert by["NODATA"] == ("unknown", None), "the engine's unknown is a real answer, not a guess"
+    assert by["NEVER"] == (None, None)
+
+
+def test_profitability_prefers_the_signals_own_day_then_latest(tmp_path):
+    _snap(tmp_path, "2026-08-25", [{"ticker": "X", "profitability": "lossmaking"}])
+    _snap(tmp_path, "2026-09-01", [{"ticker": "X", "profitability": "profitable"}])
+    P = S.load_profitability(history_dir=str(tmp_path / "outputs" / "history"),
+                             stocks_path=str(tmp_path / "nope.json"))
+    assert S.profit_lookup(P, "2026-08-25", "X") == "lossmaking"      # its own day
+    assert S.profit_lookup(P, "2026-08-28", "X") == "profitable"      # no snapshot that day: latest known
+    assert S.profit_lookup(P, "2026-09-01", "Y") is None
+
+
+def test_profitability_falls_back_to_stocks_json(tmp_path):
+    (tmp_path / "outputs").mkdir()
+    (tmp_path / "outputs" / "stocks.json").write_text(json.dumps({"trade_ranked": [{"ticker": "Q", "profitability": "profitable"}]}))
+    P = S.load_profitability(history_dir=str(tmp_path / "outputs" / "history"),
+                             stocks_path=str(tmp_path / "outputs" / "stocks.json"))
+    assert S.profit_lookup(P, "2026-09-01", "Q") == "profitable"
+    assert S.load_profitability(history_dir=str(tmp_path / "x"), stocks_path=str(tmp_path / "y")) == {"by_date": {}, "latest": {}}
 
 
 def test_rows_are_json_safe():
@@ -167,7 +210,7 @@ def test_walk_path_is_inert_without_an_atr():
 # ---------------------------------------------------------------- scorecard
 
 def _row(**k):
-    base = {"is_new": True, "r_20d": 0.05, "atr_pct": 2.0, "stop_pct": 5.0, "mfe_20d": 0.10,
+    base = {"is_new": True, "r_20d": 0.05, "atr_pct": 2.0, "stop_pct": 5.0, "mfe_20d": 0.10, "profitability": "profitable",
             "stop15_hit": False, "stop15_tp2": False, "stop15_tp3": False, "stop15_r": 1.0,
             "stop20_hit": False, "stop20_tp2": False, "stop20_tp3": False, "stop20_r": 1.0,
             "stop25_hit": False, "stop25_tp2": False, "stop25_tp3": False, "stop25_r": 1.0}
@@ -212,11 +255,3 @@ def test_target_policy_pays_2R_when_the_target_came_first():
     assert g["E_tp3_R"] == -1.0                              # 3R never reached: stopped instead
 
 
-def test_profitability_loader_handles_shapes_and_never_guesses(tmp_path):
-    p = tmp_path / "earnings_state.json"
-    p.write_text(json.dumps({"tickers": {"AAPL": {"profitable": True}, "F": {"profitable": False}}}))
-    assert S.load_profitability(str(p)) == {"AAPL": True, "F": False}
-    p.write_text(json.dumps([{"ticker": "AAPL", "profitable_ocf": True}, {"ticker": "X"}]))
-    m = S.load_profitability(str(p))
-    assert m == {"AAPL": True} and "X" not in m
-    assert S.load_profitability(str(tmp_path / "nope.json")) == {}
