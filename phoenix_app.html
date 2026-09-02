@@ -732,6 +732,12 @@
   .chip-open{background:var(--greenBg);color:var(--green);}
   .chip-win{background:var(--greenBg);color:var(--green);}
   .chip-loss{background:var(--redBg);color:var(--red);}
+  /* Screener paper positions. No new components: the badge row reuses .tr-chip and only
+     cancels its margin-left:auto so several can sit side by side. */
+  .sl-badges{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px;}
+  .sl-badges .tr-chip{margin-left:0;}
+  .chip-ghost{background:transparent;border:1px dashed var(--line2);color:var(--inkFade);}
+  .sl-note{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);margin-bottom:10px;line-height:1.5;}
   .tr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;}
   .tr-cell{background:var(--card2);border:1px solid var(--line);border-radius:4px;padding:5px 7px;}
   .tr-cell.miss{border-style:dashed;border-color:var(--line2);}
@@ -10760,6 +10766,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '<div class="tr-tab active" data-tab="plan">Plan<span class="tr-cnt" id="trCntPlan">0</span></div>'+
         '<div class="tr-tab" data-tab="open">Open<span class="tr-cnt" id="trCntOpen">0</span></div>'+
         '<div class="tr-tab" data-tab="closed">History<span class="tr-cnt" id="trCntClosed">0</span></div>'+
+        '<div class="tr-tab" data-tab="screener">Screener<span class="tr-cnt" id="trCntScr">0</span></div>'+
         '<button class="tr-exp-btn" id="trExportBtn">Export</button>'+
       '</div>'+
       '<div class="trades-body" id="trBody"></div>'+
@@ -11454,6 +11461,164 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     return cost?((pnl/cost>=0?"+":"")+(pnl/cost*100).toFixed(1)+"%"):"\u2014";
   }
 
+  // ---------- SCREENER tab: paper positions from signal_log ----------
+  // Every NEW screener signal is a paper position entered at the signal bar's close with an
+  // ATR stop. This is the READ side of signal_log — the same rows the nightly mark scores — so
+  // the screen and the kill-criteria scorecard can never drift apart. Nothing here is an order.
+  //
+  // Three stops are shown side by side (1.5x / 2.0x / 2.5x ATR) because 2.5x is 0.3% wide on one
+  // name in this list and 21.5% on another. 2.5x stays the pre-registered decision variable; the
+  // other two are descriptive, and the card says so rather than inviting a pick-the-winner read.
+  var slRows=null, slErr="", slLoading=false;
+  var SL_MULTS=[{k:"stop15",m:1.5,lab:"1.5x"},{k:"stop20",m:2.0,lab:"2.0x"},{k:"stop25",m:2.5,lab:"2.5x"}];
+
+  function slLoad(cb){
+    if(slRows!==null || slLoading){ if(cb) cb(); return; }
+    slLoading=true;
+    var cols="date,ticker,age_days,trigger,close,entry_ref,atr_pct,stop_pct,sector,industry,"+
+             "opp_score,rank,r_20d,mfe_20d,mae_20d,bars_marked,data_age_min,profitable_ocf,"+
+             "stop15_hit,stop15_day,stop15_tp2,stop15_tp3,stop15_r,"+
+             "stop20_hit,stop20_day,stop20_tp2,stop20_tp3,stop20_r,"+
+             "stop25_hit,stop25_day,stop25_tp2,stop25_tp3,stop25_r";
+    (typeof supaRows==="function"
+      ? supaRows("/rest/v1/signal_log?select="+cols+"&is_new=eq.true&order=date.desc,rank.asc&limit=500")
+      : Promise.reject(new Error("no supabase")))
+      .then(function(rows){ slRows=rows||[]; slErr=""; })
+      .catch(function(e){ slRows=[]; slErr=(e&&e.message)||"unreachable"; })
+      .then(function(){ slLoading=false; if(cb) cb(); });
+  }
+
+  function slSessions(fromISO){          // trading days elapsed, weekends excluded
+    var a=new Date(fromISO+"T00:00:00Z"), b=new Date(), n=0;
+    if(isNaN(a)) return null;
+    while(a<b){ a.setUTCDate(a.getUTCDate()+1); var d=a.getUTCDay(); if(d!==0&&d!==6) n++; }
+    return n;
+  }
+
+  function slCalc(r){
+    // Entry: the marked signal-bar close when it exists, otherwise the provisional live-lane
+    // price captured at append. Which one is in use is always shown — a provisional entry must
+    // never be mistaken for the price the scorecard measured.
+    var o={};
+    o.entry = r.close!=null?Number(r.close):(r.entry_ref!=null?Number(r.entry_ref):null);
+    o.src   = r.close!=null?"marked":(r.entry_ref!=null?"provisional":null);
+    o.atr   = r.atr_pct!=null?Number(r.atr_pct):null;
+    var q   = (typeof PX_LIVE==="object"&&PX_LIVE)?PX_LIVE[r.ticker]:null;
+    o.cur   = (q&&q.last!=null)?Number(q.last):null;
+    o.qts   = q?q.quote_ts:null;
+    o.sessions = slSessions(r.date);
+    o.marked   = r.r_20d!=null;
+    o.stopped  = r.stop25_hit===true;
+    o.status   = o.marked?"marked":(o.stopped?"stopped":(o.sessions!=null&&o.sessions>=20?"due":"open"));
+    o.levels=[];
+    SL_MULTS.forEach(function(v){
+      var risk=(o.entry!=null&&o.atr)?o.entry*v.m*o.atr/100:null;
+      var lvl={lab:v.lab, k:v.k, risk:risk, stop:risk!=null?o.entry-risk:null,
+               hit:r[v.k+"_hit"], day:r[v.k+"_day"], tp2:r[v.k+"_tp2"], tp3:r[v.k+"_tp3"],
+               r:r[v.k+"_r"]!=null?Number(r[v.k+"_r"]):null};
+      lvl.rNow = (risk&&o.cur!=null)?(o.cur-o.entry)/risk:null;
+      lvl.breachedNow = (lvl.stop!=null&&o.cur!=null)?o.cur<=lvl.stop:null;
+      o.levels.push(lvl);
+    });
+    o.head = o.levels[2];                                  // 2.5x is the headline
+    o.distStop = (o.head.stop!=null&&o.cur!=null)?(o.cur-o.head.stop)/o.cur*100:null;   // same sign as trCalc: + = room above the stop
+    return o;
+  }
+
+  function slBadges(r,c){
+    var out=[];
+    function chip(cls,txt){ out.push('<span class="tr-chip '+cls+'">'+txt+'</span>'); }
+    if(c.marked||c.stopped){
+      // measured on the recorded path: which level was touched FIRST
+      if(r.stop25_tp3) chip("chip-win","3R hit");
+      else if(r.stop25_tp2) chip("chip-win","2R hit");
+      if(c.stopped) chip("chip-loss","Stopped 2.5x"+(r.stop25_day?" d"+r.stop25_day:""));
+      if(!r.stop25_tp2 && !c.stopped) chip("chip-idea","No target, no stop");
+    }else if(c.head.rNow!=null){
+      // live, not measured: the price is there NOW, which is not the same as "was touched"
+      if(c.head.rNow>=3) chip("chip-ghost","3R now");
+      else if(c.head.rNow>=2) chip("chip-ghost","2R now");
+      if(c.head.breachedNow) chip("chip-loss","Below 2.5x stop");
+    }
+    if(r.profitable_ocf===false) chip("chip-loss","OCF negative");
+    return out.length?'<div class="sl-badges">'+out.join("")+'</div>':"";
+  }
+
+  function slLevelCells(c){
+    // The three-ATR study, per position. Marked rows show what happened; open rows show where
+    // the stop sits and whether price is under it right now.
+    return '<div class="tr-grid" style="grid-template-columns:repeat(3,1fr)">'+
+      c.levels.map(function(l){
+        var v,col;
+        if(l.hit===true){ v="Stopped d"+(l.day||"?"); col="var(--red)"; }
+        else if(l.hit===false){ v=(l.r!=null?(l.r>=0?"+":"")+l.r.toFixed(2)+"R":"Survived"); col=l.r!=null&&l.r<0?"var(--red)":"var(--green)"; }
+        else if(l.stop!=null){ v=trPx(l.stop)+(l.breachedNow?" \u26a0":""); col=l.breachedNow?"var(--red)":"var(--inkMed)"; }
+        else { v="\u2014"; col="var(--inkGhost)"; }
+        return '<div class="tr-cell"><div class="ck">'+l.lab+' ATR'+(l.hit==null?" stop":"")+'</div>'+
+               '<div class="cv" style="color:'+col+'">'+v+'</div></div>';
+      }).join("")+'</div>';
+  }
+
+  function slRenderCard(r){
+    var c=slCalc(r);
+    var chipCls=c.status==="stopped"?"chip-loss":c.status==="marked"?"chip-idea":c.status==="due"?"chip-ready":"chip-open";
+    var chipTxt=c.status==="stopped"?"STOPPED":c.status==="marked"?"MARKED":c.status==="due"?"AWAITING MARK":"OPEN";
+    function cell(k,v,color,miss){
+      return '<div class="tr-cell'+(miss?" miss":"")+'"><div class="ck">'+k+'</div>'+
+             '<div class="cv'+(miss?" empty":"")+'"'+(color?' style="color:'+color+'"':'')+'>'+v+'</div></div>';
+    }
+    return '<div class="tr-card">'+
+      '<div class="tr-head" data-action="sldetail" data-tk="'+r.ticker+'">'+
+        '<span class="tr-tk">'+r.ticker+'<span class="arrow">\u2192</span></span>'+
+        '<span class="tr-name">'+(r.industry||r.sector||"")+'</span>'+
+        '<span class="tr-chip '+chipCls+'">'+chipTxt+'</span>'+
+      '</div>'+
+      slBadges(r,c)+
+      '<div class="tr-grid">'+
+        cell("Signal", r.date)+
+        cell("Sessions", c.sessions!=null?c.sessions:"\u2014")+
+        cell("Entry", c.entry!=null?trPx(c.entry):"none yet", c.src==="provisional"?"var(--amber)":null, c.entry==null)+
+        cell("Current", c.cur!=null?trPx(c.cur):"\u2014", null, c.cur==null)+
+        cell("R now (2.5x)", c.head.rNow!=null?(c.head.rNow>=0?"+":"")+c.head.rNow.toFixed(2)+"R":"\u2014", trCol(c.head.rNow), c.head.rNow==null)+
+        cell("Dist to stop", trPct(c.distStop), (c.distStop!=null&&c.distStop<=0)?"var(--red)":null, c.distStop==null)+
+        cell("ATR", c.atr!=null?c.atr.toFixed(1)+"%":"\u2014")+
+        cell("Opp score", r.opp_score!=null?Number(r.opp_score).toFixed(1):"\u2014")+
+      '</div>'+
+      slLevelCells(c)+
+      (c.src==="provisional"?'<div class="sl-note">Entry is the live-lane price from the signal day, shown so the position is visible tonight. The nightly mark replaces it with the signal bar\u2019s close, and only that one is scored.</div>':"")+
+      (c.entry==null?'<div class="sl-note">No entry price yet. screener_triggers carries no close, so the entry is filled by the nightly mark from the signal bar itself.</div>':"")+
+    '</div>';
+  }
+
+  function slSummaryHTML(rows){
+    var open=0,stopped=0,marked=0,noEntry=0,tp2=0;
+    rows.forEach(function(r){ var c=slCalc(r);
+      if(c.entry==null) noEntry++;
+      if(c.status==="marked") marked++; else if(c.status==="stopped") stopped++; else open++;
+      if(r.stop25_tp2) tp2++; });
+    var need=Math.max(0,30-(marked+stopped));
+    return '<div class="sl-note">'+
+      '<b>'+rows.length+'</b> new signals logged \u00b7 <b>'+open+'</b> open \u00b7 <b>'+stopped+'</b> stopped \u00b7 <b>'+marked+'</b> marked \u00b7 <b>'+tp2+'</b> reached 2R before the stop.'+
+      (noEntry?' <span style="color:var(--amber)">'+noEntry+' still without an entry price \u2014 they fill on the next mark.</span>':'')+
+      (need>0?' Kill criteria stay INSUFFICIENT for '+need+' more marked signals; the numbers above are not a verdict.'
+             :' Sample is large enough for the pre-registered verdict \u2014 read it from signal_log.py report, not from this screen.')+
+      '</div>';
+  }
+
+  function trRenderScreener(){
+    if(slRows===null) return '<div class="tr-empty">Loading the signal log\u2026</div>';
+    if(slErr) return '<div class="tr-empty">Signal log unreachable ('+slErr+').<span>This is a failure, not an empty log \u2014 the rows are not zero, they are unknown.</span></div>';
+    if(!slRows.length) return '<div class="tr-empty">No screener signals logged yet.<span>Actions \u2192 Phoenix Signal Log \u2192 Run workflow, mode append.</span></div>';
+    var rows=slRows.slice().sort(function(a,b){
+      var ca=slCalc(a), cb=slCalc(b);
+      var oa=(ca.status==="open"||ca.status==="due")?0:1, ob=(cb.status==="open"||cb.status==="due")?0:1;
+      if(oa!==ob) return oa-ob;
+      if(a.date!==b.date) return a.date<b.date?1:-1;
+      return (a.rank||999)-(b.rank||999);
+    });
+    return slSummaryHTML(rows)+rows.map(slRenderCard).join("");
+  }
+
   function trRender(){
     // Portfolio owns the account config, but Trades needs it too — load it here
     // if the user landed on Trades first, otherwise every account looks empty.
@@ -11464,19 +11629,23 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(cp) cp.textContent=trByStatus("plan").length;
     if(co) co.textContent=trByStatus("open").length;
     if(cc) cc.textContent=trByStatus("closed").length;
+    var cs=document.getElementById("trCntScr"); if(cs) cs.textContent=(slRows||[]).length;
     var body=document.getElementById("trBody"); if(!body) return;
-    var content = trTab==="plan" ? trRenderPlan() : trTab==="open" ? trRenderOpen() : trRenderClosed();
-    var title=trTab==="plan"?"Plan":trTab==="open"?"Open positions":"Closed trades";
-    var n=trByStatus(trTab).length;
+    var scr = trTab==="screener";
+    if(scr && slRows===null) slLoad(function(){ trRender(); });   // one fetch, then repaint
+    var content = scr ? trRenderScreener()
+                : trTab==="plan" ? trRenderPlan() : trTab==="open" ? trRenderOpen() : trRenderClosed();
+    var title=scr?"Screener paper positions":trTab==="plan"?"Plan":trTab==="open"?"Open positions":"Closed trades";
+    var n=scr?(slRows||[]).length:trByStatus(trTab).length;
     body.innerHTML='<div class="dp-col">'+
-      '<div class="pf-switch" id="trSwitch"></div>'+
-      trSummaryHTML()+
+      (scr?'':'<div class="pf-switch" id="trSwitch"></div>')+
+      (scr?'':trSummaryHTML())+
       '<div class="w-card"><div class="w-card-h">'+
         '<span class="w-card-t">'+title+'</span>'+
         '<span class="w-card-n">'+n+' '+(n===1?"item":"items")+'</span>'+
       '</div><div class="w-card-b">'+content+'</div></div>'+
     '</div>';
-    renderAcctSwitch("trSwitch", trRender);
+    if(!scr) renderAcctSwitch("trSwitch", trRender);
     body.querySelectorAll(".sec-tog").forEach(function(h){
       h.addEventListener("click",function(){
         var k=this.dataset.sec;
@@ -11491,6 +11660,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       el.addEventListener("click",function(ev){
         ev.stopPropagation();
         var a=this.dataset.action, id=this.dataset.id;
+        if(a==="sldetail"){ if(typeof trOpenTicker==="function") trOpenTicker(this.dataset.tk); return; }
         if(a==="detail") trOpenDetail(id);
         else if(a==="open") trPromptOpen(id);
         else if(a==="close") trPromptClose(id);
@@ -13910,6 +14080,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   .page{padding-bottom:104px!important}
   .page.pad{padding-left:12px!important;padding-right:12px!important}
   .page-title{font-size:22px!important}
+
+  /* ---- trade page: four tabs + Export no longer fit one row at 390px; wrap, keep it tight ---- */
+  .trades-tabs{flex-wrap:wrap!important;padding:0 8px!important}
+  .tr-tab{padding:10px 9px!important;font-size:11px!important;letter-spacing:.5px!important}
+  .tr-exp-btn{margin-left:auto!important}
 
   /* ---- rail -> bottom tab bar ---- */
   #pxnav{top:auto!important;bottom:0!important;left:0!important;right:0!important;

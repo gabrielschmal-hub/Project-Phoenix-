@@ -2,136 +2,412 @@
 """
 PHOENIX SIGNAL LOG — append-only record of what the screener said, then what happened.
 
-  python signal_log.py append   # after the daily run: snapshot screener_triggers -> signal_log (is_new / age_days)
-  python signal_log.py mark     # nightly: fill r_1d/r_5d/r_20d, MFE/MAE, hit_stop for rows old enough
-  python signal_log.py report   # print the pre-registered kill-criteria scorecard (see KILL_CRITERIA.md)
+  python signal_log.py append   # snapshot screener_triggers -> signal_log (is_new / age_days)
+  python signal_log.py mark     # fill entry close, forward returns, and the three-ATR path outcomes
+  python signal_log.py report   # pre-registered kill-criteria scorecard + the three-ATR study
 
 Only NEW signals (first appearance in 5 sessions) count as events. A name that sits on the list for
-ten days is one signal, not ten — that is the "same names every day" problem, measured instead of guessed.
+ten days is one signal, not ten — the "same names every day" problem, measured instead of guessed.
+
+--------------------------------------------------------------------------------------------------
+CHANGES 2 Sep 2026 (day-one audit found two bugs that made the log unmeasurable)
+
+B1  close was NULL on all 163 day-one rows, because screener_triggers has no `close` column and
+    build_rows read t.get("close"). mark_row returns None when close is falsy, so the nightly mark
+    would have skipped every row forever and the verdict would have sat at INSUFFICIENT for good.
+    Fix: mark downloads from the signal date INCLUSIVE and takes that bar's close as the entry, so
+    entry and forward returns come from one series. append also records `entry_ref` from the live
+    lane for the UI, which is never used in the scorecard.
+
+B2  screener_triggers is an accumulating table keyed by ticker: each daily run upserts the names
+    that triggered that day and older rows persist untouched. `select *` therefore returned six
+    days of triggers stacked up (16 rows from 25 Aug through 60 from 1 Sep) and dated all 163 as
+    today. Forward returns measured from four days after the signal are not the signal's returns.
+    Fix: each row is dated by its OWN asof day and skipped if that (date, ticker) is already logged.
+    Appending is idempotent, so a re-run backfills rather than duplicating.
+
+THREE-ATR STUDY. Each signal is walked bar by bar under 1.5x / 2.0x / 2.5x ATR stops, recording
+which of the stop, the 2:1 target and the 3:1 target was touched FIRST. MFE and MAE cannot answer
+that: a name can show MFE 3R and MAE -1R and still have been stopped out on day two. Within a bar
+the stop is assumed to resolve before the target — pessimistic, survival-first.
+
+INTEGRITY NOTE. KILL_CRITERIA.md was pre-registered on the 2.5x stop. That remains the decision
+variable. 1.5x and 2.0x are descriptive columns only: picking the best of three multiples after
+seeing the data is how a losing screener gets kept alive. See scorecard()["decision_variable"].
+--------------------------------------------------------------------------------------------------
 """
 import os, sys, json, datetime as dt
 import pandas as pd
 
-STOP_ATR = 2.5           # position policy: 2.5 x ATR(14)
+STOP_ATR = 2.5           # position policy and pre-registered decision variable: 2.5 x ATR(14)
+STOP_MULTS = (1.5, 2.0, 2.5)
 NEW_WINDOW = 5           # sessions without appearing -> next appearance is a new event
 MIN_SAMPLE = 30          # kill criteria need at least this many MARKED new signals
 HURDLE_R = 0.054         # E must beat 0.054R, never zero
+HORIZON = 20             # bars after entry
+
+
+def mkey(m):
+    """1.5 -> 'stop15'. Column prefix for a stop multiple."""
+    return "stop" + str(int(round(m * 10)))
+
 
 def sb():
     from supabase import create_client
-    url = os.environ["SUPABASE_URL"].strip().rstrip("/"); key = os.environ["SUPABASE_SERVICE_ROLE_KEY"].strip()
+    url = os.environ["SUPABASE_URL"].strip().rstrip("/")
+    key = os.environ["SUPABASE_SERVICE_ROLE_KEY"].strip()
     return create_client(url, key)
 
+
 def load_universe(path="universe.csv"):
-    if not os.path.exists(path): return {}
-    u = pd.read_csv(path); tcol = next((c for c in u.columns if c.lower() in ("ticker","symbol")), u.columns[0])
+    if not os.path.exists(path):
+        return {}
+    u = pd.read_csv(path)
+    tcol = next((c for c in u.columns if c.lower() in ("ticker", "symbol")), u.columns[0])
     out = {}
     for _, r in u.iterrows():
         out[str(r[tcol]).strip()] = {"sector": r.get("sector"), "industry": r.get("industry")}
     return out
 
-def load_profitability(path="outputs/earnings_state.json"):
-    """True/False per ticker if the engine's OCF-based classifier exists; None otherwise (never guessed)."""
-    if not os.path.exists(path): return {}
-    try:
-        d = json.load(open(path)); rows = d.get("tickers", d) if isinstance(d, dict) else d
-        out = {}
-        it = rows.items() if isinstance(rows, dict) else ((r.get("ticker"), r) for r in rows)
-        for t, r in it:
-            if isinstance(r, dict) and "profitable" in r: out[t] = bool(r["profitable"])
-        return out
-    except Exception: return {}
 
-def build_rows(triggers, prior, today, universe, profit, now=None, engine="screener_triggers"):
-    """Pure function: today's trigger rows + prior log -> new signal_log rows. Tested offline."""
+def load_profitability(path="outputs/earnings_state.json"):
+    """True/False per ticker from the OCF classifier; None when unknown. Never guessed.
+
+    Day one returned null on all 163 rows. The file shape varies by pipeline version, so every
+    known shape is tried and the count is printed by cmd_append — a silent zero is the failure
+    mode that hid this for a day.
+    """
+    if not os.path.exists(path):
+        return {}
+    try:
+        d = json.load(open(path))
+    except Exception:
+        return {}
+    for node in ("tickers", "state", "rows", "data"):
+        if isinstance(d, dict) and isinstance(d.get(node), (dict, list)):
+            d = d[node]
+            break
+    it = d.items() if isinstance(d, dict) else ((r.get("ticker"), r) for r in d if isinstance(r, dict))
+    out = {}
+    for t, r in it:
+        if not t:
+            continue
+        if isinstance(r, bool):
+            out[str(t).strip()] = r
+            continue
+        if not isinstance(r, dict):
+            continue
+        for k in ("profitable", "profitable_ocf", "ocf_positive", "is_profitable"):
+            if k in r and r[k] is not None:
+                out[str(t).strip()] = bool(r[k])
+                break
+    return out
+
+
+def _asof_day(asof, fallback):
+    """The row's own trigger date. screener_triggers accumulates, so this is not `today`."""
+    try:
+        ts = pd.Timestamp(asof)
+        if not pd.isna(ts):
+            return ts.date()
+    except Exception:
+        pass
+    return fallback
+
+
+def build_rows(triggers, prior, today, universe, profit, now=None,
+               engine="screener_triggers", live=None):
+    """Pure function: trigger rows + prior log -> signal_log rows, dated by their own asof."""
     now = now or dt.datetime.utcnow()
-    last_seen = {}; streak = {}
-    for r in prior:                                 # prior = list of {date, ticker, age_days}
+    live = live or {}
+
+    logged = set()                       # (date, ticker) already in the log: never re-append
+    seen = {}                            # ticker -> [dates seen], ascending
+    for r in prior:
         d = pd.Timestamp(r["date"]).date()
-        if r["ticker"] not in last_seen or d > last_seen[r["ticker"]]:
-            last_seen[r["ticker"]] = d; streak[r["ticker"]] = int(r.get("age_days") or 1)
-    out = []
+        logged.add((d, str(r["ticker"]).strip()))
+        seen.setdefault(str(r["ticker"]).strip(), []).append(d)
+    for v in seen.values():
+        v.sort()
+
+    staged = []
     for t in triggers:
-        tk = str(t["ticker"]).strip(); ls = last_seen.get(tk)
-        gap = (today - ls).days if ls else None
-        is_new = ls is None or gap > NEW_WINDOW + 2        # +2 covers weekends in calendar days
-        age = 1 if is_new else (streak.get(tk, 0) + 1)
+        tk = str(t["ticker"]).strip()
+        d = _asof_day(t.get("asof"), today)
+        if d > today:                    # a clock-skewed asof must not create a future signal
+            d = today
+        staged.append((d, tk, t))
+    staged.sort(key=lambda x: (x[0], x[1]))   # ascending, so age_days builds forward in time
+
+    out = []
+    for d, tk, t in staged:
+        if (d, tk) in logged:
+            continue
+        hist = [x for x in seen.get(tk, []) if x < d]
+        prev = hist[-1] if hist else None
+        gap = (d - prev).days if prev else None
+        is_new = prev is None or gap > NEW_WINDOW + 2      # +2 covers weekends in calendar days
+        age = 1 if is_new else sum(1 for x in hist if (d - x).days <= NEW_WINDOW + 2) + 1
+
         atr = float(t["atr_pct"]) if t.get("atr_pct") is not None else None
-        asof = t.get("asof"); age_min = None
+        asof = t.get("asof")
+        age_min = None
         try:
             ts = pd.Timestamp(asof)
-            if ts.tzinfo is None: ts = ts.tz_localize("UTC")
+            if ts.tzinfo is None:
+                ts = ts.tz_localize("UTC")
             age_min = round((pd.Timestamp(now, tz="UTC") - ts).total_seconds() / 60, 1)
-        except Exception: pass
+        except Exception:
+            pass
+
         u = universe.get(tk, {})
-        out.append({"date": today.isoformat(), "ticker": tk, "is_new": bool(is_new), "age_days": int(age),
-                    "trigger": t.get("trigger"), "close": t.get("close"), "atr_pct": atr,
-                    "stop_pct": round(STOP_ATR * atr, 4) if atr is not None else None,
-                    "opp_score": t.get("opp_score"), "rank": t.get("rank"),
-                    "sector": u.get("sector"), "industry": u.get("industry"),
-                    "profitable_ocf": profit.get(tk), "data_asof": asof, "data_age_min": age_min, "engine": engine})
+        row = {"date": d.isoformat(), "ticker": tk, "is_new": bool(is_new), "age_days": int(age),
+               "trigger": t.get("trigger"), "close": None, "atr_pct": atr,
+               "stop_pct": round(STOP_ATR * atr, 4) if atr is not None else None,
+               "opp_score": t.get("opp_score"), "rank": t.get("rank"),
+               "sector": u.get("sector"), "industry": u.get("industry"),
+               "profitable_ocf": profit.get(tk), "data_asof": asof, "data_age_min": age_min,
+               "engine": engine}
+
+        # entry_ref: provisional price for the UI so a signal is visible the evening it fires.
+        # Only accepted when the live quote is from the signal day itself. Never enters the
+        # scorecard — `close` from the daily bar is the only price the measurement trusts.
+        lq = live.get(tk)
+        if lq and lq.get("last") is not None:
+            try:
+                qd = pd.Timestamp(lq.get("quote_ts")).date()
+            except Exception:
+                qd = None
+            if qd == d:
+                row["entry_ref"] = float(lq["last"])
+        out.append(row)
+        seen.setdefault(tk, []).append(d)
+        seen[tk].sort()
+        logged.add((d, tk))
     return out
+
 
 def cmd_append():
-    s = sb(); today = dt.date.today()
+    s = sb()
+    today = dt.date.today()
     trig = s.table("screener_triggers").select("*").execute().data
-    since = (today - dt.timedelta(days=NEW_WINDOW + 10)).isoformat()
+    since = (today - dt.timedelta(days=90)).isoformat()      # wide enough to date backfilled asofs
     prior = s.table("signal_log").select("date,ticker,age_days").gte("date", since).execute().data
-    rows = build_rows(trig, prior, today, load_universe(), load_profitability())
-    if rows: s.table("signal_log").upsert(rows, on_conflict="date,ticker", ignore_duplicates=True).execute()
+    try:
+        live = {r["ticker"]: r for r in
+                s.table("prices_live").select("ticker,last,quote_ts").execute().data}
+    except Exception as e:
+        print(f"[signal_log] prices_live unavailable ({e}) — entry_ref will be null")
+        live = {}
+
+    profit = load_profitability()
+    print(f"[signal_log] profitability map: {len(profit)} tickers"
+          + ("  <-- EMPTY: check outputs/earnings_state.json is in the checkout" if not profit else ""))
+
+    rows = build_rows(trig, prior, today, load_universe(), profit, live=live)
+    if not rows:
+        print(f"[signal_log] {today}: nothing new to append ({len(trig)} triggers, all already logged)")
+        return
+    s.table("signal_log").upsert(rows, on_conflict="date,ticker", ignore_duplicates=True).execute()
     os.makedirs("outputs", exist_ok=True)
-    with open("outputs/signal_log.jsonl", "a") as f:            # git-tracked twin: survives any DB accident
-        for r in rows: f.write(json.dumps(r, default=str) + "\n")
-    print(f"[signal_log] {today} appended {len(rows)} rows · new events {sum(r['is_new'] for r in rows)}")
+    with open("outputs/signal_log.jsonl", "a") as f:        # git-tracked twin: survives a DB accident
+        for r in rows:
+            f.write(json.dumps(r, default=str) + "\n")
+    by_day = {}
+    for r in rows:
+        by_day[r["date"]] = by_day.get(r["date"], 0) + 1
+    print(f"[signal_log] appended {len(rows)} rows · new events {sum(r['is_new'] for r in rows)}"
+          f" · dates {', '.join(f'{k}:{v}' for k, v in sorted(by_day.items()))}")
+
+
+def walk_path(bars, entry, atr_pct, mult):
+    """Bar-by-bar outcome under one stop multiple.
+
+    bars: sequence of (high, low, close) AFTER the entry bar, in order.
+    Returns hit / day / tp2 / tp3 / r, where tp2 and tp3 mean the target was touched BEFORE the
+    stop. Within a single bar the stop is assumed first: pessimistic, and the only assumption that
+    cannot flatter the result.
+    """
+    if not atr_pct or entry is None or entry <= 0 or not bars:
+        return {}
+    risk = entry * mult * atr_pct / 100.0
+    if risk <= 0:
+        return {}
+    stop, tp2, tp3 = entry - risk, entry + 2 * risk, entry + 3 * risk
+    hit_day = tp2_day = tp3_day = None
+    for i, (hi, lo, _c) in enumerate(bars, start=1):
+        if lo <= stop:
+            hit_day = i
+            break
+        if tp3_day is None and hi >= tp3:
+            tp3_day = i
+        if tp2_day is None and hi >= tp2:
+            tp2_day = i
+    r = -1.0 if hit_day else (bars[-1][2] - entry) / risk
+    k = mkey(mult)
+    return {k + "_hit": hit_day is not None, k + "_day": hit_day,
+            k + "_tp2": tp2_day is not None, k + "_tp3": tp3_day is not None,
+            k + "_r": round(r, 4)}
+
 
 def mark_row(row, px):
-    """px: DataFrame of daily OHLC after row.date (index = date). Returns forward-return fields."""
-    if px is None or len(px) < 1 or not row.get("close"): return None
-    c0 = float(row["close"]); stop = c0 * (1 - (row.get("stop_pct") or 0) / 100) if row.get("stop_pct") else None
-    def r(n): return float(px["Close"].iloc[n - 1]) / c0 - 1 if len(px) >= n else None
-    w = px.iloc[:20]
-    out = {"r_1d": r(1), "r_5d": r(5), "r_20d": r(20) if len(px) >= 20 else None,
-           "mfe_20d": float(w["High"].max()) / c0 - 1, "mae_20d": float(w["Low"].min()) / c0 - 1,
-           "hit_stop_20d": bool(stop and float(w["Low"].min()) <= stop) if stop else None,
+    """px: daily OHLC from the signal date INCLUSIVE (index = date).
+
+    Bar 0 is the signal day; its close is the entry, which is why `close` no longer has to come
+    from the screener (it never did). Bars 1..20 are the forward path.
+    """
+    if px is None or len(px) < 2:
+        return None
+    entry = row.get("close")
+    if entry in (None, 0):
+        entry = float(px["Close"].iloc[0])
+    entry = float(entry)
+    if entry <= 0:
+        return None
+    fwd = px.iloc[1:1 + HORIZON]
+    if not len(fwd):
+        return None
+    bars = list(zip(fwd["High"].astype(float), fwd["Low"].astype(float), fwd["Close"].astype(float)))
+
+    def r(n):
+        return float(fwd["Close"].iloc[n - 1]) / entry - 1 if len(fwd) >= n else None
+
+    out = {"close": round(entry, 6), "close_src": "daily", "bars_marked": len(fwd),
+           "r_1d": r(1), "r_5d": r(5), "r_20d": r(HORIZON) if len(fwd) >= HORIZON else None,
+           "mfe_20d": float(fwd["High"].max()) / entry - 1,
+           "mae_20d": float(fwd["Low"].min()) / entry - 1,
            "marked_at": dt.datetime.utcnow().isoformat()}
+    atr = row.get("atr_pct")
+    for m in STOP_MULTS:
+        out.update(walk_path(bars, entry, atr, m))
+    # legacy column kept so anything already reading it does not break: 2.5x is hit_stop_20d
+    out["hit_stop_20d"] = out.get(mkey(STOP_ATR) + "_hit")
     return out
+
 
 def cmd_mark():
     import yfinance as yf
-    s = sb(); today = dt.date.today()
-    due = s.table("signal_log").select("*").is_("r_20d", "null").lte("date", (today - dt.timedelta(days=2)).isoformat()).execute().data
-    if not due: print("[signal_log] nothing to mark"); return
+    s = sb()
+    today = dt.date.today()
+    due = (s.table("signal_log").select("*").is_("r_20d", "null")
+           .lte("date", (today - dt.timedelta(days=2)).isoformat())
+           .order("date").limit(2000).execute().data)
+    if not due:
+        print("[signal_log] nothing to mark")
+        return
+    ok = skipped = 0
     for row in due:
-        start = pd.Timestamp(row["date"]) + pd.Timedelta(days=1)
+        start = pd.Timestamp(row["date"])                    # INCLUSIVE: bar 0 is the entry bar
+        end = start + pd.Timedelta(days=int(HORIZON * 1.9) + 7)
         try:
-            px = yf.download(row["ticker"], start=start.date().isoformat(), interval="1d", auto_adjust=True, progress=False)
-            if isinstance(px.columns, pd.MultiIndex): px.columns = px.columns.get_level_values(0)
-        except Exception: continue
+            px = yf.download(row["ticker"], start=start.date().isoformat(),
+                             end=end.date().isoformat(), interval="1d",
+                             auto_adjust=True, progress=False)
+            if isinstance(px.columns, pd.MultiIndex):
+                px.columns = px.columns.get_level_values(0)
+        except Exception:
+            skipped += 1
+            continue
         m = mark_row(row, px)
-        if m: s.table("signal_log").update(m).eq("date", row["date"]).eq("ticker", row["ticker"]).execute()
-    print(f"[signal_log] marked {len(due)} rows")
+        if not m:
+            skipped += 1
+            continue
+        if row.get("close") is not None:
+            m.pop("close", None)                             # already latched; the guard forbids a change
+            m.pop("close_src", None)
+        s.table("signal_log").update(m).eq("date", row["date"]).eq("ticker", row["ticker"]).execute()
+        ok += 1
+    print(f"[signal_log] marked {ok} rows, skipped {skipped} (no data)")
+
+
+def _policy_R(row, m):
+    """Realised R for one signal under one stop multiple.
+
+    stop  : stop only, held to the horizon
+    tp2   : exit at +2R if the target came before the stop
+    tp3   : exit at +3R if the target came before the stop
+    """
+    k = mkey(m)
+    r = row.get(k + "_r")
+    if r is None:
+        return None
+    hit = bool(row.get(k + "_hit"))
+    out = {"stop": float(r)}
+    out["tp2"] = 2.0 if row.get(k + "_tp2") else (-1.0 if hit else float(r))
+    out["tp3"] = 3.0 if row.get(k + "_tp3") else (-1.0 if hit else float(r))
+    return out
+
 
 def scorecard(rows):
-    """Pre-registered kill criteria on NEW, MARKED signals. Returns dict; verdict is CONTINUE / STOP / INSUFFICIENT."""
-    df = pd.DataFrame([r for r in rows if r.get("is_new") and r.get("r_20d") is not None])
-    n = len(df)
-    if n < MIN_SAMPLE: return {"n": n, "verdict": "INSUFFICIENT", "need": MIN_SAMPLE - n}
-    R = df["stop_pct"].astype(float) / 100
-    e_price = float((df["r_20d"].astype(float) / R).mean())          # 20-day return in units of initial risk
-    hit = float(df["hit_stop_20d"].fillna(False).astype(bool).mean())
-    mfe_r = float((df["mfe_20d"].astype(float) / R).median())
+    """Pre-registered kill criteria on NEW, MARKED signals, plus the three-ATR study.
+
+    The verdict is computed on the 2.5x stop held to the horizon — the variable pre-registered in
+    KILL_CRITERIA.md before any signal was marked. The other multiples and the target policies are
+    reported side by side but cannot change the verdict.
+    """
+    marked = [r for r in rows if r.get("is_new") and r.get("r_20d") is not None]
+    n = len(marked)
+    if n < MIN_SAMPLE:
+        return {"n": n, "verdict": "INSUFFICIENT", "need": MIN_SAMPLE - n,
+                "decision_variable": f"{STOP_ATR}x ATR, stop only, {HORIZON} bars"}
+    df = pd.DataFrame(marked)
+    grid = {}
+    for m in STOP_MULTS:
+        k = mkey(m)
+        pol = [_policy_R(r, m) for r in marked]
+        pol = [p for p in pol if p]
+        if not pol:
+            continue
+        risk = df["atr_pct"].astype(float) * m / 100.0
+        mfe_r = float((df["mfe_20d"].astype(float) / risk).median()) if len(risk) else None
+        grid[f"{m}x"] = {
+            "n": len(pol),
+            "E_stop_R": round(sum(p["stop"] for p in pol) / len(pol), 3),
+            "E_tp2_R": round(sum(p["tp2"] for p in pol) / len(pol), 3),
+            "E_tp3_R": round(sum(p["tp3"] for p in pol) / len(pol), 3),
+            "stop_hit": round(float(df[k + "_hit"].fillna(False).astype(bool).mean()), 3),
+            "tp2_first": round(float(df[k + "_tp2"].fillna(False).astype(bool).mean()), 3),
+            "tp3_first": round(float(df[k + "_tp3"].fillna(False).astype(bool).mean()), 3),
+            "median_mfe_R": round(mfe_r, 2) if mfe_r is not None else None,
+        }
+
+    d = grid.get(f"{STOP_ATR}x", {})
+    e_price = d.get("E_stop_R")
+    hit = d.get("stop_hit")
+    mfe_r = d.get("median_mfe_R")
     win = float((df["r_20d"].astype(float) > 0).mean())
     fails = []
-    if e_price < HURDLE_R: fails.append(f"E_price {e_price:.3f}R < {HURDLE_R}R")
-    if hit > 0.60: fails.append(f"stop hit {hit:.0%} > 60%")
-    if mfe_r < 1.0: fails.append(f"median MFE {mfe_r:.2f}R < 1R (never reaches breakeven)")
-    return {"n": n, "e_price_R": round(e_price, 3), "stop_hit": round(hit, 3), "median_mfe_R": round(mfe_r, 2),
-            "win_20d": round(win, 3), "fails": fails, "verdict": "STOP" if fails else "CONTINUE"}
+    if e_price is not None and e_price < HURDLE_R:
+        fails.append(f"E_price {e_price:.3f}R < {HURDLE_R}R")
+    if hit is not None and hit > 0.60:
+        fails.append(f"stop hit {hit:.0%} > 60%")
+    if mfe_r is not None and mfe_r < 1.0:
+        fails.append(f"median MFE {mfe_r:.2f}R < 1R (never reaches breakeven)")
+    return {"n": n, "e_price_R": e_price, "stop_hit": hit, "median_mfe_R": mfe_r,
+            "win_20d": round(win, 3), "fails": fails,
+            "verdict": "STOP" if fails else "CONTINUE",
+            "decision_variable": f"{STOP_ATR}x ATR, stop only, {HORIZON} bars",
+            "atr_grid": grid,
+            "note": "1.5x and 2.0x and the target policies are descriptive. The pre-registered "
+                    "verdict is the 2.5x stop-only column; choosing the best cell after the fact "
+                    "is not a result."}
+
 
 def cmd_report():
-    rows = sb().table("signal_log").select("*").execute().data
-    sc = scorecard(rows); print(json.dumps(sc, indent=1))
-    os.makedirs("outputs", exist_ok=True); json.dump(sc, open("outputs/signal_scorecard.json", "w"), indent=1)
+    rows = sb().table("signal_log").select("*").limit(20000).execute().data
+    sc = scorecard(rows)
+    print(json.dumps(sc, indent=1))
+    g = sc.get("atr_grid") or {}
+    if g:
+        print("\n  stop      n   E(stop)  E(2:1)  E(3:1)  stop-hit  2R-first  3R-first  medMFE")
+        for k, v in g.items():
+            print(f"  {k:<7}{v['n']:>4}{v['E_stop_R']:>9.3f}{v['E_tp2_R']:>8.3f}{v['E_tp3_R']:>8.3f}"
+                  f"{v['stop_hit']:>10.0%}{v['tp2_first']:>10.0%}{v['tp3_first']:>10.0%}"
+                  f"{(v['median_mfe_R'] or 0):>8.2f}")
+    os.makedirs("outputs", exist_ok=True)
+    json.dump(sc, open("outputs/signal_scorecard.json", "w"), indent=1)
+
 
 if __name__ == "__main__":
-    {"append": cmd_append, "mark": cmd_mark, "report": cmd_report}[sys.argv[1] if len(sys.argv) > 1 else "append"]()
+    cmd = sys.argv[1] if len(sys.argv) > 1 else "append"
+    {"append": cmd_append, "mark": cmd_mark, "report": cmd_report}[cmd]()
