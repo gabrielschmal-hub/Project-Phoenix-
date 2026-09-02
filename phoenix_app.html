@@ -13899,5 +13899,69 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   <div class="ed-jump"><a data-go="markets">Markets</a><a data-go="screeners">Screeners</a><a data-go="trades">Trade</a><a data-go="portfolio">Portfolio</a></div>
   <div class="ed-colophon">Phoenix OS v1.0 · not investment advice</div>
 </div></div>
+
+<style id="px-mobile">
+/* ================= PHOENIX MOBILE — phones <=600px. Final override layer. =================
+   Desktop/iPad (>600px) is untouched: everything here lives inside one media query. */
+@media (max-width:600px){
+
+  /* ---- shell: reclaim the 64px rail, make room for the bottom bar ---- */
+  .app{padding-left:0!important}
+  .page{padding-bottom:104px!important}
+  .page.pad{padding-left:12px!important;padding-right:12px!important}
+  .page-title{font-size:22px!important}
+
+  /* ---- rail -> bottom tab bar ---- */
+  #pxnav{top:auto!important;bottom:0!important;left:0!important;right:0!important;
+    width:100%!important;height:auto!important;flex-direction:row!important;align-items:center!important;
+    gap:6px!important;padding:6px 8px calc(6px + env(safe-area-inset-bottom))!important;
+    border-right:0!important;border-top:1px solid rgba(122,96,68,.28)!important;
+    background:rgba(250,244,235,.97)!important;
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  html:not(.light) #pxnav{background:rgba(10,13,17,.97)!important;border-top-color:rgba(255,255,255,.14)!important}
+  #pxnav .pxbrand{display:none!important}
+  #pxnav .pxlinks{flex-direction:row!important;flex:1 1 auto!important;justify-content:space-around!important;
+    align-items:center!important;gap:0!important;height:auto!important;margin:0!important;padding:0!important;
+    overflow:visible!important}
+  #pxnav .pxlinks>:not(a){display:none!important}          /* Workspace / Capital group labels */
+  #pxnav .pxlinks a{padding:8px 9px!important;margin:0!important;border-radius:9px!important}
+  #pxnav .rfoot{flex-direction:row!important;align-items:center!important;height:auto!important;
+    margin:0!important;padding:0!important;gap:6px!important;border:0!important;flex:0 0 auto!important}
+  #pxnav .rfoot>:not(.pxprof){display:none!important}      /* live-data cluster leaves the bar */
+  #pxnav .pxprof{padding:6px 9px!important;margin:0!important}
+
+  /* ---- markets: the SPX toolbar wraps instead of blowing the page to 745px ---- */
+  .tile>.thead{flex-wrap:wrap!important;row-gap:8px!important}
+  .a-spx .thead .ttl,.a-spx .thead .tnote{white-space:normal!important}
+  .tile .tnote{margin-left:0!important;order:8}
+  .mk-instr{margin-left:0!important;width:100%!important;order:9}
+  .mk-view{margin-left:auto!important}
+  .mk-chips,.rp-tf{flex-wrap:wrap!important;row-gap:5px!important}
+
+  /* ---- GEX histogram scrolls inside its own card, never the page ---- */
+  .gexh-scroll{display:block!important;width:100%!important;max-width:100%!important;
+    overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+  .gexh-scroll .gex-histo{min-width:640px!important}
+  .tile{max-width:100%!important}
+  .mkt-grid>*,.mkt-row>*,.w-card,.w-card-b{min-width:0}
+
+  /* ---- landing top nav: scrolls instead of clipping ---- */
+  .hnav{left:12px!important;right:12px!important;transform:none!important;justify-content:flex-start!important;
+    gap:16px!important;overflow-x:auto!important;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .hnav::-webkit-scrollbar{display:none}
+
+  /* ---- cramped grids -> single column; nothing prints through its box ---- */
+  .pxcard{grid-template-columns:1fr!important}
+  .rs-grid{grid-template-columns:1fr!important}
+  .sm-stats>*,.pf-strip>*,.ed-tape>*,.ed-jump>*,.sf-sel>*{min-width:0}
+  .w-card-b{overflow-x:auto}
+  .w-card-t,.w-card-n{overflow-wrap:break-word}
+
+  /* ---- profile modal fits the screen ---- */
+  #pxProfPop .bx{width:calc(100vw - 40px)!important;max-width:340px!important}
+  /* ---- bottom banners/toasts ride above the tab bar, never under it ---- */
+  #trBanner,.toast,[id$="Toast"],[class*="toast"]{bottom:calc(66px + env(safe-area-inset-bottom))!important}
+}
+</style>
 </body>
 </html>
