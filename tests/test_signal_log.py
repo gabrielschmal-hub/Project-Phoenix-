@@ -274,7 +274,7 @@ def test_lens_fields_come_from_the_signals_own_day_snapshot(tmp_path):
                             "spx_close": 6400.0, "spx_vs_50d_pct": 0.8, "spx_vs_200d_pct": 3.2, "vix": 18.4})
     snap = S.load_snapshots(history_dir=hd)
     r = S.build_rows([trig("AAPL", asof="2026-09-01T20:00:00Z")], [], T, {}, {}, snap=snap)[0]
-    assert r["mcap_B"] == 3200.5 and r["breakout"] is True and r["days_on_list"] == 1
+    assert r["mcap_b"] == 3200.5 and r["breakout"] is True and r["days_on_list"] == 1
     assert r["regime"] == "ENERGY_SHOCK" and r["gex_regime"] == "Negative Gamma" and r["vix"] == 18.4
     assert r["spx_vs_200d_pct"] == 3.2
 
@@ -284,7 +284,7 @@ def test_regime_is_not_reconstructed_when_the_snapshot_lacked_it(tmp_path):
     hd = _snap_full(tmp_path, "2026-08-25", [{"ticker": "X", "mcap_B": 5.0}], market={})
     snap = S.load_snapshots(history_dir=hd)
     r = S.build_rows([trig("X", asof="2026-08-25T20:00:00Z")], [], T, {}, {}, snap=snap)[0]
-    assert r["mcap_B"] == 5.0 and "regime" not in r and "spx_close" not in r
+    assert r["mcap_b"] == 5.0 and "regime" not in r and "spx_close" not in r
 
 
 def test_legacy_context_keys_still_read(tmp_path):
@@ -318,8 +318,8 @@ def test_spx_state_latches_only_when_missing():
 
 
 def test_lenses_cut_by_group_and_flag_thin_cells():
-    rows = ([_row(sector="Tech", mcap_B=50.0, regime="GOLDILOCKS", stop25_r=1.5, stop25_day=None)] * 25
-            + [_row(sector="Energy", mcap_B=1.0, regime="ENERGY_SHOCK", stop25_r=-1.0, stop25_hit=True, stop25_day=2)] * 5)
+    rows = ([_row(sector="Tech", mcap_b=50.0, regime="GOLDILOCKS", stop25_r=1.5, stop25_day=None)] * 25
+            + [_row(sector="Energy", mcap_b=1.0, regime="ENERGY_SHOCK", stop25_r=-1.0, stop25_hit=True, stop25_day=2)] * 5)
     L = S.lenses(rows)
     sec = {c["group"]: c for c in L["sector"]}
     assert sec["Tech"]["n"] == 25 and sec["Tech"]["thin"] is False and sec["Tech"]["E_stop_R"] == 1.5
@@ -333,3 +333,26 @@ def test_scorecard_publishes_lenses_even_while_insufficient():
     sc = S.scorecard([_row(sector="Tech")] * 5)
     assert sc["verdict"] == "INSUFFICIENT" and "lenses" in sc and sc["lenses"]["sector"][0]["thin"] is True
     assert sc["min_cell"] == S.MIN_CELL and sc["logged_new"] == 5
+
+
+def test_column_names_are_lower_case_because_postgres_folds_identifiers():
+    """3 Sep: the migration created mcap_B unquoted, so Postgres stored mcap_b. The append sent
+    mcap_B and PostgREST rejected the entire batch (PGRST204) — 60 signals lost for a day."""
+    for c in S.CAND_FIELDS + S.MARKET_FIELDS:
+        assert c == c.lower(), f"{c} will not match the folded column name"
+    for m in S.STOP_MULTS:
+        for f in ("_hit", "_day", "_tp2", "_tp2_day", "_tp3", "_tp3_day", "_r"):
+            col = S.mkey(m) + f
+            assert col == col.lower(), col
+
+
+def test_snapshot_keys_map_to_the_folded_columns(tmp_path):
+    """The engine writes mcap_B in signals_<date>.json; the column is mcap_b. Both must work."""
+    d = tmp_path / "h"; d.mkdir()
+    (d / "signals_2026-09-01.json").write_text(json.dumps(
+        {"date": "2026-09-01", "context": {"market": {"regime": "POLICY_TIGHTENING"}},
+         "trade": [{"ticker": "AAPL", "mcap_B": 3200.5, "dollar_vol_M": 900.0, "breakout": True}], "invest": []}))
+    f = S.snapshot_fields(S.load_snapshots(history_dir=str(d)), "2026-09-01", "AAPL")
+    assert f["mcap_b"] == 3200.5 and f["dollar_vol_m"] == 900.0 and f["breakout"] is True
+    assert f["regime"] == "POLICY_TIGHTENING"
+    assert "mcap_B" not in f, "the mixed-case key must never reach the upsert"
