@@ -521,20 +521,23 @@ def _signal_market_context():
             return {}
     macro, spx, gex = _read("macro"), _read("spx_daily"), _read("gex")
     bars = spx.get("bars") or []
+    def _c(b):                                   # spx_daily.json bars are o/h/l/c/v, not "close"
+        v = b.get("c", b.get("close"))
+        return float(v) if v is not None else None
     last = bars[-1] if bars else {}
     prev = bars[-2] if len(bars) > 1 else {}
-    closes = [b.get("close") for b in bars if b.get("close") is not None]
+    closes = [x for x in (_c(b) for b in bars) if x is not None]
     def _ma(n):
         return (sum(closes[-n:]) / n) if len(closes) >= n else None
-    c = last.get("close"); ma50, ma200 = _ma(50), _ma(200)
+    c = _c(last) if last else None; ma50, ma200 = _ma(50), _ma(200)
     ov = gex.get("overview") or {}
     return {
         "regime": macro.get("regime"),
         "regime_held_weeks": ((macro.get("explain") or {}).get("held_weeks")
                               if isinstance(macro.get("explain"), dict) else None),
         "spx_close": c, "spx_date": last.get("date"),
-        "spx_chg_pct": (round((c / prev["close"] - 1) * 100, 2)
-                        if c and prev.get("close") else None),
+        "spx_chg_pct": (round((c / _c(prev) - 1) * 100, 2)
+                        if c and prev and _c(prev) else None),
         "spx_vs_50d_pct": (round((c / ma50 - 1) * 100, 2) if c and ma50 else None),
         "spx_vs_200d_pct": (round((c / ma200 - 1) * 100, 2) if c and ma200 else None),
         "gex_regime": ov.get("regime"), "gex_net_B": ov.get("net_gex_B"),
