@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html class="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Phoenix Wire · Gabriel · 2026-09-02</title><style>
+:root{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenSoft:#269360; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redSoft:#C4452B; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15); --blue:#2C5A82;
+  --serif:Georgia,'Times New Roman',serif;
+  --mono:'Courier New',ui-monospace,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--serif);
+  -webkit-font-smoothing:antialiased}
+.ed-wrap{background:var(--bg)}
+.ed-page{max-width:1180px;margin:0 auto;padding:30px 30px 60px;position:relative}
+.ed-x{position:absolute;top:18px;right:26px;z-index:5;background:var(--card);
+  border:1px solid var(--line2);border-radius:99px;padding:7px 15px;cursor:pointer;
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--inkLight);
+  text-decoration:none}
+.ed-x:hover{color:var(--gold);border-color:var(--gold)}
+.ed-mast{text-align:center;border-bottom:2px solid var(--line2);padding-bottom:15px}
+.ed-meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--inkFade);padding-right:130px}
+.ed-meta span:last-child{text-align:right}
+.ed-brand{display:flex;align-items:center;justify-content:center;gap:14px;margin:10px 0 4px}
+.ed-mark{width:52px;height:40px;flex:0 0 auto;display:block}
+.ed-brand .ed-name{font-family:var(--serif);font-size:56px;line-height:1;letter-spacing:-.02em}
+.ed-sub{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--inkLight)}
+.ed-sub-gamma{position:relative}
+.ed-sub-gamma::after{content:"· gamma";font-family:var(--mono);font-style:normal;
+  font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+  margin-left:9px;vertical-align:middle}
+.ed-hello{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--inkFade);margin-top:11px}
+.ed-verdict{border-bottom:1px solid var(--line);padding:20px 0 18px}
+.ed-call{font-family:var(--serif);font-size:33px;line-height:1.12}
+.ed-call em{font-style:normal;color:var(--gold)}
+.ed-vwhy{font-size:14.5px;color:var(--inkLight);margin-top:9px;line-height:1.6}
+.ed-sec{border-bottom:1px solid var(--line);padding:24px 0}
+.ed-sec:last-of-type{border-bottom:0}
+.ed-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--inkFade);display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.ed-n{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--inkLight);
+  text-transform:none;letter-spacing:0}
+.ed-hl{font-family:var(--serif);font-size:30px;line-height:1.16;margin:9px 0 13px;
+  letter-spacing:-.01em}
+.ed-hl.sm{font-size:25px}
+.ed-body{font-size:15px;line-height:1.68;color:var(--inkMed);margin:0 0 12px}
+.ed-pos{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px 16px;
+  align-items:baseline;font-family:var(--mono);font-size:13px;padding:10px 0;
+  border-bottom:1px solid var(--line)}
+.ed-pos .tk{font-family:var(--serif);font-size:18px;font-weight:700}
+.ed-pos .nt{font-family:var(--sans);font-size:12.5px;color:var(--inkFade)}
+.ed-tape{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.ed-ins{border:1px solid var(--line);border-radius:3px;padding:11px 12px 6px;
+  background:var(--card);overflow:hidden}
+.ed-ins.lead{border-color:var(--gold);border-left-width:3px}
+.ed-ins .i-k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--inkFade);display:flex;justify-content:space-between}
+.ed-ins .i-sig{color:var(--gold)}
+.ed-ins .i-v{font-family:var(--mono);font-size:19px;font-weight:700;margin-top:4px}
+.ed-ins .i-c{font-family:var(--mono);font-size:12px}
+.ed-sk{width:100%;height:44px;display:block;margin-top:5px}
+.ed-sk .ar{fill:currentColor;opacity:.12;stroke:none}
+.ed-sk .ln{fill:none;stroke:currentColor;stroke-width:1.6}
+.ed-sk.g{color:var(--green)}.ed-sk.r{color:var(--red)}
+.ed-rot{margin:8px 0 12px}
+.ed-rr{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:baseline;
+  padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ed-rr:last-child{border-bottom:0}
+.ed-rr .bar{width:110px;height:5px;background:var(--line);border-radius:3px;overflow:hidden;
+  justify-self:end}
+.ed-rr .bar b{display:block;height:100%}
+.ed-rr .pc{font-family:var(--mono);font-size:13px;min-width:70px;text-align:right}
+.ed-rr .yours{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--gold);
+  border:1px solid var(--gold);border-radius:2px;padding:1px 5px;margin-left:7px}
+.ed-smart{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;margin:8px 0 12px}
+.ed-sm{padding:11px 0;border-bottom:1px solid var(--line)}
+.ed-sm .sm-t{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--inkFade);margin-bottom:5px}
+.ed-sm .sm-l{font-size:13.5px;line-height:1.55;color:var(--inkMed)}
+.ed-setups{margin:10px 0 14px}
+.ed-su{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px 16px;
+  align-items:baseline;padding:11px 0;border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:13px}
+.ed-su:last-child{border-bottom:0}
+.ed-su .tk{font-family:var(--serif);font-size:17px;font-weight:700}
+.ed-su .nt{font-family:var(--sans);font-size:12.5px;color:var(--inkFade)}
+.ed-su .badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:2px 7px;
+  border:1px solid var(--line2);border-radius:2px;color:var(--inkLight)}
+.ed-su .badge.hot{border-color:var(--gold);color:var(--gold)}
+.ed-map{border:1px solid var(--line);border-radius:3px;background:var(--card);padding:8px;
+  margin:8px 0 14px;position:relative}
+.ed-gexh .ed-map{height:auto}
+.gexh-scroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+  padding-bottom:4px}
+.gex-svg{display:block;margin-top:6px}
+.gexh-key{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;padding:10px 2px 2px;
+  font-family:var(--mono);font-size:11.5px;color:var(--inkLight)}
+.gexh-key span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.gexh-key i{width:13px;height:4px;border-radius:2px;display:inline-block;flex:0 0 auto}
+.gexh-key b{font-weight:700;letter-spacing:.02em}
+.gexh-key em{font-style:normal}
+.gexh-key u{text-decoration:none;color:var(--inkFade);font-size:10.5px}
+.gexh-key s{text-decoration:none;color:var(--inkFade);font-style:italic;font-size:10.5px}
+.gexh-key .k-note{opacity:.8;font-style:italic;white-space:normal;flex-basis:100%;
+  line-height:1.5}
+.gexh-key .lv.off i{opacity:.45}
+.ed-chartk{font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--inkFade);display:flex;justify-content:space-between;
+  align-items:baseline;gap:14px;margin:6px 0}
+.ed-vix{border:1px solid var(--line);border-radius:3px;background:var(--card);height:250px;
+  position:relative;padding:8px;margin-bottom:14px}
+.ed-vix .vix-svg{position:absolute;inset:8px;width:calc(100% - 16px);
+  height:calc(100% - 16px)}
+.ed-note{font-size:13px;line-height:1.6;color:var(--inkFade);border-left:2px solid var(--line2);
+  padding:8px 0 8px 12px;margin:10px 0 4px;font-style:italic}
+.ed-cals{margin:10px 0 14px}
+.ed-cal{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px 14px;
+  align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ed-cal:last-child{border-bottom:0}
+.ed-cal.hot{border-left:3px solid var(--gold);padding-left:11px;margin-left:-14px}
+.ed-cal .c-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:2px 7px;
+  border-radius:2px;border:1px solid var(--line2);color:var(--inkLight)}
+.ed-cal .c-fomc{border-color:var(--red);color:var(--red)}
+.ed-cal .c-cpi{border-color:var(--gold);color:var(--gold)}
+.ed-cal .c-opex{border-color:var(--amber);color:var(--amber)}
+.ed-cal .c-w{font-family:var(--mono);font-size:12px;color:var(--inkLight);white-space:nowrap}
+.ed-cal .c-w.hot{color:var(--gold);font-weight:700}
+.ed-cal .c-d{font-family:var(--mono);font-size:11px;color:var(--inkFade);white-space:nowrap}
+.ed-w{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;
+  font-size:13.5px;padding:9px 0;border-bottom:1px solid var(--line)}
+.ed-w:last-child{border-bottom:0}
+.ed-w .w-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;padding:2px 7px;
+  border-radius:2px;background:var(--gold);color:#FFFDF9}
+.ed-w .w-tag.low{background:var(--line2);color:var(--ink)}
+.ed-w .w-when{font-family:var(--mono);font-size:11.5px;color:var(--inkFade);white-space:nowrap}
+.brief-watch{background:rgba(211,119,54,.10);border:1px solid rgba(211,119,54,.38);
+  border-radius:7px;padding:10px 13px;margin-top:11px;font-size:13.5px;line-height:1.6}
+.brief-watch .k{font-family:var(--mono);font-size:11px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--ink);display:block;margin-bottom:4px}
+.ed-jump{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:26px}
+.ed-jump a{display:block;text-align:center;padding:14px 8px;border:1px solid var(--line2);
+  border-radius:3px;color:var(--ink);font-family:var(--mono);font-size:11.5px;
+  letter-spacing:.14em;text-transform:uppercase;background:var(--card);cursor:pointer;
+  text-decoration:none}
+.ed-jump a:hover{border-color:var(--gold);color:var(--gold)}
+.ed-colophon{margin-top:20px;text-align:center;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--inkFade)}
+.ed-cond{margin-top:2px}
+@media(max-width:820px){
+  .ed-page{padding:20px 16px 50px}
+  .ed-brand .ed-name{font-size:36px}.ed-mark{width:38px;height:29px}
+  .ed-meta{padding-right:96px}
+  .ed-call{font-size:25px}
+  .ed-hl{font-size:23px}.ed-hl.sm{font-size:20px}
+  .ed-tape{grid-template-columns:1fr 1fr}.ed-jump{grid-template-columns:1fr 1fr}
+  .ed-smart{grid-template-columns:1fr;gap:0}
+  .ed-pos,.ed-su{grid-template-columns:auto 1fr;gap:3px 12px}
+  .ed-cal{grid-template-columns:auto 1fr;gap:3px 10px}
+  .ed-cal .c-w,.ed-cal .c-d{grid-column:span 2;font-size:11.5px}
+  .ed-vix{height:240px}
+}
+
+.pos-strip{margin:2px 0 4px;border-top:1px solid var(--line)}
+.pos-line{display:flex;gap:14px;align-items:baseline;padding:9px 0;
+  border-bottom:1px solid var(--line);font-family:var(--mono);font-size:13px}
+.pos-line:last-child{border-bottom:0}
+.pos-line .tk{font-family:var(--serif);font-size:17px;font-weight:700}
+.ed-w .w-tag.war-strike{background:var(--red);color:#FFFDF9}
+.ed-w .w-tag.war-oil{background:var(--amber);color:#FFFDF9}
+.ed-w .w-tag.war-talks{background:var(--green);color:#FFFDF9}
+.ed-w .w-tag.war-politics,.ed-w .w-tag.war-military{background:var(--line2);color:var(--ink)}
+</style></head><body><div class="ed-wrap"><div class="ed-page"><a class="ed-x" href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">CLOSE ✕</a><div class="ed-mast"><div class="ed-meta"><span>Phoenix Daily</span><span>Morning edition · Rome · covering Wednesday 2 September</span></div><div class="ed-brand"><svg class="ed-mark" viewBox="0 0 89 69" aria-hidden="true"><path fill="var(--gold)" fill-rule="evenodd" d="M3.90 3.70 L5.00 9.40 L9.20 17.70 L23.60 27.30 L22.60 27.80 L11.50 22.00 L10.90 23.10 L14.20 30.80 L17.10 33.70 L28.70 40.30 L30.60 42.70 L29.60 42.80 L22.60 38.10 L21.00 38.50 L22.20 41.80 L25.10 45.70 L35.80 51.60 L36.10 54.60 L38.80 55.30 L39.00 57.40 L43.40 64.70 L44.70 63.80 L45.10 61.50 L48.70 56.80 L49.30 54.10 L51.60 53.80 L52.60 51.10 L61.80 46.70 L64.70 43.80 L67.00 39.10 L65.30 37.60 L65.50 37.00 L71.70 32.80 L74.90 27.40 L76.00 22.70 L75.00 22.30 L70.70 25.60 L65.10 28.20 L60.70 31.60 L57.10 33.20 L53.20 36.60 L54.30 33.20 L60.50 28.10 L63.80 27.70 L75.80 19.70 L79.70 15.80 L84.00 5.10 L84.00 3.70 L83.20 3.20 L77.70 7.60 L64.10 16.20 L61.30 19.80 L57.10 21.20 L53.10 24.20 L47.20 30.10 L44.90 34.80 L45.80 39.40 L43.40 41.50 L41.30 38.50 L42.00 34.80 L40.90 31.50 L34.80 24.20 L27.90 19.30 L26.00 19.40 L24.70 17.20 L10.20 7.60 L6.80 4.20 L4.70 3.20 Z M49.70 42.30 L47.60 47.70 L45.90 49.70 L47.60 52.30 L46.90 52.90 L43.30 50.80 L43.00 49.90 L45.30 46.20 Z M24.30 28.30 L26.40 28.10 L29.70 30.30 L33.60 34.20 L33.80 35.50 Z M64.60 38.20 L63.70 39.60 L54.70 45.60 L53.30 45.70 L59.20 40.30 Z"/></svg><span class="ed-name">Phoenix</span></div><div class="ed-sub ed-sub-gamma" title="chosen because dealers are short gamma">Negative gamma: the move you see is the move getting bigger.</div><div class="ed-hello">Good morning Gabriel · Thursday, 3 September 2026</div></div><div class="ed-verdict"><div><div class="ed-call">The Fed blinks and the tape turns — <em>but Palantir breaks on its own</em></div><div class="ed-vwhy">New York Fed president John Williams told markets the yield surge reflects "a strong US economy" and investment in AI and data centres rather than inflation, said there is "no clear science right now whether monetary policy currently is sufficient", and left the impression that September is not settled. ADP then printed 38,000 private jobs against 47,000 expected, the weakest since January. Yields backed off their multi-year highs and everything rallied: S&P +0.46% to 7,666.60, Dow +0.56%, Nasdaq +0.45%, Russell +1.13%, with nine of eleven sectors higher and the VIX down to 15.20. Oil still rose — WTI 91.01, Brent 95.63 — because the war escalated on the same day: US forces struck close to 60 installations around the Strait of Hormuz and escorted 40 vessels carrying 18 million barrels through it, a wartime record. In the book BAC finally moved, +0.98% to 62.60 with its best high since 19 August. PLTR did the opposite and it was not the tape's fault.</div></div></div><div class="ed-sec"><div class="ed-k"><span>The tape</span><span class="ed-n">2026-09-02 · previous session</span></div><div class="ed-tape"><div class="ed-ins"><div class="i-k"><span>VIX</span><span class="i-sig">1.4σ</span></div><div class="i-v">15.2</div><div class="i-c"><span style="color:var(--red);font-weight:700">−6.98%</span></div><svg class="ed-sk r" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,31.6 L5.0,36.4 L10.0,23.7 L15.0,27.7 L20.0,32.6 L25.0,26.3 L30.0,14.2 L35.0,14.9 L40.0,24.4 L45.0,26.8 L50.0,14.6 L55.0,15.3 L60.0,14.8 L65.0,17.5 L70.0,3.0 L75.0,24.2 L80.0,30.7 L85.0,31.5 L90.0,27.7 L95.0,31.8 L100.0,35.7 L105.0,37.1 L110.0,33.8 L115.0,34.9 L120.0,39.2 L125.0,38.7 L130.0,41.0 L135.0,35.4 L140.0,31.6 L145.0,37.2 L150.0,30.6 L155.0,35.8 L160.0,31.5 L165.0,33.9 L170.0,35.3 L175.0,39.5 L180.0,37.0 L185.0,28.6 L190.0,35.4 L190,44 L0,44 Z" class="ar"/><path d="M0.0,31.6 L5.0,36.4 L10.0,23.7 L15.0,27.7 L20.0,32.6 L25.0,26.3 L30.0,14.2 L35.0,14.9 L40.0,24.4 L45.0,26.8 L50.0,14.6 L55.0,15.3 L60.0,14.8 L65.0,17.5 L70.0,3.0 L75.0,24.2 L80.0,30.7 L85.0,31.5 L90.0,27.7 L95.0,31.8 L100.0,35.7 L105.0,37.1 L110.0,33.8 L115.0,34.9 L120.0,39.2 L125.0,38.7 L130.0,41.0 L135.0,35.4 L140.0,31.6 L145.0,37.2 L150.0,30.6 L155.0,35.8 L160.0,31.5 L165.0,33.9 L170.0,35.3 L175.0,39.5 L180.0,37.0 L185.0,28.6 L190.0,35.4" class="ln"/></svg></div><div class="ed-ins"><div class="i-k"><span>S&P 500</span><span class="i-sig">1.0σ</span></div><div class="i-v">7,667</div><div class="i-c"><span style="color:var(--green);font-weight:700">+0.46%</span></div><svg class="ed-sk g" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,23.1 L4.9,20.6 L9.7,25.3 L14.6,23.1 L19.5,20.8 L24.4,23.9 L29.2,29.9 L34.1,31.0 L39.0,25.8 L43.8,26.6 L48.7,33.7 L53.6,33.5 L58.5,33.4 L63.3,32.1 L68.2,41.0 L73.1,31.4 L77.9,27.3 L82.8,18.6 L87.7,7.9 L92.6,8.9 L97.4,10.0 L102.3,6.3 L107.2,6.6 L112.1,8.6 L116.9,7.0 L121.8,3.0 L126.7,4.0 L131.5,7.2 L136.4,11.4 L141.3,10.2 L146.2,15.4 L151.0,12.8 L155.9,14.5 L160.8,12.6 L165.6,12.7 L170.5,8.4 L175.4,9.9 L180.3,11.9 L185.1,16.2 L190.0,13.4 L190,44 L0,44 Z" class="ar"/><path d="M0.0,23.1 L4.9,20.6 L9.7,25.3 L14.6,23.1 L19.5,20.8 L24.4,23.9 L29.2,29.9 L34.1,31.0 L39.0,25.8 L43.8,26.6 L48.7,33.7 L53.6,33.5 L58.5,33.4 L63.3,32.1 L68.2,41.0 L73.1,31.4 L77.9,27.3 L82.8,18.6 L87.7,7.9 L92.6,8.9 L97.4,10.0 L102.3,6.3 L107.2,6.6 L112.1,8.6 L116.9,7.0 L121.8,3.0 L126.7,4.0 L131.5,7.2 L136.4,11.4 L141.3,10.2 L146.2,15.4 L151.0,12.8 L155.9,14.5 L160.8,12.6 L165.6,12.7 L170.5,8.4 L175.4,9.9 L180.3,11.9 L185.1,16.2 L190.0,13.4" class="ln"/></svg></div><div class="ed-ins"><div class="i-k"><span>Nasdaq</span><span class="i-sig">0.6σ</span></div><div class="i-v">26,218</div><div class="i-c"><span style="color:var(--green);font-weight:700">+0.45%</span></div><svg class="ed-sk g" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,12.6 L4.9,11.4 L9.7,18.0 L14.6,14.2 L19.5,11.6 L24.4,17.8 L29.2,23.7 L34.1,23.9 L39.0,18.6 L43.8,20.9 L48.7,29.8 L53.6,32.4 L58.5,33.1 L63.3,34.0 L68.2,41.0 L73.1,30.1 L77.9,26.0 L82.8,17.3 L87.7,6.5 L92.6,10.1 L97.4,10.3 L102.3,4.8 L107.2,6.2 L112.1,8.8 L116.9,6.5 L121.8,3.0 L126.7,4.2 L131.5,5.5 L136.4,11.3 L141.3,10.6 L146.2,14.8 L151.0,13.0 L155.9,16.2 L160.8,13.5 L165.6,13.8 L170.5,7.2 L175.4,9.5 L180.3,10.0 L185.1,14.3 L190.0,12.4 L190,44 L0,44 Z" class="ar"/><path d="M0.0,12.6 L4.9,11.4 L9.7,18.0 L14.6,14.2 L19.5,11.6 L24.4,17.8 L29.2,23.7 L34.1,23.9 L39.0,18.6 L43.8,20.9 L48.7,29.8 L53.6,32.4 L58.5,33.1 L63.3,34.0 L68.2,41.0 L73.1,30.1 L77.9,26.0 L82.8,17.3 L87.7,6.5 L92.6,10.1 L97.4,10.3 L102.3,4.8 L107.2,6.2 L112.1,8.8 L116.9,6.5 L121.8,3.0 L126.7,4.2 L131.5,5.5 L136.4,11.3 L141.3,10.6 L146.2,14.8 L151.0,13.0 L155.9,16.2 L160.8,13.5 L165.6,13.8 L170.5,7.2 L175.4,9.5 L180.3,10.0 L185.1,14.3 L190.0,12.4" class="ln"/></svg></div><div class="ed-ins"><div class="i-k"><span>WTI crude</span><span class="i-sig">0.4σ</span></div><div class="i-v">91.01</div><div class="i-c"><span style="color:var(--green);font-weight:700">+0.88%</span></div><svg class="ed-sk g" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,39.8 L4.9,41.0 L9.7,28.7 L14.6,26.5 L19.5,26.0 L24.4,27.2 L29.2,20.7 L34.1,19.4 L39.0,16.3 L43.8,12.8 L48.7,3.0 L53.6,8.3 L58.5,20.5 L63.3,26.6 L68.2,17.1 L73.1,18.7 L77.9,16.8 L82.8,24.7 L87.7,33.0 L92.6,34.0 L97.4,30.2 L102.3,28.6 L107.2,21.4 L112.1,19.4 L116.9,19.3 L121.8,23.0 L126.7,20.9 L131.5,17.1 L136.4,16.3 L141.3,14.6 L146.2,11.0 L151.0,12.4 L155.9,16.1 L160.8,21.0 L165.6,21.2 L170.5,18.8 L175.4,19.1 L180.3,14.8 L185.1,6.6 L190.0,5.2 L190,44 L0,44 Z" class="ar"/><path d="M0.0,39.8 L4.9,41.0 L9.7,28.7 L14.6,26.5 L19.5,26.0 L24.4,27.2 L29.2,20.7 L34.1,19.4 L39.0,16.3 L43.8,12.8 L48.7,3.0 L53.6,8.3 L58.5,20.5 L63.3,26.6 L68.2,17.1 L73.1,18.7 L77.9,16.8 L82.8,24.7 L87.7,33.0 L92.6,34.0 L97.4,30.2 L102.3,28.6 L107.2,21.4 L112.1,19.4 L116.9,19.3 L121.8,23.0 L126.7,20.9 L131.5,17.1 L136.4,16.3 L141.3,14.6 L146.2,11.0 L151.0,12.4 L155.9,16.1 L160.8,21.0 L165.6,21.2 L170.5,18.8 L175.4,19.1 L180.3,14.8 L185.1,6.6 L190.0,5.2" class="ln"/></svg></div></div><div class="pos-strip"><div class="pos-line"><span class="tk">GOOG</span><span>333.78 · <span style="color:var(--green);font-weight:700">+0.53%</span> on the day · <span style="color:var(--green);font-weight:700">+2.4%</span> on entry · <b>0.4R</b> open</span></div><div class="pos-line"><span class="tk">BAC</span><span>62.6 · <span style="color:var(--green);font-weight:700">+0.98%</span> on the day · <span style="color:var(--red);font-weight:700">−2.8%</span> on entry · <b>-0.4R</b> open</span></div><div class="pos-line"><span class="tk">PLTR</span><span>169.46 · <span style="color:var(--red);font-weight:700">−5.81%</span> on the day · <span style="color:var(--red);font-weight:700">−7.9%</span> on entry</span></div><div class="pos-line"><span class="tk">AAPL</span><span>324.96 · <span style="color:var(--red);font-weight:700">−0.05%</span> on the day · <span style="color:var(--green);font-weight:700">+1.2%</span> on entry</span></div></div></div><div class="ed-sec"><div class="ed-k"><span>Your positions</span><span class="ed-n">signal vs noise</span></div><h2 class="ed-hl sm">1 signal on PLTR — read before the open (GOOG, BAC, AAPL quiet)</h2><div><div class="ed-w"><span class="w-tag">Signal</span><span><b>PLTR</b> — <b>PLTR −5.81% to 169.46 on 1.8x volume — down 9.1% in two sessions, on a day its sector rallied and its own news was good</b>. Tuesday's 3.5% fall could be blamed on a rates day landing on high-multiple software. Wednesday cannot. Yields fell, Nvidia rose 3.3%, technology recovered broadly, and Palantir announced an Army TITAN ground-station contract and hired Peter Zaffino, AIG's former executive chairman, to run financial services — and the stock fell 5.81% on 26.1m shares against a 14.4m average for the prior three sessions, with a 165.71 low. The reason being given is valuation: roughly 144 times earnings, and profit-taking after the run. That is a name being sold on its own account, not a factor sweeping it along, and it is the definition of a signal — it changes the thesis. The provisional entry near 184 is now −7.90%, below the 8/27 close that began the breakout and below the 8/26 close before it. The momentum trade that justified the entry no longer exists. There is still no stop on either account, which means the position currently has no defined loss, and this is the third consecutive brief saying so.</span><span class="w-when">Motley Fool · Investrade · IBKR · 2026-09-02</span></div><div class="ed-w"><span class="w-tag low">Noise</span><span><b>GOOG</b> — <b>GOOG +0.53% to 333.78 on the lightest volume in a week — still no second act on the FTC report</b>. 7.7m shares against a 9.5m average for the prior three sessions, a 0.46-sigma drift, range 329.52 to 336.51. Three sessions after Bloomberg reported the FTC was finalising a YouTube suit there has been no filing, no comment and no follow-through, which is what noise looks like in practice — a live risk that has not yet become an event. Position: +2.43% on entry, 0.39R, up from 0.31R and the first uptick after six declining sessions. The stop at 305.67 sits 8.4% below.</span><span class="w-when">IBKR · 2026-09-02</span></div><div class="ed-w"><span class="w-tag low">Noise</span><span><b>BAC</b> — <b>BAC +0.98% to 62.60, high 63.55 — the best level since 19 August, and it came on a dovish day</b>. Financials were among the three leading sectors and BAC took the whole move, trading up to 63.55 before settling at 62.60. Note the irony worth thinking about: this happened on the day the September hike case weakened, not strengthened. If the position only works when the Fed is hiking, Wednesday should have been flat; it was the best session since the entry. What actually moved it was the relief in the long end and a broad risk bid, which suggests the thesis is less a pure rates bet than it looked. Gabriel −2.77% on entry at <b>−0.45R</b>, stop 60.39 <b>3.5% below</b>; Aldemar −2.43% at <b>−0.35R</b>, stop 59.65 <b>4.7% below</b>. Both improved by about 0.15R on the day. Friday's employment report is still the event.</span><span class="w-when">Investrade · Alain Guillot · IBKR · 2026-09-02</span></div><div class="ed-w"><span class="w-tag low">Noise</span><span><b>AAPL</b> — <b>AAPL −0.05% to 324.96 — Tuesday's 2.6% move held, which is the whole point</b>. A 323.53 to 328.40 range on 21.4m shares, below the prior three sessions' average, and a close four cents from Tuesday's. After a 2.3-sigma gap the interesting question is always whether it gives it back; it did not. The provisional entry near 321 is +1.23%. Seven days to the 9 September event under John Ternus, and still no stop recorded — the same note as yesterday, now with a stock that has held a two-day gain and therefore has an obvious level to define risk against.</span><span class="w-when">IBKR · 2026-09-02</span></div></div><p class="ed-body"><b>Signal</b> changes the thesis, the levels or the size — earnings, a regulator with teeth, M&A, a ruling with a revenue line attached. Everything else is filed as noise on purpose; a real signal survives skepticism.</p></div><div class="ed-sec"><div class="ed-k"><span>The war · US–Iran</span><span class="ed-n">campaign · ~60 installations struck · 18m barrels escorted in a day · strait forced open, not agreed open</span></div><h2 class="ed-hl sm">America stops trying to end the war and starts running the strait</h2><div><div class="ed-w"><span class="w-tag war-strike">STRIKE</span><span><b>Close to 60 Iranian military installations struck around the strait — air defence, radar, maritime assets, mine-laying and communications</b>. Trump described the result plainly: "They can't see it because they have no radar, because we blew it up." The targeting was not punitive but functional — blinding the Iranian side of the waterway. One strike hit a wedding venue at Kuhestak in southern Iran, killing five people including a child and wounding at least 68; Iranian state media also reported hits on airports and power infrastructure in Hormozgan.</span><span class="w-when">CNN · NPR · 2026-09-02</span></div><div class="ed-w"><span class="w-tag war-escort">ESCORT</span><span><b>US forces escorted 40 commercial vessels carrying 18 million barrels of oil through the strait in a single day — a wartime peak</b>. Pre-conflict flow was roughly 20 million barrels a day, so this is close to normal throughput under naval escort. During the operation American forces shot down anti-ship cruise missiles and repelled multiple waves of drones. Officials say work against Iran's nuclear programme has been "backburnered" in favour of controlling the shipping lanes and blockading Iranian ports. That is the strategic shift, and it is the reason crude rose less than 1% on a day with sixty strikes.</span><span class="w-when">CNN · 2026-09-02</span></div><div class="ed-w"><span class="w-tag war-retaliation">RETALIATION</span><span><b>Iran fires ballistic missiles at a US base in Jordan and drones at US positions in Bahrain and Kuwait — all intercepted</b>. Jordan's military brought down ten missiles and three landed in unpopulated ground; Kuwait confirmed intercepting the drones. The IRGC promised "crushing and devastating blows". Two rounds of Iranian retaliation have now produced no casualties and no damage, which tells you something about the current balance — and Trump has said further retaliation will be met "at a much harder and higher level".</span><span class="w-when">NPR · Navy Times · 2026-09-02</span></div><div class="ed-w"><span class="w-tag war-shipping">SHIPPING</span><span><b>Charter rates above $500,000 a day and war-risk insurance still elevated — the industry is not convinced</b>. The escorts are working and the commercial market is pricing as if they might not keep working. One analyst noted the administration has "not covered itself with credibility". This gap between operational success and commercial confidence is the single most useful thing to watch: if charter rates and insurance come down, the oil premium goes with them and Friday's inflation arithmetic changes.</span><span class="w-when">CNN · 2026-09-02</span></div></div><p class="ed-body">Yesterday's question was whether the strait closes. Wednesday answered it for now: it is being forced open, convoy by convoy, and Trump says he has "almost total control" of it. That is why the tape could rally through sixty airstrikes — the market prices barrels moving, not munitions fired. Two things would break the frame. One is a successful attack on an escorted convoy, which would reprice insurance instantly. The other is Iran accepting the June memorandum it keeps offering to honour, which would take the premium out of crude just as fast in the other direction. Until one happens, the war is an oil-logistics story and the Fed is the market's actual subject.</p></div><div class="ed-sec"><div class="ed-k"><span>The world &amp; the market</span><span class="ed-n">in terms of news</span></div><h2 class="ed-hl sm">One dovish speech undoes a week of hawkish repricing</h2><div><div class="ed-w"><span class="w-tag low">FED</span><span><b>Williams ties the yield surge to "a strong US economy" and AI investment, not inflation, and says the Fed must "wait and see"</b>. He added there is "no clear science right now whether monetary policy currently is sufficient" to return inflation to target, and that inflation expectations remain well anchored. This is the direct counterweight to Kevin Warsh at Jackson Hole and to Cleveland's Beth Hammack, who says "now is the time to act". The committee is visibly split with two weeks to the 15–16 September meeting, and the long end took the hint: yields came off their multi-year highs and stayed at 4.796%.</span><span class="w-when">Bond Buyer · CNBC · Alain Guillot · 2026-09-02</span></div><div class="ed-w"><span class="w-tag low">DATA</span><span><b>ADP private payrolls +38,000 against 47,000 expected — the weakest since January</b>. A soft private read two days before the official report, and it landed on a market already looking for a reason to unwind the hike trade. Friday's number is now doing double duty: it settles September, and it tests whether the labour market is genuinely cooling or whether ADP is simply noisy again.</span><span class="w-when">Investrade · Alain Guillot · 2026-09-02</span></div><div class="ed-w"><span class="w-tag low">TAPE</span><span><b>S&amp;P +0.46% to 7,666.60 · Dow +0.56% to 53,061.95 · Nasdaq +0.45% to 26,217.83 · Russell +1.13%; VIX 16.34 → 15.20</b>. Nine of eleven sectors higher and roughly 60% of the index up, led by Materials, Communications and Financials, with Energy and Technology lagging despite Nvidia's 3.3% gain. Dell beat and raised FY27 guidance sharply; MongoDB and Palo Alto fell on mixed results. The breadth is the point — the Russell leading by more than double the S&P is a rates-relief signature, not a growth-scare one.</span><span class="w-when">Investrade · Alain Guillot · TradingEconomics · 2026-09-02</span></div><div class="ed-w"><span class="w-tag low">COMMODITIES</span><span><b>WTI +0.88% to 91.01 and Brent +1.04% to 95.63; gold +0.41% to 4,414.60</b>. Crude is now up 6.1% in two sessions and sits at the highest level of the conflict, but the daily increments are shrinking as the escort operation proves it can move barrels. Gold bounced modestly after Tuesday's 1.9% fall. Neither is behaving like an asset that expects the strait to close.</span><span class="w-when">Investrade · 2026-09-02</span></div><div class="ed-w"><span class="w-tag low">AHEAD</span><span><b>Employment report Friday 4 September · Apple event 9 September · CPI 11 September · FOMC 15–16 September · triple witching 18 September</b>. The book has direct exposure to the first three. Friday decides the September meeting and therefore the BAC thesis; the 9th decides whether AAPL's two-day gain was anticipation or repricing. Nothing on the calendar helps PLTR, which is the position that now needs a decision rather than a catalyst.</span><span class="w-when">Phoenix desk · 2026-09-02</span></div></div><p class="ed-body"><b>On deck.</b> <b>CPI release</b> in 8 days — 08:30 ET. The regime's tightest gate is CPI y/y.</p></div><div class="ed-jump"><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Markets</a><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Screeners</a><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Trade</a><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Portfolio</a></div><div class="ed-colophon">Phoenix OS v1.0 · not investment advice</div></div></div></body></html>
