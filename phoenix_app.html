@@ -1398,6 +1398,12 @@ html{scroll-behavior:auto}
   width:min(300px,88vw);box-shadow:0 22px 60px rgba(0,0,0,.4)}
 #pxProfPop h4{margin:0 0 3px;font-size:16px;font-weight:800;letter-spacing:-.02em}
 #pxProfPop p{margin:0 0 14px;font-size:12.5px;color:var(--inkLight)}
+#pxProfPop .auth{margin:12px 0 4px;padding-top:12px;border-top:1px solid var(--line2)}
+#pxProfPop .auth .who{font-family:var(--mono);font-size:11px;color:var(--inkFade);margin:0 0 8px;line-height:1.5;word-break:break-all}
+#pxProfPop .auth .who b{color:var(--ink);font-weight:600}
+#pxProfPop .auth .who.msg{color:var(--ember,#E0642B);margin-top:6px}
+#pxProfPop .auth .opt i{font-style:normal}
+#pxProfAv.authed{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--green)}
 #pxProfPop button.opt{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;margin-bottom:8px;
   border-radius:11px;background:var(--card);border:1px solid var(--line);color:var(--ink);cursor:pointer;text-align:left}
 #pxProfPop button.opt.on{border-color:var(--gold)}
@@ -2837,6 +2843,138 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     key: "sb_publishable_9c-C_QYAI-7BEZ_0-uw7SA_gHpVdQrd",
     timeoutMs: 4000
   };
+  // ================= AUTH — Supabase e-mail code / magic link, REST only =================
+  // Reads stay anonymous. Writes carry the session token; the database decides (allowed_users +
+  // px_is_allowed()), never this file. A stranger with a session reads what anon reads and writes
+  // nothing. The 6-digit code is the primary path on iPhone: a magic link opens wherever Mail
+  // decides, and a home-screen web app does not share Safari's session; the code always works.
+  var PX_AUTH_KEY = "phoenix.auth";
+  var PX_AUTH_PROFILE = { "gabrielschmal@gmail.com": "G", "aldemarschmal@hotmail.com": "A" };  // display only
+  var pxSession = null, pxAuthMsg = "";
+  function pxAuthLoad(){ try{ pxSession = JSON.parse(localStorage.getItem(PX_AUTH_KEY) || "null"); }catch(e){ pxSession = null; } return pxSession; }
+  function pxAuthSave(sess){
+    pxSession = sess || null;
+    try{ if(sess) localStorage.setItem(PX_AUTH_KEY, JSON.stringify(sess)); else localStorage.removeItem(PX_AUTH_KEY); }catch(e){}
+    pxAuthPaint();
+  }
+  function pxAuthEmail(){ return (pxSession && pxSession.user && pxSession.user.email) || null; }
+  function pxAuthToken(){                                   // fresh access token, or null
+    if(!pxSession || !pxSession.access_token) return null;
+    if(pxSession.expires_at && Date.now()/1000 > pxSession.expires_at - 60) return null;
+    return pxSession.access_token;
+  }
+  function pxAuthHeaders(){                                 // writes: session token when fresh, anon key otherwise
+    var t = pxAuthToken();
+    return { apikey: SUPA.key, Authorization: "Bearer " + (t || SUPA.key), "Content-Type": "application/json" };
+  }
+  function pxAuthStore(j){                                  // normalise a GoTrue session payload
+    if(!j || !j.access_token) return null;
+    var exp = j.expires_at || (Math.floor(Date.now()/1000) + (+j.expires_in || 3600));
+    var sess = { access_token: j.access_token, refresh_token: j.refresh_token || (pxSession && pxSession.refresh_token) || null,
+                 expires_at: exp, user: { email: (j.user && j.user.email) || pxAuthEmail() } };
+    pxAuthSave(sess); return sess;
+  }
+  function pxAuthRefresh(){                                 // silent; keeps a signed-in phone signed in
+    if(!pxSession || !pxSession.refresh_token) return Promise.resolve(null);
+    return fetch(SUPA.url + "/auth/v1/token?grant_type=refresh_token", { method: "POST",
+        headers: { apikey: SUPA.key, "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: pxSession.refresh_token }) })
+      .then(function(r){ return r.json().then(function(j){ return r.ok ? j : Promise.reject(j); }); })
+      .then(function(j){ return pxAuthStore(j); })
+      .catch(function(e){ if(e && /invalid|revoked|not found/i.test(e.error_description || e.msg || e.message || "")) pxAuthSave(null); return null; });
+  }
+  function pxAuthSend(email){                               // one e-mail carries both the code and the link
+    var back = location.origin + location.pathname;
+    return fetch(SUPA.url + "/auth/v1/otp?redirect_to=" + encodeURIComponent(back), { method: "POST",
+        headers: { apikey: SUPA.key, "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email, create_user: true }) })
+      .then(function(r){ return r.text().then(function(t){ var j = {}; try{ j = JSON.parse(t || "{}"); }catch(e){}
+        if(!r.ok) throw new Error(j.msg || j.error_description || j.message || ("HTTP " + r.status)); return j; }); });
+  }
+  function pxAuthVerify(email, code){
+    return fetch(SUPA.url + "/auth/v1/verify", { method: "POST",
+        headers: { apikey: SUPA.key, "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "email", email: email, token: String(code).replace(/\D/g, "") }) })
+      .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.msg || j.error_description || j.message || ("HTTP " + r.status)); return j; }); })
+      .then(function(j){ var sess = pxAuthStore(j); if(!sess) throw new Error("no session in reply"); return sess; });
+  }
+  function pxAuthSignOut(){
+    var t = pxAuthToken();
+    if(t) fetch(SUPA.url + "/auth/v1/logout", { method: "POST", headers: { apikey: SUPA.key, Authorization: "Bearer " + t } }).catch(function(){});
+    pxAuthSave(null);
+  }
+  function pxAuthFromHash(){                                // magic-link return: #access_token=...  (parsed before the router sees it)
+    var h = location.hash || "";
+    if(h.indexOf("access_token=") < 0 && h.indexOf("error=") < 0) return false;
+    var q = {}; h.replace(/^#/, "").split("&").forEach(function(kv){ var i = kv.indexOf("="); if(i > 0) q[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1).replace(/\+/g, " ")); });
+    if(q.access_token){
+      var email = null;
+      try{ email = JSON.parse(atob(q.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).email || null; }catch(e){}
+      pxAuthStore({ access_token: q.access_token, refresh_token: q.refresh_token, expires_in: q.expires_in, expires_at: q.expires_at ? +q.expires_at : null, user: { email: email } });
+      pxAuthMsg = "Signed in";
+    } else if(q.error){
+      pxAuthMsg = "Sign-in link failed: " + (q.error_description || q.error_code || q.error);
+    }
+    try{ history.replaceState(null, "", location.pathname + "#mission"); }catch(e){}   // a real route, so the router does not hop
+    return true;
+  }
+  function pxAuthProfileFor(email){ return email ? (PX_AUTH_PROFILE[String(email).toLowerCase()] || null) : null; }
+  function pxAuthPaint(){                                   // the block inside the profile popover + the rail avatar ring
+    var box = document.getElementById("pxAuthBox");
+    var email = pxAuthEmail();
+    if(box){
+      box.innerHTML = email
+        ? '<div class="who">Signed in <b>' + email + '</b></div><button class="opt auth-out" data-auth="out"><i>&#10005;</i><b>Sign out</b></button>'
+        : '<div class="who">Not signed in \u2014 reading works, saving needs a sign-in.</div><button class="opt auth-in" data-auth="in"><i>&#9993;</i><b>Sign in with e-mail</b></button>';
+      if(pxAuthMsg){ box.innerHTML += '<div class="who msg">' + pxAuthMsg + '</div>'; pxAuthMsg = ""; }
+    }
+    var av = document.getElementById("pxProfAv");
+    if(av) av.classList.toggle("authed", !!email);
+  }
+  function pxAuthModal(){
+    var email = pxAuthEmail() || "";
+    try{ email = email || localStorage.getItem("phoenix.auth.email") || ""; }catch(e){}
+    var html = '<div class="tr-modal-title">Sign in</div>' +
+      '<div class="tr-field"><label>E-mail</label><input id="mAuthEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="none" placeholder="you@example.com" value="' + email.replace(/"/g, "") + '"></div>' +
+      '<div class="tr-field" id="mAuthCodeRow" style="display:none"><label>6-digit code from the e-mail</label><input id="mAuthCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456"></div>' +
+      '<div class="sl-note" id="mAuthNote">One e-mail arrives with a code and a link. On a phone, type the code here \u2014 it works wherever the e-mail opens.</div>' +
+      '<div class="tr-modal-actions"><button class="ok" id="mAuthOk">Send code</button><button class="cancel">Cancel</button></div>';
+    trModal(html, function(bg){
+      var em = (bg.querySelector("#mAuthEmail").value || "").trim().toLowerCase();
+      var codeRow = bg.querySelector("#mAuthCodeRow"), note = bg.querySelector("#mAuthNote"), ok = bg.querySelector("#mAuthOk");
+      if(!em || em.indexOf("@") < 0){ note.textContent = "That is not an e-mail address."; return false; }
+      try{ localStorage.setItem("phoenix.auth.email", em); }catch(e){}
+      if(codeRow.style.display === "none"){
+        ok.disabled = true; note.textContent = "Sending\u2026";
+        pxAuthSend(em).then(function(){
+          codeRow.style.display = ""; ok.disabled = false; ok.textContent = "Verify";
+          note.textContent = "Sent. Type the code, or tap the link in the e-mail \u2014 either signs you in.";
+          var c = bg.querySelector("#mAuthCode"); if(c) c.focus();
+        }).catch(function(e){ ok.disabled = false; note.textContent = "Could not send: " + e.message + ". Supabase allows only a few e-mails per hour \u2014 wait before retrying."; });
+        return false;
+      }
+      var code = (bg.querySelector("#mAuthCode").value || "").trim();
+      if(!code){ note.textContent = "Type the code from the e-mail."; return false; }
+      ok.disabled = true; note.textContent = "Verifying\u2026";
+      pxAuthVerify(em, code).then(function(){
+        trModalClose();
+        var prof = pxAuthProfileFor(em);
+        if(prof && window.PHOENIX_PROFILE !== prof){ var t = document.getElementById("px" + prof); if(t) t.click(); }
+        pxAuthMsg = "Signed in as " + em; pxAuthPaint();
+      }).catch(function(e){ ok.disabled = false; note.textContent = "Not accepted: " + e.message + ". Codes expire after a few minutes; send a new one if needed."; });
+      return false;
+    });
+  }
+  pxAuthLoad();
+  pxAuthFromHash();
+  // A link tapped while the app is already open is a fragment navigation: popstate fires before
+  // hashchange, and the router is bound to both. Bind to both here too; this module loads first.
+  window.addEventListener("popstate", pxAuthFromHash);
+  window.addEventListener("hashchange", pxAuthFromHash);
+  pxAuthRefresh();                                          // boot: renew a stale token silently
+  setInterval(pxAuthRefresh, 45 * 60 * 1000);
+  window.PX_AUTH = { email: pxAuthEmail, headers: pxAuthHeaders, modal: pxAuthModal, out: pxAuthSignOut, profile: pxAuthProfileFor };
+
   var PX_SRC = {};      // provenance per file: {src:"supabase"|"pages", asof:<iso>|null}
   var PX_FROZEN = false; // future lanes (Realtime prices etc.) must check this
   // Chart text and gridlines were hardcoded per theme: "#7E93A8" vanishes on
@@ -3031,8 +3169,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(!pin) return;
     fetch(SUPA.url + "/rest/v1/rpc/toggle_freeze", {
       method: "POST",
-      headers: { apikey: SUPA.key, Authorization: "Bearer " + SUPA.key,
-                 "Content-Type": "application/json" },
+      headers: pxAuthHeaders(),
       body: JSON.stringify({ pin: pin, do_freeze: !PX_FROZEN,
                              minutes: 60, reason: "manual (app)" })
     }).then(function(r){ return r.json(); })
@@ -7518,12 +7655,12 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var on=!(sfWatched(tk));
     /* set_watch takes no PIN - it is not a destructive write. Sending one made
        the argument set unmatchable and PostgREST answered 404. */
-    fetch(SUPA.url+"/rest/v1/rpc/set_watch",{method:"POST",headers:{apikey:SUPA.key,Authorization:"Bearer "+SUPA.key,"Content-Type":"application/json"},
+    fetch(SUPA.url+"/rest/v1/rpc/set_watch",{method:"POST",headers:pxAuthHeaders(),
       body:JSON.stringify({p_ticker:tk,p_on:on})})
     .then(function(r){ return r.json(); }).then(function(j){
       if(j&&j.ok){ if(!PX_WATCH) PX_WATCH={}; if(on) PX_WATCH[tk]=j.bucket||"watch"; else delete PX_WATCH[tk];
         if(scrData) renderScreener(); if(done) done(true); }
-      else { window.alert(pxRpcErr(j,"watchlist update failed")); if(done) done(false); }
+      else { var m=pxRpcErr(j,"watchlist update failed"); pxAuthGate(m); window.alert(m); if(done) done(false); }
     }).catch(function(){ window.alert("Supabase unreachable \u2014 the watchlist lives there"); if(done) done(false); });
   }
   // ---- the 15-minute Yahoo lane: prices_universe for the rows on screen, rotation_intraday for the pickers ----
@@ -11070,6 +11207,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   /* PostgREST rejections carry {code,message,details,hint}; our own functions
      return {ok:false,error}. Reading only the latter collapsed every
      gateway-level failure into the word "RPC refused", which said nothing. */
+  function pxAuthGate(msg){                                 // a refused write names the reason and offers the sign-in
+    if(!/sign in required|allowlist|permission denied|JWT|401|403/i.test(String(msg || ""))) return false;
+    if(!pxAuthEmail()) setTimeout(function(){ pxAuthModal(); }, 50);
+    return true;
+  }
   function pxRpcErr(j,fallback){
     if(!j) return fallback;
     if(j.error) return j.error;
@@ -11127,11 +11269,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           return; }
         sessionStorage.setItem("pxPin",pin); trDirty=0; trLastSaved=new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}); trBanner(); return; }
       var op=ops[i++];
-      fetch(SUPA.url+"/rest/v1/rpc/"+op.fn,{method:"POST",headers:{apikey:SUPA.key,Authorization:"Bearer "+SUPA.key,"Content-Type":"application/json"},body:JSON.stringify(op.body)})
+      fetch(SUPA.url+"/rest/v1/rpc/"+op.fn,{method:"POST",headers:pxAuthHeaders(),body:JSON.stringify(op.body)})
         .then(function(r){ op.status=r.status; return r.json().catch(function(){ return {message:"HTTP "+r.status+" with no JSON body"}; }); })
         .then(function(j){ if(j&&j.ok){ okCount++; if(op.s==null) delete trSnap[op.id]; else trSnap[op.id]=op.s; next(); }
           else {
-            failed=pxRpcErr(j,"RPC refused ("+op.fn+", HTTP "+(op.status||"?")+")");
+            failed=pxRpcErr(j,"RPC refused ("+op.fn+", HTTP "+(op.status||"?")+")"); pxAuthGate(failed);
             var t=trGet(op.id); failedIds.push((t&&t.ticker)||op.id);
             next();
           } })
@@ -13806,6 +13948,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       '<h4>Switch profile</h4><p>Each book is separate \u2014 positions, heat and history.</p>'+
       '<button class="opt" data-p="G"><i>G</i><b>Gabriel</b></button>'+
       '<button class="opt" data-p="A"><i>A</i><b>Aldemar</b></button>'+
+      '<div class="auth" id="pxAuthBox"></div>'+
       '<button class="cx">Cancel</button></div>';
     document.body.appendChild(pop);
     function paint(){
@@ -13813,16 +13956,19 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var av=document.getElementById("pxProfAv"), nm=document.getElementById("pxProfNm");
       if(av) av.textContent=p;
       if(nm) nm.textContent=NAMES[p]||p;
-      Array.prototype.forEach.call(pop.querySelectorAll(".opt"),function(b){
+      Array.prototype.forEach.call(pop.querySelectorAll(".opt[data-p]"),function(b){
         b.classList.toggle("on", b.getAttribute("data-p")===p);
       });
+      pxAuthPaint();
     }
     function close(){ pop.classList.remove("on"); }
     window.PX_PROFILE_POPUP=function(){ paint(); pop.classList.add("on"); };
     var btn=document.getElementById("pxProf");
     if(btn) btn.addEventListener("click",function(e){ e.stopPropagation(); window.PX_PROFILE_POPUP(); });
     pop.addEventListener("click",function(e){
-      var o=e.target.closest&&e.target.closest(".opt");
+      var a=e.target.closest&&e.target.closest("[data-auth]");
+      if(a){ close(); if(a.getAttribute("data-auth")==="out"){ pxAuthSignOut(); } else { pxAuthModal(); } return; }
+      var o=e.target.closest&&e.target.closest(".opt[data-p]");
       if(o){ var t=document.getElementById("px"+o.getAttribute("data-p")); if(t) t.click(); close(); setTimeout(paint,400); return; }
       if(e.target===pop||(e.target.classList&&e.target.classList.contains("cx"))) close();
     });

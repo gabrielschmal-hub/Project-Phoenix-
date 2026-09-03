@@ -651,6 +651,31 @@ def cmd_report():
     json.dump(sc, open("outputs/signal_scorecard.json", "w"), indent=1)
 
 
+def cmd_check():
+    """Fail the job if the log is in a state that a green run must never hide.
+
+    3 Sep 2026: the first nightly mark did not run (GitHub skipped the cron) and nothing said so.
+    A workflow that exits 0 with zero rows marked is worse than one that fails: it looks like
+    patience. Run after mark; exit 1 when rows are due and none carry a mark.
+    """
+    s = sb()
+    today = dt.date.today()
+    due_cut = (today - dt.timedelta(days=2)).isoformat()
+    rows = s.table("signal_log").select("date,close,bars_marked,r_20d,is_new").lte("date", due_cut).limit(20000).execute().data
+    due = len(rows)
+    marked = sum(1 for r in rows if r.get("bars_marked"))
+    closed = sum(1 for r in rows if r.get("close") is not None)
+    at_h = sum(1 for r in rows if r.get("r_20d") is not None)
+    print(f"[signal_log] check: {due} rows due (date <= {due_cut}) · {marked} marked · {closed} with close · {at_h} at horizon")
+    if due and marked == 0:
+        print("[signal_log] CHECK FAILED: rows are due and none is marked. Yahoo blocked, or the mark never ran.")
+        sys.exit(1)
+    if due and closed < marked:
+        print("[signal_log] CHECK FAILED: marked rows without an entry close — the latch did not fill.")
+        sys.exit(1)
+    print("[signal_log] check ok")
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "append"
-    {"append": cmd_append, "mark": cmd_mark, "report": cmd_report}[cmd]()
+    {"append": cmd_append, "mark": cmd_mark, "report": cmd_report, "check": cmd_check}[cmd]()
