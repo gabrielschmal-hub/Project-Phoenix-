@@ -345,10 +345,6 @@ def cmd_append():
         print(f"[signal_log] {today}: nothing new to append ({len(trig)} triggers, all already logged)")
         return
     s.table("signal_log").upsert(rows, on_conflict="date,ticker", ignore_duplicates=True).execute()
-    os.makedirs("outputs", exist_ok=True)
-    with open("outputs/signal_log.jsonl", "a") as f:        # git-tracked twin: survives a DB accident
-        for r in rows:
-            f.write(json.dumps(r, default=str) + "\n")
     by_day = {}
     for r in rows:
         by_day[r["date"]] = by_day.get(r["date"], 0) + 1
@@ -642,8 +638,20 @@ def lenses(marked):
     return out
 
 
+def write_twin(rows, path="outputs/signal_log.jsonl"):
+    """Git-tracked copy of the whole log, rewritten in full on every report. Complete, sorted,
+    idempotent: a fresh checkout does not start it from zero, and a DB accident has a fallback."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    rows = sorted(rows, key=lambda r: (str(r.get("date")), str(r.get("ticker"))))
+    with open(path, "w") as f:
+        for r in rows:
+            f.write(json.dumps(r, default=str, sort_keys=True) + "\n")
+    return len(rows)
+
+
 def cmd_report():
     rows = sb().table("signal_log").select("*").limit(20000).execute().data
+    print(f"[signal_log] twin: {write_twin(rows)} rows -> outputs/signal_log.jsonl")
     sc = scorecard(rows)
     print(json.dumps(sc, indent=1))
     g = sc.get("atr_grid") or {}
