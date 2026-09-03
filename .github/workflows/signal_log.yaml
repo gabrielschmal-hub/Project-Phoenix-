@@ -5,13 +5,16 @@ on:
     types: [completed]
   schedule:
     - cron: "30 3 * * 2-6"      # 05:30 Rome Tue-Sat: mark forward returns for rows that are due
+    - cron: "15 6 * * 2-6"      # 08:15 Rome: second chance — GitHub skips or delays crons; the mark is idempotent
   workflow_dispatch:
     inputs:
-      mode: { description: "append | mark | report", default: "report" }
+      mode:
+        description: "append | nightly (mark + report + check) | mark | report | check"
+        default: "nightly"
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_KEY }}
@@ -23,14 +26,18 @@ jobs:
       - name: append (after daily run)
         if: github.event_name == 'workflow_run'
         run: python signal_log.py append
-      - name: mark (nightly)
-        if: github.event_name == 'schedule'
-        run: python signal_log.py mark && python signal_log.py report
-      - name: manual
-        if: github.event_name == 'workflow_dispatch'
+      - name: nightly (schedule or manual default)
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'nightly')
+        run: |
+          python signal_log.py mark
+          python signal_log.py report
+          python signal_log.py check      # a green run with nothing marked is a lie; this makes it red
+      - name: manual single step
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.mode != 'nightly'
         run: python signal_log.py ${{ github.event.inputs.mode }}
       - name: commit the git twin of the log
+        if: always()
         run: |
           git config user.name phoenix-bot && git config user.email bot@phoenix
           git add -A outputs/signal_log.jsonl outputs/signal_scorecard.json 2>/dev/null || true
-          git diff --cached --quiet || (git commit -m "signal log: ${{ github.event_name }}" && git push)
+          git diff --cached --quiet || (git commit -m "signal log: ${{ github.event_name }} ${{ github.event.inputs.mode }}" && git pull --rebase -q && git push)
