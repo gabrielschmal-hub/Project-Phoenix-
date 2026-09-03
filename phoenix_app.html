@@ -10553,7 +10553,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       case "sector": return r.sector||null;
       case "industry": return r.industry||null;
       case "profitability": return r.profitability||null;
-      case "mcap": return pfScrBucketMcap(r.mcap_B);
+      case "mcap": return pfScrBucketMcap(r.mcap_b);   // signal_log column, not the stocks.json key
       case "atr": return pfScrBucketAtr(r.atr_pct);
       case "regime": return r.regime||null;
       case "gex_regime": return r.gex_regime||null;
@@ -11812,7 +11812,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     slLoading=true;
     var cols="date,ticker,age_days,trigger,close,entry_ref,atr_pct,stop_pct,sector,industry,"+
              "opp_score,rank,r_20d,mfe_20d,mae_20d,bars_marked,data_age_min,profitable_ocf,profitability,"+
-             "mcap_B,breakout,days_on_list,regime,gex_regime,spx_vs_200d_pct,vix,"+
+             "mcap_b,breakout,days_on_list,regime,gex_regime,spx_vs_200d_pct,vix,"+   // lower case: Postgres folded the column
              "stop15_hit,stop15_day,stop15_tp2,stop15_tp2_day,stop15_tp3,stop15_tp3_day,stop15_r,"+
              "stop20_hit,stop20_day,stop20_tp2,stop20_tp2_day,stop20_tp3,stop20_tp3_day,stop20_r,"+
              "stop25_hit,stop25_day,stop25_tp2,stop25_tp2_day,stop25_tp3,stop25_tp3_day,stop25_r";

@@ -530,7 +530,8 @@ def _signal_market_context():
     ov = gex.get("overview") or {}
     return {
         "regime": macro.get("regime"),
-        "regime_held_weeks": macro.get("held_weeks"),
+        "regime_held_weeks": ((macro.get("explain") or {}).get("held_weeks")
+                              if isinstance(macro.get("explain"), dict) else None),
         "spx_close": c, "spx_date": last.get("date"),
         "spx_chg_pct": (round((c / prev["close"] - 1) * 100, 2)
                         if c and prev.get("close") else None),
@@ -7023,8 +7024,13 @@ def run_stocks(auto_pull=True):
         # publish even if the log write fails.
         try:
             _mkt = _signal_market_context()
-            write_signal_log(v2, regime=_mkt.get("regime"),
-                             spx=_mkt.get("spx_close"), market=_mkt)
+            _have = [k for k, v in _mkt.items() if v is not None]
+            print(f"[signals] market context: {len(_have)}/{len(_mkt)} fields "
+                  f"(regime={_mkt.get('regime')}, spx={_mkt.get('spx_close')})"
+                  + ("  <-- EMPTY: macro/spx_daily/gex not on disk yet at this step" if not _have else ""))
+            _p = write_signal_log(v2, regime=_mkt.get("regime"),
+                                  spx=_mkt.get("spx_close"), market=_mkt)
+            print(f"[signals] snapshot: {_p or 'already logged today (set PHOENIX_SIGNALS_FORCE=1 to rewrite)'}")
             run_signals_index()
         except Exception as e:
             print(f"[signals] FAILED (non-fatal): {e}")

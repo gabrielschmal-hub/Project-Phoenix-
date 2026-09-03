@@ -112,8 +112,13 @@ def load_profitability(history_dir="outputs/history", stocks_path="outputs/stock
     return {"by_date": by_date, "latest": latest}
 
 
-CAND_FIELDS = ("mcap_B", "breakout", "days_on_list", "pos_vs_high", "surge",
-               "industry_mom_3m", "dollar_vol_M", "trade_score")
+# Column names as Postgres actually stores them. An unquoted mixed-case identifier in a
+# CREATE TABLE is folded to lower case, so the migration's mcap_B became mcap_b; the append
+# sent mcap_B and PostgREST rejected the whole batch (PGRST204, 3 Sep). The engine snapshot
+# still uses the mixed-case keys, hence the mapping.
+CAND_FIELDS = ("mcap_b", "breakout", "days_on_list", "pos_vs_high", "surge",
+               "industry_mom_3m", "dollar_vol_m", "trade_score")
+SNAP_KEY = {"mcap_b": "mcap_B", "dollar_vol_m": "dollar_vol_M"}      # column -> key in signals_<date>.json
 MARKET_FIELDS = ("regime", "regime_held_weeks", "gex_regime", "spx_close",
                  "spx_vs_50d_pct", "spx_vs_200d_pct", "vix")
 
@@ -149,7 +154,8 @@ def load_snapshots(history_dir="outputs/history"):
             key = (day, str(t).strip())
             if key in cand:                         # trade book wins over invest for the same name
                 continue
-            cand[key] = {k: r.get(k) for k in CAND_FIELDS if r.get(k) is not None}
+            cand[key] = {k: r.get(SNAP_KEY.get(k, k)) for k in CAND_FIELDS
+                         if r.get(SNAP_KEY.get(k, k)) is not None}
     return {"cand": cand, "market": market}
 
 
@@ -295,7 +301,7 @@ def enrich_lenses(s, snap):
         return 0
     try:
         rows = (s.table("signal_log").select("date,ticker," + ",".join(CAND_FIELDS + MARKET_FIELDS))
-                .is_("mcap_B", "null").limit(5000).execute().data)
+                .is_("mcap_b", "null").limit(5000).execute().data)
     except Exception as e:
         print(f"[signal_log] lens enrich skipped ({e})"); return 0
     n = 0
@@ -592,7 +598,7 @@ LENSES = {
     "sector":        lambda r: r.get("sector"),
     "industry":      lambda r: r.get("industry"),
     "profitability": lambda r: r.get("profitability"),
-    "mcap":          lambda r: _bucket_mcap(r.get("mcap_B")),
+    "mcap":          lambda r: _bucket_mcap(r.get("mcap_b")),
     "atr":           lambda r: _bucket_atr(r.get("atr_pct")),
     "regime":        lambda r: r.get("regime"),
     "gex_regime":    lambda r: r.get("gex_regime"),
