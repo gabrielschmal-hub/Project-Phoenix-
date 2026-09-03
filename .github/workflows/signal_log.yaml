@@ -5,12 +5,16 @@ on:
     types: [completed]
   schedule:
     - cron: "30 3 * * 2-6"      # 05:30 Rome Tue-Sat: mark forward returns for rows that are due
-    - cron: "15 6 * * 2-6"      # 08:15 Rome: second chance — GitHub skips or delays crons; the mark is idempotent
+    - cron: "15 6 * * 2-6"      # 08:15 Rome: second chance. GitHub skips or delays crons; the mark is idempotent
   workflow_dispatch:
     inputs:
       mode:
-        description: "append | nightly (mark + report + check) | mark | report | check"
+        description: "nightly (mark + report + check) | append | mark | report | check"
         default: "nightly"
+
+permissions:
+  contents: write               # the commit step pushes the git twin; do not rely on repo defaults
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -18,26 +22,51 @@ jobs:
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || secrets.SUPABASE_KEY }}
+      MODE: ${{ github.event.inputs.mode }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
       - run: pip install -q pandas supabase yfinance
-      - name: append (after daily run)
+
+      - name: append (after the daily run)
         if: github.event_name == 'workflow_run'
         run: python signal_log.py append
-      - name: nightly (schedule or manual default)
+
+      - name: nightly (schedule, or manual default)
         if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'nightly')
         run: |
           python signal_log.py mark
           python signal_log.py report
-          python signal_log.py check      # a green run with nothing marked is a lie; this makes it red
+          python signal_log.py check      # exit 1 when rows are due and none is marked: green must mean marked
+
       - name: manual single step
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.mode != 'nightly'
-        run: python signal_log.py ${{ github.event.inputs.mode }}
+        run: python signal_log.py "$MODE"
+
       - name: commit the git twin of the log
         if: always()
         run: |
-          git config user.name phoenix-bot && git config user.email bot@phoenix
-          git add -A outputs/signal_log.jsonl outputs/signal_scorecard.json 2>/dev/null || true
-          git diff --cached --quiet || (git commit -m "signal log: ${{ github.event_name }} ${{ github.event.inputs.mode }}" && git pull --rebase -q && git push)
+          set -euo pipefail
+          git config user.name phoenix-bot
+          git config user.email bot@phoenix
+          # One path per `git add`. Given two paths in one command, git aborts the WHOLE add when
+          # either is missing, and a trailing `|| true` hid that: the twin was never committed
+          # in five runs while every one of them showed green.
+          for f in outputs/signal_log.jsonl outputs/signal_scorecard.json; do
+            if [ -f "$f" ]; then
+              git add -f "$f"
+              echo "staged  $f ($(wc -c < "$f") bytes)"
+            else
+              echo "absent  $f"
+            fi
+          done
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+            exit 0
+          fi
+          git commit -q -m "signal log: ${{ github.event_name }} ${MODE:-}"
+          # someone may have pushed while this ran (uploads, the daily run): replay on top of it
+          git pull --rebase -q origin "${GITHUB_REF_NAME:-main}"
+          git push -q origin "HEAD:${GITHUB_REF_NAME:-main}"
+          echo "pushed  $(git rev-parse --short HEAD): $(git show --stat --oneline HEAD | tail -n +2 | tr '\n' ' ')"
