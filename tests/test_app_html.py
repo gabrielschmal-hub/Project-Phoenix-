@@ -287,3 +287,98 @@ def test_portfolio_screener_fits_a_phone(browser, served):
     assert pg.locator("#pfScr .pf-scr-tbl table").count() == 3
     assert pg.evaluate("document.documentElement.scrollWidth") <= 392
     assert not _bad(errs), errs[:2]
+
+
+# ---------------------------------------------------------------- Auth (Supabase e-mail code / magic link)
+import base64, time
+
+
+def _jwt(email, exp):
+    b64 = lambda d: base64.urlsafe_b64encode(json.dumps(d).encode()).decode().rstrip("=")
+    return b64({"alg": "HS256"}) + "." + b64({"email": email, "exp": exp, "role": "authenticated"}) + ".sig"
+
+
+EMAIL = "gabrielschmal@gmail.com"
+
+
+def _auth_page(browser, base, w, h, mobile):
+    pg = browser.new_page(viewport={"width": w, "height": h}, is_mobile=mobile, has_touch=mobile)
+    errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
+    now = int(time.time()); calls = {"otp": [], "verify": [], "refresh": 0, "logout": 0}
+    def route(r):
+        u = r.request.url
+        if u.startswith(base): return r.continue_()
+        if "/auth/v1/otp" in u:
+            calls["otp"].append((u, json.loads(r.request.post_data))); return r.fulfill(status=200, content_type="application/json", body="{}")
+        if "/auth/v1/verify" in u:
+            body = json.loads(r.request.post_data); calls["verify"].append(body)
+            if body.get("token") != "123456":
+                return r.fulfill(status=403, content_type="application/json", body=json.dumps({"msg": "Token has expired or is invalid"}))
+            return r.fulfill(status=200, content_type="application/json", body=json.dumps(
+                {"access_token": _jwt(EMAIL, now + 3600), "refresh_token": "rt1", "expires_in": 3600, "expires_at": now + 3600, "user": {"email": EMAIL}}))
+        if "/auth/v1/token" in u:
+            calls["refresh"] += 1
+            return r.fulfill(status=200, content_type="application/json", body=json.dumps(
+                {"access_token": _jwt(EMAIL, now + 7200), "refresh_token": "rt2", "expires_in": 3600, "expires_at": now + 7200, "user": {"email": EMAIL}}))
+        if "/auth/v1/logout" in u: calls["logout"] += 1; return r.fulfill(status=204, body="")
+        if "/rest/v1/" in u: return r.fulfill(status=200, content_type="application/json", body="[]")
+        return r.abort()
+    pg.route("**/*", route)
+    pg.goto(base + "/phoenix_app.html"); pg.wait_for_timeout(1200)
+    pg.evaluate("PX_ENTER()"); pg.wait_for_timeout(600)
+    return pg, errs, calls, now
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_auth_code_flow_signs_in_and_writes_carry_the_session(browser, served):
+    pg, errs, calls, now = _auth_page(browser, served, 1280, 900, False)
+    assert "sb_publishable" in pg.evaluate("PX_AUTH.headers().Authorization"), "signed out: writes use the anon key"
+    pg.click("#pxProf"); pg.wait_for_timeout(300)
+    assert "Not signed in" in pg.locator("#pxAuthBox").inner_text()
+    pg.click('#pxAuthBox [data-auth="in"]'); pg.wait_for_timeout(400)
+    pg.fill("#mAuthEmail", EMAIL.upper()); pg.click("#mAuthOk"); pg.wait_for_timeout(600)
+    url, body = calls["otp"][0]
+    assert body == {"email": EMAIL, "create_user": True} and "redirect_to=" in url, "e-mail lower-cased, link returns to the app"
+    assert pg.locator("#mAuthCodeRow").is_visible() and pg.locator("#mAuthOk").inner_text() == "Verify"
+    pg.fill("#mAuthCode", "000000"); pg.click("#mAuthOk"); pg.wait_for_timeout(500)
+    assert "Not accepted" in pg.locator("#mAuthNote").inner_text() and pg.locator("#trModalBg").count() == 1
+    pg.fill("#mAuthCode", "12 34 56"); pg.click("#mAuthOk"); pg.wait_for_timeout(800)      # spaces tolerated
+    assert calls["verify"][-1] == {"type": "email", "email": EMAIL, "token": "123456"}
+    assert pg.locator("#trModalBg").count() == 0
+    assert pg.evaluate("JSON.parse(localStorage.getItem('phoenix.auth')).user.email") == EMAIL
+    assert pg.evaluate("window.PHOENIX_PROFILE") == "G", "the allowlisted address selects its own book"
+    hdr = pg.evaluate("PX_AUTH.headers().Authorization")
+    assert hdr.startswith("Bearer ey") and "sb_publishable" not in hdr, "signed in: writes carry the session token"
+    pg.click("#pxProf"); pg.wait_for_timeout(300)
+    assert EMAIL in pg.locator("#pxAuthBox").inner_text() and pg.evaluate("document.getElementById('pxProfAv').classList.contains('authed')")
+    assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_auth_expired_token_refreshes_on_boot_and_sign_out_clears(browser, served):
+    pg, errs, calls, now = _auth_page(browser, served, 1280, 900, False)
+    pg.evaluate("localStorage.setItem('phoenix.auth', JSON.stringify({access_token:'%s',refresh_token:'rt1',expires_at:%d,user:{email:'%s'}}))" % (_jwt(EMAIL, now - 10), now - 10, EMAIL))
+    pg.reload(); pg.wait_for_timeout(1500)
+    assert calls["refresh"] >= 1 and pg.evaluate("JSON.parse(localStorage.getItem('phoenix.auth')).refresh_token") == "rt2"
+    pg.evaluate("PX_ENTER()"); pg.wait_for_timeout(500)
+    pg.click("#pxProf"); pg.wait_for_timeout(300); pg.click('#pxAuthBox [data-auth="out"]'); pg.wait_for_timeout(400)
+    assert calls["logout"] == 1 and pg.evaluate("localStorage.getItem('phoenix.auth')") is None
+    assert "sb_publishable" in pg.evaluate("PX_AUTH.headers().Authorization")
+    assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_auth_magic_link_return_is_parsed_on_full_load_and_on_fragment_navigation(browser, served):
+    pg, errs, calls, now = _auth_page(browser, served, 390, 844, True)
+    link = served + "/phoenix_app.html#access_token=%s&refresh_token=rt9&expires_in=3600&token_type=bearer&type=magiclink" % _jwt(EMAIL, now + 3600)
+    pg.goto(link); pg.wait_for_timeout(1200)                       # same-document: popstate fires before hashchange
+    assert pg.evaluate("JSON.parse(localStorage.getItem('phoenix.auth')||'{}').user?.email") == EMAIL
+    assert pg.evaluate("location.hash") == "#mission", "the token must not survive in the URL, and the router must land on a real page"
+    pg.evaluate("localStorage.removeItem('phoenix.auth')")
+    pg2 = browser.new_page(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+    pg2.route("**/*", lambda r: r.continue_() if r.request.url.startswith(served) else r.fulfill(status=200, content_type="application/json", body="[]"))
+    pg2.goto(link); pg2.wait_for_timeout(1500)                     # full load, as from Mail
+    assert pg2.evaluate("JSON.parse(localStorage.getItem('phoenix.auth')||'{}').user?.email") == EMAIL
+    assert pg2.evaluate("document.documentElement.scrollWidth") <= 392
+    pg2.close()
+    assert not _bad(errs), errs[:2]
