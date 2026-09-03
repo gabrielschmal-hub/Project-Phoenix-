@@ -356,3 +356,13 @@ def test_snapshot_keys_map_to_the_folded_columns(tmp_path):
     assert f["mcap_b"] == 3200.5 and f["dollar_vol_m"] == 900.0 and f["breakout"] is True
     assert f["regime"] == "POLICY_TIGHTENING"
     assert "mcap_B" not in f, "the mixed-case key must never reach the upsert"
+
+
+def test_twin_is_a_full_sorted_export_not_an_append(tmp_path):
+    """3 Sep: the twin was appended in a fresh checkout every run, so it never held the log."""
+    p = tmp_path / "outputs" / "signal_log.jsonl"
+    rows = [{"date": "2026-09-02", "ticker": "B", "r_20d": None}, {"date": "2026-08-25", "ticker": "A", "close": 1.5}]
+    assert S.write_twin(rows, str(p)) == 2
+    lines = p.read_text().strip().split("\n")
+    assert json.loads(lines[0])["ticker"] == "A" and json.loads(lines[1])["ticker"] == "B"
+    assert S.write_twin(rows[:1], str(p)) == 1 and len(p.read_text().strip().split("\n")) == 1, "rewritten, not appended"
