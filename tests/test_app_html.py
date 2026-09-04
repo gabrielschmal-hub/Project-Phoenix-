@@ -382,3 +382,170 @@ def test_auth_magic_link_return_is_parsed_on_full_load_and_on_fragment_navigatio
     assert pg2.evaluate("document.documentElement.scrollWidth") <= 392
     pg2.close()
     assert not _bad(errs), errs[:2]
+
+
+# ---------------------------------------------------------------- Research -> Smart money
+SM_Q = "2026-06-30"
+def _c(m, a, q=SM_Q, sh=1000): return {"manager": m, "action": a, "shares": sh, "value_usd": 5e7, "shares_delta": 100, "pct_change": 10.0, "quarter": q}
+SM_INST = {"asof": "2026-09-04 05:30 UTC", "latest_quarter": SM_Q, "managers": {
+    "Berkshire Hathaway (Buffett)": {"quarters": [SM_Q, "2026-03-31"], "latest_in": True, "status": "ok", "edgar_name": "BERKSHIRE HATHAWAY INC"},
+    "Pershing Square (Ackman)": {"quarters": ["2026-03-31"], "latest_in": False, "status": "ok"},
+    "Appaloosa (Tepper)": {"quarters": [SM_Q, "2026-03-31"], "latest_in": True, "status": "ok"},
+    "Greenlight (Einhorn)": {"quarters": ["2023-12-31"], "latest_in": False, "status": "STALE: newest 13F-HR is 2023-12-31", "latest_13f": "2023-12-31"}},
+    "tickers": {"AAPL": [_c("Berkshire Hathaway (Buffett)", "HOLD"), _c("Appaloosa (Tepper)", "NEW"), _c("Berkshire Hathaway (Buffett)", "TRIM", "2026-03-31")],
+                "NVDA": [_c("Appaloosa (Tepper)", "ADD")], "MSFT": [_c("Berkshire Hathaway (Buffett)", "EXIT", sh=0)], "COF": [_c("Appaloosa (Tepper)", "EXIT", sh=0)]}}
+SM_CONG = {"asof": "2026-09-03", "status": {"sources": {"House Clerk PTR": {"rows": 9000, "last_30d": 0, "newest_tx": "2026-08-05", "newest_filed": "2026-08-12"}}, "quiet": ["House Clerk PTR"], "absent_chambers": ["Senate"]},
+           "tickers": {"NVDA": [{"date": "2026-08-01", "member": "Nancy Pelosi", "state": "CA11", "chamber": "House", "side": "buy", "amount": "$1,000,001 - $5,000,000", "reported": "2026-08-12"}]}}
+
+
+def _sm_page(browser, base, w, h, mobile):
+    pg = browser.new_page(viewport={"width": w, "height": h}, is_mobile=mobile, has_touch=mobile)
+    errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
+    def route(r):
+        u = r.request.url
+        if u.startswith(base): return r.continue_()
+        if "institutional_holdings" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(SM_INST))
+        if "congress_trades" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(SM_CONG))
+        if "research_index" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps({"reports": []}))
+        if "/rest/v1/" in u or "snapshots_latest" in u: return r.fulfill(status=200, content_type="application/json", body="[]")
+        return r.abort()
+    pg.route("**/*", route)
+    pg.goto(base + "/phoenix_app.html"); pg.wait_for_timeout(1200)
+    pg.evaluate("PX_ENTER()"); pg.wait_for_timeout(600)
+    pg.evaluate("location.hash='#research'"); pg.wait_for_timeout(1200)
+    pg.click('#rsMode .pf-seg[data-mode="smart"]'); pg.wait_for_timeout(1500)
+    return pg, errs
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_smart_money_grid_shows_filings_as_filed_with_honest_freshness(browser, served):
+    pg, errs = _sm_page(browser, served, 1280, 900, False)
+    assert pg.evaluate("getComputedStyle(document.getElementById('rsGrid')).display") == "none", "library hidden while Smart money is shown"
+    fresh = pg.locator("#rsSmart .sm-fresh").inner_text()
+    assert "2026-06-30" in fresh and "gone quiet" in fresh and "no Senate rows" in fresh
+    pg.click('#rsSmart button[data-smv="famous"]'); pg.wait_for_timeout(600)
+    tbl = pg.locator("#rsSmart .sm-tbl").first
+    rows = {r.locator("td.sm-first").inner_text().split("\n")[0]: [x.strip() for x in r.locator("td:not(.sm-first)").all_inner_texts()] for r in tbl.locator("tbody tr").all()}
+    cols = [h.strip() for h in tbl.locator("thead th").all_inner_texts()][1:]
+    assert cols == ["AAPL", "COF", "MSFT", "NVDA"]
+    assert rows["Appaloosa (Tepper)"] == ["N", "×", "", "+"] and rows["Berkshire Hathaway (Buffett)"] == ["=", "", "×", ""]
+    chips = {r.locator("td.sm-first b").inner_text(): r.locator("td.sm-first .sm-chip").inner_text() for r in tbl.locator("tbody tr").all()}
+    assert chips["Pershing Square (Ackman)"] == "Q2 2026 not in yet" and chips["Greenlight (Einhorn)"].startswith("STALE")
+    assert pg.evaluate("getComputedStyle(document.querySelector('#rsSmart button.sm-g.sm-n')).color") == "rgb(255, 255, 255)"
+    pg.locator('#rsSmart button.sm-g[data-tk="AAPL"][data-mgr="Appaloosa (Tepper)"]').click(); pg.wait_for_timeout(400)
+    assert "Appaloosa" in pg.locator("#trModalBg .tr-modal-title").inner_text() and "not a trade price" in pg.locator("#trModalBg").inner_text()
+    pg.click("#trModalBg .cancel"); pg.wait_for_timeout(300)
+    cong = pg.locator("#rsSmart .sm-tbl").nth(1)
+    assert cong.locator("tbody tr").count() == 1 and "Nancy Pelosi" in cong.inner_text()
+    pg.click('#rsMode .pf-seg[data-mode="library"]'); pg.wait_for_timeout(400)
+    assert pg.evaluate("getComputedStyle(document.getElementById('rsSmart')).display") == "none"
+    assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_smart_money_fits_a_phone(browser, served):
+    pg, errs = _sm_page(browser, served, 390, 844, True)
+    pg.click('#rsSmart button[data-smv="famous"]'); pg.wait_for_timeout(600)
+    assert pg.locator("#rsSmart .sm-tbl").first.locator("tbody tr").count() == 4
+    assert pg.evaluate("document.documentElement.scrollWidth") <= 392
+    assert not _bad(errs), errs[:2]
+
+
+# ---------------------------------------------------------------- profiles, follow list, MC digest
+SM_META_FIX = {"asof": "2026-09-04", "committee_sectors": {"Armed Services": ["Electronic technology"], "Financial Services": ["Finance"]},
+    "members": {"nancypelosi": {"name": "Nancy Pelosi", "party": "Democrat", "state": "CA", "district": 11, "chamber": "House", "committees": [], "term_end": "2027-01-03"},
+                "dannewhouse": {"name": "Dan Newhouse", "party": "Republican", "state": "WA", "district": 4, "chamber": "House", "committees": ["House Committee on Armed Services"]},
+                "donaldjtrump": {"name": "Donald J. Trump", "chamber": "Executive", "role": "President of the United States", "committees": [], "no_transaction_feed": True,
+                                 "disclosure": "Annual OGE Form 278e only: asset ranges, no transactions, assets held in a trust."}}}
+SM_STOCKS = {"stocks": [{"ticker": "NVDA", "sector": "Electronic technology"}, {"ticker": "AAPL", "sector": "Electronic technology"}, {"ticker": "BAC", "sector": "Finance"}]}
+SM_CONG2 = {"asof": "2026-09-03", "status": {"sources": {"House Clerk PTR": {"rows": 9, "last_30d": 2, "newest_tx": "2026-09-01", "newest_filed": "2026-09-02"}}, "quiet": [], "absent_chambers": ["Senate"]},
+    "tickers": {"NVDA": [{"date": "2026-09-01", "member": "Nancy Pelosi", "state": "CA11", "chamber": "House", "side": "buy", "amount": "$1,000,001 - $5,000,000", "reported": "2026-09-02"}],
+                "AAPL": [{"date": "2026-08-28", "member": "Dan Newhouse", "state": "WA04", "chamber": "House", "side": "sell", "amount": "$15,001 - $50,000", "reported": "2026-09-01"}]}}
+
+
+def _prof_page(browser, base, w, h, mobile):
+    pg = browser.new_page(viewport={"width": w, "height": h}, is_mobile=mobile, has_touch=mobile)
+    errs = []; pg.on("pageerror", lambda e: errs.append(str(e))); state = {"watch": [], "posts": 0, "deletes": 0}
+    def route(r):
+        u, m = r.request.url, r.request.method
+        if u.startswith(base): return r.continue_()
+        if "institutional_holdings" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(SM_INST))
+        if "congress_meta" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(SM_META_FIX))
+        if "congress_trades" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(SM_CONG2))
+        if "stocks.json" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(SM_STOCKS))
+        if "watch_entities" in u:
+            if m == "POST": state["posts"] += 1; state["watch"].append(json.loads(r.request.post_data)); return r.fulfill(status=201, body="")
+            if m == "DELETE": state["deletes"] += 1; state["watch"].clear(); return r.fulfill(status=204, body="")
+            return r.fulfill(status=200, content_type="application/json", body=json.dumps(state["watch"]))
+        if "research_index" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps({"reports": []}))
+        if "/rest/v1/" in u or "snapshots_latest" in u: return r.fulfill(status=200, content_type="application/json", body="[]")
+        return r.abort()
+    pg.route("**/*", route)
+    pg.goto(base + "/phoenix_app.html"); pg.wait_for_timeout(1200)
+    pg.evaluate("PX_ENTER()"); pg.wait_for_timeout(800)
+    return pg, errs, state
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_mission_control_digest_reports_new_filings_without_searching(browser, served):
+    pg, errs, state = _prof_page(browser, served, 1280, 900, False)
+    pg.evaluate("location.hash='#mission'"); pg.wait_for_timeout(2200)
+    card = pg.locator("#mcSmart"); assert card.count() == 1
+    txt = card.inner_text()
+    assert "Nancy Pelosi" in txt and "bought" in txt and "NVDA" in txt, txt[:200]
+    assert "Q2 2026" in txt and "not in yet" in txt and "Pershing" in txt
+    assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_member_profile_flags_committee_jurisdiction_and_follow_round_trips(browser, served):
+    pg, errs, state = _prof_page(browser, served, 1280, 900, False)
+    pg.evaluate("location.hash='#research'"); pg.wait_for_timeout(1200)
+    pg.click('#rsMode .pf-seg[data-mode="smart"]'); pg.wait_for_timeout(1800)
+    mem = pg.locator('#rsSmart .sm-who[data-kind="member"]')
+    for i in range(mem.count()):
+        if "Newhouse" in mem.nth(i).inner_text(): mem.nth(i).click(); break
+    pg.wait_for_timeout(700)
+    t = pg.locator("#trModalBg").inner_text()
+    assert "House Committee on Armed Services" in t and "Electronic technology" in t
+    assert "1 sector traded here" in t and "not an allegation" in t
+    assert "$33k" in t, "range midpoint, not an invented exact size"
+    assert "Net worth and performance" in t, "the missing pieces are named, not faked"
+    pg.locator("#trModalBg [data-follow]").click(); pg.wait_for_timeout(800)
+    assert state["posts"] == 1 and state["watch"] == [{"profile": "G", "kind": "member", "name": "Dan Newhouse"}]
+    assert "Following" in pg.locator("#trModalBg [data-follow]").inner_text()
+    pg.locator("#trModalBg [data-follow]").click(); pg.wait_for_timeout(800)
+    assert state["deletes"] == 1 and state["watch"] == []
+    pg.click("#trModalBg .cancel"); pg.wait_for_timeout(300)
+    assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_fund_profile_and_executive_branch_absence_is_stated(browser, served):
+    pg, errs, state = _prof_page(browser, served, 1280, 900, False)
+    pg.evaluate("location.hash='#research'"); pg.wait_for_timeout(1200)
+    pg.click('#rsMode .pf-seg[data-mode="smart"]'); pg.wait_for_timeout(1800)
+    pg.click('#rsSmart button[data-smv="famous"]'); pg.wait_for_timeout(700)
+    pg.locator('#rsSmart .sm-who[data-kind="fund"]').first.click(); pg.wait_for_timeout(700)
+    t = pg.locator("#trModalBg").inner_text()
+    tl = t.lower()      # the stat labels are upper-cased by CSS, so compare case-insensitively
+    assert "warren buffett" in tl and "berkshire hathaway inc" in tl and "disclosed" in tl
+    assert "not trade prices" in tl and "slice of the book" in tl
+    pg.click("#trModalBg .cancel"); pg.wait_for_timeout(300)
+    ex = pg.locator("#rsSmart .w-card").last
+    assert "Executive branch" in ex.inner_text() and "no transaction feed exists" in ex.inner_text()
+    ex.locator('.sm-who[data-kind="member"]').first.click(); pg.wait_for_timeout(700)
+    t = pg.locator("#trModalBg").inner_text()
+    assert "OGE Form 278e" in t and "no transactions" in t.lower()
+    assert pg.locator("#trModalBg [data-follow]").count() == 0, "nothing to follow: there is no feed"
+    assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_profiles_fit_a_phone(browser, served):
+    pg, errs, state = _prof_page(browser, served, 390, 844, True)
+    pg.evaluate("location.hash='#research'"); pg.wait_for_timeout(1200)
+    pg.click('#rsMode .pf-seg[data-mode="smart"]'); pg.wait_for_timeout(1800)
+    pg.locator('#rsSmart .sm-who[data-kind="fund"]').first.click(); pg.wait_for_timeout(700)
+    assert pg.evaluate("document.documentElement.scrollWidth") <= 392
+    assert not _bad(errs), errs[:2]
