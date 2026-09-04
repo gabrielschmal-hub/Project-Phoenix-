@@ -3626,6 +3626,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(id==="trades") initTrades();
     if(id==="portfolio") initPortfolio();
     if(id==="mission") initMC();
+    if(id==="smart") rsSmartRender();
     if(id==="research") initResearch();
     if(id==="mission"){ try{ trLoad(function(){ mcRender(); }); }catch(e){ try{ mcRender(); }catch(e2){} } }
     var hero=document.getElementById("px-hero");
@@ -3684,6 +3685,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     else if(id==="trades"){ p.className="page"; p.innerHTML=TRADES_HTML; }
     else if(id==="portfolio"){ p.className="page"; p.innerHTML=PORTFOLIO_HTML; }
     else if(id==="mission"){ p.className="page"; p.innerHTML=MC_HTML; }
+    else if(id==="smart"){ p.className="page pad"; p.innerHTML='<div class="page-title">Smart money</div><div class="page-dek">Who is positioned where \u2014 institutions and Congress, as filed</div><div id="rsSmart"></div>'; }
     else if(id==="research"){ p.className="page pad"; p.innerHTML=RESEARCH_HTML; }
     else { p.className="page pad"; p.innerHTML=soonHTML(id); }
     host.appendChild(p);
@@ -3708,10 +3710,6 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // drift marker instead, because a dated argument must not be repriced.
   var RESEARCH_HTML =
     '<div class="rs-wrap">'+
-      '<div class="pf-switch rs-mode" id="rsMode">'+
-        '<button class="pf-seg on" data-mode="library">Library</button>'+
-        '<button class="pf-seg" data-mode="smart">Smart money</button></div>'+
-      '<div id="rsSmart" style="display:none"></div>'+
       '<div class="rs-panel"><div class="rs-head">'+
         '<div class="rs-kick">RESEARCH LIBRARY</div>'+
         '<h1 id="rsTitle">Research</h1>'+
@@ -3872,7 +3870,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // last day of the quarter, filed up to 45 days later — a fund can buy and sell inside a
   // quarter and show nothing. PTR: transactions, 45-day lag, amounts as filed ranges.
   // An empty cell is no filing activity, not a negative signal.
-  var rsMode="library", SM={inst:null,cong:null,err:"",view:"yours",loading:false};
+  var rsMode="library", SM={inst:null,cong:null,err:"",view:"yours",loading:false};   // rsMode kept for old callers
   var SM_GLYPH={NEW:["N","sm-n","New buy"],ADD:["+","sm-a","Added"],HOLD:["=","sm-h","Held"],TRIM:["\u2212","sm-t","Trimmed"],EXIT:["\u00d7","sm-x","Sold out"]};
   // ---- follow list: people and funds the operator tracks (Supabase watch_entities, per profile) ----
   var SM_WATCH=null;
@@ -4046,15 +4044,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var a=el.querySelector("[data-smart]"); if(a) a.onclick=function(){ setTimeout(function(){ rsSetMode("smart"); },400); };
   }
 
-  function rsSetMode(m){
-    rsMode=m;
-    var sw=document.getElementById("rsMode"); if(sw) sw.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on",b.dataset.mode===m); });
-    var wrap=document.querySelector("#page-research .rs-wrap"); if(!wrap) return;
-    Array.prototype.forEach.call(wrap.children,function(ch){
-      if(ch.id==="rsMode") return;
-      ch.style.display = ch.id==="rsSmart" ? (m==="smart"?"":"none") : (m==="smart"?"none":"");
-    });
-    if(m==="smart") rsSmartRender();
+  function rsSetMode(m){                       // kept: older links still call it
+    if(m==="smart"){ location.hash="#smart"; return; }
+    location.hash="#research";
   }
   function smLoad(cb){
     if(SM.loading) return; if(SM.inst!==null&&SM.cong!==null){ cb(); return; }
@@ -4165,8 +4157,6 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var names = view==="yours"?smYourNames():view==="screener"?smScreenerNames():smCrowded(q);
     var title = view==="yours"?"Who touched your names":view==="screener"?"Who touched the screener\u2019s names":"What the famous funds did last quarter";
     el.innerHTML=
-      '<div class="rs-panel"><div class="rs-head"><div class="rs-kick">SMART MONEY \u00b7 13F + STOCK ACT</div><h1>Who is positioned where</h1>'+
-      '<p class="rs-dek">Institutions from SEC Form 13F-HR, Congress from Periodic Transaction Reports. Filings, shown as filed. Tap a cell for shares, size and dates.</p></div></div>'+
       smFreshness()+
       (fellBack?'<div class="sl-note">Nothing to filter by yet \u2014 no open positions'+(SM.view==="screener"?' and no live screener signals':', starred names or screener signals')+'. Showing the most crowded names instead.</div>':'')+
       '<div class="pf-switch" style="margin:10px 0 12px">'+[["yours","Your names"],["screener","Screener"],["famous","Famous funds"]].map(function(v){ return '<button class="pf-seg'+(SM.view===v[0]?" on":"")+'" data-smv="'+v[0]+'">'+v[1]+'</button>'; }).join("")+'</div>'+
@@ -4181,9 +4171,6 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   }
 
   function initResearch(){
-    var sw=document.getElementById("rsMode");
-    if(sw && !sw.dataset.bound){ sw.dataset.bound="1";
-      sw.querySelectorAll("button").forEach(function(b){ b.onclick=function(){ rsSetMode(this.dataset.mode); }; }); }
     if(RS.loaded) return; RS.loaded=true;
     var grid=document.getElementById("rsGrid");
     getJSON("research_index").then(function(d){
@@ -14243,7 +14230,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function pxBootAll(){
   // ---------- boot: Phoenix as a single scrolling page ----------
   var PXS=[["mission","Mission Control"],["markets","Markets"],["screeners","Screeners"],
-           ["trades","Trade"],["portfolio","Portfolio"],["research","Research"]];
+           ["trades","Trade"],["portfolio","Portfolio"],["smart","Smart Money"],["research","Research"]];
 
   window.PXS_IDS = PXS.map(function(p){ return p[0]; });
 
@@ -14254,13 +14241,14 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   PX_BOOTING=false;
 
   var PX_ICON={
+    "smart":'<svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12h12M4.5 12V7M8 12V4M11.5 12V9"/></svg>',
     "mission":'<svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 8 11 5"/></svg>',
     "markets":'<svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12.5V3M2 12.5h12"/><path d="M4.5 10 7 6.5l2.5 2L13.5 4"/></svg>',
     "screeners":'<svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3.5h12l-4.6 5.3v4.2l-2.8-1.6V8.8z"/></svg>',
     "trades":'<svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 11.5 6 8l2.5 2.5L13.5 5"/><path d="M10.5 5h3v3"/></svg>',
     "portfolio":'<svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4.5" width="12" height="9" rx="1.5"/><path d="M2 8h12M5.5 4.5V3.2A1.2 1.2 0 0 1 6.7 2h2.6a1.2 1.2 0 0 1 1.2 1.2v1.3"/></svg>',
     "research":'<svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 3.2c1.8-.7 3.6-.7 5.5 0v9.6c-1.9-.7-3.7-.7-5.5 0zM13.5 3.2c-1.8-.7-3.6-.7-5.5 0v9.6c1.8-.7 3.7-.7 5.5 0z"/></svg>'};
-  var PX_GROUPS=[["Workspace",["mission","markets","screeners"]],
+  var PX_GROUPS=[["Workspace",["mission","markets","screeners","smart"]],
                  ["Capital",["trades","portfolio","research"]]];
   var pxLinks=document.getElementById("pxlinks");
   PX_GROUPS.forEach(function(g){
