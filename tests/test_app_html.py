@@ -8,7 +8,7 @@ import json, pathlib, pytest
 from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 APP = ROOT / "phoenix_app.html"; BUILDER = ROOT / "portfolio_builder.html"
-PAGES = ("home", "markets", "screeners", "trades", "portfolio", "research")
+PAGES = ("home", "markets", "screeners", "trades", "portfolio", "smart", "research")
 
 
 @pytest.fixture(scope="module")
@@ -36,7 +36,7 @@ def test_app_iphone_layout(browser):
         pg.evaluate(f"location.hash='#{hsh}'"); pg.wait_for_timeout(900)
         assert pg.evaluate("document.documentElement.scrollWidth") <= 392, f"#{hsh} overflows"
     bar = pg.locator("#pxnav").bounding_box(); assert bar["y"] > 700 and bar["width"] >= 388, "rail must be a bottom bar on phones"
-    assert pg.locator("#pxnav .pxlinks a").count() == 6
+    assert pg.locator("#pxnav .pxlinks a").count() == 7      # + Smart Money, promoted out of Research
     assert not _bad(errs), errs[:2]
 
 
@@ -412,15 +412,14 @@ def _sm_page(browser, base, w, h, mobile):
     pg.route("**/*", route)
     pg.goto(base + "/phoenix_app.html"); pg.wait_for_timeout(1200)
     pg.evaluate("PX_ENTER()"); pg.wait_for_timeout(600)
-    pg.evaluate("location.hash='#research'"); pg.wait_for_timeout(1200)
-    pg.click('#rsMode .pf-seg[data-mode="smart"]'); pg.wait_for_timeout(1500)
+    pg.evaluate("location.hash='#smart'"); pg.wait_for_timeout(1800)
     return pg, errs
 
 
 @pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
 def test_smart_money_grid_shows_filings_as_filed_with_honest_freshness(browser, served):
     pg, errs = _sm_page(browser, served, 1280, 900, False)
-    assert pg.evaluate("getComputedStyle(document.getElementById('rsGrid')).display") == "none", "library hidden while Smart money is shown"
+    assert pg.evaluate("document.getElementById('page-smart').classList.contains('active')"), "Smart money is its own page"
     fresh = pg.locator("#rsSmart .sm-fresh").inner_text()
     assert "2026-06-30" in fresh and "gone quiet" in fresh and "no Senate rows" in fresh
     pg.click('#rsSmart button[data-smv="famous"]'); pg.wait_for_timeout(600)
@@ -437,8 +436,8 @@ def test_smart_money_grid_shows_filings_as_filed_with_honest_freshness(browser, 
     pg.click("#trModalBg .cancel"); pg.wait_for_timeout(300)
     cong = pg.locator("#rsSmart .sm-tbl").nth(1)
     assert cong.locator("tbody tr").count() == 1 and "Nancy Pelosi" in cong.inner_text()
-    pg.click('#rsMode .pf-seg[data-mode="library"]'); pg.wait_for_timeout(400)
-    assert pg.evaluate("getComputedStyle(document.getElementById('rsSmart')).display") == "none"
+    pg.evaluate("location.hash='#research'"); pg.wait_for_timeout(600)
+    assert pg.evaluate("document.getElementById('page-research').classList.contains('active')")
     assert not _bad(errs), errs[:2]
 
 
@@ -500,8 +499,7 @@ def test_mission_control_digest_reports_new_filings_without_searching(browser, s
 @pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
 def test_member_profile_flags_committee_jurisdiction_and_follow_round_trips(browser, served):
     pg, errs, state = _prof_page(browser, served, 1280, 900, False)
-    pg.evaluate("location.hash='#research'"); pg.wait_for_timeout(1200)
-    pg.click('#rsMode .pf-seg[data-mode="smart"]'); pg.wait_for_timeout(1800)
+    pg.evaluate("location.hash='#smart'"); pg.wait_for_timeout(1800)
     mem = pg.locator('#rsSmart .sm-who[data-kind="member"]')
     for i in range(mem.count()):
         if "Newhouse" in mem.nth(i).inner_text(): mem.nth(i).click(); break
@@ -523,8 +521,7 @@ def test_member_profile_flags_committee_jurisdiction_and_follow_round_trips(brow
 @pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
 def test_fund_profile_and_executive_branch_absence_is_stated(browser, served):
     pg, errs, state = _prof_page(browser, served, 1280, 900, False)
-    pg.evaluate("location.hash='#research'"); pg.wait_for_timeout(1200)
-    pg.click('#rsMode .pf-seg[data-mode="smart"]'); pg.wait_for_timeout(1800)
+    pg.evaluate("location.hash='#smart'"); pg.wait_for_timeout(1800)
     pg.click('#rsSmart button[data-smv="famous"]'); pg.wait_for_timeout(700)
     pg.locator('#rsSmart .sm-who[data-kind="fund"]').first.click(); pg.wait_for_timeout(700)
     t = pg.locator("#trModalBg").inner_text()
@@ -544,8 +541,27 @@ def test_fund_profile_and_executive_branch_absence_is_stated(browser, served):
 @pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
 def test_profiles_fit_a_phone(browser, served):
     pg, errs, state = _prof_page(browser, served, 390, 844, True)
-    pg.evaluate("location.hash='#research'"); pg.wait_for_timeout(1200)
-    pg.click('#rsMode .pf-seg[data-mode="smart"]'); pg.wait_for_timeout(1800)
+    pg.evaluate("location.hash='#smart'"); pg.wait_for_timeout(1800)
     pg.locator('#rsSmart .sm-who[data-kind="fund"]').first.click(); pg.wait_for_timeout(700)
     assert pg.evaluate("document.documentElement.scrollWidth") <= 392
     assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_smart_money_is_a_first_class_page_not_a_research_tab(browser, served):
+    """It was buried behind a switch inside Research. It is now a rail entry and a real address."""
+    pg = browser.new_page(viewport={"width": 1280, "height": 900})
+    pg.route("**/*", lambda r: r.continue_() if r.request.url.startswith(served)
+             else r.fulfill(status=200, content_type="application/json", body="[]"))
+    pg.goto(served + "/phoenix_app.html"); pg.wait_for_timeout(1200)
+    pg.evaluate("PX_ENTER()"); pg.wait_for_timeout(800)
+    labels = [a.strip() for a in pg.locator("#pxnav .pxlinks a").all_inner_texts()]
+    assert labels == ["Mission Control", "Markets", "Screeners", "Smart Money", "Trade", "Portfolio", "Research"]
+    pg.click("#pxl_smart"); pg.wait_for_timeout(900)
+    assert pg.evaluate("location.hash") == "#smart"
+    assert pg.evaluate("document.getElementById('page-smart').classList.contains('active')")
+    assert pg.evaluate("document.getElementById('pxl_smart').classList.contains('on')")
+    pg.reload(); pg.wait_for_timeout(1400); pg.evaluate("PX_ENTER()"); pg.wait_for_timeout(700)
+    assert pg.evaluate("document.getElementById('page-smart').classList.contains('active')"), "#smart must be reloadable"
+    assert pg.locator("#rsMode").count() == 0, "the Research mode switch is gone"
+    pg.close()
