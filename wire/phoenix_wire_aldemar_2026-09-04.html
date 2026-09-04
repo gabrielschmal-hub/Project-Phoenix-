@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html class="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Phoenix Wire · Aldemar · 2026-09-03</title><style>
+:root{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenSoft:#269360; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redSoft:#C4452B; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15); --blue:#2C5A82;
+  --serif:Georgia,'Times New Roman',serif;
+  --mono:'Courier New',ui-monospace,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--serif);
+  -webkit-font-smoothing:antialiased}
+.ed-wrap{background:var(--bg)}
+.ed-page{max-width:1180px;margin:0 auto;padding:30px 30px 60px;position:relative}
+.ed-x{position:absolute;top:18px;right:26px;z-index:5;background:var(--card);
+  border:1px solid var(--line2);border-radius:99px;padding:7px 15px;cursor:pointer;
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--inkLight);
+  text-decoration:none}
+.ed-x:hover{color:var(--gold);border-color:var(--gold)}
+.ed-mast{text-align:center;border-bottom:2px solid var(--line2);padding-bottom:15px}
+.ed-meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--inkFade);padding-right:130px}
+.ed-meta span:last-child{text-align:right}
+.ed-brand{display:flex;align-items:center;justify-content:center;gap:14px;margin:10px 0 4px}
+.ed-mark{width:52px;height:40px;flex:0 0 auto;display:block}
+.ed-brand .ed-name{font-family:var(--serif);font-size:56px;line-height:1;letter-spacing:-.02em}
+.ed-sub{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--inkLight)}
+.ed-sub-gamma{position:relative}
+.ed-sub-gamma::after{content:"· gamma";font-family:var(--mono);font-style:normal;
+  font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
+  margin-left:9px;vertical-align:middle}
+.ed-hello{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--inkFade);margin-top:11px}
+.ed-verdict{border-bottom:1px solid var(--line);padding:20px 0 18px}
+.ed-call{font-family:var(--serif);font-size:33px;line-height:1.12}
+.ed-call em{font-style:normal;color:var(--gold)}
+.ed-vwhy{font-size:14.5px;color:var(--inkLight);margin-top:9px;line-height:1.6}
+.ed-sec{border-bottom:1px solid var(--line);padding:24px 0}
+.ed-sec:last-of-type{border-bottom:0}
+.ed-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--inkFade);display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.ed-n{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--inkLight);
+  text-transform:none;letter-spacing:0}
+.ed-hl{font-family:var(--serif);font-size:30px;line-height:1.16;margin:9px 0 13px;
+  letter-spacing:-.01em}
+.ed-hl.sm{font-size:25px}
+.ed-body{font-size:15px;line-height:1.68;color:var(--inkMed);margin:0 0 12px}
+.ed-pos{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px 16px;
+  align-items:baseline;font-family:var(--mono);font-size:13px;padding:10px 0;
+  border-bottom:1px solid var(--line)}
+.ed-pos .tk{font-family:var(--serif);font-size:18px;font-weight:700}
+.ed-pos .nt{font-family:var(--sans);font-size:12.5px;color:var(--inkFade)}
+.ed-tape{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.ed-ins{border:1px solid var(--line);border-radius:3px;padding:11px 12px 6px;
+  background:var(--card);overflow:hidden}
+.ed-ins.lead{border-color:var(--gold);border-left-width:3px}
+.ed-ins .i-k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--inkFade);display:flex;justify-content:space-between}
+.ed-ins .i-sig{color:var(--gold)}
+.ed-ins .i-v{font-family:var(--mono);font-size:19px;font-weight:700;margin-top:4px}
+.ed-ins .i-c{font-family:var(--mono);font-size:12px}
+.ed-sk{width:100%;height:44px;display:block;margin-top:5px}
+.ed-sk .ar{fill:currentColor;opacity:.12;stroke:none}
+.ed-sk .ln{fill:none;stroke:currentColor;stroke-width:1.6}
+.ed-sk.g{color:var(--green)}.ed-sk.r{color:var(--red)}
+.ed-rot{margin:8px 0 12px}
+.ed-rr{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:baseline;
+  padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ed-rr:last-child{border-bottom:0}
+.ed-rr .bar{width:110px;height:5px;background:var(--line);border-radius:3px;overflow:hidden;
+  justify-self:end}
+.ed-rr .bar b{display:block;height:100%}
+.ed-rr .pc{font-family:var(--mono);font-size:13px;min-width:70px;text-align:right}
+.ed-rr .yours{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--gold);
+  border:1px solid var(--gold);border-radius:2px;padding:1px 5px;margin-left:7px}
+.ed-smart{display:grid;grid-template-columns:1fr 1fr;gap:0 26px;margin:8px 0 12px}
+.ed-sm{padding:11px 0;border-bottom:1px solid var(--line)}
+.ed-sm .sm-t{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--inkFade);margin-bottom:5px}
+.ed-sm .sm-l{font-size:13.5px;line-height:1.55;color:var(--inkMed)}
+.ed-setups{margin:10px 0 14px}
+.ed-su{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px 16px;
+  align-items:baseline;padding:11px 0;border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:13px}
+.ed-su:last-child{border-bottom:0}
+.ed-su .tk{font-family:var(--serif);font-size:17px;font-weight:700}
+.ed-su .nt{font-family:var(--sans);font-size:12.5px;color:var(--inkFade)}
+.ed-su .badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:2px 7px;
+  border:1px solid var(--line2);border-radius:2px;color:var(--inkLight)}
+.ed-su .badge.hot{border-color:var(--gold);color:var(--gold)}
+.ed-map{border:1px solid var(--line);border-radius:3px;background:var(--card);padding:8px;
+  margin:8px 0 14px;position:relative}
+.ed-gexh .ed-map{height:auto}
+.gexh-scroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+  padding-bottom:4px}
+.gex-svg{display:block;margin-top:6px}
+.gexh-key{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;padding:10px 2px 2px;
+  font-family:var(--mono);font-size:11.5px;color:var(--inkLight)}
+.gexh-key span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.gexh-key i{width:13px;height:4px;border-radius:2px;display:inline-block;flex:0 0 auto}
+.gexh-key b{font-weight:700;letter-spacing:.02em}
+.gexh-key em{font-style:normal}
+.gexh-key u{text-decoration:none;color:var(--inkFade);font-size:10.5px}
+.gexh-key s{text-decoration:none;color:var(--inkFade);font-style:italic;font-size:10.5px}
+.gexh-key .k-note{opacity:.8;font-style:italic;white-space:normal;flex-basis:100%;
+  line-height:1.5}
+.gexh-key .lv.off i{opacity:.45}
+.ed-chartk{font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--inkFade);display:flex;justify-content:space-between;
+  align-items:baseline;gap:14px;margin:6px 0}
+.ed-vix{border:1px solid var(--line);border-radius:3px;background:var(--card);height:250px;
+  position:relative;padding:8px;margin-bottom:14px}
+.ed-vix .vix-svg{position:absolute;inset:8px;width:calc(100% - 16px);
+  height:calc(100% - 16px)}
+.ed-note{font-size:13px;line-height:1.6;color:var(--inkFade);border-left:2px solid var(--line2);
+  padding:8px 0 8px 12px;margin:10px 0 4px;font-style:italic}
+.ed-cals{margin:10px 0 14px}
+.ed-cal{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px 14px;
+  align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ed-cal:last-child{border-bottom:0}
+.ed-cal.hot{border-left:3px solid var(--gold);padding-left:11px;margin-left:-14px}
+.ed-cal .c-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;padding:2px 7px;
+  border-radius:2px;border:1px solid var(--line2);color:var(--inkLight)}
+.ed-cal .c-fomc{border-color:var(--red);color:var(--red)}
+.ed-cal .c-cpi{border-color:var(--gold);color:var(--gold)}
+.ed-cal .c-opex{border-color:var(--amber);color:var(--amber)}
+.ed-cal .c-w{font-family:var(--mono);font-size:12px;color:var(--inkLight);white-space:nowrap}
+.ed-cal .c-w.hot{color:var(--gold);font-weight:700}
+.ed-cal .c-d{font-family:var(--mono);font-size:11px;color:var(--inkFade);white-space:nowrap}
+.ed-w{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;
+  font-size:13.5px;padding:9px 0;border-bottom:1px solid var(--line)}
+.ed-w:last-child{border-bottom:0}
+.ed-w .w-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;padding:2px 7px;
+  border-radius:2px;background:var(--gold);color:#FFFDF9}
+.ed-w .w-tag.low{background:var(--line2);color:var(--ink)}
+.ed-w .w-when{font-family:var(--mono);font-size:11.5px;color:var(--inkFade);white-space:nowrap}
+.brief-watch{background:rgba(211,119,54,.10);border:1px solid rgba(211,119,54,.38);
+  border-radius:7px;padding:10px 13px;margin-top:11px;font-size:13.5px;line-height:1.6}
+.brief-watch .k{font-family:var(--mono);font-size:11px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--ink);display:block;margin-bottom:4px}
+.ed-jump{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:26px}
+.ed-jump a{display:block;text-align:center;padding:14px 8px;border:1px solid var(--line2);
+  border-radius:3px;color:var(--ink);font-family:var(--mono);font-size:11.5px;
+  letter-spacing:.14em;text-transform:uppercase;background:var(--card);cursor:pointer;
+  text-decoration:none}
+.ed-jump a:hover{border-color:var(--gold);color:var(--gold)}
+.ed-colophon{margin-top:20px;text-align:center;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--inkFade)}
+.ed-cond{margin-top:2px}
+@media(max-width:820px){
+  .ed-page{padding:20px 16px 50px}
+  .ed-brand .ed-name{font-size:36px}.ed-mark{width:38px;height:29px}
+  .ed-meta{padding-right:96px}
+  .ed-call{font-size:25px}
+  .ed-hl{font-size:23px}.ed-hl.sm{font-size:20px}
+  .ed-tape{grid-template-columns:1fr 1fr}.ed-jump{grid-template-columns:1fr 1fr}
+  .ed-smart{grid-template-columns:1fr;gap:0}
+  .ed-pos,.ed-su{grid-template-columns:auto 1fr;gap:3px 12px}
+  .ed-cal{grid-template-columns:auto 1fr;gap:3px 10px}
+  .ed-cal .c-w,.ed-cal .c-d{grid-column:span 2;font-size:11.5px}
+  .ed-vix{height:240px}
+}
+
+.pos-strip{margin:2px 0 4px;border-top:1px solid var(--line)}
+.pos-line{display:flex;gap:14px;align-items:baseline;padding:9px 0;
+  border-bottom:1px solid var(--line);font-family:var(--mono);font-size:13px}
+.pos-line:last-child{border-bottom:0}
+.pos-line .tk{font-family:var(--serif);font-size:17px;font-weight:700}
+.ed-w .w-tag.war-strike{background:var(--red);color:#FFFDF9}
+.ed-w .w-tag.war-oil{background:var(--amber);color:#FFFDF9}
+.ed-w .w-tag.war-talks{background:var(--green);color:#FFFDF9}
+.ed-w .w-tag.war-politics,.ed-w .w-tag.war-military{background:var(--line2);color:var(--ink)}
+</style></head><body><div class="ed-wrap"><div class="ed-page"><a class="ed-x" href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">CLOSE ✕</a><div class="ed-mast"><div class="ed-meta"><span>Phoenix Daily</span><span>Morning edition · Rome · covering Thursday 3 September</span></div><div class="ed-brand"><svg class="ed-mark" viewBox="0 0 89 69" aria-hidden="true"><path fill="var(--gold)" fill-rule="evenodd" d="M3.90 3.70 L5.00 9.40 L9.20 17.70 L23.60 27.30 L22.60 27.80 L11.50 22.00 L10.90 23.10 L14.20 30.80 L17.10 33.70 L28.70 40.30 L30.60 42.70 L29.60 42.80 L22.60 38.10 L21.00 38.50 L22.20 41.80 L25.10 45.70 L35.80 51.60 L36.10 54.60 L38.80 55.30 L39.00 57.40 L43.40 64.70 L44.70 63.80 L45.10 61.50 L48.70 56.80 L49.30 54.10 L51.60 53.80 L52.60 51.10 L61.80 46.70 L64.70 43.80 L67.00 39.10 L65.30 37.60 L65.50 37.00 L71.70 32.80 L74.90 27.40 L76.00 22.70 L75.00 22.30 L70.70 25.60 L65.10 28.20 L60.70 31.60 L57.10 33.20 L53.20 36.60 L54.30 33.20 L60.50 28.10 L63.80 27.70 L75.80 19.70 L79.70 15.80 L84.00 5.10 L84.00 3.70 L83.20 3.20 L77.70 7.60 L64.10 16.20 L61.30 19.80 L57.10 21.20 L53.10 24.20 L47.20 30.10 L44.90 34.80 L45.80 39.40 L43.40 41.50 L41.30 38.50 L42.00 34.80 L40.90 31.50 L34.80 24.20 L27.90 19.30 L26.00 19.40 L24.70 17.20 L10.20 7.60 L6.80 4.20 L4.70 3.20 Z M49.70 42.30 L47.60 47.70 L45.90 49.70 L47.60 52.30 L46.90 52.90 L43.30 50.80 L43.00 49.90 L45.30 46.20 Z M24.30 28.30 L26.40 28.10 L29.70 30.30 L33.60 34.20 L33.80 35.50 Z M64.60 38.20 L63.70 39.60 L54.70 45.60 L53.30 45.70 L59.20 40.30 Z"/></svg><span class="ed-name">Phoenix</span></div><div class="ed-sub" title="chosen for the policy tightening regime">Tight money, tight stops.</div><div class="ed-hello">Good morning Aldemar · Friday, 4 September 2026</div></div><div class="ed-verdict"><div><div class="ed-call">Waller takes September off the table — <em>and yesterday's Palantir story turns out to be a Google story</em></div><div class="ed-vwhy">Fed governor Christopher Waller said he would "support keeping rates unchanged" if inflation continues to cool, and the September hike went from the market's base case to a coin flip: 54% hike against 46% hold, down from roughly two-thirds on Wednesday. Everything repriced at once — S&P +1.06% to 7,747.71, Nasdaq +1.40%, Dow +1.18%, gold up $125.30 to 4,539.90 in its largest single-day gain of the conflict, the dollar down 0.58% and the VIX to 14.32. A correction to yesterday's edition, and it matters: Palantir's 5.81% fall on Wednesday was not valuation and profit-taking. It was Google. Alphabet's DeepMind released Gemini 3.8 Flash Cyber under a government-and-critical-infrastructure-only access programme, and the market read it as a hyperscaler walking into Palantir's defence stronghold. On Thursday Palantir answered with a PwC partnership and took the whole loss back, +7.71% to 182.53. Two positions in this book are now on opposite sides of the same trade.</div></div></div><div class="ed-sec"><div class="ed-k"><span>The tape</span><span class="ed-n">2026-09-03 · previous session</span></div><div class="ed-tape"><div class="ed-ins lead"><div class="i-k"><span>S&P 500</span><span class="i-sig">2.0σ</span></div><div class="i-v">7,748</div><div class="i-c"><span style="color:var(--green);font-weight:700">+1.06%</span></div><svg class="ed-sk g" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,20.6 L4.9,25.3 L9.7,23.1 L14.6,20.8 L19.5,23.9 L24.4,29.9 L29.2,31.0 L34.1,25.8 L39.0,26.6 L43.8,33.7 L48.7,33.5 L53.6,33.4 L58.5,32.1 L63.3,41.0 L68.2,31.4 L73.1,27.3 L77.9,18.6 L82.8,7.9 L87.7,8.9 L92.6,10.0 L97.4,6.3 L102.3,6.6 L107.2,8.6 L112.1,7.0 L116.9,3.0 L121.8,4.0 L126.7,7.2 L131.5,11.4 L136.4,10.2 L141.3,15.4 L146.2,12.8 L151.0,14.5 L155.9,12.6 L160.8,12.7 L165.6,8.4 L170.5,9.9 L175.4,11.9 L180.3,16.2 L185.1,13.4 L190.0,7.0 L190,44 L0,44 Z" class="ar"/><path d="M0.0,20.6 L4.9,25.3 L9.7,23.1 L14.6,20.8 L19.5,23.9 L24.4,29.9 L29.2,31.0 L34.1,25.8 L39.0,26.6 L43.8,33.7 L48.7,33.5 L53.6,33.4 L58.5,32.1 L63.3,41.0 L68.2,31.4 L73.1,27.3 L77.9,18.6 L82.8,7.9 L87.7,8.9 L92.6,10.0 L97.4,6.3 L102.3,6.6 L107.2,8.6 L112.1,7.0 L116.9,3.0 L121.8,4.0 L126.7,7.2 L131.5,11.4 L136.4,10.2 L141.3,15.4 L146.2,12.8 L151.0,14.5 L155.9,12.6 L160.8,12.7 L165.6,8.4 L170.5,9.9 L175.4,11.9 L180.3,16.2 L185.1,13.4 L190.0,7.0" class="ln"/></svg></div><div class="ed-ins"><div class="i-k"><span>Gold</span><span class="i-sig">2.0σ</span></div><div class="i-v">4,540</div><div class="i-c"><span style="color:var(--green);font-weight:700">+2.84%</span></div><svg class="ed-sk g" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,34.1 L4.9,40.3 L9.7,36.6 L14.6,37.6 L19.5,41.0 L24.4,39.4 L29.2,39.6 L34.1,36.0 L39.0,31.6 L43.8,37.5 L48.7,36.2 L53.6,35.8 L58.5,38.1 L63.3,38.2 L68.2,34.4 L73.1,37.3 L77.9,38.2 L82.8,34.6 L87.7,25.9 L92.6,26.1 L97.4,20.4 L102.3,19.2 L107.2,18.0 L112.1,16.4 L116.9,19.1 L121.8,18.1 L126.7,15.9 L131.5,18.9 L136.4,11.8 L141.3,10.2 L146.2,4.0 L151.0,3.0 L155.9,3.2 L160.8,5.5 L165.6,4.8 L170.5,12.4 L175.4,12.2 L180.3,17.2 L185.1,16.1 L190.0,8.9 L190,44 L0,44 Z" class="ar"/><path d="M0.0,34.1 L4.9,40.3 L9.7,36.6 L14.6,37.6 L19.5,41.0 L24.4,39.4 L29.2,39.6 L34.1,36.0 L39.0,31.6 L43.8,37.5 L48.7,36.2 L53.6,35.8 L58.5,38.1 L63.3,38.2 L68.2,34.4 L73.1,37.3 L77.9,38.2 L82.8,34.6 L87.7,25.9 L92.6,26.1 L97.4,20.4 L102.3,19.2 L107.2,18.0 L112.1,16.4 L116.9,19.1 L121.8,18.1 L126.7,15.9 L131.5,18.9 L136.4,11.8 L141.3,10.2 L146.2,4.0 L151.0,3.0 L155.9,3.2 L160.8,5.5 L165.6,4.8 L170.5,12.4 L175.4,12.2 L180.3,17.2 L185.1,16.1 L190.0,8.9" class="ln"/></svg></div><div class="ed-ins"><div class="i-k"><span>Dollar</span><span class="i-sig">1.9σ</span></div><div class="i-v">98.98</div><div class="i-c"><span style="color:var(--red);font-weight:700">−0.58%</span></div><svg class="ed-sk r" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,10.6 L4.9,6.2 L9.7,11.0 L14.6,17.2 L19.5,13.9 L24.4,13.7 L29.2,10.3 L34.1,7.6 L39.0,8.2 L43.8,4.1 L48.7,3.6 L53.6,3.0 L58.5,4.8 L63.3,13.0 L68.2,24.0 L73.1,27.0 L77.9,24.7 L82.8,25.7 L87.7,28.5 L92.6,24.6 L97.4,29.8 L102.3,26.8 L107.2,26.7 L112.1,24.0 L116.9,24.7 L121.8,28.8 L126.7,29.2 L131.5,29.1 L136.4,40.6 L141.3,39.6 L146.2,41.0 L151.0,38.2 L155.9,39.3 L160.8,35.8 L165.6,36.0 L170.5,28.4 L175.4,32.2 L180.3,28.8 L185.1,30.3 L190.0,38.4 L190,44 L0,44 Z" class="ar"/><path d="M0.0,10.6 L4.9,6.2 L9.7,11.0 L14.6,17.2 L19.5,13.9 L24.4,13.7 L29.2,10.3 L34.1,7.6 L39.0,8.2 L43.8,4.1 L48.7,3.6 L53.6,3.0 L58.5,4.8 L63.3,13.0 L68.2,24.0 L73.1,27.0 L77.9,24.7 L82.8,25.7 L87.7,28.5 L92.6,24.6 L97.4,29.8 L102.3,26.8 L107.2,26.7 L112.1,24.0 L116.9,24.7 L121.8,28.8 L126.7,29.2 L131.5,29.1 L136.4,40.6 L141.3,39.6 L146.2,41.0 L151.0,38.2 L155.9,39.3 L160.8,35.8 L165.6,36.0 L170.5,28.4 L175.4,32.2 L180.3,28.8 L185.1,30.3 L190.0,38.4" class="ln"/></svg></div><div class="ed-ins"><div class="i-k"><span>Nasdaq</span><span class="i-sig">1.7σ</span></div><div class="i-v">26,584</div><div class="i-c"><span style="color:var(--green);font-weight:700">+1.40%</span></div><svg class="ed-sk g" viewBox="0 0 190 44" preserveAspectRatio="none"><path d="M0.0,11.4 L4.9,18.0 L9.7,14.2 L14.6,11.6 L19.5,17.8 L24.4,23.7 L29.2,23.9 L34.1,18.6 L39.0,20.9 L43.8,29.8 L48.7,32.4 L53.6,33.1 L58.5,34.0 L63.3,41.0 L68.2,30.1 L73.1,26.0 L77.9,17.3 L82.8,6.5 L87.7,10.1 L92.6,10.3 L97.4,4.8 L102.3,6.2 L107.2,8.8 L112.1,6.5 L116.9,3.0 L121.8,4.2 L126.7,5.5 L131.5,11.3 L136.4,10.6 L141.3,14.8 L146.2,13.0 L151.0,16.2 L155.9,13.5 L160.8,13.8 L165.6,7.2 L170.5,9.5 L175.4,10.0 L180.3,14.3 L185.1,12.4 L190.0,6.5 L190,44 L0,44 Z" class="ar"/><path d="M0.0,11.4 L4.9,18.0 L9.7,14.2 L14.6,11.6 L19.5,17.8 L24.4,23.7 L29.2,23.9 L34.1,18.6 L39.0,20.9 L43.8,29.8 L48.7,32.4 L53.6,33.1 L58.5,34.0 L63.3,41.0 L68.2,30.1 L73.1,26.0 L77.9,17.3 L82.8,6.5 L87.7,10.1 L92.6,10.3 L97.4,4.8 L102.3,6.2 L107.2,8.8 L112.1,6.5 L116.9,3.0 L121.8,4.2 L126.7,5.5 L131.5,11.3 L136.4,10.6 L141.3,14.8 L146.2,13.0 L151.0,16.2 L155.9,13.5 L160.8,13.8 L165.6,7.2 L170.5,9.5 L175.4,10.0 L180.3,14.3 L185.1,12.4 L190.0,6.5" class="ln"/></svg></div></div><div class="pos-strip"><div class="pos-line"><span class="tk">BAC</span><span>63.04 · <span style="color:var(--green);font-weight:700">+0.70%</span> on the day · <span style="color:var(--red);font-weight:700">−1.7%</span> on entry · <b>-0.2R</b> open</span></div><div class="pos-line"><span class="tk">PLTR</span><span>182.53 · <span style="color:var(--green);font-weight:700">+7.71%</span> on the day · <span style="color:var(--red);font-weight:700">−0.8%</span> on entry</span></div><div class="pos-line"><span class="tk">AAPL</span><span>328.21 · <span style="color:var(--green);font-weight:700">+1.00%</span> on the day · <span style="color:var(--green);font-weight:700">+2.2%</span> on entry</span></div></div></div><div class="ed-sec"><div class="ed-k"><span>Your positions</span><span class="ed-n">signal vs noise</span></div><h2 class="ed-hl sm">1 signal on PLTR — read before the open (BAC, AAPL quiet)</h2><div><div class="ed-w"><span class="w-tag">Signal</span><span><b>PLTR</b> — <b>PLTR +7.71% to 182.53 — a 2.0-sigma reversal on 1.4x volume that erases the two-day break</b>. The catalyst is an expanded strategic partnership with PwC US to scale enterprise AI, aimed at M&A transformation and ERP modernisation — a commercial answer to a defence-side threat. The stock opened at 172.50, held 171.94, and ran to 185.83 before closing at 182.53 on 24.9m shares against an 18.1m average for the prior three sessions. Consensus price target is around 196. The provisional entry near 184 is back to −0.80% from −7.90% yesterday. Correcting the record: Wednesday's fall was Alphabet's defence-AI entry, not the valuation story this brief reported. That was the wrong read and it mattered, because a competitive threat is a thesis question while profit-taking is a timing question. The thesis question is still open — Google has not withdrawn anything — but the stock has now been tested on it and bought. Still no stop on either account, which after a 7.7% day is the most expensive omission in the book.</span><span class="w-when">Benzinga · Investing.com · IBKR · 2026-09-03</span></div><div class="ed-w"><span class="w-tag low">Noise</span><span><b>PLTR</b> — <b>Correction to the 3 September edition: PLTR's Wednesday decline was attributed to valuation and profit-taking</b>. The Motley Fool piece cited that morning gave roughly 144 times earnings and post-run profit-taking as the cause, and this brief repeated it, noting that the stock fell "on a day its own news was good". The Army TITAN contract and the Zaffino hire were real, but the drop had a specific cause the brief missed: Alphabet's Gemini 3.8 Flash Cyber announcement, released Wednesday under the restricted-access Fairwind Program. Reported here so the record is straight.</span><span class="w-when">Phoenix desk · 2026-09-03</span></div><div class="ed-w"><span class="w-tag low">Noise</span><span><b>BAC</b> — <b>BAC +0.70% to 63.04 — three straight gains and the best close since 19 August, on a day the hike odds fell</b>. Financials rose 0.98%, second only to consumer discretionary, and BAC went with them: 62.32 to 63.27 range, 16.0m shares, exactly its three-session average. This is now the second session running where the position gained while the September hike case weakened, which is worth taking seriously — the thesis was written as a rates bet and the stock is behaving like a beta-and-credit bet. Gabriel −2.08% on entry at <b>−0.34R</b>, stop 60.39 <b>4.2% below</b>; Aldemar −1.75% at <b>−0.25R</b>, stop 59.65 <b>5.4% below</b>. Both have recovered about 0.26R in three sessions. This morning's employment report is the test the position has been waiting for since 14 August.</span><span class="w-when">Investrade · IBKR · 2026-09-03</span></div><div class="ed-w"><span class="w-tag low">Noise</span><span><b>AAPL</b> — <b>AAPL +1.00% to 328.21 — a third session holding Tuesday's gap, six days to the event</b>. Range 324.11 to 330.81 on 23.1m shares, below the prior three sessions' average, and a new closing high for the position. Provisional entry near 321 is +2.25%. Nothing has happened since the Ternus handover except that the stock has refused to give the move back, which for a name eight sessions from a product launch is the behaviour you want. Still no stop, and the obvious level to define one against — Tuesday's 314.73 low — is now 4.1% away.</span><span class="w-when">IBKR · 2026-09-03</span></div></div><p class="ed-body"><b>Signal</b> changes the thesis, the levels or the size — earnings, a regulator with teeth, M&A, a ruling with a revenue line attached. Everything else is filed as noise on purpose; a real signal survives skepticism.</p></div><div class="ed-sec"><div class="ed-k"><span>The war · US–Iran</span><span class="ed-n">campaign · Trump rejects diplomacy · Iran claims 18 dead · 86 vessels redirected · crude flat</span></div><h2 class="ed-hl sm">The rhetoric escalates and the price does not</h2><div><div class="ed-w"><span class="w-tag war-diplomacy">DIPLOMACY</span><span><b>Trump dismisses negotiation outright: "I think an agreement with them isn't worth the paper it's written on"</b>. This closes, at least rhetorically, the off-ramp Pezeshkian had been holding open — the June memorandum both sides kept citing. Trump added that further Iranian retaliation would be met "much harder" and threatened complete elimination if attacks continue. Tehran had spent the week touting a proposal to reopen the strait; the White House is no longer pretending to be interested.</span><span class="w-when">CBS News · 2026-09-03</span></div><div class="ed-w"><span class="w-tag war-casualties">CASUALTIES</span><span><b>Iran reports 18 killed and 108 wounded; Vance says he is "extremely skeptical" the strike hit a wedding</b>. The vice president cited Iran's record on media reporting, acknowledged the military is investigating, and said civilians are not intentional targets. Whatever the forensics conclude, the political effect is already priced into Iranian domestic politics rather than into oil, which is the distinction that matters for the book.</span><span class="w-when">CBS News · NPR · 2026-09-03</span></div><div class="ed-w"><span class="w-tag war-escalation">ESCALATION</span><span><b>Iran's First Vice President warns of "dark months ahead" for the US economy and a shift to "asymmetric" and "multilayered" tactics</b>. Iran claimed new strikes on US bases in Kuwait and the UAE; a US official said no American facilities were impacted. "Asymmetric" is the word to watch — it means the next attempt is unlikely to be a ballistic missile that Jordan intercepts. The US Navy has now redirected 86 commercial vessels under the blockade.</span><span class="w-when">CBS News · 2026-09-03</span></div><div class="ed-w"><span class="w-tag war-oil">OIL</span><span><b>WTI +0.29 to 91.30 and Brent −0.11 to 95.52 — crude went nowhere on the loudest day of the war</b>. US pump prices are averaging $4.14 a gallon, which is the real political constraint and the reason this cannot run indefinitely. But the futures market has stopped reacting to headlines, because the escort operation keeps demonstrating throughput and because Waller just removed the channel through which oil was hurting equities.</span><span class="w-when">Investrade · CBS News · 2026-09-03</span></div></div><p class="ed-body">Three days ago the chain ran strait → oil → inflation → Fed, and every link fired. On Thursday the last link was cut: Waller made the September decision about CPI rather than crude, so a barrel of oil no longer converts directly into a rate hike. That is why the tape could rally 1% while the president declared diplomacy worthless. The war has not become less dangerous — "asymmetric" and "dark months ahead" are threats to widen it, and $4.14 gasoline is a clock — it has become less financially transmissible for the next two weeks. The thing that would restore the transmission is a successful attack on an escorted convoy. Nothing else on the board does it.</p></div><div class="ed-sec"><div class="ed-k"><span>The world &amp; the market</span><span class="ed-n">in terms of news</span></div><h2 class="ed-hl sm">A coin flip is not a base case</h2><div><div class="ed-w"><span class="w-tag low">FED</span><span><b>Waller would "support keeping rates unchanged" if inflation keeps cooling; September odds fall to 54% hike, 46% hold</b>. He declined to rule out an increase if price pressures prove stronger than expected, which is the standard hedge, but the direction was unmistakable and the market moved on it. Line them up: Chair Warsh hawkish at Jackson Hole, Cleveland's Hammack saying "now is the time to act", Williams saying "wait and see", Waller now leaning hold. The committee is genuinely split, which means the 11 September CPI print, not the war, decides the 16 September meeting.</span><span class="w-when">FXStreet · Investrade · 2026-09-03</span></div><div class="ed-w"><span class="w-tag low">DATA</span><span><b>ISM services 55.4 against 54.2 expected · jobless claims 206,000 · July trade deficit −$88.6bn · Q2 productivity +1.4%</b>. A firm services print alongside Wednesday's weak ADP — the economy is not rolling over, which is the combination that lets the Fed wait. This morning's employment report has to break the tie, and it is the last data point before CPI.</span><span class="w-when">Investrade · 2026-09-03</span></div><div class="ed-w"><span class="w-tag low">TAPE</span><span><b>S&amp;P +1.06% to 7,747.71 · Nasdaq +1.40% to 26,584.06 · Dow +1.18% to 53,686.11 · Russell +0.51%; VIX 14.32</b>. Consumer discretionary led at +1.29%, financials +0.98%, technology +0.75%; staples, health care and materials were the only losers. Snowflake's 35% revenue growth set the tone for software. Note the Russell lagging badly at +0.51% — this was a large-cap growth rally on rate relief, not the broad small-cap risk bid you saw on Wednesday.</span><span class="w-when">Investrade · Alain Guillot · 2026-09-03</span></div><div class="ed-w"><span class="w-tag low">COMMODITIES</span><span><b>Gold +$125.30 to 4,539.90, the biggest one-day gain of the conflict; the dollar index −0.58% to 98.98 and the 10-year at 4.77%</b>. Gold has now round-tripped the entire war selloff and more, and it did it on a dovish Fed rather than on a war headline — real yields, not fear. The dollar breaking below 99 is the same trade. If CPI comes in soft on the 11th, both of these keep going.</span><span class="w-when">Investrade · FXStreet · 2026-09-03</span></div><div class="ed-w"><span class="w-tag low">AHEAD</span><span><b>Employment report this morning · Labor Day Monday, markets closed · Apple event 9 September · CPI 11 September · FOMC 16 September</b>. Payrolls lands into a market that has just decided September is a coin flip, so the asymmetry is unusual: a hot number puts the hike back and helps BAC, a cold one extends the growth rally and helps the other three. There is no session on Monday, so today's close carries a long weekend of war headlines.</span><span class="w-when">Phoenix desk · 2026-09-03</span></div></div><p class="ed-body"><b>On deck.</b> <b>CPI release</b> in 7 days — 08:30 ET. The regime's tightest gate is CPI y/y.</p></div><div class="ed-jump"><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Markets</a><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Screeners</a><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Trade</a><a href="https://gabrielschmal-hub.github.io/Project-Phoenix-/">Portfolio</a></div><div class="ed-colophon">Phoenix OS v1.0 · not investment advice</div></div></div></body></html>
