@@ -117,9 +117,65 @@ def _json_safe(o, _stats=None):
     return o
 
 
+def _congress_finalize(data):
+    """Applied to every write of congress_trades.json, whichever of the four steps wrote it.
+
+    Validation: a transaction dated after its own filing date or after today is a parse error
+    (the live file carried a trade dated 26 Dec 2026) and is dropped, counted, and reported.
+    Freshness: per source, the newest transaction and filing date and how many rows landed
+    in the last 30 days — so a source that has gone quiet (Senate: zero rows for months;
+    House: frozen since 12 Aug) shows as quiet instead of hiding inside a green run.
+    """
+    import datetime as _dt
+    if not isinstance(data, dict) or not isinstance(data.get("tickers"), dict):
+        return data
+    today = _dt.date.today().isoformat()
+    cut30 = (_dt.date.today() - _dt.timedelta(days=30)).isoformat()
+    dropped = 0
+    per = {}
+    for tk, rows in list(data["tickers"].items()):
+        keep = []
+        for r in rows or []:
+            d = str(r.get("date") or "")[:10]
+            f = str(r.get("reported") or r.get("filed") or "")[:10]
+            if len(d) == 10 and (d > today or (len(f) == 10 and d > f)):
+                dropped += 1
+                continue
+            keep.append(r)
+            src = r.get("source") or r.get("chamber") or "unknown"
+            p = per.setdefault(src, {"rows": 0, "last_30d": 0, "newest_tx": None, "newest_filed": None})
+            p["rows"] += 1
+            if d >= cut30:
+                p["last_30d"] += 1
+            if len(d) == 10 and (p["newest_tx"] is None or d > p["newest_tx"]):
+                p["newest_tx"] = d
+            if len(f) == 10 and (p["newest_filed"] is None or f > p["newest_filed"]):
+                p["newest_filed"] = f
+        if keep:
+            data["tickers"][tk] = keep
+        else:
+            data["tickers"].pop(tk, None)
+    data["ticker_count"] = len(data["tickers"])
+    data["trade_count"] = sum(len(v) for v in data["tickers"].values())
+    data["status"] = {"written": today, "dropped_impossible_dates": dropped, "sources": per,
+                      "quiet": [k for k, v in per.items() if v["last_30d"] == 0]}
+    if dropped:
+        print(f"[congress] dropped {dropped} row(s) dated after filing or after today")
+    for k, v in per.items():
+        print(f"[congress] {k}: {v['rows']} rows, {v['last_30d']} in the last 30 days, newest {v['newest_tx']}"
+              + ("  <-- QUIET" if v["last_30d"] == 0 else ""))
+    missing = [c for c in ("Senate",) if not any(c.lower() in k.lower() for k in per)]
+    if missing:
+        print(f"[congress] NO ROWS AT ALL from: {', '.join(missing)} — every source for that chamber is failing")
+        data["status"]["absent_chambers"] = missing
+    return data
+
+
 def write_json(name, data):
     os.makedirs(OUTPUTS_DIR, exist_ok=True)
     path = os.path.join(OUTPUTS_DIR, f"{name}.json")
+    if name == "congress_trades":
+        data = _congress_finalize(data)
     stats = [0]
     clean = _json_safe(data, stats)
     if stats[0]:
@@ -1027,24 +1083,39 @@ def _wire_parse_weekly(raw):
 def run_wire():
     """Publish outputs/wire.json: the newest daily wire AND weekly brief per account."""
     import glob as _g, re as _re, os as _os
-    files = _g.glob(_os.path.join(WIRE_DIR, "phoenix-*-*.html"))
+    # Glob everything and let the regex decide, so a name that does not match is REPORTED.
+    # 4 Sep 2026: the glob was "phoenix-*-*.html" and the morning chat began writing
+    # phoenix_wire_gabriel_2026-09-04.html with underscores. Those files did not match the
+    # glob, so they were never even listed as skipped — the step published the 1 Sep brief
+    # for three days and said nothing. Both separators are accepted now.
+    files = [f for f in _g.glob(_os.path.join(WIRE_DIR, "*.html"))
+             if _os.path.basename(f).lower().startswith("phoenix")]
     if not files:
         print(f"[wire] no files under {WIRE_DIR}/ — nothing to publish. Commit "
               f"phoenix-wire-<account>-YYYY-MM-DD.html (daily) or "
               f"phoenix-weekly-<account>-YYYY-MM-DD.html (weekend) to feed it.")
         return
-    best, best_wk = {}, {}
+    best, best_wk, skipped = {}, {}, []
     for p in sorted(files):
-        m = _re.search(r"phoenix-(wire|weekly)-([a-z0-9_]+)-"
-                       r"(\d{4}-\d{2}-\d{2})\.html$", p)
+        m = _re.search(r"phoenix[-_](wire|weekly)[-_]([a-z0-9]+)[-_]"
+                       r"(\d{4}-\d{2}-\d{2})\.html$", _os.path.basename(p), _re.I)
         if not m:
-            print(f"[wire] skipping {p} — name must be phoenix-wire-<account>-"
-                  f"YYYY-MM-DD.html or phoenix-weekly-<account>-YYYY-MM-DD.html")
+            skipped.append(p)
+            print(f"[wire] SKIPPED {p} — name must be phoenix-wire-<account>-"
+                  f"YYYY-MM-DD.html or phoenix-weekly-<account>-YYYY-MM-DD.html "
+                  f"(hyphens or underscores, either is fine)")
             continue
-        kind, acct, d = m.group(1), m.group(2), m.group(3)
+        kind, acct, d = m.group(1).lower(), m.group(2).lower(), m.group(3)
         tgt = best if kind == "wire" else best_wk
         if acct not in tgt or d > tgt[acct][0]:
             tgt[acct] = (d, p)
+    print(f"[wire] {len(files)} file(s) in {WIRE_DIR}/, {len(skipped)} unparseable, "
+          f"daily accounts {sorted(best)}, weekly accounts {sorted(best_wk)}")
+    for _a, (_d, _p) in sorted(best.items()):
+        print(f"[wire] {_a}: newest daily is {_d} ({_os.path.basename(_p)})")
+    if not best:
+        print("[wire] NO DAILY BRIEF MATCHED A NAME — the previous wire.json is being kept. "
+              "This is a naming problem, not an empty week; see the SKIPPED lines above.")
     accounts = {}
     for acct, (d, p) in sorted(best.items()):
         try:
@@ -9818,38 +9889,32 @@ SMART_MONEY = {
     ],
     # Curated institutional managers (name -> SEC CIK). Edit freely. CIKs are the
     # stable SEC identifier; edgartools resolves the latest 13F-HR from them.
+    # Concentrated, discretionary managers only. Quant and market-making books
+    # (Renaissance, Citadel, Bridgewater) were 88% of every row and carry no
+    # conviction — a 13F from a stat-arb book is inventory, not a view. CIKs are
+    # verified against EDGAR's registrant name at run time (see managers block
+    # in the output); a wrong CIK prints STALE/MISMATCH instead of going quiet.
     "managers": {
-        "Berkshire Hathaway (Buffett)": 1067983,
-        "Scion Asset Mgmt (Burry)": 1649339,
-        "Pershing Square (Ackman)": 1336528,
-        "Bridgewater Associates": 1350694,
-        "Citadel Advisors": 1423053,
-        "Renaissance Technologies": 1037389,
-        "Third Point (Loeb)": 1040273,
-        "Greenlight Capital (Einhorn)": 1079114,
-        "Icahn Capital": 921669,
-        "Tiger Global": 1167483,
-        # --- added from the full 13F filer scan (Aug 2026) ---------------
-        "VIKING GLOBAL INVESTORS LP": 1103804,
-        "Elliott Investment Management L.P.": 1791786,
-        "COATUE MANAGEMENT LLC": 1135730,
-        "PZENA INVESTMENT MANAGEMENT LLC": 1027796,
-        "PARNASSUS INVESTMENTS, LLC": 948669,
-        "Castle Hook Partners LP": 1687241,
-        "Pentwater Capital Management LP": 1425851,
-        "DIAMOND HILL CAPITAL MANAGEMENT INC": 1217541,
-        "Winslow Capital Management, LLC": 900973,
-        "PineStone Asset Management Inc.": 1904893,
-        "Independent Franchise Partners LLP": 1483866,
-        "ARK Investment Management LLC": 1697748,
-        "Mawer Investment Management Ltd.": 1538449,
-        "WCM INVESTMENT MANAGEMENT, LLC": 1061186,
-        "Rokos Capital Management LLP": 1666335,
-        "MARKEL GROUP INC.": 1096343,
-        "Temasek Holdings (Private) Ltd": 1021944,
-        "WASATCH ADVISORS LP": 814133,
-        "WESTFIELD CAPITAL MANAGEMENT CO LP": 1177719,
-        "BROOKFIELD Corp /ON/": 1001085,
+        "Berkshire Hathaway (Buffett)":        1067983,
+        "Pershing Square (Ackman)":            1336528,
+        "Appaloosa (Tepper)":                  1006438,
+        "Duquesne Family Office (Druckenmiller)": 1536411,
+        "Third Point (Loeb)":                  1040273,
+        "Baupost (Klarman)":                   1061768,
+        "Tiger Global (Coleman)":              1167483,
+        "Lone Pine (Mandel)":                  1061165,
+        "Viking Global (Halvorsen)":           1103804,
+        "TCI Fund (Hohn)":                     1647251,
+        "Soros Fund Management":               1029160,
+        "Coatue (Laffont)":                    1135730,
+        "Elliott (Singer)":                    1791786,
+        "Icahn Capital":                       921669,
+        "Greenlight (Einhorn)":                1079114,
+        "Scion (Burry)":                       1649339,
+        "Castle Hook":                         1687241,
+        "Pentwater":                           1425851,
+        "ARK (Wood)":                          1697748,
+        "Independent Franchise Partners":      1483866,
     },
     "congress_lookback_days": 1200,  # ~3yr: keep multi-year history for backtests
     "min_trade_value_hint": 1000,    # STOCK Act threshold
@@ -10149,6 +10214,27 @@ def _cusip_ticker_from_universe(issuer_name, universe_by_name):
             if best is None or abs(len(nm) - len(stripped)) < best[0]:
                 best = (abs(len(nm) - len(stripped)), tk)
     return best[1] if best else None
+
+
+def _sec_entity(cik, identity):
+    """EDGAR's own name for a CIK and the report date of its newest 13F-HR.
+
+    The one check that makes a wrong or retired CIK visible: Greenlight sat on 2023 filings for
+    months and nothing said so. Returns {"name", "latest_13f", "n_13f"} or {} on failure.
+    """
+    import requests
+    H = {"User-Agent": identity, "Accept-Encoding": "gzip, deflate"}
+    cik_int = int(str(cik).lstrip("CIK").lstrip("0") or 0)
+    try:
+        sub = requests.get(f"https://data.sec.gov/submissions/CIK{cik_int:010d}.json", headers=H, timeout=30)
+        sub.raise_for_status()
+        j = sub.json()
+        rec = (j.get("filings") or {}).get("recent") or {}
+        forms, rds = rec.get("form") or [], rec.get("reportDate") or []
+        dates = sorted((rds[i] for i, f in enumerate(forms) if f in ("13F-HR", "13F-HR/A") and i < len(rds)), reverse=True)
+        return {"name": j.get("name"), "latest_13f": dates[0] if dates else None, "n_13f": len(dates)}
+    except Exception as e:
+        return {"error": str(e)[:120]}
 
 
 def _sec_13f_snaps(cik, quarters, identity, universe_by_name):
@@ -10514,15 +10600,24 @@ def run_institutional_13f(identity=None, quarters=5):
     print(f"[13f] issuer-name map has {len(universe_by_name)} entries")
 
     # ---- load the archive so we only compute what's missing ----
+    # The archive is REBUILT from scratch whenever the roster or the storage rules change
+    # (roster_hash), because rows written by older code cannot be told apart from new ones.
+    import hashlib
+    roster_hash = hashlib.sha1(json.dumps(sorted(SMART_MONEY["managers"].items()), default=str).encode()
+                               + b"|rules=v2-hold-stored-done-when-mapped").hexdigest()[:12]
     path = os.path.join(OUTPUTS_DIR, "institutional_holdings.json")
-    by_ticker, done = {}, set()
+    by_ticker, done, mgr_meta = {}, set(), {}
     if os.path.exists(path):
         try:
             prev = json.load(open(path))
-            by_ticker = prev.get("tickers", {}) or {}
-            done = {tuple(x) for x in (prev.get("_done") or [])}
+            if prev.get("roster_hash") == roster_hash and os.environ.get("PHOENIX_13F_REBUILD") != "1":
+                by_ticker = prev.get("tickers", {}) or {}
+                done = {tuple(x) for x in (prev.get("_done") or [])}
+                mgr_meta = prev.get("managers") or {}
+            else:
+                print(f"[13f] roster/rules changed ({prev.get('roster_hash')} -> {roster_hash}): REBUILDING the archive")
         except Exception:
-            by_ticker, done = {}, set()
+            by_ticker, done, mgr_meta = {}, set(), {}
     before = sum(len(v) for v in by_ticker.values())
 
     def holdings_map(obj):
@@ -10560,17 +10655,37 @@ def run_institutional_13f(identity=None, quarters=5):
         return None
 
     added, mgrs_ok = 0, 0
+    import datetime as _dt
     for mgr, cik in SMART_MONEY["managers"].items():
         try:
+            ent = _sec_entity(cik, identity)
+            meta = {"cik": cik, "edgar_name": ent.get("name"), "latest_13f": ent.get("latest_13f"),
+                    "quarters": [], "status": "ok"}
+            if ent.get("error"):
+                meta["status"] = "unreachable: " + ent["error"]
+            elif ent.get("latest_13f"):
+                age = (_dt.date.today() - _dt.date.fromisoformat(ent["latest_13f"])).days
+                if age > 200:
+                    meta["status"] = f"STALE: newest 13F-HR is {ent['latest_13f']} — retired filer or wrong CIK"
+            else:
+                meta["status"] = "NO 13F-HR filings under this CIK — wrong CIK"
+            print(f"[13f] {mgr} -> EDGAR '{ent.get('name')}', newest 13F {ent.get('latest_13f')}"
+                  + ("" if meta["status"] == "ok" else f"  <-- {meta['status']}"))
+            mgr_meta[mgr] = meta
+            if meta["status"] != "ok" and not ent.get("latest_13f"):
+                continue
             snaps = _sec_13f_snaps(cik, quarters, identity, universe_by_name)
+            meta["quarters"] = [q for q, _ in snaps]
             _pos = sum(len(h) for _, h in snaps)
             _tk = sum(1 for _, h in snaps for v in h.values() if v.get("ticker"))
+            meta["positions"], meta["mapped"] = _pos, _tk
             print(f"[13f] {mgr}: {len(snaps)} filings, {_pos} positions, "
                   f"{_tk} mapped to tickers"
                   + ("  <-- LOW, issuer-name matching is failing"
                      if _pos and _tk < _pos * 0.4 else ""))
             if len(snaps) < 2:
                 print(f"[13f] {mgr}: SKIPPED — need 2 filings to diff")
+                meta["status"] = "fewer than 2 filings"
                 continue
             mgrs_ok += 1
             # diff each consecutive pair -> events dated at the NEWER quarter
@@ -10579,6 +10694,13 @@ def run_institutional_13f(identity=None, quarters=5):
                 _, prv = snaps[i + 1]
                 if (mgr, qd) in done:
                     continue          # already archived
+                mapped_here = sum(1 for h in cur.values() if h.get("ticker"))
+                if mapped_here < 5:
+                    # A quarter with nothing mapped is a parse or mapping failure, not a
+                    # quiet fund. Ten managers sat "done" for five quarters with zero rows.
+                    print(f"[13f] {mgr} {qd}: only {mapped_here} holdings mapped — NOT marking done, will retry")
+                    meta["status"] = f"mapping failed for {qd} ({mapped_here} mapped)"
+                    continue
                 for key, h in cur.items():
                     tk = h["ticker"]
                     if not tk or (universe and tk not in universe):
@@ -10587,12 +10709,16 @@ def run_institutional_13f(identity=None, quarters=5):
                     dsh = h["shares"] - p["shares"]
                     if p["shares"] == 0 and h["shares"] > 0:
                         action = "NEW"
+                    elif h["shares"] == 0 and p["shares"] > 0:
+                        action = "EXIT"   # a zero-share line in the newer filing is a sale to zero, not a trim
+                    elif h["shares"] == 0:
+                        continue          # zero both sides: nothing to say
                     elif h["shares"] > p["shares"]:
                         action = "ADD"
                     elif h["shares"] < p["shares"]:
                         action = "TRIM"
                     else:
-                        continue      # unchanged: not a trade, don't store it
+                        action = "HOLD"   # stored: the grid needs "=" to mean "held, unchanged"
                     by_ticker.setdefault(tk, []).append({
                         "manager": mgr, "action": action,
                         "shares": int(h["shares"]), "value_usd": int(h["value"]),
@@ -10623,7 +10749,7 @@ def run_institutional_13f(identity=None, quarters=5):
         print("[13f] nothing fetched and no archive — leaving file untouched")
         return None
     # dedupe + sort newest-first within each ticker
-    prio = {"NEW": 0, "ADD": 1, "TRIM": 2, "EXIT": 3}
+    prio = {"NEW": 0, "ADD": 1, "HOLD": 2, "TRIM": 3, "EXIT": 4}
     for tk in by_ticker:
         seen, uniq = set(), []
         for h in by_ticker[tk]:
@@ -10635,13 +10761,19 @@ def run_institutional_13f(identity=None, quarters=5):
         by_ticker[tk] = uniq
 
     total = sum(len(v) for v in by_ticker.values())
+    latest_q = max((q for m in mgr_meta.values() for q in (m.get("quarters") or [])), default=None)
+    for m in mgr_meta.values():          # filed the latest quarter, or not in yet (Pershing on 3 Sep)
+        m["latest_in"] = bool(latest_q and latest_q in (m.get("quarters") or []))
     write_json("institutional_holdings", {
         "asof": _now(),
         "source": "SEC Form 13F-HR (quarterly institutional holdings)",
-        "note": f"Rolling ~{quarters}-quarter history of position CHANGES. Built once, "
-                f"extended incrementally; prior quarters are archived, never refetched.",
+        "note": f"Rolling ~{quarters}-quarter history of position changes incl. HOLD. Rebuilt when the "
+                f"roster or rules change (roster_hash); otherwise extended incrementally.",
+        "roster_hash": roster_hash,
+        "latest_quarter": latest_q,
         "managers_tracked": len(SMART_MONEY["managers"]),
         "managers_fetched": mgrs_ok,
+        "managers": mgr_meta,
         "quarters_span": quarters,
         "ticker_count": len(by_ticker), "change_count": total,
         "_done": sorted([list(x) for x in done]),
@@ -10650,6 +10782,107 @@ def run_institutional_13f(identity=None, quarters=5):
           f"({added} new this run, {before} archived) from {mgrs_ok}/{len(SMART_MONEY['managers'])} managers")
     return by_ticker
 
+
+
+# Committee jurisdiction -> the Phoenix sectors it touches. Deliberately coarse: the question a
+# reader asks is "does this person's job touch the thing they just bought", and a coarse yes is
+# more honest than a fine-grained guess. Names match the unitedstates/congress-legislators data.
+COMMITTEE_SECTORS = {
+    "Armed Services": ["Electronic technology", "Industrial services", "Producer manufacturing"],
+    "Energy and Commerce": ["Energy minerals", "Health technology", "Health services", "Utilities", "Technology services", "Communications"],
+    "Energy and Natural Resources": ["Energy minerals", "Utilities", "Non-energy minerals"],
+    "Financial Services": ["Finance"],
+    "Banking, Housing, and Urban Affairs": ["Finance"],
+    "Agriculture": ["Process industries", "Consumer non-durables"],
+    "Health, Education, Labor, and Pensions": ["Health technology", "Health services"],
+    "Commerce, Science, and Transportation": ["Technology services", "Electronic technology", "Transportation", "Communications"],
+    "Transportation and Infrastructure": ["Transportation", "Industrial services"],
+    "Science, Space, and Technology": ["Electronic technology", "Technology services"],
+    "Intelligence": ["Electronic technology", "Technology services"],
+    "Homeland Security": ["Electronic technology", "Industrial services"],
+    "Judiciary": ["Technology services", "Communications"],
+    "Ways and Means": ["Finance", "Health services"],
+    "Appropriations": [],
+}
+SMART_MONEY["legislators"] = {
+    "people": "https://unitedstates.github.io/congress-legislators/legislators-current.json",
+    "committees": "https://unitedstates.github.io/congress-legislators/committees-current.json",
+    "membership": "https://unitedstates.github.io/congress-legislators/committee-membership-current.json",
+}
+# Executive-branch figures who move markets but file NO transaction reports. Listed so the app
+# says so instead of leaving a hole that looks like missing data.
+SMART_MONEY["executive"] = [
+    {"name": "Donald J. Trump", "role": "President of the United States",
+     "disclosure": "Annual OGE Form 278e only: asset ranges, no transactions, assets held in a trust. "
+                   "No transaction feed exists from any source. Market impact comes from policy "
+                   "statements, not filings; that is a headline question, handled by the news layer."}
+]
+
+
+def _committee_sector_hits(committees, sector):
+    """Committees a member sits on whose jurisdiction touches this sector."""
+    if not sector:
+        return []
+    hits = []
+    for c in committees or []:
+        for key, secs in COMMITTEE_SECTORS.items():
+            if key.lower() in (c or "").lower() and sector in secs:
+                hits.append(c)
+    return sorted(set(hits))
+
+
+def run_congress_meta():
+    """Who each trading member is: party, state, chamber, committees — from the maintained
+    unitedstates/congress-legislators dataset (public domain). Joined on name, which is what
+    the PTR rows carry. Writes outputs/congress_meta.json; failures are recorded, not hidden."""
+    import json, os, re, requests, datetime as _dt
+    H = {"User-Agent": os.environ.get("SEC_IDENTITY", "Phoenix Research phoenix@example.com")}
+    def get(url):
+        r = requests.get(url, headers=H, timeout=60); r.raise_for_status(); return r.json()
+    status, people, committees, membership = {}, [], [], {}
+    for key, url in SMART_MONEY["legislators"].items():
+        try:
+            data = get(url)
+            if key == "people": people = data
+            elif key == "committees": committees = data
+            else: membership = data
+            status[key] = "ok"
+        except Exception as e:
+            status[key] = f"failed: {str(e)[:80]}"
+            print(f"[congress-meta] {key}: {status[key]}")
+    cname = {}
+    for c in committees or []:
+        cname[c.get("thomas_id")] = c.get("name")
+        for sc in c.get("subcommittees") or []:
+            cname[(c.get("thomas_id") or "") + (sc.get("thomas_id") or "")] = f"{c.get('name')} / {sc.get('name')}"
+    by_bioguide = {}
+    for cid, members in (membership or {}).items():
+        for m in members or []:
+            by_bioguide.setdefault(m.get("bioguide"), []).append(cname.get(cid) or cid)
+    def norm(n):
+        return re.sub(r"[^a-z]", "", (n or "").lower())
+    out = {}
+    for p in people or []:
+        nm = p.get("name") or {}; ids = p.get("id") or {}; terms = p.get("terms") or []
+        t = terms[-1] if terms else {}
+        full = f"{nm.get('first','')} {nm.get('last','')}".strip()
+        official = nm.get("official_full") or full
+        rec = {"name": official, "party": t.get("party"), "state": t.get("state"), "chamber": "Senate" if t.get("type") == "sen" else "House",
+               "district": t.get("district"), "bioguide": ids.get("bioguide"),
+               "committees": sorted(set(by_bioguide.get(ids.get("bioguide"), []))),
+               "term_end": t.get("end"), "url": t.get("url")}
+        for k in {norm(full), norm(official), norm(f"{nm.get('nickname','') or nm.get('first','')} {nm.get('last','')}")}:
+            if k: out[k] = rec
+    # the executive entries, stated honestly
+    for e in SMART_MONEY["executive"]:
+        out[norm(e["name"])] = {"name": e["name"], "chamber": "Executive", "role": e["role"], "committees": [],
+                                "disclosure": e["disclosure"], "no_transaction_feed": True}
+    payload = {"asof": _dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"), "source": "unitedstates/congress-legislators (public domain)",
+               "status": status, "people": len(people), "with_committees": sum(1 for v in out.values() if v.get("committees")),
+               "committee_sectors": COMMITTEE_SECTORS, "members": out}
+    write_json("congress_meta", payload)
+    print(f"[congress-meta] {len(people)} legislators, {payload['with_committees']} keys with committees, status {status}")
+    return payload
 
 
 def backtest_smart_money(windows=(30, 90, 180)):
@@ -11178,6 +11411,7 @@ def run_full():
     step("rotation_daily", run_rotation_daily, optional=True)
     step("rotation_nav",   run_rotation_nav,  optional=True)
     step("congress",       run_congress_trades)
+    step("congress_meta",  run_congress_meta, optional=True)
     step("house_ptr",      run_house_ptr)
     step("senate_efd",     run_senate_efd,    optional=True)
     step("oge",            run_oge_disclosures)

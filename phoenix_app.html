@@ -738,6 +738,36 @@
   .sl-badges .tr-chip{margin-left:0;}
   .chip-ghost{background:transparent;border:1px dashed var(--line2);color:var(--inkFade);}
   .sl-note{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);margin-bottom:10px;line-height:1.5;}
+  /* Smart money grids (Research -> Smart money). Glyph per cell, first column sticky. */
+  .rs-mode{margin:0 0 14px}
+  .sm-tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+  .sm-tbl table{border-collapse:separate;border-spacing:0;font-family:var(--mono);font-size:11.5px;min-width:100%}
+  .sm-tbl th{font-size:9.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--inkFade);padding:8px 6px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--card2,var(--card))}
+  .sm-tbl td{padding:6px 4px;text-align:center;border-bottom:1px solid var(--line2);min-width:44px}
+  .sm-tbl .sm-first{text-align:left;position:sticky;left:0;background:var(--card);min-width:150px;max-width:220px;font-family:var(--serif,Georgia,serif);font-size:12.5px;padding-left:10px;border-right:1px solid var(--line);z-index:1}
+  .sm-tbl th.sm-first{font-family:var(--mono);font-size:9.5px}
+  .sm-tbl td.sm-e{background:transparent}
+  .sm-g{display:inline-block;min-width:24px;height:24px;line-height:24px;border-radius:5px;border:1px solid var(--line2);background:transparent;color:var(--inkFade);font-family:var(--mono);font-weight:700;font-size:12px;padding:0 4px;cursor:pointer}
+  .sm-g sup{font-size:8px;margin-left:1px}
+  .sm-g.sm-n{background:#1F3A5F;border-color:#1F3A5F;color:#fff}
+  .sm-g.sm-a{background:rgba(59,130,196,.18);border-color:rgba(59,130,196,.35);color:#1F3A5F}
+  .sm-g.sm-h{color:var(--inkFade)}
+  .sm-g.sm-t{background:rgba(180,54,47,.14);border-color:rgba(180,54,47,.3);color:var(--red)}
+  .sm-g.sm-x{background:#8F2A24;border-color:#8F2A24;color:#fff}
+  .sm-legend{display:flex;gap:6px 14px;flex-wrap:wrap;align-items:center;font-family:var(--mono);font-size:10.5px;color:var(--inkFade);margin:0 0 10px}
+  .sm-legend .sm-g{cursor:default;margin-right:2px}
+  .sm-chip{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.5px;padding:2px 6px;border:1px solid var(--line2);border-radius:3px;color:var(--inkFade);margin-top:3px}
+  .sm-chip.warn{border-color:var(--amber);color:var(--amber)}
+  .sm-fresh{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);margin:0 0 6px;line-height:1.7}
+  .mc-line{font-family:var(--mono);font-size:11.5px;padding:5px 0;border-bottom:1px solid var(--line2);line-height:1.5}
+  .mc-line b{color:var(--ink)}
+  .sm-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+  .sm-stat{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+  .sm-stat .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--inkFade)}
+  .sm-stat .v{font-family:var(--mono);font-weight:700;font-size:15px;margin-top:2px}
+  .sm-stat .d{font-family:var(--mono);font-size:10px;color:var(--inkFade)}
+  .sm-who{cursor:pointer;border-bottom:1px dotted var(--line2)}
+  html:not(.light) .sm-g.sm-a{color:#9CC4EE}
   /* Screener book tables (Portfolio -> Screener). Mono numbers, serif nowhere: this is a ledger. */
   .pf-scr-tbl{overflow-x:auto;margin-bottom:8px;}
   .pf-scr-tbl table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px;}
@@ -3678,6 +3708,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // drift marker instead, because a dated argument must not be repriced.
   var RESEARCH_HTML =
     '<div class="rs-wrap">'+
+      '<div class="pf-switch rs-mode" id="rsMode">'+
+        '<button class="pf-seg on" data-mode="library">Library</button>'+
+        '<button class="pf-seg" data-mode="smart">Smart money</button></div>'+
+      '<div id="rsSmart" style="display:none"></div>'+
       '<div class="rs-panel"><div class="rs-head">'+
         '<div class="rs-kick">RESEARCH LIBRARY</div>'+
         '<h1 id="rsTitle">Research</h1>'+
@@ -3833,7 +3867,323 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var x=document.getElementById("rsX"); if(x) x.hidden=(t==="");
   }
 
+  // ================= SMART MONEY (Research -> Smart money) =================
+  // Two disclosure regimes, shown as filings rather than as a verdict. 13F: holdings on the
+  // last day of the quarter, filed up to 45 days later — a fund can buy and sell inside a
+  // quarter and show nothing. PTR: transactions, 45-day lag, amounts as filed ranges.
+  // An empty cell is no filing activity, not a negative signal.
+  var rsMode="library", SM={inst:null,cong:null,err:"",view:"yours",loading:false};
+  var SM_GLYPH={NEW:["N","sm-n","New buy"],ADD:["+","sm-a","Added"],HOLD:["=","sm-h","Held"],TRIM:["\u2212","sm-t","Trimmed"],EXIT:["\u00d7","sm-x","Sold out"]};
+  // ---- follow list: people and funds the operator tracks (Supabase watch_entities, per profile) ----
+  var SM_WATCH=null;
+  function smWatchLoad(cb){
+    if(SM_WATCH!==null){ if(cb) cb(); return; }
+    var prof=window.PHOENIX_PROFILE||"G";
+    (typeof supaRows==="function"?supaRows("/rest/v1/watch_entities?select=kind,name&profile=eq."+prof):Promise.reject(new Error("no supabase")))
+      .then(function(rows){ SM_WATCH={}; (rows||[]).forEach(function(r){ SM_WATCH[r.kind+":"+r.name]=1; }); })
+      .catch(function(){ SM_WATCH={}; }).then(function(){ if(cb) cb(); });
+  }
+  function smFollowing(kind,name){ return !!(SM_WATCH&&SM_WATCH[kind+":"+name]); }
+  function smToggleFollow(kind,name,cb){
+    var prof=window.PHOENIX_PROFILE||"G", on=smFollowing(kind,name);
+    var url=SUPA.url+"/rest/v1/watch_entities"+(on?"?profile=eq."+prof+"&kind=eq."+kind+"&name=eq."+encodeURIComponent(name):"");
+    fetch(url,{method:on?"DELETE":"POST",headers:Object.assign(pxAuthHeaders(),{Prefer:"return=minimal"}),body:on?undefined:JSON.stringify({profile:prof,kind:kind,name:name})})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); if(on) delete SM_WATCH[kind+":"+name]; else SM_WATCH[kind+":"+name]=1; })
+      .catch(function(e){ if(typeof pxAuthGate==="function") pxAuthGate(e.message); window.alert("Could not update the follow list: "+e.message); })
+      .then(function(){ if(cb) cb(); });
+  }
+
+  // ---- profiles: who this fund or member is, and what they did ----
+  var SM_FUND_BIO={
+    "Berkshire Hathaway (Buffett)":"Warren Buffett's holding company. Very few positions, held for years; a change is rare and deliberate.",
+    "Pershing Square (Ackman)":"Bill Ackman. Concentrated activist book of 8-12 large caps; new names usually arrive with a public thesis.",
+    "Appaloosa (Tepper)":"David Tepper. Macro-aware, trades the cycle; large swings in tech and China exposure quarter to quarter.",
+    "Duquesne Family Office (Druckenmiller)":"Stanley Druckenmiller. Trend and regime; enters and exits fast, so a quarterly snapshot lags him badly.",
+    "Third Point (Loeb)":"Dan Loeb. Event-driven and activist; positions often pair with an investor letter.",
+    "Baupost (Klarman)":"Seth Klarman. Deep value with a margin of safety; holds cash and buys what is hated.",
+    "Tiger Global (Coleman)":"Chase Coleman. Growth and internet; large positions, willing to trim hard.",
+    "Lone Pine (Mandel)":"Stephen Mandel's firm. Long-duration growth; a new name usually means a multi-year view.",
+    "Viking Global (Halvorsen)":"Andreas Halvorsen. Large diversified long/short; an exit can be hedging rather than a view.",
+    "TCI Fund (Hohn)":"Chris Hohn. A handful of very large, very long holdings; almost never a new name.",
+    "Soros Fund Management":"Family office of George Soros. Macro; equity lines are often hedges for bets that never appear in a 13F.",
+    "Coatue (Laffont)":"Philippe Laffont. Technology long/short; adds and trims track the semiconductor cycle.",
+    "Elliott (Singer)":"Paul Singer. Activist; a new position is usually the opening of a campaign.",
+    "Icahn Capital":"Carl Icahn. Activist and concentrated; the 13F understates his derivatives.",
+    "Greenlight (Einhorn)":"David Einhorn. Value long/short with public short theses.",
+    "Scion (Burry)":"Michael Burry. Small, contrarian book, and an irregular filer.",
+    "Castle Hook":"Macro and equities, ex-Soros lineage.",
+    "Pentwater":"Event-driven and merger arbitrage; positions track deal spreads, not company views.",
+    "ARK (Wood)":"Cathie Wood's ETFs. They disclose holdings daily elsewhere, so the 13F is the slow copy.",
+    "Independent Franchise Partners":"Concentrated quality-franchise investor; low turnover."};
+  var SM_META=null;
+  function smMetaLoad(cb){ if(SM_META!==null){ cb(); return; } getJSON("congress_meta").then(function(d){ SM_META=d||{}; }).catch(function(){ SM_META={}; }).then(cb); }
+  function smNorm(n){ return String(n||"").toLowerCase().replace(/[^a-z]/g,""); }
+  function smSector(tk){ try{ var x=scrLookup(tk)||{}; return x.sector||null; }catch(e){ return null; } }
+  function smMid(a){ var m=(String(a||"").match(/\$[\d,]+/g)||[]).map(function(x){ return +x.replace(/[$,]/g,""); }); return m.length>=2?(m[0]+m[1])/2:(m[0]||0); }
+  function smFollowBtn(kind,name){ return '<button class="ok" data-follow="'+kind+'" data-name="'+name.replace(/"/g,"")+'">'+(smFollowing(kind,name)?"\u2713 Following":"+ Follow")+'</button>'; }
+
+  function smProfileFund(name){
+    var rows=[]; Object.keys(SM.inst.tickers||{}).forEach(function(tk){ (SM.inst.tickers[tk]||[]).forEach(function(c){ if(c.manager===name) rows.push(Object.assign({tk:tk},c)); }); });
+    var meta=(SM.inst.managers||{})[name]||{}, q=(meta.quarters&&meta.quarters[0])||smLatestQ();
+    var latest=rows.filter(function(r){ return r.quarter===q; });
+    var held=latest.filter(function(r){ return r.action!=="EXIT"; }).sort(function(a,b){ return (b.value_usd||0)-(a.value_usd||0); });
+    var aum=held.reduce(function(a,r){ return a+(r.value_usd||0); },0);
+    var sec={}; held.forEach(function(r){ var x=smSector(r.tk)||"unclassified"; sec[x]=(sec[x]||0)+(r.value_usd||0); });
+    var secs=Object.keys(sec).sort(function(a,b){ return sec[b]-sec[a]; }).slice(0,6);
+    var acts={}; latest.forEach(function(r){ acts[r.action]=(acts[r.action]||0)+1; });
+    return '<div class="tr-modal-title">'+name+'</div>'+
+      '<div class="sl-note">'+(SM_FUND_BIO[name]||"")+(meta.edgar_name?' Files with the SEC as <b>'+meta.edgar_name+'</b>.':'')+
+        (meta.status&&meta.status!=="ok"?' <span class="sm-chip warn">'+meta.status+'</span>':'')+'</div>'+
+      '<div class="sm-stats">'+
+        '<div class="sm-stat"><div class="k">Disclosed, '+smQLabel(q)+'</div><div class="v">$'+(aum/1e9).toFixed(1)+'B</div><div class="d">'+held.length+' names inside Phoenix\u2019s universe</div></div>'+
+        '<div class="sm-stat"><div class="k">Activity that quarter</div><div class="v">'+(acts.NEW||0)+'N \u00b7 '+(acts.ADD||0)+'+ \u00b7 '+(acts.TRIM||0)+'\u2212 \u00b7 '+(acts.EXIT||0)+'\u00d7</div><div class="d">'+(acts.HOLD||0)+' left unchanged</div></div></div>'+
+      (secs.length?'<div class="pf-scr-tbl"><table><thead><tr><th>Sector</th><th>Share of disclosed value</th></tr></thead><tbody>'+
+        secs.map(function(k){ return '<tr><td>'+k+'</td><td>'+(aum?(sec[k]/aum*100).toFixed(0)+'%':"\u2014")+'</td></tr>'; }).join("")+'</tbody></table></div>':'')+
+      (held.length?'<div class="pf-scr-tbl"><table><thead><tr><th>Largest positions</th><th>Value</th><th>Last action</th></tr></thead><tbody>'+
+        held.slice(0,10).map(function(r){ return '<tr><td class="sm-who" data-tkgo="'+r.tk+'">'+r.tk+'</td><td>$'+Math.round((r.value_usd||0)/1e6).toLocaleString()+'m</td><td>'+((SM_GLYPH[r.action]||[r.action,"",r.action])[2])+'</td></tr>'; }).join("")+'</tbody></table></div>':'')+
+      '<div class="sl-note">Values are the filing\u2019s own quarter-end figures, not trade prices. Holdings outside Phoenix\u2019s universe, plus options, shorts and non-US listings, are not in a 13F as stored here \u2014 so this is a slice of the book, not the book.</div>'+
+      '<div class="tr-modal-actions">'+smFollowBtn("fund",name)+'<button class="cancel">Close</button></div>';
+  }
+
+  function smProfileMember(name){
+    var m=((SM_META&&SM_META.members)||{})[smNorm(name)]||{}, cs=(SM_META&&SM_META.committee_sectors)||{};
+    if(m.no_transaction_feed) return '<div class="tr-modal-title">'+(m.name||name)+'</div>'+
+      '<div class="sl-note"><b>'+(m.role||"")+'.</b> '+(m.disclosure||"")+'</div>'+
+      '<div class="tr-modal-actions"><button class="cancel">Close</button></div>';
+    var rows=[]; Object.keys(SM.cong.tickers||{}).forEach(function(tk){ (SM.cong.tickers[tk]||[]).forEach(function(r){ if(r.member===name) rows.push(Object.assign({tk:tk},r)); }); });
+    rows.sort(function(a,b){ return a.date<b.date?1:-1; });
+    var buys=rows.filter(function(r){ return r.side==="buy"; }).length;
+    var mid=rows.reduce(function(a,r){ return a+smMid(r.amount); },0);
+    var sec={}, hits={};
+    rows.forEach(function(r){ var x=smSector(r.tk)||"unclassified"; sec[x]=(sec[x]||0)+smMid(r.amount);
+      (m.committees||[]).forEach(function(c){ Object.keys(cs).forEach(function(k){
+        if(String(c).toLowerCase().indexOf(k.toLowerCase())>=0 && (cs[k]||[]).indexOf(x)>=0) hits[x]=c; }); }); });
+    var secs=Object.keys(sec).sort(function(a,b){ return sec[b]-sec[a]; }).slice(0,6);
+    var nHit=Object.keys(hits).length;
+    return '<div class="tr-modal-title">'+name+'</div>'+
+      '<div class="sl-note">'+(m.party?m.party+' \u00b7 ':'')+(m.chamber||"")+(m.state?' \u00b7 '+m.state+(m.district!=null?'-'+m.district:''):'')+(m.term_end?' \u00b7 term to '+m.term_end:'')+
+        (m.committees&&m.committees.length?'<br><b>Committees:</b> '+m.committees.join("; ")
+         :(SM_META&&SM_META.members&&Object.keys(SM_META.members).length?'<br>No committee record under this name.':'<br>Committee data not loaded \u2014 congress_meta.json is missing.'))+'</div>'+
+      '<div class="sm-stats">'+
+        '<div class="sm-stat"><div class="k">Filed trades</div><div class="v">'+rows.length+'</div><div class="d">'+buys+' buys \u00b7 '+(rows.length-buys)+' sells</div></div>'+
+        '<div class="sm-stat"><div class="k">Range midpoints, total</div><div class="v">$'+Math.round(mid/1000).toLocaleString()+'k</div><div class="d">amounts are filed bands, not exact</div></div></div>'+
+      (secs.length?'<div class="pf-scr-tbl"><table><thead><tr><th>Sector traded</th><th>Midpoint $</th><th>Sits on a committee over it</th></tr></thead><tbody>'+
+        secs.map(function(k){ return '<tr'+(hits[k]?' class="pre"':'')+'><td>'+k+'</td><td>$'+Math.round(sec[k]/1000).toLocaleString()+'k</td><td>'+(hits[k]?'<span class="sm-chip warn">'+hits[k]+'</span>':"\u2014")+'</td></tr>'; }).join("")+'</tbody></table></div>':'')+
+      (nHit?'<div class="sl-note">'+nHit+' sector'+(nHit>1?'s':'')+' traded here fall under a committee this member sits on. That is a fact about jurisdiction, not an allegation \u2014 committee assignments are public and so are these filings.</div>':'')+
+      (rows.length?'<div class="pf-scr-tbl"><table><thead><tr><th>Traded</th><th>Ticker</th><th>Side</th><th>Amount</th><th>Filed</th></tr></thead><tbody>'+
+        rows.slice(0,15).map(function(r){ return '<tr><td>'+r.date+'</td><td class="sm-who" data-tkgo="'+r.tk+'">'+r.tk+'</td><td style="color:'+(r.side==="buy"?"var(--green)":"var(--red)")+'">'+r.side+'</td><td>'+(r.amount||"\u2014")+'</td><td>'+(r.reported||"\u2014")+'</td></tr>'; }).join("")+'</tbody></table></div>':'')+
+      '<div class="sl-note">Net worth and performance against the index are not here: both need the annual Financial Disclosure forms parsed, which Phoenix does not do yet. A PTR gives a date, a side and a band \u2014 never a price or a size.</div>'+
+      '<div class="tr-modal-actions">'+smFollowBtn("member",name)+'<button class="cancel">Close</button></div>';
+  }
+
+  function smProfile(kind,name){
+    smWatchLoad(function(){ smMetaLoad(function(){
+      trModal(kind==="fund"?smProfileFund(name):smProfileMember(name), function(){ return true; });
+      var b=document.querySelector("#trModalBg [data-follow]");
+      if(b) b.onclick=function(){ var self=this; self.disabled=true;
+        smToggleFollow(self.dataset.follow,self.dataset.name,function(){ self.disabled=false;
+          self.textContent=smFollowing(self.dataset.follow,self.dataset.name)?"\u2713 Following":"+ Follow";
+          if(rsMode==="smart") rsSmartRender(); if(typeof mcSmart==="function") mcSmart(); }); return false; };
+      document.querySelectorAll("#trModalBg [data-tkgo]").forEach(function(t){ t.style.cursor="pointer";
+        t.onclick=function(){ trModalClose(); if(typeof trOpenTicker==="function") trOpenTicker(this.dataset.tkgo); }; });
+    }); });
+  }
+  function smExecNote(){
+    // Executive-branch figures move markets but file no transaction reports. Without this the
+    // absence looks like missing data and someone goes hunting for a feed that does not exist.
+    var ex=[]; var mem=(SM_META&&SM_META.members)||{};
+    Object.keys(mem).forEach(function(k){ if(mem[k].no_transaction_feed) ex.push(mem[k]); });
+    if(!ex.length) return "";
+    return '<div class="w-card"><div class="w-card-h"><span class="w-card-t">Executive branch <span class="sub">\u00b7 no transaction feed exists</span></span></div><div class="w-card-b">'+
+      ex.map(function(e){ return '<div class="mc-line"><b class="sm-who" data-kind="member" data-name="'+e.name.replace(/"/g,"")+'">'+e.name+'</b> \u00b7 '+(e.role||"")+'</div>'; }).join("")+
+      '<div class="sl-note">The STOCK Act covers Congress. The President files one annual OGE Form 278e \u2014 asset ranges, no transactions, filed months late \u2014 so there is nothing to follow here at any price. What moves markets is policy, which arrives as news, not as a filing.</div></div></div>';
+  }
+  function smFromDp(){                        // the ticker page already holds both files
+    if(SM.inst===null && typeof dpInstit!=="undefined" && dpInstit) SM.inst={tickers:dpInstit};
+    if(SM.cong===null && typeof dpCongress!=="undefined" && dpCongress) SM.cong={tickers:dpCongress};
+  }
+
+  // ---- Mission Control: what changed, so nobody has to go looking ----
+  function mcSmart(){
+    var el=document.getElementById("mcSmart"); if(!el) return;
+    if(SM.inst===null||SM.cong===null||SM_WATCH===null){
+      el.innerHTML='<div class="w-card"><div class="w-card-h"><span class="w-card-t">Smart money <span class="sub">\u00b7 what changed</span></span></div><div class="w-card-b"><div class="loading">Loading filings\u2026</div></div></div>';
+      smLoad(function(){ smWatchLoad(mcSmart); }); return; }
+    var mine=smYourNames(), q=smLatestQ(), now=Date.now();
+    var d14=new Date(now-14*86400000).toISOString().slice(0,10), d7=new Date(now-7*86400000).toISOString().slice(0,10);
+    var lines=[];
+    Object.keys(SM.cong.tickers||{}).forEach(function(tk){ (SM.cong.tickers[tk]||[]).forEach(function(r){
+      var f=r.reported||r.date; if(!f||f<d14) return;
+      var w=mine.indexOf(tk)>=0?3:smFollowing("member",r.member)?2:(smMid(r.amount)>=250000&&f>=d7)?1:0;
+      if(!w) return;
+      lines.push({w:w,h:'<div class="mc-line"><b data-tk="'+tk+'">'+tk+'</b> '+(r.side==="buy"?'<span style="color:var(--green)">bought</span>':'<span style="color:var(--red)">sold</span>')+
+        ' by <span class="sm-who" data-kind="member" data-name="'+String(r.member||"").replace(/"/g,"")+'">'+r.member+'</span> \u00b7 '+(r.amount||"")+' \u00b7 filed '+f+
+        (w===3?' <span class="sm-chip warn">your name</span>':w===2?' <span class="sm-chip">followed</span>':'')+'</div>'}); }); });
+    var fundLines=[];
+    Object.keys(SM.inst.tickers||{}).forEach(function(tk){ (SM.inst.tickers[tk]||[]).forEach(function(c){
+      if(c.quarter!==q||c.action==="HOLD") return;
+      var f=smFollowing("fund",c.manager), y=mine.indexOf(tk)>=0; if(!f&&!y) return;
+      fundLines.push({w:(y?2:0)+(f?1:0),v:c.value_usd||0,
+        h:'<div class="mc-line"><b data-tk="'+tk+'">'+tk+'</b> '+((SM_GLYPH[c.action]||[c.action,"",c.action])[2]).toLowerCase()+
+          ' by <span class="sm-who" data-kind="fund" data-name="'+String(c.manager||"").replace(/"/g,"")+'">'+c.manager+'</span> \u00b7 $'+Math.round((c.value_usd||0)/1e6).toLocaleString()+'m'+
+          (y?' <span class="sm-chip warn">your name</span>':'')+'</div>'}); }); });
+    lines.sort(function(a,b){ return b.w-a.w; }); fundLines.sort(function(a,b){ return b.w-a.w||b.v-a.v; });
+    var meta=SM.inst.managers||{};
+    var inQ=Object.keys(meta).filter(function(m){ return meta[m].latest_in; }).length;
+    var notIn=Object.keys(meta).filter(function(m){ return meta[m].latest_in===false && (meta[m].status==="ok"); });
+    var st=SM.cong.status||{}, quiet=((st.quiet||[]).length||(st.absent_chambers||[]).length);
+    var nF=SM_WATCH?Object.keys(SM_WATCH).length:0;
+    el.innerHTML='<div class="w-card"><div class="w-card-h"><span class="w-card-t">Smart money <span class="sub">\u00b7 what changed</span></span>'+
+      '<span class="w-card-n">'+nF+' followed</span></div><div class="w-card-b">'+
+      (lines.length?lines.slice(0,6).map(function(l){ return l.h; }).join("")
+        :'<div class="sl-note">No Congress filing in 14 days on a name you hold or a member you follow.</div>')+
+      (fundLines.length?'<div class="sl-note" style="margin:10px 0 2px"><b>13F \u00b7 '+smQLabel(q)+'</b></div>'+fundLines.slice(0,5).map(function(l){ return l.h; }).join(""):'')+
+      '<div class="sl-note" style="margin-top:10px">'+(q?smQLabel(q)+': '+inQ+' funds filed'+(notIn.length?' \u00b7 not in yet: '+notIn.slice(0,3).join(", ")+(notIn.length>3?' +'+(notIn.length-3):''):''):'no 13F data yet')+
+      (quiet?' \u00b7 <span class="sm-chip warn">Congress feed quiet</span>':'')+' \u00b7 <a href="#research" data-smart="1">open Smart money \u2192</a></div>'+
+      '</div></div>';
+    el.querySelectorAll("[data-tk]").forEach(function(b){ b.style.cursor="pointer"; b.onclick=function(){ if(typeof trOpenTicker==="function") trOpenTicker(this.dataset.tk); }; });
+    el.querySelectorAll(".sm-who").forEach(function(b){ b.onclick=function(e){ e.stopPropagation(); smProfile(this.dataset.kind,this.dataset.name); }; });
+    var a=el.querySelector("[data-smart]"); if(a) a.onclick=function(){ setTimeout(function(){ rsSetMode("smart"); },400); };
+  }
+
+  function rsSetMode(m){
+    rsMode=m;
+    var sw=document.getElementById("rsMode"); if(sw) sw.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on",b.dataset.mode===m); });
+    var wrap=document.querySelector("#page-research .rs-wrap"); if(!wrap) return;
+    Array.prototype.forEach.call(wrap.children,function(ch){
+      if(ch.id==="rsMode") return;
+      ch.style.display = ch.id==="rsSmart" ? (m==="smart"?"":"none") : (m==="smart"?"none":"");
+    });
+    if(m==="smart") rsSmartRender();
+  }
+  function smLoad(cb){
+    if(SM.loading) return; if(SM.inst!==null&&SM.cong!==null){ cb(); return; }
+    SM.loading=true;
+    Promise.all([getJSON("institutional_holdings").catch(function(){return null;}), getJSON("congress_trades").catch(function(){return null;})])
+      .then(function(r){ SM.inst=r[0]||{tickers:{}}; SM.cong=r[1]||{tickers:{}}; SM.err=(!r[0]&&!r[1])?"neither file loaded":""; })
+      .then(function(){ SM.loading=false; cb(); });
+  }
+  function smYourNames(){
+    var out=[];
+    (typeof trLog!=="undefined"?trLog:[]).forEach(function(t){ if(t&&t.status==="open"&&t.ticker&&out.indexOf(t.ticker)<0) out.push(t.ticker); });
+    if(typeof PX_WATCH==="object"&&PX_WATCH) Object.keys(PX_WATCH).forEach(function(tk){ if(PX_WATCH[tk]==="watch"&&out.indexOf(tk)<0) out.push(tk); });
+    return out;
+  }
+  function smScreenerNames(){
+    var rows=(typeof slRows!=="undefined"&&slRows)?slRows:[]; var out=[];
+    rows.filter(function(r){ return r.r_20d==null && r.stop25_hit!==true; })
+        .sort(function(a,b){ return (a.date<b.date?1:a.date>b.date?-1:0)||((a.rank||99)-(b.rank||99)); })
+        .forEach(function(r){ if(out.indexOf(r.ticker)<0 && out.length<14) out.push(r.ticker); });
+    return out;
+  }
+  function smLatestQ(){
+    if(SM.inst.latest_quarter) return SM.inst.latest_quarter;
+    var q=null; Object.keys(SM.inst.tickers||{}).forEach(function(tk){ SM.inst.tickers[tk].forEach(function(c){ if(!q||c.quarter>q) q=c.quarter; }); }); return q;
+  }
+  function smManagers(){
+    var meta=SM.inst.managers||null, names=[];
+    if(meta) names=Object.keys(meta);
+    else { var seen={}; Object.keys(SM.inst.tickers||{}).forEach(function(tk){ SM.inst.tickers[tk].forEach(function(c){ seen[c.manager]=1; }); }); names=Object.keys(seen).sort(); }
+    return names;
+  }
+  function smCrowded(q){                       // the names most funds acted on in the latest quarter
+    var cnt={}; Object.keys(SM.inst.tickers||{}).forEach(function(tk){ var n=0; SM.inst.tickers[tk].forEach(function(c){ if(c.quarter===q && c.action!=="HOLD") n++; }); if(n) cnt[tk]=n; });
+    return Object.keys(cnt).sort(function(a,b){ return cnt[b]-cnt[a]||(a<b?-1:1); }).slice(0,14);
+  }
+  function smCell(tk,mgr,q){
+    var rows=(SM.inst.tickers||{})[tk]||[]; var c=null;
+    rows.forEach(function(r){ if(r.manager===mgr && r.quarter===q) c=r; });
+    if(!c) return '<td class="sm-e"></td>';
+    var g=SM_GLYPH[c.action]||[c.action,"","",""];
+    return '<td><button class="sm-g '+g[1]+'" data-tk="'+tk+'" data-mgr="'+mgr.replace(/"/g,"")+'" data-q="'+q+'" title="'+g[2]+'">'+g[0]+'</button></td>';
+  }
+  function smQLabel(q){ if(!q) return "\u2014"; var m=+q.slice(5,7); return "Q"+Math.ceil(m/3)+" "+q.slice(0,4); }
+  function smInstGrid(names,q){
+    var meta=SM.inst.managers||{}, mgrs=smManagers();
+    if(!names.length) return '<div class="sl-note">Nothing to show: no open positions, starred names or screener signals.</div>';
+    var head='<thead><tr><th class="sm-first">Fund \u00b7 data as of '+q+'</th>'+names.map(function(t){ return '<th>'+t+'</th>'; }).join("")+'</tr></thead>';
+    var body=mgrs.map(function(m){
+      var mt=meta[m]||{}; var chip=(mt.status&&mt.status!=="ok")?'<span class="sm-chip warn">'+mt.status.split(":")[0]+(mt.latest_13f?' · last '+smQLabel(mt.latest_13f):'')+'</span>':mt.latest_in===false?'<span class="sm-chip warn">'+smQLabel(q)+' not in yet</span>':(mt.quarters&&mt.quarters.length?'<span class="sm-chip">Filed '+smQLabel(mt.quarters[0])+'</span>':'');
+      return '<tr><td class="sm-first"><b class="sm-who" data-kind="fund" data-name="'+m.replace(/"/g,"")+'">'+m+(smFollowing("fund",m)?' <span class="sm-chip">following</span>':'')+'</b>'+(chip?'<br>'+chip:'')+'</td>'+names.map(function(t){ return smCell(t,m,q); }).join("")+'</tr>';
+    }).join("");
+    var touched=names.filter(function(t){ return (SM.inst.tickers[t]||[]).some(function(c){ return c.quarter===q; }); });
+    var untouched=names.filter(function(t){ return touched.indexOf(t)<0; });
+    return '<div class="sm-legend"><span class="sm-g sm-n">N</span>New buy <span class="sm-g sm-a">+</span>Added <span class="sm-g sm-h">=</span>Held <span class="sm-g sm-t">\u2212</span>Trimmed <span class="sm-g sm-x">\u00d7</span>Sold out</div>'+
+      '<div class="sm-tbl"><table>'+head+'<tbody>'+body+'</tbody></table></div>'+
+      (untouched.length?'<div class="sl-note">No roster fund touched <b>'+untouched.join(", ")+'</b> in '+smQLabel(q)+' \u2014 that is worth knowing too.</div>':'');
+  }
+  function smCongGrid(names,days){
+    var cut=new Date(Date.now()-days*86400000).toISOString().slice(0,10), by={};
+    names.forEach(function(t){ ((SM.cong.tickers||{})[t]||[]).forEach(function(r){ if(r.date>=cut){ var k=r.member||"?"; by[k]=by[k]||{}; (by[k][t]=by[k][t]||[]).push(r); } }); });
+    var members=Object.keys(by).sort(function(a,b){ var na=Object.keys(by[a]).length, nb=Object.keys(by[b]).length; return nb-na||(a<b?-1:1); }).slice(0,14);
+    if(!members.length) return '<div class="sl-note">No member of Congress filed a trade in these names in the last '+days+' days.</div>';
+    var head='<thead><tr><th class="sm-first">Member \u00b7 last '+days+' days</th>'+names.map(function(t){ return '<th>'+t+'</th>'; }).join("")+'</tr></thead>';
+    var body=members.map(function(m){
+      var any=Object.values(by[m])[0][0];
+      return '<tr><td class="sm-first"><b class="sm-who" data-kind="member" data-name="'+m.replace(/"/g,"")+'">'+m+(smFollowing("member",m)?' <span class="sm-chip">following</span>':'')+'</b><br><span class="sm-chip">'+(any.chamber||"")+(any.state?' \u00b7 '+any.state:'')+'</span></td>'+names.map(function(t){
+        var rs=by[m][t]; if(!rs) return '<td class="sm-e"></td>';
+        var buys=rs.filter(function(r){return r.side==="buy";}).length, sells=rs.length-buys;
+        var cls=buys&&!sells?"sm-a":sells&&!buys?"sm-t":"sm-h", g=buys&&!sells?"B":sells&&!buys?"S":"B/S";
+        return '<td><button class="sm-g '+cls+'" data-ctk="'+t+'" data-mem="'+m.replace(/"/g,"")+'" title="'+rs.length+' filing(s)">'+g+(rs.length>1?'<sup>'+rs.length+'</sup>':'')+'</button></td>';
+      }).join("")+'</tr>';
+    }).join("");
+    return '<div class="sm-legend"><span class="sm-g sm-a">B</span>Bought <span class="sm-g sm-t">S</span>Sold <span class="sm-g sm-h">B/S</span>Both</div><div class="sm-tbl"><table>'+head+'<tbody>'+body+'</tbody></table></div>';
+  }
+  function smDetail(tk,mgr,q){
+    var rows=((SM.inst.tickers||{})[tk]||[]).filter(function(r){ return r.manager===mgr; }).sort(function(a,b){ return a.quarter<b.quarter?1:-1; });
+    var html='<div class="tr-modal-title">'+mgr+' \u00b7 '+tk+'</div><div class="pf-scr-tbl"><table><thead><tr><th>Quarter</th><th>Action</th><th>Shares</th><th>Value</th><th>Change</th></tr></thead><tbody>'+
+      rows.map(function(r){ return '<tr'+(r.quarter===q?' class="pre"':'')+'><td>'+smQLabel(r.quarter)+'</td><td>'+(SM_GLYPH[r.action]||[r.action])[2]+'</td><td>'+(r.shares!=null?Number(r.shares).toLocaleString():"\u2014")+'</td><td>'+(r.value_usd!=null?"$"+Math.round(r.value_usd/1e6).toLocaleString()+"m":"\u2014")+'</td><td>'+(r.pct_change!=null?(r.pct_change>0?"+":"")+r.pct_change+"%":"\u2014")+'</td></tr>'; }).join("")+
+      '</tbody></table></div><div class="sl-note">Holdings on the last day of each quarter, from the 13F-HR filed up to 45 days later. Value is the filing\u2019s own figure at quarter end, not a trade price.</div>'+
+      '<div class="tr-modal-actions"><button class="cancel">Close</button></div>';
+    trModal(html,function(){ return true; });
+  }
+  function smCongDetail(tk,mem){
+    var rows=((SM.cong.tickers||{})[tk]||[]).filter(function(r){ return r.member===mem; }).sort(function(a,b){ return a.date<b.date?1:-1; });
+    var html='<div class="tr-modal-title">'+mem+' \u00b7 '+tk+'</div><div class="pf-scr-tbl"><table><thead><tr><th>Traded</th><th>Side</th><th>Amount</th><th>Filed</th></tr></thead><tbody>'+
+      rows.map(function(r){ return '<tr><td>'+r.date+'</td><td style="color:'+(r.side==="buy"?"var(--green)":"var(--red)")+'">'+r.side+'</td><td>'+(r.amount||"\u2014")+'</td><td>'+(r.reported||"\u2014")+'</td></tr>'; }).join("")+
+      '</tbody></table></div><div class="sl-note">Periodic Transaction Report as filed. Amounts are the ranges the STOCK Act requires; the filing may be up to 45 days after the trade.</div>'+
+      '<div class="tr-modal-actions"><button class="cancel">Close</button></div>';
+    trModal(html,function(){ return true; });
+  }
+  function smFreshness(){
+    var q=smLatestQ(), st=(SM.cong.status||{}), src=st.sources||{}, quiet=st.quiet||[], absent=st.absent_chambers||[];
+    var newest=null; Object.keys(src).forEach(function(k){ var f=src[k].newest_filed||src[k].newest_tx; if(f&&(!newest||f>newest)) newest=f; });
+    if(!newest){ Object.keys(SM.cong.tickers||{}).slice(0,400).forEach(function(tk){ SM.cong.tickers[tk].forEach(function(r){ var f=r.reported||r.date; if(f&&(!newest||f>newest)) newest=f; }); }); }
+    var age=newest?Math.round((Date.now()-new Date(newest))/86400000):null;
+    return '<div class="sl-note"><b>Read this first.</b> This page shows regulatory filings, not current positions. Fund data can be up to 135 days old by the time you see it; these investors may have sold, hedged or reversed everything shown. Short bets and trades made inside a quarter are invisible here. Nothing on this page is a recommendation.</div>'+
+      '<div class="sm-fresh">13F: holdings as of <b>'+(q||"\u2014")+'</b> ('+smQLabel(q)+'), file built '+(SM.inst.asof||"\u2014")+' \u00b7 Congress: newest filing <b>'+(newest||"\u2014")+'</b>'+(age!=null&&age>21?' <span class="sm-chip warn">'+age+' days old \u2014 the feed has gone quiet</span>':'')+
+      (absent.length?' <span class="sm-chip warn">no '+absent.join("/")+' rows at all</span>':'')+(quiet.length?' <span class="sm-chip warn">quiet: '+quiet.join(", ")+'</span>':'')+'</div>';
+  }
+  function rsSmartRender(){
+    var el=document.getElementById("rsSmart"); if(!el) return;
+    if(SM.inst===null||SM.cong===null||SM_WATCH===null||SM_META===null){ el.innerHTML='<div class="rs-loading">Loading filings\u2026</div>'; smLoad(function(){ smWatchLoad(function(){ smMetaLoad(rsSmartRender); }); }); if(typeof slLoad==="function"&&typeof slRows!=="undefined"&&slRows===null) slLoad(function(){ if(rsMode==="smart") rsSmartRender(); }); return; }
+    if(SM.err){ el.innerHTML='<div class="tr-empty">Filings unreachable ('+SM.err+').<span>Unknown, not empty.</span></div>'; return; }
+    var q=smLatestQ();
+    var view=SM.view, fellBack=false;
+    if(view==="yours" && !smYourNames().length){ view="famous"; fellBack=true; }        // an empty book should not show empty grids
+    if(view==="screener" && !smScreenerNames().length){ view="famous"; fellBack=true; }
+    var names = view==="yours"?smYourNames():view==="screener"?smScreenerNames():smCrowded(q);
+    var title = view==="yours"?"Who touched your names":view==="screener"?"Who touched the screener\u2019s names":"What the famous funds did last quarter";
+    el.innerHTML=
+      '<div class="rs-panel"><div class="rs-head"><div class="rs-kick">SMART MONEY \u00b7 13F + STOCK ACT</div><h1>Who is positioned where</h1>'+
+      '<p class="rs-dek">Institutions from SEC Form 13F-HR, Congress from Periodic Transaction Reports. Filings, shown as filed. Tap a cell for shares, size and dates.</p></div></div>'+
+      smFreshness()+
+      (fellBack?'<div class="sl-note">Nothing to filter by yet \u2014 no open positions'+(SM.view==="screener"?' and no live screener signals':', starred names or screener signals')+'. Showing the most crowded names instead.</div>':'')+
+      '<div class="pf-switch" style="margin:10px 0 12px">'+[["yours","Your names"],["screener","Screener"],["famous","Famous funds"]].map(function(v){ return '<button class="pf-seg'+(SM.view===v[0]?" on":"")+'" data-smv="'+v[0]+'">'+v[1]+'</button>'; }).join("")+'</div>'+
+      '<div class="w-card"><div class="w-card-h"><span class="w-card-t">'+title+' <span class="sub">\u00b7 institutions</span></span><span class="w-card-n">'+smManagers().length+' funds \u00b7 '+names.length+' names</span></div><div class="w-card-b">'+smInstGrid(names,q)+'</div></div>'+
+      '<div class="w-card"><div class="w-card-h"><span class="w-card-t">'+title.replace("Who touched","Which members traded").replace("What the famous funds did last quarter","Congress on the same names")+' <span class="sub">\u00b7 Congress, last 120 days</span></span></div><div class="w-card-b">'+smCongGrid(names,120)+'</div></div>'+
+      smExecNote()+
+      '<div class="sl-note">Quiet columns are normal: most quarters, most funds leave most stocks alone. A \u201cbuy\u201d from a macro fund may be a hedge for bets you cannot see. Amounts on Congress filings are ranges, as filed.</div>';
+    el.querySelectorAll("button[data-smv]").forEach(function(b){ b.onclick=function(){ SM.view=this.dataset.smv; rsSmartRender(); }; });
+    el.querySelectorAll("button.sm-g[data-tk]").forEach(function(b){ b.onclick=function(){ smDetail(this.dataset.tk,this.dataset.mgr,this.dataset.q); }; });
+    el.querySelectorAll("button.sm-g[data-ctk]").forEach(function(b){ b.onclick=function(){ smCongDetail(this.dataset.ctk,this.dataset.mem); }; });
+    el.querySelectorAll(".sm-who").forEach(function(b){ b.style.cursor="pointer"; b.onclick=function(){ smProfile(this.dataset.kind,this.dataset.name); }; });
+  }
+
   function initResearch(){
+    var sw=document.getElementById("rsMode");
+    if(sw && !sw.dataset.bound){ sw.dataset.bound="1";
+      sw.querySelectorAll("button").forEach(function(b){ b.onclick=function(){ rsSetMode(this.dataset.mode); }; }); }
     if(RS.loaded) return; RS.loaded=true;
     var grid=document.getElementById("rsGrid");
     getJSON("research_index").then(function(d){
@@ -8675,6 +9025,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '</div>'+
         '<div class="col">'+
           '<div class="mcc" id="mcCal"></div>'+
+          '<div class="mcc" id="mcSmart"></div>'+
           '<div class="mcc" id="mcBookHealth"></div>'+
         '</div>'+
       '</div>'+
@@ -9068,6 +9419,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       try{ mcGates(); }catch(e){}
       try{ mcRegime(); }catch(e){}
       try{ mcCal(); }catch(e){}
+      try{ mcSmart(); }catch(e){ console.warn("mcSmart",e); }
       try{ mcHealth(mstate); }catch(e){}
     }
     if(!document.getElementById("mcVerdict")) return;
@@ -10532,7 +10884,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   var PF_SCR_MULTS=[{k:"stop15",m:1.5},{k:"stop20",m:2.0},{k:"stop25",m:2.5}];
   var PF_SCR_LENSES=[["sector","Sector"],["industry","Industry"],["profitability","Profitability"],["mcap","Market cap"],
                      ["atr","ATR"],["regime","Engine regime"],["gex_regime","GEX regime"],["spx_vs_200d","SPX vs 200d"],
-                     ["breakout","Breakout"],["days_on_list","Days on list"],["time_in_trade","Time in trade"]];
+                     ["breakout","Breakout"],["days_on_list","Days on list"],["time_in_trade","Time in trade"],
+                     ["institutions","Institutions"],["congress","Congress"]];
 
   function pfScrLoad(cb){
     var need=2, done=function(){ if(--need===0 && cb) cb(); };
@@ -10563,6 +10916,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       case "time_in_trade":
         if(r.stop25_day!=null) return r.stop25_day<=3?"stopped d1-3":r.stop25_day<=10?"stopped d4-10":"stopped d11-20";
         return r.r_20d!=null?"held 20":null;
+      case "institutions": return r.inst_net_q==null?null:(+r.inst_net_q>0?"net buying":+r.inst_net_q<0?"net selling":"mixed");
+      case "congress": return r.pol_net_90d==null?null:(+r.pol_net_90d>0?"bought":+r.pol_net_90d<0?"sold":"mixed");
     }
     return null;
   }
@@ -11812,7 +12167,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     slLoading=true;
     var cols="date,ticker,age_days,trigger,close,entry_ref,atr_pct,stop_pct,sector,industry,"+
              "opp_score,rank,r_20d,mfe_20d,mae_20d,bars_marked,data_age_min,profitable_ocf,profitability,"+
-             "mcap_b,breakout,days_on_list,regime,gex_regime,spx_vs_200d_pct,vix,"+   // lower case: Postgres folded the column
+             "mcap_b,breakout,days_on_list,regime,gex_regime,spx_vs_200d_pct,vix,inst_net_q,pol_net_90d,"+   // lower case: Postgres folded the column
              "stop15_hit,stop15_day,stop15_tp2,stop15_tp2_day,stop15_tp3,stop15_tp3_day,stop15_r,"+
              "stop20_hit,stop20_day,stop20_tp2,stop20_tp2_day,stop20_tp3,stop20_tp3_day,stop20_r,"+
              "stop25_hit,stop25_day,stop25_tp2,stop25_tp2_day,stop25_tp3,stop25_tp3_day,stop25_r";
@@ -12775,7 +13130,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       }
       ev.push({who:h.manager.replace(/\s*\(.*\)/,""), date:h.quarter, buy:buy, label:h.action,
                amount:flow, amountTxt:flow?_usd(flow):"—",
-               position:h.value_usd||0, kind:"inst", px:_openAt(bars,h.quarter)});
+               // px:null on purpose. A 13F is a quarter-end snapshot; the fund traded somewhere
+               // inside the quarter at a price nobody filed. Pricing it at the quarter-end open
+               // invented a "return since trade" and a win rate. Flow and positioning stay.
+               position:h.value_usd||0, kind:"inst", px:null, quarter:h.quarter});
     });
     return ev.filter(function(e){return e.date;});
   }
@@ -12810,11 +13168,14 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var rets=priced.map(function(e){return (cur-e.px)/e.px*100;});
     var avgRet=rets.length?rets.reduce(function(a,b){return a+b;},0)/rets.length:null;
     var right=priced.filter(function(e){var up=cur>e.px; return e.buy?up:!up;}).length;
+    // priced == politician trades only: a PTR has a trade DATE, so a price exists. 13F rows are
+    // quarter-end snapshots with no trade date, so they are excluded rather than guessed.
     var winRate=priced.length?right/priced.length*100:null;
     var span=(function(){ if(!all.length) return ""; var ds=all.map(function(e){return e.date;}).sort();
       var m=Math.round((new Date(ds[ds.length-1])-new Date(ds[0]))/2592000000); return m>0?m+"mo":"recent"; })();
 
     var buying=lean;
+    var filings=(function(){ try{ smFromDp(); if(!smLatestQ()) return ""; return '<div class="sl-note" style="margin-top:14px"><b>The filings themselves.</b> Institutions: holdings on the last day of the quarter, filed up to 45 days later. Congress: transactions, filed up to 45 days later. Tap a cell.</div>'+smInstGrid([tk],smLatestQ())+'<div style="height:10px"></div>'+smCongGrid([tk],180); }catch(e){ return ""; } })();
     var head='<div class="w-card-h">'+
         '<span class="w-card-t">Smart Money Map <span class="sub">\u00b7 politicians + institutions</span></span>'+
         '<span class="w-card-n">'+buys.length+' buys \u00b7 '+sells.length+' sells'+(span?' \u00b7 '+span:'')+'</span></div>';
@@ -12825,7 +13186,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           ((pols.length||execs.length)?'<b style="color:'+(polNet>=0?"var(--green)":"var(--red)")+'">'+(polNet>=0?"+":"\u2212")+_usd(Math.abs(polNet))+'</b> officials':'')+
           ((pols.length||execs.length)&&insts.length?' \u00b7 ':'')+
           (insts.length?'<b style="color:'+(instNet>=0?"var(--green)":"var(--red)")+'">'+(instNet>=0?"+":"\u2212")+_usd(Math.abs(instNet))+'</b> institutions':'')+
-          (avgRet!=null?' \u00b7 <b style="color:'+(avgRet>=0?"var(--green)":"var(--red)")+'">'+(avgRet>=0?"+":"")+avgRet.toFixed(1)+'%</b> since trade':'')+
+          (avgRet!=null?' \u00b7 <b style="color:'+(avgRet>=0?"var(--green)":"var(--red)")+'">'+(avgRet>=0?"+":"")+avgRet.toFixed(1)+'%</b> since the politician trades':'')+
         '</span></div>';
     var chips='<div class="sm-chips">'+
       [["all","All trades",all.length],["buys","Buys",buys.length],["sells","Sells",sells.length],
@@ -12848,7 +13209,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           :(_usd(inflow)+" in / "+_usd(outflow)+" out"),
         (insts.length?instNet:polNet)>=0?"var(--green)":"var(--red)")+
       stat("Total trades",all.length,buys.length+" buys \u00b7 "+sells.length+" sells","")+
-      stat("Avg since trade",avgRet!=null?(avgRet>=0?"+":"")+avgRet.toFixed(1)+"%":"\u2014","price change since each trade",avgRet==null?"":avgRet>=0?"var(--green)":"var(--red)")+
+      stat("Avg since trade",avgRet!=null?(avgRet>=0?"+":"")+avgRet.toFixed(1)+"%":"\u2014","politician trades only \u2014 a 13F has no trade date",avgRet==null?"":avgRet>=0?"var(--green)":"var(--red)")+
       stat("On the right side",winRate!=null?Math.round(winRate)+"%":"\u2014","buys that rose, sells that fell",winRate==null?"":winRate>=50?"var(--green)":"var(--red)")+
     '</div>';
     // top traders by net $
@@ -12878,7 +13239,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       (insts.length?('<b>'+insts.length+'</b> institutional change'+(insts.length>1?"s":"")+' (SEC 13F, quarter-end'+(SM_MANAGERS?', '+SM_MANAGERS+' tracked funds':'')+')'):'no 13F changes on file')+
       '</div>';
     var tbl=prov+'<div class="sm-top" id="dpSm"></div>';
-    card.innerHTML=head+banner+chips+chart+stats+topHtml+tbl;
+    card.innerHTML=head+banner+chips+chart+stats+topHtml+tbl+filings;
+    card.querySelectorAll("button.sm-g[data-tk]").forEach(function(b){ b.onclick=function(){ smDetail(this.dataset.tk,this.dataset.mgr,this.dataset.q); }; });
+    card.querySelectorAll("button.sm-g[data-ctk]").forEach(function(b){ b.onclick=function(){ smCongDetail(this.dataset.ctk,this.dataset.mem); }; });
+    card.querySelectorAll(".sm-who").forEach(function(b){ b.onclick=function(){ smProfile(this.dataset.kind,this.dataset.name); }; });
     card.querySelectorAll(".sm-chip").forEach(function(c){
       c.addEventListener("click",function(){ smFilter=c.dataset.f; dpSmartCard(tk,cg,inst,bars); });
     });
