@@ -9897,7 +9897,11 @@ SMART_MONEY = {
     "managers": {
         "Berkshire Hathaway (Buffett)":        1067983,
         "Pershing Square (Ackman)":            1336528,
-        "Appaloosa (Tepper)":                  1006438,
+        # 1006438 is Appaloosa MANAGEMENT LP, which stopped filing after 2015. The active filer
+        # is Appaloosa LP. The EDGAR identity check caught this on the first run: "STALE, newest
+        # 13F-HR is 2015-12-31". A manager that re-registers under a new entity is the standard
+        # way a hard-coded CIK goes quietly wrong.
+        "Appaloosa (Tepper)":                  1656456,
         "Duquesne Family Office (Druckenmiller)": 1536411,
         "Third Point (Loeb)":                  1040273,
         "Baupost (Klarman)":                   1061768,
@@ -9909,8 +9913,10 @@ SMART_MONEY = {
         "Coatue (Laffont)":                    1135730,
         "Elliott (Singer)":                    1791786,
         "Icahn Capital":                       921669,
-        "Greenlight (Einhorn)":                1079114,
-        "Scion (Burry)":                       1649339,
+        # Greenlight Capital Inc (1079114) last filed 2023; the funds now report through
+        # DME Capital Management, LP. Same manager, different registrant.
+        "Greenlight (Einhorn)":                1489933,
+        "Scion (Burry)":                       1649339,   # genuinely retired: last 13F-HR 2025-09-30, kept for the history
         "Castle Hook":                         1687241,
         "Pentwater":                           1425851,
         "ARK (Wood)":                          1697748,
@@ -10666,7 +10672,10 @@ def run_institutional_13f(identity=None, quarters=5):
             elif ent.get("latest_13f"):
                 age = (_dt.date.today() - _dt.date.fromisoformat(ent["latest_13f"])).days
                 if age > 200:
-                    meta["status"] = f"STALE: newest 13F-HR is {ent['latest_13f']} — retired filer or wrong CIK"
+                    meta["status"] = (f"STALE: newest 13F-HR is {ent['latest_13f']}, {age} days old — "
+                                      + ("this manager has stopped filing" if age < 500 else
+                                         "almost certainly the wrong CIK; check whether the manager re-registered "
+                                         "under a new entity, as Appaloosa and Greenlight both did"))
             else:
                 meta["status"] = "NO 13F-HR filings under this CIK — wrong CIK"
             print(f"[13f] {mgr} -> EDGAR '{ent.get('name')}', newest 13F {ent.get('latest_13f')}"
