@@ -8,7 +8,7 @@ import json, pathlib, pytest
 from playwright.sync_api import sync_playwright
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 APP = ROOT / "phoenix_app.html"; BUILDER = ROOT / "portfolio_builder.html"
-PAGES = ("home", "markets", "screeners", "trades", "portfolio", "smart", "research")
+PAGES = ("home", "launch", "markets", "screeners", "trades", "portfolio", "smart", "research")
 
 
 @pytest.fixture(scope="module")
@@ -36,7 +36,7 @@ def test_app_iphone_layout(browser):
         pg.evaluate(f"location.hash='#{hsh}'"); pg.wait_for_timeout(900)
         assert pg.evaluate("document.documentElement.scrollWidth") <= 392, f"#{hsh} overflows"
     bar = pg.locator("#pxnav").bounding_box(); assert bar["y"] > 700 and bar["width"] >= 388, "rail must be a bottom bar on phones"
-    assert pg.locator("#pxnav .pxlinks a").count() == 7      # + Smart Money, promoted out of Research
+    assert pg.locator("#pxnav .pxlinks a").count() == 8      # + Smart Money and Launch Control
     assert not _bad(errs), errs[:2]
 
 
@@ -556,7 +556,8 @@ def test_smart_money_is_a_first_class_page_not_a_research_tab(browser, served):
     pg.goto(served + "/phoenix_app.html"); pg.wait_for_timeout(1200)
     pg.evaluate("PX_ENTER()"); pg.wait_for_timeout(800)
     labels = [a.strip() for a in pg.locator("#pxnav .pxlinks a").all_inner_texts()]
-    assert labels == ["Mission Control", "Markets", "Screeners", "Smart Money", "Trade", "Portfolio", "Research"]
+    assert labels == ["Mission Control", "Launch Control", "Markets", "Screeners", "Smart Money",
+                      "Trade", "Portfolio", "Research"]
     pg.click("#pxl_smart"); pg.wait_for_timeout(900)
     assert pg.evaluate("location.hash") == "#smart"
     assert pg.evaluate("document.getElementById('page-smart').classList.contains('active')")
@@ -565,3 +566,119 @@ def test_smart_money_is_a_first_class_page_not_a_research_tab(browser, served):
     assert pg.evaluate("document.getElementById('page-smart').classList.contains('active')"), "#smart must be reloadable"
     assert pg.locator("#rsMode").count() == 0, "the Research mode switch is gone"
     pg.close()
+
+
+# ---------------------------------------------------------------- Launch Control
+LC_GEX = {"overview": {"spx_spot": 7747.71, "net_gex_B": -2.1, "flip": 7723, "dist_to_flip_pct": 0.31,
+                       "call_wall": 7800, "put_wall": 7700}}
+LC_MACRO = {"asof": "2026-09-04 05:33 UTC", "regime": "POLICY_TIGHTENING", "explain": {"held_weeks": 1},
+            "inputs": {"spx": 7747.71, "spx_1d": 1.06, "vix": 14.32, "us10y": 4.77, "gold": 4539.9, "wti": 91.3}}
+LC_TB = [{"id": "t1", "account": "gabriel", "status": "open", "ticker": "GOOG", "name": "Alphabet",
+          "entry": 325.86, "stop": 305.67, "target": 420, "qty": 30, "account_size": 100000},
+         {"id": "t2", "account": "gabriel", "status": "open", "ticker": "BAC", "name": "Bank of America",
+          "entry": 64.38, "stop": 60.39, "target": 75.03, "qty": 150, "account_size": 100000},
+         {"id": "t3", "account": "gabriel", "status": "open", "ticker": "PLTR", "name": "Palantir",
+          "entry": 184, "qty": 10, "account_size": 100000}]
+LC_LIVE = [{"ticker": t, "last": p, "prev_close": p, "chg_pct": 0,
+            "quote_ts": "2026-09-04T13:00:00Z", "updated_at": "2026-09-04T13:00:00Z"}
+           for t, p in [("GOOG", 339.08), ("BAC", 63.04), ("PLTR", 182.53)]]
+
+
+def _lc_page(browser, base, w, h, mobile, scheme="dark", sig=None):
+    pg = browser.new_page(viewport={"width": w, "height": h}, is_mobile=mobile, has_touch=mobile, color_scheme=scheme)
+    errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
+    def route(r):
+        u = r.request.url
+        if u.startswith(base): return r.continue_()
+        if "gex" in u and "stocks" not in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(LC_GEX))
+        if "trade_book" in u:
+            return r.fulfill(status=200, content_type="application/json",
+                             body=json.dumps([{"id": t["id"], "ord": i, "body": t, "deleted": False} for i, t in enumerate(LC_TB)]))
+        if "prices_live" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(LC_LIVE))
+        if "signal_log" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(sig if sig is not None else []))
+        if "macro" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(LC_MACRO))
+        if "/rest/v1/" in u or ".json" in u: return r.fulfill(status=200, content_type="application/json", body="[]")
+        return r.abort()
+    pg.route("**/*", route)
+    pg.goto(base + "/phoenix_app.html"); pg.wait_for_timeout(1400)
+    pg.evaluate("PX_ENTER()"); pg.wait_for_timeout(900)
+    pg.evaluate("document.getElementById('pxl_launch').click()"); pg.wait_for_timeout(2600)
+    return pg, errs
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_launch_control_leads_with_decisions_and_names_the_unsized(browser, served):
+    pg, errs = _lc_page(browser, served, 1440, 1000, False)
+    assert pg.evaluate("location.hash") == "#launch"
+    al = pg.locator("#lcRoot .lc-al")
+    assert al.count() == 3
+    first = al.first
+    assert first.locator(".tk").inner_text() == "PLTR", "the position with no stop is the costliest to ignore"
+    assert first.locator(".act").inner_text().upper() == "SET STOP"
+    assert "cannot be read in R" in first.locator(".why").inner_text()
+    acts = [a.inner_text().upper() for a in al.locator(".act").all()]
+    assert acts.count("HOLD") == 2, "a position needing nothing must still say so"
+    assert pg.locator("#lcRoot .lc-pos").count() == 3
+    assert pg.locator("#lcRoot .lc-pos.new .lc-rbar.flat").count() == 1, "unsized positions get a flat rail, not a fake one"
+    assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_launch_control_heat_is_in_R_not_account_percent(browser, served):
+    """1R is 1% of the account. Dividing risk$ by the account gave 0.01R for a 1.2R book."""
+    pg, errs = _lc_page(browser, served, 1440, 1000, False)
+    heat = pg.locator("#lcRoot .lc-heat .num").inner_text()
+    assert heat.startswith("1.2"), heat        # GOOG 0.61R + BAC 0.60R, PLTR unsized contributes nothing
+    assert "3R cap" in heat
+    note = pg.locator("#lcRoot .lc-note").first.inner_text()
+    assert "1 of 3 positions carries no stop" in note and "cannot be read in R" in note
+    assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_launch_control_ladder_reads_the_flip_against_spot(browser, served):
+    pg, errs = _lc_page(browser, served, 1440, 1000, False)
+    lad = pg.locator("#lcRoot .lc-lrow")
+    assert lad.count() == 4
+    order = [r.locator(".p").inner_text() for r in lad.all()]
+    assert order == ["7,800", "7,747.71", "7,723", "7,700"], "descending by price, spot in its true place"
+    assert pg.locator("#lcRoot .lc-lrow.spot").count() == 1 and pg.locator("#lcRoot .lc-lrow.flip").count() == 1
+    txt = pg.locator("#lcRoot .lc-card").last.inner_text() + pg.content()
+    assert "above the flip" in txt and "dampens" in txt
+    regime = [x.strip() for x in pg.locator("#lcRoot .lc-reg .v").all_inner_texts()]
+    assert regime[0] == "POLICY_TIGHTENING" and "2.1bn" in regime[1]
+    assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_launch_control_survives_a_malformed_signal_log(browser, served):
+    """A non-array response used to throw and blank the entire page."""
+    pg, errs = _lc_page(browser, served, 1440, 1000, False, sig={"unexpected": "shape"})
+    assert pg.locator("#lcRoot .lc-pos").count() == 3, "the book still renders"
+    assert pg.locator("#lcRoot .lc-al").count() == 3
+    assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_launch_control_fits_a_phone_and_the_tab_bar_stays_reachable(browser, served):
+    pg, errs = _lc_page(browser, served, 390, 844, True)
+    assert pg.locator("#lcRoot .lc-pos").count() == 3
+    assert pg.evaluate("document.documentElement.scrollWidth") <= 392
+    pg.evaluate("window.scrollTo(0,1500)"); pg.wait_for_timeout(400)
+    nav = pg.locator("#pxnav").bounding_box()
+    assert pg.evaluate("getComputedStyle(document.getElementById('pxnav')).position") == "fixed"
+    assert nav["y"] + nav["height"] <= 850, "the bottom bar must stay on screen while scrolling"
+    assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_theme_follows_the_device_until_the_operator_chooses(browser, served):
+    """It hard-defaulted to light, so an iPad in dark mode opened Phoenix in cream every day."""
+    for scheme, want_light in (("dark", False), ("light", True)):
+        pg = browser.new_page(viewport={"width": 1280, "height": 900}, color_scheme=scheme)
+        pg.route("**/*", lambda r: r.continue_() if r.request.url.startswith(served)
+                 else r.fulfill(status=200, content_type="application/json", body="[]"))
+        pg.goto(served + "/phoenix_app.html"); pg.wait_for_timeout(1300)
+        pg.evaluate("PX_ENTER()"); pg.wait_for_timeout(700)
+        assert pg.evaluate("document.documentElement.classList.contains('light')") is want_light, scheme
+        pg.close()
