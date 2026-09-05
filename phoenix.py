@@ -969,8 +969,14 @@ def _wire_from_embedded_json(raw):
 def _wire_parse_html(raw):
     """Best-effort parse of the known phoenix-wire markup. PURE."""
     import re as _re
+    # Mission Control is this document. Cowork writes it every morning against Phoenix's own
+    # fact_pack.json and commits it to wire/; the parser routes each section to a named slot so
+    # the page can lay it out rather than dumping a list of blocks. An unrecognised kicker still
+    # comes through as a theme, so a new section never disappears silently.
     out = {"headline": None, "standfirst": None, "positions": None,
-           "themes": [], "world": None, "ondeck": None}
+           "themes": [], "world": None, "ondeck": None,
+           "recap": None, "stance": None, "markets": None, "smart_money": None,
+           "screener": None, "changed": None, "invalidation": None}
     m = _re.search(r'class="ed-call"[^>]*>(.*?)</div>', raw, _re.S)
     if m:
         out["headline"] = _wire_strip(m.group(1))
@@ -1003,6 +1009,18 @@ def _wire_parse_html(raw):
         if n:
             note = _wire_keep_b(n.group(1))
         low = kicker.lower()
+        SLOTS = (("in five minutes", "recap"), ("five minutes", "recap"), ("the recap", "recap"),
+                 ("the stance", "stance"), ("phoenix's stance", "stance"),
+                 ("the market", "markets"), ("markets", "markets"), ("the tape today", "markets"),
+                 ("smart money", "smart_money"), ("positioning", "smart_money"),
+                 ("the screener", "screener"), ("opportunities", "screener"),
+                 ("what changed", "changed"),
+                 ("what would change", "invalidation"), ("invalidation", "invalidation"))
+        slot = next((v for k, v in SLOTS if low.startswith(k)), None)
+        if slot:
+            out[slot] = {"kicker": kicker, "right": right, "title": title,
+                         "items": items, "note": note}
+            continue
         if low.startswith("your positions"):
             body = None
             if not items:
@@ -10894,6 +10912,315 @@ def run_congress_meta():
     return payload
 
 
+# ============================ THE FACT PACK ============================
+# Mission Control is a document Phoenix writes, not a page of cards. A writer that reads the
+# whole outputs/ directory would be reading eleven shapes and inventing the joins; instead every
+# module contributes to ONE typed summary, and the writer only ever sees this.
+#
+# Three properties matter more than the fields:
+#   1. Provenance. Every block records where it came from and how old it is. A pack with a stale
+#      block must be able to say so, because a confident sentence built on four-day-old data is
+#      the failure mode this whole system is built to avoid.
+#   2. Archive. Each day's pack is kept. Yesterday's pack against today's IS "what changed" — a
+#      computed diff, not a feed of events. Without memory the writer produces the same paragraph
+#      every morning.
+#   3. One definition per number. Open heat is computed HERE, once. Two pages previously divided
+#      risk by different denominators and disagreed by two orders of magnitude on the same book.
+PACK_DIR = os.path.join(OUTPUTS_DIR, "history")
+
+
+def _pk_read(name):
+    """Read an output written earlier in this run. Returns (data, note) — never raises."""
+    p = os.path.join(OUTPUTS_DIR, name + ".json")
+    if not os.path.exists(p):
+        return None, f"{name}.json absent"
+    try:
+        return json.load(open(p)), None
+    except Exception as e:
+        return None, f"{name}.json unreadable: {str(e)[:60]}"
+
+
+def _pk_age_min(asof):
+    """Minutes since an 'YYYY-MM-DD HH:MM UTC' stamp, or None."""
+    import datetime as _dt
+    if not asof:
+        return None
+    for fmt in ("%Y-%m-%d %H:%M UTC", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
+        try:
+            return round((_dt.datetime.utcnow() - _dt.datetime.strptime(str(asof)[:19], fmt)).total_seconds() / 60)
+        except Exception:
+            continue
+    return None
+
+
+def _pk_market(macro, gex, spx):
+    inp = (macro or {}).get("inputs") or {}
+    ov = (gex or {}).get("overview") or {}
+    bars = (spx or {}).get("bars") or []
+    def _c(b):
+        v = b.get("c", b.get("close"))
+        return float(v) if v is not None else None
+    closes = [x for x in (_c(b) for b in bars) if x is not None]
+    last = closes[-1] if closes else inp.get("spx")
+    def ma(n):
+        return sum(closes[-n:]) / n if len(closes) >= n else None
+    m50, m200 = ma(50), ma(200)
+    out = {
+        "regime": (macro or {}).get("regime"),
+        "regime_held_weeks": ((macro or {}).get("explain") or {}).get("held_weeks"),
+        "spx": {"last": round(last, 2) if last else None,
+                "chg_1d_pct": (round((last / closes[-2] - 1) * 100, 2) if last and len(closes) > 1 else None),
+                "vs_50d_pct": (round((last / m50 - 1) * 100, 2) if last and m50 else None),
+                "vs_200d_pct": (round((last / m200 - 1) * 100, 2) if last and m200 else None)},
+        "vix": inp.get("vix"), "dxy": inp.get("dxy"), "us10y": inp.get("us10y"),
+        "gold": inp.get("gold"), "wti": inp.get("wti"),
+        "gex": {"net_B": ov.get("net_gex_B"), "regime": ov.get("regime"), "flip": ov.get("flip"),
+                "dist_to_flip_pct": ov.get("dist_to_flip_pct"),
+                "call_wall": ov.get("call_wall"), "put_wall": ov.get("put_wall"),
+                "spot": ov.get("spx_spot")},
+    }
+    return out
+
+
+def _pk_screener(stocks, top_n=8):
+    """Today's setups, from the engine's own ranked list. Gates, not opinions."""
+    if not stocks:
+        return {"n_candidates": 0, "top": [], "note": "stocks.json absent"}
+    tr = stocks.get("trade_ranked") or []
+    keep = ("ticker", "sector", "industry", "trade_score", "opp_score", "atr14_pct", "mcap_B",
+            "breakout", "days_on_list", "profitability", "pos_vs_high", "surge", "dollar_vol_M")
+    top = []
+    for r in tr[:top_n]:
+        d = {k: r.get(k) for k in keep if r.get(k) is not None}
+        if r.get("atr14_pct"):
+            d["stop_pct_2_5atr"] = round(float(r["atr14_pct"]) * 2.5, 2)
+        top.append(d)
+    by_sec = {}
+    for r in tr:
+        s = r.get("sector")
+        if s:
+            by_sec[s] = by_sec.get(s, 0) + 1
+    lean = sorted(by_sec.items(), key=lambda x: -x[1])[:4]
+    return {"n_candidates": len(tr), "top": top,
+            "leaning": [{"sector": s, "n": n} for s, n in lean],
+            "counts": (stocks.get("counts") or {})}
+
+
+def _pk_smart(inst, cong, universe_sector, days=45):
+    """Where institutions and Congress are accumulating and distributing.
+
+    Net action per sector: (NEW + ADD) minus (TRIM + EXIT), newest quarter only, HOLD excluded
+    because holding is not a decision. Values are the filings' own quarter-end figures.
+    """
+    import datetime as _dt
+    out = {"quarter": (inst or {}).get("latest_quarter"), "accumulating": [], "distributing": [],
+           "notable": [], "congress_recent": [], "note": None}
+    if not inst:
+        out["note"] = "institutional_holdings.json absent"
+    else:
+        q = out["quarter"]
+        net, val = {}, {}
+        for tk, rows in (inst.get("tickers") or {}).items():
+            sec = universe_sector.get(tk)
+            for c in rows or []:
+                if c.get("quarter") != q or c.get("action") == "HOLD":
+                    continue
+                sign = 1 if c.get("action") in ("NEW", "ADD") else -1
+                if sec:
+                    net[sec] = net.get(sec, 0) + sign
+                    val[sec] = val.get(sec, 0) + sign * (c.get("value_usd") or 0)
+                if (c.get("value_usd") or 0) >= 2.5e8:
+                    out["notable"].append({"ticker": tk, "manager": c.get("manager"),
+                                           "action": c.get("action"), "value_usd": c.get("value_usd"),
+                                           "sector": sec})
+        ranked = sorted(net.items(), key=lambda x: -x[1])
+        out["accumulating"] = [{"sector": s, "net_moves": n, "net_usd": round(val.get(s, 0))}
+                               for s, n in ranked if n > 0][:5]
+        out["distributing"] = [{"sector": s, "net_moves": n, "net_usd": round(val.get(s, 0))}
+                               for s, n in reversed(ranked) if n < 0][:5]
+        out["notable"] = sorted(out["notable"], key=lambda x: -(x["value_usd"] or 0))[:8]
+    if not cong:
+        out["note"] = (out["note"] or "") + " congress_trades.json absent"
+    else:
+        cut = (_dt.date.today() - _dt.timedelta(days=days)).isoformat()
+        rows = []
+        for tk, trades in (cong.get("tickers") or {}).items():
+            for r in trades or []:
+                f = r.get("reported") or r.get("date")
+                if f and f >= cut:
+                    rows.append({"ticker": tk, "member": r.get("member"), "side": r.get("side"),
+                                 "amount": r.get("amount"), "filed": f,
+                                 "sector": universe_sector.get(tk)})
+        out["congress_recent"] = sorted(rows, key=lambda r: r["filed"], reverse=True)[:10]
+        out["congress_status"] = cong.get("status") or {}
+    return out
+
+
+def _pk_portfolio(trades, live, risk_pct=0.01):
+    """The book in R. ONE definition of heat: risk dollars over 1% of the account.
+
+    Two pages used to divide by different denominators and disagreed by two orders of magnitude
+    on the same three positions. The pack settles it; the app reads this number rather than
+    recomputing it.
+    """
+    out = {"open": [], "heat_R": 0.0, "cap_R": 3.0, "unsized": 0, "note": None}
+    if not trades:
+        out["note"] = "trades.json absent"
+        return out
+    rows = trades if isinstance(trades, list) else (trades.get("trades") or trades.get("open") or [])
+    bal = None
+    if isinstance(trades, dict):
+        bal = trades.get("balance") or trades.get("account_size")
+    heat = 0.0
+    for t in rows:
+        if str(t.get("status") or "open") != "open":
+            continue
+        tk = t.get("ticker")
+        entry = float(t.get("entry") or 0)
+        stop = float(t.get("stop") or t.get("current_stop") or 0)
+        qty = float(t.get("qty") or 0)
+        acct = float(t.get("account_size") or bal or 0)
+        cur = (live or {}).get(tk)
+        R = ((cur - entry) / abs(entry - stop)) if (cur and entry and stop and entry != stop) else None
+        unsized = not (stop > 0)
+        if unsized:
+            out["unsized"] += 1
+        elif entry and qty and acct:
+            heat += abs(entry - stop) * qty / (acct * risk_pct)
+        out["open"].append({"ticker": tk, "entry": entry or None, "stop": stop or None,
+                            "last": cur, "R": round(R, 2) if R is not None else None,
+                            "managed": bool(t.get("managed")), "unsized": unsized,
+                            "dist_stop_pct": (round((stop - cur) / cur * 100, 2) if cur and stop else None),
+                            "sector": t.get("sector"), "event_in_days": t.get("event_in_days")})
+    out["heat_R"] = round(heat, 2)
+    out["over_cap"] = heat > out["cap_R"]
+    return out
+
+
+def _pk_news(wire, account="gabriel"):
+    a = ((wire or {}).get("accounts") or {}).get(account) or {}
+    p = a.get("parsed") or a
+    return {"date": a.get("date"), "asof": (wire or {}).get("generated") or (wire or {}).get("asof"),
+            "headline": p.get("headline"), "standfirst": p.get("standfirst"),
+            "themes": (p.get("themes") or [])[:6], "ondeck": p.get("ondeck"),
+            "note": None if a else "wire.json has no entry for " + account}
+
+
+def pack_diff(today, prev):
+    """What materially changed, computed from two packs. Not a feed — a difference.
+
+    Only moves that cross a threshold are reported, because a diff that fires on every decimal
+    is a feed with extra steps.
+    """
+    if not prev:
+        return {"first_pack": True, "changes": []}
+    ch = []
+    def add(kind, what, was, now, why):
+        ch.append({"kind": kind, "what": what, "was": was, "now": now, "why": why})
+    tm, pm = today.get("market") or {}, prev.get("market") or {}
+    if tm.get("regime") != pm.get("regime"):
+        add("regime", "engine regime", pm.get("regime"), tm.get("regime"),
+            "the regime label drives which setups the engine favours")
+    tg, pg = tm.get("gex") or {}, pm.get("gex") or {}
+    if tg.get("regime") != pg.get("regime"):
+        add("gex", "index gamma", pg.get("regime"), tg.get("regime"),
+            "dealers switch between dampening and amplifying moves")
+    for k, thr, why in (("vix", 2.0, "volatility repriced"),
+                        ("us10y", 0.10, "the discount rate moved"),
+                        ("dxy", 1.0, "the dollar moved")):
+        a, b = pm.get(k), tm.get(k)
+        if a is not None and b is not None and abs(float(b) - float(a)) >= thr:
+            add("market", k, a, b, why)
+    ta, pa = today.get("smart_money") or {}, prev.get("smart_money") or {}
+    if ta.get("quarter") != pa.get("quarter"):
+        add("smart_money", "13F quarter", pa.get("quarter"), ta.get("quarter"), "a new filing quarter landed")
+    was_acc = {x["sector"] for x in (pa.get("accumulating") or [])}
+    now_dis = {x["sector"] for x in (ta.get("distributing") or [])}
+    for s in sorted(was_acc & now_dis):
+        add("smart_money", s, "accumulating", "distributing", "institutional flow reversed in this sector")
+    tp, pp = today.get("portfolio") or {}, prev.get("portfolio") or {}
+    if tp.get("heat_R") is not None and pp.get("heat_R") is not None and abs(tp["heat_R"] - pp["heat_R"]) >= 0.25:
+        add("portfolio", "open heat", pp["heat_R"], tp["heat_R"], "committed risk moved materially")
+    if tp.get("unsized", 0) > pp.get("unsized", 0):
+        add("portfolio", "positions without a stop", pp.get("unsized"), tp.get("unsized"),
+            "an unsized position cannot be read in R and carries no defined exit")
+    prev_tk = {r["ticker"] for r in (pp.get("open") or [])}
+    now_tk = {r["ticker"] for r in (tp.get("open") or [])}
+    for tk in sorted(prev_tk - now_tk):
+        add("portfolio", tk, "open", "closed", "the position left the book")
+    ts, ps = today.get("screener") or {}, prev.get("screener") or {}
+    prev_top = {r.get("ticker") for r in (ps.get("top") or [])}
+    fresh = [r.get("ticker") for r in (ts.get("top") or []) if r.get("ticker") not in prev_top]
+    if fresh:
+        add("screener", "new in the top setups", None, ", ".join(fresh[:6]),
+            "names the engine ranked highest that were not there yesterday")
+    return {"first_pack": False, "prev_date": prev.get("date"), "changes": ch}
+
+
+def run_fact_pack(account="gabriel"):
+    """Assemble every module's view into one typed summary, archive it, and diff it."""
+    import datetime as _dt
+    macro, n1 = _pk_read("macro")
+    gex, n2 = _pk_read("gex")
+    spx, n3 = _pk_read("spx_daily")
+    stocks, n4 = _pk_read("stocks")
+    inst, n5 = _pk_read("institutional_holdings")
+    cong, n6 = _pk_read("congress_trades")
+    wire, n7 = _pk_read("wire")
+    trades, n8 = _pk_read("trades")
+    missing = [x for x in (n1, n2, n3, n4, n5, n6, n7, n8) if x]
+
+    sector = {}
+    for r in ((stocks or {}).get("trade_ranked") or []) + ((stocks or {}).get("invest_ranked") or []):
+        if r.get("ticker") and r.get("sector"):
+            sector[r["ticker"]] = r["sector"]
+    live = {}
+    for r in ((stocks or {}).get("trade_ranked") or []):
+        if r.get("ticker") and r.get("price") is not None:
+            live[r["ticker"]] = r["price"]
+
+    today = _dt.date.today().isoformat()
+    pack = {
+        "schema": "phoenix-fact-pack/1",
+        "date": today,
+        "asof": _now(),
+        "market": _pk_market(macro, gex, spx),
+        "screener": _pk_screener(stocks),
+        "smart_money": _pk_smart(inst, cong, sector),
+        "portfolio": _pk_portfolio(trades, live),
+        "news": _pk_news(wire, account),
+        "provenance": {
+            "macro": {"asof": (macro or {}).get("asof"), "age_min": _pk_age_min((macro or {}).get("asof"))},
+            "gex": {"asof": (gex or {}).get("asof"), "age_min": _pk_age_min((gex or {}).get("asof"))},
+            "stocks": {"asof": (stocks or {}).get("asof"), "age_min": _pk_age_min((stocks or {}).get("asof"))},
+            "institutional_holdings": {"asof": (inst or {}).get("asof"), "quarter": (inst or {}).get("latest_quarter")},
+            "congress_trades": {"asof": (cong or {}).get("asof"), "status": (cong or {}).get("status")},
+            "wire": {"asof": (wire or {}).get("generated") or (wire or {}).get("asof")},
+        },
+        "missing": missing,
+    }
+    # archive, then diff against the most recent EARLIER pack
+    os.makedirs(PACK_DIR, exist_ok=True)
+    prev = None
+    try:
+        older = sorted(f for f in os.listdir(PACK_DIR)
+                       if f.startswith("pack_") and f.endswith(".json") and f < f"pack_{today}.json")
+        if older:
+            prev = json.load(open(os.path.join(PACK_DIR, older[-1])))
+    except Exception:
+        prev = None
+    pack["changed"] = pack_diff(pack, prev)
+    with open(os.path.join(PACK_DIR, f"pack_{today}.json"), "w") as f:
+        json.dump(pack, f, indent=1, allow_nan=False)
+    write_json("fact_pack", pack)
+    print(f"[pack] {today}: regime={pack['market']['regime']} "
+          f"screener={pack['screener'].get('n_candidates')} "
+          f"open={len(pack['portfolio']['open'])} heat={pack['portfolio']['heat_R']}R "
+          f"changes={len(pack['changed']['changes'])}"
+          + (f"  <-- MISSING: {', '.join(missing)}" if missing else ""))
+    return pack
+
+
 def backtest_smart_money(windows=(30, 90, 180)):
     """
     Measure whether disclosed smart-money BUYING precedes gains — the honest way:
@@ -11436,6 +11763,10 @@ def run_full():
     step("ratings_all",    lambda: run_ratings_all(limit=RATINGS_DAILY_CAP), optional=True)
     step("theses",         run_theses,        optional=True)
     step("alerts",         run_alerts,        optional=True)
+
+    # The pack reads every module above, so it must be the LAST step. Placed earlier it would
+    # have summarised yesterday's 13F and today's everything else, and nothing would have said so.
+    step("fact_pack",      run_fact_pack,     optional=True)
 
     if PUBLISH_HOLDS:
         print("=== PUBLISH GATE HELD BACK %d FILE(S) ===" % len(PUBLISH_HOLDS))

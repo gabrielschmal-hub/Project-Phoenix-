@@ -759,6 +759,39 @@
   .sm-chip{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.5px;padding:2px 6px;border:1px solid var(--line2);border-radius:3px;color:var(--inkFade);margin-top:3px}
   .sm-chip.warn{border-color:var(--amber);color:var(--amber)}
   .sm-fresh{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);margin:0 0 6px;line-height:1.7}
+  /* ---- Mission Control as the written brief ---- */
+  .mcb-top{margin-bottom:14px}
+  .mcb-recap{border:1px solid var(--gold);border-left:3px solid var(--gold);border-radius:12px;
+             background:rgba(211,119,54,.06);padding:13px 15px;margin-bottom:16px}
+  .mcb-rk{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  .mcb-rt{font-family:var(--serif);font-size:21px;line-height:1.25;margin-top:6px;color:var(--ink)}
+  .mcb-rb{font-size:14px;color:var(--inkMed);margin-top:7px;line-height:1.6}
+  .mcb-rl{margin-top:9px;display:flex;flex-direction:column;gap:5px}
+  .mcb-ri{font-family:var(--mono);font-size:11.5px;color:var(--inkMed);padding-left:13px;position:relative;line-height:1.5}
+  .mcb-ri::before{content:"\2022";position:absolute;left:0;color:var(--gold)}
+  .mcb-src{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:14px;padding-top:9px;border-top:1px solid var(--line2)}
+  .mcb-file{color:var(--inkGhost)}
+  .mcb-stale{font-family:var(--mono);font-size:10.5px;color:var(--amber);border:1px solid var(--amber);
+             border-radius:8px;padding:8px 11px;margin-top:9px;line-height:1.55}
+  .mcb-none{font-family:var(--mono);font-size:10.5px;color:var(--amber);border-left:2px solid var(--amber);
+            padding:6px 0 6px 11px;margin-bottom:11px;line-height:1.55}
+  /* ---- Mission Control: confluence + since-you-last-looked ---- */
+  .mcconf{border:1px solid var(--line);border-radius:10px;background:var(--card2);padding:9px 11px;margin-bottom:8px}
+  .mcconf:last-of-type{margin-bottom:0}
+  .mcconf .hd{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .mcconf .tk{font-family:var(--mono);font-weight:700;font-size:14px}
+  .mcconf .src{font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid var(--line2);color:var(--inkFade)}
+  .mcconf .s-book{border-color:var(--gold);color:var(--gold)}
+  .mcconf .s-screener{border-color:var(--blue,#3B82C4);color:var(--blue,#3B82C4)}
+  .mcconf .s-congress{border-color:var(--amber);color:var(--amber)}
+  .mcconf .s-funds{border-color:var(--green);color:var(--green)}
+  .mcconf .n{margin-left:auto;font-family:var(--mono);font-size:9.5px;color:var(--inkFade)}
+  .mcconf .ln{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.55;margin-top:5px}
+  .mcconf .ln b{color:var(--inkMed)}
+  .mcline{font-family:var(--mono);font-size:11.5px;padding:6px 0;border-bottom:1px solid var(--line2);line-height:1.5;color:var(--inkMed)}
+  .mcline:last-of-type{border-bottom:none}
+  .mcsub{font-family:var(--mono);font-size:9.5px;color:var(--inkFade);margin-left:auto}
+  .mcfoot{font-family:var(--mono);font-size:10px;color:var(--inkFade);line-height:1.55;margin-top:9px;padding-top:8px;border-top:1px solid var(--line2)}
   /* ---- Launch Control ---- */
   .lc-alerts{border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:12px;background:var(--card);overflow:hidden;margin-bottom:16px}
   .lc-alerts .hd{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line);background:var(--card2);font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
@@ -3701,6 +3734,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(id==="trades") initTrades();
     if(id==="portfolio") initPortfolio();
     if(id==="mission") initMC();
+    // Mark the visit only on a REAL navigation away from Mission Control. Boot paints every
+    // page once, which was stamping the marker before the operator had seen anything.
+    if(!PX_BOOTING && id!=="mission" && PX_LAST_PAGE==="mission" && typeof mcMarkSeen==="function") mcMarkSeen();
+    if(!PX_BOOTING) PX_LAST_PAGE=id;
     if(id==="launch") lcRender();
     if(id==="smart") rsSmartRender();
     if(id==="research") initResearch();
@@ -3950,6 +3987,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // Everything is computed from the same functions the Trade, Markets and Smart money pages use;
   // nothing here re-derives a number, so the pages can never disagree.
   var LC = {gex:null, macro:null, loading:false};
+  var PX_LAST_PAGE=null;
 
   function lcLoad(cb){
     if(LC.loading) return; if(LC.gex!==null && LC.macro!==null){ cb(); return; }
@@ -4296,6 +4334,107 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function smFromDp(){                        // the ticker page already holds both files
     if(SM.inst===null && typeof dpInstit!=="undefined" && dpInstit) SM.inst={tickers:dpInstit};
     if(SM.cong===null && typeof dpCongress!=="undefined" && dpCongress) SM.cong={tickers:dpCongress};
+  }
+
+  // ---- CONFLUENCE: where independent systems point at the same ticker ----
+  // The reason this card exists: cross-links between pages do not add information, they add
+  // navigation. What you cannot get by visiting four pages is the OVERLAP — a name the screener
+  // fired on, that a fund bought, that a member of Congress filed, that you already hold.
+  // Each system is counted once and named, so a "3" is three independent sources, not one source
+  // shouting three times. Ordered by how many agree, then by how recent the newest one is.
+  function mcConf(){
+    var el=document.getElementById("mcConf"); if(!el) return;
+    if(SM.inst===null||SM.cong===null){
+      el.innerHTML='<div class="mch"><h2>Confluence</h2></div><div class="mcna">loading filings\u2026</div>';
+      smLoad(function(){ mcConf(); });
+      if(typeof slLoad==="function"&&typeof slRows!=="undefined"&&slRows===null) slLoad(function(){ mcConf(); });
+      return;
+    }
+    var by={};
+    function add(tk,src,txt,when){
+      if(!tk) return; var k=String(tk).toUpperCase();
+      by[k]=by[k]||{tk:k,src:{},when:""};
+      if(!by[k].src[src]) by[k].src[src]=txt;
+      if(when&&when>by[k].when) by[k].when=when;
+    }
+    // 1. the book
+    var open=[]; try{ var o=trByStatus("open"); if(Array.isArray(o)) open=o; }catch(e){}
+    open.forEach(function(t){
+      var cur=(PX_LIVE[t.ticker]||{}).last, entry=+t.entry||0, stop=+t.stop||0;
+      var R=(entry>0&&stop>0&&cur!=null)?(cur-entry)/Math.abs(entry-stop):null;
+      add(t.ticker,"book", R!=null?("you hold it, "+(R>=0?"+":"")+R.toFixed(2)+"R"):"you hold it, unsized","");
+    });
+    // 2. the screener, live signals only
+    var sig=(typeof slRows!=="undefined"&&Array.isArray(slRows))?slRows:[];
+    sig.filter(function(r){ return r.is_new && r.r_20d==null && r.stop25_hit!==true; })
+       .forEach(function(r){ add(r.ticker,"screener","screener signal "+r.date,r.date); });
+    // 3. Congress, filed in the last 45 days
+    var cut=new Date(Date.now()-45*86400000).toISOString().slice(0,10);
+    Object.keys(SM.cong.tickers||{}).forEach(function(tk){
+      (SM.cong.tickers[tk]||[]).forEach(function(r){
+        var f=r.reported||r.date; if(!f||f<cut) return;
+        add(tk,"congress",(r.member||"a member")+" "+(r.side==="buy"?"bought":"sold")+" \u00b7 "+(r.amount||""),f); }); });
+    // 4. institutions, newest quarter only, HOLD is not an action
+    var q=smLatestQ();
+    Object.keys(SM.inst.tickers||{}).forEach(function(tk){
+      (SM.inst.tickers[tk]||[]).forEach(function(c){
+        if(c.quarter!==q||c.action==="HOLD") return;
+        add(tk,"funds",c.manager+" "+((SM_GLYPH[c.action]||[c.action,"",c.action])[2]).toLowerCase(),c.quarter); }); });
+
+    var rows=Object.keys(by).map(function(k){ return by[k]; })
+      .filter(function(r){ return Object.keys(r.src).length>=2; })
+      .sort(function(a,b){ var d=Object.keys(b.src).length-Object.keys(a.src).length; return d||(a.when<b.when?1:-1); });
+
+    var LBL={book:"Book",screener:"Screener",congress:"Congress",funds:"Funds"};
+    var html='<div class="mch"><h2>Confluence</h2><span class="mcsub">'+rows.length+' name'+(rows.length===1?"":"s")+' where two or more systems agree</span></div>';
+    if(!rows.length){
+      html+='<div class="mcna">Nothing overlaps today. Most days nothing does \u2014 that is the honest reading, not a broken card.</div>';
+    }else{
+      html+=rows.slice(0,6).map(function(r){
+        var keys=Object.keys(r.src);
+        return '<div class="mcconf" data-tk="'+r.tk+'">'+
+          '<div class="hd"><span class="tk">'+r.tk+'</span>'+
+            keys.map(function(k){ return '<span class="src s-'+k+'">'+LBL[k]+'</span>'; }).join("")+
+            '<span class="n">'+keys.length+' sources</span></div>'+
+          '<div class="ln">'+keys.map(function(k){ return '<b>'+LBL[k]+':</b> '+r.src[k]; }).join(' \u00b7 ')+'</div></div>';
+      }).join("");
+      html+='<div class="mcfoot">Agreement is not evidence. Two systems can be wrong together, and the filings are up to 135 days old. This card shortens the search, it does not shorten the thinking.</div>';
+    }
+    el.innerHTML=html;
+    el.querySelectorAll("[data-tk]").forEach(function(n){ n.style.cursor="pointer";
+      n.onclick=function(){ if(typeof trOpenTicker==="function") trOpenTicker(this.dataset.tk); }; });
+  }
+
+  // ---- SINCE YOU LAST LOOKED ----
+  // Answers one question on open: what is different from the last time I was here. The marker is
+  // written on leaving, not on arriving, so a quick glance does not erase the very list it showed.
+  var MC_SEEN_KEY="phoenix.mcSeen";
+  function mcSeen(){ try{ return localStorage.getItem(MC_SEEN_KEY)||""; }catch(e){ return ""; } }
+  function mcMarkSeen(){ try{ localStorage.setItem(MC_SEEN_KEY,new Date().toISOString()); }catch(e){} }
+  function mcSince(){
+    var el=document.getElementById("mcSince"); if(!el) return;
+    var seen=mcSeen(), seenD=seen?seen.slice(0,10):null, out=[];
+    var sig=(typeof slRows!=="undefined"&&Array.isArray(slRows))?slRows:[];
+    if(SM.cong){
+      var cut=seenD||new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+      Object.keys(SM.cong.tickers||{}).forEach(function(tk){
+        (SM.cong.tickers[tk]||[]).forEach(function(r){ var f=r.reported||r.date;
+          if(f&&f>cut) out.push({w:2,tk:tk,t:(r.member||"A member")+" "+(r.side==="buy"?"bought":"sold")+" "+tk+" \u00b7 filed "+f}); }); });
+    }
+    if(seenD){
+      sig.filter(function(r){ return r.is_new && r.date>seenD; })
+         .slice(0,4).forEach(function(r){ out.push({w:1,tk:r.ticker,t:"New screener signal \u00b7 "+r.ticker+" \u00b7 "+r.date}); });
+      sig.filter(function(r){ return r.stop25_hit===true && (r.marked_at||"").slice(0,10)>seenD; })
+         .slice(0,3).forEach(function(r){ out.push({w:3,tk:r.ticker,t:r.ticker+" stopped out at 2.5\u00d7ATR"}); });
+    }
+    out.sort(function(a,b){ return b.w-a.w; });
+    var when=seen?("since "+seen.slice(0,10)+" "+seen.slice(11,16)):"in the last 7 days";
+    el.innerHTML='<div class="mch"><h2>Since you last looked</h2><span class="mcsub">'+when+'</span></div>'+
+      (out.length?out.slice(0,7).map(function(x){ return '<div class="mcline" data-tk="'+x.tk+'">'+x.t+'</div>'; }).join("")
+                 :'<div class="mcna">Nothing new '+when+'.</div>')+
+      (seen?'':'<div class="mcfoot">First visit on this device \u2014 the marker is set when you leave, so this list is never wiped by the glance that showed it.</div>');
+    el.querySelectorAll("[data-tk]").forEach(function(n){ n.style.cursor="pointer";
+      n.onclick=function(){ if(typeof trOpenTicker==="function") trOpenTicker(this.dataset.tk); }; });
   }
 
   // ---- Mission Control: what changed, so nobody has to go looking ----
@@ -9298,6 +9437,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           '<button class="mcgo" onclick="PX_OPEN_EDITION()">Open the full read \u2192</button></div>'+
         '<div id="mcBrief" class="mcna">loading\u2026</div></div>'+
       '<div class="mc2">'+
+        '<div class="col"><div class="mcc" id="mcConf"></div></div>'+
+        '<div class="col"><div class="mcc" id="mcSince"></div></div>'+
+      '</div>'+
+      '<div class="mc2">'+
         '<div class="col"><div class="mcc" id="mcMacro"></div></div>'+
         '<div class="col"><div class="mcc" id="mcRegime"></div></div>'+
       '</div>'+
@@ -9623,7 +9766,74 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // ---- daily brief ----
   // Full width now, so it carries the whole read-through: regime, what the
   // gamma structure implies, the state of the book, and the next event.
+  // ---- Mission Control IS the brief ----
+  // Cowork writes the document each morning against outputs/fact_pack.json and commits it to
+  // wire/; run_wire parses it into wire.json. This renders that document. The old generated
+  // paragraph is kept ONLY as a fallback for a morning with no brief, and says so plainly —
+  // a template that reads like prose is worse than an admission that today's brief is missing.
+  var MCB_ORDER=[["recap","In five minutes"],["stance","The stance"],["markets","The market"],
+                 ["smart_money","Smart money"],["screener","The screener"],["positions","Your positions"],
+                 ["world","The world"],["changed","What changed"],["invalidation","What would change this"]];
+  function mcbSec(s,fallbackKicker){
+    if(!s) return "";
+    var items=(s.items||[]).map(function(it){
+      return '<div class="ed-w"><span class="w-tag '+(it.tone||"")+'">'+(it.tag||"")+'</span>'+
+             '<span'+(it.ticker?' data-tk="'+it.ticker+'"':'')+'>'+(it.html||"")+'</span>'+
+             '<span class="w-when">'+(it.when||"")+'</span></div>'; }).join("");
+    return '<div class="ed-sec"><div class="ed-k"><span>'+(s.kicker||fallbackKicker||"")+'</span>'+
+      '<span class="ed-n">'+(s.right||"")+'</span></div>'+
+      (s.title?'<h2 class="ed-hl">'+s.title+'</h2>':"")+items+
+      (s.note?'<p class="ed-body">'+s.note+'</p>':"")+'</div>';
+  }
   function mcBrief(st){
+    var host=document.getElementById("mcBrief"); if(!host) return;
+    getJSON("wire").catch(function(){return null;}).then(function(w){
+      var prof=(window.PHOENIX_PROFILE==="A")?"aldemar":"gabriel";
+      var acct=((w||{}).accounts||{})[prof]||((w||{}).accounts||{}).gabriel||null;
+      var d=acct&&(acct.parsed||acct);
+      if(!d||!(d.headline||d.recap)){ mcBriefFallback(st); return; }
+      // Calendar days, not elapsed hours. Rounding milliseconds called this morning's brief
+      // "yesterday" from mid-afternoon onward, which is exactly the kind of small lie that
+      // makes an operator stop trusting the timestamps.
+      var age=null;
+      try{
+        var bd=String(d.date||acct.date||"").slice(0,10);
+        if(/^\d{4}-\d{2}-\d{2}$/.test(bd)){
+          var t=new Date(); var todayUTC=Date.UTC(t.getFullYear(),t.getMonth(),t.getDate());
+          var pp=bd.split("-");
+          age=Math.round((todayUTC-Date.UTC(+pp[0],+pp[1]-1,+pp[2]))/86400000);
+        }
+      }catch(e){}
+      var stale=(age!=null&&age>=2);
+      var recap=d.recap;
+      var html=
+        '<div class="mcb-top">'+
+          (recap?'<div class="mcb-recap">'+
+            '<div class="mcb-rk">In five minutes'+(recap.right?' \u00b7 '+recap.right:'')+'</div>'+
+            (recap.title?'<div class="mcb-rt">'+recap.title+'</div>':"")+
+            (recap.note?'<div class="mcb-rb">'+recap.note+'</div>':"")+
+            (recap.items&&recap.items.length?'<div class="mcb-rl">'+recap.items.map(function(it){
+               return '<div class="mcb-ri"'+(it.ticker?' data-tk="'+it.ticker+'"':'')+'>'+(it.html||"")+'</div>'; }).join("")+'</div>':"")+
+           '</div>':"")+
+          (d.headline?'<div class="ed-call">'+d.headline+'</div>':"")+
+          (d.standfirst?'<div class="ed-vwhy">'+d.standfirst+'</div>':"")+
+        '</div>'+
+        MCB_ORDER.filter(function(x){ return x[0]!=="recap"; })
+                 .map(function(x){ return mcbSec(d[x[0]],x[1]); }).join("")+
+        (d.themes||[]).map(function(t){ return mcbSec(t); }).join("")+
+        (d.ondeck?'<p class="ed-body"><b>On deck.</b> '+d.ondeck+'</p>':"")+
+        '<div class="mcb-src">Written '+(acct.date||d.date||"\u2014")+
+          (age!=null?' \u00b7 '+(age<=0?"today":age===1?"yesterday":age+" days ago"):'')+
+          ' \u00b7 from Phoenix\u2019s fact pack \u00b7 <span class="mcb-file">'+(acct.file||"")+'</span></div>'+
+        (stale?'<div class="mcb-stale">This brief is '+age+' days old. Nothing below has been re-checked against today\u2019s data \u2014 read it as a record of that morning, not as this morning.</div>':"");
+      host.className="";
+      host.innerHTML=html;
+      host.querySelectorAll("[data-tk]").forEach(function(n){ n.style.cursor="pointer";
+        n.onclick=function(){ if(typeof trOpenTicker==="function") trOpenTicker(this.dataset.tk); }; });
+    });
+  }
+
+  function mcBriefFallback(st){
     var host=document.getElementById("mcBrief"); if(!host) return;
     Promise.all([getJSON("macro").catch(function(){return null;}),
                  getJSON("gex").catch(function(){return null;}),
@@ -9645,6 +9855,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
             (above ? 'Dealers are long gamma, buying weakness and selling strength, which cushions a downward move rather than guaranteeing any level holds.'
                    : 'Dealers are short gamma, selling weakness and buying strength, which widens the range in both directions.');
       }
+      P.push('<div class="mcb-none">No brief committed for today. What follows is generated from '+
+             'the current data files — useful, but it is not the written brief and does not carry its judgement.</div>');
       if(p1) P.push('<p class="lead">'+p1+'</p>');
       if(ov.call_wall!=null||ov.put_wall!=null){
         var w=[];
@@ -9704,6 +9916,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       try{ mcRegime(); }catch(e){}
       try{ mcCal(); }catch(e){}
       try{ mcSmart(); }catch(e){ console.warn("mcSmart",e); }
+      try{ mcConf(); }catch(e){ console.warn("mcConf",e); }
+      try{ mcSince(); }catch(e){ console.warn("mcSince",e); }
       try{ mcHealth(mstate); }catch(e){}
     }
     if(!document.getElementById("mcVerdict")) return;
@@ -15071,6 +15285,25 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
 /* ================= PHOENIX MOBILE — phones <=600px. Final override layer. =================
    Desktop/iPad (>600px) is untouched: everything here lives inside one media query. */
 @media (max-width:600px){
+
+  /* ---- landing screen: its header row is wider than a phone, and .gone only sets
+     visibility:hidden, so the hidden screen kept forcing a 448px document. Wrap the row and
+     clip the screen itself; the fade-out transition is untouched. ---- */
+  /* The bottom bar carries 8 destinations now (Launch Control and Smart Money were added).
+     Clip the bar to the viewport and let the icon row scroll inside it, so the tab bar can
+     never widen the document; the profile button keeps its place at the right. */
+  #pxnav{max-width:100vw!important;overflow:hidden!important}
+  #pxnav .pxlinks{overflow-x:auto!important;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+                  justify-content:flex-start!important;gap:2px!important;min-width:0!important}
+  #pxnav .pxlinks::-webkit-scrollbar{display:none}
+  #pxnav .pxlinks a{flex:0 0 auto!important;padding:8px 7px!important}
+  #pxnav .rfoot{flex:0 0 auto!important}
+  /* Any wide Mission Control table scrolls inside its card rather than the page. */
+  .mcc table,table.mct{display:block;overflow-x:auto;max-width:100%}
+
+  #home{max-width:100vw!important;overflow:hidden!important}
+  #home .hrow,#home .hlinks{flex-wrap:wrap!important;max-width:100%!important;row-gap:6px}
+  #home .hlinks{gap:14px!important}
 
   /* ---- shell: reclaim the 64px rail, make room for the bottom bar ---- */
   .app{padding-left:0!important}
