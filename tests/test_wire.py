@@ -60,3 +60,66 @@ def test_mixed_case_and_both_separators(tmp_path):
     d = _mk(tmp_path, ["Phoenix_Wire_Gabriel_2026-09-04.html", "phoenix-wire-aldemar-2026-09-03.html"])
     best, _, skipped = _discover(d)
     assert set(best) == {"gabriel", "aldemar"} and skipped == []
+
+
+# ---------------------------------------------------------------- Mission Control brief sections
+def _parse(raw):
+    src = (ROOT / "phoenix.py").read_text()
+    i = src.index("def _wire_strip"); j = src.index("\ndef _wire_sanitize")
+    ns = {}; exec(src[i:j], ns)
+    return ns["_wire_parse_html"](raw)
+
+
+def _sec(kicker, title, body, items="", right="r"):
+    return ('<div class="ed-sec"><div class="ed-k"><span>' + kicker + '</span>'
+            '<span class="ed-n">' + right + '</span></div>'
+            '<h2 class="ed-hl">' + title + '</h2>' + items +
+            '<p class="ed-body">' + body + '</p></div>')
+
+
+def test_every_mission_control_section_routes_to_its_own_slot():
+    raw = ('<div class="ed-call">Payrolls decide the week</div>'
+           '<div class="ed-vwhy">A hot print flips the index.</div>'
+           + _sec("IN FIVE MINUTES", "Tightening holds", "Three things matter.")
+           + _sec("THE STANCE", "Constructive but unconvinced", "Held 6 days.")
+           + _sec("THE MARKET", "SPX above the flip", "VIX 14.3.")
+           + _sec("SMART MONEY", "Energy in, software out", "Appaloosa opened CRNX.")
+           + _sec("THE SCREENER", "Nine new, two clean", "CRNX and DINO.")
+           + _sec("YOUR POSITIONS", "Two live, one unsized", "PLTR has no stop.",
+                  '<div class="ed-w"><span class="w-tag">HOLD</span><span><b>GOOG</b> +0.65R</span>'
+                  '<span class="w-when">now</span></div>')
+           + _sec("THE WORLD", "Payrolls, then CPI", "Rates dominate.")
+           + _sec("WHAT CHANGED", "Gamma flipped negative", "It was positive yesterday.")
+           + _sec("WHAT WOULD CHANGE THIS", "A close above 7,800", "Or VIX through 20.")
+           + '<p class="ed-body"><b>On deck.</b> CPI 11 Sep</p>')
+    o = _parse(raw)
+    for slot, title in (("recap", "Tightening holds"), ("stance", "Constructive but unconvinced"),
+                        ("markets", "SPX above the flip"), ("smart_money", "Energy in, software out"),
+                        ("screener", "Nine new, two clean"), ("positions", "Two live, one unsized"),
+                        ("world", "Payrolls, then CPI"), ("changed", "Gamma flipped negative"),
+                        ("invalidation", "A close above 7,800")):
+        assert o[slot], "slot not filled: " + slot
+        assert o[slot]["title"] == title, slot
+    assert o["headline"] == "Payrolls decide the week" and o["ondeck"] == "CPI 11 Sep"
+    assert o["positions"]["items"][0]["ticker"] == "GOOG", "a leading <b>TICKER</b> becomes tappable"
+
+
+def test_an_unplanned_section_is_kept_as_a_theme_not_dropped():
+    o = _parse(_sec("SHIPPING RATES", "Firm into Q4", "Not one of the nine kickers."))
+    assert o["themes"] and o["themes"][0]["kicker"] == "SHIPPING RATES"
+    assert all(o[s] is None for s in ("recap", "stance", "markets", "changed"))
+
+
+def test_kicker_matching_tolerates_the_variants_a_writer_will_use():
+    for kicker, slot in (("Five minutes", "recap"), ("The recap", "recap"),
+                         ("MARKETS", "markets"), ("Phoenix's stance", "stance"),
+                         ("Opportunities", "screener"), ("Positioning", "smart_money"),
+                         ("Invalidation", "invalidation")):
+        o = _parse(_sec(kicker, "T", "B"))
+        assert o[slot], f"{kicker!r} should route to {slot}"
+
+
+def test_missing_sections_stay_none_so_the_page_can_omit_them():
+    o = _parse(_sec("THE MARKET", "Only one section", "Everything else absent."))
+    assert o["markets"]["title"] == "Only one section"
+    assert o["recap"] is None and o["invalidation"] is None and o["positions"] is None
