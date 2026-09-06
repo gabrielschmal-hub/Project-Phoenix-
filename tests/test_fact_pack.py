@@ -25,6 +25,11 @@ def _write(tmp, name, obj):
 
 
 def _seed(tmp, **over):
+    _write(tmp, "macro_series", over.get("macro_series", {"series": [
+        {"date": "d%d" % i, "spx": 7600 + i, "vix": 15 - i * 0.02, "dxy": 99 + i * 0.01,
+         "tnx": 4.70 + i * 0.002, "us02": 4.23, "real10": 2.40 - i * 0.001, "hy": 270 - i,
+         "gold": 4400 + i, "wti": 85 + i * 0.2, "btc": 78000 + i * 50, "cpi_yoy": 3.3}
+        for i in range(22)]}))
     _write(tmp, "macro", over.get("macro", {"asof": "2026-09-05 05:33 UTC", "regime": "POLICY_TIGHTENING",
                                             "explain": {"held_weeks": 1},
                                             "inputs": {"vix": 14.32, "dxy": 98.98, "us10y": 4.77, "gold": 4539.9, "wti": 91.3}}))
@@ -57,6 +62,19 @@ def _seed(tmp, **over):
         {"ticker": "GOOG", "status": "open", "entry": 325.86, "stop": 305.67, "qty": 30, "account_size": 100000},
         {"ticker": "BAC", "status": "open", "entry": 64.38, "stop": 60.39, "qty": 150, "account_size": 100000},
         {"ticker": "PLTR", "status": "open", "entry": 184.0, "qty": 10, "account_size": 100000}]}))
+
+
+def test_macro_block_gives_yields_in_bp_and_names_what_is_absent(tmp_path):
+    """A brief that says "yields rose 1.2%" when it means 5bp is unusable. And USDJPY is not
+    fetched by Phoenix at all, so it must be named rather than filled in from memory."""
+    _seed(tmp_path); ns = _load(tmp_path)
+    m = ns["run_fact_pack"]()["macro"]
+    assert m["tnx"]["last"] == 4.74 and m["tnx"]["d1_bp"] == 0 or "d1_bp" in m["tnx"]
+    assert "d1_bp" in m["hy"] and "d1_pct" not in m["hy"], "spreads move in basis points"
+    assert "d1_pct" in m["spx"] and "d1_bp" not in m["spx"], "prices move in percent"
+    assert m["curve_2s10s_bp"] == round((m["tnx"]["last"] - m["us02"]["last"]) * 100)
+    assert any("usdjpy" in a for a in m["absent"]), "an untracked asset is named, never guessed"
+    assert m["rows"] == 22
 
 
 def test_pack_assembles_every_module(tmp_path):

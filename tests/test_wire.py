@@ -123,3 +123,20 @@ def test_missing_sections_stay_none_so_the_page_can_omit_them():
     o = _parse(_sec("THE MARKET", "Only one section", "Everything else absent."))
     assert o["markets"]["title"] == "Only one section"
     assert o["recap"] is None and o["invalidation"] is None and o["positions"] is None
+
+
+def test_inline_svg_survives_sanitising_but_executable_content_does_not():
+    """The weekly's sparklines and tape charts are inline SVG and carry half its value.
+    They were being stripped wholesale. Allowed now, minus anything that can run or embed HTML."""
+    src = (ROOT / "phoenix.py").read_text()
+    i = src.index("def _wire_sanitize"); j = src.index("\ndef ", i + 10)
+    ns = {}; exec(src[i:j], ns)
+    raw = ('<div class="ed-sec"><svg viewBox="0 0 100 40"><path d="M0,0 L10,10" class="ln"/></svg>'
+           '<svg><script>alert(1)</script><circle r="2"/></svg>'
+           '<svg><foreignObject><b>html</b></foreignObject></svg>'
+           '<p onclick="steal()">body</p><style>:root{--bg:#fff}</style></div>')
+    out = ns["_wire_sanitize"](raw)
+    assert "<svg" in out and 'class="ln"' in out, "the chart itself must survive"
+    assert "<script" not in out and "alert(1)" not in out
+    assert "foreignObject" not in out, "the one SVG element that can embed arbitrary HTML"
+    assert "onclick" not in out and "<style" not in out
