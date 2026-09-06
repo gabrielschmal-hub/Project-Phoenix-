@@ -975,7 +975,7 @@ def _wire_parse_html(raw):
     # comes through as a theme, so a new section never disappears silently.
     out = {"headline": None, "standfirst": None, "positions": None,
            "themes": [], "world": None, "ondeck": None,
-           "recap": None, "stance": None, "markets": None, "smart_money": None,
+           "recap": None, "stance": None, "markets": None, "macro": None, "smart_money": None,
            "screener": None, "changed": None, "invalidation": None}
     m = _re.search(r'class="ed-call"[^>]*>(.*?)</div>', raw, _re.S)
     if m:
@@ -1012,6 +1012,7 @@ def _wire_parse_html(raw):
         SLOTS = (("in five minutes", "recap"), ("five minutes", "recap"), ("the recap", "recap"),
                  ("the stance", "stance"), ("phoenix's stance", "stance"),
                  ("the market", "markets"), ("markets", "markets"), ("the tape today", "markets"),
+                 ("the macro", "macro"), ("macro", "macro"), ("rates and the dollar", "macro"),
                  ("smart money", "smart_money"), ("positioning", "smart_money"),
                  ("the screener", "screener"), ("opportunities", "screener"),
                  ("what changed", "changed"),
@@ -1049,7 +1050,10 @@ def _wire_sanitize(s):
     """
     import re as _re
     s = s or ""
-    for tag in ("script", "style", "iframe", "object", "embed", "svg"):
+    # <svg> is allowed: the weekly's sparklines and tape charts are inline SVG and carry half its
+    # value. Anything executable inside one is removed by the script/handler rules below, and
+    # <foreignObject> — the one SVG element that can embed arbitrary HTML — is stripped with it.
+    for tag in ("script", "style", "iframe", "object", "embed", "foreignObject"):
         s = _re.sub(rf"<{tag}\b.*?</{tag}>", "", s, flags=_re.S | _re.I)
         s = _re.sub(rf"<{tag}\b[^>]*/?>", "", s, flags=_re.I)
     s = _re.sub(r"<(link|meta)\b[^>]*>", "", s, flags=_re.I)
@@ -10953,6 +10957,58 @@ def _pk_age_min(asof):
     return None
 
 
+def _pk_macro_block(series, macro):
+    """The cross-asset picture, computed once so the brief never has to eyeball a chart.
+
+    macro_series.json carries 252 daily rows of spx/ndx/dow/rut, vix, dxy, tnx (10y), us02,
+    real10, hy, gold, wti, btc and cpi_yoy. For each we give the level and the 1-day, 1-week and
+    1-month change, in the unit that matters: percent for prices, BASIS POINTS for yields and
+    spreads. A brief that says "yields rose 1.2%" when it means 5bp is a brief nobody can act on.
+
+    USDJPY is NOT here. Phoenix does not fetch it (see symbols_fetched). It is listed in `absent`
+    so the writer says so instead of reaching for memory.
+    """
+    rows = (series or {}).get("series") or []
+    if not rows:
+        return {"absent": ["macro_series.json"], "note": "no cross-asset series"}
+    def col(k):
+        return [r.get(k) for r in rows if r.get(k) is not None]
+    def at(k, back):
+        v = col(k)
+        return v[-1 - back] if len(v) > back else None
+    PCT = ("spx", "ndx", "dow", "rut", "gold", "wti", "btc", "dxy", "vix")
+    BPS = ("tnx", "us02", "real10", "hy")
+    out, absent = {}, []
+    for k in PCT + BPS:
+        now = at(k, 0)
+        if now is None:
+            absent.append(k); continue
+        d = {"last": round(now, 2 if k not in ("btc",) else 0)}
+        for label, back in (("d1", 1), ("w1", 5), ("m1", 21)):
+            prev = at(k, back)
+            if prev is None or not prev:
+                continue
+            if k in BPS:
+                # hy is already in bp; the yields are in percent, so x100
+                d[label + "_bp"] = round((now - prev) * (1 if k == "hy" else 100))
+            else:
+                d[label + "_pct"] = round((now / prev - 1) * 100, 2)
+        out[k] = d
+    cpi = col("cpi_yoy")
+    if cpi:
+        out["cpi_yoy"] = {"last": cpi[-1], "prev_print": next((v for v in reversed(cpi) if v != cpi[-1]), None)}
+    # the curve, because a level without its slope says nothing about the policy path
+    t, u2 = at("tnx", 0), at("us02", 0)
+    if t is not None and u2 is not None:
+        out["curve_2s10s_bp"] = round((t - u2) * 100)
+        p_t, p_u2 = at("tnx", 21), at("us02", 21)
+        if p_t is not None and p_u2 is not None:
+            out["curve_2s10s_chg_1m_bp"] = round(((t - u2) - (p_t - p_u2)) * 100)
+    out["absent"] = absent + ["usdjpy (not fetched by Phoenix)"]
+    out["rows"] = len(rows)
+    return out
+
+
 def _pk_market(macro, gex, spx):
     inp = (macro or {}).get("inputs") or {}
     ov = (gex or {}).get("overview") or {}
@@ -11161,6 +11217,7 @@ def run_fact_pack(account="gabriel"):
     """Assemble every module's view into one typed summary, archive it, and diff it."""
     import datetime as _dt
     macro, n1 = _pk_read("macro")
+    mseries, n9 = _pk_read("macro_series")
     gex, n2 = _pk_read("gex")
     spx, n3 = _pk_read("spx_daily")
     stocks, n4 = _pk_read("stocks")
@@ -11168,7 +11225,7 @@ def run_fact_pack(account="gabriel"):
     cong, n6 = _pk_read("congress_trades")
     wire, n7 = _pk_read("wire")
     trades, n8 = _pk_read("trades")
-    missing = [x for x in (n1, n2, n3, n4, n5, n6, n7, n8) if x]
+    missing = [x for x in (n1, n2, n3, n4, n5, n6, n7, n8, n9) if x]
 
     sector = {}
     for r in ((stocks or {}).get("trade_ranked") or []) + ((stocks or {}).get("invest_ranked") or []):
@@ -11185,6 +11242,8 @@ def run_fact_pack(account="gabriel"):
         "date": today,
         "asof": _now(),
         "market": _pk_market(macro, gex, spx),
+        "macro": _pk_macro_block(mseries, macro),
+        "regime_gates": ((macro or {}).get("explain") or {}),
         "screener": _pk_screener(stocks),
         "smart_money": _pk_smart(inst, cong, sector),
         "portfolio": _pk_portfolio(trades, live),

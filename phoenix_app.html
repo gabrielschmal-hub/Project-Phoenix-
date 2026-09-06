@@ -760,6 +760,23 @@
   .sm-chip.warn{border-color:var(--amber);color:var(--amber)}
   .sm-fresh{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);margin:0 0 6px;line-height:1.7}
   /* ---- Mission Control as the written brief ---- */
+  .mcb-plate{border:1px solid var(--line2);border-radius:12px;background:var(--card);padding:14px 16px;margin:14px 0}
+  .mcb-links{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--line2)}
+  .mcb-links a,.mcb-jump a{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--gold);cursor:pointer}
+  .mcb-jump{display:flex;gap:16px;flex-wrap:wrap;margin-top:20px;padding-top:14px;border-top:1px solid var(--line)}
+  .mcrot2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .mcrot2 .rh{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--inkFade);margin-bottom:7px}
+  .ed-rr{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line2);font-family:var(--mono);font-size:11.5px}
+  .ed-rr:last-child{border-bottom:none}
+  .ed-rr .nm{font-family:var(--sans);font-size:12.5px;color:var(--inkMed);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ed-rr .sc{font-size:9.5px;color:var(--inkGhost);font-family:var(--mono)}
+  @media(max-width:620px){ .mcrot2{grid-template-columns:1fr} }
+  .mcb-tabs{display:flex;gap:6px;margin:0 0 16px}
+  .mcb-tab{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+           padding:7px 13px;border:1px solid var(--line2);border-radius:99px;background:transparent;
+           color:var(--inkFade);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+  .mcb-tab.on{border-color:var(--gold);color:var(--gold);font-weight:700;background:rgba(211,119,54,.08)}
+  .mcb-tab .d{font-size:9px;letter-spacing:0;opacity:.75}
   .mcb-top{margin-bottom:14px}
   .mcb-recap{border:1px solid var(--gold);border-left:3px solid var(--gold);border-radius:12px;
              background:rgba(211,119,54,.06);padding:13px 15px;margin-bottom:16px}
@@ -9430,32 +9447,16 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   /* Paired rows rather than two tall columns. A single grid let the right
      column run on while the left ran out, which is what left that half-screen
      void; imbalance is now contained to one row at a time. */
+  /* Mission Control IS the daily brief. Cowork writes the document each morning against
+     outputs/fact_pack.json and commits it to wire/; this page renders it. Phoenix supplies the
+     instruments the prose refers to — the SPX strike histogram and the VIX term curve, drawn by
+     the SAME functions the Markets page uses so the two can never disagree — and every section
+     links onward to the page that owns its data.
+     The old tile grid is gone. It restated the brief in worse words, and when a file was late it
+     filled the screen with "waiting on macro_series.json" instead of saying anything. */
   var MC_HTML =
     '<div class="mcw">'+
-      '<div class="mcc mcbrief-wide">'+
-        '<div class="mch"><h2>Daily brief</h2>'+
-          '<button class="mcgo" onclick="PX_OPEN_EDITION()">Open the full read \u2192</button></div>'+
-        '<div id="mcBrief" class="mcna">loading\u2026</div></div>'+
-      '<div class="mc2">'+
-        '<div class="col"><div class="mcc" id="mcConf"></div></div>'+
-        '<div class="col"><div class="mcc" id="mcSince"></div></div>'+
-      '</div>'+
-      '<div class="mc2">'+
-        '<div class="col"><div class="mcc" id="mcMacro"></div></div>'+
-        '<div class="col"><div class="mcc" id="mcRegime"></div></div>'+
-      '</div>'+
-      '<div class="mc2">'+
-        '<div class="col">'+
-          '<div class="mcc" id="mcBudget"></div>'+
-          '<div class="mcc" id="mcBook"></div>'+
-          '<div class="mcc" id="mcGates"></div>'+
-        '</div>'+
-        '<div class="col">'+
-          '<div class="mcc" id="mcCal"></div>'+
-          '<div class="mcc" id="mcSmart"></div>'+
-          '<div class="mcc" id="mcBookHealth"></div>'+
-        '</div>'+
-      '</div>'+
+      '<div id="mcBrief" class="mcna">loading\u2026</div>'+
     '</div>' 
 
   function initMC(){
@@ -9771,7 +9772,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // wire/; run_wire parses it into wire.json. This renders that document. The old generated
   // paragraph is kept ONLY as a fallback for a morning with no brief, and says so plainly —
   // a template that reads like prose is worse than an admission that today's brief is missing.
-  var MCB_ORDER=[["recap","In five minutes"],["stance","The stance"],["markets","The market"],
+  var MCB_ORDER=[["recap","In five minutes"],["stance","The stance"],["markets","The market"],["macro","The macro"],
                  ["smart_money","Smart money"],["screener","The screener"],["positions","Your positions"],
                  ["world","The world"],["changed","What changed"],["invalidation","What would change this"]];
   function mcbSec(s,fallbackKicker){
@@ -9785,13 +9786,102 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       (s.title?'<h2 class="ed-hl">'+s.title+'</h2>':"")+items+
       (s.note?'<p class="ed-body">'+s.note+'</p>':"")+'</div>';
   }
+  // Daily and weekly are two documents on one page. The weekly keeps its own markup verbatim
+  // (tape cards, book rows with R, the calendar strip) because reducing it to the daily's schema
+  // would drop the richest parts and break every time Saturday's brief gains a block.
+  var MCB_VIEW="daily";
+  function mcbTabs(hasDaily,hasWeekly,dDate,wDate){
+    if(!hasWeekly) return "";
+    function t(id,lab,on,dt){ return '<button class="mcb-tab'+(on?" on":"")+'" data-mcb="'+id+'">'+lab+
+      (dt?'<span class="d">'+dt+'</span>':'')+'</button>'; }
+    return '<div class="mcb-tabs">'+t("daily","Daily",MCB_VIEW==="daily",dDate)+
+           t("weekly","Weekly",MCB_VIEW==="weekly",wDate)+'</div>';
+  }
+  // ---- Phoenix plates: the instruments the prose refers to ----
+  // Drawn by drawMktGex / drawVIX — the SAME functions the Markets page calls, with an "MC"
+  // suffix so both can exist at once. Nothing is recomputed here, so the brief and Markets can
+  // never show different levels for the same day.
+  function mcbPlateGex(){
+    return '<div class="ed-sec mcb-plate"><div class="ed-k"><span>The map</span>'+
+      '<span class="ed-n" id="gexHNoteMC"></span></div>'+
+      '<div id="gexhRowMC" class="ed-gexh">'+
+        '<div class="ed-chartk"><span>SPX strike histogram</span><span class="ed-n">net dealer gamma by strike</span></div>'+
+        '<div class="ed-map"><div class="gexh-scroll"><div class="gex-histo" id="mGexPlotMC"></div></div>'+
+        '<div class="gexh-key" id="gexHKeyMC"></div></div></div>'+
+      '<div class="ed-chartk" style="margin-top:16px"><span>VIX term structure</span>'+
+        '<span class="ed-n" id="vixNoteMC"></span></div>'+
+      '<div class="ed-vix"><div class="plot" id="vixPlotMC"></div></div>'+
+      '<div class="mcb-links"><a data-go="markets">Full markets page \u2192</a></div></div>';
+  }
+  function mcbPlateRot(){
+    return '<div class="ed-sec mcb-plate"><div class="ed-k"><span>Where money moved</span>'+
+      '<span class="ed-n" id="mcRotN"></span></div>'+
+      '<div class="ed-rot" id="mcRotRows"></div>'+
+      '<div class="mcb-links"><a data-go="screeners">Screeners \u2192</a>'+
+        '<a data-go="markets">Sector map \u2192</a></div></div>';
+  }
+  function mcbPlateConf(){
+    // Confluence belongs beside the positioning prose, not in a tile of its own: it answers
+    // "does anything the funds and Congress did line up with what the screener and the book say".
+    return '<div class="ed-sec mcb-plate"><div id="mcConf"></div>'+
+      '<div class="mcb-links"><a data-go="smart">Smart Money \u2192</a></div></div>';
+  }
+  function mcbPlateSince(){
+    return '<div class="ed-sec mcb-plate"><div id="mcSince"></div></div>';
+  }
+  function mcbDrawPlates(){
+    try{ if(document.getElementById("mcConf")  && typeof mcConf==="function")  mcConf();  }catch(e){}
+    try{ if(document.getElementById("mcSince") && typeof mcSince==="function") mcSince(); }catch(e){}
+    // charts: reuse the Markets renderers, never a second implementation
+    try{ getJSON("gex").then(function(g){ if(typeof drawMktGex==="function") drawMktGex(g,"MC"); }).catch(function(){}); }catch(e){}
+    try{ if(typeof drawVIX==="function") drawVIX("MC"); }catch(e){}
+    var host=document.getElementById("mcRotRows"); if(!host) return;
+    getJSON("industry").then(function(d){
+      var rows=((d&&d.industries)||[]).filter(function(r){ return r.m1!=null && (r.n||0)>=3; });
+      if(!rows.length){ host.innerHTML='<div class="mcna">industry.json has no monthly series yet.</div>'; return; }
+      var up=rows.slice().sort(function(a,b){ return b.m1-a.m1; }).slice(0,5);
+      var dn=rows.slice().sort(function(a,b){ return a.m1-b.m1; }).slice(0,5);
+      function row(r){
+        var c=r.m1>=0?"var(--green)":"var(--red)";
+        return '<div class="ed-rr" data-ind="'+String(r.industry).replace(/"/g,"")+'">'+
+          '<span class="nm">'+r.industry+'<span class="sc"> \u00b7 '+(r.sector||"")+'</span></span>'+
+          '<span style="color:'+c+';font-weight:700">'+(r.m1>=0?"+":"\u2212")+Math.abs(r.m1).toFixed(1)+'%</span>'+
+          '<span class="sc">'+(r.n||0)+' names</span></div>';
+      }
+      host.innerHTML='<div class="mcrot2"><div><div class="rh">Leading \u00b7 one month</div>'+up.map(row).join("")+'</div>'+
+        '<div><div class="rh">Lagging \u00b7 one month</div>'+dn.map(row).join("")+'</div></div>';
+      var n=document.getElementById("mcRotN"); if(n) n.textContent=rows.length+" industries";
+      host.querySelectorAll("[data-ind]").forEach(function(el){ el.style.cursor="pointer";
+        el.onclick=function(){ location.hash="#screeners"; }; });
+    }).catch(function(){ host.innerHTML='<div class="mcna">industry.json unavailable.</div>'; });
+  }
+
+  function mcbWeekly(wk,tabs){
+    return tabs+
+      (wk.headline?'<div class="ed-call">'+wk.headline+'</div>':"")+
+      (wk.standfirst?'<div class="ed-vwhy">'+wk.standfirst+'</div>':"")+
+      (wk.sections||[]).map(function(s){
+        return '<div class="ed-sec"><div class="ed-k"><span>'+(s.kicker||"")+'</span>'+
+               '<span class="ed-n">'+(s.right||"")+'</span></div>'+(s.html||"")+'</div>'; }).join("")+
+      '<div class="mcb-src">Weekly \u00b7 written '+(wk.date||"\u2014")+' \u00b7 <span class="mcb-file">'+(wk.file||"")+'</span></div>';
+  }
   function mcBrief(st){
     var host=document.getElementById("mcBrief"); if(!host) return;
     getJSON("wire").catch(function(){return null;}).then(function(w){
       var prof=(window.PHOENIX_PROFILE==="A")?"aldemar":"gabriel";
       var acct=((w||{}).accounts||{})[prof]||((w||{}).accounts||{}).gabriel||null;
       var d=acct&&(acct.parsed||acct);
-      if(!d||!(d.headline||d.recap)){ mcBriefFallback(st); return; }
+      var wk=acct&&acct.weekly;
+      var hasDaily=!!(d&&(d.headline||d.recap));
+      if(!hasDaily&&!wk){ mcBriefFallback(st); return; }
+      if(!hasDaily) MCB_VIEW="weekly";
+      var tabs=mcbTabs(hasDaily,!!wk,(acct.date||"").slice(5),(wk&&wk.date||"").slice(5));
+      function bind(){
+        host.querySelectorAll("[data-mcb]").forEach(function(b){ b.onclick=function(){ MCB_VIEW=this.dataset.mcb; mcBrief(st); }; });
+        host.querySelectorAll("[data-tk]").forEach(function(n){ n.style.cursor="pointer";
+          n.onclick=function(){ if(typeof trOpenTicker==="function") trOpenTicker(this.dataset.tk); }; });
+      }
+      if(MCB_VIEW==="weekly"&&wk){ host.className=""; host.innerHTML=mcbWeekly(wk,tabs); bind(); return; }
       // Calendar days, not elapsed hours. Rounding milliseconds called this morning's brief
       // "yesterday" from mid-afternoon onward, which is exactly the kind of small lie that
       // makes an operator stop trusting the timestamps.
@@ -9807,6 +9897,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var stale=(age!=null&&age>=2);
       var recap=d.recap;
       var html=
+        tabs+
         '<div class="mcb-top">'+
           (recap?'<div class="mcb-recap">'+
             '<div class="mcb-rk">In five minutes'+(recap.right?' \u00b7 '+recap.right:'')+'</div>'+
@@ -9819,17 +9910,30 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           (d.standfirst?'<div class="ed-vwhy">'+d.standfirst+'</div>':"")+
         '</div>'+
         MCB_ORDER.filter(function(x){ return x[0]!=="recap"; })
-                 .map(function(x){ return mcbSec(d[x[0]],x[1]); }).join("")+
+                 .map(function(x){
+                   var html=mcbSec(d[x[0]],x[1]);
+                   // the instruments sit directly under the prose that refers to them
+                   if(x[0]==="markets")     html+=mcbPlateGex();   // the map sits under the prose it serves
+                   if(x[0]==="smart_money") html+=mcbPlateConf();
+                   if(x[0]==="screener")    html+=mcbPlateRot();
+                   if(x[0]==="changed")     html+=mcbPlateSince();
+                   return html;
+                 }).join("")+
         (d.themes||[]).map(function(t){ return mcbSec(t); }).join("")+
         (d.ondeck?'<p class="ed-body"><b>On deck.</b> '+d.ondeck+'</p>':"")+
+        '<div class="ed-jump mcb-jump"><a data-go="launch">Launch Control</a><a data-go="markets">Markets</a>'+
+          '<a data-go="screeners">Screeners</a><a data-go="trades">Trade</a>'+
+          '<a data-go="smart">Smart Money</a><a data-go="portfolio">Portfolio</a></div>'+
         '<div class="mcb-src">Written '+(acct.date||d.date||"\u2014")+
           (age!=null?' \u00b7 '+(age<=0?"today":age===1?"yesterday":age+" days ago"):'')+
           ' \u00b7 from Phoenix\u2019s fact pack \u00b7 <span class="mcb-file">'+(acct.file||"")+'</span></div>'+
         (stale?'<div class="mcb-stale">This brief is '+age+' days old. Nothing below has been re-checked against today\u2019s data \u2014 read it as a record of that morning, not as this morning.</div>':"");
       host.className="";
       host.innerHTML=html;
-      host.querySelectorAll("[data-tk]").forEach(function(n){ n.style.cursor="pointer";
-        n.onclick=function(){ if(typeof trOpenTicker==="function") trOpenTicker(this.dataset.tk); }; });
+      bind();
+      host.querySelectorAll("[data-go]").forEach(function(a){ a.style.cursor="pointer";
+        a.onclick=function(){ location.hash="#"+this.dataset.go; }; });
+      mcbDrawPlates();
     });
   }
 
@@ -9904,20 +10008,22 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   };
 
   function mcRender(){
-    // New Mission Control. Painted from the same state the dedicated pages use.
-    if(document.getElementById("mcBudget")){
+    // Mission Control is the brief. The whole render used to be gated on #mcBudget, a tile that
+    // no longer exists, which silently left the page on "loading…" forever. Gate on the brief.
+    if(document.getElementById("mcBrief")){
       var mstate=null;
       try{ mstate=pfCompute(); }catch(e){ mstate=null; }
-      try{ mcMacro(); }catch(e){ console.warn("mcMacro",e); }
-      try{ mcBudget(mstate); }catch(e){ console.warn("mcBudget",e); }
-      try{ mcBook(mstate); }catch(e){ console.warn("mcBook",e); }
+      try{ if(document.getElementById("mcMacro")) mcMacro(); }catch(e){ console.warn("mcMacro",e); }
+      try{ if(document.getElementById("mcBudget")) mcBudget(mstate); }catch(e){ console.warn("mcBudget",e); }
+      try{ if(document.getElementById("mcBook")) mcBook(mstate); }catch(e){ console.warn("mcBook",e); }
       try{ mcBrief(mstate); }catch(e){}
-      try{ mcGates(); }catch(e){}
-      try{ mcRegime(); }catch(e){}
-      try{ mcCal(); }catch(e){}
-      try{ mcSmart(); }catch(e){ console.warn("mcSmart",e); }
-      try{ mcConf(); }catch(e){ console.warn("mcConf",e); }
-      try{ mcSince(); }catch(e){ console.warn("mcSince",e); }
+      try{ if(document.getElementById("mcGates")) mcGates(); }catch(e){ console.warn("mcGates",e); }
+      try{ if(document.getElementById("mcRegime")) mcRegime(); }catch(e){ console.warn("mcRegime",e); }
+      try{ if(document.getElementById("mcCal")) mcCal(); }catch(e){ console.warn("mcCal",e); }
+      // Their tiles are gone from the page; guard so a missing host is not an error.
+      try{ if(document.getElementById("mcSmart")) mcSmart(); }catch(e){ console.warn("mcSmart",e); }
+      try{ if(document.getElementById("mcConf")) mcConf(); }catch(e){ console.warn("mcConf",e); }
+      try{ if(document.getElementById("mcSince")) mcSince(); }catch(e){ console.warn("mcSince",e); }
       try{ mcHealth(mstate); }catch(e){}
     }
     if(!document.getElementById("mcVerdict")) return;
@@ -15300,6 +15406,18 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   #pxnav .rfoot{flex:0 0 auto!important}
   /* Any wide Mission Control table scrolls inside its card rather than the page. */
   .mcc table,table.mct{display:block;overflow-x:auto;max-width:100%}
+
+  /* The edition grid (daily and weekly briefs) is "tag | body | when" on three columns. The
+     third column has no width limit, so a long "when" pushed the document to 589px on a phone.
+     Stack it under the body instead of truncating it: the timing is part of the sentence. */
+  .ed-w{grid-template-columns:auto 1fr!important;row-gap:3px!important}
+  .ed-w .w-when{grid-column:2!important;justify-self:start!important;text-align:left!important;white-space:normal!important}
+  .ed-pos{grid-template-columns:auto 1fr!important;row-gap:2px!important}
+  .ed-pos .nt{grid-column:1 / -1!important}
+  .ed-sec,.ed-w,.ed-pos,.mcb-recap,.mcb-top{max-width:100%!important;min-width:0!important}
+  .ed-sec svg{max-width:100%!important;height:auto!important}
+  .ed-call{font-size:24px!important;line-height:1.18!important}
+  .ed-hl,.ed-hl.sm{font-size:19px!important;line-height:1.25!important}
 
   #home{max-width:100vw!important;overflow:hidden!important}
   #home .hrow,#home .hlinks{flex-wrap:wrap!important;max-width:100%!important;row-gap:6px}
