@@ -486,13 +486,15 @@ def _prof_page(browser, base, w, h, mobile):
 
 
 @pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
-def test_mission_control_digest_reports_new_filings_without_searching(browser, served):
+def test_confluence_and_since_render_inside_the_brief_not_as_tiles(browser, served):
     pg, errs, state = _prof_page(browser, served, 1280, 900, False)
     pg.evaluate("location.hash='#mission'"); pg.wait_for_timeout(2200)
-    card = pg.locator("#mcSmart"); assert card.count() == 1
-    txt = card.inner_text()
-    assert "Nancy Pelosi" in txt and "bought" in txt and "NVDA" in txt, txt[:200]
-    assert "Q2 2026" in txt and "not in yet" in txt and "Pershing" in txt
+    # The standalone digest tile is gone: Mission Control is the brief, and what changed on
+    # your names is the brief's own WHAT CHANGED section plus the confluence plate beside it.
+    conf = pg.locator("#mcConf"); assert conf.count() == 1, "confluence renders inside the brief"
+    txt = conf.inner_text()
+    assert "CRNX" in txt and "Congress" in txt.replace("CONGRESS", "Congress")
+    assert "Agreement is not evidence" in txt
     assert not _bad(errs), errs[:2]
 
 
@@ -682,3 +684,100 @@ def test_theme_follows_the_device_until_the_operator_chooses(browser, served):
         pg.evaluate("PX_ENTER()"); pg.wait_for_timeout(700)
         assert pg.evaluate("document.documentElement.classList.contains('light')") is want_light, scheme
         pg.close()
+
+
+# ---------------------------------------------------------------- Mission Control: confluence
+def _mc_page(browser, base, w, h, mobile, seen=None):
+    import datetime as dt
+    today = dt.date.today().isoformat(); rec = (dt.date.today() - dt.timedelta(days=3)).isoformat()
+    Q = "2026-06-30"
+    inst = {"latest_quarter": Q, "managers": {}, "tickers": {
+        "GOOG": [{"manager": "Duquesne", "action": "ADD", "value_usd": 4.12e8, "quarter": Q}],
+        "CRNX": [{"manager": "Appaloosa", "action": "NEW", "value_usd": 9e7, "quarter": Q}],
+        "NVDA": [{"manager": "Tiger", "action": "HOLD", "value_usd": 1e8, "quarter": Q}]}}
+    cong = {"tickers": {
+        "CRNX": [{"date": rec, "reported": rec, "member": "Nancy Pelosi", "side": "buy", "amount": "$250,001 - $500,000"}],
+        "BAC": [{"date": rec, "reported": rec, "member": "Dan Newhouse", "side": "sell", "amount": "$15,001 - $50,000"}]}}
+    sig = [{"date": today, "ticker": "CRNX", "close": 20.0, "atr_pct": 1.64, "stop_pct": 4.1, "r_20d": None, "stop25_hit": False, "is_new": True},
+           {"date": today, "ticker": "GOOG", "close": 330.0, "atr_pct": 2.0, "stop_pct": 5.0, "r_20d": None, "stop25_hit": False, "is_new": True}]
+    tb = [{"id": "t1", "account": "gabriel", "status": "open", "ticker": "GOOG", "entry": 325.86, "stop": 305.67, "target": 420, "qty": 30, "account_size": 100000},
+          {"id": "t2", "account": "gabriel", "status": "open", "ticker": "BAC", "entry": 64.38, "stop": 60.39, "target": 75.03, "qty": 150, "account_size": 100000}]
+    live = [{"ticker": t, "last": p, "prev_close": p, "chg_pct": 0, "quote_ts": "2026-09-05T13:00:00Z", "updated_at": "2026-09-05T13:00:00Z"}
+            for t, p in [("GOOG", 339.08), ("BAC", 63.04), ("CRNX", 22.5)]]
+    pg = browser.new_page(viewport={"width": w, "height": h}, is_mobile=mobile, has_touch=mobile)
+    errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
+    def route(r):
+        u = r.request.url
+        if u.startswith(base): return r.continue_()
+        if "institutional_holdings" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(inst))
+        if "congress_trades" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(cong))
+        if "wire" in u:
+            # Mission Control IS the brief; the confluence and since-you-last-looked blocks are
+            # plates inside it, so a brief must exist for them to render at all.
+            def sec(k, t, note): return {"kicker": k, "right": "", "title": t, "items": [], "note": note}
+            return r.fulfill(status=200, content_type="application/json", body=json.dumps({
+                "generated": today + " 04:10 UTC", "accounts": {"gabriel": {"date": today,
+                "file": "wire/phoenix_wire_gabriel_%s.html" % today, "parsed": {
+                    "headline": "Test brief", "standfirst": "Standfirst.",
+                    "recap": sec("IN FIVE MINUTES", "Recap", "Three things."),
+                    "markets": sec("THE MARKET", "Markets", "Body."),
+                    "smart_money": sec("SMART MONEY", "Positioning", "Body."),
+                    "screener": sec("THE SCREENER", "Setups", "Body."),
+                    "changed": sec("WHAT CHANGED", "Changes", "Body."),
+                    "themes": [], "ondeck": "CPI"}}}}))
+        if "trade_book" in u:
+            return r.fulfill(status=200, content_type="application/json",
+                             body=json.dumps([{"id": t["id"], "ord": i, "body": t, "deleted": False} for i, t in enumerate(tb)]))
+        if "prices_live" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(live))
+        if "signal_log" in u: return r.fulfill(status=200, content_type="application/json", body=json.dumps(sig))
+        if "/rest/v1/" in u or ".json" in u: return r.fulfill(status=200, content_type="application/json", body="[]")
+        return r.abort()
+    pg.route("**/*", route)
+    pg.goto(base + "/phoenix_app.html"); pg.wait_for_timeout(1300)
+    if seen: pg.evaluate("localStorage.setItem('phoenix.mcSeen','%s')" % seen)
+    pg.evaluate("PX_ENTER()"); pg.wait_for_timeout(900)
+    pg.evaluate("location.hash='#mission'")
+    # The brief loads wire.json, then renders, then draws its plates. Wait for the last of those
+    # rather than a fixed timeout: a flaky fixed wait produces a flaky test, which is worse than
+    # no test because it teaches you to re-run instead of to look.
+    try: pg.wait_for_selector("#mcBrief .mcb-recap, #mcBrief .ed-sec", timeout=8000)
+    except Exception: pass
+    pg.wait_for_timeout(900)
+    return pg, errs
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_confluence_counts_independent_sources_and_ignores_a_lone_hold(browser, served):
+    pg, errs = _mc_page(browser, served, 1440, 1000, False)
+    rows = pg.locator("#mcConf .mcconf")
+    assert rows.count() == 3
+    # the chips are upper-cased by CSS, so compare case-insensitively
+    by = {r.locator(".tk").inner_text(): {s.strip().lower() for s in r.locator(".src").all_inner_texts()} for r in rows.all()}
+    assert by["CRNX"] == {"screener", "congress", "funds"}
+    assert by["GOOG"] == {"book", "screener", "funds"}
+    assert by["BAC"] == {"book", "congress"}
+    assert "NVDA" not in by, "a single HOLD is neither an action nor a second source"
+    assert list(by)[0] == "CRNX" or len(by[list(by)[0]]) == 3, "most agreement first"
+    assert "Agreement is not evidence" in pg.locator("#mcConf .mcfoot").inner_text()
+    assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_since_you_last_looked_is_marked_on_leaving_not_on_arriving(browser, served):
+    pg, errs = _mc_page(browser, served, 1440, 1000, False)
+    assert pg.evaluate("localStorage.getItem('phoenix.mcSeen')") is None, \
+        "boot paints every page once; that must not stamp the marker"
+    assert pg.locator("#mcSince .mcline").count() >= 2
+    assert "in the last 7 days" in pg.locator("#mcSince .mcsub").inner_text()
+    pg.evaluate("location.hash='#launch'"); pg.wait_for_timeout(900)
+    assert pg.evaluate("localStorage.getItem('phoenix.mcSeen')"), "leaving Mission Control sets the marker"
+    assert not _bad(errs), errs[:2]
+
+
+@pytest.mark.skipif(not APP.exists(), reason="phoenix_app.html not in repo root")
+def test_mission_control_fits_a_phone_with_eight_rail_destinations(browser, served):
+    pg, errs = _mc_page(browser, served, 390, 844, True)
+    assert pg.evaluate("document.documentElement.scrollWidth") <= 392
+    box = pg.locator("#pxl_launch").bounding_box()
+    assert box["width"] > 0 and box["x"] >= 0, "every tab must be reachable in the bottom bar"
+    assert not _bad(errs), errs[:2]

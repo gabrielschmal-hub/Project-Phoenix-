@@ -171,3 +171,32 @@ def test_provenance_records_age_of_every_block(tmp_path):
     assert pr["institutional_holdings"]["quarter"] == "2026-06-30"
     assert pr["congress_trades"]["status"]["absent_chambers"] == ["Senate"], \
         "a quiet feed must reach the writer as a fact, not as silence"
+
+
+def test_usdjpy_is_a_tracked_asset_not_an_absence(tmp_path):
+    """The yen is the carry trade's funding leg; a sharp rally has unwound leveraged positioning
+    twice in two years. It used to be listed in `absent`."""
+    _seed(tmp_path)
+    ser = json.load(open(os.path.join(str(tmp_path), "macro_series.json")))
+    for i, r in enumerate(ser["series"]):
+        r["usdjpy"] = 150.0 + i * 0.1
+    _write(tmp_path, "macro_series", ser)
+    ns = _load(tmp_path)
+    m = ns["run_fact_pack"]()["macro"]
+    assert "usdjpy" in m and m["usdjpy"]["last"] == 152.1
+    assert "d1_pct" in m["usdjpy"], "a currency moves in percent, not basis points"
+    assert not any("usdjpy" in a for a in m["absent"])
+
+
+def test_a_flat_carried_yield_is_visible_as_flat(tmp_path):
+    """us02 was a WEEKLY FRED value carried forward daily, so the 2-year read unchanged for five
+    sessions and a brief concluded the Fed was not being repriced. The pack must report what the
+    series actually contains, so a stuck field shows as 0bp rather than being smoothed away."""
+    _seed(tmp_path)
+    ser = json.load(open(os.path.join(str(tmp_path), "macro_series.json")))
+    for r in ser["series"]:
+        r["us02"] = 4.23
+    _write(tmp_path, "macro_series", ser)
+    ns = _load(tmp_path)
+    m = ns["run_fact_pack"]()["macro"]
+    assert m["us02"]["last"] == 4.23 and m["us02"]["d1_bp"] == 0 and m["us02"]["w1_bp"] == 0
