@@ -4830,7 +4830,11 @@ def run_macro_series_daily():
 
     SYMS = {"spx": "^GSPC", "ndx": "^IXIC", "dow": "^DJI", "rut": "^RUT",
             "vix": "^VIX", "wti": "CL=F", "gold": "GC=F", "dxy": "DX-Y.NYB",
-            "tnx": "^TNX", "btc": "BTC-USD"}   # the asset board plots btc too
+            "tnx": "^TNX", "btc": "BTC-USD",
+            # USDJPY: the carry trade's funding leg and the cleanest read on BoJ vs Fed policy
+            # divergence. A sharp yen rally has unwound leveraged positioning twice in two years,
+            # so it belongs on the board rather than in the operator's head.
+            "usdjpy": "JPY=X"}
     period = os.environ.get("MACRO_DAILY_PERIOD", "1y")
     cols = {}
     for key, sym in SYMS.items():
@@ -4905,6 +4909,17 @@ def run_macro_series_daily():
     carry_keys = ("us02", "real10", "hy", "cpi_yoy")
 
     dates = sorted(cols["spx"])
+    # Daily FRED for the three series that actually move every day. The weekly file stays as the
+    # fallback, and `daily_fred` records which source each row used so a brief can tell whether
+    # "unchanged" means unchanged or merely uncarried.
+    _fstart = dates[0] if dates else None
+    FRED_D = {}
+    if _fstart:
+        for _k, _sid in (("us02", "DGS2"), ("real10", "DFII10"), ("hy", "BAMLH0A0HYM2")):
+            got = _fred_daily(_sid, _fstart)
+            if got:
+                FRED_D[_k] = got
+        print(f"[macro] daily FRED: {', '.join(sorted(FRED_D)) or 'none (weekly carry-forward in use)'}")
     wkeys = sorted(weekly)
     out, carry = [], {}
     for d in dates:
@@ -4914,7 +4929,9 @@ def run_macro_series_daily():
             if v is not None:
                 row[k] = round(v, 4)
         if "tnx" in row:
-            row["us10"] = round(row["tnx"] / 10.0, 3)
+            # ^TNX is already quoted in percent (4.76 = 4.76%). The /10 here produced 0.476 and
+            # made us10 a decade wrong; nothing downstream should use it, but it was published.
+            row["us10"] = round(row["tnx"], 3)
         # weekly rows are dated Mondays; a trading day rarely matches exactly,
         # so take the most recent weekly row on or before this date
         for wd in wkeys:
@@ -4926,6 +4943,14 @@ def run_macro_series_daily():
                     carry[k] = w[k]
         for k, v in carry.items():
             row.setdefault(k, v)
+        # a true daily observation beats a carried weekly one
+        for k, m in FRED_D.items():
+            v = m.get(d)
+            if v is None:                      # FRED skips holidays: take the latest on or before
+                prior = [dd for dd in m if dd <= d]
+                v = m[max(prior)] if prior else None
+            if v is not None:
+                row[k] = v
         out.append(row)
 
     out = out[-260:]
@@ -10957,6 +10982,27 @@ def _pk_age_min(asof):
     return None
 
 
+def _fred_daily(series_id, start):
+    """Daily FRED observations as {date: value}. Empty dict on any failure.
+
+    The daily macro series used to carry the WEEKLY values of DGS2, DFII10 and BAMLH0A0HYM2
+    forward across every trading day, so the 2-year yield sat unchanged for a week at a time and
+    a brief reading it concluded the market was not repricing the Fed. It was, daily; the series
+    just could not see it.
+    """
+    import requests as _rq
+    key = os.environ.get("FRED_API_KEY", "")
+    if not key:
+        return {}
+    u = (f"https://api.stlouisfed.org/fred/series/observations?series_id={series_id}"
+         f"&api_key={key}&file_type=json&observation_start={start}&frequency=d&sort_order=asc")
+    try:
+        obs = _rq.get(u, timeout=30).json().get("observations", [])
+        return {o["date"]: float(o["value"]) for o in obs if o.get("value") not in (".", "", None)}
+    except Exception:
+        return {}
+
+
 def _pk_macro_block(series, macro):
     """The cross-asset picture, computed once so the brief never has to eyeball a chart.
 
@@ -10976,7 +11022,7 @@ def _pk_macro_block(series, macro):
     def at(k, back):
         v = col(k)
         return v[-1 - back] if len(v) > back else None
-    PCT = ("spx", "ndx", "dow", "rut", "gold", "wti", "btc", "dxy", "vix")
+    PCT = ("spx", "ndx", "dow", "rut", "gold", "wti", "btc", "dxy", "vix", "usdjpy")
     BPS = ("tnx", "us02", "real10", "hy")
     out, absent = {}, []
     for k in PCT + BPS:
@@ -11004,7 +11050,7 @@ def _pk_macro_block(series, macro):
         p_t, p_u2 = at("tnx", 21), at("us02", 21)
         if p_t is not None and p_u2 is not None:
             out["curve_2s10s_chg_1m_bp"] = round(((t - u2) - (p_t - p_u2)) * 100)
-    out["absent"] = absent + ["usdjpy (not fetched by Phoenix)"]
+    out["absent"] = absent
     out["rows"] = len(rows)
     return out
 
