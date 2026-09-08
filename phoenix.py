@@ -284,14 +284,28 @@ def sb_heartbeat(lane, ok, note=""):
     shows up as a stale row instead of a 27-day-old asof nobody sees.
     Best effort: never raises.
     """
-    import requests
+    import requests, json, os
     from datetime import datetime, timezone
+    body = {"lane": lane, "ts": datetime.now(timezone.utc).isoformat(), "ok": bool(ok), "note": str(note)[:400]}
+    # local copy first: outputs/heartbeats.json is served by Vercel, so a lane's
+    # last word is readable even when the run has no database credentials
+    try:
+        hp = os.path.join(OUTPUTS_DIR, "heartbeats.json")
+        cur = {}
+        try:
+            cur = json.load(open(hp))
+        except Exception:
+            pass
+        cur[lane] = body
+        os.makedirs(OUTPUTS_DIR, exist_ok=True)
+        json.dump(cur, open(hp, "w"), indent=1)
+    except Exception as e:
+        print(f"[heartbeat] local write failed: {e}")
     url, key = _sb_env()
     if not (url and key):
         return False
     H = {"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/json",
          "Prefer": "resolution=merge-duplicates,return=minimal"}
-    body = {"lane": lane, "ts": datetime.now(timezone.utc).isoformat(), "ok": bool(ok), "note": str(note)[:400]}
     try:
         r = requests.post(f"{url}/rest/v1/heartbeats", headers=H, params={"on_conflict": "lane"},
                           json=body, timeout=30)
@@ -317,6 +331,7 @@ def pull_trade_book():
     path = os.path.join(OUTPUTS_DIR, "trades.json")
     if not (url and key):
         print("[trade_book] no SUPABASE_URL / service key in env — trades.json left as committed")
+        sb_heartbeat("trade_book", False, "no SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY in the workflow env")
         return None
     try:
         rows = _sb_get("trade_book", {"select": "id,account,status,ticker,ord,body,updated_at,updated_by,deleted",
@@ -1037,7 +1052,11 @@ def run_senate_efd():
             continue
         if n_parsed >= cfg["max_reports_per_run"]:
             break
-        member = f"{first} {last}".strip()
+        member = _re.sub(r"[\s,]+$", "", f"{first} {last}".strip())
+        try:
+            filed = datetime.strptime(filed.strip(), "%m/%d/%Y").strftime("%Y-%m-%d")
+        except Exception:
+            pass                                  # already ISO or blank — keep as is
         try:
             rp = s.get(base + href, timeout=cfg["timeout"])
             if rp.status_code != 200:
@@ -1120,11 +1139,11 @@ def run_senate_efd():
 # are kept for the signal: awards (A), option exercises (M), tax withholding (F)
 # and gifts (G) are recorded in the raw count but say nothing about conviction.
 # ============================================================
-INSIDER = {"lookback_days": 180, "max_tickers": 140, "per_min": 50}
+INSIDER = {"lookback_days": 180, "max_tickers": 140, "max_filings_per_ticker": 40, "req_gap": 0.12}
 
 
 def _insider_tickers():
-    """Names worth the API budget: the book, plans, watchlist, screener leaders, smart-money names."""
+    """Names worth the request budget: the book, plans, watchlist, screener leaders, smart-money names."""
     out = []
     def add(x):
         for t in x or []:
@@ -1150,86 +1169,185 @@ def _insider_tickers():
     return out[:INSIDER["max_tickers"]]
 
 
+def _sec_ticker_cik_map():
+    """ticker -> CIK from SEC's company_tickers.json (cached a day, same file _sec_name_ticker_map uses)."""
+    import os, json, time, requests
+    cache = os.path.join(OUTPUTS_DIR, "sec_cik_map.json")
+    try:
+        if os.path.exists(cache) and (time.time() - os.path.getmtime(cache)) < 86400:
+            return json.load(open(cache))
+    except Exception:
+        pass
+    ident = os.environ.get("SEC_IDENTITY", "Phoenix Research phoenix@example.com")
+    out = {}
+    try:
+        r = requests.get("https://www.sec.gov/files/company_tickers.json", headers={"User-Agent": ident}, timeout=60)
+        r.raise_for_status()
+        data = r.json()
+        for row in (data.values() if isinstance(data, dict) else data):
+            tk = (row.get("ticker") or "").strip().upper()
+            if tk and row.get("cik_str") is not None:
+                out[tk] = int(row["cik_str"])
+        json.dump(out, open(cache, "w"))
+    except Exception as e:
+        print(f"[insider] company_tickers.json failed ({e})")
+    return out
+
+
+def _form4_parse(xml):
+    """
+    One Form 4 XML -> list of non-derivative transactions.
+    Codes: P open-market purchase, S sale, A award, M option exercise, F tax withholding, G gift.
+    Only P and S carry a side. Derivative-table rows (options) are not returned.
+    """
+    import re as _re
+    def tag(block, name):
+        m = _re.search(r"<%s>\s*(?:<value>)?\s*([^<]*?)\s*(?:</value>)?\s*</%s>" % (name, name), block, _re.S)
+        return (m.group(1) or "").strip() if m else ""
+    # "See Remarks" is common (Palantir's filings, among others): the real title
+    # sits in <remarks> as "Officer title: Chief Financial Officer and Treasurer."
+    remarks = tag(xml, "remarks")
+    mrem = _re.search(r"Officer title:\s*([^.;\n]+)", remarks, _re.I)
+    remark_title = mrem.group(1).strip() if mrem else ""
+    plan = tag(xml, "aff10b5One") in ("1", "true")      # sold under a pre-set 10b5-1 plan
+    owners = []
+    for ob in _re.findall(r"<reportingOwner>(.*?)</reportingOwner>", xml, _re.S):
+        nm = tag(ob, "rptOwnerName")
+        rel = []
+        if tag(ob, "isDirector") in ("1", "true"): rel.append("Director")
+        if tag(ob, "isOfficer") in ("1", "true"):
+            t = tag(ob, "officerTitle") or "Officer"
+            if t.lower().startswith("see remark") and remark_title: t = remark_title
+            rel.append(t)
+        if tag(ob, "isTenPercentOwner") in ("1", "true"): rel.append("10% owner")
+        owners.append((nm, ", ".join(rel)))
+    name = "; ".join(o[0] for o in owners if o[0]) or "unknown"
+    role = "; ".join(o[1] for o in owners if o[1])
+    rows = []
+    for tb in _re.findall(r"<nonDerivativeTransaction>(.*?)</nonDerivativeTransaction>", xml, _re.S):
+        code = tag(tb, "transactionCode").upper()
+        ad = tag(tb, "transactionAcquiredDisposedCode").upper()
+        try: sh = float(tag(tb, "transactionShares") or 0)
+        except Exception: sh = None
+        try: px = float(tag(tb, "transactionPricePerShare") or 0) or None
+        except Exception: px = None
+        try: after = float(tag(tb, "sharesOwnedFollowingTransaction") or 0)
+        except Exception: after = None
+        side = {"P": "buy", "S": "sell"}.get(code)
+        rows.append({"name": name, "role": role, "date": tag(tb, "transactionDate"), "code": code,
+                     "acq_disp": ad, "side": side, "shares": sh, "price": px,
+                     "value": (sh * px) if (sh and px) else None, "held_after": after,
+                     "plan_10b5_1": plan})
+    return rows
+
+
 def run_insider_transactions():
+    """SEC Form 4 (insider transactions) straight from EDGAR — no key, primary source, officer titles included."""
     import os, json, time, requests
     from datetime import datetime, timedelta
-    key = os.environ.get("FINNHUB_API_KEY") or os.environ.get("FINNHUB_TOKEN") or ""
+    ident = os.environ.get("SEC_IDENTITY", "Phoenix Research phoenix@example.com")
+    H = {"User-Agent": ident, "Accept-Encoding": "gzip, deflate"}
     path = os.path.join(OUTPUTS_DIR, "insider_trades.json")
-    if not key:
-        print("[insider] FINNHUB_API_KEY not set — insider_trades.json left as is")
-        sb_heartbeat("insider", False, "no FINNHUB_API_KEY")
-        return None
+    seen_path = os.path.join(OUTPUTS_DIR, "form4_seen.json")
     tickers = _insider_tickers()
     if not tickers:
-        print("[insider] no tickers to query")
-        return None
+        print("[insider] no tickers to query"); return None
+    ciks = _sec_ticker_cik_map()
     prev = {}
     try:
         prev = json.load(open(path)).get("tickers", {}) or {}
     except Exception:
         pass
+    try:
+        seen = set(json.load(open(seen_path)))
+    except Exception:
+        seen = set()
     since = (datetime.utcnow() - timedelta(days=INSIDER["lookback_days"])).strftime("%Y-%m-%d")
-    out, n_rows, n_fail, n_new = {}, 0, 0, 0
-    delay = 60.0 / max(1, INSIDER["per_min"])
-    for i, tk in enumerate(tickers):
+    gap = INSIDER["req_gap"]
+    out, n_filings, n_rows, n_fail, n_new, n_nocik = {}, 0, 0, 0, 0, 0
+    for tk in tickers:
+        cik = ciks.get(tk)
+        if not cik:
+            n_nocik += 1; continue
+        rows = list((prev.get(tk) or {}).get("rows") or [])
         try:
-            r = requests.get("https://finnhub.io/api/v1/stock/insider-transactions",
-                             params={"symbol": tk, "from": since, "token": key}, timeout=30)
-            if r.status_code == 429:
-                time.sleep(20); r = requests.get("https://finnhub.io/api/v1/stock/insider-transactions",
-                                                 params={"symbol": tk, "from": since, "token": key}, timeout=30)
-            if r.status_code != 200:
+            time.sleep(gap)
+            sub = requests.get(f"https://data.sec.gov/submissions/CIK{cik:010d}.json", headers=H, timeout=30)
+            if sub.status_code != 200:
                 n_fail += 1
-                if n_fail <= 3:
-                    print(f"[insider] {tk}: HTTP {r.status_code} {r.text[:80]}")
+                if n_fail <= 3: print(f"[insider] {tk}: submissions HTTP {sub.status_code}")
                 continue
-            data = (r.json() or {}).get("data") or []
+            rc = (sub.json().get("filings") or {}).get("recent") or {}
+            forms, accs, dates, docs = rc.get("form") or [], rc.get("accessionNumber") or [], rc.get("filingDate") or [], rc.get("primaryDocument") or []
         except Exception as e:
             n_fail += 1
-            if n_fail <= 3:
-                print(f"[insider] {tk}: {e}")
+            if n_fail <= 3: print(f"[insider] {tk}: {type(e).__name__}: {e}")
             continue
-        rows = []
-        for d in data:
-            code = (d.get("transactionCode") or "").upper()
-            side = {"P": "buy", "S": "sell"}.get(code)
-            chg = d.get("change"); px = d.get("transactionPrice")
-            rows.append({"name": d.get("name") or "", "date": d.get("transactionDate") or "",
-                         "filed": d.get("filingDate") or "", "code": code, "side": side,
-                         "shares": abs(chg) if isinstance(chg, (int, float)) else None,
-                         "price": px, "value": (abs(chg) * px) if isinstance(chg, (int, float)) and isinstance(px, (int, float)) else None,
-                         "held_after": d.get("share"), "derivative": bool(d.get("isDerivative"))})
-        rows.sort(key=lambda x: (x["filed"], x["date"]), reverse=True)
-        pv = {(x.get("name"), x.get("date"), x.get("code"), x.get("shares")) for x in prev.get(tk, {}).get("rows", [])}
-        for x in rows:
-            if x["side"] and (x["name"], x["date"], x["code"], x["shares"]) not in pv:
-                n_new += 1
-                _note_new_filing("SEC Form 4", x["name"], tk, x["side"], x["date"], x["filed"],
-                                 (f"${x['value']:,.0f}" if x["value"] else ""), {"shares": x["shares"]})
+        got = 0
+        for form, acc, fdate, doc in zip(forms, accs, dates, docs):
+            if form not in ("4", "4/A") or fdate < since or acc in seen:
+                continue
+            if got >= INSIDER["max_filings_per_ticker"]:
+                break
+            # primaryDocument is the styled view (xslF345X05/form4.xml); the raw XML is the same name without the xsl folder
+            raw = doc.split("/")[-1]
+            url = f"https://www.sec.gov/Archives/edgar/data/{cik}/{acc.replace('-', '')}/{raw}"
+            try:
+                time.sleep(gap)
+                fx = requests.get(url, headers=H, timeout=30)
+                if fx.status_code != 200 or "<ownershipDocument" not in fx.text:
+                    n_fail += 1; continue
+                for r in _form4_parse(fx.text):
+                    r["filed"] = fdate; r["accession"] = acc; r["amended"] = form == "4/A"
+                    r["url"] = f"https://www.sec.gov/Archives/edgar/data/{cik}/{acc.replace('-', '')}/{doc}"
+                    rows.append(r); n_rows += 1
+                    if r["side"]:
+                        n_new += 1
+                        _note_new_filing("SEC Form 4", f"{r['name']}" + (f" ({r['role']})" if r["role"] else ""),
+                                         tk, r["side"], r["date"], fdate,
+                                         (f"${r['value']:,.0f}" if r["value"] else ""), {"shares": r["shares"]})
+                seen.add(acc); got += 1; n_filings += 1
+            except Exception as e:
+                n_fail += 1
+                if n_fail <= 3: print(f"[insider] {tk} {acc}: {type(e).__name__}: {e}")
+        # de-dupe (an amendment re-lists the original's rows), keep the window, sort newest first
+        uniq = {}
+        for r in rows:
+            k = (r.get("name"), r.get("date"), r.get("code"), r.get("shares"), r.get("price"))
+            if k not in uniq or (r.get("filed") or "") > (uniq[k].get("filed") or ""):
+                uniq[k] = r
+        rows = sorted([r for r in uniq.values() if (r.get("date") or "") >= since],
+                      key=lambda x: (x.get("filed") or "", x.get("date") or ""), reverse=True)
         cut90 = (datetime.utcnow() - timedelta(days=90)).strftime("%Y-%m-%d")
-        buys = [x for x in rows if x["side"] == "buy" and x["date"] >= cut90]
-        sells = [x for x in rows if x["side"] == "sell" and x["date"] >= cut90]
-        out[tk] = {"rows": rows[:60],
+        buys = [x for x in rows if x["side"] == "buy" and (x.get("date") or "") >= cut90]
+        sells = [x for x in rows if x["side"] == "sell" and (x.get("date") or "") >= cut90]
+        out[tk] = {"rows": rows[:80],
                    "n_buy_90d": len(buys), "n_sell_90d": len(sells),
                    "buy_usd_90d": round(sum(x["value"] or 0 for x in buys)),
                    "sell_usd_90d": round(sum(x["value"] or 0 for x in sells)),
                    "buyers_90d": sorted({x["name"] for x in buys}),
+                   "officer_buys_90d": len([x for x in buys if x.get("role")]),
+                   "discretionary_sells_90d": len([x for x in sells if not x.get("plan_10b5_1")]),
                    "last_filed": rows[0]["filed"] if rows else None}
-        n_rows += len(rows)
-        time.sleep(delay)
+    try:
+        json.dump(sorted(seen), open(seen_path, "w"))
+    except Exception:
+        pass
     if not out:
-        print("[insider] nothing fetched — file untouched")
-        sb_heartbeat("insider", False, f"0 of {len(tickers)} tickers · {n_fail} failures")
+        print(f"[insider] nothing fetched · {n_nocik} without CIK · {n_fail} failures — file untouched")
+        sb_heartbeat("insider", False, f"0 of {len(tickers)} tickers · {n_nocik} no CIK · {n_fail} failures")
         return None
     write_json("insider_trades", {
-        "asof": _now(), "source": "SEC Form 4 via Finnhub /stock/insider-transactions",
-        "note": "Open-market purchases (P) and sales (S) only carry a side; awards, option "
-                "exercises, tax withholding and gifts are listed with a blank side. Filed within "
-                "two business days of the trade — the most timely of the three disclosure feeds.",
-        "lookback_days": INSIDER["lookback_days"], "ticker_count": len(out), "row_count": n_rows,
+        "asof": _now(), "source": "SEC Form 4 via EDGAR (data.sec.gov submissions + raw XML)",
+        "note": "Non-derivative transactions only. Open-market purchases (P) and sales (S) carry a side; "
+                "awards (A), option exercises (M), tax withholding (F) and gifts (G) are listed with a blank "
+                "side. Filed within two business days of the trade — the most timely of the disclosure feeds. "
+                "Role comes from the filing itself (director / officer title / 10% owner).",
+        "lookback_days": INSIDER["lookback_days"], "ticker_count": len(out), "row_count": sum(len(v["rows"]) for v in out.values()),
         "tickers": out})
-    print(f"[insider] {len(out)} tickers · {n_rows} rows · {n_new} new P/S since last run · {n_fail} failures")
-    sb_heartbeat("insider", True, f"{len(out)} tickers · {n_rows} rows · {n_new} new · {n_fail} failures")
+    msg = f"{len(out)} tickers · {n_filings} new Form 4s · {n_rows} rows · {n_new} new P/S · {n_nocik} no CIK · {n_fail} failures"
+    print(f"[insider] {msg}")
+    sb_heartbeat("insider", True, msg)
     return out
 
 
@@ -1241,83 +1359,88 @@ def run_insider_transactions():
 # github.com/tbrown034/open-cabinet) OCRs and audits them and publishes CSV/JSON.
 # Provenance is stamped on every row: the source filing is OGE's, the parse is theirs.
 # ============================================================
-EXEC_TRADES = {"download_page": "https://open-cabinet.org/download",
-               "officials": ["Donald J. Trump"],      # extend to cabinet names when wanted
+EXEC_TRADES = {"dataset": "https://open-cabinet.org/data/full-dataset.json",
+               "officials": ["trump-donald"],       # slug prefixes; add cabinet slugs when wanted
+               "all_officials": False,              # True = every official in the dataset
                "min_date": "2025-01-01"}
 
 
-def _exec_fetch_export():
-    """Find the JSON (preferred) or CSV export link on the download page and fetch it."""
-    import requests, re as _re, json, io, csv
-    H = {"User-Agent": "phoenix-smartmoney/1.1 (personal research)"}
-    pg = requests.get(EXEC_TRADES["download_page"], headers=H, timeout=60)
-    if pg.status_code != 200:
-        raise RuntimeError(f"download page HTTP {pg.status_code}")
-    links = _re.findall(r'href="([^"]+\.(?:json|csv)(?:\?[^"]*)?)"', pg.text, _re.I)
-    if not links:
-        raise RuntimeError("no .json/.csv link on the download page")
-    links.sort(key=lambda u: (not u.lower().endswith(".json"), len(u)))
-    u = links[0]
-    if u.startswith("/"):
-        u = "https://open-cabinet.org" + u
-    r = requests.get(u, headers=H, timeout=120)
+def _exec_fetch_dataset():
+    """Open Cabinet's full export: {exportedAt, officials:[{name, slug, title, agency,
+    transactions:[{ticker, resolvedTicker, type, date, amount, lateFilingFlag, sourceUrl,
+    instrumentType, verificationState, ...}]}]}. Verified against the live file 2026-09-08."""
+    import requests
+    H = {"User-Agent": "phoenix-smartmoney/1.1 (personal research)", "Accept": "application/json"}
+    r = requests.get(EXEC_TRADES["dataset"], headers=H, timeout=120)
     if r.status_code != 200:
-        raise RuntimeError(f"export {u} HTTP {r.status_code}")
-    if u.lower().split("?")[0].endswith(".json"):
-        d = r.json()
-        rows = d if isinstance(d, list) else (d.get("transactions") or d.get("trades") or d.get("data") or [])
-    else:
-        rows = list(csv.DictReader(io.StringIO(r.text)))
-    return u, rows
+        raise RuntimeError(f"dataset HTTP {r.status_code}")
+    d = r.json()
+    if not isinstance(d, dict) or "officials" not in d:
+        raise RuntimeError("dataset shape changed: no 'officials' key")
+    return d
 
 
-def _exec_norm_row(r):
-    """Map an Open Cabinet row onto the congress_trades row shape. Field names are
-    matched loosely because the export schema is theirs to change."""
-    import re as _re
-    def g(*names):
-        for n in names:
-            for k in r:
-                if k and k.lower().replace("_", "").replace(" ", "") == n:
-                    v = r[k]
-                    return v if v not in (None, "", "N/A", "null") else None
-        return None
-    name = g("official", "officialname", "filer", "name") or ""
-    tk = (g("ticker", "symbol") or "").upper().strip()
-    side_raw = (g("type", "transactiontype", "side", "action") or "").lower()
-    side = "buy" if "purch" in side_raw or side_raw == "buy" else ("sell" if "sale" in side_raw or side_raw == "sell" else None)
-    date = (g("date", "transactiondate", "tradedate") or "")[:10]
-    filed = (g("disclosed", "filingdate", "fileddate", "disclosuredate", "filed") or "")[:10]
-    amount = g("amount", "amountrange", "range", "value") or ""
-    desc = g("description", "asset", "assetname", "security") or ""
-    late = g("late", "latefiled", "islate")
-    atype = g("assettype", "type_of_asset") or ("Stock" if tk else "Other")
-    return {"member": name, "chamber": "Executive", "branch": "Executive", "ticker": tk,
-            "date": date, "reported": filed, "side": side, "amount": str(amount),
-            "asset": desc, "asset_type": atype, "late": bool(late) if late is not None else None,
-            "source": "OGE 278-T via Open Cabinet"}
+def _exec_display_name(n):
+    """'Trump, Donald J.' -> 'Donald J. Trump' so the roster reads like the House/Senate rows."""
+    if "," in (n or ""):
+        last, first = [x.strip() for x in n.split(",", 1)]
+        return f"{first} {last}".strip()
+    return (n or "").strip()
+
+
+def _exec_asset_type(t):
+    return {"common_stock": "Stock", "etf": "ETF", "mutual_fund": "Mutual Fund", "bond": "Bond",
+            "municipal_bond": "Municipal Bond", "corporate_bond": "Corporate Bond",
+            "option": "Stock Option", "private": "Private", "crypto": "Crypto"}.get(
+        (t or "").lower(), (t or "Other").replace("_", " ").title())
 
 
 def run_executive_trades():
+    """OGE Form 278-T transactions (executive branch) into congress_trades.json."""
     import os, json
     try:
-        url, raw = _exec_fetch_export()
+        d = _exec_fetch_dataset()
     except Exception as e:
-        print(f"[exec] Open Cabinet export not fetched: {e} — congress_trades.json untouched")
-        sb_heartbeat("executive", False, f"fetch failed: {e}")
+        print(f"[exec] Open Cabinet dataset not fetched: {type(e).__name__}: {e} — congress_trades.json untouched")
+        sb_heartbeat("executive", False, f"fetch failed: {type(e).__name__}: {str(e)[:160]}")
         return None
-    want = {n.lower() for n in EXEC_TRADES["officials"]}
-    rows = []
-    for r in raw:
-        n = _exec_norm_row(r)
-        if not n["member"] or n["member"].lower() not in want:
+    want = [w.lower() for w in EXEC_TRADES["officials"]]
+    rows, n_seen, n_skip = [], 0, {}
+    for off in d.get("officials") or []:
+        slug = (off.get("slug") or "").lower()
+        if not EXEC_TRADES["all_officials"] and not any(slug.startswith(w) for w in want):
             continue
-        if not n["ticker"] or not n["side"] or not n["date"] or n["date"] < EXEC_TRADES["min_date"]:
-            continue
-        rows.append(n)
-    print(f"[exec] {url}: {len(raw)} rows in export · {len(rows)} tickered {'/'.join(EXEC_TRADES['officials'])} trades")
+        member = _exec_display_name(off.get("name"))
+        title = off.get("title") or ""
+        for t in off.get("transactions") or []:
+            n_seen += 1
+            tk = (t.get("resolvedTicker") or t.get("ticker") or "").upper().strip()
+            typ = (t.get("type") or "").lower()
+            side = "buy" if typ.startswith("purch") else ("sell" if typ.startswith("sale") else None)
+            date = (t.get("date") or "")[:10]
+            if not tk:
+                n_skip["no_ticker"] = n_skip.get("no_ticker", 0) + 1; continue
+            if not side:
+                n_skip[typ or "untyped"] = n_skip.get(typ or "untyped", 0) + 1; continue
+            if not date or date < EXEC_TRADES["min_date"]:
+                n_skip["old"] = n_skip.get("old", 0) + 1; continue
+            src = t.get("sourceUrl") or ""
+            # filing date is not a field; the PDF name carries it: ...-08.12.2026-278T.pdf
+            import re as _re
+            m = _re.search(r"-(\d{2})\.(\d{2})\.(\d{4})-278", src)
+            reported = f"{m.group(3)}-{m.group(1)}-{m.group(2)}" if m else ""
+            rows.append({"member": member, "title": title, "chamber": "Executive", "ticker": tk,
+                         "date": date, "reported": reported, "side": side,
+                         "amount": t.get("amount") or "", "asset": t.get("description") or "",
+                         "asset_type": _exec_asset_type(t.get("instrumentType")),
+                         "late": bool(t.get("lateFilingFlag")),
+                         "verification": t.get("verificationState") or "",
+                         "source": "OGE 278-T via Open Cabinet", "source_url": src})
+    print(f"[exec] Open Cabinet export {d.get('exportedAt','')[:10]} · {n_seen} transactions for "
+          f"{'all officials' if EXEC_TRADES['all_officials'] else '/'.join(EXEC_TRADES['officials'])} · "
+          f"{len(rows)} tickered buy/sell rows · skipped {n_skip}")
     if not rows:
-        sb_heartbeat("executive", False, f"{len(raw)} rows, 0 usable")
+        sb_heartbeat("executive", False, f"{n_seen} rows, 0 usable · {n_skip}")
         return None
     ep = os.path.join(OUTPUTS_DIR, "congress_trades.json")
     try:
@@ -1334,17 +1457,17 @@ def run_executive_trades():
             continue
         merged.setdefault(tk, []).append(n); added += 1
         _note_new_filing("OGE 278-T", n["member"], tk, n["side"], n["date"], n["reported"], n["amount"],
-                         {"late": n.get("late")})
+                         {"late": n.get("late"), "asset_type": n.get("asset_type")})
     for tk in merged:
         merged[tk].sort(key=lambda x: x.get("date", ""), reverse=True)
     write_json("congress_trades", {
         "asof": _now(),
         "source": "House Clerk PTR (official) + Senate eFD (official) + OGE 278-T via Open Cabinet + committed history",
-        "note": cur.get("note", ""),
+        "note": cur.get("note", ""), "exec_export": d.get("exportedAt", ""),
         "ticker_count": len(merged), "trade_count": sum(len(v) for v in merged.values()),
         "tickers": merged})
     print(f"[exec] merged {added} new executive-branch trades")
-    sb_heartbeat("executive", True, f"{len(rows)} rows · merged {added}")
+    sb_heartbeat("executive", True, f"{len(rows)} rows · merged {added} · export {d.get('exportedAt','')[:10]}")
     return added
 
 
@@ -10881,8 +11004,9 @@ def run_house_ptr(year=None, max_filings=None):
             import time as _tm; _tm.sleep(3)
             z = requests.get(f"{base}/financial-pdfs/{year}FD.zip", headers=H, timeout=120)
         if z.status_code != 200:
-            print(f"[house] {year}FD.zip -> HTTP {z.status_code}")
-            sb_heartbeat("house_ptr", False, f"{year}FD.zip HTTP {z.status_code}")
+            _snip = (z.text or "")[:160].replace("\n", " ")
+            print(f"[house] {year}FD.zip -> HTTP {z.status_code} · {dict(z.headers).get('Server','')} · {_snip}")
+            sb_heartbeat("house_ptr", False, f"{year}FD.zip HTTP {z.status_code} · {_snip[:120]}")
             return None
         zf = zipfile.ZipFile(io.BytesIO(z.content))
         xml_name = next((n for n in zf.namelist() if n.lower().endswith(".xml")), None)
@@ -10892,8 +11016,8 @@ def run_house_ptr(year=None, max_filings=None):
         import xml.etree.ElementTree as ET
         root = ET.fromstring(zf.read(xml_name))
     except Exception as e:
-        print(f"[house] index fetch failed: {e}")
-        sb_heartbeat("house_ptr", False, f"index fetch failed: {e}")
+        print(f"[house] index fetch failed: {type(e).__name__}: {e}")
+        sb_heartbeat("house_ptr", False, f"index fetch failed: {type(e).__name__}: {str(e)[:160]}")
         return None
 
     filings = []
@@ -12350,7 +12474,7 @@ def run_full():
     step("senate_efd",     run_senate_efd,    optional=True)
     step("oge",            run_oge_disclosures)        # manual PDFs, if any are dropped in
     step("executive",      run_executive_trades, optional=True)   # OGE 278-T via Open Cabinet
-    step("insider",        run_insider_transactions, optional=True)   # SEC Form 4 via Finnhub
+    step("insider",        run_insider_transactions, optional=True)   # SEC Form 4 via EDGAR
     step("institutional_13f", run_institutional_13f)
 
     # --- earnings + fundamentals -------------------------------------------
