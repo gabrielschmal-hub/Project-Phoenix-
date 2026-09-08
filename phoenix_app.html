@@ -838,6 +838,16 @@
   .lc-pos .r{font-family:var(--mono);font-size:19px;font-weight:700}
   .lc-chip{font-family:var(--mono);font-size:9px;letter-spacing:.09em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line2);color:var(--inkFade)}
   .lc-chip.warn{border-color:var(--amber);color:var(--amber)}
+  .lc-pos.managed::before{background:var(--sage,#9CA889)}
+  .lc-state{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:9px 14px;margin-bottom:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);font-size:13px}
+  .lc-state .k{font-family:var(--mono);font-size:10px;color:var(--inkFade);letter-spacing:.06em;text-transform:uppercase}
+  .lc-state .v{font-weight:700;margin-right:2px} .lc-state .c{font-family:var(--mono);font-size:11px;color:var(--inkFade)}
+  .lc-state .px-stale{margin-left:4px}
+  .lc-more{margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:6px;border:1px solid var(--line2);background:transparent;color:var(--inkFade);cursor:pointer}
+  .lc-more:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+  .lc-urge{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.6;padding:8px 14px;border-top:1px solid var(--line2);background:var(--card2)}
+  .lc-ds{margin-bottom:12px}
+  .lc-ds .mcds{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:9px 14px}
   .lc-g4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;padding-left:10px}
   .lc-cell{border:1px solid var(--line);border-radius:7px;padding:6px 8px;background:var(--card)}
   .lc-cell .k{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--inkFade)}
@@ -4003,14 +4013,30 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // silence on a position is indistinguishable from an oversight.
   // Everything is computed from the same functions the Trade, Markets and Smart money pages use;
   // nothing here re-derives a number, so the pages can never disagree.
-  var LC = {gex:null, macro:null, loading:false};
+  var LC = {gex:null, macro:null, dayscore:null, loading:false, at:0, tapeOpen:false};
+  var LC_MAX_AGE_MS = 10*60*1000;        // refetch the tape if it is older than this
   var PX_LAST_PAGE=null;
 
-  function lcLoad(cb){
-    if(LC.loading) return; if(LC.gex!==null && LC.macro!==null){ cb(); return; }
+  // Account size for heat and sizing. The book is $2,000 paper; a missing field must fall
+  // back to THAT, never to a six-figure placeholder — dividing by the wrong account makes
+  // heat read 50x too low, which is the one direction a survival gauge must never be wrong in.
+  function lcAcct(t){
+    var a=+(t&&t.account_size);
+    if(a>0) return a;
+    try{ var s=+(pfAcct().startingBalance); if(s>0) return s; }catch(e){}
+    return 2000;
+  }
+  function lcCap(){ return (typeof RULES!=="undefined"&&RULES&&+RULES.maxHeatR>0)?+RULES.maxHeatR:3; }
+
+  function lcLoad(cb, force){
+    if(LC.loading) return;
+    var fresh=(LC.gex!==null && LC.macro!==null && (Date.now()-LC.at)<LC_MAX_AGE_MS);
+    if(fresh && !force){ cb(); return; }
     LC.loading=true;
-    Promise.all([getJSON("gex").catch(function(){return null;}), getJSON("macro").catch(function(){return null;})])
-      .then(function(r){ LC.gex=r[0]||{}; LC.macro=r[1]||{}; })
+    Promise.all([getJSON("gex").catch(function(){return null;}),
+                 getJSON("macro").catch(function(){return null;}),
+                 getJSON("dayscore").catch(function(){return null;})])
+      .then(function(r){ LC.gex=r[0]||{}; LC.macro=r[1]||{}; LC.dayscore=r[2]||null; LC.at=Date.now(); })
       .then(function(){ LC.loading=false; cb(); });
   }
   function lcPx(tk){ var q=(typeof PX_LIVE==="object"&&PX_LIVE)?PX_LIVE[tk]:null; return (q&&q.last!=null)?+q.last:null; }
@@ -4020,32 +4046,86 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function lcAtr(tk){                                  // ATR% from the screener row, for a suggested stop
     try{ var s=scrLookup(tk)||{}; return s.atr14_pct!=null?+s.atr14_pct:null; }catch(e){ return null; }
   }
+  function lcR(t,cur){
+    var entry=+t.entry||0, stop=+t.stop||0, ref=+(t.initial_stop||0);
+    // R is measured against the ORIGINAL risk: once the stop moves to breakeven the
+    // denominator would collapse to zero and every position would read as infinite R.
+    var risk=(entry>0&&ref>0&&entry>ref)?(entry-ref):((entry>0&&stop>0)?Math.abs(entry-stop):0);
+    return (cur!=null&&risk>0)?(cur-entry)/risk:null;
+  }
+  function lcIsManaged(t){ return !!(t&&t.managed); }
+
+  // ---- earnings inside the window: the binary event the policy says to be out before ----
+  function lcEarn(tk){
+    var d=null;
+    try{ var st=(window.PHOENIX_EARN_STATE||{})[tk]; if(typeof st==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(st)) d=st; }catch(e){}
+    if(!d){ try{ var s=scrLookup(tk)||{}; var nd=s.next_earnings||(s.earnings&&s.earnings.next_date); if(typeof nd==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(nd)) d=nd; }catch(e){} }
+    if(!d) return null;
+    var now=new Date(); now.setHours(0,0,0,0);
+    var ev=new Date(d+"T00:00:00"); if(isNaN(ev)) return null;
+    var cal=Math.round((ev-now)/86400000); if(cal<0) return null;
+    // trading days, roughly: drop weekends between now and the event
+    var td=0, c=new Date(now); while(c<ev){ c.setDate(c.getDate()+1); if(c.getDay()!==0&&c.getDay()!==6) td++; }
+    return {date:d, cal:cal, td:td};
+  }
+
+  // ---- structure to trail to: the per-ticker dealer level if we have one, else honest fallback ----
+  function lcStructure(tk, cur){
+    var g=(window.__scrGexU||{})[tk]||null, lv=(g&&g.levels)||{};
+    var cands=[];
+    if(lv.put_wall!=null) cands.push({p:+lv.put_wall, src:"put wall"});
+    if(lv.gamma_flip!=null) cands.push({p:+lv.gamma_flip, src:"gamma flip"});
+    if(lv.pin!=null) cands.push({p:+lv.pin, src:"pin"});
+    // the nearest level BELOW price: a trail sits under the market, not on top of it
+    cands=cands.filter(function(c){ return cur!=null && c.p>0 && c.p<cur; }).sort(function(a,b){ return b.p-a.p; });
+    if(cands.length) return cands[0];
+    var atr=lcAtr(tk);
+    if(atr&&cur!=null) return {p:cur*(1-2.5*atr/100), src:"2.5\u00d7ATR \u00b7 no structure on file"};
+    return null;
+  }
 
   // ---- one position, as a card with a stop/target rail ----
   function lcPosCard(t){
     var cur=lcPx(t.ticker), c=trCalc(t,cur);
     var entry=+t.entry||0, stop=+t.stop||0, tgt=+t.target||0;
-    var R=(c.rMultiple!=null)?c.rMultiple:((entry>0&&stop>0&&cur!=null)?(cur-entry)/Math.abs(entry-stop):null);
+    function cell(k,v,col,dim){ return '<div class="lc-cell"><div class="k">'+k+'</div><div class="v"'+(col?' style="color:'+col+'"':'')+(dim?' data-dim="1"':'')+'>'+v+'</div></div>'; }
+    if(lcIsManaged(t)){
+      // Managed mandate: no stop by design, outside heat, never prompted. Watch levels only.
+      var st=lcStructure(t.ticker,cur), chg=(cur!=null&&entry>0)?((cur/entry-1)*100):null;
+      return '<div class="lc-pos managed" data-tk="'+t.ticker+'">'+
+        '<div class="top"><span class="tk">'+t.ticker+'</span><span class="nm">'+((t.name||t.industry||t.sector||"")+"")+'</span>'+
+          '<span class="lc-chip">Managed</span>'+
+          '<span class="r" style="color:'+(chg==null?"var(--inkFade)":lcCol(chg))+'">'+(chg==null?"\u2014":lcPct(chg))+'</span></div>'+
+        '<div class="lc-g4">'+
+          cell("Cost", entry>0?lcN(entry):"\u2014")+
+          cell("Last", cur!=null?lcN(cur):"\u2014")+
+          cell("Watch", st?lcN(st.p):"\u2014", null, true)+
+          cell("Stop", "none by design", "var(--inkFade)")+
+        '</div><div class="lc-rrail"><div class="lc-rbar flat"></div><div class="lc-rlab"><span>Mandate position \u2014 outside heat, no stop prompts</span>'+
+          (st?'<span>watch '+st.src+'</span>':'')+'</div></div></div>';
+    }
+    var R=lcR(t,cur);
     var unsized=!(stop>0);
     var cls=unsized?"new":(R==null?"":(R>=0?"up":"dn"));
     var atr=lcAtr(t.ticker), sug=(atr&&cur!=null)?cur*(1-2.5*atr/100):null;
-    function cell(k,v,col,dim){ return '<div class="lc-cell"><div class="k">'+k+'</div><div class="v"'+(col?' style="color:'+col+'"':'')+(dim?' data-dim="1"':'')+'>'+v+'</div></div>'; }
     var rail;
     if(unsized||entry<=0){
       rail='<div class="lc-rbar flat"></div><div class="lc-rlab"><span>Unsized \u2014 no R until a stop exists</span>'+
            (sug?'<span style="color:var(--amber)">2.5\u00d7ATR \u21d2 '+lcN(sug)+'</span>':'')+'</div>';
     }else{
-      var lo=stop, hi=(tgt>0?tgt:entry+(entry-stop)*3), span=hi-lo;
+      var lo=Math.min(stop,entry), hi=(tgt>0?tgt:entry+(entry-lo)*3), span=hi-lo;
       var pos=(cur!=null&&span>0)?Math.max(0,Math.min(100,(cur-lo)/span*100)):null;
       var be=span>0?Math.max(0,Math.min(100,(entry-lo)/span*100)):null;
       rail='<div class="lc-rbar">'+(be!=null?'<span class="be" style="left:'+be.toFixed(1)+'%"></span>':'')+
            (pos!=null?'<span class="now" style="left:'+pos.toFixed(1)+'%"></span>':'')+'</div>'+
-           '<div class="lc-rlab"><span style="color:var(--red)">'+lcN(stop)+' stop</span><span>'+lcN(entry)+' entry</span>'+
+           '<div class="lc-rlab"><span style="color:var(--red)">'+lcN(stop)+' stop'+(stop>=entry?' (\u2265 entry)':'')+'</span><span>'+lcN(entry)+' entry</span>'+
            (tgt>0?'<span style="color:var(--green)">'+lcN(tgt)+' target</span>':'<span>\u2014</span>')+'</div>';
     }
+    var ev=lcEarn(t.ticker);
     return '<div class="lc-pos '+cls+'" data-tk="'+t.ticker+'">'+
       '<div class="top"><span class="tk">'+t.ticker+'</span><span class="nm">'+((t.name||t.industry||t.sector||"")+"")+'</span>'+
         (unsized?'<span class="lc-chip warn">No stop</span>':'')+
+        (ev&&ev.td<=(typeof RULES!=="undefined"&&RULES.earnDays?RULES.earnDays:14)?'<span class="lc-chip '+(ev.td<=2?"warn":"")+'">Earnings '+ev.date.slice(5)+'</span>':'')+
         '<span class="r" style="color:'+(R==null?"var(--amber)":lcCol(R))+'">'+(R==null?"\u2014":(R>=0?"+":"")+R.toFixed(2)+"R")+'</span></div>'+
       '<div class="lc-g4">'+
         cell("Entry"+(t.provisional?' <span style="color:var(--amber)">prov.</span>':''), entry>0?lcN(entry):"\u2014")+
@@ -4056,11 +4136,22 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   }
 
   // ---- the decision strip: the reason this page exists ----
-  function lcAlerts(open){
-    var out=[];
+  // Weight = cost of ignoring. The order encodes the policy: a missing stop and a binary
+  // event outrank everything; the stop being hit outranks improving it; +2R trail outranks
+  // +1R breakeven because the money you can lose at +2R is larger. Managed mandates never
+  // enter this list. A closed trade with no debrief sits near the top: the answers decay in days.
+  function lcAlerts(open, closedUndebriefed){
+    var out=[], earnHot=2, earnWarm=(typeof RULES!=="undefined"&&RULES.earnDays)?RULES.earnDays:14;
+    (closedUndebriefed||[]).forEach(function(t){
+      var R=null;
+      if(t.entry&&t.initial_stop&&t.exit_price&&t.entry>t.initial_stop) R=(t.exit_price-t.entry)/(t.entry-t.initial_stop);
+      out.push({w:98,cls:"warm",tk:t.ticker,act:"Debrief",id:t.id,
+        why:'<b>Closed '+(t.exit_date||"")+(R!=null?' at '+(R>=0?"+":"")+R.toFixed(2)+'R':'')+', no debrief yet.</b> Five questions, two minutes. The honest answers are gone in a week.'});
+    });
     open.forEach(function(t){
+      if(lcIsManaged(t)) return;
       var cur=lcPx(t.ticker), c=trCalc(t,cur), stop=+t.stop||0, entry=+t.entry||0;
-      var R=(entry>0&&stop>0&&cur!=null)?(cur-entry)/Math.abs(entry-stop):null;
+      var R=lcR(t,cur), ev=lcEarn(t.ticker);
       if(!(stop>0)){
         var atr=lcAtr(t.ticker), sug=(atr&&cur!=null)?cur*(1-2.5*atr/100):null;
         out.push({w:100,cls:"hot",tk:t.ticker,act:"Set stop",
@@ -4068,54 +4159,97 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
               (sug?' 2.5\u00d7ATR would put it at '+lcN(sug)+'.':'')});
         return;
       }
+      if(ev && ev.td<=earnHot){
+        out.push({w:95,cls:"hot",tk:t.ticker,act:"Exit before event",
+          why:'<b>Earnings '+ev.date+' \u2014 '+(ev.td===0?"today":ev.td+" trading day"+(ev.td===1?"":"s"))+' away.</b> Policy exits before binary events; the stop does not protect you through a gap.'+
+              (R!=null?' Currently '+(R>=0?"+":"")+R.toFixed(2)+'R.':'')});
+        return;
+      }
       if(c.distStop!=null && Math.abs(c.distStop)<=2){
         out.push({w:90,cls:"hot",tk:t.ticker,act:"At stop",why:'<b>'+lcPct(-Math.abs(c.distStop))+' from the stop at '+lcN(stop)+'.</b> The level was chosen in advance; this is the moment it earns its keep.'});
         return;
       }
-      if(R!=null && R>=1 && (+t.stop < +t.entry)){
-        out.push({w:70,cls:"warm",tk:t.ticker,act:"Breakeven",why:'<b>'+R.toFixed(2)+'R.</b> Policy moves the stop to entry at +1R \u2014 '+lcN(entry)+' from '+lcN(stop)+'.'});
+      if(ev && ev.td<=5){
+        out.push({w:85,cls:"warm",tk:t.ticker,act:"Event ahead",
+          why:'<b>Earnings '+ev.date+' in '+ev.td+' trading days.</b> Decide the exit now, not on the day. Into strength if it is there.'});
+        return;
+      }
+      if(R!=null && R>=2){
+        var st=lcStructure(t.ticker,cur);
+        if(st && st.p>stop){
+          out.push({w:80,cls:"warm",tk:t.ticker,act:"Trail",
+            why:'<b>'+R.toFixed(2)+'R.</b> Policy trails from +2R to structure \u2014 level is <b>'+lcN(st.p)+'</b> ('+st.src+'), stop is '+lcN(stop)+'. Then leave it alone; exit into strength, not into the trail.'});
+          return;
+        }
+        out.push({w:20,cls:"good",tk:t.ticker,act:"Hold",
+          why:'<b>'+R.toFixed(2)+'R.</b> Stop '+lcN(stop)+(st?' is already at or above structure ('+st.src+' '+lcN(st.p)+')':'')+'. Nothing to raise it to yet \u2014 leave it alone.'});
+        return;
+      }
+      if(R!=null && R>=1 && stop<entry){
+        out.push({w:70,cls:"warm",tk:t.ticker,act:"Breakeven",why:'<b>'+R.toFixed(2)+'R.</b> Policy moves the stop to entry at +1R \u2014 '+lcN(entry)+' from '+lcN(stop)+'. Then leave it alone until +2R.'});
+        return;
+      }
+      if(ev && ev.td<=earnWarm){
+        out.push({w:15,cls:"good",tk:t.ticker,act:"Hold",
+          why:(R!=null?'<b>'+(R>=0?"+":"")+R.toFixed(2)+'R.</b> ':'')+'Stop '+lcN(stop)+' is '+lcPct(c.distStop!=null?-Math.abs(c.distStop):null)+' away. Earnings '+ev.date+' \u2014 inside the '+earnWarm+'-day window, nothing due yet.'});
         return;
       }
       out.push({w:10,cls:"good",tk:t.ticker,act:"Hold",
         why:(R!=null?'<b>'+(R>=0?"+":"")+R.toFixed(2)+'R.</b> ':'')+'Stop '+lcN(stop)+' is '+lcPct(c.distStop!=null?-Math.abs(c.distStop):null)+' away. Nothing required \u2014 said so you do not go looking.'});
     });
     out.sort(function(a,b){ return b.w-a.w; });
+    var managedN=open.filter(lcIsManaged).length;
+    var urge='<div class="lc-urge">Want out of something? The first move is to raise the stop, not to sell.'+
+      (managedN?' '+managedN+' managed position'+(managedN===1?"":"s")+' held outside this list by design.':'')+'</div>';
     if(!out.length) return '<div class="lc-alerts"><div class="hd">Needs a decision<span class="n">nothing open</span></div>'+
-      '<div class="lc-al"><span class="tk">\u2014</span><span class="why">No open positions on this book.</span><span class="act">Flat</span></div></div>';
+      '<div class="lc-al"><span class="tk">\u2014</span><span class="why">No open positions on this book'+(managedN?' outside the mandate':'')+'.</span><span class="act">Flat</span></div>'+urge+'</div>';
     var need=out.filter(function(x){ return x.w>=70; }).length;
-    return '<div class="lc-alerts"><div class="hd">Needs a decision<span class="n">'+need+' of '+out.length+' positions \u00b7 sorted by cost of ignoring</span></div>'+
-      out.map(function(a){ return '<div class="lc-al '+a.cls+'" data-tk="'+a.tk+'"><span class="tk">'+a.tk+'</span><span class="why">'+a.why+'</span><span class="act">'+a.act+'</span></div>'; }).join("")+'</div>';
+    return '<div class="lc-alerts"><div class="hd">Needs a decision<span class="n">'+need+' of '+out.length+' \u00b7 sorted by cost of ignoring</span></div>'+
+      out.map(function(a){ return '<div class="lc-al '+a.cls+'" data-tk="'+a.tk+'"'+(a.id?' data-debrief="'+a.id+'"':'')+'><span class="tk">'+a.tk+'</span><span class="why">'+a.why+'</span><span class="act">'+a.act+'</span></div>'; }).join("")+urge+'</div>';
   }
 
   function lcHeat(open){
-    var used=0, unsized=0;
+    var used=0, unsized=0, managedExp=0, live=[];
     open.forEach(function(t){
-      var stop=+t.stop||0, entry=+t.entry||0, qty=+t.qty||0, acct=+(t.account_size||100000);
+      if(lcIsManaged(t)){ managedExp+=(+t.entry||0)*(+t.qty||0); return; }
+      live.push(t);
+      var stop=+t.stop||0, entry=+t.entry||0, qty=+t.qty||0, acct=lcAcct(t);
       if(!(stop>0&&entry>0&&qty>0)){ unsized++; return; }
-      used += Math.abs(entry-stop)*qty/(acct*0.01);   // 1R is 1% of the account, not the account
+      used += Math.max(0,entry-stop)*qty/(acct*0.01);   // 1R is 1% of the account, not the account; a stop above entry risks nothing
     });
-    var cap=3, pct=Math.min(100,used/cap*100);
+    var cap=lcCap(), pct=Math.min(100,used/cap*100);
     return '<div class="lc-note"><div class="lc-heat">'+
       '<span class="lbl">Open heat</span><span class="bar"><i style="width:'+pct.toFixed(0)+'%;background:'+(used>cap?"var(--red)":"var(--green)")+'"></i></span>'+
       '<span class="num">'+used.toFixed(2)+'R <span style="color:var(--inkFade);font-weight:400">/ '+cap+'R cap</span></span></div>'+
-      (unsized?'<b>'+unsized+' of '+open.length+' position'+(open.length===1?"":"s")+' carr'+(unsized===1?"ies":"y")+' no stop</b>, so they contribute nothing to heat and cannot be read in R. The cap is not the binding constraint \u2014 the missing levels are.':
-        'Every open position has a stop, so this number is the whole downside if all of them fail at once.')+'</div>';
+      (unsized?'<b>'+unsized+' of '+live.length+' position'+(live.length===1?"":"s")+' carr'+(unsized===1?"ies":"y")+' no stop</b>, so they contribute nothing to heat and cannot be read in R. The cap is not the binding constraint \u2014 the missing levels are.':
+        (used>cap?'<b>Over the cap by '+(used-cap).toFixed(2)+'R.</b> The next decision reduces heat; it does not add to it.':
+        'Every open position has a stop, so this number is the whole downside if all of them fail at once.'))+
+      (managedExp>0?' Plus $'+Math.round(managedExp).toLocaleString()+' managed \u2014 no stop, outside heat.':'')+'</div>';
   }
 
+  // ---- the tape: one line by default, the full grid on demand ----
   function lcTape(){
-    var m=LC.macro||{}, ov=(LC.gex||{}).overview||{};
-    function ti(k,v,c,col){ return '<div class="lc-ti"><div class="k">'+k+'</div><div class="v">'+v+'</div><div class="c"'+(col?' style="color:'+col+'"':'')+'>'+(c||"&nbsp;")+'</div></div>'; }
+    var m=LC.macro||{}, g=LC.gex||{}, ov=g.overview||{};
     var sp=(m.inputs||{}), spx=sp.spx!=null?sp.spx:null;
+    var reg=m.regime||null, held=((m.explain||{}).held_weeks);
+    var gsign=ov.net_gex_B!=null?(+ov.net_gex_B>=0?"positive":"negative"):null;
+    var stale=(typeof pxStaleTag==="function")?(pxStaleTag(m.asof)||pxStaleTag(g.asof)):"";
+    var line='<div class="lc-state" id="lcState">'+
+      '<span class="k">S&P</span><span class="v">'+(spx!=null?(+spx).toLocaleString():"\u2014")+'</span>'+(sp.spx_1d!=null?'<span class="c" style="color:'+lcCol(sp.spx_1d)+'">'+lcPct(sp.spx_1d)+'</span>':'')+
+      '<span class="k">VIX</span><span class="v">'+(sp.vix!=null?lcN(sp.vix,1):"\u2014")+'</span>'+
+      '<span class="k">Gamma</span><span class="v" style="color:'+(gsign==="negative"?"var(--red)":gsign?"var(--green)":"")+'">'+(gsign||"\u2014")+'</span>'+(ov.dist_to_flip_pct!=null?'<span class="c">'+lcPct(ov.dist_to_flip_pct,2)+' to flip</span>':'')+
+      '<span class="k">Regime</span><span class="v" style="color:var(--amber)">'+(reg||"\u2014")+'</span>'+(held!=null?'<span class="c">'+held+'w</span>':'')+
+      stale+
+      '<button class="lc-more" data-lc-toggle="tape">'+(LC.tapeOpen?"less":"more")+'</button></div>';
+    if(!LC.tapeOpen) return line;
+    function ti(k,v,c,col){ return '<div class="lc-ti"><div class="k">'+k+'</div><div class="v">'+v+'</div><div class="c"'+(col?' style="color:'+col+'"':'')+'>'+(c||"&nbsp;")+'</div></div>'; }
     var rows=ti("S&P 500", spx!=null?(+spx).toLocaleString():"\u2014", sp.spx_1d!=null?lcPct(sp.spx_1d):"", lcCol(sp.spx_1d))+
       ti("VIX", sp.vix!=null?lcN(sp.vix):"\u2014","")+
       ti("US 10y", sp.us10y!=null?lcN(sp.us10y)+"%":"\u2014","")+
       ti("Gold", sp.gold!=null?(+sp.gold).toLocaleString():"\u2014","")+
       ti("WTI", sp.wti!=null?lcN(sp.wti):"\u2014","")+
       ti("Dollar", sp.dxy!=null?lcN(sp.dxy):"\u2014","");
-    var reg=m.regime||null, held=((m.explain||{}).held_weeks);
-    var gsign=ov.net_gex_B!=null?(+ov.net_gex_B>=0?"positive":"negative"):null;
-    return '<div class="lc-card"><div class="hd"><span class="t">The tape</span><span class="s">\u00b7 live</span>'+
-      '<span class="r">'+(m.asof||"")+'</span></div><div class="lc-tape">'+rows+'</div>'+
+    return line+'<div class="lc-card"><div class="hd"><span class="t">The tape</span><span class="s">\u00b7 macro '+(m.asof||"")+' \u00b7 gamma '+(g.asof||"")+'</span></div><div class="lc-tape">'+rows+'</div>'+
       '<div class="bd" style="border-top:1px solid var(--line)"><div class="lc-reg">'+
         '<div class="rg"><div class="k">Engine regime</div><div class="v" style="color:var(--amber)">'+(reg||"\u2014")+'</div><div class="sub">'+(held!=null?"held "+held+" week"+(held===1?"":"s"):"")+'</div></div>'+
         '<div class="rg"><div class="k">Index gamma</div><div class="v" style="color:'+(gsign==="negative"?"var(--red)":"var(--green)")+'">'+(ov.net_gex_B!=null?(ov.net_gex_B>=0?"+":"\u2212")+"$"+Math.abs(+ov.net_gex_B).toFixed(1)+"bn":"\u2014")+'</div><div class="sub">'+(gsign?gsign+(gsign==="negative"?" \u00b7 amplifies":" \u00b7 dampens"):"")+'</div></div>'+
@@ -4124,7 +4258,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   }
 
   function lcLadder(){
-    var ov=(LC.gex||{}).overview||{}, spot=ov.spx_spot!=null?+ov.spx_spot:null;
+    var g=LC.gex||{}, ov=g.overview||{}, spot=ov.spx_spot!=null?+ov.spx_spot:null;
     if(spot==null) return "";
     var rows=[];
     function row(p,lab,cls,desc){ if(p==null) return; rows.push({p:+p,lab:lab,cls:cls,desc:desc}); }
@@ -4140,12 +4274,13 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '<span class="l '+r.cls+'">'+r.lab+'</span><span class="d">'+(isSpot?"live":lcPct(d,2))+(r.desc?" \u00b7 "+r.desc:"")+'</span></div>';
     }).join("");
     var above=(ov.flip!=null&&spot!=null)?(spot>+ov.flip):null;
+    var stale=(typeof pxStaleTag==="function")?pxStaleTag(g.asof):"";
     return '<div class="lc-card"><div class="hd"><span class="t">SPX gamma ladder</span><span class="s">\u00b7 CBOE delayed</span>'+
-      '<span class="r">'+(ov.dist_to_flip_pct!=null?lcPct(ov.dist_to_flip_pct,2)+" to flip":"")+'</span></div>'+
+      '<span class="r">'+stale+(ov.dist_to_flip_pct!=null?lcPct(ov.dist_to_flip_pct,2)+" to flip":"")+'</span></div>'+
       '<div class="bd lc-lad">'+html+'</div>'+
       (above!=null?'<div class="lc-note">Spot is <b>'+(above?"above":"below")+' the flip</b>. '+
-        (above?"The index dampens moves today; a break below turns that into amplification."
-              :"The index amplifies moves today \u2014 size for a faster tape than the VIX implies.")+'</div>':'')+'</div>';
+        (above?"Dealers dampen moves today; a break below turns that into amplification."
+              :"Dealers amplify moves today \u2014 size for a faster tape than the VIX implies.")+'</div>':'')+'</div>';
   }
 
   function lcSignals(){
@@ -4188,8 +4323,24 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       '<div class="lc-note">Filings, not positions \u2014 up to 135 days old. Context for a name you already hold, never a reason to act.</div></div>';
   }
 
+  // closed trades on this book whose exit_notes carry no "[debrief" stamp — the loop is not closed
+  function lcUndebriefed(){
+    var out=[];
+    try{
+      var cut=new Date(Date.now()-30*86400000).toISOString().slice(0,10);   // older than a month: the moment has passed
+      trByStatus("closed").forEach(function(t){
+        if(lcIsManaged(t)) return;
+        if(t.exit_date && t.exit_date<cut) return;
+        if(/\[debrief/.test(String(t.exit_notes||""))) return;
+        out.push(t);
+      });
+    }catch(e){ console.warn("lc: undebriefed",e); }
+    return out.sort(function(a,b){ return (b.exit_date||"")<(a.exit_date||"")?-1:1; });
+  }
+
   function lcRender(){
     var el=document.getElementById("lcRoot"); if(!el) return;
+    var stale=(LC.gex!==null && LC.macro!==null && (Date.now()-LC.at)>=LC_MAX_AGE_MS);
     if(LC.gex===null||LC.macro===null){
       el.innerHTML='<div class="lc-card"><div class="bd"><div class="loading">Loading the tape\u2026</div></div></div>';
       lcLoad(lcRender);
@@ -4197,24 +4348,33 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(typeof smLoad==="function" && SM.inst===null) smLoad(function(){ lcRender(); });
       return;
     }
+    if(stale) lcLoad(lcRender, true);                 // render what we have now, redraw when the refetch lands
     var open=[];
     try{ if(typeof trByStatus==="function"){ var _o=trByStatus("open"); if(Array.isArray(_o)) open=_o; } }
     catch(e){ console.warn("lc: trByStatus",e); }
+    var undeb=lcUndebriefed();
     function safe(fn,label){ try{ return fn(); }catch(e){ console.warn("lc:"+label,e);
       return '<div class="lc-card"><div class="bd"><div class="tr-empty">'+label+' unavailable.<span>'+(e.message||"")+'</span></div></div></div>'; } }
+    var ds=(LC.dayscore&&typeof pxDayScoreHTML==="function")?safe(function(){ return pxDayScoreHTML(LC.dayscore); },"Day score"):"";
+    var live=open.filter(function(t){ return !lcIsManaged(t); });
     el.innerHTML=
-      safe(function(){ return lcAlerts(open); },"Decisions")+
+      safe(function(){ return lcAlerts(open, undeb); },"Decisions")+
+      (ds?'<div class="lc-ds">'+ds+'</div>':'')+
+      safe(lcTape,"Tape")+
       '<div class="lc-body"><div class="lc-col">'+
         '<div class="lc-card"><div class="hd"><span class="t">Open positions</span><span class="s">\u00b7 live R</span>'+
-          '<span class="r">'+open.length+' open \u00b7 '+open.filter(function(t){return !(+t.stop>0);}).length+' unsized</span></div>'+
+          '<span class="r">'+live.length+' open \u00b7 '+live.filter(function(t){return !(+t.stop>0);}).length+' unsized'+(open.length-live.length?' \u00b7 '+(open.length-live.length)+' managed':'')+'</span></div>'+
           '<div class="bd">'+(open.length?open.map(lcPosCard).join(""):'<div class="tr-empty">No open positions on this book.</div>')+'</div>'+
           (open.length?lcHeat(open):'')+'</div>'+
         safe(lcSignals,"Screener")+
       '</div><div class="lc-col">'+
-        safe(lcTape,"Tape")+safe(lcLadder,"Gamma ladder")+safe(lcSmart,"Smart money")+
+        safe(lcLadder,"Gamma ladder")+safe(lcSmart,"Smart money")+
       '</div></div>';
     el.querySelectorAll("[data-tk]").forEach(function(n){ n.style.cursor="pointer";
-      n.onclick=function(e){ e.stopPropagation(); if(typeof trOpenTicker==="function") trOpenTicker(this.dataset.tk); }; });
+      n.onclick=function(e){ e.stopPropagation();
+        if(this.dataset.debrief && typeof trDebrief==="function"){ trDebrief(this.dataset.debrief); return; }
+        if(typeof trOpenTicker==="function") trOpenTicker(this.dataset.tk); }; });
+    el.querySelectorAll("[data-lc-toggle]").forEach(function(b){ b.onclick=function(e){ e.stopPropagation(); LC.tapeOpen=!LC.tapeOpen; lcRender(); }; });
   }
 
   // ================= SMART MONEY (Research -> Smart money) =================
@@ -9834,7 +9994,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     try{ if(document.getElementById("mcSince") && typeof mcSince==="function") mcSince(); }catch(e){}
     // charts: reuse the Markets renderers, never a second implementation
     try{ getJSON("gex").then(function(g){ if(typeof drawMktGex==="function") drawMktGex(g,"MC"); }).catch(function(){}); }catch(e){}
-    try{ if(typeof drawVIX==="function") drawVIX("MC"); }catch(e){}
+    try{ if(typeof drawVIX==="function"){ drawn.vixMC=false; drawVIX("MC");
+      // the tile can be laid out at zero width if the page was hidden when Plotly drew it
+      setTimeout(function(){ var v=document.getElementById("vixPlotMC"); if(v&&v.data&&window.Plotly) Plotly.Plots.resize(v); },400); } }catch(e){}
     var host=document.getElementById("mcRotRows"); if(!host) return;
     getJSON("industry").then(function(d){
       var rows=((d&&d.industries)||[]).filter(function(r){ return r.m1!=null && (r.n||0)>=3; });
@@ -12140,6 +12302,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var cur=(t.current_stop!=null)?t.current_stop:t.initial_stop;
     t.stop=(cur!=null)?cur:null;
     if(!Array.isArray(t.stop_history)) t.stop_history=[];
+    // rows saved between 27 Aug and this fix carry initial_stop but no history entry
+    if(!t.stop_history.length && t.initial_stop!=null)
+      t.stop_history.push({date:t.entry_date||t.plan_date||null,stop:t.initial_stop,note:"initial (reconstructed from initial_stop)"});
     return t;
   }
   // Strip the derived field before the file is written, or `stop` creeps back
@@ -12425,7 +12590,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var planPct=null;
     if(cur!==null&&entry>0&&target>0&&Math.abs(target-entry)>0)
       planPct=Math.min(100,Math.max(-50,(cur-entry)/(target-entry)*100));
-    var acct=+(t.account_size||100000), sugQty=null, riskAmt=null;
+    var acct=(typeof lcAcct==="function")?lcAcct(t):(+(t.account_size)||2000), sugQty=null, riskAmt=null;
     if(riskSh&&riskSh>0){ riskAmt=acct*0.01; sugQty=Math.floor(riskAmt/riskSh); }
     return {rr:rr,pnl:pnl,pnlPct:pnlPct,distStop:distStop,distTarget:distTarget,
             planPct:planPct,sugQty:sugQty,riskSh:riskSh,riskAmt:riskAmt};
@@ -13064,7 +13229,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       '<div class="tr-field"><label>Thesis \u00B7 why you\'d own it</label><textarea id="mTh">'+(pre.thesis||"")+'</textarea></div>'+
       '<div class="tr-2col">'+
         '<div class="tr-field"><label>Date added</label><input id="mDate" type="date" value="'+(pre.plan_date||today)+'"></div>'+
-        '<div class="tr-field"><label>Account size ($)</label><input id="mAcct" type="number" inputmode="numeric" value="'+(pre.account_size||100000)+'"></div>'+
+        '<div class="tr-field"><label>Account size ($)</label><input id="mAcct" type="number" inputmode="numeric" value="'+((+pre.account_size>0)?+pre.account_size:(typeof pfAcct==="function"?pfAcct().startingBalance:2000))+'"></div>'+
       '</div>'+
       (function(){
         var keys=(typeof pfCfg!=="undefined"&&pfCfg&&pfCfg.accounts)?Object.keys(pfCfg.accounts):[];
@@ -13123,8 +13288,13 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       // stop routing: first stop ever set becomes initial_stop; later changes
       // are trails — current_stop moves and the change is dated in history.
       if(_stopIn!=null && _stopIn!==rec.stop){
-        if(rec.initial_stop==null) rec.initial_stop=_stopIn;
-        else{
+        if(rec.initial_stop==null){
+          rec.initial_stop=_stopIn;
+          // the first stop is history too — without this entry the engine's
+          // validator rejects the row ("stop_history missing or empty")
+          if(!Array.isArray(rec.stop_history)) rec.stop_history=[];
+          if(!rec.stop_history.length) rec.stop_history.push({date:rec.entry_date||new Date().toISOString().slice(0,10),stop:_stopIn,note:"initial"});
+        }else{
           if(!Array.isArray(rec.stop_history)) rec.stop_history=[];
           rec.stop_history.push({date:new Date().toISOString().slice(0,10),
                                  stop:_stopIn,note:"moved"});
@@ -13262,7 +13432,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var c=trCalc(t,trPrices[t.ticker]);
     var html='<div class="tr-modal-title">Open \u2014 '+t.ticker+'</div>'+
       '<div class="tr-modal-sub">Capture your actual fill. It may differ from the plan \u2014 that difference is worth tracking.'+
-        (c.sugQty?'<br>Plan sizing suggested '+c.sugQty+' shares (1% risk on $'+(+t.account_size||100000).toLocaleString()+').':'')+'</div>'+
+        (c.sugQty?'<br>Plan sizing suggested '+c.sugQty+' shares (1% risk on $'+((typeof lcAcct==="function")?lcAcct(t):(+t.account_size||2000)).toLocaleString()+').':'')+'</div>'+
       '<div class="tr-2col">'+
         '<div class="tr-field"><label>Fill price</label><input id="mFx" type="number" step="0.01" inputmode="decimal" value="'+(t.entry||"")+'"></div>'+
         '<div class="tr-field"><label>Shares filled</label><input id="mFq" type="number" step="1" inputmode="numeric" value="'+(t.qty||c.sugQty||"")+'"></div>'+
@@ -15420,8 +15590,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   .ed-hl,.ed-hl.sm{font-size:19px!important;line-height:1.25!important}
 
   #home{max-width:100vw!important;overflow:hidden!important}
-  #home .hrow,#home .hlinks{flex-wrap:wrap!important;max-width:100%!important;row-gap:6px}
-  #home .hlinks{gap:14px!important}
+  #home .hrow{flex-wrap:wrap!important;max-width:100%!important;row-gap:6px}
+  #home .hlinks,#home .hlogin{display:none!important}
+  #home .hnav{justify-content:space-between!important;overflow:visible!important;padding:7px 7px 7px 16px!important}
+  #home .hnav .pill-ink{margin-left:auto}
 
   /* ---- shell: reclaim the 64px rail, make room for the bottom bar ---- */
   .app{padding-left:0!important}

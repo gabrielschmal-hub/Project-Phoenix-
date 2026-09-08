@@ -227,6 +227,138 @@ def write_json_guarded(name, data, validator, warnings=None):
 # renders as a confident number rather than an error.
 # ============================================================
 
+# ---- Supabase (service role) — the engine's read path into the app's tables ----
+# The app writes the trade book to Supabase (save_trade RPC, since 27 Aug 2026).
+# The engine reads outputs/trades.json. Nothing joined them, so every engine
+# consumer of the book froze at the 27 Aug seed. This pulls trade_book -> file
+# at the top of the run. One direction only: Supabase is the truth, the file is
+# a derived artifact. With no credentials it leaves the file untouched and says so.
+def _sb_env():
+    import os
+    url = (os.environ.get("SUPABASE_URL") or "").rstrip("/")
+    key = None
+    for k in ("SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SERVICE_KEY", "SUPABASE_KEY", "SUPABASE_ANON_KEY"):
+        if os.environ.get(k):
+            key = os.environ[k]; break
+    return url, key
+
+
+def _sb_get(table, params, limit=5000):
+    import requests
+    url, key = _sb_env()
+    if not (url and key):
+        return None
+    H = {"apikey": key, "Authorization": f"Bearer {key}", "Accept": "application/json"}
+    out, off = [], 0
+    while True:
+        q = dict(params); q.update({"limit": str(min(1000, limit)), "offset": str(off)})
+        r = requests.get(f"{url}/rest/v1/{table}", headers=H, params=q, timeout=60)
+        if r.status_code != 200:
+            raise RuntimeError(f"{table} HTTP {r.status_code}: {r.text[:200]}")
+        rows = r.json() or []
+        out.extend(rows)
+        if len(rows) < 1000 or len(out) >= limit:
+            break
+        off += 1000
+    return out
+
+
+def sb_heartbeat(lane, ok, note=""):
+    """
+    One row per lane in `heartbeats` (lane, ts, ok, note) — the fast lane already
+    writes here; the engine's silent-return steps now do too, so a stalled feed
+    shows up as a stale row instead of a 27-day-old asof nobody sees.
+    Best effort: never raises.
+    """
+    import requests
+    from datetime import datetime, timezone
+    url, key = _sb_env()
+    if not (url and key):
+        return False
+    H = {"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/json",
+         "Prefer": "resolution=merge-duplicates,return=minimal"}
+    body = {"lane": lane, "ts": datetime.now(timezone.utc).isoformat(), "ok": bool(ok), "note": str(note)[:400]}
+    try:
+        r = requests.post(f"{url}/rest/v1/heartbeats", headers=H, params={"on_conflict": "lane"},
+                          json=body, timeout=30)
+        if r.status_code >= 300:      # no unique(lane)? fall back to a plain insert
+            H["Prefer"] = "return=minimal"
+            r = requests.post(f"{url}/rest/v1/heartbeats", headers=H, json=body, timeout=30)
+        return r.status_code < 300
+    except Exception as e:
+        print(f"[heartbeat] {lane}: {e}")
+        return False
+
+
+def pull_trade_book():
+    """
+    Pipeline step 0: Supabase trade_book -> outputs/trades.json.
+    Row shape matches what the app persists: the jsonb body plus the columns
+    it mirrors (id, account, status, ticker). Deleted rows are dropped. Runs
+    BEFORE run_trades so the validator checks the live book, not the seed.
+    """
+    import json, os
+    from datetime import datetime, timezone
+    url, key = _sb_env()
+    path = os.path.join(OUTPUTS_DIR, "trades.json")
+    if not (url and key):
+        print("[trade_book] no SUPABASE_URL / service key in env — trades.json left as committed")
+        return None
+    try:
+        rows = _sb_get("trade_book", {"select": "id,account,status,ticker,ord,body,updated_at,updated_by,deleted",
+                                      "deleted": "eq.false", "order": "ord.asc,updated_at.asc"})
+    except Exception as e:
+        print(f"[trade_book] pull failed: {e} — trades.json left as committed")
+        sb_heartbeat("trade_book", False, f"pull failed: {e}")
+        return None
+    trades, meta = [], {}
+    for r in rows or []:
+        b = r.get("body") if isinstance(r.get("body"), dict) else {}
+        if r.get("id") == "_meta":          # schema, accounts, lessons, execution — the file's header
+            meta = dict(b)
+            continue
+        t = dict(b)
+        for k in ("id", "account", "status", "ticker"):
+            if r.get(k) is not None:
+                t[k] = r[k]
+        if not t.get("id") or not t.get("ticker"):
+            continue
+        # The app's save path (27 Aug -> 8 Sep) set initial_stop without the
+        # matching history entry; the validator rightly refuses those rows.
+        # Reconstruct it, labelled, rather than fail every downstream step.
+        if not t.get("stop_history") and t.get("initial_stop") is not None:
+            t["stop_history"] = [{"date": t.get("entry_date") or t.get("plan_date"),
+                                  "stop": t["initial_stop"],
+                                  "note": "initial (reconstructed from initial_stop by pull_trade_book)"}]
+        trades.append(t)
+    if not trades:
+        print("[trade_book] 0 rows returned — refusing to overwrite trades.json with an empty book")
+        sb_heartbeat("trade_book", False, "0 rows")
+        return None
+    prev = None
+    try:
+        prev = json.load(open(path))
+        prev = prev.get("trades") if isinstance(prev, dict) else prev
+    except Exception:
+        pass
+    out = dict(meta)                        # phoenix.trades/2 header first, so nothing that read it breaks
+    out.update({"asof": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+                "source": "supabase trade_book (read-only mirror; the app writes via save_trade)",
+                "count": len(trades), "trades": trades})
+    os.makedirs(OUTPUTS_DIR, exist_ok=True)
+    json.dump(out, open(path, "w"), indent=1, default=str)
+    import collections
+    c = collections.Counter((t.get("account"), t.get("status")) for t in trades)
+    parts = " · ".join(f"{a} {st}:{n}" for (a, st), n in sorted(c.items(), key=lambda x: (str(x[0][0]), str(x[0][1]))))
+    delta = (f", was {len(prev)}" if isinstance(prev, list) else "")
+    print(f"[trade_book] trades.json <- {len(trades)} rows{delta} · {parts}")
+    _fx = [t["id"] for t in trades if any("reconstructed" in str(h.get("note", "")) for h in (t.get("stop_history") or []))]
+    if _fx:
+        print(f"[trade_book] {len(_fx)} row(s) had no stop_history — initial entry reconstructed: {', '.join(_fx)}")
+    sb_heartbeat("trade_book", True, f"{len(trades)} rows · {parts}")
+    return out
+
+
 def _load_trades():
     """
     The trade book, from the single source of truth.
@@ -10407,6 +10539,7 @@ def run_house_ptr(year=None, max_filings=None):
         z = requests.get(f"{base}/financial-pdfs/{year}FD.zip", headers=H, timeout=120)
         if z.status_code != 200:
             print(f"[house] {year}FD.zip -> HTTP {z.status_code}")
+            sb_heartbeat("house_ptr", False, f"{year}FD.zip HTTP {z.status_code}")
             return None
         zf = zipfile.ZipFile(io.BytesIO(z.content))
         xml_name = next((n for n in zf.namelist() if n.lower().endswith(".xml")), None)
@@ -10417,6 +10550,7 @@ def run_house_ptr(year=None, max_filings=None):
         root = ET.fromstring(zf.read(xml_name))
     except Exception as e:
         print(f"[house] index fetch failed: {e}")
+        sb_heartbeat("house_ptr", False, f"index fetch failed: {e}")
         return None
 
     filings = []
@@ -10543,8 +10677,11 @@ def run_house_ptr(year=None, max_filings=None):
           f"{len(by_ticker)} tickers ({fails} fetch/parse failures)")
     print(f"[house] {_inuni} rows are in the current universe, "
           f"{n_rows - _inuni} kept for later expansion")
+    sb_heartbeat("house_ptr", True, f"{n_pdf} PDFs · {n_rows} rows · {len(by_ticker)} tickers · {fails} failures")
     if not n_rows:
         print("[house] nothing parsed - keeping existing file")
+        sb_heartbeat("house_ptr", n_pdf == 0 and len(filings) == 0,
+                     f"{len(filings)} unseen filings · {n_pdf} PDFs parsed · {fails} fetch/parse failures · 0 rows")
         return None
 
     ep = os.path.join(OUTPUTS_DIR, "congress_trades.json")
@@ -10869,9 +11006,11 @@ SMART_MONEY["legislators"] = {
 # says so instead of leaving a hole that looks like missing data.
 SMART_MONEY["executive"] = [
     {"name": "Donald J. Trump", "role": "President of the United States",
-     "disclosure": "Annual OGE Form 278e only: asset ranges, no transactions, assets held in a trust. "
-                   "No transaction feed exists from any source. Market impact comes from policy "
-                   "statements, not filings; that is a headline question, handled by the news layer."}
+     "disclosure": "Files OGE Form 278-T periodic transaction reports (executive-branch twin of a PTR) "
+                   "plus the annual 278e. The 2025 278-Ts disclosed several hundred purchases, almost all "
+                   "municipal and corporate bonds; equities sit in a trust. No structured feed exists — "
+                   "the PDFs go through the oge step (drop them in outputs/oge/). Not in congress_trades.json "
+                   "because he is not in Congress."}
 ]
 
 
@@ -11820,7 +11959,8 @@ def run_full():
         except Exception:
             pass
 
-    # --- correctness gate: cheap, and everything downstream trusts the book --
+    # --- the live book first, then the gate: everything downstream trusts it --
+    step("trade_book",     pull_trade_book)
     step("trades",         run_trades)
     step("trade_metrics",  run_trade_metrics)
     step("research",       run_research_library, optional=True)
