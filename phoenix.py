@@ -138,7 +138,10 @@ def _congress_finalize(data):
         for r in rows or []:
             d = str(r.get("date") or "")[:10]
             f = str(r.get("reported") or r.get("filed") or "")[:10]
-            if len(d) == 10 and (d > today or (len(f) == 10 and d > f)):
+            # a string compare only means anything on ISO dates: "09/02/2026" sorts
+            # before "2026-08-13" and silently dropped every Senate row on 8 Sep
+            _iso = lambda x: len(x) == 10 and x[4] == "-" and x[7] == "-"
+            if _iso(d) and (d > today or (_iso(f) and d > f)):
                 dropped += 1
                 continue
             keep.append(r)
@@ -1020,15 +1023,16 @@ def run_senate_efd():
     seen = set()
     try:
         _sv = _json.load(open(seen_path))
-        if isinstance(_sv, dict) and _sv.get("v") == 2:
+        if isinstance(_sv, dict) and _sv.get("v") == 3:
             seen = set(_sv.get("ids") or [])
         else:
-            print(f"[senate] seen-file is v1 ({len(_sv) if isinstance(_sv, list) else '?'} ids) — "
-                  "discarded: v1 marked zero-row reports as seen")
+            print("[senate] seen-file is not v3 — discarded (v1 marked zero-row reports seen; "
+                  "v2 rows carried US-format filing dates and were dropped on write)")
     except Exception:
         pass
     by_ticker, n_new, n_paper, n_parsed, n_zero = {}, 0, 0, 0, 0
     rej_total = collections.Counter()
+    rej_assets = collections.Counter()          # what the no-ticker rows actually were
     _names = _sec_name_ticker_map()
 
     def _clean(x):
@@ -1073,6 +1077,7 @@ def run_senate_efd():
                     tk = m2.group(1) if m2 else (_cusip_ticker_from_universe(t["asset"], _names) or "")
                 if not tk:
                     rej_total["no_ticker"] += 1
+                    rej_assets[(t.get("asset_type") or "?") + ": " + (t["asset"] or "")[:40]] += 1
                     continue
                 by_ticker.setdefault(tk, []).append({
                     "member": member, "chamber": "Senate", "date": t["date"],
@@ -1092,9 +1097,11 @@ def run_senate_efd():
 
     summary = (f"{n_parsed} PTRs parsed · {n_new} rows · {n_zero} zero-row · {n_paper} paper · "
                f"rejects {dict(rej_total)}")
+    if rej_assets:
+        summary += " · no-ticker sample: " + "; ".join(f"{k} x{v}" for k, v in rej_assets.most_common(4))
     print(f"[senate] {summary}")
     if n_new == 0:
-        _json.dump({"v": 2, "ids": sorted(seen)}, open(seen_path, "w"))
+        _json.dump({"v": 3, "ids": sorted(seen)}, open(seen_path, "w"))
         print("[senate] no new transactions — congress_trades.json untouched")
         sb_heartbeat("senate_efd", n_parsed == 0, summary)
         return
@@ -1126,7 +1133,7 @@ def run_senate_efd():
         "ticker_count": len(merged),
         "trade_count": sum(len(v) for v in merged.values()),
         "tickers": merged})
-    _json.dump({"v": 2, "ids": sorted(seen)}, open(seen_path, "w"))
+    _json.dump({"v": 3, "ids": sorted(seen)}, open(seen_path, "w"))
     print(f"[senate] merged {added} new Senate trades "
           f"({sum(len(v) for v in merged.values())} total on file)")
     sb_heartbeat("senate_efd", True, f"{summary} · merged {added}")
@@ -5535,8 +5542,8 @@ def run_macro_series_daily():
         for k, m in FRED_D.items():
             v = m.get(d)
             if v is None:                      # FRED skips holidays: take the latest on or before
-                prior = [dd for dd in m if dd <= d]
-                v = m[max(prior)] if prior else None
+                _onb = [dd for dd in m if dd <= d]   # (was named `prior`: it shadowed the carry-forward dict
+                v = m[max(_onb)] if _onb else None   #  and crashed the step at `prior.keys()` every run)
             if v is not None:
                 row[k] = v
         out.append(row)
@@ -11052,6 +11059,20 @@ def run_house_ptr(year=None, max_filings=None):
         seen_docs = set(json.load(open(seen_path)))
     except Exception:
         seen_docs = set()
+    # v1 seen-file marked docs seen before checking whether anything was parsed;
+    # on 8 Sep it swallowed ~140 filings (Pelosi's 21 Aug PTR among them) on a run
+    # that extracted nothing. v2 keeps only ids the file can vouch for.
+    if seen_docs and not any(str(x).startswith("v2:") for x in seen_docs):
+        _keep = {x for x in seen_docs if not (str(x).isdigit() and 20035000 < int(x) < 90000000)}
+        print(f"[house] seen-file is v1: keeping {len(_keep)} ids, re-parsing {len(seen_docs) - len(_keep)} "
+              "post-12-Aug docs that were marked seen without rows")
+        seen_docs = _keep
+    seen_docs.discard("v2:")
+    import shutil as _sh
+    if not _sh.which("pdftotext"):
+        print("[house] pdftotext is not installed on this runner — cannot parse PTR PDFs")
+        sb_heartbeat("house_ptr", False, "pdftotext missing on runner (apt-get install poppler-utils)")
+        return None
     before = len(filings)
     filings = [f for f in filings if f["doc"] not in seen_docs]
     if before != len(filings):
@@ -11068,6 +11089,8 @@ def run_house_ptr(year=None, max_filings=None):
     DATE = re.compile(r"(\d{2}/\d{2}/\d{4})")
     MONEY = re.compile(r"\$[\d,]+")
     by_ticker, n_rows, n_pdf, fails = {}, 0, 0, 0
+    parsed_docs = set()                       # only these become "seen"
+    fail_kinds = {}
 
     for f in filings:
         url = f"{base}/ptr-pdfs/{year}/{f['doc']}.pdf"
@@ -11075,16 +11098,23 @@ def run_house_ptr(year=None, max_filings=None):
             r = requests.get(url, headers=H, timeout=60)
             if r.status_code != 200:
                 fails += 1
+                fail_kinds[f"HTTP {r.status_code}"] = fail_kinds.get(f"HTTP {r.status_code}", 0) + 1
                 continue
             p = subprocess.run(["pdftotext", "-layout", "-", "-"],
                                input=r.content, capture_output=True, timeout=60)
             text = p.stdout.decode("utf-8", "ignore")
+            if p.returncode != 0 or not text.strip():
+                fails += 1
+                fail_kinds["pdftotext empty"] = fail_kinds.get("pdftotext empty", 0) + 1
+                continue
         except Exception as e:
             fails += 1
+            fail_kinds[type(e).__name__] = fail_kinds.get(type(e).__name__, 0) + 1
             if fails <= 3:
-                print(f"[house]   {f['doc']}: {e}")
+                print(f"[house]   {f['doc']}: {type(e).__name__}: {e}")
             continue
         n_pdf += 1
+        parsed_docs.add(f["doc"])
         lines = text.split("\n")
         for i, ln in enumerate(lines):
             mt = TICK.search(ln)
@@ -11144,8 +11174,8 @@ def run_house_ptr(year=None, max_filings=None):
             n_rows += 1
 
     try:
-        seen_docs.update(f["doc"] for f in filings)
-        json.dump(sorted(seen_docs), open(seen_path, "w"))
+        seen_docs.update(parsed_docs)         # fetched and text-extracted; a failed doc is retried tomorrow
+        json.dump(sorted(seen_docs | {"v2:"}), open(seen_path, "w"))
     except Exception:
         pass
     _inuni = sum(1 for v in by_ticker.values() for r in v if r.get("in_universe"))
@@ -11153,11 +11183,11 @@ def run_house_ptr(year=None, max_filings=None):
           f"{len(by_ticker)} tickers ({fails} fetch/parse failures)")
     print(f"[house] {_inuni} rows are in the current universe, "
           f"{n_rows - _inuni} kept for later expansion")
-    sb_heartbeat("house_ptr", True, f"{n_pdf} PDFs · {n_rows} rows · {len(by_ticker)} tickers · {fails} failures")
+    sb_heartbeat("house_ptr", True, f"{n_pdf} PDFs · {n_rows} rows · {len(by_ticker)} tickers · {fails} failures {fail_kinds}")
     if not n_rows:
         print("[house] nothing parsed - keeping existing file")
         sb_heartbeat("house_ptr", n_pdf == 0 and len(filings) == 0,
-                     f"{len(filings)} unseen filings · {n_pdf} PDFs parsed · {fails} fetch/parse failures · 0 rows")
+                     f"{len(filings)} unseen filings · {n_pdf} PDFs parsed · {fails} fetch/parse failures {fail_kinds} · 0 rows")
         return None
 
     ep = os.path.join(OUTPUTS_DIR, "congress_trades.json")
@@ -11548,7 +11578,8 @@ def run_congress_meta():
     # the executive entries, stated honestly
     for e in SMART_MONEY["executive"]:
         out[norm(e["name"])] = {"name": e["name"], "chamber": "Executive", "role": e["role"], "committees": [],
-                                "disclosure": e["disclosure"], "no_transaction_feed": True}
+                                "disclosure": e["disclosure"], "no_transaction_feed": False,
+                                "feed": "OGE 278-T via Open Cabinet (executive step)"}
     payload = {"asof": _dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"), "source": "unitedstates/congress-legislators (public domain)",
                "status": status, "people": len(people), "with_committees": sum(1 for v in out.values() if v.get("committees")),
                "committee_sectors": COMMITTEE_SECTORS, "members": out}
