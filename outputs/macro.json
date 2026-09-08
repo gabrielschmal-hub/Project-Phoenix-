@@ -1,5 +1,5 @@
 {
- "asof": "2026-09-08 14:37 UTC",
+ "asof": "2026-09-08 21:26 UTC",
  "regime": "POLICY_TIGHTENING",
  "confidence": 36.5,
  "confidence_note": "regime score, not a calibrated probability (A4)",
@@ -8,26 +8,26 @@
  },
  "secondary_tag": "INFLATIONARY",
  "inputs": {
-  "wti_12m": 47.86,
-  "wti_3m": 1.04,
-  "wti_vs_2yr": 27.53,
+  "wti_12m": 50.34,
+  "wti_3m": 11.04,
+  "wti_vs_2yr": 30.94,
   "cpi_yoy": 3.3,
   "cpi_chg_3m": -0.16,
-  "spx_3m": 4.54,
-  "spx_1m": -0.5,
-  "dd": -0.86,
-  "trail_dd": -0.86,
-  "spx_off_low": 0.58,
-  "fresh_high": true,
-  "us02_3m": 23.0,
-  "real_3m": 28.0,
-  "vix": 14.53,
-  "vix_3m_chg": -32.45,
-  "hy": 266.0
+  "spx_3m": 3.26,
+  "spx_1m": -1.44,
+  "dd": -1.44,
+  "trail_dd": -1.44,
+  "spx_off_low": 0.0,
+  "fresh_high": false,
+  "us02_3m": 29.0,
+  "real_3m": 33.0,
+  "vix": 15.72,
+  "vix_3m_chg": -11.09,
+  "hy": 265.0
  },
  "explain": {
   "regime": "POLICY_TIGHTENING",
-  "held_weeks": 1,
+  "held_weeks": 2,
   "since": "2026-08-31",
   "drivers": [
    {
@@ -42,28 +42,28 @@
    {
     "key": "real_3m",
     "label": "Real 10Y 3m change (bp)",
-    "value": 28.0,
+    "value": 33.0,
     "op": ">",
     "threshold": 25,
-    "clear_by": 3.0,
+    "clear_by": 8.0,
     "ok": true
    },
    {
     "key": "dd",
     "label": "Drawdown",
-    "value": -0.86,
+    "value": -1.44,
     "op": ">",
     "threshold": -12,
-    "clear_by": 11.14,
+    "clear_by": 10.56,
     "ok": true
    },
    {
     "key": "us02_3m",
     "label": "2Y yield 3m change (bp)",
-    "value": 23.0,
+    "value": 29.0,
     "op": ">",
     "threshold": 40,
-    "clear_by": -17.0,
+    "clear_by": -11.0,
     "ok": false
    }
   ],
@@ -77,16 +77,16 @@
    },
    {
     "if": "Real 10Y 3m change (bp) falls below 25",
-    "now": 28.0,
+    "now": 33.0,
     "threshold": 25,
-    "distance": 3.0,
+    "distance": 8.0,
     "then": "POLICY_TIGHTENING no longer qualifies"
    },
    {
     "if": "Drawdown falls below -12",
-    "now": -0.86,
+    "now": -1.44,
     "threshold": -12,
-    "distance": 11.14,
+    "distance": 10.56,
     "then": "POLICY_TIGHTENING no longer qualifies"
    }
   ],
