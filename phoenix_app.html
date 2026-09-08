@@ -4013,7 +4013,19 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // silence on a position is indistinguishable from an oversight.
   // Everything is computed from the same functions the Trade, Markets and Smart money pages use;
   // nothing here re-derives a number, so the pages can never disagree.
-  var LC = {gex:null, macro:null, dayscore:null, loading:false, at:0, tapeOpen:false};
+  var LC = {gex:null, macro:null, dayscore:null, ms:null, loading:false, at:0, tapeOpen:false, fx:null, fxAt:0, fxSrc:""};
+  // USD -> EUR for the P&L line. ECB reference rate via frankfurter.app (no key, CORS),
+  // cached an hour. If it cannot be fetched the cards say USD instead of guessing.
+  function lcFxLoad(cb){
+    if(LC.fx && (Date.now()-LC.fxAt)<3600000){ if(cb) cb(); return; }
+    try{
+      fetch("https://api.frankfurter.app/latest?from=USD&to=EUR").then(function(r){ return r.json(); })
+        .then(function(j){ var v=j&&j.rates&&+j.rates.EUR; if(v>0){ LC.fx=v; LC.fxAt=Date.now(); LC.fxSrc="ECB "+(j.date||""); } })
+        .catch(function(){}).then(function(){ if(cb) cb(); });
+    }catch(e){ if(cb) cb(); }
+  }
+  function lcEur(usd){ return (usd!=null && LC.fx)? usd*LC.fx : null; }
+  function lcMoney(v,cur){ if(v==null) return "\u2014"; var a=Math.abs(v); var t=a>=1000?a.toLocaleString(undefined,{maximumFractionDigits:0}):a.toFixed(a>=100?0:2); return (v<0?"\u2212":"+")+(cur==="EUR"?"\u20ac":"$")+t; }
   var LC_MAX_AGE_MS = 10*60*1000;        // refetch the tape if it is older than this
   var PX_LAST_PAGE=null;
 
@@ -4033,13 +4045,29 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var fresh=(LC.gex!==null && LC.macro!==null && (Date.now()-LC.at)<LC_MAX_AGE_MS);
     if(fresh && !force){ cb(); return; }
     LC.loading=true;
+    lcFxLoad();
     Promise.all([getJSON("gex").catch(function(){return null;}),
                  getJSON("macro").catch(function(){return null;}),
-                 getJSON("dayscore").catch(function(){return null;})])
-      .then(function(r){ LC.gex=r[0]||{}; LC.macro=r[1]||{}; LC.dayscore=r[2]||null; LC.at=Date.now(); })
+                 getJSON("dayscore").catch(function(){return null;}),
+                 getJSON("macro_series").catch(function(){return null;})])
+      .then(function(r){ LC.gex=r[0]||{}; LC.macro=r[1]||{}; LC.dayscore=r[2]||null;
+        var ser=(r[3]&&r[3].series)||[]; LC.ms=ser.length?{last:ser[ser.length-1]||{},prev:ser[ser.length-2]||{},asof:(r[3]||{}).asof}:{last:{},prev:{},asof:null};
+        LC.at=Date.now(); })
       .then(function(){ LC.loading=false; cb(); });
   }
   function lcPx(tk){ var q=(typeof PX_LIVE==="object"&&PX_LIVE)?PX_LIVE[tk]:null; return (q&&q.last!=null)?+q.last:null; }
+  // Tape quote: fresh prices_live row (SPX, VIX, US10Y, OIL, GOLD, DXY) wins, macro_series
+  // last/prev is the base. Same rule as the Markets marquee — the two must never disagree.
+  function lcQuote(msKey, liveKey, yieldish){
+    var ms=LC.ms||{last:{},prev:{}}, cur=ms.last?ms.last[msKey]:null, pr=ms.prev?ms.prev[msKey]:null, live=false;
+    var q=(typeof PX_LIVE==="object"&&PX_LIVE)?PX_LIVE[liveKey]:null;
+    if(q && q.last!=null && q.updated_at && (Date.now()-new Date(q.updated_at).getTime())<30*60*1000){
+      cur=+q.last; pr=(q.prev_close!=null?+q.prev_close:pr); live=true; }
+    if(cur==null) return {cur:null,chg:null,live:false};
+    if(yieldish){ if(cur>20) cur=cur/10; if(pr!=null&&pr>20) pr=pr/10; }
+    var chg=(pr!=null&&pr!==0)?((cur-pr)/pr*100):null;
+    return {cur:+cur,chg:chg,live:live};
+  }
   function lcN(v,d){ return v==null?"\u2014":(+v).toFixed(d==null?2:d); }
   function lcPct(v,d){ return v==null?"\u2014":((+v>=0?"+":"")+(+v).toFixed(d==null?1:d)+"%"); }
   function lcCol(v){ return v==null?"":(+v>=0?"var(--green)":"var(--red)"); }
@@ -4105,8 +4133,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           (st?'<span>watch '+st.src+'</span>':'')+'</div></div></div>';
     }
     var R=lcR(t,cur);
+    var qty=+t.qty||0, pnlUsd=(cur!=null&&entry>0&&qty>0)?(cur-entry)*qty:null, pnlEur=lcEur(pnlUsd);
+    var pnlTxt=pnlEur!=null?lcMoney(pnlEur,"EUR"):(pnlUsd!=null?lcMoney(pnlUsd,"USD"):"\u2014");
+    var pnlPct=(cur!=null&&entry>0)?((cur/entry-1)*100):null;
     var unsized=!(stop>0);
-    var cls=unsized?"new":(R==null?"":(R>=0?"up":"dn"));
+    var cls=unsized?"new":(pnlUsd==null?"":(pnlUsd>=0?"up":"dn"));
     var atr=lcAtr(t.ticker), sug=(atr&&cur!=null)?cur*(1-2.5*atr/100):null;
     var rail;
     if(unsized||entry<=0){
@@ -4118,7 +4149,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var be=span>0?Math.max(0,Math.min(100,(entry-lo)/span*100)):null;
       rail='<div class="lc-rbar">'+(be!=null?'<span class="be" style="left:'+be.toFixed(1)+'%"></span>':'')+
            (pos!=null?'<span class="now" style="left:'+pos.toFixed(1)+'%"></span>':'')+'</div>'+
-           '<div class="lc-rlab"><span style="color:var(--red)">'+lcN(stop)+' stop'+(stop>=entry?' (\u2265 entry)':'')+'</span><span>'+lcN(entry)+' entry</span>'+
+           '<div class="lc-rlab"><span style="color:var(--red)">'+lcN(stop)+' stop'+(stop>=entry?' (\u2265 entry)':'')+(c.distStop!=null?' \u00b7 '+lcPct(-Math.abs(c.distStop)):'')+'</span><span>'+lcN(entry)+' entry</span>'+
            (tgt>0?'<span style="color:var(--green)">'+lcN(tgt)+' target</span>':'<span>\u2014</span>')+'</div>';
     }
     var ev=lcEarn(t.ticker);
@@ -4126,12 +4157,13 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       '<div class="top"><span class="tk">'+t.ticker+'</span><span class="nm">'+((t.name||t.industry||t.sector||"")+"")+'</span>'+
         (unsized?'<span class="lc-chip warn">No stop</span>':'')+
         (ev&&ev.td<=(typeof RULES!=="undefined"&&RULES.earnDays?RULES.earnDays:14)?'<span class="lc-chip '+(ev.td<=2?"warn":"")+'">Earnings '+ev.date.slice(5)+'</span>':'')+
-        '<span class="r" style="color:'+(R==null?"var(--amber)":lcCol(R))+'">'+(R==null?"\u2014":(R>=0?"+":"")+R.toFixed(2)+"R")+'</span></div>'+
+        '<span class="r" style="color:'+(pnlUsd==null?"var(--inkFade)":lcCol(pnlUsd))+'" title="'+(pnlUsd!=null?lcMoney(pnlUsd,"USD")+(LC.fxSrc?' \u00b7 '+LC.fxSrc:''):'')+'">'+pnlTxt+
+          (pnlPct!=null?'<small style="font-size:11px;font-weight:400;margin-left:6px;color:var(--inkFade)">'+lcPct(pnlPct)+'</small>':'')+'</span></div>'+
       '<div class="lc-g4">'+
         cell("Entry"+(t.provisional?' <span style="color:var(--amber)">prov.</span>':''), entry>0?lcN(entry):"\u2014")+
         cell("Last", cur!=null?lcN(cur):"\u2014")+
         cell("Stop", stop>0?lcN(stop):"none", stop>0?"var(--red)":"var(--amber)")+
-        cell(stop>0?"To stop":"Suggested", stop>0?lcPct(c.distStop!=null?-Math.abs(c.distStop):null):(sug?lcN(sug):"\u2014"))+
+        cell("R", R==null?"\u2014":((R>=0?"+":"")+R.toFixed(2)+"R"), R==null?null:lcCol(R))+
       '</div><div class="lc-rrail">'+rail+'</div></div>';
   }
 
@@ -4218,7 +4250,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       used += Math.max(0,entry-stop)*qty/(acct*0.01);   // 1R is 1% of the account, not the account; a stop above entry risks nothing
     });
     var cap=lcCap(), pct=Math.min(100,used/cap*100);
-    return '<div class="lc-note"><div class="lc-heat">'+
+    var totUsd=0, nT=0;
+    live.forEach(function(t){ var cur=lcPx(t.ticker), e=+t.entry||0, q=+t.qty||0; if(cur!=null&&e>0&&q>0){ totUsd+=(cur-e)*q; nT++; } });
+    var totEur=lcEur(totUsd), totTxt=nT?(totEur!=null?lcMoney(totEur,"EUR"):lcMoney(totUsd,"USD")):null;
+    return '<div class="lc-note">'+(totTxt?'<div class="lc-heat"><span class="lbl">Open P&L</span><span class="bar" style="background:transparent"></span><span class="num" style="color:'+lcCol(totUsd)+'">'+totTxt+'</span></div>':'')+'<div class="lc-heat">'+
       '<span class="lbl">Open heat</span><span class="bar"><i style="width:'+pct.toFixed(0)+'%;background:'+(used>cap?"var(--red)":"var(--green)")+'"></i></span>'+
       '<span class="num">'+used.toFixed(2)+'R <span style="color:var(--inkFade);font-weight:400">/ '+cap+'R cap</span></span></div>'+
       (unsized?'<b>'+unsized+' of '+live.length+' position'+(live.length===1?"":"s")+' carr'+(unsized===1?"ies":"y")+' no stop</b>, so they contribute nothing to heat and cannot be read in R. The cap is not the binding constraint \u2014 the missing levels are.':
@@ -4230,26 +4265,25 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // ---- the tape: one line by default, the full grid on demand ----
   function lcTape(){
     var m=LC.macro||{}, g=LC.gex||{}, ov=g.overview||{};
-    var sp=(m.inputs||{}), spx=sp.spx!=null?sp.spx:null;
+    var spx=lcQuote("spx","SPX"), vix=lcQuote("vix","VIX"), tnx=lcQuote("tnx","US10Y",true),
+        gold=lcQuote("gold","GOLD"), wti=lcQuote("wti","OIL"), dxy=lcQuote("dxy","DXY");
     var reg=m.regime||null, held=((m.explain||{}).held_weeks);
     var gsign=ov.net_gex_B!=null?(+ov.net_gex_B>=0?"positive":"negative"):null;
-    var stale=(typeof pxStaleTag==="function")?(pxStaleTag(m.asof)||pxStaleTag(g.asof)):"";
+    var anyLive=[spx,vix,tnx,gold,wti,dxy].some(function(x){ return x.live; });
+    var stale=anyLive?"":((typeof pxStaleTag==="function")?(pxStaleTag((LC.ms||{}).asof)||pxStaleTag(m.asof)):"");
+    function v(q,d,pre,suf){ return q.cur==null?"\u2014":(pre||"")+(d===0?Math.round(q.cur).toLocaleString():(+q.cur).toFixed(d))+(suf||""); }
+    function c(q){ return q.chg==null?"":'<span class="c" style="color:'+lcCol(q.chg)+'">'+lcPct(q.chg,2)+'</span>'; }
     var line='<div class="lc-state" id="lcState">'+
-      '<span class="k">S&P</span><span class="v">'+(spx!=null?(+spx).toLocaleString():"\u2014")+'</span>'+(sp.spx_1d!=null?'<span class="c" style="color:'+lcCol(sp.spx_1d)+'">'+lcPct(sp.spx_1d)+'</span>':'')+
-      '<span class="k">VIX</span><span class="v">'+(sp.vix!=null?lcN(sp.vix,1):"\u2014")+'</span>'+
+      '<span class="k">S&P</span><span class="v">'+v(spx,0)+'</span>'+c(spx)+
+      '<span class="k">VIX</span><span class="v">'+v(vix,2)+'</span>'+c(vix)+
       '<span class="k">Gamma</span><span class="v" style="color:'+(gsign==="negative"?"var(--red)":gsign?"var(--green)":"")+'">'+(gsign||"\u2014")+'</span>'+(ov.dist_to_flip_pct!=null?'<span class="c">'+lcPct(ov.dist_to_flip_pct,2)+' to flip</span>':'')+
       '<span class="k">Regime</span><span class="v" style="color:var(--amber)">'+(reg||"\u2014")+'</span>'+(held!=null?'<span class="c">'+held+'w</span>':'')+
-      stale+
+      (anyLive?'<span class="c" style="color:var(--green)">\u25cf live</span>':stale)+
       '<button class="lc-more" data-lc-toggle="tape">'+(LC.tapeOpen?"less":"more")+'</button></div>';
     if(!LC.tapeOpen) return line;
-    function ti(k,v,c,col){ return '<div class="lc-ti"><div class="k">'+k+'</div><div class="v">'+v+'</div><div class="c"'+(col?' style="color:'+col+'"':'')+'>'+(c||"&nbsp;")+'</div></div>'; }
-    var rows=ti("S&P 500", spx!=null?(+spx).toLocaleString():"\u2014", sp.spx_1d!=null?lcPct(sp.spx_1d):"", lcCol(sp.spx_1d))+
-      ti("VIX", sp.vix!=null?lcN(sp.vix):"\u2014","")+
-      ti("US 10y", sp.us10y!=null?lcN(sp.us10y)+"%":"\u2014","")+
-      ti("Gold", sp.gold!=null?(+sp.gold).toLocaleString():"\u2014","")+
-      ti("WTI", sp.wti!=null?lcN(sp.wti):"\u2014","")+
-      ti("Dollar", sp.dxy!=null?lcN(sp.dxy):"\u2014","");
-    return line+'<div class="lc-card"><div class="hd"><span class="t">The tape</span><span class="s">\u00b7 macro '+(m.asof||"")+' \u00b7 gamma '+(g.asof||"")+'</span></div><div class="lc-tape">'+rows+'</div>'+
+    function ti(k,q,d,pre,suf){ return '<div class="lc-ti"><div class="k">'+k+(q.live?' <i style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);vertical-align:1px"></i>':'')+'</div><div class="v">'+v(q,d,pre,suf)+'</div><div class="c" style="color:'+lcCol(q.chg)+'">'+(q.chg==null?"&nbsp;":lcPct(q.chg,2))+'</div></div>'; }
+    var rows=ti("S&P 500",spx,0)+ti("VIX",vix,2)+ti("US 10y",tnx,2,"","%")+ti("Gold",gold,0,"$")+ti("WTI",wti,2,"$")+ti("Dollar",dxy,2);
+    return line+'<div class="lc-card"><div class="hd"><span class="t">The tape</span><span class="s">\u00b7 '+(anyLive?'live \u00b7 ':'')+'series '+((LC.ms||{}).asof||"")+' \u00b7 gamma '+(g.asof||"")+'</span></div><div class="lc-tape">'+rows+'</div>'+
       '<div class="bd" style="border-top:1px solid var(--line)"><div class="lc-reg">'+
         '<div class="rg"><div class="k">Engine regime</div><div class="v" style="color:var(--amber)">'+(reg||"\u2014")+'</div><div class="sub">'+(held!=null?"held "+held+" week"+(held===1?"":"s"):"")+'</div></div>'+
         '<div class="rg"><div class="k">Index gamma</div><div class="v" style="color:'+(gsign==="negative"?"var(--red)":"var(--green)")+'">'+(ov.net_gex_B!=null?(ov.net_gex_B>=0?"+":"\u2212")+"$"+Math.abs(+ov.net_gex_B).toFixed(1)+"bn":"\u2014")+'</div><div class="sub">'+(gsign?gsign+(gsign==="negative"?" \u00b7 amplifies":" \u00b7 dampens"):"")+'</div></div>'+
@@ -4349,6 +4383,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       return;
     }
     if(stale) lcLoad(lcRender, true);                 // render what we have now, redraw when the refetch lands
+    if(!LC.fx) lcFxLoad(function(){ if(LC.fx) lcRender(); });
     var open=[];
     try{ if(typeof trByStatus==="function"){ var _o=trByStatus("open"); if(Array.isArray(_o)) open=_o; } }
     catch(e){ console.warn("lc: trByStatus",e); }
@@ -4362,7 +4397,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       (ds?'<div class="lc-ds">'+ds+'</div>':'')+
       safe(lcTape,"Tape")+
       '<div class="lc-body"><div class="lc-col">'+
-        '<div class="lc-card"><div class="hd"><span class="t">Open positions</span><span class="s">\u00b7 live R</span>'+
+        '<div class="lc-card"><div class="hd"><span class="t">Open positions</span><span class="s">\u00b7 live P&L in '+(LC.fx?'\u20ac ('+LC.fxSrc+')':'$ \u00b7 EUR rate unavailable')+'</span>'+
           '<span class="r">'+live.length+' open \u00b7 '+live.filter(function(t){return !(+t.stop>0);}).length+' unsized'+(open.length-live.length?' \u00b7 '+(open.length-live.length)+' managed':'')+'</span></div>'+
           '<div class="bd">'+(open.length?open.map(lcPosCard).join(""):'<div class="tr-empty">No open positions on this book.</div>')+'</div>'+
           (open.length?lcHeat(open):'')+'</div>'+
