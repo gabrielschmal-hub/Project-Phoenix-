@@ -21,10 +21,15 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          sudo apt-get install -y -qq poppler-utils >/dev/null 2>&1 || true   # pdftotext for House PTR PDFs
       - name: Run Phoenix
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SEC_IDENTITY: "Phoenix Research gabriel@example.com"
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
             python phoenix.py --engine wire
