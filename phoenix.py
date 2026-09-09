@@ -766,6 +766,76 @@ def _signal_market_context():
     }
 
 
+def _easter(year):
+    """Anonymous Gregorian algorithm — needed only for Good Friday."""
+    import datetime
+    a = year % 19; b, c = divmod(year, 100); d, e = divmod(b, 4)
+    f = (b + 8) // 25; g = (b - f + 1) // 3
+    h = (19 * a + b - d - g + 15) % 30
+    i, k = divmod(c, 4)
+    l = (32 + 2 * e + 2 * i - h - k) % 7
+    m = (a + 11 * h + 22 * l) // 451
+    month, day = divmod(h + l - 7 * m + 114, 31)
+    return datetime.date(year, month, day + 1)
+
+
+def _nyse_holidays(year):
+    """
+    NYSE full-day closures, with the Saturday->Friday / Sunday->Monday observance rule.
+    Half-days (the 1pm closes around Thanksgiving and Christmas) are still trading
+    days and stay in.
+    """
+    import datetime
+    D = datetime.date
+    def nth_weekday(y, month, weekday, n):        # n=-1 for last
+        if n > 0:
+            d = D(y, month, 1)
+            d += datetime.timedelta((weekday - d.weekday()) % 7)
+            return d + datetime.timedelta(7 * (n - 1))
+        d = D(y, month + 1, 1) - datetime.timedelta(1) if month < 12 else D(y, 12, 31)
+        return d - datetime.timedelta((d.weekday() - weekday) % 7)
+    def observed(d):
+        if d.weekday() == 5: return d - datetime.timedelta(1)
+        if d.weekday() == 6: return d + datetime.timedelta(1)
+        return d
+    out = {
+        observed(D(year, 1, 1)),                       # New Year's Day
+        nth_weekday(year, 1, 0, 3),                    # MLK, 3rd Monday of January
+        nth_weekday(year, 2, 0, 3),                    # Washington's Birthday
+        _easter(year) - datetime.timedelta(2),         # Good Friday
+        nth_weekday(year, 5, 0, -1),                   # Memorial Day
+        observed(D(year, 6, 19)),                      # Juneteenth
+        observed(D(year, 7, 4)),                       # Independence Day
+        nth_weekday(year, 9, 0, 1),                    # Labor Day
+        nth_weekday(year, 11, 3, 4),                   # Thanksgiving, 4th Thursday
+        observed(D(year, 12, 25)),                     # Christmas
+    }
+    return out
+
+
+def is_trading_day(d=None):
+    """True when the US equity market holds a full session on date `d` (UTC date by default)."""
+    import datetime
+    if d is None:
+        d = datetime.datetime.now(datetime.timezone.utc).date()
+    if isinstance(d, str):
+        d = datetime.date.fromisoformat(d[:10])
+    if d.weekday() >= 5:
+        return False
+    return d not in _nyse_holidays(d.year)
+
+
+def last_trading_day(d=None):
+    import datetime
+    if d is None:
+        d = datetime.datetime.now(datetime.timezone.utc).date()
+    if isinstance(d, str):
+        d = datetime.date.fromisoformat(d[:10])
+    while not is_trading_day(d):
+        d -= datetime.timedelta(1)
+    return d
+
+
 def write_signal_log(v2, regime=None, spx=None, market=None):
     """
     Append today's ranked screener output to outputs/history/signals_<date>.json.
@@ -776,6 +846,18 @@ def write_signal_log(v2, regime=None, spx=None, market=None):
     from datetime import datetime, timezone
 
     day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    # A signal cohort must be dated on a day the market actually traded. The cron
+    # is Mon-Fri and does not know about holidays: on Labor Day 2026 the screener
+    # re-scored Friday's closes and wrote a 60-row cohort dated 2026-09-07, a date
+    # with no bar. Those rows can never take an entry price and would pollute any
+    # forward test. Skip the day instead.
+    if not is_trading_day(day):
+        print(f"[signals] {day} is not a trading day (weekend or NYSE holiday) — nothing logged")
+        try:
+            sb_heartbeat("signal_log", True, f"{day} not a trading day — skipped")
+        except Exception:
+            pass
+        return None
     os.makedirs(SIGNALS_DIR, exist_ok=True)
     path = os.path.join(SIGNALS_DIR, f"signals_{day}.json")
 
