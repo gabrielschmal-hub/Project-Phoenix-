@@ -1,115 +1,114 @@
 {
- "asof": "2026-09-09 06:52 UTC",
- "date": "2026-09-07",
+ "asof": "2026-09-09 06:53 UTC",
+ "date": "2026-09-08",
  "accounts": {
   "aldemar": {
-   "headline": "No session, and crude broke out anyway \u2014 the transmission this brief called broken is back",
-   "standfirst": "Monday was Labor Day and US markets did not open, so every price in the pack is Friday 4 September's carried forward and there is no tape to read. What moved was the thing the tape cannot show: Brent reached about $97 and WTI $92.27 on Monday, both six-week highs, with an average of roughly ten ships a day crossing the Strait of Hormuz (Al Jazeera) \u2014 Phoenix's own WTI still reads 91.48 because that is Friday's close. Crude feeds CPI, CPI is the gate holding this regime, and it prints on Friday. In the book, nothing changed: heat is still 3.16R against a 3.0R cap and flagged over cap, and Apple reports tomorrow with no stop on the position.",
+   "headline": "Dealer gamma flipped negative \u2014 and the heat figure in yesterday's brief was wrong",
+   "standfirst": "One real change and one correction. Net gamma went from +$36.13B to \u2212$3.98B, so dealer hedging now amplifies moves rather than damping them, with spot sitting 0.04% from the flip \u2014 on it, not near it. The correction is the book: this brief reported heat of 7.19R yesterday and called it 2.4 times the cap. That number pools both accounts and divides by one account's capital. Recomputed with the engine's own formula, your heat is 3.15R against a 3.0R cap \u2014 over it, but by a hair, and no position size or stop has changed since August. Underneath, the 2s10s curve flattened to 44bp, the yen rallied 3.87% on the week with the BoJ 97% priced to hike, and crude closed +20.56% on the month with CPI two sessions away.",
    "positions": {
-    "right": "1 tracked \u00b7 heat 3.16R / 3.0R",
-    "title": "Unchanged over the weekend, over cap, and two names still carry no stop.",
+    "right": "3 open \u00b7 heat 3.15R / 3.0R",
+    "title": "Every position has a stop for the first time. The heat number I printed yesterday was wrong.",
     "items": [
      {
       "tone": "warn",
       "tag": "BAC",
-      "html": "<b>62.68</b> \u00b7 entry 64.16 \u00b7 <b>-0.33R</b> \u00b7 stop 59.65 is <b>4.83% below</b>",
-      "when": "4 Sep mark"
+      "html": "<b>62.39</b> \u00b7 -0.46% on the day \u00b7 entry 64.16 \u00b7 <b>-0.39R</b> \u00b7 stop 59.65 is <b>4.39% below</b>",
+      "when": "8 Sep mark"
      },
      {
       "tone": "bad",
       "tag": "PLTR",
-      "html": "<b>174.33</b> \u00b7 entered ~184 on 27 Aug \u00b7 <b>-5.26% on entry</b> \u00b7 <b>no stop</b> \u00b7 not in trades.json",
-      "when": "unsized"
+      "html": "<b>170.30</b> \u00b7 -2.31% on the day \u00b7 entry 184.45 \u00b7 <b>-0.71R</b> \u00b7 stop 164.45 is <b>3.44% below</b>",
+      "when": "8 Sep mark"
      },
      {
-      "tone": "bad",
+      "tone": "warn",
       "tag": "AAPL",
-      "html": "<b>319.97</b> \u00b7 entered ~321 on 28 Aug \u00b7 <b>-0.32% on entry</b> \u00b7 <b>no stop</b> \u00b7 <b>event tomorrow</b>",
-      "when": "unsized"
+      "html": "<b>316.22</b> \u00b7 -1.17% on the day \u00b7 entry 321.96 \u00b7 <b>-0.29R</b> \u00b7 stop 301.99 is <b>4.50% below</b>",
+      "when": "8 Sep mark"
      }
     ],
-    "note": "Heat is <b>3.16R</b> against a <b>3.0R</b> cap and the pack flags it <b>over cap</b>, unchanged from Friday because nothing traded. That single number is why the screener section ends in \"not actionable\" and will keep doing so."
+    "note": "<b>PLTR and AAPL are in trades.json with stops on both accounts.</b> After eight consecutive briefs naming them, the open item is closed: the pack counts <b>0 unsized</b> and it is now true. Gabriel's PLTR is 184.67 stopped at 164.62 and AAPL 321.97 at 301.26; Aldemar's are 184.45 at 164.45 and 321.96 at 301.99."
    },
    "themes": [],
    "world": {
     "kicker": "THE WORLD",
     "right": "3 items",
-    "title": "The tanker war became an oil shock while the market was shut.",
+    "title": "Oil ran at $100, software repriced on OpenAI, and Apple presents today.",
     "items": [
      {
       "tone": "",
       "tag": "OIL",
-      "html": "<b>Brent reached about $97 and WTI $92.27 on Monday, both six-week highs</b> \u2014 Brent up roughly 9% in five days and 19% on the month. Kpler data has an average of about 10 commodity ships a day crossing the strait over the preceding ten days, through a chokepoint that carries roughly a fifth of world oil in peacetime. One analyst quoted describes markets \"pricing in longer disruptions\". US diesel has set a record at $5.85 a gallon.",
-      "when": "Al Jazeera \u00b7 6\u20137 Sep"
+      "html": "<b>Brent settled at $97.92, up about 1%, after trading close to $100 \u2014 the highest since late July; WTI closed near $93.03</b>. Houthi forces struck multiple Saudi energy facilities including the 400,000 barrel-a-day Jazan refinery, saying it was a response to the siege of Sana'a, and Saudi Arabia said operations at several sites were halted. Iran's Mehr agency reported explosions on Kharg Island, its main export hub, just before the settle. Goldman Sachs says markets are increasingly pricing a prolonged conflict.",
+      "when": "Rigzone \u00b7 8 Sep"
      },
      {
       "tone": "",
-      "tag": "WAR",
-      "html": "<b>The US struck three Iranian oil tankers, one near Kharg Island and one near Jask; Iran fired ballistic missiles at a US carrier and destroyer, then claimed three tankers and three US-linked vessels of its own.</b> Saudi Aramco's Jizan refinery was hit for the second time in a month. Al Jazeera reports vessel counts of 6, 11 and 5 on consecutive days against a US Treasury claim of 17 million barrels a day transiting, which it could not verify. The quoted analyst view is that \"the only option is to escalate\".",
-      "when": "Al Jazeera \u00b7 5\u20136 Sep"
+      "tag": "PLTR",
+      "html": "<b>Enterprise software repriced on competition again: ServiceNow fell about 5%, Salesforce and Intuit about 4%, on concern that OpenAI's newest model competes with specialised software</b> (<i>Alain Guillot</i>). That is the second competitive shock to the software complex in a week, after Alphabet's government-only Gemini release took 5.81% out of Palantir on 2 September. The position is 7.7% under water with its stop <b>3.44% away</b>, and the sector keeps finding new reasons to derate.",
+      "when": "Alain Guillot \u00b7 8 Sep"
      },
      {
       "tone": "",
       "tag": "AAPL",
-      "html": "<b>Apple's event is tomorrow: an iPhone Ultra above $2,000 with a 5.5-inch cover display opening to 7.8 inches, Touch ID rather than Face ID, and two rear cameras with no telephoto</b>, alongside the iPhone 18 Pro, a HomePod refresh and AirPods with cameras. It lands four days after reports the foldable is being built at low volumes and that two MacBooks were cancelled. The position is unhedged into it.",
-      "when": "TechCrunch \u00b7 7 Sep"
+      "html": "<b>Apple's product event is today</b>, with an iPhone Ultra above $2,000 the expected headline (<i>TechCrunch</i>). The stock fell 1.17% on Tuesday into it. Unlike every previous brief, the position now has a defined stop \u2014 301.26 for Gabriel, 301.99 for Aldemar, both about 4.7% below Tuesday's close \u2014 so the event is an event rather than an open-ended exposure.",
+      "when": "TechCrunch \u00b7 9 Sep"
      }
     ],
-    "note": "The first two items are the same story and it is the one that matters here. This brief has argued since 2 September that the chain from the strait to the Fed was broken because crude kept refusing to react to headlines. Over a weekend with no market open, it reacted \u2014 not to a headline but to traffic collapsing to single digits. Crude feeds CPI, CPI is the gate holding the regime, and CPI prints on Friday."
+    "note": "The first two are the same trade seen twice. Crude at $98 is what keeps CPI above the gate; a software complex derating on competition is what makes the largest loss in this book worse. Neither is a headline about Iran or about Palantir specifically \u2014 both are sector-level repricings that happen to land on positions you hold."
    },
-   "ondeck": "Apple's product event is tomorrow, Wednesday 9 September; August CPI lands Friday 11 September at 08:30 ET and is the regime's tightest gate; the FOMC meets 15\u201316 September; triple witching is 18 September.",
+   "ondeck": "Apple's product event is today, Wednesday 9 September; August CPI lands Friday 11 September at 08:30 ET and is the regime's tightest gate; the Bank of Japan meets next week with a hike 97%% priced; the FOMC meets 15\u201316 September; triple witching is 18 September.",
    "recap": {
     "kicker": "IN FIVE MINUTES",
     "right": "3 things",
-    "title": "No session. Crude broke out anyway. Apple prints tomorrow.",
+    "title": "Gamma flipped. Every position has a stop. Yesterday's heat number was wrong: 3.15R, not 7.19R.",
     "items": [
      {
       "tone": "bad",
       "tag": "1",
-      "html": "<b>Crude broke out over the long weekend</b> \u2014 Brent near $97 and WTI $92.27, both six-week highs, with Kpler counting an average of about 10 ships a day through the strait against a fifth of world supply in peacetime (<i>Al Jazeera, 7 Sep</i>). Phoenix's own WTI still reads <b>91.48</b>, Friday's close, because there was no US session. Crude is the mechanism that moves the CPI gate, and that gate is what holds the regime.",
-      "when": "6-week high"
-     },
-     {
-      "tone": "warn",
-      "tag": "2",
-      "html": "<b>Heat is unchanged at 3.16R against a 3.0R cap and still flagged over cap.</b> Nothing closed, no stop moved, and no screener name is actionable until it is back under.",
-      "when": "over cap"
+      "html": "<b>Net gamma flipped negative</b> \u2014 <b>\u2212$3.98B</b> from +$36.13B on Monday, and the pack's own diff fired it. Dealer hedging now amplifies moves instead of damping them, and spot sits <b>0.04%</b> from the flip, which is to say on it. This is the invalidation condition set on 4 September, and it has been met two days before CPI.",
+      "when": "condition met"
      },
      {
       "tone": "bad",
+      "tag": "2",
+      "html": "<b>The pack's heat number is wrong and I printed it.</b> It reports <b>7.19R</b>; that is both accounts' risk added together and divided by one account's capital. Your heat is <b>3.15R</b> against a 3.0R cap \u2014 over it, but by a hair rather than the 2.4\u00d7 I wrote yesterday morning.",
+      "when": "corrected"
+     },
+     {
+      "tone": "warn",
       "tag": "3",
-      "html": "<b>AAPL</b>'s event is tomorrow \u2014 an iPhone Ultra above $2,000 is the expected headline (<i>TechCrunch, 7 Sep</i>) \u2014 and the position still has <b>no stop</b> and is still not in trades.json, four sessions after this brief first said so.",
-      "when": "8 sessions",
-      "ticker": "AAPL"
+      "html": "<b>The yen is snapping, not drifting</b> \u2014 USDJPY <b>153.93</b>, <b>-3.87% on the week</b>. Phoenix started fetching it this run, so it is no longer a blind spot. The BoJ is 97% priced for a hike next week against 52% a month ago, on a record \u00a5360tn of cross-border yen borrowing (<i>Reuters via Yahoo, 8 Sep</i>).",
+      "when": "new signal"
      }
     ],
     "note": null
    },
    "stance": {
     "kicker": "THE STANCE",
-    "right": "held 1 week \u00b7 since 2026-08-31",
-    "title": "Unchanged, and the weekend made it easier to hold rather than harder.",
+    "right": "held 2 weeks \u00b7 since 2026-08-31",
+    "title": "The regime call holds. The dampening read does not \u2014 I am withdrawing it.",
     "items": [],
-    "note": "Phoenix has been in <b>Policy Tightening</b> since <b>2026-08-31</b> \u2014 one week. None of the three invalidation conditions set on 4 September were met: CPI does not print until Friday, heat is still 3.16R, and net gamma is still positive. The stance stands: <b>hold the regime call, add no risk while heat is over cap.</b>"
+    "note": "Phoenix has been in <b>Policy Tightening</b> for <b>two weeks</b>, and nothing in today's pack argues against it: three of four gates hold and crude is up <b>+20.56% on the month</b> into a CPI print on Friday. The regime stance is unchanged."
    },
    "markets": {
     "kicker": "THE MARKET",
-    "right": "no session \u00b7 positive gamma",
-    "title": "Markets were closed. Every price here is Friday's, and the gamma cushion has halved.",
+    "right": "negative gamma \u00b7 on the flip",
+    "title": "The index is sitting exactly on the gamma boundary, and it crossed to the wrong side.",
     "items": [],
-    "note": "<b>Monday 7 September was Labor Day and US markets did not open</b>, so there is no tape to read and no new close to report. The pack carries Friday's: SPX <b>7,718.60</b>, <b>-0.38%</b> on that day, <b>+1.67%</b> above the 50-day and <b>+8.08%</b> above the 200-day, VIX <b>14.53</b>."
+    "note": "SPX <b>7,673.52</b>, <b>-0.58%</b> on the day, <b>+0.99%</b> above the 50-day and <b>+7.37%</b> above the 200-day \u2014 the 50-day cushion has more than halved from 1.67% on Friday. VIX <b>15.72</b>, up <b>+8.19%</b> on the day."
    },
    "macro": {
     "kicker": "THE MACRO",
-    "right": "rates \u00b7 dollar \u00b7 credit \u00b7 commodities",
-    "title": "Nominal yields up, real yields down: this is an inflation repricing, not a Fed repricing.",
+    "right": "rates \u00b7 yen \u00b7 credit \u00b7 crude",
+    "title": "The curve flattened, the yen is unwinding a record carry trade, and crude is up a fifth in a month.",
     "items": [],
-    "note": "Start with rates, because everything else hangs off them. The ten-year is <b>4.78%</b>, +2bp on the day, <b>+6bp</b> on the week and <b>+11bp</b> on the month. The two-year \u2014 the policy path \u2014 is <b>4.23%</b>, flat on the day, <b>+3bp</b> on the week and <b>-3bp</b> on the month. The 2s10s curve is <b>55bp</b> and has <b>steepened 14bp</b> over the month. The real ten-year is <b>2.36%</b>, <b>-3bp</b> on the week. Nominal up, real down, two-year barely moving: the market is repricing inflation and term premium out along the curve, not the Fed's next move. That distinction is the whole section, and it is why a hot payroll print moved the long end and left the front end alone."
+    "note": "The ten-year is <b>4.81%</b>, +2bp on the day, <b>+5bp</b> on the week, <b>+15bp</b> on the month. The two-year is <b>4.37%</b>. The 2s10s curve is <b>44bp</b> and has <b>flattened 3bp</b> over the month \u2014 the opposite of last week, when it was 55bp and steepening. The real ten-year is <b>2.43%</b>, -1bp on the week. A flattening curve with the front end higher is the market putting the Fed back in play, which is a different message from the one this section carried on Monday."
    },
    "smart_money": {
     "kicker": "SMART MONEY",
-    "right": "13F 2026-06-30 \u00b7 PTRs to 2026-08-12",
-    "title": "The two largest concentrated buyers in the file are both long a name you own.",
+    "right": "13F 2026-06-30 \u00b7 PTRs to 2026-09-05",
+    "title": "The Congress feed came back to life; the sector view is still missing.",
     "items": [
      {
       "tone": "good",
@@ -138,90 +137,102 @@
       "html": "<b>DVA</b> \u2014 Berkshire Hathaway (Buffett), $6.4B",
       "when": "2026-06-30",
       "ticker": "DVA"
-     },
-     {
-      "tone": "good",
-      "tag": "ADD",
-      "html": "<b>SPGI</b> \u2014 TCI Fund (Hohn), $5.7B",
-      "when": "2026-06-30",
-      "ticker": "SPGI"
      }
     ],
-    "note": "<b>Berkshire added $37.8B of GOOGL and TCI added $4.4B</b> in the quarter to 2026-06-30. That is the only overlap between positioning and the book in this pack, and it is a large one."
+    "note": "<b>A correction.</b> This brief has said for three runs that the Congress feed had been quiet since 12 August. It is not: the newest filing is <b>2026-09-05</b> \u2014 David J. Taylor, a sell in AMGN \u2014 and provenance now carries a source breakdown showing <b>47 House Clerk rows in the last 30 days</b> and 4 from the Senate. What is genuinely quiet is one source, OGE 278-T, which the pack itself now flags. The engine fixed this between packs and I should have re-read it rather than repeating the old line."
    },
    "screener": {
     "kicker": "THE SCREENER",
-    "right": "700 candidates \u00b7 INSUFFICIENT",
-    "title": "Three refiners near the top of the list on the weekend crude broke out.",
+    "right": "560 candidates \u00b7 INSUFFICIENT",
+    "title": "The list turned commodity-heavy in the same week crude went to $98.",
     "items": [
-     {
-      "tone": "good",
-      "tag": "DLO",
-      "html": "<b>Packaged software</b> \u00b7 score 76 \u00b7 stop 8.20% \u00b7 12 days on list",
-      "when": "profitable"
-     },
      {
       "tone": "warn",
       "tag": "DK",
-      "html": "<b>Oil refining/Marketing</b> \u00b7 score 71 \u00b7 stop 15.43% \u00b7 27 days on list",
+      "html": "<b>Oil refining/Marketing</b> \u00b7 score 73 \u00b7 stop 15.25% \u00b7 28 days on list",
       "when": "marginal"
      },
      {
       "tone": "good",
-      "tag": "CXW",
-      "html": "<b>Miscellaneous commercial services</b> \u00b7 score 70 \u00b7 stop 9.12% \u00b7 29 days on list",
+      "tag": "DLO",
+      "html": "<b>Packaged software</b> \u00b7 score 72 \u00b7 stop 8.85% \u00b7 13 days on list",
       "when": "profitable"
      },
      {
       "tone": "warn",
-      "tag": "CLMT",
-      "html": "<b>Oil refining/Marketing</b> \u00b7 score 69 \u00b7 stop 11.38% \u00b7 28 days on list",
-      "when": "marginal"
+      "tag": "OKTA",
+      "html": "<b>Packaged software</b> \u00b7 score 71 \u00b7 stop 14.70% \u00b7 21 days on list",
+      "when": "profitable"
+     },
+     {
+      "tone": "warn",
+      "tag": "AYA",
+      "html": "<b>Precious metals</b> \u00b7 score 70 \u00b7 stop 15.00% \u00b7 18 days on list",
+      "when": "profitable"
      },
      {
       "tone": "warn",
       "tag": "EA",
-      "html": "<b>Packaged software</b> \u00b7 score 69 \u00b7 stop 0.33% \u00b7 20 days on list",
+      "html": "<b>Packaged software</b> \u00b7 score 70 \u00b7 stop 0.33% \u00b7 21 days on list",
       "when": "profitable"
      }
     ],
-    "note": "Workable stop widths on a 2.5\u00d7ATR basis: <b>DLO</b> at 8.20%, <b>GNK</b> at 8.38% and <b>CXW</b> at 9.12%. <b>EA</b> scores 69 and breaks out, and its stop is <b>0.33%</b> \u2014 that is inside the noise, not a stop, and the name is unusable at that width whatever the setup. The three refiners are the opposite problem: <b>DK</b> 15.43%, <b>PBF</b> 13.70%, <b>CLMT</b> 11.38% \u2014 honest widths for their volatility and far too wide to size against a cap you are already through."
+    "note": "Five names are new since Monday \u2014 <b>OKTA, AYA, PBR, CF, PHVS</b> \u2014 and the candidate count fell from 700 to <b>560</b>. Only two carry a workable 2.5\u00d7ATR stop: <b>PBR</b> at 8.18% and <b>DLO</b> at 8.85%. <b>EA</b> is unchanged and still unusable at <b>0.33%</b>, which is inside its own noise. <b>DK</b> 15.25%, <b>AYA</b> 15.00%, <b>OKTA</b> 14.70% and <b>PHVS</b> 12.78% are honest widths for their volatility and unsizeable against this book."
    },
    "changed": {
     "kicker": "WHAT CHANGED",
-    "right": "0 computed changes",
-    "title": "Nothing material changed in the pack, and one of my conditions was written too narrowly.",
-    "items": [],
-    "note": "The diff runs against the <b>2026-09-05</b> pack \u2014 there was no Sunday build \u2014 and returns <b>no changes</b>. No regime flip, no gamma sign flip, no sector flow reversal, no heat move, nothing closed and no new top setup. Nothing material changed, which on a holiday is what it should say. The one movement worth naming falls below its threshold: the distance to the gamma flip went from \u22120.92% to <b>-0.36%</b> across the two packs."
+    "right": "3 computed changes",
+    "title": "Three material changes, and the one I flagged as a bug turns out to have been my error.",
+    "items": [
+     {
+      "tone": "bad",
+      "tag": "GEX",
+      "html": "<b>index gamma</b>: positive \u2192 <b>negative</b>. dealers switch between dampening and amplifying moves",
+      "when": "vs 2026-09-07"
+     },
+     {
+      "tone": "bad",
+      "tag": "PORTFOLIO",
+      "html": "<b>open heat</b>: 3.16 \u2192 <b>7.19</b>. committed risk moved materially",
+      "when": "vs 2026-09-07"
+     },
+     {
+      "tone": "",
+      "tag": "SCREENER",
+      "html": "<b>new in the top setups</b>: \u2014 \u2192 <b>OKTA, AYA, PBR, CF, PHVS</b>. names the engine ranked highest that were not there yesterday",
+      "when": "vs 2026-09-07"
+     }
+    ],
+    "note": "The gamma flip is the consequential one: for two weeks the brief has argued dealer hedging would dampen moves, and from today it does the opposite. <b>The heat move is not a change in risk at all</b> \u2014 nothing was bought, four rows became visible to a calculation that pools both accounts against one account's capital, and the resulting 7.19R is an artefact. Your heat is 3.15R. The five new screener names are a commodity tilt, not a signal."
    },
    "invalidation": {
     "kicker": "WHAT WOULD CHANGE THIS",
     "right": "3 conditions",
-    "title": "Two of these resolve by Friday.",
+    "title": "All three resolve inside a week.",
     "items": [
      {
       "tone": "",
       "tag": "1",
-      "html": "<b>August CPI on Friday 11 September prints at or below 3.0% year over year.</b> The gate's cushion falls from 0.8 to 0.5 or less, and with the real ten-year gate clearing by only 3bp the regime stops being comfortable and starts being arithmetic. Checkable Friday 08:30 ET.",
-      "when": "3 days"
+      "html": "<b>August CPI on Friday prints at or below 3.0% year over year.</b> The gate's cushion falls from 0.8 to 0.5 or less and the regime call goes from comfortable to arithmetic. With crude up 20.6% on the month the risk is arguably the other way, and a hot print above 3.5% would make the 16 September hike close to settled.",
+      "when": "2 days"
      },
      {
       "tone": "",
       "tag": "2",
-      "html": "<b>The real ten-year's three-month change falls below 25bp.</b> It is at 28bp and clears by <b>3bp</b> \u2014 the nearest gate to flipping, and by Phoenix's own rule POLICY_TIGHTENING no longer qualifies if it goes. Three basis points is one soft inflation print.",
-      "when": "watch"
+      "html": "<b>The Bank of Japan hikes next week and USDJPY breaks below 150.</b> It is at 153.93 and 97% priced. A disorderly carry unwind on a record \u00a5360tn of borrowing is the one scenario that damages this book without any position's thesis being wrong \u2014 and with gamma negative, the index would amplify rather than absorb it.",
+      "when": "next week"
      },
      {
       "tone": "",
       "tag": "3",
-      "html": "<b>Heat returns to 3.00R or below.</b> A close, a raised stop, or PLTR and AAPL entered into trades.json with stops so the number is computed on the real book. Until then no screener name is actionable and this brief will keep saying so.",
-      "when": "any run"
+      "html": "<b>Heat returns below 3.0R.</b> You are at <b>3.15R</b> on the corrected per-account figure \u2014 over by 0.15R, which is roughly one position trimmed or one stop raised, not a liquidation. The tightest stop in this account is 3.44% from the price, and in negative gamma that distance does more work than usual.",
+      "when": "any session"
      }
     ],
     "note": null
    },
-   "date": "2026-09-07",
-   "file": "wire/phoenix_wire_aldemar_2026-09-07.html",
+   "date": "2026-09-08",
+   "file": "wire/phoenix_wire_aldemar_2026-09-08.html",
    "parser": "html-parse",
    "weekly": {
     "headline": "A week that changed everything and moved nothing \u2014 the S&P finished nine basis points higher",
@@ -258,119 +269,118 @@
    }
   },
   "gabriel": {
-   "headline": "No session, and crude broke out anyway \u2014 the transmission this brief called broken is back",
-   "standfirst": "Monday was Labor Day and US markets did not open, so every price in the pack is Friday 4 September's carried forward and there is no tape to read. What moved was the thing the tape cannot show: Brent reached about $97 and WTI $92.27 on Monday, both six-week highs, with an average of roughly ten ships a day crossing the Strait of Hormuz (Al Jazeera) \u2014 Phoenix's own WTI still reads 91.48 because that is Friday's close. Crude feeds CPI, CPI is the gate holding this regime, and it prints on Friday. In the book, nothing changed: heat is still 3.16R against a 3.0R cap and flagged over cap, and Apple reports tomorrow with no stop on the position.",
+   "headline": "Dealer gamma flipped negative \u2014 and the heat figure in yesterday's brief was wrong",
+   "standfirst": "One real change and one correction. Net gamma went from +$36.13B to \u2212$3.98B, so dealer hedging now amplifies moves rather than damping them, with spot sitting 0.04% from the flip \u2014 on it, not near it. The correction is the book: this brief reported heat of 7.19R yesterday and called it 2.4 times the cap. That number pools both accounts and divides by one account's capital. Recomputed with the engine's own formula, your heat is 4.04R against a 3.0R cap \u2014 over it, but by a hair, and no position size or stop has changed since August. Underneath, the 2s10s curve flattened to 44bp, the yen rallied 3.87% on the week with the BoJ 97% priced to hike, and crude closed +20.56% on the month with CPI two sessions away.",
    "positions": {
-    "right": "2 tracked \u00b7 heat 3.16R / 3.0R",
-    "title": "Unchanged over the weekend, over cap, and two names still carry no stop.",
+    "right": "4 open \u00b7 heat 4.04R / 3.0R",
+    "title": "Every position has a stop for the first time. The heat number I printed yesterday was wrong.",
     "items": [
      {
       "tone": "good",
       "tag": "GOOG",
-      "html": "<b>335.31</b> \u00b7 entry 325.86 \u00b7 <b>+0.47R</b> \u00b7 stop 305.67 is <b>8.84% below</b> \u00b7 managed",
-      "when": "4 Sep mark"
+      "html": "<b>335.38</b> \u00b7 +0.02% on the day \u00b7 entry 325.86 \u00b7 <b>+0.47R</b> \u00b7 stop 305.67 is <b>8.86% below</b> \u00b7 managed",
+      "when": "8 Sep mark"
      },
      {
-      "tone": "warn",
+      "tone": "bad",
       "tag": "BAC",
-      "html": "<b>62.68</b> \u00b7 entry 64.38 \u00b7 <b>-0.43R</b> \u00b7 stop 60.39 is <b>3.65% below</b>",
-      "when": "4 Sep mark"
+      "html": "<b>62.39</b> \u00b7 -0.46% on the day \u00b7 entry 64.38 \u00b7 <b>-0.50R</b> \u00b7 stop 60.39 is <b>3.21% below</b>",
+      "when": "8 Sep mark"
      },
      {
       "tone": "bad",
       "tag": "PLTR",
-      "html": "<b>174.33</b> \u00b7 entered ~184 on 27 Aug \u00b7 <b>-5.26% on entry</b> \u00b7 <b>no stop</b> \u00b7 not in trades.json",
-      "when": "unsized"
+      "html": "<b>170.30</b> \u00b7 -2.31% on the day \u00b7 entry 184.67 \u00b7 <b>-0.72R</b> \u00b7 stop 164.62 is <b>3.34% below</b>",
+      "when": "8 Sep mark"
      },
      {
-      "tone": "bad",
+      "tone": "warn",
       "tag": "AAPL",
-      "html": "<b>319.97</b> \u00b7 entered ~321 on 28 Aug \u00b7 <b>-0.32% on entry</b> \u00b7 <b>no stop</b> \u00b7 <b>event tomorrow</b>",
-      "when": "unsized"
+      "html": "<b>316.22</b> \u00b7 -1.17% on the day \u00b7 entry 321.97 \u00b7 <b>-0.28R</b> \u00b7 stop 301.26 is <b>4.73% below</b>",
+      "when": "8 Sep mark"
      }
     ],
-    "note": "Heat is <b>3.16R</b> against a <b>3.0R</b> cap and the pack flags it <b>over cap</b>, unchanged from Friday because nothing traded. That single number is why the screener section ends in \"not actionable\" and will keep doing so."
+    "note": "<b>PLTR and AAPL are in trades.json with stops on both accounts.</b> After eight consecutive briefs naming them, the open item is closed: the pack counts <b>0 unsized</b> and it is now true. Gabriel's PLTR is 184.67 stopped at 164.62 and AAPL 321.97 at 301.26; Aldemar's are 184.45 at 164.45 and 321.96 at 301.99."
    },
    "themes": [],
    "world": {
     "kicker": "THE WORLD",
     "right": "3 items",
-    "title": "The tanker war became an oil shock while the market was shut.",
+    "title": "Oil ran at $100, software repriced on OpenAI, and Apple presents today.",
     "items": [
      {
       "tone": "",
       "tag": "OIL",
-      "html": "<b>Brent reached about $97 and WTI $92.27 on Monday, both six-week highs</b> \u2014 Brent up roughly 9% in five days and 19% on the month. Kpler data has an average of about 10 commodity ships a day crossing the strait over the preceding ten days, through a chokepoint that carries roughly a fifth of world oil in peacetime. One analyst quoted describes markets \"pricing in longer disruptions\". US diesel has set a record at $5.85 a gallon.",
-      "when": "Al Jazeera \u00b7 6\u20137 Sep"
+      "html": "<b>Brent settled at $97.92, up about 1%, after trading close to $100 \u2014 the highest since late July; WTI closed near $93.03</b>. Houthi forces struck multiple Saudi energy facilities including the 400,000 barrel-a-day Jazan refinery, saying it was a response to the siege of Sana'a, and Saudi Arabia said operations at several sites were halted. Iran's Mehr agency reported explosions on Kharg Island, its main export hub, just before the settle. Goldman Sachs says markets are increasingly pricing a prolonged conflict.",
+      "when": "Rigzone \u00b7 8 Sep"
      },
      {
       "tone": "",
-      "tag": "WAR",
-      "html": "<b>The US struck three Iranian oil tankers, one near Kharg Island and one near Jask; Iran fired ballistic missiles at a US carrier and destroyer, then claimed three tankers and three US-linked vessels of its own.</b> Saudi Aramco's Jizan refinery was hit for the second time in a month. Al Jazeera reports vessel counts of 6, 11 and 5 on consecutive days against a US Treasury claim of 17 million barrels a day transiting, which it could not verify. The quoted analyst view is that \"the only option is to escalate\".",
-      "when": "Al Jazeera \u00b7 5\u20136 Sep"
+      "tag": "PLTR",
+      "html": "<b>Enterprise software repriced on competition again: ServiceNow fell about 5%, Salesforce and Intuit about 4%, on concern that OpenAI's newest model competes with specialised software</b> (<i>Alain Guillot</i>). That is the second competitive shock to the software complex in a week, after Alphabet's government-only Gemini release took 5.81% out of Palantir on 2 September. The position is 7.8% under water with its stop <b>3.34% away</b>, and the sector keeps finding new reasons to derate.",
+      "when": "Alain Guillot \u00b7 8 Sep"
      },
      {
       "tone": "",
       "tag": "AAPL",
-      "html": "<b>Apple's event is tomorrow: an iPhone Ultra above $2,000 with a 5.5-inch cover display opening to 7.8 inches, Touch ID rather than Face ID, and two rear cameras with no telephoto</b>, alongside the iPhone 18 Pro, a HomePod refresh and AirPods with cameras. It lands four days after reports the foldable is being built at low volumes and that two MacBooks were cancelled. The position is unhedged into it.",
-      "when": "TechCrunch \u00b7 7 Sep"
+      "html": "<b>Apple's product event is today</b>, with an iPhone Ultra above $2,000 the expected headline (<i>TechCrunch</i>). The stock fell 1.17% on Tuesday into it. Unlike every previous brief, the position now has a defined stop \u2014 301.26 for Gabriel, 301.99 for Aldemar, both about 4.7% below Tuesday's close \u2014 so the event is an event rather than an open-ended exposure.",
+      "when": "TechCrunch \u00b7 9 Sep"
      }
     ],
-    "note": "The first two items are the same story and it is the one that matters here. This brief has argued since 2 September that the chain from the strait to the Fed was broken because crude kept refusing to react to headlines. Over a weekend with no market open, it reacted \u2014 not to a headline but to traffic collapsing to single digits. Crude feeds CPI, CPI is the gate holding the regime, and CPI prints on Friday."
+    "note": "The first two are the same trade seen twice. Crude at $98 is what keeps CPI above the gate; a software complex derating on competition is what makes the largest loss in this book worse. Neither is a headline about Iran or about Palantir specifically \u2014 both are sector-level repricings that happen to land on positions you hold."
    },
-   "ondeck": "Apple's product event is tomorrow, Wednesday 9 September; August CPI lands Friday 11 September at 08:30 ET and is the regime's tightest gate; the FOMC meets 15\u201316 September; triple witching is 18 September.",
+   "ondeck": "Apple's product event is today, Wednesday 9 September; August CPI lands Friday 11 September at 08:30 ET and is the regime's tightest gate; the Bank of Japan meets next week with a hike 97%% priced; the FOMC meets 15\u201316 September; triple witching is 18 September.",
    "recap": {
     "kicker": "IN FIVE MINUTES",
     "right": "3 things",
-    "title": "No session. Crude broke out anyway. Apple prints tomorrow.",
+    "title": "Gamma flipped. Every position has a stop. Yesterday's heat number was wrong: 4.04R, not 7.19R.",
     "items": [
      {
       "tone": "bad",
       "tag": "1",
-      "html": "<b>Crude broke out over the long weekend</b> \u2014 Brent near $97 and WTI $92.27, both six-week highs, with Kpler counting an average of about 10 ships a day through the strait against a fifth of world supply in peacetime (<i>Al Jazeera, 7 Sep</i>). Phoenix's own WTI still reads <b>91.48</b>, Friday's close, because there was no US session. Crude is the mechanism that moves the CPI gate, and that gate is what holds the regime.",
-      "when": "6-week high"
-     },
-     {
-      "tone": "warn",
-      "tag": "2",
-      "html": "<b>Heat is unchanged at 3.16R against a 3.0R cap and still flagged over cap.</b> Nothing closed, no stop moved, and no screener name is actionable until it is back under.",
-      "when": "over cap"
+      "html": "<b>Net gamma flipped negative</b> \u2014 <b>\u2212$3.98B</b> from +$36.13B on Monday, and the pack's own diff fired it. Dealer hedging now amplifies moves instead of damping them, and spot sits <b>0.04%</b> from the flip, which is to say on it. This is the invalidation condition set on 4 September, and it has been met two days before CPI.",
+      "when": "condition met"
      },
      {
       "tone": "bad",
+      "tag": "2",
+      "html": "<b>The pack's heat number is wrong and I printed it.</b> It reports <b>7.19R</b>; that is both accounts' risk added together and divided by one account's capital. Your heat is <b>4.04R</b> including the managed GOOG position, 3.04R without it against a 3.0R cap \u2014 over it, but by a hair rather than the 2.4\u00d7 I wrote yesterday morning.",
+      "when": "corrected"
+     },
+     {
+      "tone": "warn",
       "tag": "3",
-      "html": "<b>AAPL</b>'s event is tomorrow \u2014 an iPhone Ultra above $2,000 is the expected headline (<i>TechCrunch, 7 Sep</i>) \u2014 and the position still has <b>no stop</b> and is still not in trades.json, four sessions after this brief first said so.",
-      "when": "8 sessions",
-      "ticker": "AAPL"
+      "html": "<b>The yen is snapping, not drifting</b> \u2014 USDJPY <b>153.93</b>, <b>-3.87% on the week</b>. Phoenix started fetching it this run, so it is no longer a blind spot. The BoJ is 97% priced for a hike next week against 52% a month ago, on a record \u00a5360tn of cross-border yen borrowing (<i>Reuters via Yahoo, 8 Sep</i>).",
+      "when": "new signal"
      }
     ],
     "note": null
    },
    "stance": {
     "kicker": "THE STANCE",
-    "right": "held 1 week \u00b7 since 2026-08-31",
-    "title": "Unchanged, and the weekend made it easier to hold rather than harder.",
+    "right": "held 2 weeks \u00b7 since 2026-08-31",
+    "title": "The regime call holds. The dampening read does not \u2014 I am withdrawing it.",
     "items": [],
-    "note": "Phoenix has been in <b>Policy Tightening</b> since <b>2026-08-31</b> \u2014 one week. None of the three invalidation conditions set on 4 September were met: CPI does not print until Friday, heat is still 3.16R, and net gamma is still positive. The stance stands: <b>hold the regime call, add no risk while heat is over cap.</b>"
+    "note": "Phoenix has been in <b>Policy Tightening</b> for <b>two weeks</b>, and nothing in today's pack argues against it: three of four gates hold and crude is up <b>+20.56% on the month</b> into a CPI print on Friday. The regime stance is unchanged."
    },
    "markets": {
     "kicker": "THE MARKET",
-    "right": "no session \u00b7 positive gamma",
-    "title": "Markets were closed. Every price here is Friday's, and the gamma cushion has halved.",
+    "right": "negative gamma \u00b7 on the flip",
+    "title": "The index is sitting exactly on the gamma boundary, and it crossed to the wrong side.",
     "items": [],
-    "note": "<b>Monday 7 September was Labor Day and US markets did not open</b>, so there is no tape to read and no new close to report. The pack carries Friday's: SPX <b>7,718.60</b>, <b>-0.38%</b> on that day, <b>+1.67%</b> above the 50-day and <b>+8.08%</b> above the 200-day, VIX <b>14.53</b>."
+    "note": "SPX <b>7,673.52</b>, <b>-0.58%</b> on the day, <b>+0.99%</b> above the 50-day and <b>+7.37%</b> above the 200-day \u2014 the 50-day cushion has more than halved from 1.67% on Friday. VIX <b>15.72</b>, up <b>+8.19%</b> on the day."
    },
    "macro": {
     "kicker": "THE MACRO",
-    "right": "rates \u00b7 dollar \u00b7 credit \u00b7 commodities",
-    "title": "Nominal yields up, real yields down: this is an inflation repricing, not a Fed repricing.",
+    "right": "rates \u00b7 yen \u00b7 credit \u00b7 crude",
+    "title": "The curve flattened, the yen is unwinding a record carry trade, and crude is up a fifth in a month.",
     "items": [],
-    "note": "Start with rates, because everything else hangs off them. The ten-year is <b>4.78%</b>, +2bp on the day, <b>+6bp</b> on the week and <b>+11bp</b> on the month. The two-year \u2014 the policy path \u2014 is <b>4.23%</b>, flat on the day, <b>+3bp</b> on the week and <b>-3bp</b> on the month. The 2s10s curve is <b>55bp</b> and has <b>steepened 14bp</b> over the month. The real ten-year is <b>2.36%</b>, <b>-3bp</b> on the week. Nominal up, real down, two-year barely moving: the market is repricing inflation and term premium out along the curve, not the Fed's next move. That distinction is the whole section, and it is why a hot payroll print moved the long end and left the front end alone."
+    "note": "The ten-year is <b>4.81%</b>, +2bp on the day, <b>+5bp</b> on the week, <b>+15bp</b> on the month. The two-year is <b>4.37%</b>. The 2s10s curve is <b>44bp</b> and has <b>flattened 3bp</b> over the month \u2014 the opposite of last week, when it was 55bp and steepening. The real ten-year is <b>2.43%</b>, -1bp on the week. A flattening curve with the front end higher is the market putting the Fed back in play, which is a different message from the one this section carried on Monday."
    },
    "smart_money": {
     "kicker": "SMART MONEY",
-    "right": "13F 2026-06-30 \u00b7 PTRs to 2026-08-12",
-    "title": "The two largest concentrated buyers in the file are both long a name you own.",
+    "right": "13F 2026-06-30 \u00b7 PTRs to 2026-09-05",
+    "title": "The Congress feed came back to life; the sector view is still missing.",
     "items": [
      {
       "tone": "good",
@@ -399,90 +409,102 @@
       "html": "<b>DVA</b> \u2014 Berkshire Hathaway (Buffett), $6.4B",
       "when": "2026-06-30",
       "ticker": "DVA"
-     },
-     {
-      "tone": "good",
-      "tag": "ADD",
-      "html": "<b>SPGI</b> \u2014 TCI Fund (Hohn), $5.7B",
-      "when": "2026-06-30",
-      "ticker": "SPGI"
      }
     ],
-    "note": "<b>Berkshire added $37.8B of GOOGL and TCI added $4.4B</b> in the quarter to 2026-06-30. That is the only overlap between positioning and the book in this pack, and it is a large one."
+    "note": "<b>A correction.</b> This brief has said for three runs that the Congress feed had been quiet since 12 August. It is not: the newest filing is <b>2026-09-05</b> \u2014 David J. Taylor, a sell in AMGN \u2014 and provenance now carries a source breakdown showing <b>47 House Clerk rows in the last 30 days</b> and 4 from the Senate. What is genuinely quiet is one source, OGE 278-T, which the pack itself now flags. The engine fixed this between packs and I should have re-read it rather than repeating the old line."
    },
    "screener": {
     "kicker": "THE SCREENER",
-    "right": "700 candidates \u00b7 INSUFFICIENT",
-    "title": "Three refiners near the top of the list on the weekend crude broke out.",
+    "right": "560 candidates \u00b7 INSUFFICIENT",
+    "title": "The list turned commodity-heavy in the same week crude went to $98.",
     "items": [
-     {
-      "tone": "good",
-      "tag": "DLO",
-      "html": "<b>Packaged software</b> \u00b7 score 76 \u00b7 stop 8.20% \u00b7 12 days on list",
-      "when": "profitable"
-     },
      {
       "tone": "warn",
       "tag": "DK",
-      "html": "<b>Oil refining/Marketing</b> \u00b7 score 71 \u00b7 stop 15.43% \u00b7 27 days on list",
+      "html": "<b>Oil refining/Marketing</b> \u00b7 score 73 \u00b7 stop 15.25% \u00b7 28 days on list",
       "when": "marginal"
      },
      {
       "tone": "good",
-      "tag": "CXW",
-      "html": "<b>Miscellaneous commercial services</b> \u00b7 score 70 \u00b7 stop 9.12% \u00b7 29 days on list",
+      "tag": "DLO",
+      "html": "<b>Packaged software</b> \u00b7 score 72 \u00b7 stop 8.85% \u00b7 13 days on list",
       "when": "profitable"
      },
      {
       "tone": "warn",
-      "tag": "CLMT",
-      "html": "<b>Oil refining/Marketing</b> \u00b7 score 69 \u00b7 stop 11.38% \u00b7 28 days on list",
-      "when": "marginal"
+      "tag": "OKTA",
+      "html": "<b>Packaged software</b> \u00b7 score 71 \u00b7 stop 14.70% \u00b7 21 days on list",
+      "when": "profitable"
+     },
+     {
+      "tone": "warn",
+      "tag": "AYA",
+      "html": "<b>Precious metals</b> \u00b7 score 70 \u00b7 stop 15.00% \u00b7 18 days on list",
+      "when": "profitable"
      },
      {
       "tone": "warn",
       "tag": "EA",
-      "html": "<b>Packaged software</b> \u00b7 score 69 \u00b7 stop 0.33% \u00b7 20 days on list",
+      "html": "<b>Packaged software</b> \u00b7 score 70 \u00b7 stop 0.33% \u00b7 21 days on list",
       "when": "profitable"
      }
     ],
-    "note": "Workable stop widths on a 2.5\u00d7ATR basis: <b>DLO</b> at 8.20%, <b>GNK</b> at 8.38% and <b>CXW</b> at 9.12%. <b>EA</b> scores 69 and breaks out, and its stop is <b>0.33%</b> \u2014 that is inside the noise, not a stop, and the name is unusable at that width whatever the setup. The three refiners are the opposite problem: <b>DK</b> 15.43%, <b>PBF</b> 13.70%, <b>CLMT</b> 11.38% \u2014 honest widths for their volatility and far too wide to size against a cap you are already through."
+    "note": "Five names are new since Monday \u2014 <b>OKTA, AYA, PBR, CF, PHVS</b> \u2014 and the candidate count fell from 700 to <b>560</b>. Only two carry a workable 2.5\u00d7ATR stop: <b>PBR</b> at 8.18% and <b>DLO</b> at 8.85%. <b>EA</b> is unchanged and still unusable at <b>0.33%</b>, which is inside its own noise. <b>DK</b> 15.25%, <b>AYA</b> 15.00%, <b>OKTA</b> 14.70% and <b>PHVS</b> 12.78% are honest widths for their volatility and unsizeable against this book."
    },
    "changed": {
     "kicker": "WHAT CHANGED",
-    "right": "0 computed changes",
-    "title": "Nothing material changed in the pack, and one of my conditions was written too narrowly.",
-    "items": [],
-    "note": "The diff runs against the <b>2026-09-05</b> pack \u2014 there was no Sunday build \u2014 and returns <b>no changes</b>. No regime flip, no gamma sign flip, no sector flow reversal, no heat move, nothing closed and no new top setup. Nothing material changed, which on a holiday is what it should say. The one movement worth naming falls below its threshold: the distance to the gamma flip went from \u22120.92% to <b>-0.36%</b> across the two packs."
+    "right": "3 computed changes",
+    "title": "Three material changes, and the one I flagged as a bug turns out to have been my error.",
+    "items": [
+     {
+      "tone": "bad",
+      "tag": "GEX",
+      "html": "<b>index gamma</b>: positive \u2192 <b>negative</b>. dealers switch between dampening and amplifying moves",
+      "when": "vs 2026-09-07"
+     },
+     {
+      "tone": "bad",
+      "tag": "PORTFOLIO",
+      "html": "<b>open heat</b>: 3.16 \u2192 <b>7.19</b>. committed risk moved materially",
+      "when": "vs 2026-09-07"
+     },
+     {
+      "tone": "",
+      "tag": "SCREENER",
+      "html": "<b>new in the top setups</b>: \u2014 \u2192 <b>OKTA, AYA, PBR, CF, PHVS</b>. names the engine ranked highest that were not there yesterday",
+      "when": "vs 2026-09-07"
+     }
+    ],
+    "note": "The gamma flip is the consequential one: for two weeks the brief has argued dealer hedging would dampen moves, and from today it does the opposite. <b>The heat move is not a change in risk at all</b> \u2014 nothing was bought, four rows became visible to a calculation that pools both accounts against one account's capital, and the resulting 7.19R is an artefact. Your heat is 4.04R. The five new screener names are a commodity tilt, not a signal."
    },
    "invalidation": {
     "kicker": "WHAT WOULD CHANGE THIS",
     "right": "3 conditions",
-    "title": "Two of these resolve by Friday.",
+    "title": "All three resolve inside a week.",
     "items": [
      {
       "tone": "",
       "tag": "1",
-      "html": "<b>August CPI on Friday 11 September prints at or below 3.0% year over year.</b> The gate's cushion falls from 0.8 to 0.5 or less, and with the real ten-year gate clearing by only 3bp the regime stops being comfortable and starts being arithmetic. Checkable Friday 08:30 ET.",
-      "when": "3 days"
+      "html": "<b>August CPI on Friday prints at or below 3.0% year over year.</b> The gate's cushion falls from 0.8 to 0.5 or less and the regime call goes from comfortable to arithmetic. With crude up 20.6% on the month the risk is arguably the other way, and a hot print above 3.5% would make the 16 September hike close to settled.",
+      "when": "2 days"
      },
      {
       "tone": "",
       "tag": "2",
-      "html": "<b>The real ten-year's three-month change falls below 25bp.</b> It is at 28bp and clears by <b>3bp</b> \u2014 the nearest gate to flipping, and by Phoenix's own rule POLICY_TIGHTENING no longer qualifies if it goes. Three basis points is one soft inflation print.",
-      "when": "watch"
+      "html": "<b>The Bank of Japan hikes next week and USDJPY breaks below 150.</b> It is at 153.93 and 97% priced. A disorderly carry unwind on a record \u00a5360tn of borrowing is the one scenario that damages this book without any position's thesis being wrong \u2014 and with gamma negative, the index would amplify rather than absorb it.",
+      "when": "next week"
      },
      {
       "tone": "",
       "tag": "3",
-      "html": "<b>Heat returns to 3.00R or below.</b> A close, a raised stop, or PLTR and AAPL entered into trades.json with stops so the number is computed on the real book. Until then no screener name is actionable and this brief will keep saying so.",
-      "when": "any run"
+      "html": "<b>Heat returns below 3.0R.</b> You are at <b>4.04R</b> on the corrected per-account figure \u2014 over by 1.04R, which is roughly one position trimmed or one stop raised, not a liquidation. The tightest stop in this account is 3.21% from the price, and in negative gamma that distance does more work than usual.",
+      "when": "any session"
      }
     ],
     "note": null
    },
-   "date": "2026-09-07",
-   "file": "wire/phoenix_wire_gabriel_2026-09-07.html",
+   "date": "2026-09-08",
+   "file": "wire/phoenix_wire_gabriel_2026-09-08.html",
    "parser": "html-parse",
    "weekly": {
     "headline": "A week that changed everything and moved nothing \u2014 the S&P finished nine basis points higher",
