@@ -1,1 +1,28 @@
+# What Vercel is allowed to serve.
+#
+# The repo being private stops GitHub exposure; it does NOT stop Vercel, which
+# serves every deployed file to anyone with the URL. These three carry the book
+# and must not be deployed. They stay in the repo — the engine and Cowork still
+# read them — they just stop being published.
+outputs/trades.json
+outputs/fact_pack.json
+outputs/trade_metrics.json
+
+# Never requested by the browser, and they make every deployment bigger
+# (deployment storage is the limit the Vercel email was about).
+*.py
+*.pyc
+__pycache__/
+*.csv
+*.db
+*.zip
+.github/
+tests/
+test_*.py
+requirements.txt
+outputs/oge/
+outputs/history/
+outputs/*_seen.json
+outputs/sec_cik_map.json
+outputs/iv_history.json
 
