@@ -1,28 +1,28 @@
 {
- "asof": "2026-09-11 09:24 UTC",
+ "asof": "2026-09-14 10:23 UTC",
  "regime": "POLICY_TIGHTENING",
- "confidence": 36.5,
+ "confidence": 36.8,
  "confidence_note": "regime score, not a calibrated probability (A4)",
  "scores": {
-  "POLICY_TIGHTENING": 36.5
+  "POLICY_TIGHTENING": 36.8
  },
  "secondary_tag": "INFLATIONARY",
  "inputs": {
-  "wti_12m": 60.01,
-  "wti_3m": 18.18,
-  "wti_vs_2yr": 39.24,
-  "cpi_yoy": 3.3,
-  "cpi_chg_3m": -0.16,
-  "spx_3m": 2.16,
-  "spx_1m": -2.49,
-  "dd": -2.49,
-  "trail_dd": -2.49,
+  "wti_12m": 59.59,
+  "wti_3m": 17.87,
+  "wti_vs_2yr": 38.89,
+  "cpi_yoy": 3.35,
+  "cpi_chg_3m": -0.11,
+  "spx_3m": 3.03,
+  "spx_1m": -1.65,
+  "dd": -1.65,
+  "trail_dd": -1.65,
   "spx_off_low": 0.0,
   "fresh_high": false,
   "us02_3m": 29.0,
   "real_3m": 33.0,
-  "vix": 17.26,
-  "vix_3m_chg": -2.38,
+  "vix": 15.84,
+  "vix_3m_chg": -10.41,
   "hy": 265.0
  },
  "explain": {
@@ -33,10 +33,10 @@
    {
     "key": "cpi_yoy",
     "label": "CPI y/y",
-    "value": 3.3,
+    "value": 3.35,
     "op": ">",
     "threshold": 2.5,
-    "clear_by": 0.8,
+    "clear_by": 0.85,
     "ok": true
    },
    {
@@ -51,10 +51,10 @@
    {
     "key": "dd",
     "label": "Drawdown",
-    "value": -2.49,
+    "value": -1.65,
     "op": ">",
     "threshold": -12,
-    "clear_by": 9.51,
+    "clear_by": 10.35,
     "ok": true
    },
    {
@@ -70,9 +70,9 @@
   "watch": [
    {
     "if": "CPI y/y falls below 2.5",
-    "now": 3.3,
+    "now": 3.35,
     "threshold": 2.5,
-    "distance": 0.8,
+    "distance": 0.85,
     "then": "POLICY_TIGHTENING no longer qualifies"
    },
    {
@@ -84,9 +84,9 @@
    },
    {
     "if": "Drawdown falls below -12",
-    "now": -2.49,
+    "now": -1.65,
     "threshold": -12,
-    "distance": 9.51,
+    "distance": 10.35,
     "then": "POLICY_TIGHTENING no longer qualifies"
    }
   ],
@@ -98,7 +98,7 @@
     {
      "label": "CPI 3m change",
      "need": "> 0.3",
-     "now": -0.16000000000000014
+     "now": -0.10999999999999988
     }
    ]
   }

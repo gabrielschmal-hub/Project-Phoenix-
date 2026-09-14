@@ -1,0 +1,662 @@
+{
+ "schema": "phoenix-fact-pack/1",
+ "date": "2026-09-14",
+ "asof": "2026-09-14 10:52 UTC",
+ "market": {
+  "regime": "POLICY_TIGHTENING",
+  "regime_held_weeks": 2,
+  "spx": {
+   "last": 7656.98,
+   "chg_1d_pct": 0.86,
+   "vs_50d_pct": 0.65,
+   "vs_200d_pct": 6.9
+  },
+  "vix": 15.84,
+  "dxy": null,
+  "us10y": null,
+  "gold": null,
+  "wti": null,
+  "gex": {
+   "net_B": 9.59,
+   "regime": "positive",
+   "flip": null,
+   "dist_to_flip_pct": -0.4,
+   "call_wall": null,
+   "put_wall": null,
+   "spot": 7656.98
+  }
+ },
+ "macro": {
+  "spx": {
+   "last": 7656.98,
+   "d1_pct": 0.86,
+   "w1_pct": -1.17,
+   "m1_pct": -1.18
+  },
+  "ndx": {
+   "last": 26333.04,
+   "d1_pct": 0.96,
+   "w1_pct": -0.94,
+   "m1_pct": -0.96
+  },
+  "dow": {
+   "last": 52573.29,
+   "d1_pct": 0.98,
+   "w1_pct": -2.07,
+   "m1_pct": -2.23
+  },
+  "rut": {
+   "last": 2903.94,
+   "d1_pct": 0.45,
+   "w1_pct": -2.17,
+   "m1_pct": -4.65
+  },
+  "gold": {
+   "last": 4366.2,
+   "d1_pct": 0.04,
+   "w1_pct": -2.79,
+   "m1_pct": -0.97
+  },
+  "wti": {
+   "last": 100.05,
+   "d1_pct": -2.37,
+   "w1_pct": 9.58,
+   "m1_pct": 20.15
+  },
+  "btc": {
+   "last": 77174.0,
+   "d1_pct": 0.79,
+   "w1_pct": -5.04,
+   "m1_pct": 21.72
+  },
+  "dxy": {
+   "last": 99.12,
+   "d1_pct": 0.03,
+   "w1_pct": 0.12,
+   "m1_pct": -0.89
+  },
+  "vix": {
+   "last": 15.84,
+   "d1_pct": -11.21,
+   "w1_pct": 10.61,
+   "m1_pct": 8.87
+  },
+  "usdjpy": {
+   "last": 154.48,
+   "d1_pct": 0.59,
+   "w1_pct": -2.79,
+   "m1_pct": -3.0
+  },
+  "tnx": {
+   "last": 4.97,
+   "d1_bp": 3,
+   "w1_bp": 21,
+   "m1_bp": 29
+  },
+  "us02": {
+   "last": 4.56,
+   "d1_bp": 0,
+   "w1_bp": 22,
+   "m1_bp": 36
+  },
+  "real10": {
+   "last": 2.55,
+   "d1_bp": 0,
+   "w1_bp": 13,
+   "m1_bp": 13
+  },
+  "hy": {
+   "last": 2.7,
+   "d1_bp": 0,
+   "w1_bp": 0,
+   "m1_bp": 0
+  },
+  "cpi_yoy": {
+   "last": 3.35,
+   "prev_print": 3.3
+  },
+  "curve_2s10s_bp": 42,
+  "curve_2s10s_chg_1m_bp": -7,
+  "absent": [],
+  "rows": 251
+ },
+ "regime_gates": {
+  "regime": "POLICY_TIGHTENING",
+  "held_weeks": 2,
+  "since": "2026-08-31",
+  "drivers": [
+   {
+    "key": "cpi_yoy",
+    "label": "CPI y/y",
+    "value": 3.35,
+    "op": ">",
+    "threshold": 2.5,
+    "clear_by": 0.85,
+    "ok": true
+   },
+   {
+    "key": "real_3m",
+    "label": "Real 10Y 3m change (bp)",
+    "value": 33.0,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 8.0,
+    "ok": true
+   },
+   {
+    "key": "dd",
+    "label": "Drawdown",
+    "value": -1.65,
+    "op": ">",
+    "threshold": -12,
+    "clear_by": 10.35,
+    "ok": true
+   },
+   {
+    "key": "us02_3m",
+    "label": "2Y yield 3m change (bp)",
+    "value": 29.0,
+    "op": ">",
+    "threshold": 40,
+    "clear_by": -11.0,
+    "ok": false
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI y/y falls below 2.5",
+    "now": 3.35,
+    "threshold": 2.5,
+    "distance": 0.85,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   },
+   {
+    "if": "Real 10Y 3m change (bp) falls below 25",
+    "now": 33.0,
+    "threshold": 25,
+    "distance": 8.0,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   },
+   {
+    "if": "Drawdown falls below -12",
+    "now": -1.65,
+    "threshold": -12,
+    "distance": 10.35,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   }
+  ],
+  "runner_up": {
+   "regime": "ENERGY_GRIND",
+   "score": null,
+   "gates_missing": 1,
+   "needs": [
+    {
+     "label": "CPI 3m change",
+     "need": "> 0.3",
+     "now": -0.10999999999999988
+    }
+   ]
+  }
+ },
+ "screener": {
+  "n_candidates": 421,
+  "top": [
+   {
+    "ticker": "DK",
+    "industry": "Oil refining/Marketing",
+    "trade_score": 72,
+    "atr14_pct": 5.66,
+    "mcap_B": 2.63,
+    "breakout": false,
+    "days_on_list": 34,
+    "profitability": "marginal",
+    "pos_vs_high": 0.0,
+    "surge": 39,
+    "dollar_vol_M": 133.0,
+    "stop_pct_2_5atr": 14.15
+   },
+   {
+    "ticker": "PBR",
+    "industry": "Integrated oil",
+    "trade_score": 71,
+    "atr14_pct": 3.2,
+    "mcap_B": 103.1,
+    "breakout": false,
+    "days_on_list": 13,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 49,
+    "dollar_vol_M": 443.0,
+    "stop_pct_2_5atr": 8.0
+   },
+   {
+    "ticker": "NMM",
+    "industry": "Marine shipping",
+    "trade_score": 70,
+    "atr14_pct": 2.6,
+    "mcap_B": 2.04,
+    "breakout": true,
+    "days_on_list": 24,
+    "profitability": "investing",
+    "pos_vs_high": 0.0,
+    "surge": 73,
+    "dollar_vol_M": 16.2,
+    "stop_pct_2_5atr": 6.5
+   },
+   {
+    "ticker": "BWLP",
+    "industry": "Marine shipping",
+    "trade_score": 69,
+    "atr14_pct": 3.33,
+    "mcap_B": 2.86,
+    "breakout": false,
+    "days_on_list": 10,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 26,
+    "dollar_vol_M": 11.3,
+    "stop_pct_2_5atr": 8.32
+   },
+   {
+    "ticker": "DAC",
+    "industry": "Marine shipping",
+    "trade_score": 69,
+    "atr14_pct": 1.95,
+    "mcap_B": 2.32,
+    "breakout": false,
+    "days_on_list": 36,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 11,
+    "dollar_vol_M": 17.1,
+    "stop_pct_2_5atr": 4.88
+   },
+   {
+    "ticker": "BP",
+    "industry": "Integrated oil",
+    "trade_score": 67,
+    "atr14_pct": 2.14,
+    "mcap_B": 102.37,
+    "breakout": false,
+    "days_on_list": 35,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 10,
+    "dollar_vol_M": 408.4,
+    "stop_pct_2_5atr": 5.35
+   },
+   {
+    "ticker": "CF",
+    "industry": "Chemicals: agricultural",
+    "trade_score": 66,
+    "atr14_pct": 4.07,
+    "mcap_B": 15.92,
+    "breakout": false,
+    "days_on_list": 25,
+    "profitability": "profitable",
+    "pos_vs_high": -1.6,
+    "surge": 3,
+    "dollar_vol_M": 341.4,
+    "stop_pct_2_5atr": 10.18
+   },
+   {
+    "ticker": "CMBT",
+    "industry": "Marine shipping",
+    "trade_score": 66,
+    "atr14_pct": 2.75,
+    "mcap_B": 4.43,
+    "breakout": false,
+    "days_on_list": 36,
+    "profitability": "profitable",
+    "pos_vs_high": -0.1,
+    "surge": 11,
+    "dollar_vol_M": 21.1,
+    "stop_pct_2_5atr": 6.88
+   }
+  ],
+  "leaning": [],
+  "counts": {}
+ },
+ "smart_money": {
+  "quarter": "2026-06-30",
+  "accumulating": [],
+  "distributing": [],
+  "notable": [
+   {
+    "ticker": "GOOGL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 37764088383,
+    "sector": null
+   },
+   {
+    "ticker": "GE",
+    "manager": "TCI Fund (Hohn)",
+    "action": "TRIM",
+    "value_usd": 17725353519,
+    "sector": null
+   },
+   {
+    "ticker": "V",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 10462232091,
+    "sector": null
+   },
+   {
+    "ticker": "DVA",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "TRIM",
+    "value_usd": 6425268898,
+    "sector": null
+   },
+   {
+    "ticker": "SPGI",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 5735017808,
+    "sector": null
+   },
+   {
+    "ticker": "DAL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 5368591200,
+    "sector": null
+   },
+   {
+    "ticker": "IEP",
+    "manager": "Icahn Capital",
+    "action": "ADD",
+    "value_usd": 4458616003,
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 4389741007,
+    "sector": null
+   }
+  ],
+  "congress_recent": [
+   {
+    "ticker": "JNJ",
+    "member": "John Boozman",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-11",
+    "sector": null
+   },
+   {
+    "ticker": "FSLR",
+    "member": "John Boozman",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-11",
+    "sector": null
+   },
+   {
+    "ticker": "IVV",
+    "member": "John Boozman",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-11",
+    "sector": null
+   },
+   {
+    "ticker": "CEG",
+    "member": "John Boozman",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-11",
+    "sector": null
+   },
+   {
+    "ticker": "OTIS",
+    "member": "John Boozman",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-11",
+    "sector": null
+   },
+   {
+    "ticker": "SPYM",
+    "member": "John Boozman",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-11",
+    "sector": null
+   },
+   {
+    "ticker": "WWSYX",
+    "member": "John Boozman",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-09-11",
+    "sector": null
+   },
+   {
+    "ticker": "IJR",
+    "member": "John Boozman",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-11",
+    "sector": null
+   },
+   {
+    "ticker": "AVUV",
+    "member": "John Boozman",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-11",
+    "sector": null
+   },
+   {
+    "ticker": "INTU",
+    "member": "Gilbert Cisneros",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-10",
+    "sector": null
+   }
+  ],
+  "note": null,
+  "congress_status": {
+   "written": "2026-09-14",
+   "dropped_impossible_dates": 0,
+   "sources": {
+    "House Clerk PTR": {
+     "rows": 9502,
+     "last_30d": 117,
+     "newest_tx": "2026-08-28",
+     "newest_filed": "2026-09-10"
+    },
+    "OGE 278-T via Open Cabinet": {
+     "rows": 6438,
+     "last_30d": 0,
+     "newest_tx": "2026-06-24",
+     "newest_filed": "2026-08-12"
+    },
+    "Senate eFD": {
+     "rows": 991,
+     "last_30d": 8,
+     "newest_tx": "2026-08-27",
+     "newest_filed": "2026-09-11"
+    }
+   },
+   "quiet": [
+    "OGE 278-T via Open Cabinet"
+   ]
+  }
+ },
+ "portfolio": {
+  "open": [
+   {
+    "ticker": "GOOG",
+    "entry": 325.86,
+    "stop": 305.67,
+    "last": null,
+    "R": null,
+    "managed": true,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "BAC",
+    "entry": 64.38,
+    "stop": 60.39,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "BAC",
+    "entry": 64.16,
+    "stop": 59.65,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "AAPL",
+    "entry": 321.97,
+    "stop": 301.26,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "PLTR",
+    "entry": 184.45,
+    "stop": 164.45,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "AAPL",
+    "entry": 321.96,
+    "stop": 301.99,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   }
+  ],
+  "heat_R": 6.19,
+  "cap_R": 3.0,
+  "unsized": 0,
+  "note": null,
+  "over_cap": true
+ },
+ "news": {
+  "date": "2026-09-11",
+  "asof": "2026-09-14 10:23 UTC",
+  "headline": "CPI came in line and the bond market called it a hike \u2014 Wednesday is now 86% priced",
+  "standfirst": "August CPI rose 0.4% on the month and 3.4% on the year, both as expected, with core a tenth hot at +0.3%. Equities took it as relief and broke a four-day losing streak \u2014 the S&P rose 1.06% \u2014 while Treasury yields set fresh 52-week highs across the curve, the ten-year at 4.959%, and odds of a hike on Wednesday went to 85.6% from roughly 70%. The dovish condition this brief set on 4 September has failed outright: 3.4% against a 3.0% test, moving up rather than down. Oil eased for the first time in a week, WTI \u22123.35% to $99.05. Marks below are Thursday's, so Palantir's stop \u2014 0.75% away \u2014 is still unconfirmed. Heat 4.04R against 3.0R.",
+  "themes": [],
+  "ondeck": "The FOMC meets Tuesday and Wednesday and decides on 16 September with a hike 85.6% priced; the Bank of Japan meets this week with a hike 97% priced; triple witching is Friday 18 September. The next brief covers Monday's session.",
+  "note": null
+ },
+ "provenance": {
+  "macro": {
+   "asof": "2026-09-14 10:23 UTC",
+   "age_min": null
+  },
+  "gex": {
+   "asof": "2026-09-14 10:23 UTC",
+   "age_min": null
+  },
+  "stocks": {
+   "asof": "2026-09-14 10:39 UTC",
+   "age_min": null
+  },
+  "institutional_holdings": {
+   "asof": "2026-09-14 10:47 UTC",
+   "quarter": "2026-06-30"
+  },
+  "congress_trades": {
+   "asof": "2026-09-14 10:45 UTC",
+   "status": {
+    "written": "2026-09-14",
+    "dropped_impossible_dates": 0,
+    "sources": {
+     "House Clerk PTR": {
+      "rows": 9502,
+      "last_30d": 117,
+      "newest_tx": "2026-08-28",
+      "newest_filed": "2026-09-10"
+     },
+     "OGE 278-T via Open Cabinet": {
+      "rows": 6438,
+      "last_30d": 0,
+      "newest_tx": "2026-06-24",
+      "newest_filed": "2026-08-12"
+     },
+     "Senate eFD": {
+      "rows": 991,
+      "last_30d": 8,
+      "newest_tx": "2026-08-27",
+      "newest_filed": "2026-09-11"
+     }
+    },
+    "quiet": [
+     "OGE 278-T via Open Cabinet"
+    ]
+   }
+  },
+  "wire": {
+   "asof": "2026-09-14 10:23 UTC"
+  }
+ },
+ "missing": [],
+ "changed": {
+  "first_pack": false,
+  "prev_date": "2026-09-11",
+  "changes": [
+   {
+    "kind": "gex",
+    "what": "index gamma",
+    "was": "negative",
+    "now": "positive",
+    "why": "dealers switch between dampening and amplifying moves"
+   },
+   {
+    "kind": "portfolio",
+    "what": "open heat",
+    "was": 7.19,
+    "now": 6.19,
+    "why": "committed risk moved materially"
+   },
+   {
+    "kind": "screener",
+    "what": "new in the top setups",
+    "was": null,
+    "now": "CMBT",
+    "why": "names the engine ranked highest that were not there yesterday"
+   }
+  ]
+ }
+}
