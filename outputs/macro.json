@@ -1,5 +1,5 @@
 {
- "asof": "2026-09-14 10:23 UTC",
+ "asof": "2026-09-15 09:49 UTC",
  "regime": "POLICY_TIGHTENING",
  "confidence": 36.8,
  "confidence_note": "regime score, not a calibrated probability (A4)",
@@ -8,26 +8,26 @@
  },
  "secondary_tag": "INFLATIONARY",
  "inputs": {
-  "wti_12m": 59.59,
-  "wti_3m": 17.87,
-  "wti_vs_2yr": 38.89,
+  "wti_12m": 66.05,
+  "wti_3m": 34.23,
+  "wti_vs_2yr": 43.87,
   "cpi_yoy": 3.35,
   "cpi_chg_3m": -0.11,
-  "spx_3m": 3.03,
-  "spx_1m": -1.65,
-  "dd": -1.65,
-  "trail_dd": -1.65,
+  "spx_3m": 1.59,
+  "spx_1m": -0.71,
+  "dd": -2.13,
+  "trail_dd": -2.13,
   "spx_off_low": 0.0,
   "fresh_high": false,
-  "us02_3m": 29.0,
-  "real_3m": 33.0,
-  "vix": 15.84,
-  "vix_3m_chg": -10.41,
-  "hy": 265.0
+  "us02_3m": 39.0,
+  "real_3m": 32.0,
+  "vix": 17.84,
+  "vix_3m_chg": 8.78,
+  "hy": 268.0
  },
  "explain": {
   "regime": "POLICY_TIGHTENING",
-  "held_weeks": 2,
+  "held_weeks": 3,
   "since": "2026-08-31",
   "drivers": [
    {
@@ -40,31 +40,31 @@
     "ok": true
    },
    {
+    "key": "us02_3m",
+    "label": "2Y yield 3m change (bp)",
+    "value": 39.0,
+    "op": ">",
+    "threshold": 40,
+    "clear_by": -1.0,
+    "ok": false
+   },
+   {
     "key": "real_3m",
     "label": "Real 10Y 3m change (bp)",
-    "value": 33.0,
+    "value": 32.0,
     "op": ">",
     "threshold": 25,
-    "clear_by": 8.0,
+    "clear_by": 7.0,
     "ok": true
    },
    {
     "key": "dd",
     "label": "Drawdown",
-    "value": -1.65,
+    "value": -2.13,
     "op": ">",
     "threshold": -12,
-    "clear_by": 10.35,
+    "clear_by": 9.87,
     "ok": true
-   },
-   {
-    "key": "us02_3m",
-    "label": "2Y yield 3m change (bp)",
-    "value": 29.0,
-    "op": ">",
-    "threshold": 40,
-    "clear_by": -11.0,
-    "ok": false
    }
   ],
   "watch": [
@@ -77,16 +77,16 @@
    },
    {
     "if": "Real 10Y 3m change (bp) falls below 25",
-    "now": 33.0,
+    "now": 32.0,
     "threshold": 25,
-    "distance": 8.0,
+    "distance": 7.0,
     "then": "POLICY_TIGHTENING no longer qualifies"
    },
    {
     "if": "Drawdown falls below -12",
-    "now": -1.65,
+    "now": -2.13,
     "threshold": -12,
-    "distance": 10.35,
+    "distance": 9.87,
     "then": "POLICY_TIGHTENING no longer qualifies"
    }
   ],
