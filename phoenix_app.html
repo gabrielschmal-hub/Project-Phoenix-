@@ -999,6 +999,21 @@
   .dp-gex-stats{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px;margin-bottom:6px;}
   .dp-gex-stats .st{color:var(--inkFade);} .dp-gex-stats .sv{font-weight:700;color:var(--ink);margin-left:4px;}
   .dp-gex-plot{position:relative;height:340px;width:100%;overflow:hidden;}
+  .dp-vol{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  @media(max-width:820px){.dp-vol{grid-template-columns:repeat(2,1fr)}}
+  .dp-vol .vc{border:1px solid var(--line);border-radius:9px;background:var(--card2);padding:8px 10px;min-width:0}
+  .dp-vol .vc .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--inkFade);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dp-vol .vc .v{font-size:17px;font-weight:700;line-height:1.25;margin-top:1px}
+  .dp-vol .vc .s{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dp-vol .vc.wide{grid-column:span 2}
+  .px-fresh{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;border:1px solid var(--line2);color:var(--inkFade);margin-left:6px;white-space:nowrap}
+  .px-fresh.ok{border-color:var(--green);color:var(--green)} .px-fresh.aged{border-color:var(--amber);color:var(--amber)} .px-fresh.bad{border-color:var(--red);color:var(--red)}
+  .px-refresh{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:6px;border:1px solid var(--line2);background:transparent;color:var(--inkFade);cursor:pointer;margin-left:8px}
+  .px-refresh:hover:not(:disabled){border-color:var(--gold);color:var(--gold)} .px-refresh:disabled{opacity:.55;cursor:default}
+  .dp-volnote{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.6;margin-top:9px;padding-top:8px;border-top:1px solid var(--line2)}
+  .dp-volnote b{color:var(--ink)}
+  .dp-volplan{margin-top:8px;padding-top:7px;border-top:1px solid var(--line2)}
+  .dp-volplan .s{font-family:var(--mono);font-size:10.5px;line-height:1.5;color:var(--inkFade)}
   .sm-sub{font-family:var(--mono);font-size:11px;letter-spacing:.5px;color:var(--ink);text-transform:uppercase;margin-bottom:5px;display:flex;justify-content:space-between;align-items:baseline;}
   .sm-cap{color:var(--inkFade);font-size:10.5px;letter-spacing:0;text-transform:none;}
   .sm-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:baseline;font-family:var(--mono);font-size:11.5px;padding:3px 0;border-bottom:1px solid var(--line);}
@@ -13919,6 +13934,121 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     getJSON("rotation_nav").then(function(d){ NV=d; paint(); }).catch(function(){});
   }
 
+  // ---------------- IMPLIED VOL + EXPECTED MOVE ----------------
+  // outputs/iv_em.json carries one row per ticker, each stamped with the spot it
+  // was computed against and the earnings date known then. Age alone is the wrong
+  // staleness test: a six-day-old quote in a quiet tape is usable, and a one-day-old
+  // quote from before an earnings report is not stale, it is wrong. So a row is
+  // FRESH / AGED / INVALID, and an invalid row shows its numbers greyed with the reason.
+  var IVEM=null, IVEM_MISS=false;
+  function ivemLoad(cb){
+    if(IVEM!==null||IVEM_MISS){ cb(); return; }
+    getJSON("iv_em").then(function(d){ IVEM=(d&&d.tickers)||{}; }).catch(function(){ IVEM_MISS=true; IVEM={}; }).then(cb);
+  }
+  function ivemState(r, live){
+    if(!r||!r.asof) return {cls:"bad", label:"no data", why:"No options data on file for this name."};
+    // whole calendar days, both ends as dates — a timestamp difference makes a
+    // quote taken this morning read as "1d old" by the afternoon
+    var todayStr=new Date().toISOString().slice(0,10);
+    var days=Math.round((Date.parse(todayStr+"T00:00:00Z")-Date.parse(r.asof+"T00:00:00Z"))/86400000);
+    if(!isFinite(days)) days=99;
+    // earnings between the quote and now: the whole surface repriced, the row is void
+    if(r.next_earnings && r.next_earnings>=r.asof && r.next_earnings<=todayStr)
+      return {cls:"bad", label:"invalid", days:days, why:"Earnings on "+r.next_earnings+" fell after this quote \u2014 implied vol has repriced. Treat these as unknown until the next refresh."};
+    // price has run away from the spot the row was computed against
+    if(live!=null && r.spot && r.atr14){
+      var drift=Math.abs(live-r.spot)/r.atr14;
+      if(drift>=2) return {cls:"bad", label:"invalid", days:days, why:"Price has moved "+drift.toFixed(1)+"\u00d7ATR since this quote ("+fmtN(r.spot)+" \u2192 "+fmtN(live)+"). The expected move no longer describes this price."};
+      if(drift>=1) return {cls:"aged", label:days<=0?"today":days+"d old", days:days, why:"Price has moved "+drift.toFixed(1)+"\u00d7ATR since the quote \u2014 read the percentages, not the dollar figures."};
+    }
+    if(days<=0) return {cls:"ok", label:"today", days:0};
+    if(days<=7) return {cls:"aged", label:days+"d old", days:days, why:"Tier B names refresh at weekends. Star this ticker and the next run picks it up daily."};
+    return {cls:"bad", label:days+"d old", days:days, why:"Older than a week \u2014 too stale to size from."};
+  }
+  function ivemRefreshBtn(tk, scope){
+    return '<button class="px-refresh" data-refresh="'+tk+'" data-scope="'+(scope||"all")+'">\u21bb Update now</button>';
+  }
+  function ivemWireRefresh(root){
+    (root||document).querySelectorAll("[data-refresh]").forEach(function(b){
+      b.onclick=function(){
+        var self=this, tk=self.dataset.refresh;
+        self.disabled=true; self.textContent="\u2026 queuing";
+        fetch(SUPA.url+"/rest/v1/rpc/request_refresh",{method:"POST",headers:pxAuthHeaders(),
+          body:JSON.stringify({p_ticker:tk,p_scope:self.dataset.scope||"all"})})
+        .then(function(x){ return x.json(); }).then(function(r){
+          if(!r || r.code || r.message){ self.textContent="sign in to refresh"; self.disabled=false;
+            if(typeof pxAuthGate==="function") pxAuthGate(typeof pxRpcErr==="function"?pxRpcErr(r,"refresh refused"):"refresh refused"); return; }
+          if(r.ok===false){ self.textContent=r.error||"not queued"; return; }
+          // The queue is drained by the next pipeline run, not instantly. Say so.
+          self.textContent="\u2713 queued \u00b7 next run";
+          self.title="Phoenix refreshes this ticker on its next run. Starring it moves it to the daily list permanently.";
+        }).catch(function(){
+          self.textContent="sign in to refresh"; self.disabled=false;
+          if(typeof pxAuthGate==="function") pxAuthGate("Refreshing a ticker needs a signed-in account.");
+        });
+      };
+    });
+  }
+  function dpLoadVol(tk){
+    var tile=document.getElementById("dpVolTile"); if(!tile) return;
+    ivemLoad(function(){
+      var r=(IVEM||{})[tk], live=(typeof trPrices==="object"&&trPrices)?trPrices[tk]:null;
+      if(live==null && typeof PX_LIVE==="object" && PX_LIVE && PX_LIVE[tk]) live=PX_LIVE[tk].last;
+      var st=ivemState(r, live);
+      tile.style.display="block";
+      var meta=document.getElementById("dpVolMeta");
+      if(meta) meta.innerHTML=(r&&r.asof?" \u00b7 "+r.asof:"")+'<span class="px-fresh '+st.cls+'">'+st.label+'</span>'+
+        (r&&r.tier?'<span class="px-fresh">tier '+r.tier+'</span>':'')+ivemRefreshBtn(tk,"all");
+      var body=document.getElementById("dpVolBody");
+      if(!r || r.coverage==="no_chain" || r.em_pct==null){
+        body.innerHTML='<div class="ed-note">'+(r&&r.coverage==="no_chain"
+          ?'No usable option chain for '+tk+' \u2014 nothing to imply a move from. ATR is the only volatility input here.'
+          :'No implied-vol record for '+tk+' yet. It is not in the daily list; the weekend run covers the S&amp;P 500.')+'</div>';
+        ivemWireRefresh(tile); return;
+      }
+      var dim=(st.cls==="bad")?' style="opacity:.45"':'';
+      function vc(k,v,sub,col,wide){ return '<div class="vc'+(wide?" wide":"")+'"><div class="k">'+k+'</div><div class="v"'+(col?' style="color:'+col+'"':'')+'>'+v+'</div>'+(sub?'<div class="s">'+sub+'</div>':'')+'</div>'; }
+      var iv=r.iv_annual_pct, rv=r.rv30_pct, sp=r.spread_pts;
+      var basisReal=(r.stop_basis==="realised");
+      body.innerHTML='<div class="dp-vol"'+dim+'>'+
+        vc("Implied vol \u00b7 annual", iv!=null?iv.toFixed(1)+"%":"\u2014", r.coverage==="iv_proxy"?"from IV, quotes unusable":"options market")+
+        vc("Realised vol \u00b7 30d", rv!=null?rv.toFixed(1)+"%":"\u2014", "what it actually did")+
+        vc("Spread", sp!=null?((sp>=0?"+":"")+sp.toFixed(1)):"\u2014", sp==null?"":(sp>0?"implied above realised":"implied below realised"), sp==null?null:(sp>0?"var(--amber)":"var(--green)"))+
+        vc("IV percentile 52w", r.iv_percentile_52w!=null?r.iv_percentile_52w+"th":"building", r.iv_percentile_52w!=null?"of the last year":(r.iv_hist_days||0)+" of 20 days")+
+        vc("Expected move \u00b7 "+(r.dte!=null?r.dte+"d":""), r.em_pct!=null?r.em_pct.toFixed(1)+"%":"\u2014", (r.em_abs!=null?"\u00b1"+fmtN(r.em_abs):"")+(r.expiry?" \u00b7 exp "+r.expiry:"")+(r.coverage==="straddle"?" \u00b7 ATM straddle":" \u00b7 IV proxy"))+
+        vc("IV-implied daily", r.iv_daily_pct!=null?r.iv_daily_pct.toFixed(2)+"%":"\u2014", r.iv_daily_abs!=null?fmtN(r.iv_daily_abs):"")+
+        vc("Realised daily", r.rv_daily_pct!=null?r.rv_daily_pct.toFixed(2)+"%":"\u2014", r.atr14!=null?"ATR-14 "+fmtN(r.atr14)+" ("+r.atr14_pct.toFixed(1)+"%)":"")+
+        vc("Stop basis", r.stop_basis?r.stop_basis.toUpperCase():"\u2014",
+           r.stop_floor_pct!=null?"floor "+r.stop_floor_pct.toFixed(2)+"%/day":"", basisReal?"var(--amber)":"var(--green)")+
+      '</div>'+
+      (r.em_to_earnings?'<div class="dp-volnote">Next earnings <b>'+r.next_earnings+'</b> \u00b7 the '+r.em_to_earnings.expiry+' expiry ('+r.em_to_earnings.dte+'d) implies <b>\u00b1'+r.em_to_earnings.pct.toFixed(1)+'%</b> through the event'+(r.em_to_earnings.proxy?" (IV proxy)":"")+'. Policy exits before binary events \u2014 this is the size of the thing you would be sitting through.</div>':
+        (r.next_earnings?'<div class="dp-volnote">Next earnings <b>'+r.next_earnings+'</b> \u00b7 no expiry spanning it on file.</div>':''))+
+      (st.why?'<div class="dp-volnote" style="color:var(--amber)">'+st.why+'</div>':'')+
+      '<div class="dp-volnote">'+(basisReal
+        ? 'The tape is moving more than the options imply, so <b>size from realised</b>: an options-derived stop would sit inside the noise.'
+        : 'Options imply more movement than the tape has delivered, so <b>implied is the wider input</b> \u2014 size from it and the stop survives an ordinary day.')+
+        (r.stop_floor_pct!=null?' A one-day move of <b>'+r.stop_floor_pct.toFixed(2)+'%</b> is ordinary for this name.':'')+'</div>';
+      ivemWireRefresh(tile);
+      dpPlanVolCheck(tk, r);
+    });
+  }
+  // the planner already computes shares from entry and stop; warn when that stop is
+  // inside a single ordinary day's move, which is the most common sizing mistake
+  function dpPlanVolCheck(tk, r){
+    var el=document.getElementById("dpPlanVol"); if(!el) return;
+    if(!r||r.stop_floor_pct==null){ el.innerHTML=""; return; }
+    var t=window.__dpTrade||{}, e=+t.entry||0, st=+t.stop||0;
+    if(!(e>0&&st>0&&e>st)){
+      el.innerHTML='<span class="s">Ordinary day for '+tk+': <b>'+r.stop_floor_pct.toFixed(2)+'%</b>'+
+        (r.em_pct!=null?' \u00b7 expected move to '+r.expiry+': \u00b1'+r.em_pct.toFixed(1)+'%':'')+'</span>';
+      return;
+    }
+    var w=(e-st)/e*100, mult=w/r.stop_floor_pct;
+    el.innerHTML='<span class="s" style="color:'+(mult<1?"var(--red)":mult<1.5?"var(--amber)":"var(--green)")+'">'+
+      'Stop is '+w.toFixed(1)+'% away \u00b7 '+mult.toFixed(1)+'\u00d7 an ordinary day ('+r.stop_floor_pct.toFixed(2)+'%)'+
+      (mult<1?' \u2014 inside the noise, this gets hit by nothing happening.':mult<1.5?' \u2014 tight; one ordinary day reaches it.':'')+'</span>';
+  }
+
   function dpLoadGex(tk){
     var tile=document.getElementById("dpGexTile");
     if(!tile) return;
@@ -14524,6 +14654,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     }
 
     // ---- levels + plan panel (the right rail) ----
+    window.__dpTrade=t;                      // the vol check reads the stored levels from here
     var planPanel='<div class="dp-panel">'+
       '<h4>'+(t.status==="open"?"Position":t.status==="closed"?"Trade record":"Plan")+'</h4>'+
       '<div class="dp-lv-grid">'+
@@ -14545,6 +14676,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         rr("Capital at risk", calc.riskAmt!=null?"$"+Math.round(calc.riskAmt).toLocaleString():"\u2014")
       )+
       rr("Trade / Invest", (t.trade_score!=null?t.trade_score:"\u2014")+" / "+(t.invest_score!=null?t.invest_score:"\u2014"))+
+      '<div id="dpPlanVol" class="dp-volplan"></div>'+
       '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">'+
         (t.status==="plan"?(ready?
           '<button class="tr-btn primary" data-dp="open" style="flex:1">Open trade \u2192</button>':
@@ -14674,6 +14806,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
               '<span class="sub" id="dpGroupMeta"></span></span></div>'+
             '<div class="w-card-b"><div class="dp-groups" id="dpGroups"></div></div>'+
           '</div>'+
+          // VOLATILITY — implied vs realised, expected move, and which one to size from
+          '<div class="w-card" id="dpVolTile" style="display:none">'+
+            '<div class="w-card-h"><span class="w-card-t">Volatility <span class="sub" id="dpVolMeta"></span></span></div>'+
+            '<div class="w-card-b" id="dpVolBody"></div>'+
+          '</div>'+
           // GEX
           '<div class="w-card" id="dpGexTile" style="display:none">'+
             '<div class="w-card-h"><span class="w-card-t">GEX structure <span class="sub" id="dpGexMeta"></span></span></div>'+
@@ -14761,6 +14898,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(t.entry==null) wrap.classList.add("open");   // nothing set yet: show it
     })();
     dpLoadGroups(tk);
+    dpLoadVol(tk);
     dpLoadGex(tk);
     dpLoadSmart(tk);
     var tvb=document.getElementById("dpTvBtn");

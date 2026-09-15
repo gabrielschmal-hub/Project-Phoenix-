@@ -1197,10 +1197,10 @@ def run_senate_efd():
     merged = {tk: list(rw) for tk, rw in existing.items()}
     added = 0
     for tk, rws in by_ticker.items():
-        have = {(r.get("member"), r.get("date"), r.get("side"), r.get("amount"))
+        have = {(r.get("member"), r.get("date"), r.get("side"), r.get("amount"), r.get("asset_type") or "Stock")
                 for r in merged.get(tk, [])}
         for r in rws:
-            k = (r["member"], r["date"], r["side"], r["amount"])
+            k = (r["member"], r["date"], r["side"], r["amount"], r.get("asset_type") or "Stock")
             if k not in have:
                 merged.setdefault(tk, []).append(r); have.add(k); added += 1
                 _note_new_filing("Senate eFD", r["member"], tk, r["side"], r["date"], r["reported"], r["amount"])
@@ -8718,6 +8718,326 @@ def fetch_stock_chain_yfinance(symbol):
     return chain, spot
 
 
+# ============================================================
+# IMPLIED VOLATILITY + EXPECTED MOVE
+# Two tiers, because a chain costs one HTTP call per expiry per name:
+#   A (every run)  — the book, plans, the watchlist, the screener's leaders.
+#   B (weekends)   — the S&P 500, so a name you look up on a whim is at worst
+#                    six days old rather than absent.
+# Expected move comes from the ATM straddle mid when the quotes are usable and
+# from IV x S x sqrt(T) when they are not; the method is recorded on every row.
+# A number is never printed as live when it is not: each row carries the spot it
+# was computed against and the earnings date known at the time, and the app
+# decides fresh / aged / invalid from those. The pos_vs_high lesson — a field
+# that silently prints a wrong constant is worse than one that says nothing.
+# ============================================================
+IVEM = {
+    "max_expiries": 3,          # nearest three, enough for near-term EM + an earnings-spanning one
+    "min_dte": 3,               # under 3 days the straddle is mostly gamma, not a move estimate
+    "max_dte": 75,
+    "tier_a_cap": 160,
+    "tier_b_cap": 520,
+    "hist_days": 260,           # one year of ATM IV, for the percentile
+    "req_gap": 0.35,            # Yahoo throttles the options endpoint harder than quotes
+}
+
+
+def _spx_constituents():
+    """S&P 500 members. Wikipedia first; falls back to the biggest names in our own
+    universe, which is close enough for coverage purposes and never fails."""
+    import re as _re, requests
+    try:
+        h = requests.get("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
+                         headers={"User-Agent": "phoenix-research/1.0"}, timeout=45).text
+        tbl = h[h.index('id="constituents"'):]
+        syms = _re.findall(r'<td><a rel="nofollow" class="external text" href="[^"]*">([A-Z][A-Z.\-]{0,6})</a>', tbl)
+        syms = [x.replace(".", "-") for x in syms]          # BRK.B -> BRK-B for Yahoo
+        if len(syms) >= 400:
+            return sorted(set(syms))
+        print(f"[ivem] Wikipedia parse returned only {len(syms)} symbols — falling back")
+    except Exception as e:
+        print(f"[ivem] S&P 500 list unavailable ({type(e).__name__}: {e}) — falling back to top caps")
+    try:
+        import csv, os
+        rows = list(csv.DictReader(open(os.path.join(BASE_DIR, "universe.csv"))))
+    except Exception:
+        rows = []
+    rows = [r for r in rows if (r.get("market_cap") or "").replace(".", "").isdigit()]
+    rows.sort(key=lambda r: -float(r["market_cap"]))
+    return sorted({r["ticker"] for r in rows[:IVEM["tier_b_cap"]]})
+
+
+def _ivem_tier_a():
+    """Everything a decision could touch today."""
+    out = []
+    def add(seq):
+        for t in seq or []:
+            t = (t or "").upper().strip()
+            if t and t not in out:
+                out.append(t)
+    try:
+        add(t.get("ticker") for t in _load_trades() if t.get("status") in ("open", "plan"))
+    except Exception:
+        pass
+    for fn in (_pinned_tickers, _watchlist_tickers, _ranked_candidates):
+        try:
+            v = fn()
+            add(v if isinstance(v, (list, tuple, set)) else list(v))
+        except Exception:
+            pass
+    return out[:IVEM["tier_a_cap"]]
+
+
+def _ivem_queue():
+    """Names the app asked to refresh (Supabase refresh_queue). Drained on every run."""
+    try:
+        rows = _sb_get("refresh_queue", {"select": "ticker,requested_at", "done": "eq.false",
+                                         "order": "requested_at.asc"}, limit=200) or []
+    except Exception as e:
+        print(f"[ivem] refresh queue unreadable: {e}")
+        return []
+    return [(r.get("ticker") or "").upper() for r in rows if r.get("ticker")]
+
+
+def _ivem_queue_clear(tickers):
+    import os, requests
+    url, key = _sb_env()
+    if not (url and key and tickers):
+        return
+    try:
+        requests.patch(f"{url}/rest/v1/refresh_queue",
+                       headers={"apikey": key, "Authorization": f"Bearer {key}",
+                                "Content-Type": "application/json", "Prefer": "return=minimal"},
+                       params={"ticker": "in.(" + ",".join(tickers) + ")", "done": "eq.false"},
+                       json={"done": True, "done_at": _now()}, timeout=30)
+    except Exception as e:
+        print(f"[ivem] queue clear failed: {e}")
+
+
+def _atm_from_chain(calls, puts, spot):
+    """(straddle_mid, atm_iv, strike, quality) for the strike nearest spot.
+    quality: 'quoted' when both legs have a two-sided market, else 'iv_only'."""
+    if not calls or not puts:
+        return None, None, None, "no_chain"
+    ks = sorted({r["strike"] for r in calls} & {r["strike"] for r in puts},
+                key=lambda k: abs(k - spot))
+    if not ks:
+        return None, None, None, "no_pair"
+    k = ks[0]
+    c = next(r for r in calls if r["strike"] == k)
+    p = next(r for r in puts if r["strike"] == k)
+    ivs = [x for x in (c.get("iv"), p.get("iv")) if x and 0.01 < x < 5]
+    atm_iv = sum(ivs) / len(ivs) if ivs else None
+
+    def mid(r):
+        b, a = r.get("bid"), r.get("ask")
+        if b and a and a > 0 and b > 0 and (a - b) / ((a + b) / 2) < 0.60:
+            return (b + a) / 2
+        lp = r.get("last")
+        return lp if lp and lp > 0 else None
+    cm, pm = mid(c), mid(p)
+    if cm and pm:
+        return cm + pm, atm_iv, k, "quoted"
+    return None, atm_iv, k, "iv_only"
+
+
+def _ivem_chain(symbol):
+    """Nearest expiries with bid/ask kept — fetch_stock_chain_yfinance drops them."""
+    import yfinance as yf
+    from datetime import datetime
+    tk = yf.Ticker(symbol)
+    hist = tk.history(period="3mo")
+    if hist is None or len(hist) < 20:
+        return None, None, None
+    closes = [float(x) for x in hist["Close"].dropna()]
+    highs = [float(x) for x in hist["High"].dropna()]
+    lows = [float(x) for x in hist["Low"].dropna()]
+    spot = closes[-1]
+    now = datetime.now()
+    exps = []
+    for e in (tk.options or []):
+        try:
+            dte = (datetime.strptime(e, "%Y-%m-%d") - now).days
+        except Exception:
+            continue
+        if IVEM["min_dte"] <= dte <= IVEM["max_dte"]:
+            exps.append((e, dte))
+        if len(exps) >= IVEM["max_expiries"]:
+            break
+    out = []
+    for e, dte in exps:
+        try:
+            oc = tk.option_chain(e)
+        except Exception:
+            continue
+        def rows(df):
+            r = []
+            for _, x in df.iterrows():
+                r.append({"strike": float(x["strike"]), "bid": float(x.get("bid") or 0) or None,
+                          "ask": float(x.get("ask") or 0) or None, "last": float(x.get("lastPrice") or 0) or None,
+                          "iv": float(x.get("impliedVolatility") or 0) or None,
+                          "oi": int(x.get("openInterest") or 0)})
+            return r
+        out.append({"expiry": e, "dte": dte, "calls": rows(oc.calls), "puts": rows(oc.puts)})
+    return spot, out, (closes, highs, lows)
+
+
+def _realised_vol(closes, n=30):
+    import math
+    r = [math.log(closes[i] / closes[i - 1]) for i in range(1, len(closes)) if closes[i - 1] > 0]
+    r = r[-n:]
+    if len(r) < 10:
+        return None
+    m = sum(r) / len(r)
+    var = sum((x - m) ** 2 for x in r) / (len(r) - 1)
+    return math.sqrt(var) * math.sqrt(252) * 100
+
+
+def _atr14(highs, lows, closes):
+    trs = []
+    for i in range(1, len(closes)):
+        trs.append(max(highs[i] - lows[i], abs(highs[i] - closes[i - 1]), abs(lows[i] - closes[i - 1])))
+    trs = trs[-14:]
+    return (sum(trs) / len(trs)) if len(trs) == 14 else None
+
+
+def run_iv_em(tier_b=None):
+    """Write outputs/iv_em.json. tier_b=None decides by weekday (Sat/Sun = full S&P 500)."""
+    import os, json, math, time
+    from datetime import datetime, timezone
+    path = os.path.join(OUTPUTS_DIR, "iv_em.json")
+    hist_path = os.path.join(OUTPUTS_DIR, "iv_history.json")
+    prev, hist = {}, {}
+    try:
+        prev = json.load(open(path)).get("tickers", {}) or {}
+    except Exception:
+        pass
+    try:
+        hist = json.load(open(hist_path)) or {}
+    except Exception:
+        pass
+
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    if tier_b is None:
+        tier_b = datetime.now(timezone.utc).weekday() >= 5
+    a = _ivem_tier_a()
+    queued = _ivem_queue()
+    names = list(dict.fromkeys(queued + a))
+    tier = {t: "A" for t in names}
+    if tier_b:
+        for t in _spx_constituents():
+            if t not in tier:
+                names.append(t); tier[t] = "B"
+    earn = (_load_earnings_state() or {}).get("next_dates", {})
+
+    out = dict(prev)                      # keep yesterday's rows; today's overwrite theirs
+    n_ok = n_proxy = n_none = n_fail = 0
+    t0 = time.time()
+    for i, tk in enumerate(names):
+        try:
+            time.sleep(IVEM["req_gap"])
+            spot, chains, bars = _ivem_chain(tk)
+        except Exception as e:
+            n_fail += 1
+            if n_fail <= 3:
+                print(f"[ivem] {tk}: {type(e).__name__}: {e}")
+            continue
+        if not spot or not chains:
+            out[tk] = {"asof": today, "tier": tier.get(tk, "B"), "coverage": "no_chain", "spot": spot}
+            n_none += 1
+            continue
+        closes, highs, lows = bars
+        near = chains[0]
+        strad, atm_iv, k, quality = _atm_from_chain(near["calls"], near["puts"], spot)
+        dte = near["dte"]
+        if strad:
+            em_abs, method = strad, "straddle"
+        elif atm_iv:
+            em_abs, method = spot * atm_iv * math.sqrt(dte / 365.0), "iv_proxy"
+        else:
+            out[tk] = {"asof": today, "tier": tier.get(tk, "B"), "coverage": "no_chain", "spot": round(spot, 2)}
+            n_none += 1
+            continue
+        n_ok += 1 if method == "straddle" else 0
+        n_proxy += 1 if method == "iv_proxy" else 0
+
+        rv30 = _realised_vol(closes, 30)
+        atr = _atr14(highs, lows, closes)
+        iv_pct = (atm_iv * 100) if atm_iv else None
+        iv_daily_pct = (iv_pct / math.sqrt(252)) if iv_pct else None
+        atr_pct = (atr / spot * 100) if atr else None
+        # the IBM rule: size from the wider of what options imply and what the tape did
+        basis = None
+        if iv_daily_pct and atr_pct:
+            basis = "realised" if atr_pct > iv_daily_pct else "implied"
+
+        h = hist.setdefault(tk, {})
+        if iv_pct:
+            h[today] = round(iv_pct, 2)
+            for d in sorted(h)[:-IVEM["hist_days"]]:
+                h.pop(d, None)
+        vals = sorted(h.values())
+        pctile = (100.0 * sum(1 for v in vals if v <= (iv_pct or 0)) / len(vals)) if len(vals) >= 20 else None
+
+        # an expiry that spans the next earnings date, when we know it
+        ed = earn.get(tk)
+        em_earn = None
+        if ed:
+            for c in chains:
+                if c["expiry"] >= ed:
+                    st, iv2, _, _ = _atm_from_chain(c["calls"], c["puts"], spot)
+                    if st:
+                        em_earn = {"expiry": c["expiry"], "dte": c["dte"], "pct": round(st / spot * 100, 2)}
+                    elif iv2:
+                        em_earn = {"expiry": c["expiry"], "dte": c["dte"],
+                                   "pct": round(iv2 * math.sqrt(c["dte"] / 365.0) * 100, 2), "proxy": True}
+                    break
+
+        out[tk] = {
+            "asof": today, "tier": tier.get(tk, "B"), "coverage": method,
+            "spot": round(spot, 2), "atm_strike": k, "expiry": near["expiry"], "dte": dte,
+            "em_abs": round(em_abs, 2), "em_pct": round(em_abs / spot * 100, 2),
+            "em_daily_pct": round(em_abs / spot * 100 / math.sqrt(max(dte, 1)), 2),
+            "iv_annual_pct": round(iv_pct, 1) if iv_pct else None,
+            "iv_daily_pct": round(iv_daily_pct, 2) if iv_daily_pct else None,
+            "iv_daily_abs": round(spot * iv_daily_pct / 100, 2) if iv_daily_pct else None,
+            "rv30_pct": round(rv30, 1) if rv30 else None,
+            "spread_pts": round((iv_pct - rv30), 1) if (iv_pct and rv30) else None,
+            "iv_percentile_52w": round(pctile) if pctile is not None else None,
+            "iv_hist_days": len(vals),
+            "atr14": round(atr, 2) if atr else None,
+            "atr14_pct": round(atr_pct, 2) if atr_pct else None,
+            "rv_daily_pct": round(rv30 / math.sqrt(252), 2) if rv30 else None,
+            "stop_basis": basis,
+            "stop_floor_pct": round(max(x for x in (iv_daily_pct, atr_pct) if x), 2) if (iv_daily_pct or atr_pct) else None,
+            "next_earnings": ed, "em_to_earnings": em_earn,
+            "quality": quality,
+        }
+        if (i + 1) % 50 == 0:
+            print(f"[ivem] {i+1}/{len(names)} · {int(time.time()-t0)}s", flush=True)
+
+    json.dump(hist, open(hist_path, "w"), separators=(",", ":"))
+    write_json("iv_em", {
+        "asof": _now(), "date": today,
+        "source": "Yahoo option chains; expected move from the ATM straddle mid, "
+                  "IV x S x sqrt(T) when quotes are unusable (method on every row)",
+        "note": "Rows carry the spot they were computed against and the earnings date known then. "
+                "A row is stale by age, and INVALID once earnings have passed or spot has moved far "
+                "from the quote — the app decides which.",
+        "tier_a": len([t for t in names if tier.get(t) == 'A']),
+        "tier_b_refreshed": bool(tier_b),
+        "ticker_count": len(out),
+        "tickers": out})
+    if queued:
+        _ivem_queue_clear(queued)
+    msg = (f"{len(names)} requested ({len([t for t in names if tier.get(t)=='A'])} tier A"
+           f"{', S&P 500 refreshed' if tier_b else ''}) · {n_ok} straddle · {n_proxy} iv-proxy · "
+           f"{n_none} no chain · {n_fail} failures · {len(out)} on file · {int(time.time()-t0)}s")
+    print(f"[ivem] {msg}")
+    sb_heartbeat("iv_em", n_fail < max(5, len(names) * 0.2), msg)
+    return out
+
+
 def run_gex_stocks(tickers=None):
     """Compute per-stock GEX for Stage-0 eligible names. Non-fatal per ticker."""
     import os, json, time
@@ -11282,10 +11602,12 @@ def run_house_ptr(year=None, max_filings=None):
     merged = {tk: list(rows) for tk, rows in existing.items()}
     added = 0
     for tk, rows in by_ticker.items():
-        seen = {(r.get("member"), r.get("date"), r.get("side"), r.get("amount"))
+        # asset type is part of identity: Pelosi's 24 Jul BE stock and BE call option
+        # share member/date/side/band and collapsed into one row without it
+        seen = {(r.get("member"), r.get("date"), r.get("side"), r.get("amount"), r.get("asset_type") or "Stock")
                 for r in merged.get(tk, [])}
         for r in rows:
-            k = (r.get("member"), r.get("date"), r.get("side"), r.get("amount"))
+            k = (r.get("member"), r.get("date"), r.get("side"), r.get("amount"), r.get("asset_type") or "Stock")
             if k in seen:
                 continue
             merged.setdefault(tk, []).append(r)
@@ -12592,6 +12914,7 @@ def run_full():
 
     # --- earnings + fundamentals -------------------------------------------
     step("earnings_refresh", run_earnings_refresh)
+    step("iv_em",          run_iv_em,         optional=True)   # implied vol + expected move, two-tier
     step("financials_all", run_financials_all)
     step("detail_bundle",  run_detail_bundle)
 
