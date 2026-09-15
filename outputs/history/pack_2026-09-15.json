@@ -1,7 +1,7 @@
 {
  "schema": "phoenix-fact-pack/1",
  "date": "2026-09-15",
- "asof": "2026-09-15 10:21 UTC",
+ "asof": "2026-09-15 13:18 UTC",
  "market": {
   "regime": "POLICY_TIGHTENING",
   "regime_held_weeks": 3,
@@ -11,16 +11,16 @@
    "vs_50d_pct": 0.13,
    "vs_200d_pct": 6.32
   },
-  "vix": 17.84,
+  "vix": 17.01,
   "dxy": null,
   "us10y": null,
   "gold": null,
   "wti": null,
   "gex": {
-   "net_B": -22.24,
+   "net_B": -26.94,
    "regime": "negative",
    "flip": null,
-   "dist_to_flip_pct": 0.12,
+   "dist_to_flip_pct": 0.4,
    "call_wall": null,
    "put_wall": null,
    "spot": 7619.98
@@ -54,8 +54,8 @@
   "gold": {
    "last": 4351.9,
    "d1_pct": -1.29,
-   "w1_pct": -1.76,
-   "m1_pct": -0.27
+   "w1_pct": -2.79,
+   "m1_pct": -1.55
   },
   "wti": {
    "last": 101.39,
@@ -573,32 +573,68 @@
  },
  "news": {
   "date": "2026-09-14",
-  "asof": "2026-09-15 09:49 UTC",
-  "headline": "Two stops taken and one position opened \u2014 and by Monday's close the book was back at its cap",
-  "standfirst": "PLTR stopped out on Thursday 10 September \u2014 low 164.55 against your 164.62 stop \u2014 and BAC followed on Monday, low 58.92 against 60.39, after Brian Moynihan told the Barclays conference that third-quarter investment banking fees would fall at least 10%. Both at the original line, both a clean \u22121.00R, \u2212$40.00 together. JPMorgan fell 1.71% and Wells 1.75% on the same headline, so BAC was three times the sector move \u2014 a single-name repricing on the day the ten-year touched 5.00% for the first time since October 2023 and a Wednesday hike went above 90% priced. The thesis was right and the position died anyway. Alphabet rose 3.06% to a +0.98R mark as money rotated out of chips and into distribution after Anthropic's Dario Amodei called for slowing frontier AI development. Heat is now 3.05R against 3.0R, down from 4.04R \u2014 inside the cap for the first time in three weeks, and it got there by losing rather than deciding.",
-  "themes": [],
-  "ondeck": "The FOMC decides Wednesday 16 September with a hike above 90% priced; the Bank of Japan decides Friday 18 September with a hike 97% priced; triple witching is the same Friday. Phoenix cannot be refreshed until the repository is reachable again \u2014 every number above sourced to a date came from the tape, and the exits in this brief are reconciled by hand because the engine has not seen them. The next brief covers Tuesday's session and runs into decision day.",
+  "asof": "2026-09-15 12:52 UTC",
+  "headline": "Two stops at the original line \u2014 and seven cents decided one of them",
+  "standfirst": "PLTR stopped out Thursday on a low of 164.55 against a 164.62 stop, and BAC followed Monday at 60.39 after Brian Moynihan guided third-quarter investment banking fees down at least 10%. Both at the original line, \u2212$40.00 together. OKTA came on the same afternoon at 182.73 and closed 186.45 \u2014 your position +2.04%, the stock +11.98%, because the fill came after most of the move. Heat round-tripped 4.04R \u2192 2.05R \u2192 3.05R in one session and sits at the 3.0R cap. Underneath it: the ten-year touched 5.00% for the first time since October 2023, a Wednesday hike went above 90% priced, and Saudi Arabia shut the pipeline built to bypass Hormuz. Two of the three positions now open move on the same AI-safety story.",
+  "themes": [
+   {
+    "kicker": "The book",
+    "right": "3 open \u00b7 2 closed \u00b7 heat 3.05R / 3.0R",
+    "title": "Two stops at the original line, one entry the same afternoon, and heat right back where it started",
+    "items": [],
+    "note": "<b>PLTR and BAC both closed at their original stops</b>, PLTR on Thursday 10 September and BAC on Monday, realising <b>\u2212$40.00</b> \u2014 a clean \u22121.00R each, <b>2.0% of the account</b>."
+   },
+   {
+    "kicker": "The wire \u00b7 your positions",
+    "right": "3 names \u00b7 company news only",
+    "title": "What is actually happening at the companies you own",
+    "items": [],
+    "note": "<b>Street:</b> Strong Buy \u00b7 62 analysts, average target <b>$422.34</b> \u2014 22.2% above the 345.71 close."
+   },
+   {
+    "kicker": "What actually mattered",
+    "right": "one session, filtered",
+    "title": "The book is concentrated in a story, and two of its three names have already outrun the street",
+    "items": [],
+    "note": "<b>1. GOOG and OKTA both rose on Monday for the same reason</b>, and only the third name is unattached to it. They sit in different industries, so no screener and no sector check would flag this \u2014 it is concentration in a <i>narrative</i>, not a sector. The AI-safety trade arrived in a single session on an essay; it can leave the same way, and if it does two thirds of the book moves down together. There is no date on the calendar for it."
+   },
+   {
+    "kicker": "The war \u00b7 the day",
+    "right": "Brent above $105 \u00b7 pipeline shut five to six weeks",
+    "title": "The pipeline built to survive a closed Hormuz was shut by drones from Iraq",
+    "items": [],
+    "note": "<b>Saudi Arabia suspended the East-West pipeline on 13 September</b> after a drone strike the kingdom traced to Maysan province in south-eastern Iraq, near the Iranian border. The 1,200km line normally carries <b>4\u20135m barrels a day</b> against a 7m maximum, running crude west to Yanbu on the Red Sea. It exists <i>precisely</i> to bypass the Strait of Hormuz \u2014 and Hormuz flows are already down to roughly <b>6\u20139m bpd</b> from more than a fifth of global supply in peacetime. Repairs are estimated at <b>five to six weeks</b>."
+   },
+   {
+    "kicker": "What's next",
+    "right": "FOMC Wednesday \u00b7 BoJ and expiry Friday",
+    "title": "A decision tomorrow, then two central banks and an expiry inside three days",
+    "items": [],
+    "note": "<b>The Fed is tomorrow and the surprise is one-sided.</b> Above 90% priced means a hike is already in the price and a hold is not, so the larger move comes from the outcome nobody is positioned for \u2014 amplified by a dealer book that is short gamma. There is nothing to do before 2pm ET on Wednesday, and no room to do it: heat is at the cap."
+   }
+  ],
+  "ondeck": null,
   "note": null
  },
  "provenance": {
   "macro": {
-   "asof": "2026-09-15 09:49 UTC",
+   "asof": "2026-09-15 12:52 UTC",
    "age_min": null
   },
   "gex": {
-   "asof": "2026-09-15 09:49 UTC",
+   "asof": "2026-09-15 12:52 UTC",
    "age_min": null
   },
   "stocks": {
-   "asof": "2026-09-15 10:06 UTC",
+   "asof": "2026-09-15 13:05 UTC",
    "age_min": null
   },
   "institutional_holdings": {
-   "asof": "2026-09-15 10:14 UTC",
+   "asof": "2026-09-15 13:12 UTC",
    "quarter": "2026-06-30"
   },
   "congress_trades": {
-   "asof": "2026-09-15 10:12 UTC",
+   "asof": "2026-09-15 13:10 UTC",
    "status": {
     "written": "2026-09-15",
     "dropped_impossible_dates": 0,
@@ -628,7 +664,7 @@
    }
   },
   "wire": {
-   "asof": "2026-09-15 09:49 UTC"
+   "asof": "2026-09-15 12:52 UTC"
   }
  },
  "missing": [],
@@ -642,13 +678,6 @@
     "was": "positive",
     "now": "negative",
     "why": "dealers switch between dampening and amplifying moves"
-   },
-   {
-    "kind": "market",
-    "what": "vix",
-    "was": 15.84,
-    "now": 17.84,
-    "why": "volatility repriced"
    },
    {
     "kind": "screener",
