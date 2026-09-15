@@ -1013,6 +1013,10 @@
   .dp-volnote{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.6;margin-top:9px;padding-top:8px;border-top:1px solid var(--line2)}
   .dp-volnote b{color:var(--ink)}
   .dp-volplan{margin-top:8px;padding-top:7px;border-top:1px solid var(--line2)}
+  .tb-th{display:none;margin-left:auto;background:transparent;border:1px solid var(--line2);color:var(--inkFade);
+    border-radius:8px;width:32px;height:32px;font-size:15px;line-height:1;cursor:pointer;flex:0 0 auto}
+  .tb-th:active{border-color:var(--gold);color:var(--gold)}
+  @media(max-width:900px){ .topbar{display:flex;align-items:center;gap:10px} .tb-th{display:block} }
   .dp-volplan .s{font-family:var(--mono);font-size:10.5px;line-height:1.5;color:var(--inkFade)}
   .sm-sub{font-family:var(--mono);font-size:11px;letter-spacing:.5px;color:var(--ink);text-transform:uppercase;margin-bottom:5px;display:flex;justify-content:space-between;align-items:baseline;}
   .sm-cap{color:var(--inkFade);font-size:10.5px;letter-spacing:0;text-transform:none;}
@@ -2969,7 +2973,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   <div class="pxhidden">
     <div class="navbtn" id="navBtn"></div><div class="navscrim" id="navScrim"></div>
     <nav class="navpanel" id="navPanel"><div class="rail-nav" id="railNav"></div></nav>
-    <div class="topbar"><div class="tb-sec" id="tbSection"></div><div class="asof" id="stripAsof"></div></div>
+    <div class="topbar"><div class="tb-sec" id="tbSection"></div><div class="asof" id="stripAsof"></div>
+      <button class="tb-th" id="tbTheme" aria-label="Switch light or dark">\u25D1</button></div>
   </div>
 
   <header id="pxhead"><h1 id="pxhTitle">Mission Control</h1><p id="pxhSub"></p></header>
@@ -3027,7 +3032,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
      The publishable key is DESIGNED to live in public HTML: it grants only what
      Row Level Security allows (read-only selects). The secret/service key must
      never appear in this file. */
-  var PAGES_BASE = "https://gabrielschmal-hub.github.io/Project-Phoenix-/outputs/";
+  /* Same origin. This used to point at GitHub Pages; making the repo private
+     took Pages down with it, and every file Supabase does not mirror — all
+     2,900 charts among them — started 404ing. Vercel serves outputs/ anyway,
+     and it honours .vercelignore, so the book stays out. */
+  var PAGES_BASE = "/outputs/";
   var BASE = PAGES_BASE; // kept for any legacy references
   var SUPA = {
     url: "https://tinribrtctphlmfytgqo.supabase.co",
@@ -14187,6 +14196,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     return "charts/"+String(tk).replace(/[\/.]/g,"-");
   }
 
+  var dpChartErr={};            // ticker -> why the fetch failed, so the empty state can say it
   function dpLoadChart(tk, cb){
     if(dpChartCache[tk]){ cb(dpChartCache[tk]); return; }
     if(dpChartMiss[tk]){ cb(null); return; }
@@ -14196,7 +14206,14 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         if(d && d.quote && d.quote.last!=null) trPrices[tk]=d.quote.last;
         cb(d);
       })
-      .catch(function(){ dpChartMiss[tk]=true; cb(null); });
+      .catch(function(e){
+        dpChartMiss[tk]=true;
+        var m=String((e&&e.message)||e||"");
+        // a 404 means the engine has not written this ticker; anything else is
+        // the fetch itself failing, and saying "not in the universe" would be a lie
+        dpChartErr[tk]=/404/.test(m)?null:(m||"fetch failed");
+        cb(null);
+      });
   }
 
   function dpFetchBars(tk,tf,cb){
@@ -14980,7 +14997,12 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var otherTf = dpCache[tk] && Object.keys(dpCache[tk].bars).filter(function(k){
         return k!==tf && dpCache[tk].bars[k] && dpCache[tk].bars[k].length; });
       var msg;
-      if(otherTf && otherTf.length){
+      if(dpChartErr[tk]){
+        msg='Chart data for '+tk+' could not be loaded.<div class="fix">'+
+            'The request failed with <code>'+String(dpChartErr[tk]).replace(/</g,"&lt;")+'</code>. '+
+            'The file may exist \u2014 this is a transport problem, not a missing ticker. '+
+            'Reload the page; if it persists the outputs host is unreachable.</div>';
+      } else if(otherTf && otherTf.length){
         msg='No '+tf+' bars for '+tk+'.<div class="fix">Other timeframes have data \u2014 try '+
             otherTf.map(function(k){return k.charAt(0).toUpperCase();}).join(" or ")+'.</div>';
       } else if(inScreener){
@@ -15812,6 +15834,12 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     document.addEventListener("click",function(){ box.classList.remove("open"); });
     document.getElementById("thDark").addEventListener("click",function(){ setTheme("dark"); });
     document.getElementById("thLight").addEventListener("click",function(){ setTheme("light"); });
+    // the rail footer holding Light/Dark is clipped when the rail collapses on a
+    // phone, so the top bar carries the same control there
+    var _tbTh=document.getElementById("tbTheme");
+    if(_tbTh) _tbTh.addEventListener("click",function(){
+      setTheme(document.documentElement.classList.contains("light")?"dark":"light");
+    });
     var db=document.getElementById("pxDragBtn");
     if(db) db.addEventListener("click",function(e){ e.stopPropagation(); setDrag(!DRAG); });
     document.getElementById("pxG").addEventListener("click",function(){ setProfile("G"); });
