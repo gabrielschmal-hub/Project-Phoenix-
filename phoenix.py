@@ -1671,16 +1671,44 @@ def _wire_parse_html(raw):
         t = _re.search(r'<h2 class="ed-hl[^"]*">(.*?)</h2>', ch, _re.S)
         title = _wire_strip(t.group(1)) if t else ""
         items = []
+        # The wire is written by hand each morning and its rows are not uniform: some
+        # carry a <span class="w-when">, most do not, and calendar rows use a different
+        # shape entirely. The old pattern required all three spans, so on 16 Sep it
+        # matched 0 of 18 rows and every bullet vanished while the headings survived —
+        # "only pieces". Match what is actually written.
         for im in _re.finditer(
-                r'<div class="ed-w"><span class="w-tag ?([a-z\- ]*)">(.*?)</span>'
-                r'<span>(.*?)</span><span class="w-when">(.*?)</span></div>',
+                r'<div class="ed-w"[^>]*><span class="w-tag ?([a-z\- ]*)"[^>]*>(.*?)</span>'
+                r'\s*<span(?![^>]*class="w-when")[^>]*>(.*?)</span>'
+                r'(?:\s*<span class="w-when"[^>]*>(.*?)</span>)?\s*</div>',
                 ch, _re.S):
             it = {"tone": im.group(1).strip(), "tag": _wire_strip(im.group(2)),
-                  "html": _wire_keep_b(im.group(3)), "when": _wire_strip(im.group(4))}
+                  "html": _wire_keep_b(im.group(3)), "when": _wire_strip(im.group(4) or "")}
             tk = _re.match(r'<b>([A-Z][A-Z0-9.\-]{0,6})</b>', im.group(3).strip())
             if tk:
                 it["ticker"] = tk.group(1)
             items.append(it)
+        # calendar rows: <span class="c-tag ..">TAG</span><span class="c-l">what</span>
+        #               <span class="c-w">Fri</span><span class="c-d">2026-09-18</span>
+        for im in _re.finditer(
+                r'<div class="ed-cal"[^>]*><span class="c-tag ?([a-z\- ]*)"[^>]*>(.*?)</span>'
+                r'\s*<span class="c-l"[^>]*>(.*?)</span>'
+                r'(?:\s*<span class="c-w"[^>]*>(.*?)</span>)?'
+                r'(?:\s*<span class="c-d"[^>]*>(.*?)</span>)?', ch, _re.S):
+            when = " \u00b7 ".join(x for x in (_wire_strip(im.group(4) or ""),
+                                           _wire_strip(im.group(5) or "")) if x)
+            items.append({"tone": im.group(1).strip(), "tag": _wire_strip(im.group(2)),
+                          "html": _wire_keep_b(im.group(3)), "when": when, "kind": "calendar"})
+        # instrument rows: <div class="i-k"><span>Dow</span><span class="i-sig">1.6s</span>
+        for im in _re.finditer(
+                r'<div class="ed-ins"[^>]*>\s*<div class="i-k"[^>]*><span[^>]*>(.*?)</span>'
+                r'\s*<span class="i-sig"[^>]*>(.*?)</span>.*?'
+                r'(?:<span class="i-v"[^>]*>(.*?)</span>)?'
+                r'(?:\s*<span class="i-c"[^>]*>(.*?)</span>)?', ch, _re.S):
+            val = " ".join(x for x in (_wire_strip(im.group(3) or ""),
+                                       _wire_strip(im.group(4) or "")) if x)
+            items.append({"tone": "", "tag": _wire_strip(im.group(1)),
+                          "html": _wire_keep_b(val or im.group(2)),
+                          "when": _wire_strip(im.group(2)), "kind": "instrument"})
         note = None
         n = _re.search(r'<p class="ed-body">(?!\s*<b>On deck)(.*?)</p>', ch, _re.S)
         if n:
@@ -1688,14 +1716,32 @@ def _wire_parse_html(raw):
         low = kicker.lower()
         SLOTS = (("in five minutes", "recap"), ("five minutes", "recap"), ("the recap", "recap"),
                  ("the stance", "stance"), ("phoenix's stance", "stance"),
-                 ("the market", "markets"), ("markets", "markets"), ("the tape today", "markets"),
+                 ("the market", "markets"), ("markets", "markets"),
+                 ("the tape today", "markets"), ("the tape", "markets"),
                  ("the macro", "macro"), ("macro", "macro"), ("rates and the dollar", "macro"),
                  ("smart money", "smart_money"), ("positioning", "smart_money"),
                  ("the screener", "screener"), ("opportunities", "screener"),
-                 ("what changed", "changed"),
-                 ("what would change", "invalidation"), ("invalidation", "invalidation"))
+                 ("what changed", "changed"), ("what actually mattered", "changed"),
+                 ("what would change", "invalidation"), ("invalidation", "invalidation"),
+                 # the shapes the morning wire actually uses
+                 ("the book", "positions"), ("the wire \u00b7 your positions", "positions"),
+                 ("the wire", "positions"),
+                 ("the war", "world"), ("the world", "world"),
+                 ("what's next", "ondeck"), ("whats next", "ondeck"), ("on deck", "ondeck"))
         slot = next((v for k, v in SLOTS if low.startswith(k)), None)
         if slot:
+            if slot == "ondeck":                 # ondeck is a string slot, not a block
+                out["ondeck"] = out["ondeck"] or note or title
+                out["themes"].append({"kicker": kicker, "right": right,
+                                      "title": title, "items": items, "note": note})
+                continue
+            if slot == "positions":
+                out["positions"] = {"right": right, "title": title,
+                                    "items": items, "note": note}
+                continue
+            prev = out.get(slot)
+            if prev and (prev.get("items") or prev.get("note")) and not (items or note):
+                continue                          # keep the fuller of two same-slot sections
             out[slot] = {"kicker": kicker, "right": right, "title": title,
                          "items": items, "note": note}
             continue
@@ -1709,7 +1755,7 @@ def _wire_parse_html(raw):
         elif low.startswith("the world"):
             out["world"] = {"kicker": kicker, "right": right, "title": title,
                             "items": items, "note": note}
-        elif (not kicker) or low.startswith("the tape"):
+        elif not kicker:
             continue
         else:
             out["themes"].append({"kicker": kicker, "right": right,
