@@ -836,6 +836,193 @@ def last_trading_day(d=None):
     return d
 
 
+# ============================================================
+# GROUP STRENGTH — is the signal's sector and industry actually leading?
+# The industry gate asks whether a group ranks well inside our own universe. It
+# let through Major banks (1 win in 14) and Other metals (0 in 8) while Marine
+# shipping went 25 of 28. This measures the thing the gate does not: the group's
+# return AGAINST THE INDEX, whether it sits above its 50-day, whether that
+# average is rising, and where it ranks. Stamped on every signal at write time
+# so the forward test can be cut by it, and published daily for the app.
+# ============================================================
+def _spx_returns():
+    """SPX 1-month and 3-month % returns from the daily macro series."""
+    import os, json
+    try:
+        d = json.load(open(os.path.join(OUTPUTS_DIR, "macro_series.json")))
+        ser = [r for r in (d.get("series") or []) if r.get("spx") is not None]
+        ser.sort(key=lambda r: r.get("date", ""))
+        c = [float(r["spx"]) for r in ser]
+        if len(c) < 64:
+            return None, None
+        return round((c[-1] / c[-22] - 1) * 100, 2), round((c[-1] / c[-64] - 1) * 100, 2)
+    except Exception:
+        return None, None
+
+
+def _group_strength_from(ind_rows, sec_rows, spx_m1=None, spx_m3=None):
+    """Turn industry.json / sector_perf.json rows into a lookup with vs-SPX and rank."""
+    def build(rows, key):
+        rows = [r for r in (rows or []) if r.get(key)]
+        # rank by 3-month return, best = 1
+        by3 = sorted([r for r in rows if r.get("m3") is not None], key=lambda r: -r["m3"])
+        rank3 = {r[key]: i + 1 for i, r in enumerate(by3)}
+        by1 = sorted([r for r in rows if r.get("m1") is not None], key=lambda r: -r["m1"])
+        rank1 = {r[key]: i + 1 for i, r in enumerate(by1)}
+        out = {}
+        for r in rows:
+            m1, m3 = r.get("m1"), r.get("m3")
+            vs1 = round(m1 - spx_m1, 2) if (m1 is not None and spx_m1 is not None) else None
+            vs3 = round(m3 - spx_m3, 2) if (m3 is not None and spx_m3 is not None) else None
+            above, rising = bool(r.get("above")), bool(r.get("rising"))
+            # the gate the Colab run validated: above its trend and beating the index
+            ok = above and (vs1 is not None and vs1 > 0)
+            out[r[key]] = {"m1": m1, "m3": m3, "w1": r.get("w1"),
+                           "vs_spx_m1": vs1, "vs_spx_m3": vs3,
+                           "above_50": above, "rising_50": rising,
+                           "rank_m3": rank3.get(r[key]), "rank_m1": rank1.get(r[key]),
+                           "of": len(rows), "n": r.get("n"), "ok": ok,
+                           "sector": r.get("sector")}
+        return out
+    return {"industries": build(ind_rows, "industry"), "sectors": build(sec_rows, "sector"),
+            "spx_m1": spx_m1, "spx_m3": spx_m3}
+
+
+def group_strength_today():
+    import os, json
+    try:
+        ind = json.load(open(os.path.join(OUTPUTS_DIR, "industry.json"))).get("industries") or []
+    except Exception:
+        ind = []
+    try:
+        sec = json.load(open(os.path.join(OUTPUTS_DIR, "sector_perf.json"))).get("sectors") or []
+    except Exception:
+        sec = []
+    m1, m3 = _spx_returns()
+    return _group_strength_from(ind, sec, m1, m3)
+
+
+def _stamp_group(row, gs):
+    """Add the industry/sector strength fields to one signal row (in place)."""
+    gi = (gs.get("industries") or {}).get(row.get("industry") or "", {})
+    gsec = (gs.get("sectors") or {}).get(row.get("sector") or "", {})
+    row["ind_m1"] = gi.get("m1"); row["ind_m3"] = gi.get("m3")
+    row["ind_vs_spx_m1"] = gi.get("vs_spx_m1"); row["ind_vs_spx_m3"] = gi.get("vs_spx_m3")
+    row["ind_above_50"] = gi.get("above_50"); row["ind_rising_50"] = gi.get("rising_50")
+    row["ind_rank"] = gi.get("rank_m3"); row["ind_of"] = gi.get("of")
+    row["sec_m1"] = gsec.get("m1"); row["sec_vs_spx_m1"] = gsec.get("vs_spx_m1")
+    row["sec_above_50"] = gsec.get("above_50"); row["sec_rank"] = gsec.get("rank_m3")
+    row["group_ok"] = (bool(gi.get("ok")) and bool(gsec.get("ok"))) if (gi and gsec) else None
+    return row
+
+
+GROUP_COLS = ["ind_m1", "ind_m3", "ind_vs_spx_m1", "ind_vs_spx_m3", "ind_above_50", "ind_rising_50",
+              "ind_rank", "ind_of", "sec_m1", "sec_vs_spx_m1", "sec_above_50", "sec_rank", "group_ok"]
+
+
+def _sb_patch_signal_rows(day, rows):
+    """Write the group columns straight to Supabase signal_log for (date, ticker).
+    The sync script maps a fixed column list, so a new field in the daily file would
+    never arrive; this goes around it. Best effort."""
+    import requests
+    url, key = _sb_env()
+    if not (url and key):
+        return 0
+    H = {"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/json",
+         "Prefer": "return=minimal"}
+    n = 0
+    for r in rows:
+        body = {c: r.get(c) for c in GROUP_COLS if c in r}
+        if not body or not r.get("ticker"):
+            continue
+        try:
+            x = requests.patch(f"{url}/rest/v1/signal_log", headers=H,
+                               params={"date": f"eq.{day}", "ticker": f"eq.{r['ticker']}"},
+                               json=body, timeout=20)
+            if x.status_code < 300:
+                n += 1
+        except Exception:
+            pass
+    return n
+
+
+def run_group_strength():
+    """Publish outputs/group_strength.json — today's sector and industry strength."""
+    gs = group_strength_today()
+    ind, sec = gs["industries"], gs["sectors"]
+    ok_i = sum(1 for v in ind.values() if v["ok"]); ok_s = sum(1 for v in sec.values() if v["ok"])
+    write_json("group_strength", {
+        "asof": _now(), "spx_m1": gs["spx_m1"], "spx_m3": gs["spx_m3"],
+        "note": "m1/m3 = cap-weighted 1-month / 3-month return. vs_spx = that minus SPX over the same "
+                "window. above_50 = the group's index is above its 10-week average (~50 trading days). "
+                "ok = above its trend AND beating the index over a month — the gate the ten-year "
+                "test validated. rank_m3 = 1 is the strongest.",
+        "industry_count": len(ind), "sector_count": len(sec),
+        "industries_ok": ok_i, "sectors_ok": ok_s,
+        "industries": ind, "sectors": sec})
+    lead = sorted(ind.items(), key=lambda kv: (kv[1]["rank_m3"] or 999))[:5]
+    lag = sorted(ind.items(), key=lambda kv: -(kv[1]["rank_m3"] or 0))[:3]
+    print(f"[group] {ok_i}/{len(ind)} industries and {ok_s}/{len(sec)} sectors pass · "
+          f"SPX 1m {gs['spx_m1']} 3m {gs['spx_m3']} · leaders: "
+          + ", ".join(f"{k} ({v['vs_spx_m1']:+.1f} vs SPX)" for k, v in lead if v.get("vs_spx_m1") is not None)
+          + " · laggards: " + ", ".join(k for k, _ in lag))
+    sb_heartbeat("group_strength", bool(ind), f"{ok_i}/{len(ind)} industries ok · {ok_s}/{len(sec)} sectors ok")
+    return gs
+
+
+def backfill_group_strength(days=60):
+    """
+    Stamp group strength onto EXISTING signal_log rows using rotation_daily.json —
+    the per-day record of sector and industry performance the engine has been
+    appending since August. Each signal gets the group state as it stood on its
+    own date, not today's. Runs once per day, cheap, idempotent.
+    """
+    import os, json
+    log_path = os.path.join(OUTPUTS_DIR, "rotation_daily.json")
+    try:
+        hist = {}
+        for ln in open(log_path):
+            ln = ln.strip()
+            if not ln:
+                continue
+            row = json.loads(ln)
+            hist[row["date"]] = row
+    except Exception as e:
+        print(f"[group] no rotation history to backfill from ({e})")
+        return 0
+    # SPX per day from the daily macro series
+    spx_by = {}
+    try:
+        d = json.load(open(os.path.join(OUTPUTS_DIR, "macro_series.json")))
+        ser = sorted([r for r in (d.get("series") or []) if r.get("spx") is not None], key=lambda r: r["date"])
+        for i, r in enumerate(ser):
+            m1 = round((ser[i]["spx"] / ser[i - 22]["spx"] - 1) * 100, 2) if i >= 22 else None
+            m3 = round((ser[i]["spx"] / ser[i - 64]["spx"] - 1) * 100, 2) if i >= 64 else None
+            spx_by[r["date"][:10]] = (m1, m3)
+    except Exception:
+        pass
+    # signals to stamp: read the per-day files the engine wrote
+    n_days = n_rows = 0
+    for fn in sorted(os.listdir(SIGNALS_DIR))[-days:] if os.path.isdir(SIGNALS_DIR) else []:
+        if not fn.startswith("signals_") or not fn.endswith(".json"):
+            continue
+        day = fn[len("signals_"):-len(".json")]
+        h = hist.get(day) or hist.get(max((k for k in hist if k <= day), default=""))
+        if not h:
+            continue
+        m1, m3 = spx_by.get(day, (None, None))
+        gs = _group_strength_from(h.get("industries") or [], h.get("sectors") or [], m1, m3)
+        try:
+            rows = json.load(open(os.path.join(SIGNALS_DIR, fn))).get("rows") or []
+        except Exception:
+            continue
+        for r in rows:
+            _stamp_group(r, gs)
+        n_rows += _sb_patch_signal_rows(day, rows); n_days += 1
+    print(f"[group] backfilled {n_rows} signal rows over {n_days} days from rotation history")
+    return n_rows
+
+
 def write_signal_log(v2, regime=None, spx=None, market=None):
     """
     Append today's ranked screener output to outputs/history/signals_<date>.json.
@@ -846,6 +1033,11 @@ def write_signal_log(v2, regime=None, spx=None, market=None):
     from datetime import datetime, timezone
 
     day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    try:
+        _gs = group_strength_today()          # stamped on every row below
+    except Exception as _e:
+        print(f"[signals] group strength unavailable ({_e}) — rows carry no group fields today")
+        _gs = {"industries": {}, "sectors": {}}
     # A signal cohort must be dated on a day the market actually traded. The cron
     # is Mon-Fri and does not know about holidays: on Labor Day 2026 the screener
     # re-scored Friday's closes and wrote a 60-row cohort dated 2026-09-07, a date
@@ -866,8 +1058,8 @@ def write_signal_log(v2, regime=None, spx=None, market=None):
               f"(PHOENIX_SIGNALS_FORCE=1 to replace)")
         return None
 
-    trade = [_signal_row(c, "trade") for c in (v2.get("trade_ranked") or [])]
-    invest = [_signal_row(c, "invest") for c in (v2.get("invest_ranked") or [])]
+    trade = [_stamp_group(_signal_row(c, "trade"), _gs) for c in (v2.get("trade_ranked") or [])]
+    invest = [_stamp_group(_signal_row(c, "invest"), _gs) for c in (v2.get("invest_ranked") or [])]
     meta = v2.get("meta") or {}
 
     doc = {
@@ -12948,6 +13140,7 @@ def run_full():
     step("perf_series",    run_perf_series)   # needs industry.json from stocks
     step("etf_profiles",   run_etf_profiles, optional=True)   # ETF pages: holdings, mix, 5y returns
     step("rotation_daily", run_rotation_daily, optional=True)
+    step("group_strength", run_group_strength, optional=True)   # sector/industry vs SPX, above 50d, rank
     step("rotation_nav",   run_rotation_nav,  optional=True)
     step("congress",       run_congress_trades)
     step("congress_meta",  run_congress_meta, optional=True)
@@ -12970,6 +13163,7 @@ def run_full():
     step("theses",         run_theses,        optional=True)
     step("alerts",         run_alerts,        optional=True)
     step("filings_alert",  run_filings_alert)
+    step("group_backfill", backfill_group_strength, optional=True)   # stamp group state onto logged signals, direct to Supabase
 
     # The pack reads every module above, so it must be the LAST step. Placed earlier it would
     # have summarised yesterday's 13F and today's everything else, and nothing would have said so.
