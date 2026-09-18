@@ -2630,6 +2630,12 @@ html.light .pf-tf button.on{color:#FFFDF9}
 .pf-proj .pmid{fill:none;stroke:var(--gold);stroke-width:2}
 .pf-proj .pgl{stroke:var(--line);stroke-width:1}
 .pf-proj .pax{font-family:var(--mono);font-size:10px;fill:var(--inkFade)}
+.pf-comm h3{font-family:var(--serif,Georgia,serif);font-size:19px;font-weight:600;line-height:1.3;margin:2px 0 10px;color:var(--ink)}
+.pf-comm p{font-size:14.5px;line-height:1.65;margin:0 0 10px;color:var(--ink)} .pf-comm p b{color:var(--ink)}
+.pf-comm.old{border-top:1px solid var(--line);padding-top:10px;margin-top:10px} .pf-comm.old h4{font-size:14px;margin:4px 0 6px} .pf-comm.old p{font-size:13px;color:var(--inkFade)}
+.pf-comm .d{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--inkFade)}
+.pf-comm-prev summary{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--inkFade);cursor:pointer;padding:6px 0}
+.pf-comm-foot{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:10px;padding-top:8px;border-top:1px solid var(--line2)}
 .pf-note{border-left:3px solid var(--gold);background:var(--card2);padding:11px 13px;
   border-radius:0 6px 6px 0;font-size:13px;line-height:1.6;margin-top:10px;color:var(--inkMed)}
 .pf-note b{color:var(--ink)}
@@ -11875,6 +11881,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       // account switcher + headline stats
       '<div class="pf-switch" id="pfSwitch"></div>'+
       '<div id="pfScr" style="display:none"></div>'+
+      // COMMENTARY — written after each trade, not generated from the numbers.
+      // The other notes on this page are templates that re-fill their figures;
+      // this one is a read of the book by someone who looked at it.
+      '<div class="w-card" id="pfCommCard" style="display:none"><div class="w-card-h"><span class="w-card-t">Commentary <span class="sub" id="pfCommMeta"></span></span></div>'+
+        '<div class="w-card-b" id="pfCommBody"></div></div>'+
       '<div class="w-card"><div class="pf-strip sm-stats" id="pfStrip">'+
         '<div class="loading" style="grid-column:1/-1;padding:14px">\u2026</div></div></div>'+
       // PORTFOLIO BUILDER — separate page (portfolio_builder.html); profile passed in the URL
@@ -12127,6 +12138,35 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     });
     Array.prototype.forEach.call(document.querySelectorAll("#page-portfolio .pf-grid > *:not(.dp-col)"),function(ch){ ch.style.display=scr?"none":""; });
   }
+  var PF_COMM={};                      // account -> [entries], newest first
+  function pfCommentaryLoad(acct, cb){
+    if(PF_COMM[acct]){ cb(PF_COMM[acct]); return; }
+    fetch(SUPA.url+"/rest/v1/portfolio_commentary?account=eq."+encodeURIComponent(acct)+"&select=asof,prompted_by,headline,body,author,created_at&order=asof.desc,id.desc&limit=12",
+          {headers:{apikey:SUPA.key,Authorization:"Bearer "+SUPA.key}})
+      .then(function(r){ return r.ok?r.json():[]; }).then(function(rows){ PF_COMM[acct]=rows||[]; cb(PF_COMM[acct]); })
+      .catch(function(){ PF_COMM[acct]=[]; cb([]); });
+  }
+  function pfCommentaryRender(){
+    var card=document.getElementById("pfCommCard"); if(!card) return;
+    var acct=pfCfg.active;
+    pfCommentaryLoad(acct, function(rows){
+      if(!rows.length){ card.style.display="none"; return; }
+      card.style.display="block";
+      var cur=rows[0];
+      function esc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/&lt;(\/?b)&gt;/g,"<$1>").replace(/&lt;(\/?i)&gt;/g,"<$1>"); }
+      function paras(b){ return String(b||"").split(/\n\s*\n/).map(function(p){ return "<p>"+esc(p.trim()).replace(/\n/g,"<br>")+"</p>"; }).join(""); }
+      var days=Math.round((Date.parse(new Date().toISOString().slice(0,10)+"T00:00:00Z")-Date.parse(cur.asof+"T00:00:00Z"))/86400000);
+      document.getElementById("pfCommMeta").innerHTML=" \u00b7 "+cur.asof+(cur.prompted_by?" \u00b7 after "+esc(cur.prompted_by):"")+
+        '<span class="px-fresh '+(days<=1?"ok":days<=7?"aged":"bad")+'">'+(days<=0?"today":days+"d ago")+'</span>';
+      var h='<div class="pf-comm"><h3>'+esc(cur.headline)+'</h3>'+paras(cur.body)+'</div>';
+      if(rows.length>1){
+        h+='<details class="pf-comm-prev"><summary>Previous \u00b7 '+(rows.length-1)+'</summary>'+
+          rows.slice(1).map(function(r){ return '<div class="pf-comm old"><div class="d">'+r.asof+(r.prompted_by?" \u00b7 after "+esc(r.prompted_by):"")+'</div><h4>'+esc(r.headline)+'</h4>'+paras(r.body)+'</div>'; }).join("")+'</details>';
+      }
+      h+='<div class="pf-comm-foot">Written after the trade it names, not regenerated from the figures. To update it: ask Claude for a portfolio commentary after your next close.</div>';
+      document.getElementById("pfCommBody").innerHTML=h;
+    });
+  }
   function pfRender(){
     if(!document.getElementById("pfStrip")) return;
     pfShowView();
@@ -12145,6 +12185,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     });
     var s=pfCompute();
     pfRenderSwitch();
+    pfCommentaryRender();
     document.getElementById("pfStrip").innerHTML=pfStrip(s);
     document.getElementById("pfHeatBody").innerHTML=pfHeatTile(s);
     document.getElementById("pfStreakBody").innerHTML=pfStreakTile(s);
