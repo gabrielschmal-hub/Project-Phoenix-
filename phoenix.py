@@ -761,6 +761,7 @@ def _signal_market_context():
         "spx_vs_50d_pct": (round((c / ma50 - 1) * 100, 2) if c and ma50 else None),
         "spx_vs_200d_pct": (round((c / ma200 - 1) * 100, 2) if c and ma200 else None),
         "gex_regime": ov.get("regime"), "gex_net_B": ov.get("net_gex_B"),
+        "gex_flip": ov.get("gamma_flip"),
         "gex_dist_to_flip_pct": ov.get("dist_to_flip_pct"),
         "vix": (macro.get("inputs") or {}).get("vix") if isinstance(macro.get("inputs"), dict) else None,
     }
@@ -917,7 +918,11 @@ def _stamp_group(row, gs):
 
 
 GROUP_COLS = ["ind_m1", "ind_m3", "ind_vs_spx_m1", "ind_vs_spx_m3", "ind_above_50", "ind_rising_50",
-              "ind_rank", "ind_of", "sec_m1", "sec_vs_spx_m1", "sec_above_50", "sec_rank", "group_ok"]
+              "ind_rank", "ind_of", "sec_m1", "sec_vs_spx_m1", "sec_above_50", "sec_rank", "group_ok",
+              # market context that the daily file always carried but the sync never mapped
+              "regime", "regime_held_weeks", "gex_regime", "gex_net_B", "gex_flip", "gex_dist_to_flip_pct",
+              "spx_close", "spx_chg_pct", "spx_vs_50d_pct", "spx_vs_200d_pct", "vix",
+              "atr_suspect", "atr14_pct_raw"]
 
 
 def _sb_patch_signal_rows(day, rows):
@@ -932,7 +937,7 @@ def _sb_patch_signal_rows(day, rows):
          "Prefer": "return=minimal"}
     n = 0
     for r in rows:
-        body = {c: r.get(c) for c in GROUP_COLS if c in r}
+        body = {c.lower(): r.get(c) for c in GROUP_COLS if c in r}   # Postgres folds unquoted names: gex_net_B -> gex_net_b
         if not body or not r.get("ticker"):
             continue
         try:
@@ -944,6 +949,78 @@ def _sb_patch_signal_rows(day, rows):
         except Exception:
             pass
     return n
+
+
+def _context_at_commit(day):
+    """Rebuild the market context for `day` from the outputs as the bot committed them
+    that morning. git history is the only honest source for a day nobody stamped."""
+    import subprocess, json
+    try:
+        sha = subprocess.run(["git", "log", "--format=%H", "-1", f"--before={day} 23:59", "--",
+                              "outputs/gex.json"], capture_output=True, text=True, timeout=30).stdout.strip()
+        if not sha:
+            return None, None
+        def show(path):
+            r = subprocess.run(["git", "show", f"{sha}:{path}"], capture_output=True, text=True, timeout=30)
+            return json.loads(r.stdout) if r.returncode == 0 and r.stdout.strip() else {}
+        macro, gex, spx = show("outputs/macro.json"), show("outputs/gex.json"), show("outputs/spx_daily.json")
+    except Exception:
+        return None, None
+    bars = spx.get("bars") or []
+    def _c(b):
+        v = b.get("c", b.get("close")); return float(v) if v is not None else None
+    closes = [x for x in (_c(b) for b in bars) if x is not None]
+    # the close ON that day, not the last bar the file happened to hold
+    dayc = next((_c(b) for b in reversed(bars) if str(b.get("date", ""))[:10] == day), None)
+    c = dayc if dayc is not None else (closes[-1] if closes else None)
+    ma50 = (sum(closes[-50:]) / 50) if len(closes) >= 50 else None
+    ma200 = (sum(closes[-200:]) / 200) if len(closes) >= 200 else None
+    ov = gex.get("overview") or {}
+    ctx = {"regime": macro.get("regime"),
+           "regime_held_weeks": ((macro.get("explain") or {}).get("held_weeks") if isinstance(macro.get("explain"), dict) else None),
+           "gex_regime": ov.get("regime"), "gex_net_B": ov.get("net_gex_B"), "gex_flip": ov.get("gamma_flip"),
+           "gex_dist_to_flip_pct": ov.get("dist_to_flip_pct"),
+           "spx_close": c,
+           "spx_vs_50d_pct": (round((c / ma50 - 1) * 100, 2) if c and ma50 else None),
+           "spx_vs_200d_pct": (round((c / ma200 - 1) * 100, 2) if c and ma200 else None),
+           "vix": (macro.get("inputs") or {}).get("vix") if isinstance(macro.get("inputs"), dict) else None}
+    return sha[:8], ctx
+
+
+def backfill_signal_context(days=60):
+    """Stamp regime / GEX / VIX / SPX onto signals written before the context capture existed
+    (3 Sep 2026), from the files as they stood on each signal's own day. Direct to Supabase."""
+    import os, json
+    if not os.path.isdir(SIGNALS_DIR):
+        return 0
+    n_rows = n_days = 0
+    for fn in sorted(os.listdir(SIGNALS_DIR))[-days:]:
+        if not (fn.startswith("signals_") and fn.endswith(".json")):
+            continue
+        day = fn[len("signals_"):-len(".json")]
+        try:
+            doc = json.load(open(os.path.join(SIGNALS_DIR, fn)))
+        except Exception:
+            continue
+        rows = doc.get("rows") or []
+        have = doc.get("market") or {}
+        if have.get("regime") and have.get("gex_net_B") is not None:
+            ctx = dict(have); ctx.setdefault("regime", doc.get("regime")); src = "file"
+        else:
+            sha, ctx = _context_at_commit(day)
+            if not ctx:
+                continue
+            src = f"git {sha}"
+        for r in rows:
+            for k in ("regime", "regime_held_weeks", "gex_regime", "gex_net_B", "gex_flip",
+                      "gex_dist_to_flip_pct", "spx_close", "spx_chg_pct", "spx_vs_50d_pct",
+                      "spx_vs_200d_pct", "vix"):
+                if ctx.get(k) is not None:
+                    r[k] = ctx[k]
+        n_rows += _sb_patch_signal_rows(day, rows); n_days += 1
+        print(f"[signals] {day}: context from {src} -> {len(rows)} rows")
+    print(f"[signals] context backfill: {n_rows} rows over {n_days} days")
+    return n_rows
 
 
 def run_group_strength():
@@ -1060,6 +1137,20 @@ def write_signal_log(v2, regime=None, spx=None, market=None):
 
     trade = [_stamp_group(_signal_row(c, "trade"), _gs) for c in (v2.get("trade_ranked") or [])]
     invest = [_stamp_group(_signal_row(c, "invest"), _gs) for c in (v2.get("invest_ranked") or [])]
+    # ATR floor. GBTG was logged with ATR 0.10% -> a 2.4-cent "stop" that turned a 1% drift
+    # into "+3R". A row whose ATR cannot be real keeps its price but loses its stop, and
+    # says why, rather than writing a level that cannot exist.
+    _atr_bad = 0
+    for _r in trade + invest:
+        _a = _r.get("atr14_pct")
+        if _a is not None and (_a < 1.0 or _a > 40.0):
+            _r["atr_suspect"] = True
+            _r["atr14_pct_raw"] = _a
+            _r["stop"] = None
+            _r["atr14_pct"] = None
+            _atr_bad += 1
+    if _atr_bad:
+        print(f"[signals] {_atr_bad} row(s) had an ATR outside 1-40% — stop withheld, atr_suspect=true")
     meta = v2.get("meta") or {}
 
     doc = {
@@ -10985,6 +11076,9 @@ def run_gex_cboe(symbol="_SPX", label="SPX"):
         ov["regime"] = "positive" if _net_B > 0 else "negative"
         if _flip:
             ov["gamma_flip"] = round(_flip, 2)
+            lv["gamma_flip"] = ov["gamma_flip"]      # ONE flip. levels used to keep the legacy
+                                                     # engine's solve (10 pts off) and the app
+                                                     # showed both, depending on the page.
         lv["call_wall"] = _walls["call_wall"]
         lv["put_wall"] = _walls["put_wall"]
         if _walls["magnets"]:
@@ -10995,6 +11089,23 @@ def run_gex_cboe(symbol="_SPX", label="SPX"):
             "levels": "high", "regime_sign": "high",
             "note": "Coach's exact spec (10 Aug 2026). Flip/net: BS re-solve. "
                     "Walls: vendor gamma, closest significant.",
+        }
+        _exps = sorted({c["expiry"] for c in _contracts})
+        res["assumptions"] = {
+            "spot": round(spot, 2), "spot_source": spot_source,
+            "scrape_date": str(_scrape),
+            "day_count": "business days / 262 (T floored at 1 business day)",
+            "iv": "sticky-strike: each contract priced from its own vendor IV",
+            "expiries": "strictly AFTER the scrape date — contracts expiring today are EXCLUDED",
+            "expiry_first": str(_exps[0]) if _exps else None, "expiry_last": str(_exps[-1]) if _exps else None,
+            "expiry_count": len(_exps), "contracts": len(_contracts),
+            "opex_note": "On a monthly OPEX morning the AM-settled block is already out of this solve; "
+                         "a tool that still counts it will show a different flip until the open. "
+                         "Removing negative gamma lowers the flip.",
+            "flip_method": "Black-Scholes re-solve of net dealer gamma across a 0.8-1.2x spot grid, "
+                           "zero-crossing nearest spot",
+            "walls": "closest significant strike on vendor gamma, strikes divisible by 50, "
+                     "floor 25% of that side's maximum",
         }
         res["mme"] = {
             "method": "MME spec (coach, 10 Aug 2026): BS re-solve flip on a "
@@ -13164,6 +13275,7 @@ def run_full():
     step("alerts",         run_alerts,        optional=True)
     step("filings_alert",  run_filings_alert)
     step("group_backfill", backfill_group_strength, optional=True)   # stamp group state onto logged signals, direct to Supabase
+    step("context_backfill", backfill_signal_context, optional=True)   # regime/GEX/VIX/SPX onto every logged signal, from git history
 
     # The pack reads every module above, so it must be the LAST step. Placed earlier it would
     # have summarised yesterday's 13F and today's everything else, and nothing would have said so.

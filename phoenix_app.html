@@ -1013,6 +1013,13 @@
   .dp-volnote{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.6;margin-top:9px;padding-top:8px;border-top:1px solid var(--line2)}
   .dp-volnote b{color:var(--ink)}
   .dp-volplan{margin-top:8px;padding-top:7px;border-top:1px solid var(--line2)}
+  .gs-hd{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--inkFade);margin:12px 0 6px;padding-top:10px;border-top:1px solid var(--line2)}
+  .gs-row{display:grid;grid-template-columns:64px 1fr;gap:2px 10px;padding:6px 0;border-bottom:1px dashed var(--line2);font-size:12.5px}
+  .gs-row .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--inkFade);padding-top:3px}
+  .gs-row .n{font-weight:600} .gs-row .v{grid-column:2;font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.5}
+  .sp-k.gs-ok{border-color:var(--green);color:var(--green)} .sp-k.gs-no{border-color:var(--red);color:var(--red)}
+  .grpb{display:inline-block;margin-left:5px;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;padding:1px 5px;border-radius:4px;border:1px solid var(--line2);color:var(--inkFade);vertical-align:middle}
+  .grpb.ok{border-color:var(--green);color:var(--green)} .grpb.no{border-color:var(--red);color:var(--red)}
   .tb-th{display:none;margin-left:auto;background:transparent;border:1px solid var(--line2);color:var(--inkFade);
     border-radius:8px;width:32px;height:32px;font-size:15px;line-height:1;cursor:pointer;flex:0 0 auto}
   .tb-th:active{border-color:var(--gold);color:var(--gold)}
@@ -9312,6 +9319,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   }
 
   function renderScreener(){
+    if(GS==null&&!GS_MISS){ gsLoad(function(){ if(GS&&GS.industries) renderScreener(); }); }
     if(!scrData) return;
     sfRenderBlock();
     if(scrView==="gexu"){ renderGexUniverse(); return; }
@@ -9428,6 +9436,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var setup=s.setup||(s.breakout?"Breakout":s.surge?"Surge":s.near_high?"Near high":"\u2014");
       var setCls=setup==="Breakout"?"brk":setup==="Surge"?"srg":"";
       var im=s.industry_mom_3m;
+      // group gate: is this name's industry AND sector leading the index? (group_strength.json)
+      var _gi=(GS&&GS.industries)?GS.industries[sfRowInd(s)]:null, _gs=(GS&&GS.sectors)?GS.sectors[sfRowSector(s)]:null;
+      var grp=(_gi&&_gs)?(_gi.ok&&_gs.ok):null;
+      var grpChip=grp==null?"":'<i class="grpb '+(grp?"ok":"no")+'" title="'+(grp?"industry and sector above their 50-day and beating SPX this month":"industry or sector lagging the index or below its 50-day")+'">'+(grp?"LEAD":"LAG")+'</i>';
       var gexIn=!!((window.__scrGexU&&window.__scrGexU[s.ticker])||SF_GEX_LIST.indexOf(s.ticker)>=0);
       var pill=sc==null?"\u2014":'<span class="scr-pill '+pillCls+'">'+sc+'</span>';
       return '<div class="scr-tr'+(s.passer===false?' nearmiss':'')+'" data-row-tk="'+s.ticker+'">'+
@@ -9440,7 +9452,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           '<i class="cmpb'+(cmpHas(s.ticker)?" on":"")+'" data-cmp="'+s.ticker+'" title="compare">'+(cmpHas(s.ticker)?"\u2611":"\u229E")+'</i></span>'+
           '<span class="co">'+(nm||"")+'</span></span>'+
         '<span class="patcell" data-pat="'+s.ticker+'"></span>'+
-        '<span><span class="scr-setup '+setCls+'">'+setup+'</span></span>'+
+        '<span><span class="scr-setup '+setCls+'">'+setup+'</span>'+grpChip+'</span>'+
         '<span class="scorecell"><b>'+(sc==null?"\u2014":sc)+'</b>'+
           '<i class="sbar"><u style="width:'+(sc||0)+'%"></u></i>'+
           '<em>trade '+(s.trade_score!=null?s.trade_score:"\u2014")+
@@ -13951,11 +13963,47 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // above answers "how is INTC"; these answer "is this INTC or is this semis",
   // which is the question that actually changes a decision. Tapping either
   // opens the navigator at that level rather than duplicating it here.
+  // ---- group strength: the group AGAINST THE INDEX, above/below its 50-day, rank ----
+  // outputs/group_strength.json, written daily by the engine. The rotation nav says how
+  // a group did; this says whether it is leading the market, which is the question
+  // the Financials losses asked. ok = above its 50-day and beating SPX on the month.
+  var GS=null, GS_MISS=false;
+  function gsLoad(cb){
+    if(GS!=null||GS_MISS){ cb(); return; }          // loose: the var is hoisted, may be undefined before its line runs
+    getJSON("group_strength").then(function(d){ GS=d||{}; }).catch(function(){ GS_MISS=true; GS={}; }).then(cb);
+  }
+  function gsChip(ok){ return ok==null?'<span class="sp-k">no read</span>':(ok?'<span class="sp-k gs-ok">leading</span>':'<span class="sp-k gs-no">lagging</span>'); }
+  function gsPct(v,plus){ return v==null?"\u2014":((plus&&v>=0?"+":"")+(+v).toFixed(1)+"%"); }
+  function gsRow(kind,name,g,spx1){
+    if(!g) return '<div class="gs-row"><span class="k">'+kind+'</span><span class="n">'+nvEsc(name)+'</span><span class="v" style="color:var(--inkFade)">no strength read</span></div>';
+    var vs=g.vs_spx_m1, col=vs==null?"var(--inkFade)":vs>0?"var(--green)":"var(--red)";
+    return '<div class="gs-row"><span class="k">'+kind+'</span><span class="n">'+nvEsc(name)+gsChip(g.ok)+'</span>'+
+      '<span class="v"><b style="color:'+col+'">'+gsPct(vs,true)+' vs SPX</b> \u00b7 1m '+gsPct(g.m1,true)+' \u00b7 3m '+gsPct(g.m3,true)+
+      ' \u00b7 '+(g.above_50?'<span style="color:var(--green)">above 50d</span>':'<span style="color:var(--red)">below 50d</span>')+
+      (g.rising_50===false?' <span style="color:var(--inkFade)">(falling)</span>':'')+
+      (g.rank_m3?' \u00b7 rank '+g.rank_m3+'/'+g.of:'')+'</span></div>';
+  }
+  function dpLoadGroupStrength(tk){
+    var host=document.getElementById("dpGroupStrength"); if(!host) return;
+    gsLoad(function(){
+      var v=NV&&NV.tickers?NV.tickers[tk]:null; if(!v||!GS||!GS.industries){ host.innerHTML=""; return; }
+      var gi=(GS.industries||{})[v.i], gsec=(GS.sectors||{})[v.s];
+      var both=(gi&&gsec)?(gi.ok&&gsec.ok):null;
+      host.innerHTML='<div class="gs-hd">Against the market <span class="ed-n">\u00b7 '+(GS.asof||"")+(GS.spx_m1!=null?' \u00b7 SPX 1m '+gsPct(GS.spx_m1,true):'')+'</span>'+
+        (both==null?'':'<span class="sp-k '+(both?'gs-ok':'gs-no')+'" style="margin-left:auto">'+(both?'group gate: pass':'group gate: FAIL')+'</span>')+'</div>'+
+        gsRow("Industry",v.i,gi,GS.spx_m1)+gsRow("Sector",v.s,gsec,GS.spx_m1)+
+        '<div class="ed-note" style="margin-top:6px">'+(both===false
+          ?'The group is not leading. In the ten-year test, base breakouts in lagging groups averaged <b>\u22120.01R</b>; in leading groups <b>+0.08R</b>. Same setup, different tape.'
+          :both===true?'Both the industry and the sector are above their 50-day and beating the index this month \u2014 the condition the ten-year test found the edge inside.'
+          :'No strength read for this group yet.')+'</div>';
+    });
+  }
   function dpLoadGroups(tk){
     var tile=document.getElementById("dpGroupTile"),
         host=document.getElementById("dpGroups"),
         meta=document.getElementById("dpGroupMeta");
     if(!tile||!host) return;
+    dpLoadGroupStrength(tk);
     function paint(){
       var v=NV&&NV.tickers?NV.tickers[tk]:null;
       if(!v||!(v.i||v.s)){ tile.style.display="none"; return; }
@@ -13981,7 +14029,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     }
     if(NV){ paint(); return; }
     tile.style.display="none";
-    getJSON("rotation_nav").then(function(d){ NV=d; paint(); }).catch(function(){});
+    getJSON("rotation_nav").then(function(d){ NV=d; paint(); dpLoadGroupStrength(tk); }).catch(function(){});
   }
 
   // ---------------- IMPLIED VOL + EXPECTED MOVE ----------------
@@ -14862,7 +14910,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           '<div class="w-card" id="dpGroupTile" style="display:none">'+
             '<div class="w-card-h"><span class="w-card-t">Where it sits '+
               '<span class="sub" id="dpGroupMeta"></span></span></div>'+
-            '<div class="w-card-b"><div class="dp-groups" id="dpGroups"></div></div>'+
+            '<div class="w-card-b"><div class="dp-groups" id="dpGroups"></div><div id="dpGroupStrength"></div></div>'+
           '</div>'+
           // VOLATILITY — implied vs realised, expected move, and which one to size from
           '<div class="w-card" id="dpVolTile" style="display:none">'+
