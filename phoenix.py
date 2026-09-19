@@ -917,37 +917,52 @@ def _stamp_group(row, gs):
     return row
 
 
-GROUP_COLS = ["ind_m1", "ind_m3", "ind_vs_spx_m1", "ind_vs_spx_m3", "ind_above_50", "ind_rising_50",
-              "ind_rank", "ind_of", "sec_m1", "sec_vs_spx_m1", "sec_above_50", "sec_rank", "group_ok",
-              # market context that the daily file always carried but the sync never mapped
-              "regime", "regime_held_weeks", "gex_regime", "gex_net_B", "gex_flip", "gex_dist_to_flip_pct",
-              "spx_close", "spx_chg_pct", "spx_vs_50d_pct", "spx_vs_200d_pct", "vix",
-              "atr_suspect", "atr14_pct_raw"]
+# signal_log has an append-only trigger: some columns are FROZEN, some are LATCHED
+# (fill once, never change). A PATCH that touches a latched column already holding a
+# value is rejected as a whole — which is how the first backfill wrote nothing.
+SAFE_COLS = ["ind_m1", "ind_m3", "ind_vs_spx_m1", "ind_vs_spx_m3", "ind_above_50", "ind_rising_50",
+             "ind_rank", "ind_of", "sec_m1", "sec_vs_spx_m1", "sec_above_50", "sec_rank", "group_ok",
+             "gex_net_B", "gex_flip", "gex_dist_to_flip_pct", "spx_chg_pct", "atr_suspect", "atr14_pct_raw"]
+LATCHED_CTX = ["regime", "regime_held_weeks", "gex_regime", "vix", "spx_vs_50d_pct", "spx_vs_200d_pct"]
+# spx_close is latched and already filled on every row — never sent.
 
 
 def _sb_patch_signal_rows(day, rows):
-    """Write the group columns straight to Supabase signal_log for (date, ticker).
-    The sync script maps a fixed column list, so a new field in the daily file would
-    never arrive; this goes around it. Best effort."""
+    """Write group/context columns to Supabase signal_log for (date, ticker).
+    Safe columns go unconditionally; latched context goes only to rows whose
+    regime is still null (PostgREST filter), so the trigger never fires. Best effort."""
     import requests
     url, key = _sb_env()
     if not (url and key):
         return 0
     H = {"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/json",
          "Prefer": "return=minimal"}
-    n = 0
+    n = 0; first_err = None
     for r in rows:
-        body = {c.lower(): r.get(c) for c in GROUP_COLS if c in r}   # Postgres folds unquoted names: gex_net_B -> gex_net_b
-        if not body or not r.get("ticker"):
+        if not r.get("ticker"):
             continue
+        base = {"date": f"eq.{day}", "ticker": f"eq.{r['ticker']}"}
+        safe = {c.lower(): r.get(c) for c in SAFE_COLS if c in r}
+        latch = {c.lower(): r.get(c) for c in LATCHED_CTX if r.get(c) is not None}
+        ok = False
         try:
-            x = requests.patch(f"{url}/rest/v1/signal_log", headers=H,
-                               params={"date": f"eq.{day}", "ticker": f"eq.{r['ticker']}"},
-                               json=body, timeout=20)
-            if x.status_code < 300:
-                n += 1
-        except Exception:
-            pass
+            if safe:
+                x = requests.patch(f"{url}/rest/v1/signal_log", headers=H, params=base, json=safe, timeout=20)
+                ok = x.status_code < 300
+                if not ok and first_err is None:
+                    first_err = f"{x.status_code} {x.text[:160]}"
+            if latch:
+                x = requests.patch(f"{url}/rest/v1/signal_log", headers=H,
+                                   params=dict(base, regime="is.null"), json=latch, timeout=20)
+                ok = ok or x.status_code < 300
+                if x.status_code >= 300 and first_err is None:
+                    first_err = f"{x.status_code} {x.text[:160]}"
+        except Exception as e:
+            if first_err is None:
+                first_err = f"{type(e).__name__}: {e}"
+        n += 1 if ok else 0
+    if first_err:
+        print(f"[signals] patch: first error was {first_err}")
     return n
 
 
@@ -1020,6 +1035,7 @@ def backfill_signal_context(days=60):
         n_rows += _sb_patch_signal_rows(day, rows); n_days += 1
         print(f"[signals] {day}: context from {src} -> {len(rows)} rows")
     print(f"[signals] context backfill: {n_rows} rows over {n_days} days")
+    sb_heartbeat("context_backfill", n_rows > 0 or n_days == 0, f"{n_rows} rows over {n_days} days")
     return n_rows
 
 
@@ -1097,6 +1113,7 @@ def backfill_group_strength(days=60):
             _stamp_group(r, gs)
         n_rows += _sb_patch_signal_rows(day, rows); n_days += 1
     print(f"[group] backfilled {n_rows} signal rows over {n_days} days from rotation history")
+    sb_heartbeat("group_backfill", n_rows > 0 or n_days == 0, f"{n_rows} rows over {n_days} days")
     return n_rows
 
 
