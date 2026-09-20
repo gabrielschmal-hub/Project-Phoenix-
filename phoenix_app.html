@@ -1020,6 +1020,7 @@
   .sp-k.gs-ok{border-color:var(--green);color:var(--green)} .sp-k.gs-no{border-color:var(--red);color:var(--red)}
   .grpb{display:inline-block;margin-left:5px;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;padding:1px 5px;border-radius:4px;border:1px solid var(--line2);color:var(--inkFade);vertical-align:middle}
   .grpb.ok{border-color:var(--green);color:var(--green)} .grpb.no{border-color:var(--red);color:var(--red)}
+  html.px-locked .app, html.px-locked #pxstatus{filter:blur(6px);pointer-events:none;user-select:none}
   .tb-th{display:none;margin-left:auto;background:transparent;border:1px solid var(--line2);color:var(--inkFade);
     border-radius:8px;width:32px;height:32px;font-size:15px;line-height:1;cursor:pointer;flex:0 0 auto}
   .tb-th:active{border-color:var(--gold);color:var(--gold)}
@@ -3080,6 +3081,21 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var t = pxAuthToken();
     return { apikey: SUPA.key, Authorization: "Bearer " + (t || SUPA.key), "Content-Type": "application/json" };
   }
+  function pxReadHeaders(){                                 // reads: same rule. Private tables refuse the anon key; market data does not care.
+    var t = pxAuthToken();
+    return { apikey: SUPA.key, Authorization: "Bearer " + (t || SUPA.key) };
+  }
+  // ---- password sign-in (primary from 20 Sep 2026); the e-mail code stays as the fallback ----
+  function pxAuthPassword(email, pw){
+    return fetch(SUPA.url + "/auth/v1/token?grant_type=password", { method: "POST",
+        headers: { apikey: SUPA.key, "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email, password: pw }) })
+      .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.msg || j.error_description || j.message || ("HTTP " + r.status)); return j; }); })
+      .then(function(j){ var sess = pxAuthStore(j); if(!sess) throw new Error("no session in reply"); return sess; });
+  }
+  // The app is private: without a session nothing past the landing page renders.
+  var PX_GATE_ON = true;
+  function pxAuthRequired(){ return PX_GATE_ON && !pxAuthToken(); }
   function pxAuthStore(j){                                  // normalise a GoTrue session payload
     if(!j || !j.access_token) return null;
     var exp = j.expires_at || (Math.floor(Date.now()/1000) + (+j.expires_in || 3600));
@@ -3115,6 +3131,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var t = pxAuthToken();
     if(t) fetch(SUPA.url + "/auth/v1/logout", { method: "POST", headers: { apikey: SUPA.key, Authorization: "Bearer " + t } }).catch(function(){});
     pxAuthSave(null);
+    setTimeout(function(){ location.hash = "#home"; location.reload(); }, 50);
   }
   function pxAuthFromHash(){                                // magic-link return: #access_token=...  (parsed before the router sees it)
     var h = location.hash || "";
@@ -3131,6 +3148,16 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     try{ history.replaceState(null, "", location.pathname + "#mission"); }catch(e){}   // a real route, so the router does not hop
     return true;
   }
+  document.addEventListener("click", function(e){
+    var b = e.target && e.target.closest && e.target.closest("#mAuthAlt"); if(!b) return;
+    e.preventDefault(); e.stopPropagation();
+    var bg = b.closest(".tr-modal") || document;
+    var pwRow = bg.querySelector("#mAuthPwRow"), codeRow = bg.querySelector("#mAuthCodeRow"), ok = bg.querySelector("#mAuthOk"), note = bg.querySelector("#mAuthNote");
+    if(pwRow) pwRow.style.display = "none";
+    if(ok){ ok.textContent = "Send code"; ok.disabled = false; }
+    if(note) note.textContent = "One e-mail arrives with a code and a link. Type the code here.";
+    b.style.display = "none";
+  }, true);
   function pxAuthProfileFor(email){ return email ? (PX_AUTH_PROFILE[String(email).toLowerCase()] || null) : null; }
   function pxAuthPaint(){                                   // the block inside the profile popover + the rail avatar ring
     var box = document.getElementById("pxAuthBox");
@@ -3138,7 +3165,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(box){
       box.innerHTML = email
         ? '<div class="who">Signed in <b>' + email + '</b></div><button class="opt auth-out" data-auth="out"><i>&#10005;</i><b>Sign out</b></button>'
-        : '<div class="who">Not signed in \u2014 reading works, saving needs a sign-in.</div><button class="opt auth-in" data-auth="in"><i>&#9993;</i><b>Sign in with e-mail</b></button>';
+        : '<div class="who">Not signed in \u2014 Phoenix is private; sign in to see anything.</div><button class="opt auth-in" data-auth="in"><i>&#9993;</i><b>Sign in with e-mail</b></button>';
       if(pxAuthMsg){ box.innerHTML += '<div class="who msg">' + pxAuthMsg + '</div>'; pxAuthMsg = ""; }
     }
     var av = document.getElementById("pxProfAv");
@@ -3147,16 +3174,30 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function pxAuthModal(){
     var email = pxAuthEmail() || "";
     try{ email = email || localStorage.getItem("phoenix.auth.email") || ""; }catch(e){}
-    var html = '<div class="tr-modal-title">Sign in</div>' +
-      '<div class="tr-field"><label>E-mail</label><input id="mAuthEmail" type="email" inputmode="email" autocomplete="email" autocapitalize="none" placeholder="you@example.com" value="' + email.replace(/"/g, "") + '"></div>' +
+    var html = '<div class="tr-modal-title">Sign in to Phoenix</div>' +
+      '<div class="tr-field"><label>E-mail</label><input id="mAuthEmail" type="email" inputmode="email" autocomplete="username" autocapitalize="none" placeholder="you@example.com" value="' + email.replace(/"/g, "&quot;") + '"></div>' +
+      '<div class="tr-field" id="mAuthPwRow"><label>Password</label><input id="mAuthPw" type="password" inputmode="numeric" autocomplete="current-password" placeholder="\u2022\u2022\u2022\u2022"></div>' +
       '<div class="tr-field" id="mAuthCodeRow" style="display:none"><label>6-digit code from the e-mail</label><input id="mAuthCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456"></div>' +
-      '<div class="sl-note" id="mAuthNote">One e-mail arrives with a code and a link. On a phone, type the code here \u2014 it works wherever the e-mail opens.</div>' +
-      '<div class="tr-modal-actions"><button class="ok" id="mAuthOk">Send code</button><button class="cancel">Cancel</button></div>';
+      '<div class="sl-note" id="mAuthNote">Two accounts exist. Nothing in Phoenix renders without one.</div>' +
+      '<div class="tr-modal-actions"><button class="ok" id="mAuthOk">Sign in</button><button class="cancel" id="mAuthAlt" style="opacity:.75">E-mail me a code instead</button></div>';
     trModal(html, function(bg){
       var em = (bg.querySelector("#mAuthEmail").value || "").trim().toLowerCase();
-      var codeRow = bg.querySelector("#mAuthCodeRow"), note = bg.querySelector("#mAuthNote"), ok = bg.querySelector("#mAuthOk");
+      var codeRow = bg.querySelector("#mAuthCodeRow"), pwRow = bg.querySelector("#mAuthPwRow"), note = bg.querySelector("#mAuthNote"), ok = bg.querySelector("#mAuthOk");
       if(!em || em.indexOf("@") < 0){ note.textContent = "That is not an e-mail address."; return false; }
       try{ localStorage.setItem("phoenix.auth.email", em); }catch(e){}
+      var pwEl = bg.querySelector("#mAuthPw");
+      if(pwRow && pwRow.style.display !== "none"){                       // password path
+        var pw = (pwEl && pwEl.value) || "";
+        if(!pw){ note.textContent = "Type the password."; return false; }
+        ok.disabled = true; note.textContent = "Signing in\u2026";
+        pxAuthPassword(em, pw).then(function(){
+          trModalClose();
+          var prof = pxAuthProfileFor(em);
+          if(prof && window.PHOENIX_PROFILE !== prof){ var t = document.getElementById("px" + prof); if(t) t.click(); }
+          if(typeof PX_AFTER_AUTH === "function") PX_AFTER_AUTH();
+        }).catch(function(e){ ok.disabled = false; note.textContent = "Sign-in failed: " + e.message; });
+        return false;
+      }
       if(codeRow.style.display === "none"){
         ok.disabled = true; note.textContent = "Sending\u2026";
         pxAuthSend(em).then(function(){
@@ -3184,7 +3225,16 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // hashchange, and the router is bound to both. Bind to both here too; this module loads first.
   window.addEventListener("popstate", pxAuthFromHash);
   window.addEventListener("hashchange", pxAuthFromHash);
-  pxAuthRefresh();                                          // boot: renew a stale token silently
+  pxAuthRefresh().then(function(){                          // boot: renew a stale token silently, then gate
+    if(pxAuthRequired()){
+      document.documentElement.classList.add("px-locked");
+      // the landing page stays visible; the app waits behind the sign-in
+      var open = function(){ if(pxAuthRequired()){ pxAuthModal(); } };
+      window.PX_AFTER_AUTH = function(){ document.documentElement.classList.remove("px-locked"); location.reload(); };
+      setTimeout(open, 400);
+      document.addEventListener("click", function(e){ if(pxAuthRequired() && !(e.target.closest && e.target.closest(".tr-modal"))){ open(); } }, true);
+    }
+  });
   setInterval(pxAuthRefresh, 45 * 60 * 1000);
   window.PX_AUTH = { email: pxAuthEmail, headers: pxAuthHeaders, modal: pxAuthModal, out: pxAuthSignOut, profile: pxAuthProfileFor };
 
@@ -3219,7 +3269,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     return fetch(SUPA.url + "/rest/v1/snapshots_latest"
         + "?name=eq." + encodeURIComponent(name + ".json")
         + "&select=payload,created_at",
-      { headers: { apikey: SUPA.key, Authorization: "Bearer " + SUPA.key },
+      { headers: pxReadHeaders(),
         signal: ctl ? ctl.signal : undefined })
     .then(function(r){ if(!r.ok) throw new Error("supabase HTTP " + r.status); return r.json(); })
     .then(function(rows){
@@ -3431,7 +3481,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
 
   function pxFreezePoll(){
     return fetch(SUPA.url + "/rest/v1/system_state?id=eq.1&select=mode,reason,frozen_at,auto_resume_at",
-      { headers: { apikey: SUPA.key, Authorization: "Bearer " + SUPA.key } })
+      { headers: pxReadHeaders() })
     .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
     .then(function(rows){ pxFreezeBanner(rows && rows[0] ? rows[0] : null); })
     .catch(function(){ /* unreachable: leave current state, assume live */ });
@@ -3453,7 +3503,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
 
   function supaRows(path){
     return fetch(SUPA.url + path,
-      { headers: { apikey: SUPA.key, Authorization: "Bearer " + SUPA.key } })
+      { headers: pxReadHeaders() })
     .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
   }
 
@@ -3789,6 +3839,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   var host=document.getElementById("pageHost");
   var PX_BOOTING=true;
   function go(id,fromHash){
+    if(typeof pxAuthRequired==="function" && pxAuthRequired() && id!=="home"){ if(typeof pxAuthModal==="function") pxAuthModal(); return; }
     if(!built[id]){ buildPage(id); built[id]=true; }
     Array.prototype.forEach.call(document.querySelectorAll(".page"),function(p){p.classList.toggle("active",p.id==="page-"+id);});
     Array.prototype.forEach.call(document.querySelectorAll(".nav-item"),function(it){it.classList.toggle("active",it.dataset.page===id);});
@@ -12154,7 +12205,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function pfCommentaryLoad(acct, cb){
     if(PF_COMM[acct]){ cb(PF_COMM[acct]); return; }
     fetch(SUPA.url+"/rest/v1/portfolio_commentary?account=eq."+encodeURIComponent(acct)+"&select=asof,prompted_by,headline,body,author,created_at&order=asof.desc,id.desc&limit=12",
-          {headers:{apikey:SUPA.key,Authorization:"Bearer "+SUPA.key}})
+          {headers:pxReadHeaders()})
       .then(function(r){ return r.ok?r.json():[]; }).then(function(rows){ PF_COMM[acct]=rows||[]; cb(PF_COMM[acct]); })
       .catch(function(){ PF_COMM[acct]=[]; cb([]); });
   }
