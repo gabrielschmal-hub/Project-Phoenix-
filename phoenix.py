@@ -1002,40 +1002,42 @@ def _context_at_commit(day):
     return sha[:8], ctx
 
 
-def backfill_signal_context(days=60):
-    """Stamp regime / GEX / VIX / SPX onto signals written before the context capture existed
-    (3 Sep 2026), from the files as they stood on each signal's own day. Direct to Supabase."""
-    import os, json
-    if not os.path.isdir(SIGNALS_DIR):
-        return 0
+def _sb_signal_rows_needing(select, filt):
+    """(date, ticker, ...) rows from Supabase signal_log. The runner's checkout does not
+    reliably carry the per-day history files, so backfills key off the database itself."""
+    try:
+        rows = _sb_get("signal_log", dict({"select": select, "is_new": "eq.true", "order": "date.asc"}, **filt), limit=5000) or []
+    except Exception as e:
+        print(f"[signals] cannot read signal_log ({e})")
+        return []
+    return rows
+
+
+def backfill_signal_context(days=90):
+    """Stamp regime / GEX / VIX / SPX onto signals that have none, from the files as they
+    stood on each signal's own day (git history). Direct to Supabase."""
+    rows = _sb_signal_rows_needing("date,ticker", {"regime": "is.null"})
+    by_day = {}
+    for r in rows:
+        by_day.setdefault(str(r["date"])[:10], []).append(r)
     n_rows = n_days = 0
-    for fn in sorted(os.listdir(SIGNALS_DIR))[-days:]:
-        if not (fn.startswith("signals_") and fn.endswith(".json")):
+    for day in sorted(by_day)[-days:]:
+        sha, ctx = _context_at_commit(day)
+        if not ctx or not ctx.get("regime"):
+            print(f"[signals] {day}: no context in git history — skipped")
             continue
-        day = fn[len("signals_"):-len(".json")]
-        try:
-            doc = json.load(open(os.path.join(SIGNALS_DIR, fn)))
-        except Exception:
-            continue
-        rows = doc.get("rows") or []
-        have = doc.get("market") or {}
-        if have.get("regime") and have.get("gex_net_B") is not None:
-            ctx = dict(have); ctx.setdefault("regime", doc.get("regime")); src = "file"
-        else:
-            sha, ctx = _context_at_commit(day)
-            if not ctx:
-                continue
-            src = f"git {sha}"
-        for r in rows:
+        stamped = []
+        for r in by_day[day]:
+            x = {"ticker": r["ticker"]}
             for k in ("regime", "regime_held_weeks", "gex_regime", "gex_net_B", "gex_flip",
-                      "gex_dist_to_flip_pct", "spx_close", "spx_chg_pct", "spx_vs_50d_pct",
-                      "spx_vs_200d_pct", "vix"):
+                      "gex_dist_to_flip_pct", "spx_chg_pct", "spx_vs_50d_pct", "spx_vs_200d_pct", "vix"):
                 if ctx.get(k) is not None:
-                    r[k] = ctx[k]
-        n_rows += _sb_patch_signal_rows(day, rows); n_days += 1
-        print(f"[signals] {day}: context from {src} -> {len(rows)} rows")
+                    x[k] = ctx[k]
+            stamped.append(x)
+        n = _sb_patch_signal_rows(day, stamped); n_rows += n; n_days += 1
+        print(f"[signals] {day}: context from git {sha} -> {n}/{len(stamped)} rows")
     print(f"[signals] context backfill: {n_rows} rows over {n_days} days")
-    sb_heartbeat("context_backfill", n_rows > 0 or n_days == 0, f"{n_rows} rows over {n_days} days")
+    sb_heartbeat("context_backfill", (n_rows > 0) or (len(rows) == 0), f"{n_rows} rows over {n_days} days · {len(rows)} were missing context")
     return n_rows
 
 
@@ -1063,27 +1065,25 @@ def run_group_strength():
     return gs
 
 
-def backfill_group_strength(days=60):
+def backfill_group_strength(days=90):
     """
-    Stamp group strength onto EXISTING signal_log rows using rotation_daily.json —
-    the per-day record of sector and industry performance the engine has been
-    appending since August. Each signal gets the group state as it stood on its
-    own date, not today's. Runs once per day, cheap, idempotent.
+    Stamp group strength onto logged signals from outputs/history/rotation_daily.jsonl —
+    the per-day record of sector and industry performance the engine appends each session.
+    Each signal gets the group state as it stood on its OWN date. Rows come from the
+    database (the checkout does not reliably carry the per-day signal files).
     """
     import os, json
-    log_path = os.path.join(OUTPUTS_DIR, "rotation_daily.json")
+    log_path = os.path.join(OUTPUTS_DIR, "history", "rotation_daily.jsonl")
+    hist = {}
     try:
-        hist = {}
         for ln in open(log_path):
             ln = ln.strip()
-            if not ln:
-                continue
-            row = json.loads(ln)
-            hist[row["date"]] = row
+            if ln:
+                row = json.loads(ln); hist[str(row.get("date"))[:10]] = row
     except Exception as e:
-        print(f"[group] no rotation history to backfill from ({e})")
+        print(f"[group] no rotation history to backfill from ({log_path}: {e})")
+        sb_heartbeat("group_backfill", False, f"no rotation history: {e}")
         return 0
-    # SPX per day from the daily macro series
     spx_by = {}
     try:
         d = json.load(open(os.path.join(OUTPUTS_DIR, "macro_series.json")))
@@ -1091,29 +1091,25 @@ def backfill_group_strength(days=60):
         for i, r in enumerate(ser):
             m1 = round((ser[i]["spx"] / ser[i - 22]["spx"] - 1) * 100, 2) if i >= 22 else None
             m3 = round((ser[i]["spx"] / ser[i - 64]["spx"] - 1) * 100, 2) if i >= 64 else None
-            spx_by[r["date"][:10]] = (m1, m3)
+            spx_by[str(r["date"])[:10]] = (m1, m3)
     except Exception:
         pass
-    # signals to stamp: read the per-day files the engine wrote
-    n_days = n_rows = 0
-    for fn in sorted(os.listdir(SIGNALS_DIR))[-days:] if os.path.isdir(SIGNALS_DIR) else []:
-        if not fn.startswith("signals_") or not fn.endswith(".json"):
-            continue
-        day = fn[len("signals_"):-len(".json")]
+    rows = _sb_signal_rows_needing("date,ticker,industry,sector", {"group_ok": "is.null"})
+    by_day = {}
+    for r in rows:
+        by_day.setdefault(str(r["date"])[:10], []).append(r)
+    n_rows = n_days = 0
+    for day in sorted(by_day)[-days:]:
         h = hist.get(day) or hist.get(max((k for k in hist if k <= day), default=""))
         if not h:
-            continue
+            print(f"[group] {day}: no rotation row on or before this date — skipped"); continue
         m1, m3 = spx_by.get(day, (None, None))
         gs = _group_strength_from(h.get("industries") or [], h.get("sectors") or [], m1, m3)
-        try:
-            rows = json.load(open(os.path.join(SIGNALS_DIR, fn))).get("rows") or []
-        except Exception:
-            continue
-        for r in rows:
-            _stamp_group(r, gs)
-        n_rows += _sb_patch_signal_rows(day, rows); n_days += 1
+        stamped = [_stamp_group(dict(r), gs) for r in by_day[day]]
+        n = _sb_patch_signal_rows(day, stamped); n_rows += n; n_days += 1
+        print(f"[group] {day}: rotation row {h.get('date')} -> {n}/{len(stamped)} rows")
     print(f"[group] backfilled {n_rows} signal rows over {n_days} days from rotation history")
-    sb_heartbeat("group_backfill", n_rows > 0 or n_days == 0, f"{n_rows} rows over {n_days} days")
+    sb_heartbeat("group_backfill", (n_rows > 0) or (len(rows) == 0), f"{n_rows} rows over {n_days} days · {len(rows)} were missing · history {min(hist) if hist else '-'} -> {max(hist) if hist else '-'}")
     return n_rows
 
 
