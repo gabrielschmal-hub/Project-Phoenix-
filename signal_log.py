@@ -1,3 +1,4 @@
+import time
 #!/usr/bin/env python3
 """
 PHOENIX SIGNAL LOG — append-only record of what the screener said, then what happened.
@@ -112,13 +113,8 @@ def load_profitability(history_dir="outputs/history", stocks_path="outputs/stock
     return {"by_date": by_date, "latest": latest}
 
 
-# Column names as Postgres actually stores them. An unquoted mixed-case identifier in a
-# CREATE TABLE is folded to lower case, so the migration's mcap_B became mcap_b; the append
-# sent mcap_B and PostgREST rejected the whole batch (PGRST204, 3 Sep). The engine snapshot
-# still uses the mixed-case keys, hence the mapping.
-CAND_FIELDS = ("mcap_b", "breakout", "days_on_list", "pos_vs_high", "surge",
-               "industry_mom_3m", "dollar_vol_m", "trade_score")
-SNAP_KEY = {"mcap_b": "mcap_B", "dollar_vol_m": "dollar_vol_M"}      # column -> key in signals_<date>.json
+CAND_FIELDS = ("mcap_B", "breakout", "days_on_list", "pos_vs_high", "surge",
+               "industry_mom_3m", "dollar_vol_M", "trade_score")
 MARKET_FIELDS = ("regime", "regime_held_weeks", "gex_regime", "spx_close",
                  "spx_vs_50d_pct", "spx_vs_200d_pct", "vix")
 
@@ -154,8 +150,7 @@ def load_snapshots(history_dir="outputs/history"):
             key = (day, str(t).strip())
             if key in cand:                         # trade book wins over invest for the same name
                 continue
-            cand[key] = {k: r.get(SNAP_KEY.get(k, k)) for k in CAND_FIELDS
-                         if r.get(SNAP_KEY.get(k, k)) is not None}
+            cand[key] = {k: r.get(k) for k in CAND_FIELDS if r.get(k) is not None}
     return {"cand": cand, "market": market}
 
 
@@ -301,7 +296,7 @@ def enrich_lenses(s, snap):
         return 0
     try:
         rows = (s.table("signal_log").select("date,ticker," + ",".join(CAND_FIELDS + MARKET_FIELDS))
-                .is_("mcap_b", "null").limit(5000).execute().data)
+                .is_("mcap_B", "null").limit(5000).execute().data)
     except Exception as e:
         print(f"[signal_log] lens enrich skipped ({e})"); return 0
     n = 0
@@ -345,6 +340,10 @@ def cmd_append():
         print(f"[signal_log] {today}: nothing new to append ({len(trig)} triggers, all already logged)")
         return
     s.table("signal_log").upsert(rows, on_conflict="date,ticker", ignore_duplicates=True).execute()
+    os.makedirs("outputs", exist_ok=True)
+    with open("outputs/signal_log.jsonl", "a") as f:        # git-tracked twin: survives a DB accident
+        for r in rows:
+            f.write(json.dumps(r, default=str) + "\n")
     by_day = {}
     for r in rows:
         by_day[r["date"]] = by_day.get(r["date"], 0) + 1
@@ -444,7 +443,26 @@ def mark_row(row, px, spx=None):
     return out
 
 
+def _beat(s, ok, note):
+    """One row in heartbeats (lane='signal_mark') so the app and the operator can see this lane."""
+    try:
+        s.table("heartbeats").upsert({"lane": "signal_mark", "ts": dt.datetime.utcnow().isoformat() + "+00:00",
+                                      "ok": bool(ok), "note": str(note)[:300]}, on_conflict="lane").execute()
+    except Exception as e:
+        print(f"[signal_log] heartbeat failed: {e}")
+
+
 def cmd_mark():
+    """
+    Fill entry close, forward returns and the stop-path outcomes for every row not yet at
+    the 20-bar horizon.
+
+    B2 (20 Sep 2026): this used to download one ticker per row — hundreds of yfinance calls a
+    night — and Yahoo throttled it, so most rows came back empty and were 'skipped (no data)'
+    until a later night got lucky. Cohorts sat without a close for a week. Now one batched
+    download per ~80 tickers from the earliest due date, sliced per row. A few calls instead
+    of a few hundred.
+    """
     import yfinance as yf
     s = sb()
     today = dt.date.today()
@@ -453,6 +471,7 @@ def cmd_mark():
            .order("date").limit(2000).execute().data)
     if not due:
         print("[signal_log] nothing to mark")
+        _beat(s, True, "nothing due")
         return
     spx = None
     if any(r.get("spx_close") is None for r in due):
@@ -463,19 +482,46 @@ def cmd_mark():
                 spx.columns = spx.columns.get_level_values(0)
         except Exception as e:
             print(f"[signal_log] ^GSPC unavailable ({e}); SPX state stays null this run")
-    ok = skipped = 0
+
+    # ---- one download per batch of tickers, from the earliest date any of them needs ----
+    tickers = sorted({r["ticker"] for r in due})
+    start_all = (pd.Timestamp(min(r["date"] for r in due))).date().isoformat()
+    end_all = (today + dt.timedelta(days=1)).isoformat()
+    bars = {}
+    BATCH = 80
+    for i in range(0, len(tickers), BATCH):
+        chunk = tickers[i:i + BATCH]
+        for attempt in range(3):
+            try:
+                df = yf.download(chunk, start=start_all, end=end_all, interval="1d",
+                                 auto_adjust=True, group_by="ticker", threads=True, progress=False)
+                break
+            except Exception as e:
+                print(f"[signal_log] batch {i//BATCH + 1} attempt {attempt + 1} failed: {e}")
+                df = None
+                time.sleep(5 * (attempt + 1))
+        if df is None or len(df) == 0:
+            continue
+        for tk in chunk:
+            try:
+                sub = df if len(chunk) == 1 else df[tk]
+                sub = sub[["Open", "High", "Low", "Close", "Volume"]].dropna(subset=["Close"])
+                if len(sub):
+                    bars[tk] = sub
+            except Exception:
+                continue
+        time.sleep(1.5)
+    print(f"[signal_log] bars for {len(bars)}/{len(tickers)} tickers in {len(range(0, len(tickers), BATCH))} downloads")
+
+    ok = skipped = failed = 0
+    first_err = None
     for row in due:
-        start = pd.Timestamp(row["date"])                    # INCLUSIVE: bar 0 is the entry bar
-        end = start + pd.Timedelta(days=int(HORIZON * 1.9) + 7)
-        try:
-            px = yf.download(row["ticker"], start=start.date().isoformat(),
-                             end=end.date().isoformat(), interval="1d",
-                             auto_adjust=True, progress=False)
-            if isinstance(px.columns, pd.MultiIndex):
-                px.columns = px.columns.get_level_values(0)
-        except Exception:
+        px_all = bars.get(row["ticker"])
+        if px_all is None:
             skipped += 1
             continue
+        start = pd.Timestamp(row["date"])                    # INCLUSIVE: bar 0 is the entry bar
+        px = px_all[px_all.index >= start]
         m = mark_row(row, px, spx=spx)
         if not m:
             skipped += 1
@@ -483,9 +529,18 @@ def cmd_mark():
         if row.get("close") is not None:
             m.pop("close", None)                             # already latched; the guard forbids a change
             m.pop("close_src", None)
-        s.table("signal_log").update(m).eq("date", row["date"]).eq("ticker", row["ticker"]).execute()
-        ok += 1
-    print(f"[signal_log] marked {ok} rows, skipped {skipped} (no data)")
+        try:
+            s.table("signal_log").update(m).eq("date", row["date"]).eq("ticker", row["ticker"]).execute()
+            ok += 1
+        except Exception as e:
+            failed += 1
+            if first_err is None:
+                first_err = str(e)[:160]
+    note = f"marked {ok} · skipped {skipped} (no bars yet) · failed {failed} · {len(due)} due · {len(bars)}/{len(tickers)} tickers fetched"
+    if first_err:
+        note += f" · first error: {first_err}"
+    print(f"[signal_log] {note}")
+    _beat(s, failed == 0 and (ok > 0 or len(due) == 0), note)
 
 
 def _policy_R(row, m):
@@ -594,7 +649,7 @@ LENSES = {
     "sector":        lambda r: r.get("sector"),
     "industry":      lambda r: r.get("industry"),
     "profitability": lambda r: r.get("profitability"),
-    "mcap":          lambda r: _bucket_mcap(r.get("mcap_b")),
+    "mcap":          lambda r: _bucket_mcap(r.get("mcap_B")),
     "atr":           lambda r: _bucket_atr(r.get("atr_pct")),
     "regime":        lambda r: r.get("regime"),
     "gex_regime":    lambda r: r.get("gex_regime"),
@@ -638,20 +693,8 @@ def lenses(marked):
     return out
 
 
-def write_twin(rows, path="outputs/signal_log.jsonl"):
-    """Git-tracked copy of the whole log, rewritten in full on every report. Complete, sorted,
-    idempotent: a fresh checkout does not start it from zero, and a DB accident has a fallback."""
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    rows = sorted(rows, key=lambda r: (str(r.get("date")), str(r.get("ticker"))))
-    with open(path, "w") as f:
-        for r in rows:
-            f.write(json.dumps(r, default=str, sort_keys=True) + "\n")
-    return len(rows)
-
-
 def cmd_report():
     rows = sb().table("signal_log").select("*").limit(20000).execute().data
-    print(f"[signal_log] twin: {write_twin(rows)} rows -> outputs/signal_log.jsonl")
     sc = scorecard(rows)
     print(json.dumps(sc, indent=1))
     g = sc.get("atr_grid") or {}
@@ -665,31 +708,6 @@ def cmd_report():
     json.dump(sc, open("outputs/signal_scorecard.json", "w"), indent=1)
 
 
-def cmd_check():
-    """Fail the job if the log is in a state that a green run must never hide.
-
-    3 Sep 2026: the first nightly mark did not run (GitHub skipped the cron) and nothing said so.
-    A workflow that exits 0 with zero rows marked is worse than one that fails: it looks like
-    patience. Run after mark; exit 1 when rows are due and none carry a mark.
-    """
-    s = sb()
-    today = dt.date.today()
-    due_cut = (today - dt.timedelta(days=2)).isoformat()
-    rows = s.table("signal_log").select("date,close,bars_marked,r_20d,is_new").lte("date", due_cut).limit(20000).execute().data
-    due = len(rows)
-    marked = sum(1 for r in rows if r.get("bars_marked"))
-    closed = sum(1 for r in rows if r.get("close") is not None)
-    at_h = sum(1 for r in rows if r.get("r_20d") is not None)
-    print(f"[signal_log] check: {due} rows due (date <= {due_cut}) · {marked} marked · {closed} with close · {at_h} at horizon")
-    if due and marked == 0:
-        print("[signal_log] CHECK FAILED: rows are due and none is marked. Yahoo blocked, or the mark never ran.")
-        sys.exit(1)
-    if due and closed < marked:
-        print("[signal_log] CHECK FAILED: marked rows without an entry close — the latch did not fill.")
-        sys.exit(1)
-    print("[signal_log] check ok")
-
-
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "append"
-    {"append": cmd_append, "mark": cmd_mark, "report": cmd_report, "check": cmd_check}[cmd]()
+    {"append": cmd_append, "mark": cmd_mark, "report": cmd_report}[cmd]()

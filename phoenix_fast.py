@@ -14,6 +14,8 @@ WHAT IT IS
 WHAT IT WRITES
   prices_universe   one row per ticker: last, prev_close, volume, currency,
                     source='yahoo_batch', quote_date, updated_at
+  prices_live       EURUSD (20 Sep 2026): the FX rate the app sizes and marks
+                    euro positions with, refreshed every run
   rotation_intraday one row per sector and per industry (US stocks, primary
                     lines): chg_pct (cap-weighted), rs (vs SPY), members
   heartbeats        lane='yahoo': ok, note
@@ -44,6 +46,11 @@ FORCE = os.environ.get("PHOENIX_FORCE", "") == "1"
 BATCH = 200            # yfinance symbols per request
 CHUNK = 500            # rows per PostgREST upsert
 MIN_COVERAGE = 0.25    # below this the run writes nothing
+
+# FX rides along with the universe pull. Yahoo symbol -> the key the app reads from prices_live.
+# The 5-minute lane writes the same key from watch_tickers (ysym EURUSD=X); whichever wrote
+# last is what the app sees, and both are the same number.
+FX = {"EURUSD=X": "EURUSD"}
 
 
 def log(msg):
@@ -143,7 +150,7 @@ def pull_batch(symbols, out):
             qd = sub.index[-1]
             qd = qd.strftime("%Y-%m-%d") if hasattr(qd, "strftime") else str(qd)[:10]
             if last and last > 0:
-                out[s] = {"last": round(last, 4), "prev_close": (round(prev, 4) if prev and prev > 0 else None),
+                out[s] = {"last": round(last, 5), "prev_close": (round(prev, 5) if prev and prev > 0 else None),
                           "volume": vol, "quote_date": qd}
         except Exception:
             continue
@@ -200,6 +207,31 @@ def rotation_rows(universe, quotes, asof):
     return rows
 
 
+# --------------------------------------------------------------------------- fx
+def write_fx(quotes, now):
+    """EURUSD (and any other FX in FX) into prices_live, keyed the way the app reads it."""
+    rows = []
+    for ysym, key in FX.items():
+        q = quotes.get(ysym)
+        if not q or not q.get("last"):
+            continue
+        chg = ((q["last"] / q["prev_close"] - 1) * 100) if q.get("prev_close") else None
+        rows.append({"ticker": key, "last": round(q["last"], 5),
+                     "prev_close": (round(q["prev_close"], 5) if q.get("prev_close") else None),
+                     "chg_pct": (round(chg, 3) if chg is not None else None), "volume": None,
+                     "source": "yahoo_batch", "quote_ts": now, "updated_at": now})
+    if not rows:
+        log("FX: no quote this run — prices_live keeps the previous rate")
+        return 0
+    try:
+        supa("POST", "/rest/v1/prices_live?on_conflict=ticker", rows, prefer="resolution=merge-duplicates,return=minimal")
+        log("prices_live FX: " + ", ".join(f"{r['ticker']} {r['last']}" for r in rows))
+    except Exception as e:
+        log(f"prices_live FX upsert failed: {e}")
+        return 0
+    return len(rows)
+
+
 # --------------------------------------------------------------------------- main
 def main():
     t0 = time.time()
@@ -213,18 +245,25 @@ def main():
         return 0
     universe = load_universe(UNIVERSE)
     symbols = [r["ticker"] for r in universe if r["primary"]]
+    symbols = symbols + [k for k in FX if k not in symbols]
     log(f"{stamp} · pulling {len(symbols)} symbols from Yahoo in batches of {BATCH}")
     quotes = pull_all(symbols)
-    cov = len(quotes) / len(symbols) if symbols else 0
+    n_uni = len(symbols) - len(FX)
+    cov = (len([s for s in quotes if s not in FX]) / n_uni) if n_uni else 0
     log(f"pull: {len(quotes)} ok, {len(symbols) - len(quotes)} missing ({cov*100:.1f}% coverage) in {time.time()-t0:.0f}s")
+
+    now = datetime.now(timezone.utc).isoformat()
+    n_fx = write_fx(quotes, now)               # FX first: it is cheap and independent of coverage
+
     if cov < MIN_COVERAGE:
         beat(False, f"pull unusable: {len(quotes)}/{len(symbols)} ({cov*100:.0f}%) — nothing written, previous prices kept")
         return 1
 
-    now = datetime.now(timezone.utc).isoformat()
     ccy = {r["ticker"]: r["currency"] for r in universe}
     rows = []
     for s, q in quotes.items():
+        if s in FX:
+            continue                            # FX does not belong in prices_universe
         c = ccy.get(s, "USD")
         scale = 0.01 if c == "GBX" else 1.0    # pence -> pounds, same convention as the engine
         rows.append({"ticker": s, "last": round(q["last"] * scale, 4),
@@ -248,7 +287,8 @@ def main():
             log(f"prune skipped: {e}")
         ns = sum(1 for r in rot if r["scope"] == "sector"); ni = len(rot) - ns
         log(f"rotation_intraday: {ns} sectors, {ni} industries")
-    note = f"{len(quotes)}/{len(symbols)} ok ({cov*100:.0f}%) · {len(rot)} rotation rows · {time.time()-t0:.0f}s · {stamp}"
+    note = (f"{len(quotes) - n_fx}/{n_uni} ok ({cov*100:.0f}%) · {len(rot)} rotation rows · "
+            f"FX {'ok' if n_fx else 'missing'} · {time.time()-t0:.0f}s · {stamp}")
     beat(cov >= 0.8, note)
     log(note)
     return 0
