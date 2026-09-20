@@ -1021,6 +1021,8 @@
   .grpb{display:inline-block;margin-left:5px;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;padding:1px 5px;border-radius:4px;border:1px solid var(--line2);color:var(--inkFade);vertical-align:middle}
   .grpb.ok{border-color:var(--green);color:var(--green)} .grpb.no{border-color:var(--red);color:var(--red)}
   html.px-locked .app, html.px-locked #pxstatus{filter:blur(6px);pointer-events:none;user-select:none}
+  .hero-who{margin-top:14px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--inkFade)} .hero-who a{color:var(--gold)}
+  .tb-auth{display:block!important;margin-left:6px}
   .tb-th{display:none;margin-left:auto;background:transparent;border:1px solid var(--line2);color:var(--inkFade);
     border-radius:8px;width:32px;height:32px;font-size:15px;line-height:1;cursor:pointer;flex:0 0 auto}
   .tb-th:active{border-color:var(--gold);color:var(--gold)}
@@ -2988,7 +2990,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     <div class="navbtn" id="navBtn"></div><div class="navscrim" id="navScrim"></div>
     <nav class="navpanel" id="navPanel"><div class="rail-nav" id="railNav"></div></nav>
     <div class="topbar"><div class="tb-sec" id="tbSection"></div><div class="asof" id="stripAsof"></div>
-      <button class="tb-th" id="tbTheme" aria-label="Switch light or dark">\u25D1</button></div>
+      <button class="tb-th" id="tbTheme" aria-label="Switch light or dark">\u25D1</button>
+      <button class="tb-th tb-auth" id="tbAuth" aria-label="Sign in or out" title="Sign in / out">\u2386</button></div>
   </div>
 
   <header id="pxhead"><h1 id="pxhTitle">Mission Control</h1><p id="pxhSub"></p></header>
@@ -3227,12 +3230,17 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   window.addEventListener("hashchange", pxAuthFromHash);
   pxAuthRefresh().then(function(){                          // boot: renew a stale token silently, then gate
     if(pxAuthRequired()){
-      document.documentElement.classList.add("px-locked");
-      // the landing page stays visible; the app waits behind the sign-in
-      var open = function(){ if(pxAuthRequired()){ pxAuthModal(); } };
-      window.PX_AFTER_AUTH = function(){ document.documentElement.classList.remove("px-locked"); location.reload(); };
-      setTimeout(open, 400);
-      document.addEventListener("click", function(e){ if(pxAuthRequired() && !(e.target.closest && e.target.closest(".tr-modal"))){ open(); } }, true);
+      document.documentElement.classList.add("px-locked");     // the app blurs; the landing stays readable
+      window.PX_AFTER_AUTH = function(){ document.documentElement.classList.remove("px-locked"); var h=(location.hash||"").replace(/^#/,""); if(typeof PX_ENTER==="function") PX_ENTER(h||"mission"); };
+      // Deep link into the app (or the landing already dismissed): ask now. On the landing
+      // itself the Enter / Sign in buttons open it — no pop-up on a marketing page.
+      var onLanding = (!location.hash || /^#(home)?$/.test(location.hash)) && !(document.getElementById("home")||{}).classList.contains("gone");
+      if(!onLanding) setTimeout(function(){ if(pxAuthRequired()) pxAuthModal(); }, 400);
+      document.addEventListener("click", function(e){
+        if(!pxAuthRequired()) return;
+        var inLanding = e.target.closest && (e.target.closest("#home") || e.target.closest(".tr-modal-bg"));
+        if(!inLanding){ e.preventDefault(); e.stopPropagation(); pxAuthModal(); }   // anything in the app -> sign-in
+      }, true);
     }
   });
   setInterval(pxAuthRefresh, 45 * 60 * 1000);
@@ -3839,7 +3847,13 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   var host=document.getElementById("pageHost");
   var PX_BOOTING=true;
   function go(id,fromHash){
-    if(typeof pxAuthRequired==="function" && pxAuthRequired() && id!=="home"){ if(typeof pxAuthModal==="function") pxAuthModal(); return; }
+    if(typeof pxAuthRequired==="function" && pxAuthRequired() && id!=="home"){
+      // no session: never build an app page. If the landing is still up, stay quiet — its
+      // buttons open the sign-in; a deep link or an in-app click gets the modal.
+      var homeUp=!((document.getElementById("home")||{}).classList||{contains:function(){return false;}}).contains("gone");
+      if(!homeUp && typeof pxAuthModal==="function") pxAuthModal();
+      return;
+    }
     if(!built[id]){ buildPage(id); built[id]=true; }
     Array.prototype.forEach.call(document.querySelectorAll(".page"),function(p){p.classList.toggle("active",p.id==="page-"+id);});
     Array.prototype.forEach.call(document.querySelectorAll(".nav-item"),function(it){it.classList.toggle("active",it.dataset.page===id);});
@@ -15672,9 +15686,47 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     return PXS.some(function(x){ return x[0]===h; }) ? h : "mission";
   }
   window.PX_ENTER=function(id){
+    // The landing page is public; everything past it is not. No session -> the sign-in,
+    // and only a successful sign-in opens the door.
+    if(typeof pxAuthRequired==="function" && pxAuthRequired()){
+      window.PX_AFTER_AUTH=function(){
+        document.documentElement.classList.remove("px-locked");
+        if(PX_HOME) PX_HOME.classList.add("gone");
+        pxPaintLanding();
+        go(id||"mission");                       // no reload: nothing was built without a session, so build now
+      };
+      if(typeof pxAuthModal==="function") pxAuthModal();
+      return;
+    }
     if(PX_HOME) PX_HOME.classList.add("gone");
     go(id||pxCurrentRoute());
   };
+  // the landing tells you whether you are signed in, and what the button will do
+  function pxPaintLanding(){
+    var signed=!(typeof pxAuthRequired==="function" && pxAuthRequired());
+    var email=(typeof pxAuthEmail==="function"&&pxAuthEmail())||"";
+    document.querySelectorAll("#home .hlogin").forEach(function(el){
+      el.textContent=signed?"Sign out":"Sign in";
+      el.onclick=function(e){ e.preventDefault(); e.stopPropagation(); if(signed){ pxAuthSignOut(); } else { PX_ENTER("mission"); } };
+    });
+    document.querySelectorAll("#home .pill-ink").forEach(function(el){ el.textContent=signed?"Enter":"Sign in"; });
+    document.querySelectorAll("#home .cta-ink").forEach(function(el){
+      var svg=el.querySelector("svg"); el.textContent=signed?"Enter Mission Control ":"Sign in with e-mail and password "; if(svg) el.appendChild(svg);
+    });
+    var who=document.getElementById("pxHomeWho");
+    if(!who){ var cta=document.querySelector("#home .hero-cta"); if(cta){ who=document.createElement("div"); who.id="pxHomeWho"; who.className="hero-who"; cta.appendChild(who); } }
+    if(who) who.innerHTML=signed?('Signed in as <b>'+email.replace(/</g,"&lt;")+'</b> \u00b7 <a href="#" id="pxHomeOut">sign out</a>'):'Phoenix is private. Two accounts exist.';
+    var out=document.getElementById("pxHomeOut"); if(out) out.onclick=function(e){ e.preventDefault(); pxAuthSignOut(); };
+  }
+  pxPaintLanding();
+  setTimeout(function(){
+    pxPaintLanding();
+    // signed in and arriving on an app route (bookmark, home-screen icon): straight in
+    var h=(location.hash||"").replace(/^#/,"").toLowerCase();
+    if(h && h!=="home" && PXS.some(function(x){ return x[0]===h; }) && !(typeof pxAuthRequired==="function" && pxAuthRequired()) && PX_HOME && !PX_HOME.classList.contains("gone")){
+      PX_HOME.classList.add("gone"); go(h);
+    }
+  }, 1200);                                 // after the boot refresh settles
   window.PX_HOMESCREEN=function(){ if(PX_HOME){ PX_HOME.classList.remove("gone"); window.scrollTo(0,0); } };
   pxFromHash();
 
@@ -15976,6 +16028,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     document.getElementById("thLight").addEventListener("click",function(){ setTheme("light"); });
     // the rail footer holding Light/Dark is clipped when the rail collapses on a
     // phone, so the top bar carries the same control there
+    var _tbAuth=document.getElementById("tbAuth");
+    if(_tbAuth) _tbAuth.addEventListener("click",function(){
+      if(typeof pxAuthRequired==="function" && pxAuthRequired()){ pxAuthModal(); }
+      else if(confirm("Sign out of Phoenix on this device?")){ pxAuthSignOut(); }
+    });
     var _tbTh=document.getElementById("tbTheme");
     if(_tbTh) _tbTh.addEventListener("click",function(){
       setTheme(document.documentElement.classList.contains("light")?"dark":"light");
