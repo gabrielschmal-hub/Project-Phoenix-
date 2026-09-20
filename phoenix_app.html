@@ -1021,6 +1021,7 @@
   .grpb{display:inline-block;margin-left:5px;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;padding:1px 5px;border-radius:4px;border:1px solid var(--line2);color:var(--inkFade);vertical-align:middle}
   .grpb.ok{border-color:var(--green);color:var(--green)} .grpb.no{border-color:var(--red);color:var(--red)}
   html.px-locked .app, html.px-locked #pxstatus{filter:blur(6px);pointer-events:none;user-select:none}
+  .pxaccts[hidden]{display:none!important}   /* the profile popover is the one control; the chips only hold state */
   .hero-who{margin-top:14px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--inkFade)} .hero-who a{color:var(--gold)}
   .tb-auth{display:block!important;margin-left:6px}
   .tb-th{display:none;margin-left:auto;background:transparent;border:1px solid var(--line2);color:var(--inkFade);
@@ -3098,7 +3099,18 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   }
   // The app is private: without a session nothing past the landing page renders.
   var PX_GATE_ON = true;
-  function pxAuthRequired(){ return PX_GATE_ON && !pxAuthToken(); }
+  var _pxRefreshing = null;
+  function pxAuthRequired(){
+    if(!PX_GATE_ON) return false;
+    if(pxAuthToken()) return false;
+    // access tokens last an hour; a refresh token means the person IS signed in and the
+    // silent renewal just has not run yet. Renew, do not lock the screen and swallow taps.
+    if(pxSession && pxSession.refresh_token){
+      if(!_pxRefreshing) _pxRefreshing = pxAuthRefresh().then(function(){ _pxRefreshing = null; });
+      return false;
+    }
+    return true;
+  }
   function pxAuthStore(j){                                  // normalise a GoTrue session payload
     if(!j || !j.access_token) return null;
     var exp = j.expires_at || (Math.floor(Date.now()/1000) + (+j.expires_in || 3600));
@@ -15738,7 +15750,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var pop=document.createElement("div");
     pop.id="pxProfPop";
     pop.innerHTML='<div class="bx" role="dialog" aria-label="Switch profile">'+
-      '<h4>Switch profile</h4><p>Each book is separate \u2014 positions, heat and history.</p>'+
+      '<h4>Switch book</h4><p>Both admins can open either book. Positions, heat and history are separate.</p>'+
       '<button class="opt" data-p="G"><i>G</i><b>Gabriel</b></button>'+
       '<button class="opt" data-p="A"><i>A</i><b>Aldemar</b></button>'+
       '<div class="auth" id="pxAuthBox"></div>'+
@@ -16024,8 +16036,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     btn.addEventListener("click",function(e){ e.stopPropagation(); box.classList.toggle("open"); });
     box.addEventListener("click",function(e){ e.stopPropagation(); });
     document.addEventListener("click",function(){ box.classList.remove("open"); });
-    document.getElementById("thDark").addEventListener("click",function(){ setTheme("dark"); });
-    document.getElementById("thLight").addEventListener("click",function(){ setTheme("light"); });
+    document.addEventListener("click",function(e){
+      var t=e.target && e.target.closest && e.target.closest("#thDark,#thLight");
+      if(!t) return;
+      e.stopPropagation(); setTheme(t.id==="thLight"?"light":"dark");
+    }, true);
     // the rail footer holding Light/Dark is clipped when the rail collapses on a
     // phone, so the top bar carries the same control there
     var _tbAuth=document.getElementById("tbAuth");
