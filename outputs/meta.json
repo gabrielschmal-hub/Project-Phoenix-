@@ -1,12 +1,14 @@
 {
- "last_run": "2026-09-19T17:54:15.528640+00:00",
+ "last_run": "2026-09-21T10:57:56.479827+00:00",
  "source_flags": {},
- "warnings": [],
+ "warnings": [
+  "group_backfill failed: 'str' object has no attribute 'get'"
+ ],
  "progress": [
   {
    "step": "trade_book",
    "status": "ok",
-   "seconds": 1.8
+   "seconds": 1.6
   },
   {
    "step": "trades",
@@ -21,7 +23,7 @@
   {
    "step": "research",
    "status": "ok",
-   "seconds": 0.0
+   "seconds": 0.1
   },
   {
    "step": "universe_gaps",
@@ -31,7 +33,7 @@
   {
    "step": "macro",
    "status": "ok",
-   "seconds": 4.2
+   "seconds": 3.1
   },
   {
    "step": "spx_daily",
@@ -41,12 +43,12 @@
   {
    "step": "macro_series",
    "status": "ok",
-   "seconds": 2.1
+   "seconds": 1.8
   },
   {
    "step": "macro_daily",
    "status": "ok",
-   "seconds": 1.0
+   "seconds": 0.9
   },
   {
    "step": "vix_term",
@@ -56,7 +58,7 @@
   {
    "step": "gex",
    "status": "ok",
-   "seconds": 3.0
+   "seconds": 3.3
   },
   {
    "step": "dayscore",
@@ -76,17 +78,17 @@
   {
    "step": "sectors",
    "status": "ok",
-   "seconds": 1.7
+   "seconds": 1.6
   },
   {
    "step": "gex_universe",
    "status": "ok",
-   "seconds": 0.5
+   "seconds": 19.8
   },
   {
    "step": "gex_stocks",
    "status": "ok",
-   "seconds": 80.6
+   "seconds": 78.2
   },
   {
    "step": "universe_charts",
@@ -96,37 +98,37 @@
   {
    "step": "stocks",
    "status": "ok",
-   "seconds": 1095.6
+   "seconds": 1032.6
   },
   {
    "step": "perf_series",
    "status": "ok",
-   "seconds": 1.2
+   "seconds": 1.1
   },
   {
    "step": "etf_profiles",
    "status": "ok",
-   "seconds": 15.3
+   "seconds": 14.7
   },
   {
    "step": "rotation_daily",
    "status": "ok",
-   "seconds": 2.0
+   "seconds": 2.1
   },
   {
    "step": "group_strength",
    "status": "ok",
-   "seconds": 0.9
+   "seconds": 0.8
   },
   {
    "step": "rotation_nav",
    "status": "ok",
-   "seconds": 2.8
+   "seconds": 3.0
   },
   {
    "step": "congress",
    "status": "ok",
-   "seconds": 4.6
+   "seconds": 4.4
   },
   {
    "step": "congress_meta",
@@ -136,12 +138,12 @@
   {
    "step": "house_ptr",
    "status": "ok",
-   "seconds": 1.1
+   "seconds": 0.9
   },
   {
    "step": "senate_efd",
    "status": "ok",
-   "seconds": 4.0
+   "seconds": 4.1
   },
   {
    "step": "oge",
@@ -151,27 +153,27 @@
   {
    "step": "executive",
    "status": "ok",
-   "seconds": 1.4
+   "seconds": 1.1
   },
   {
    "step": "insider",
    "status": "ok",
-   "seconds": 34.5
+   "seconds": 38.7
   },
   {
    "step": "institutional_13f",
    "status": "ok",
-   "seconds": 33.4
+   "seconds": 31.4
   },
   {
    "step": "earnings_refresh",
    "status": "ok",
-   "seconds": 126.1
+   "seconds": 119.9
   },
   {
    "step": "iv_em",
    "status": "ok",
-   "seconds": 93.7
+   "seconds": 95.0
   },
   {
    "step": "financials_all",
@@ -181,17 +183,17 @@
   {
    "step": "detail_bundle",
    "status": "ok",
-   "seconds": 33.2
+   "seconds": 32.8
   },
   {
    "step": "research",
    "status": "ok",
-   "seconds": 150.9
+   "seconds": 148.8
   },
   {
    "step": "ratings_all",
    "status": "ok",
-   "seconds": 286.5
+   "seconds": 179.3
   },
   {
    "step": "theses",
@@ -210,8 +212,9 @@
   },
   {
    "step": "group_backfill",
-   "status": "ok",
-   "seconds": 0.0
+   "status": "failed",
+   "seconds": 0.6,
+   "error": "'str' object has no attribute 'get'"
   },
   {
    "step": "context_backfill",
