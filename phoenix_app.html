@@ -3089,6 +3089,18 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var t = pxAuthToken();
     return { apikey: SUPA.key, Authorization: "Bearer " + (t || SUPA.key) };
   }
+  // Resolves once the access token is fresh. On a cold open the stored token is usually
+  // an hour or more old; a read fired before the silent renewal lands goes out with the
+  // public key, the database refuses it, and the app concluded the book was empty and
+  // cached that. Reads now wait for this instead.
+  function pxAuthReady(){
+    if(pxAuthToken()) return Promise.resolve(true);
+    if(pxSession && pxSession.refresh_token){
+      if(!_pxRefreshing) _pxRefreshing = pxAuthRefresh().then(function(){ _pxRefreshing = null; });
+      return _pxRefreshing.then(function(){ return !!pxAuthToken(); });
+    }
+    return Promise.resolve(false);
+  }
   // ---- password sign-in (primary from 20 Sep 2026); the e-mail code stays as the fallback ----
   function pxAuthPassword(email, pw){
     return fetch(SUPA.url + "/auth/v1/token?grant_type=password", { method: "POST",
@@ -3286,11 +3298,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var ctl = (typeof AbortController !== "undefined") ? new AbortController() : null;
     var t = ctl ? setTimeout(function(){ ctl.abort(); }, SUPA.timeoutMs) : null;
     function settle(v, err){ if(t) clearTimeout(t); if(err) throw err; return v; }
-    return fetch(SUPA.url + "/rest/v1/snapshots_latest"
+    return pxAuthReady().then(function(){ return fetch(SUPA.url + "/rest/v1/snapshots_latest"
         + "?name=eq." + encodeURIComponent(name + ".json")
         + "&select=payload,created_at",
       { headers: pxReadHeaders(),
-        signal: ctl ? ctl.signal : undefined })
+        signal: ctl ? ctl.signal : undefined }); })
     .then(function(r){ if(!r.ok) throw new Error("supabase HTTP " + r.status); return r.json(); })
     .then(function(rows){
         if(!rows || !rows.length || rows[0] == null || rows[0].payload == null)
@@ -3522,9 +3534,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   var PX_LIVE = {}, PX_WATCH = null, PX_HIST = {}, pxLiveTimer = null;
 
   function supaRows(path){
-    return fetch(SUPA.url + path,
-      { headers: pxReadHeaders() })
-    .then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
+    return pxAuthReady().then(function(){
+      return fetch(SUPA.url + path, { headers: pxReadHeaders() });
+    }).then(function(r){ if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); });
   }
 
   function pxTapeTickers(){
@@ -12716,10 +12728,13 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       })
       .catch(function(e){
         // No silent empty book: an unreachable file must look like a failure,
-        // not like "you have no trades".
-        trLog = []; trLoadedFor = "shared"; trDirty = 0;
-        console.error("[trades] trades.json unreachable:", e);
-        trBanner("trades.json could not be loaded — this book is EMPTY, not zero.");
+        // not like "you have no trades". And it must not be CACHED as one:
+        // trLog stays null so the next page that needs the book asks again.
+        trLog = null; trLoadedFor = null; trDirty = 0;
+        console.error("[trades] book unreachable:", e);
+        var _auth=/401|403/.test(String(e&&e.message));
+        trBanner(_auth ? "The book needs a signed-in account." : "The book could not be loaded \u2014 it is EMPTY, not zero.");
+        if(_auth && typeof pxAuthGate==="function") pxAuthGate("The book needs a signed-in account.");
       })
       // cb runs OUTSIDE the data chain. It used to run inside .then(), so any
       // exception thrown by the CALLER'S render fell into .catch(), which wiped
@@ -12945,6 +12960,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     return (typeof pfCfg!=="undefined" && pfCfg && pfCfg.active) || PF_DEFAULT_ACCT;
   }
   function trByStatus(s){
+    if(!Array.isArray(trLog)) return [];
     var a=pfActiveAcct();
     return (trLog||[]).filter(function(t){
       return t.status===s && (t.account||PF_DEFAULT_ACCT)===a;
