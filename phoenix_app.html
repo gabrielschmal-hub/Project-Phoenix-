@@ -2981,7 +2981,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     <button class="pxprof" id="pxProf" aria-haspopup="dialog">
       <span class="av" id="pxProfAv">G</span><span class="nm" id="pxProfNm">Gabriel</span><span class="cv">&#9662;</span>
     </button>
-    <div class="pxaccts" hidden><div class="pxacct on" id="pxG">G</div><div class="pxacct" id="pxA">A</div></div>
+    <div class="pxaccts" hidden style="display:none!important"><div class="pxacct on" id="pxG">G</div><div class="pxacct" id="pxA">A</div></div>
     <div class="thsw"><b id="thLight">Light</b><b id="thDark">Dark</b></div>
   </div>
 </nav>
@@ -3191,9 +3191,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     try{ email = email || localStorage.getItem("phoenix.auth.email") || ""; }catch(e){}
     var html = '<div class="tr-modal-title">Sign in to Phoenix</div>' +
       '<div class="tr-field"><label>E-mail</label><input id="mAuthEmail" type="email" inputmode="email" autocomplete="username" autocapitalize="none" placeholder="you@example.com" value="' + email.replace(/"/g, "&quot;") + '"></div>' +
-      '<div class="tr-field" id="mAuthPwRow"><label>Password</label><input id="mAuthPw" type="password" inputmode="numeric" autocomplete="current-password" placeholder="\u2022\u2022\u2022\u2022"></div>' +
+      '<div class="tr-field" id="mAuthPwRow"><label>Password</label><input id="mAuthPw" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false"></div>' +
       '<div class="tr-field" id="mAuthCodeRow" style="display:none"><label>6-digit code from the e-mail</label><input id="mAuthCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456"></div>' +
-      '<div class="sl-note" id="mAuthNote">Two accounts exist. Nothing in Phoenix renders without one.</div>' +
+      '<div class="sl-note" id="mAuthNote"></div>' +
       '<div class="tr-modal-actions"><button class="ok" id="mAuthOk">Sign in</button><button class="cancel" id="mAuthAlt" style="opacity:.75">E-mail me a code instead</button></div>';
     trModal(html, function(bg){
       var em = (bg.querySelector("#mAuthEmail").value || "").trim().toLowerCase();
@@ -15727,7 +15727,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     });
     var who=document.getElementById("pxHomeWho");
     if(!who){ var cta=document.querySelector("#home .hero-cta"); if(cta){ who=document.createElement("div"); who.id="pxHomeWho"; who.className="hero-who"; cta.appendChild(who); } }
-    if(who) who.innerHTML=signed?('Signed in as <b>'+email.replace(/</g,"&lt;")+'</b> \u00b7 <a href="#" id="pxHomeOut">sign out</a>'):'Phoenix is private. Two accounts exist.';
+    if(who) who.innerHTML=signed?('Signed in as <b>'+email.replace(/</g,"&lt;")+'</b> \u00b7 <a href="#" id="pxHomeOut">sign out</a>'):'';
     var out=document.getElementById("pxHomeOut"); if(out) out.onclick=function(e){ e.preventDefault(); pxAuthSignOut(); };
   }
   pxPaintLanding();
