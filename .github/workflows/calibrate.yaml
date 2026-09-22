@@ -1,0 +1,39 @@
+name: Phoenix Calibration
+
+# Pairs Elliott's briefing archive (calib_source.csv, one row per briefing)
+# against the full git history of outputs/gex.json and prints the flip
+# offset per date. Run by hand whenever calib_source.csv changes.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'calib_source.csv'
+
+concurrency:
+  group: phoenix-daily
+  cancel-in-progress: false
+
+jobs:
+  calibrate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # required: the backfill reads every past commit of outputs/gex.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Backfill and analyze
+        run: python phoenix.py --calib-backfill
+      - name: Commit calibration log
+        run: |
+          git config user.name  "phoenix-bot"
+          git config user.email "phoenix-bot@users.noreply.github.com"
+          git pull --rebase origin main || true
+          git add calibration_log.json || true
+          git commit -m "Calibration backfill $(date -u +%Y-%m-%dT%H:%M)" || echo "No changes"
+          git push || echo "Nothing to push"
