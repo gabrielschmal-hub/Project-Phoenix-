@@ -10,6 +10,12 @@ on:
     paths:
       - 'wire/**'
 
+# One Phoenix run at a time. A wire push landing during the scheduled run
+# queues behind it instead of racing it for the commit to main.
+concurrency:
+  group: phoenix-daily
+  cancel-in-progress: false
+
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
@@ -18,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0          # full history: the context backfill reads each signal day's files from git
+          fetch-depth: 0          # full history: the context backfill and GEX history read past commits via git log/show
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -32,6 +38,10 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SEC_IDENTITY: "Phoenix Research gabriel@example.com"
+          # Optional. phoenix.py skips the theses and alerts steps with a
+          # printed notice when these are empty, so an unset secret is safe.
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
             python phoenix.py --engine wire
@@ -43,6 +53,9 @@ jobs:
           git config user.name  "phoenix-bot"
           git config user.email "phoenix-bot@users.noreply.github.com"
           git pull --rebase origin main || true
-          git add outputs/ macroflow.db || true
+          # macro_weekly.csv is the committed fallback the macro engine writes
+          # at the repo root; it was never being added, so the fallback never
+          # updated after the first commit.
+          git add outputs/ macroflow.db macro_weekly.csv || true
           git commit -m "Phoenix run $(date -u +%Y-%m-%dT%H:%M) (${{ github.event_name }})" || echo "No changes"
           git push || echo "Nothing to push"
