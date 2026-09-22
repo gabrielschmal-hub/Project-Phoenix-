@@ -2,7 +2,12 @@ name: Phoenix Daily Run
 
 on:
   schedule:
-    - cron: '0 5 * * 1-5'
+    - cron: '0 5 * * 1-5'     # full pipeline
+    # GEX refresh. At 05:00 UTC neither the prior cash close nor the overnight
+    # OI update is available, so the 05:00 run republishes yesterday's gex.json
+    # (the publish gate holds the last good file). 10:30 UTC = 06:30 ET, after
+    # CBOE's OI refresh, is when the chain is complete for the new session.
+    - cron: '30 10 * * 1-5'   # gex only
   workflow_dispatch:
   # Dropping the morning wire files IS the publish: any commit touching
   # wire/** triggers a fast wire-only run, live on the dashboard in ~2 min.
@@ -45,6 +50,8 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
             python phoenix.py --engine wire
+          elif [ "${{ github.event.schedule }}" = "30 10 * * 1-5" ]; then
+            python phoenix.py --engine gex
           else
             python phoenix.py --full
           fi
