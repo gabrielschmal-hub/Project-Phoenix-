@@ -2687,7 +2687,7 @@ def compute_greeks(S, K, T, r, q, sigma):
     return gamma, vanna, charm
 
 
-def gex_engine(chain, spot, scale=1.0):
+def gex_engine(chain, spot, scale=1.0, floors=None):
     """
     PURE FUNCTION. Compute dealer gamma/vanna/charm exposure from an options chain.
 
@@ -2745,7 +2745,15 @@ def gex_engine(chain, spot, scale=1.0):
     n_strikes = len(strikes)
     # A healthy SPX/SPY chain has hundreds of strikes and millions of OI near spot.
     # If we have very few strikes, tiny OI, or zero puts, the pull is broken.
-    bad_pull = (n_strikes < 20) or (total_oi < 50000) or (total_put_oi < 1000)
+    # Floors are index-sized by default. The per-stock path passes its own
+    # (GEX_STOCKS) — until 22 Sep 2026 every single name was judged against the
+    # SPX floors here first, so anything under 50k OI in the band (OKTA, most
+    # mid-caps) came back "degenerate_chain" and never reached the stock floors.
+    _fl = floors or {}
+    _min_strikes = _fl.get("min_strikes", 20)
+    _min_oi = _fl.get("min_total_oi", 50000)
+    _min_put = _fl.get("min_put_oi", 1000)
+    bad_pull = (n_strikes < _min_strikes) or (total_oi < _min_oi) or (total_put_oi < _min_put)
     if bad_pull:
         return {
             "asof": _now(),
@@ -3094,11 +3102,19 @@ def compute_sector_performance(stock_data, universe, daily_ret=None):
         def ret(nbars):
             return round((idx[-1] / idx[-1 - nbars] - 1) * 100, 2) if len(idx) > nbars else None
 
+        # Same trend flags the industry builder emits (10 weekly bars ≈ 50 days).
+        # Until 22 Sep 2026 sectors had no "above" key, so group_strength read
+        # every sector as below its 50-day and every sector failed the gate —
+        # Electronic Technology at +4.8% vs SPX was showing "lagging".
+        ma10 = _sma(idx, 10); ma10_prev = _sma(idx[:-4], 10)
+        above = ma10 is not None and idx[-1] > ma10
+        rising = ma10 is not None and ma10_prev is not None and ma10 > ma10_prev
         out.append({
             "sector": sec, "series": idx_norm, "n": len(series),
             "n_industries": len(inds), "mcap_B": round(W / 1e9, 1),
             "d1": (round(sum(d1s) / sum(d1w), 2) if d1w else None),
             "w1": ret(1), "m1": ret(4), "m3": ret(13),
+            "above": above, "rising": rising,
         })
     out.sort(key=lambda r: -(r.get("mcap_B") or 0))
     return out
@@ -9505,7 +9521,10 @@ def run_gex_stocks(tickers=None):
             old_band = GEX["otm_band"]
             GEX["otm_band"] = band
             try:
-                res = gex_engine(chain, spot, scale=1.0)
+                res = gex_engine(chain, spot, scale=1.0,
+                                 floors={"min_strikes": cfg["min_strikes"],
+                                         "min_total_oi": cfg["min_total_oi"],
+                                         "min_put_oi": cfg["min_put_oi"]})
             finally:
                 GEX["otm_band"] = old_band
             # per-ticker degenerate floors (thinner than index, but real)
@@ -10814,10 +10833,19 @@ def mme_flip_net(contracts, spot, scrape_date):
     pre = []
     tcache = {}
     iv_skipped = 0
+    # DIAGNOSTIC (22 Sep 2026): contracts with vendor IV <= 0 are dropped from the
+    # solve. If those cluster near the money and near expiry, they are exactly
+    # the contracts that move the flip. Count them by distance and DTE so a
+    # flip disagreement can be attributed rather than guessed at.
+    _skip_near, _skip_near_oi, _skip_oi, _skip_by_exp = 0, 0, 0, {}
     for c in contracts:
         sig = c["iv"]
         if sig <= 0:
             iv_skipped += 1
+            _skip_oi += c["oi"]
+            _skip_by_exp[c["expiry"]] = _skip_by_exp.get(c["expiry"], 0) + c["oi"]
+            if abs(c["K"] / spot - 1.0) <= 0.03:
+                _skip_near += 1; _skip_near_oi += c["oi"]
             continue
         T = tcache.get(c["expiry"])
         if T is None:
@@ -10852,7 +10880,15 @@ def mme_flip_net(contracts, spot, scrape_date):
             break
         prevL, prevG = L, g
     net_B = curve(spot) / 1e9
+    if iv_skipped:
+        _top = sorted(_skip_by_exp.items(), key=lambda kv: -kv[1])[:5]
+        print(f"[mme] iv<=0 skipped: {iv_skipped} contracts / {_skip_oi:,} OI; "
+              f"within 3% of spot: {_skip_near} contracts / {_skip_near_oi:,} OI; "
+              f"top expiries by skipped OI: " + ", ".join(f"{str(e)}={o:,}" for e, o in _top))
     return flip, round(net_B, 2), {"grid": n, "iv_skipped": iv_skipped,
+                                   "iv_skipped_oi": _skip_oi,
+                                   "iv_skipped_near_spot": _skip_near,
+                                   "iv_skipped_near_spot_oi": _skip_near_oi,
                                    "expiries": len(tcache)}
 
 
@@ -11234,6 +11270,9 @@ def run_gex_cboe(symbol="_SPX", label="SPX"):
             "spot_source": spot_source,
             "contracts": len(_contracts), "expiries": _meta["expiries"],
             "iv_skipped": _meta.get("iv_skipped", 0),
+            "iv_skipped_oi": _meta.get("iv_skipped_oi", 0),
+            "iv_skipped_near_spot": _meta.get("iv_skipped_near_spot", 0),
+            "iv_skipped_near_spot_oi": _meta.get("iv_skipped_near_spot_oi", 0),
             "call_tiered": _walls["call_tiered"], "put_tiered": _walls["put_tiered"],
             "magnets": _walls["magnets"],
             "call_wall_pin": _walls["call_wall_pin"],
