@@ -14186,15 +14186,19 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var r=(IVEM||{})[tk], live=(typeof trPrices==="object"&&trPrices)?trPrices[tk]:null;
       if(live==null && typeof PX_LIVE==="object" && PX_LIVE && PX_LIVE[tk]) live=PX_LIVE[tk].last;
       var st=ivemState(r, live);
+      if(r && r.refresh_failed && st.cls!=="bad"){ st={cls:"aged", label:(st.label||"")+" \u00b7 refresh failed", days:st.days,
+        why:"Today\u2019s fetch failed ("+r.refresh_failed+"); this is the last good read."}; }
       tile.style.display="block";
       var meta=document.getElementById("dpVolMeta");
       if(meta) meta.innerHTML=(r&&r.asof?" \u00b7 "+r.asof:"")+'<span class="px-fresh '+st.cls+'">'+st.label+'</span>'+
         (r&&r.tier?'<span class="px-fresh">tier '+r.tier+'</span>':'')+ivemRefreshBtn(tk,"all");
       var body=document.getElementById("dpVolBody");
-      if(!r || r.coverage==="no_chain" || r.em_pct==null){
+      if(!r || r.coverage==="no_chain" || r.coverage==="failed" || r.em_pct==null){
         body.innerHTML='<div class="ed-note">'+(r&&r.coverage==="no_chain"
           ?'No usable option chain for '+tk+' \u2014 nothing to imply a move from. ATR is the only volatility input here.'
-          :'No implied-vol record for '+tk+' yet. It is not in the daily list; the weekend run covers the S&amp;P 500.')+'</div>';
+          :r&&r.coverage==="failed"
+          ?'The option chain for '+tk+' could not be fetched on '+r.asof+' ('+String(r.reason||"no reason given").replace(/</g,"&lt;")+'). Tap Update now to queue a retry on the next run.'
+          :'No implied-vol record for '+tk+' yet. Open positions, plans, the watchlist and the screener\u2019s leaders refresh every run; the rest of the S&amp;P 500 at the weekend. Tap Update now to queue this one.')+'</div>';
         ivemWireRefresh(tile); return;
       }
       var dim=(st.cls==="bad")?' style="opacity:.45"':'';

@@ -1067,49 +1067,82 @@ def run_group_strength():
 
 def backfill_group_strength(days=90):
     """
-    Stamp group strength onto logged signals from outputs/history/rotation_daily.jsonl —
-    the per-day record of sector and industry performance the engine appends each session.
-    Each signal gets the group state as it stood on its OWN date. Rows come from the
-    database (the checkout does not reliably carry the per-day signal files).
+    Stamp group strength onto logged signals. outputs/history/rotation_daily.jsonl stores one
+    DAILY return per sector and industry ({"date", "sectors": {name: d1}, "industries": {...}}),
+    not the m1/m3/above-50 fields — so they are rebuilt here from those returns: compound each
+    group into an index, 1-month = last 21 sessions on or before the signal date, above-50 only
+    when 50 sessions of history exist (otherwise left null and said so).
     """
     import os, json
     log_path = os.path.join(OUTPUTS_DIR, "history", "rotation_daily.jsonl")
-    hist = {}
+    days_rows = []
     try:
         for ln in open(log_path):
             ln = ln.strip()
             if ln:
-                row = json.loads(ln); hist[str(row.get("date"))[:10]] = row
+                days_rows.append(json.loads(ln))
     except Exception as e:
-        print(f"[group] no rotation history to backfill from ({log_path}: {e})")
+        print(f"[group] no rotation history ({log_path}: {e})")
         sb_heartbeat("group_backfill", False, f"no rotation history: {e}")
         return 0
+    days_rows.sort(key=lambda r: str(r.get("date")))
+    dates = [str(r.get("date"))[:10] for r in days_rows]
     spx_by = {}
     try:
         d = json.load(open(os.path.join(OUTPUTS_DIR, "macro_series.json")))
         ser = sorted([r for r in (d.get("series") or []) if r.get("spx") is not None], key=lambda r: r["date"])
         for i, r in enumerate(ser):
-            m1 = round((ser[i]["spx"] / ser[i - 22]["spx"] - 1) * 100, 2) if i >= 22 else None
-            m3 = round((ser[i]["spx"] / ser[i - 64]["spx"] - 1) * 100, 2) if i >= 64 else None
-            spx_by[str(r["date"])[:10]] = (m1, m3)
+            spx_by[str(r["date"])[:10]] = round((ser[i]["spx"] / ser[i - 21]["spx"] - 1) * 100, 2) if i >= 21 else None
     except Exception:
         pass
+
+    def strength(kind, name, upto):
+        idx = [i for i, dd in enumerate(dates) if dd <= upto]
+        if not idx:
+            return None
+        series, lvl = [], 100.0
+        for i in idx:
+            v = (days_rows[i].get(kind) or {})
+            v = v.get(name) if isinstance(v, dict) else None
+            if v is None:
+                continue
+            lvl *= 1 + float(v) / 100.0
+            series.append(lvl)
+        if len(series) < 22:
+            return None
+        m1 = round((series[-1] / series[-22] - 1) * 100, 2)
+        above = None
+        if len(series) >= 50:
+            ma = sum(series[-50:]) / 50.0
+            above = series[-1] > ma
+        return {"m1": m1, "above": above, "n": len(series)}
+
     rows = _sb_signal_rows_needing("date,ticker,industry,sector", {"group_ok": "is.null"})
     by_day = {}
     for r in rows:
         by_day.setdefault(str(r["date"])[:10], []).append(r)
-    n_rows = n_days = 0
+    n_rows = n_days = short = 0
     for day in sorted(by_day)[-days:]:
-        h = hist.get(day) or hist.get(max((k for k in hist if k <= day), default=""))
-        if not h:
-            print(f"[group] {day}: no rotation row on or before this date — skipped"); continue
-        m1, m3 = spx_by.get(day, (None, None))
-        gs = _group_strength_from(h.get("industries") or [], h.get("sectors") or [], m1, m3)
-        stamped = [_stamp_group(dict(r), gs) for r in by_day[day]]
-        n = _sb_patch_signal_rows(day, stamped); n_rows += n; n_days += 1
-        print(f"[group] {day}: rotation row {h.get('date')} -> {n}/{len(stamped)} rows")
-    print(f"[group] backfilled {n_rows} signal rows over {n_days} days from rotation history")
-    sb_heartbeat("group_backfill", (n_rows > 0) or (len(rows) == 0), f"{n_rows} rows over {n_days} days · {len(rows)} were missing · history {min(hist) if hist else '-'} -> {max(hist) if hist else '-'}")
+        spx1 = spx_by.get(day) or spx_by.get(max((k for k in spx_by if k <= day), default=""), None)
+        stamped = []
+        for r in by_day[day]:
+            gi, gs = strength("industries", r.get("industry") or "", day), strength("sectors", r.get("sector") or "", day)
+            if not gi or not gs:
+                short += 1
+                continue
+            vi = round(gi["m1"] - spx1, 2) if spx1 is not None else None
+            vs = round(gs["m1"] - spx1, 2) if spx1 is not None else None
+            ok_i = (vi is not None and vi > 0) and (gi["above"] is not False)
+            ok_s = (vs is not None and vs > 0) and (gs["above"] is not False)
+            stamped.append({"ticker": r["ticker"], "ind_m1": gi["m1"], "ind_vs_spx_m1": vi, "ind_above_50": gi["above"],
+                            "sec_m1": gs["m1"], "sec_vs_spx_m1": vs, "sec_above_50": gs["above"],
+                            "group_ok": bool(ok_i and ok_s)})
+        if stamped:
+            n = _sb_patch_signal_rows(day, stamped); n_rows += n; n_days += 1
+    note = (f"{n_rows} rows over {n_days} days rebuilt from daily group returns · {short} rows lacked 22 sessions "
+            f"of history · log {dates[0] if dates else '-'} -> {dates[-1] if dates else '-'} ({len(dates)} sessions)")
+    print(f"[group] {note}")
+    sb_heartbeat("group_backfill", n_rows > 0 or not rows, note)
     return n_rows
 
 
@@ -9085,27 +9118,51 @@ IVEM = {
 
 
 def _spx_constituents():
-    """S&P 500 members. Wikipedia first; falls back to the biggest names in our own
-    universe, which is close enough for coverage purposes and never fails."""
-    import re as _re, requests
+    """S&P 500 members, from the first source that answers with a plausible list:
+    the datasets/s-and-p-500-companies CSV (stable, plain), Wikipedia, then the 520
+    biggest names in our own universe.csv. The last one cannot fail.
+    21 Sep 2026: the weekend refresh added 38 names instead of ~500 — the Wikipedia
+    parse returned too few and the fallback read a BASE_DIR that does not exist."""
+    import re as _re, requests, csv, io, os
+    H = {"User-Agent": "phoenix-research/1.0"}
     try:
-        h = requests.get("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
-                         headers={"User-Agent": "phoenix-research/1.0"}, timeout=45).text
-        tbl = h[h.index('id="constituents"'):]
-        syms = _re.findall(r'<td><a rel="nofollow" class="external text" href="[^"]*">([A-Z][A-Z.\-]{0,6})</a>', tbl)
-        syms = [x.replace(".", "-") for x in syms]          # BRK.B -> BRK-B for Yahoo
-        if len(syms) >= 400:
+        r = requests.get("https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv",
+                         headers=H, timeout=45)
+        syms = [row.get("Symbol", "").strip().replace(".", "-") for row in csv.DictReader(io.StringIO(r.text))]
+        syms = [x for x in syms if x]
+        if len(syms) >= 450:
             return sorted(set(syms))
-        print(f"[ivem] Wikipedia parse returned only {len(syms)} symbols — falling back")
+        print(f"[ivem] constituents.csv gave {len(syms)} — trying Wikipedia")
     except Exception as e:
-        print(f"[ivem] S&P 500 list unavailable ({type(e).__name__}: {e}) — falling back to top caps")
+        print(f"[ivem] constituents.csv unavailable ({type(e).__name__}) — trying Wikipedia")
     try:
-        import csv, os
-        rows = list(csv.DictReader(open(os.path.join(BASE_DIR, "universe.csv"))))
-    except Exception:
-        rows = []
-    rows = [r for r in rows if (r.get("market_cap") or "").replace(".", "").isdigit()]
-    rows.sort(key=lambda r: -float(r["market_cap"]))
+        h = requests.get("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies", headers=H, timeout=45).text
+        tbl = h[h.index('id="constituents"'):]
+        tbl = tbl[:tbl.index("</table>")]
+        syms = []
+        for tr in _re.findall(r"<tr>(.*?)</tr>", tbl, _re.S):
+            m = _re.search(r"<td[^>]*>\s*(?:<a[^>]*>)?\s*([A-Z][A-Z.\-]{0,6})\s*(?:</a>)?\s*</td>", tr)
+            if m:
+                syms.append(m.group(1).replace(".", "-"))
+        if len(syms) >= 450:
+            return sorted(set(syms))
+        print(f"[ivem] Wikipedia parse gave {len(syms)} — falling back to our biggest names")
+    except Exception as e:
+        print(f"[ivem] Wikipedia unavailable ({type(e).__name__}) — falling back to our biggest names")
+    rows = []
+    for pth in ("universe.csv", os.path.join("data", "universe.csv")):
+        try:
+            rows = list(csv.DictReader(open(pth, encoding="utf-8-sig")))
+            break
+        except Exception:
+            continue
+    def cap(r):
+        try:
+            return float(r.get("market_cap") or 0)
+        except Exception:
+            return 0.0
+    rows = [r for r in rows if cap(r) > 0 and (r.get("market") or "US") == "US"]
+    rows.sort(key=lambda r: -cap(r))
     return sorted({r["ticker"] for r in rows[:IVEM["tier_b_cap"]]})
 
 
@@ -9275,19 +9332,12 @@ def run_iv_em(tier_b=None):
     out = dict(prev)                      # keep yesterday's rows; today's overwrite theirs
     n_ok = n_proxy = n_none = n_fail = 0
     t0 = time.time()
-    for i, tk in enumerate(names):
-        try:
-            time.sleep(IVEM["req_gap"])
-            spot, chains, bars = _ivem_chain(tk)
-        except Exception as e:
-            n_fail += 1
-            if n_fail <= 3:
-                print(f"[ivem] {tk}: {type(e).__name__}: {e}")
-            continue
+    C = {"ok": 0, "proxy": 0, "none": 0}
+    def _ivem_store(tk, spot, chains, bars):
         if not spot or not chains:
             out[tk] = {"asof": today, "tier": tier.get(tk, "B"), "coverage": "no_chain", "spot": spot}
-            n_none += 1
-            continue
+            C["none"] += 1
+            return
         closes, highs, lows = bars
         near = chains[0]
         strad, atm_iv, k, quality = _atm_from_chain(near["calls"], near["puts"], spot)
@@ -9298,10 +9348,10 @@ def run_iv_em(tier_b=None):
             em_abs, method = spot * atm_iv * math.sqrt(dte / 365.0), "iv_proxy"
         else:
             out[tk] = {"asof": today, "tier": tier.get(tk, "B"), "coverage": "no_chain", "spot": round(spot, 2)}
-            n_none += 1
-            continue
-        n_ok += 1 if method == "straddle" else 0
-        n_proxy += 1 if method == "iv_proxy" else 0
+            C["none"] += 1
+            return
+        C["ok"] += 1 if method == "straddle" else 0
+        C["proxy"] += 1 if method == "iv_proxy" else 0
 
         rv30 = _realised_vol(closes, 30)
         atr = _atr14(highs, lows, closes)
@@ -9355,9 +9405,41 @@ def run_iv_em(tier_b=None):
             "next_earnings": ed, "em_to_earnings": em_earn,
             "quality": quality,
         }
-        if (i + 1) % 50 == 0:
-            print(f"[ivem] {i+1}/{len(names)} · {int(time.time()-t0)}s", flush=True)
 
+    failed_first = []
+    def _fetch(tk):
+        time.sleep(IVEM["req_gap"])
+        return _ivem_chain(tk)
+    queue = list(names)
+    for i, tk in enumerate(queue + [None]):
+        if tk is None:
+            # retry pass: Yahoo's options endpoint throttles in bursts; a cool-down clears most of it
+            if failed_first:
+                print(f"[ivem] retrying {len(failed_first)} failed name(s) after a 20s cool-down")
+                time.sleep(20)
+                queue2 = list(failed_first); failed_first.clear()
+                for tk2 in queue2:
+                    try:
+                        spot, chains, bars = _fetch(tk2)
+                    except Exception as e:
+                        n_fail += 1
+                        prev_row = out.get(tk2) or {}
+                        if prev_row.get("coverage") in ("straddle", "iv_proxy"):
+                            prev_row["refresh_failed"] = today      # keep the last good read, say it is not today's
+                        else:
+                            out[tk2] = {"asof": today, "tier": tier.get(tk2, "B"), "coverage": "failed",
+                                        "reason": f"{type(e).__name__}: {str(e)[:80]}"}
+                        continue
+                    _ivem_store(tk2, spot, chains, bars)
+            continue
+        try:
+            spot, chains, bars = _fetch(tk)
+        except Exception as e:
+            failed_first.append(tk)
+            if len(failed_first) <= 3:
+                print(f"[ivem] {tk}: {type(e).__name__}: {e} (will retry)")
+            continue
+        _ivem_store(tk, spot, chains, bars)
     json.dump(hist, open(hist_path, "w"), separators=(",", ":"))
     write_json("iv_em", {
         "asof": _now(), "date": today,
@@ -9372,6 +9454,7 @@ def run_iv_em(tier_b=None):
         "tickers": out})
     if queued:
         _ivem_queue_clear(queued)
+    n_ok, n_proxy, n_none = C["ok"], C["proxy"], C["none"]
     msg = (f"{len(names)} requested ({len([t for t in names if tier.get(t)=='A'])} tier A"
            f"{', S&P 500 refreshed' if tier_b else ''}) · {n_ok} straddle · {n_proxy} iv-proxy · "
            f"{n_none} no chain · {n_fail} failures · {len(out)} on file · {int(time.time()-t0)}s")
@@ -10433,6 +10516,16 @@ def run_gex_stocks_cboe(tickers=None, limit=None):
         # screener rows sorted by trade score, so with the 150 cap the seed
         # names were never reached unless they happened to be top-150 by
         # score - PLTR and others showed yesterday's chain marked STALE.
+        # OPEN and PLANNED positions first (21 Sep 2026): OKTA was held for a week with no
+        # dealer read because the list was seed -> every ticker ever traded -> screener, and
+        # the book's history pushed live positions behind names closed in May.
+        try:
+            _tb = json.load(open(os.path.join(OUTPUTS_DIR, "trades.json")))
+            _tb = _tb.get("trades") if isinstance(_tb, dict) else _tb
+            tickers += [str(t.get("ticker")).upper() for t in (_tb or [])
+                        if t.get("ticker") and t.get("status") in ("open", "plan")]
+        except Exception as e:
+            print(f"[gexc] open positions unreadable: {e}")
         try:
             tickers += list(GEX_UNIVERSE.get("seed") or [])
         except Exception:
@@ -10465,7 +10558,8 @@ def run_gex_stocks_cboe(tickers=None, limit=None):
         if t and t not in seen:
             seen.add(t); order.append(t)
     order = order[:limit]
-    print(f"[gexc] per-ticker GEX for {len(order)} names (cap {limit}) - Elliott's list first")
+    first_fail = None
+    print(f"[gexc] per-ticker GEX for {len(order)} names (cap {limit}) - open positions, then Elliott's list")
     # A chain file for a name that is NOT on today's list is a leftover from a
     # day when that name was a screener candidate; left in place it shows on
     # the ticker page as STALE for weeks (BAC was the case). Remove leftovers
@@ -10493,18 +10587,30 @@ def run_gex_stocks_cboe(tickers=None, limit=None):
         try:
             res, note = run_gex_ticker(sym, out_dir=out_dir)
         except Exception as e:
-            fail += 1; note = str(e)[:60]; res = None
+            note = f"{type(e).__name__}: {str(e)[:60]}"; res = None
         if res:
             ok += 1
         elif "thin" in (note or ""):
             thin += 1
         else:
             fail += 1
+            if first_fail is None:
+                first_fail = f"{sym}: {str(note)[:80]}"
         if (i + 1) % 25 == 0:
             print(f"[gexc]   {i+1}/{len(order)}  ok={ok} thin={thin} fail={fail}")
         time.sleep(0.35)
     print(f"[gexc] wrote {ok} per-ticker GEX files "
           f"({thin} thin chains, {fail} failures)")
+    try:
+        _open = [t for t in order[:12]]
+        _have = [t for t in _open if os.path.exists(os.path.join(out_dir, t.replace("/", "-").replace(".", "-") + ".json"))]
+        sb_heartbeat("gex_stocks", ok > 0, f"{ok} written · {thin} thin · {fail} failed of {len(order)} · "
+                     f"first names {','.join(_open)} · files present {len(_have)}/{len(_open)}"
+                     + (f" · first failure: {first_fail}" if first_fail else ""))
+    except Exception:
+        pass
+    if order and ok == 0:
+        raise RuntimeError(f"per-ticker GEX wrote nothing ({thin} thin, {fail} failed) — first failure: {first_fail}")
     return ok
 
 
