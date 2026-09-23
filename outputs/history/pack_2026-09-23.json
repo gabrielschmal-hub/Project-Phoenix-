@@ -1,0 +1,685 @@
+{
+ "schema": "phoenix-fact-pack/1",
+ "date": "2026-09-23",
+ "asof": "2026-09-23 10:15 UTC",
+ "market": {
+  "regime": "POLICY_TIGHTENING",
+  "regime_held_weeks": 4,
+  "spx": {
+   "last": 7764.7,
+   "chg_1d_pct": 1.49,
+   "vs_50d_pct": 1.89,
+   "vs_200d_pct": 8.03
+  },
+  "vix": 14.13,
+  "dxy": null,
+  "us10y": null,
+  "gold": null,
+  "wti": null,
+  "gex": {
+   "net_B": 76.54,
+   "regime": "positive",
+   "flip": null,
+   "dist_to_flip_pct": -1.57,
+   "call_wall": null,
+   "put_wall": null,
+   "spot": 7764.7
+  }
+ },
+ "macro": {
+  "spx": {
+   "last": 7764.7,
+   "d1_pct": 1.49,
+   "w1_pct": 1.9,
+   "m1_pct": 1.62
+  },
+  "ndx": {
+   "last": 27122.09,
+   "d1_pct": 2.26,
+   "w1_pct": 3.57,
+   "m1_pct": 4.05
+  },
+  "dow": {
+   "last": 52048.83,
+   "d1_pct": 0.71,
+   "w1_pct": -0.71,
+   "m1_pct": -1.35
+  },
+  "rut": {
+   "last": 2875.36,
+   "d1_pct": 0.52,
+   "w1_pct": -0.58,
+   "m1_pct": -3.91
+  },
+  "gold": {
+   "last": 4383.9,
+   "d1_pct": -0.93,
+   "w1_pct": 0.74,
+   "m1_pct": -4.1
+  },
+  "wti": {
+   "last": 95.78,
+   "d1_pct": -4.51,
+   "w1_pct": -5.53,
+   "m1_pct": 9.05
+  },
+  "btc": {
+   "last": 86603.0,
+   "d1_pct": 7.05,
+   "w1_pct": 10.8,
+   "m1_pct": 18.58
+  },
+  "dxy": {
+   "last": 100.43,
+   "d1_pct": 0.21,
+   "w1_pct": 0.98,
+   "m1_pct": 1.55
+  },
+  "vix": {
+   "last": 14.87,
+   "d1_pct": 0.41,
+   "w1_pct": -13.04,
+   "m1_pct": -7.12
+  },
+  "usdjpy": {
+   "last": 157.05,
+   "d1_pct": 0.59,
+   "w1_pct": 2.36,
+   "m1_pct": -0.78
+  },
+  "tnx": {
+   "last": 4.96,
+   "d1_bp": -4,
+   "w1_bp": 0,
+   "m1_bp": 27
+  },
+  "us02": {
+   "last": 4.76,
+   "d1_bp": 0,
+   "w1_bp": 11,
+   "m1_bp": 57
+  },
+  "real10": {
+   "last": 2.62,
+   "d1_bp": -6,
+   "w1_bp": 2,
+   "m1_bp": 27
+  },
+  "hy": {
+   "last": 2.66,
+   "d1_bp": 0,
+   "w1_bp": 0,
+   "m1_bp": 0
+  },
+  "cpi_yoy": {
+   "last": 3.35,
+   "prev_print": 3.3
+  },
+  "curve_2s10s_bp": 20,
+  "curve_2s10s_chg_1m_bp": -30,
+  "absent": [],
+  "rows": 250
+ },
+ "regime_gates": {
+  "regime": "POLICY_TIGHTENING",
+  "held_weeks": 4,
+  "since": "2026-08-31",
+  "drivers": [
+   {
+    "key": "cpi_yoy",
+    "label": "CPI y/y",
+    "value": 3.35,
+    "op": ">",
+    "threshold": 2.5,
+    "clear_by": 0.85,
+    "ok": true
+   },
+   {
+    "key": "dd",
+    "label": "Drawdown",
+    "value": -0.27,
+    "op": ">",
+    "threshold": -12,
+    "clear_by": 11.73,
+    "ok": true
+   },
+   {
+    "key": "us02_3m",
+    "label": "2Y yield 3m change (bp)",
+    "value": 57.0,
+    "op": ">",
+    "threshold": 40,
+    "clear_by": 17.0,
+    "ok": true
+   },
+   {
+    "key": "real_3m",
+    "label": "Real 10Y 3m change (bp)",
+    "value": 46.0,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 21.0,
+    "ok": true
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI y/y falls below 2.5",
+    "now": 3.35,
+    "threshold": 2.5,
+    "distance": 0.85,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   },
+   {
+    "if": "Drawdown falls below -12",
+    "now": -0.27,
+    "threshold": -12,
+    "distance": 11.73,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   },
+   {
+    "if": "2Y yield 3m change (bp) falls below 40",
+    "now": 57.0,
+    "threshold": 40,
+    "distance": 17.0,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   }
+  ],
+  "runner_up": {
+   "regime": "ENERGY_GRIND",
+   "score": null,
+   "gates_missing": 1,
+   "needs": [
+    {
+     "label": "CPI 3m change",
+     "need": "> 0.3",
+     "now": -0.10999999999999988
+    }
+   ]
+  }
+ },
+ "screener": {
+  "n_candidates": 318,
+  "top": [
+   {
+    "ticker": "HPE",
+    "industry": "Computer processing hardware",
+    "trade_score": 75,
+    "atr14_pct": 6.88,
+    "mcap_B": 64.09,
+    "breakout": true,
+    "days_on_list": 45,
+    "profitability": "profitable",
+    "pos_vs_high": -0.3,
+    "surge": 87,
+    "dollar_vol_M": 1504.9,
+    "stop_pct_2_5atr": 17.2
+   },
+   {
+    "ticker": "DELL",
+    "industry": "Computer processing hardware",
+    "trade_score": 73,
+    "atr14_pct": 6.55,
+    "mcap_B": 271.44,
+    "breakout": true,
+    "days_on_list": 45,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 97,
+    "dollar_vol_M": 5364.9,
+    "stop_pct_2_5atr": 16.38
+   },
+   {
+    "ticker": "GNK",
+    "industry": "Marine shipping",
+    "trade_score": 70,
+    "atr14_pct": 3.01,
+    "mcap_B": 1.03,
+    "breakout": true,
+    "days_on_list": 33,
+    "profitability": "investing",
+    "pos_vs_high": -0.5,
+    "surge": 91,
+    "dollar_vol_M": 21.0,
+    "stop_pct_2_5atr": 7.52
+   },
+   {
+    "ticker": "BWLP",
+    "industry": "Marine shipping",
+    "trade_score": 68,
+    "atr14_pct": 3.26,
+    "mcap_B": 2.86,
+    "breakout": false,
+    "days_on_list": 19,
+    "profitability": "profitable",
+    "pos_vs_high": -1.4,
+    "surge": 54,
+    "dollar_vol_M": 12.2,
+    "stop_pct_2_5atr": 8.15
+   },
+   {
+    "ticker": "SWKS",
+    "industry": "Semiconductors",
+    "trade_score": 67,
+    "atr14_pct": 6.51,
+    "mcap_B": 11.46,
+    "breakout": false,
+    "days_on_list": 2,
+    "profitability": "profitable",
+    "pos_vs_high": -3.5,
+    "surge": 77,
+    "dollar_vol_M": 643.9,
+    "stop_pct_2_5atr": 16.27
+   },
+   {
+    "ticker": "QRVO",
+    "industry": "Semiconductors",
+    "trade_score": 66,
+    "atr14_pct": 4.63,
+    "mcap_B": 8.98,
+    "breakout": false,
+    "days_on_list": 2,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 42,
+    "dollar_vol_M": 150.3,
+    "stop_pct_2_5atr": 11.57
+   },
+   {
+    "ticker": "TEN",
+    "industry": "Marine shipping",
+    "trade_score": 66,
+    "atr14_pct": 3.71,
+    "mcap_B": 1.17,
+    "breakout": false,
+    "days_on_list": 15,
+    "profitability": "unknown",
+    "pos_vs_high": -2.2,
+    "surge": 119,
+    "dollar_vol_M": 21.6,
+    "stop_pct_2_5atr": 9.28
+   },
+   {
+    "ticker": "BBY",
+    "industry": "Electronics/Appliance stores",
+    "trade_score": 65,
+    "atr14_pct": 3.29,
+    "mcap_B": 16.02,
+    "breakout": false,
+    "days_on_list": 13,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 13,
+    "dollar_vol_M": 390.1,
+    "stop_pct_2_5atr": 8.22
+   }
+  ],
+  "leaning": [],
+  "counts": {}
+ },
+ "smart_money": {
+  "quarter": "2026-06-30",
+  "accumulating": [],
+  "distributing": [],
+  "notable": [
+   {
+    "ticker": "GOOGL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 37764088383,
+    "sector": null
+   },
+   {
+    "ticker": "GE",
+    "manager": "TCI Fund (Hohn)",
+    "action": "TRIM",
+    "value_usd": 17725353519,
+    "sector": null
+   },
+   {
+    "ticker": "V",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 10462232091,
+    "sector": null
+   },
+   {
+    "ticker": "DVA",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "TRIM",
+    "value_usd": 6425268898,
+    "sector": null
+   },
+   {
+    "ticker": "SPGI",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 5735017808,
+    "sector": null
+   },
+   {
+    "ticker": "DAL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 5368591200,
+    "sector": null
+   },
+   {
+    "ticker": "IEP",
+    "manager": "Icahn Capital",
+    "action": "ADD",
+    "value_usd": 4458616003,
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 4389741007,
+    "sector": null
+   }
+  ],
+  "congress_recent": [
+   {
+    "ticker": "WFC",
+    "member": "A. Mitchell McConnell, Jr.",
+    "side": "buy",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-09-21",
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "member": "Pete Sessions",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-09-18",
+    "sector": null
+   },
+   {
+    "ticker": "ABBV",
+    "member": "Pete Sessions",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-09-18",
+    "sector": null
+   },
+   {
+    "ticker": "ACN",
+    "member": "Scott Scott Franklin",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-17",
+    "sector": null
+   },
+   {
+    "ticker": "PG",
+    "member": "David J. Taylor",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-17",
+    "sector": null
+   },
+   {
+    "ticker": "GOOG",
+    "member": "Scott Scott Franklin",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-17",
+    "sector": null
+   },
+   {
+    "ticker": "AAPL",
+    "member": "Scott Scott Franklin",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-17",
+    "sector": null
+   },
+   {
+    "ticker": "MCD",
+    "member": "Scott Scott Franklin",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-17",
+    "sector": null
+   },
+   {
+    "ticker": "EA",
+    "member": "Alan Armstrong",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-17",
+    "sector": null
+   },
+   {
+    "ticker": "JPM",
+    "member": "Scott Scott Franklin",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-17",
+    "sector": null
+   }
+  ],
+  "note": null,
+  "congress_status": {
+   "written": "2026-09-23",
+   "dropped_impossible_dates": 0,
+   "sources": {
+    "House Clerk PTR": {
+     "rows": 9530,
+     "last_30d": 74,
+     "newest_tx": "2026-09-14",
+     "newest_filed": "2026-09-18"
+    },
+    "OGE 278-T via Open Cabinet": {
+     "rows": 6448,
+     "last_30d": 0,
+     "newest_tx": "2026-06-24",
+     "newest_filed": "2026-08-12"
+    },
+    "Senate eFD": {
+     "rows": 995,
+     "last_30d": 3,
+     "newest_tx": "2026-09-01",
+     "newest_filed": "2026-09-21"
+    }
+   },
+   "quiet": [
+    "OGE 278-T via Open Cabinet"
+   ]
+  }
+ },
+ "portfolio": {
+  "open": [
+   {
+    "ticker": "GOOG",
+    "entry": 325.86,
+    "stop": 305.67,
+    "last": null,
+    "R": null,
+    "managed": true,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "AAPL",
+    "entry": 321.97,
+    "stop": 301.26,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "PLTR",
+    "entry": 184.45,
+    "stop": 164.45,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "AAPL",
+    "entry": 321.96,
+    "stop": 301.99,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "OKTA",
+    "entry": 182.82,
+    "stop": 163.14,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "OKTA",
+    "entry": 182.73,
+    "stop": 162.61,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   }
+  ],
+  "heat_R": 6.03,
+  "cap_R": 3.0,
+  "unsized": 0,
+  "note": null,
+  "over_cap": true
+ },
+ "news": {
+  "date": "2026-09-22",
+  "asof": "2026-09-23 09:45 UTC",
+  "headline": "Iran offered to reopen Hormuz in seven days \u2014 and crude gave back the entire war premium",
+  "standfirst": "A senior Iranian official said Tehran would reopen the Strait of Hormuz within seven days if Washington eases military pressure and lifts its blockade, an offer delivered through mediators six days earlier; Rubio said the administration was open to that, though a Trump-Pezeshkian meeting has been ruled out. WTI fell 8.6% to $89.42 \u2014 a 2.7 sigma move, below where it traded before the East-West pipeline was cut, and 14% below last Tuesday. Equities ignored it: the S&P closed exactly unchanged, the Nasdaq rose 0.45% to a new closing high, the Dow fell 0.36% and the Russell rose 0.79%. In the book OKTA rose 2.76% to 196.62, its best mark, the day before its investor summit, and GOOG holds +1.07R after a twelve-point intraday reversal. Heat 3.05R against 3.0R.",
+  "themes": [
+   {
+    "kicker": "What's next",
+    "right": "Oktane today \u00b7 Pezeshkian at the UN today",
+    "title": "Two events today, one in the book and one underneath it",
+    "items": [
+     {
+      "tone": "c-cb",
+      "tag": "OKTA",
+      "html": "<b>Oktane</b> \u2014 keynote and investor summit webcast",
+      "when": "today \u00b7 2026-09-23",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "UNGA",
+      "html": "<b>Pezeshkian addresses the UN General Assembly</b> \u2014 a Trump meeting is ruled out",
+      "when": "today \u00b7 2026-09-23",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-fomc",
+      "tag": "FOMC",
+      "html": "<b>Next Fed decision</b>, the same day Alphabet reports",
+      "when": "Wed \u00b7 2026-10-28",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "AAPL",
+      "html": "<b>Apple Q4 earnings</b>",
+      "when": "Thu \u00b7 2026-10-29",
+      "kind": "calendar"
+     }
+    ],
+    "note": "<b>Oktane is today and OKTA is held in both accounts.</b> The position goes in at <b>196.62, +0.69R</b>, 7.6% above the fill and 17.30% above the stop \u2014 the largest cushion in the book. What management has to show is whether AI security keeps growing as a share of bookings from the roughly <b>30%</b> it reached in the August quarter, and whether the re-rating that took Goldman from $126 to $203 has numbers behind it. Baird raised its target yesterday explicitly as an Oktane preview, so something is expected. The cushion means a disappointment costs gain rather than capital; there is no action available either way, because heat is at the cap."
+   }
+  ],
+  "ondeck": "<b>Oktane is today and OKTA is held in both accounts.</b> The position goes in at <b>196.62, +0.69R</b>, 7.6% above the fill and 17.30% above the stop \u2014 the largest cushion in the book. What management has to show is whether AI security keeps growing as a share of bookings from the roughly <b>30%</b> it reached in the August quarter, and whether the re-rating that took Goldman from $126 to $203 has numbers behind it. Baird raised its target yesterday explicitly as an Oktane preview, so something is expected. The cushion means a disappointment costs gain rather than capital; there is no action available either way, because heat is at the cap.",
+  "note": null
+ },
+ "provenance": {
+  "macro": {
+   "asof": "2026-09-23 09:43 UTC",
+   "age_min": null
+  },
+  "gex": {
+   "asof": "2026-09-23 09:45 UTC",
+   "age_min": null
+  },
+  "stocks": {
+   "asof": "2026-09-23 09:59 UTC",
+   "age_min": null
+  },
+  "institutional_holdings": {
+   "asof": "2026-09-23 10:06 UTC",
+   "quarter": "2026-06-30"
+  },
+  "congress_trades": {
+   "asof": "2026-09-23 10:05 UTC",
+   "status": {
+    "written": "2026-09-23",
+    "dropped_impossible_dates": 0,
+    "sources": {
+     "House Clerk PTR": {
+      "rows": 9530,
+      "last_30d": 74,
+      "newest_tx": "2026-09-14",
+      "newest_filed": "2026-09-18"
+     },
+     "OGE 278-T via Open Cabinet": {
+      "rows": 6448,
+      "last_30d": 0,
+      "newest_tx": "2026-06-24",
+      "newest_filed": "2026-08-12"
+     },
+     "Senate eFD": {
+      "rows": 995,
+      "last_30d": 3,
+      "newest_tx": "2026-09-01",
+      "newest_filed": "2026-09-21"
+     }
+    },
+    "quiet": [
+     "OGE 278-T via Open Cabinet"
+    ]
+   }
+  },
+  "wire": {
+   "asof": "2026-09-23 09:45 UTC"
+  }
+ },
+ "missing": [],
+ "changed": {
+  "first_pack": false,
+  "prev_date": "2026-09-22",
+  "changes": [
+   {
+    "kind": "screener",
+    "what": "new in the top setups",
+    "was": null,
+    "now": "GNK, QRVO, TEN, BBY",
+    "why": "names the engine ranked highest that were not there yesterday"
+   }
+  ]
+ }
+}
