@@ -1,0 +1,685 @@
+{
+ "schema": "phoenix-fact-pack/1",
+ "date": "2026-09-25",
+ "asof": "2026-09-25 10:35 UTC",
+ "market": {
+  "regime": "POLICY_TIGHTENING",
+  "regime_held_weeks": 4,
+  "spx": {
+   "last": 7704.13,
+   "chg_1d_pct": -0.02,
+   "vs_50d_pct": 1.0,
+   "vs_200d_pct": 7.06
+  },
+  "vix": 15.33,
+  "dxy": null,
+  "us10y": null,
+  "gold": null,
+  "wti": null,
+  "gex": {
+   "net_B": 15.27,
+   "regime": "positive",
+   "flip": null,
+   "dist_to_flip_pct": -0.59,
+   "call_wall": null,
+   "put_wall": null,
+   "spot": 7704.13
+  }
+ },
+ "macro": {
+  "spx": {
+   "last": 7704.13,
+   "d1_pct": -0.02,
+   "w1_pct": 2.02,
+   "m1_pct": 0.67
+  },
+  "ndx": {
+   "last": 26939.37,
+   "d1_pct": 0.01,
+   "w1_pct": 3.7,
+   "m1_pct": 3.69
+  },
+  "dow": {
+   "last": 51349.98,
+   "d1_pct": -0.31,
+   "w1_pct": -0.22,
+   "m1_pct": -3.87
+  },
+  "rut": {
+   "last": 2835.57,
+   "d1_pct": -0.11,
+   "w1_pct": -0.81,
+   "m1_pct": -5.33
+  },
+  "gold": {
+   "last": 4298.0,
+   "d1_pct": -0.47,
+   "w1_pct": -2.04,
+   "m1_pct": -8.51
+  },
+  "wti": {
+   "last": 94.61,
+   "d1_pct": 2.66,
+   "w1_pct": -7.63,
+   "m1_pct": 11.29
+  },
+  "btc": {
+   "last": 84379.0,
+   "d1_pct": -0.0,
+   "w1_pct": 10.81,
+   "m1_pct": 6.86
+  },
+  "dxy": {
+   "last": 101.29,
+   "d1_pct": 0.19,
+   "w1_pct": 0.98,
+   "m1_pct": 2.31
+  },
+  "vix": {
+   "last": 15.67,
+   "d1_pct": 3.23,
+   "w1_pct": -11.52,
+   "m1_pct": -1.14
+  },
+  "usdjpy": {
+   "last": 158.26,
+   "d1_pct": 0.51,
+   "w1_pct": 1.93,
+   "m1_pct": -0.4
+  },
+  "tnx": {
+   "last": 5.16,
+   "d1_bp": 5,
+   "w1_bp": 16,
+   "m1_bp": 46
+  },
+  "us02": {
+   "last": 4.85,
+   "d1_bp": 0,
+   "w1_bp": 11,
+   "m1_bp": 61
+  },
+  "real10": {
+   "last": 2.76,
+   "d1_bp": 0,
+   "w1_bp": 8,
+   "m1_bp": 38
+  },
+  "hy": {
+   "last": 2.73,
+   "d1_bp": 0,
+   "w1_bp": 0,
+   "m1_bp": 0
+  },
+  "cpi_yoy": {
+   "last": 3.35,
+   "prev_print": 3.3
+  },
+  "curve_2s10s_bp": 31,
+  "curve_2s10s_chg_1m_bp": -15,
+  "absent": [],
+  "rows": 250
+ },
+ "regime_gates": {
+  "regime": "POLICY_TIGHTENING",
+  "held_weeks": 4,
+  "since": "2026-08-31",
+  "drivers": [
+   {
+    "key": "cpi_yoy",
+    "label": "CPI y/y",
+    "value": 3.35,
+    "op": ">",
+    "threshold": 2.5,
+    "clear_by": 0.85,
+    "ok": true
+   },
+   {
+    "key": "dd",
+    "label": "Drawdown",
+    "value": -1.05,
+    "op": ">",
+    "threshold": -12,
+    "clear_by": 10.95,
+    "ok": true
+   },
+   {
+    "key": "us02_3m",
+    "label": "2Y yield 3m change (bp)",
+    "value": 57.0,
+    "op": ">",
+    "threshold": 40,
+    "clear_by": 17.0,
+    "ok": true
+   },
+   {
+    "key": "real_3m",
+    "label": "Real 10Y 3m change (bp)",
+    "value": 46.0,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 21.0,
+    "ok": true
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI y/y falls below 2.5",
+    "now": 3.35,
+    "threshold": 2.5,
+    "distance": 0.85,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   },
+   {
+    "if": "Drawdown falls below -12",
+    "now": -1.05,
+    "threshold": -12,
+    "distance": 10.95,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   },
+   {
+    "if": "2Y yield 3m change (bp) falls below 40",
+    "now": 57.0,
+    "threshold": 40,
+    "distance": 17.0,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   }
+  ],
+  "runner_up": {
+   "regime": "ENERGY_GRIND",
+   "score": null,
+   "gates_missing": 1,
+   "needs": [
+    {
+     "label": "CPI 3m change",
+     "need": "> 0.3",
+     "now": -0.10999999999999988
+    }
+   ]
+  }
+ },
+ "screener": {
+  "n_candidates": 256,
+  "top": [
+   {
+    "ticker": "HPE",
+    "industry": "Computer processing hardware",
+    "trade_score": 75,
+    "atr14_pct": 6.13,
+    "mcap_B": 64.09,
+    "breakout": true,
+    "days_on_list": 47,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 87,
+    "dollar_vol_M": 1585.1,
+    "stop_pct_2_5atr": 15.32
+   },
+   {
+    "ticker": "DELL",
+    "industry": "Computer processing hardware",
+    "trade_score": 66,
+    "atr14_pct": 5.81,
+    "mcap_B": 271.44,
+    "breakout": false,
+    "days_on_list": 47,
+    "profitability": "profitable",
+    "pos_vs_high": -5.6,
+    "surge": 97,
+    "dollar_vol_M": 5787.7,
+    "stop_pct_2_5atr": 14.52
+   },
+   {
+    "ticker": "SWKS",
+    "industry": "Semiconductors",
+    "trade_score": 66,
+    "atr14_pct": 6.44,
+    "mcap_B": 11.46,
+    "breakout": false,
+    "days_on_list": 4,
+    "profitability": "profitable",
+    "pos_vs_high": -4.5,
+    "surge": 77,
+    "dollar_vol_M": 655.6,
+    "stop_pct_2_5atr": 16.1
+   },
+   {
+    "ticker": "QRVO",
+    "industry": "Semiconductors",
+    "trade_score": 65,
+    "atr14_pct": 4.58,
+    "mcap_B": 8.98,
+    "breakout": false,
+    "days_on_list": 4,
+    "profitability": "profitable",
+    "pos_vs_high": -0.7,
+    "surge": 42,
+    "dollar_vol_M": 156.1,
+    "stop_pct_2_5atr": 11.45
+   },
+   {
+    "ticker": "SONO",
+    "industry": "Electronics/Appliances",
+    "trade_score": 64,
+    "atr14_pct": 3.93,
+    "mcap_B": 1.71,
+    "breakout": false,
+    "days_on_list": 1,
+    "profitability": "unknown",
+    "pos_vs_high": -6.8,
+    "surge": 8,
+    "dollar_vol_M": 30.5,
+    "stop_pct_2_5atr": 9.83
+   },
+   {
+    "ticker": "BBY",
+    "industry": "Electronics/Appliance stores",
+    "trade_score": 62,
+    "atr14_pct": 3.36,
+    "mcap_B": 16.02,
+    "breakout": false,
+    "days_on_list": 15,
+    "profitability": "profitable",
+    "pos_vs_high": -2.0,
+    "surge": 13,
+    "dollar_vol_M": 397.9,
+    "stop_pct_2_5atr": 8.4
+   },
+   {
+    "ticker": "BWLP",
+    "industry": "Marine shipping",
+    "trade_score": 62,
+    "atr14_pct": 3.12,
+    "mcap_B": 2.86,
+    "breakout": false,
+    "days_on_list": 21,
+    "profitability": "profitable",
+    "pos_vs_high": -6.2,
+    "surge": 54,
+    "dollar_vol_M": 11.9,
+    "stop_pct_2_5atr": 7.8
+   },
+   {
+    "ticker": "FRO",
+    "industry": "Marine shipping",
+    "trade_score": 60,
+    "atr14_pct": 3.86,
+    "mcap_B": 9.26,
+    "breakout": false,
+    "days_on_list": 47,
+    "profitability": "profitable",
+    "pos_vs_high": -6.7,
+    "surge": 48,
+    "dollar_vol_M": 173.4,
+    "stop_pct_2_5atr": 9.65
+   }
+  ],
+  "leaning": [],
+  "counts": {}
+ },
+ "smart_money": {
+  "quarter": "2026-06-30",
+  "accumulating": [],
+  "distributing": [],
+  "notable": [
+   {
+    "ticker": "GOOGL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 37764088383,
+    "sector": null
+   },
+   {
+    "ticker": "GE",
+    "manager": "TCI Fund (Hohn)",
+    "action": "TRIM",
+    "value_usd": 17725353519,
+    "sector": null
+   },
+   {
+    "ticker": "V",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 10462232091,
+    "sector": null
+   },
+   {
+    "ticker": "DVA",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "TRIM",
+    "value_usd": 6425268898,
+    "sector": null
+   },
+   {
+    "ticker": "SPGI",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 5735017808,
+    "sector": null
+   },
+   {
+    "ticker": "DAL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 5368591200,
+    "sector": null
+   },
+   {
+    "ticker": "IEP",
+    "manager": "Icahn Capital",
+    "action": "ADD",
+    "value_usd": 4458616003,
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 4389741007,
+    "sector": null
+   }
+  ],
+  "congress_recent": [
+   {
+    "ticker": "ROL",
+    "member": "Richard W. Allen",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-09-22",
+    "sector": null
+   },
+   {
+    "ticker": "AVGO",
+    "member": "Richard W. Allen",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-22",
+    "sector": null
+   },
+   {
+    "ticker": "AAPL",
+    "member": "Pete Sessions",
+    "side": "sell",
+    "amount": "$100,001 - $250,000",
+    "filed": "2026-09-22",
+    "sector": null
+   },
+   {
+    "ticker": "TSM",
+    "member": "Richard W. Allen",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-22",
+    "sector": null
+   },
+   {
+    "ticker": "WFC",
+    "member": "A. Mitchell McConnell, Jr.",
+    "side": "buy",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-09-21",
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "member": "Pete Sessions",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-09-18",
+    "sector": null
+   },
+   {
+    "ticker": "ABBV",
+    "member": "Pete Sessions",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-09-18",
+    "sector": null
+   },
+   {
+    "ticker": "ACN",
+    "member": "Scott Scott Franklin",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-17",
+    "sector": null
+   },
+   {
+    "ticker": "PG",
+    "member": "David J. Taylor",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-17",
+    "sector": null
+   },
+   {
+    "ticker": "GOOG",
+    "member": "Scott Scott Franklin",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-09-17",
+    "sector": null
+   }
+  ],
+  "note": null,
+  "congress_status": {
+   "written": "2026-09-25",
+   "dropped_impossible_dates": 0,
+   "sources": {
+    "House Clerk PTR": {
+     "rows": 9534,
+     "last_30d": 28,
+     "newest_tx": "2026-09-22",
+     "newest_filed": "2026-09-22"
+    },
+    "OGE 278-T via Open Cabinet": {
+     "rows": 6448,
+     "last_30d": 0,
+     "newest_tx": "2026-06-24",
+     "newest_filed": "2026-08-12"
+    },
+    "Senate eFD": {
+     "rows": 995,
+     "last_30d": 3,
+     "newest_tx": "2026-09-01",
+     "newest_filed": "2026-09-21"
+    }
+   },
+   "quiet": [
+    "OGE 278-T via Open Cabinet"
+   ]
+  }
+ },
+ "portfolio": {
+  "open": [
+   {
+    "ticker": "GOOG",
+    "entry": 325.86,
+    "stop": 305.67,
+    "last": null,
+    "R": null,
+    "managed": true,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "AAPL",
+    "entry": 321.97,
+    "stop": 301.26,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "PLTR",
+    "entry": 184.45,
+    "stop": 164.45,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "AAPL",
+    "entry": 321.96,
+    "stop": 301.99,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "OKTA",
+    "entry": 182.82,
+    "stop": 163.14,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "OKTA",
+    "entry": 182.73,
+    "stop": 162.61,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   }
+  ],
+  "heat_R": 6.03,
+  "cap_R": 3.0,
+  "unsized": 0,
+  "note": null,
+  "over_cap": true
+ },
+ "news": {
+  "date": "2026-09-23",
+  "asof": "2026-09-25 09:59 UTC",
+  "headline": "Okta built a consortium and Alphabet raised its bill \u2014 the AI trade split into two in a single session",
+  "standfirst": "Okta used its investor day to launch the Blueprint Alliance with AWS, CrowdStrike, Google Cloud, Salesforce, ServiceNow, Zscaler and Wiz, and made Okta for AI Agents generally available at a 25-37.5% pricing uplift; the stock rose 4.46% to 205.38, above +1R. Alphabet went the other way, down 3.58% to 334.98, after raising 2026 capex guidance to $195-205bn in the same week OpenAI cut GPT-6 API prices by roughly half and Anthropic shipped Opus 5.5 about 40% cheaper. Underneath both, the ten-year set a 52-week high at 5.106% and the five-year cleared 5% for the first time since 2007 \u2014 not on oil or inflation but on a PMI at a five-year high, which took the Russell down 1.60% and the Nasdaq 1.11%. GOOG went from +1.07R to +0.45R. Heat 3.05R against 3.0R, unchanged.",
+  "themes": [
+   {
+    "kicker": "What's next",
+    "right": "nothing scheduled until 28 October",
+    "title": "The calendar is now empty for five weeks",
+    "items": [
+     {
+      "tone": "c-fomc",
+      "tag": "FOMC",
+      "html": "<b>Next Fed decision</b> \u2014 the dot plot implies one more hike; crude is $15 lower than when it was written",
+      "when": "Wed \u00b7 2026-10-28",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "GOOG",
+      "html": "<b>Alphabet Q3 earnings</b> \u2014 the first read on $195-205bn of capex",
+      "when": "Wed \u00b7 2026-10-28",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "AAPL",
+      "html": "<b>Apple Q4 earnings</b> \u2014 the first iPhone 18 quarter",
+      "when": "Thu \u00b7 2026-10-29",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "PLTR",
+      "html": "<b>Palantir Q3 earnings</b>",
+      "when": "Mon \u00b7 2026-11-02",
+      "kind": "calendar"
+     }
+    ],
+    "note": "<b>Oktane was the last scheduled catalyst on any holding until late October.</b> From here the book has no company events for five weeks, and then three earnings reports and a Fed decision inside four sessions \u2014 Alphabet and the FOMC on the same Wednesday, Apple the next day, Palantir the following Monday. That clustering matters: there is nothing to react to for a month and then everything at once."
+   }
+  ],
+  "ondeck": "<b>Oktane was the last scheduled catalyst on any holding until late October.</b> From here the book has no company events for five weeks, and then three earnings reports and a Fed decision inside four sessions \u2014 Alphabet and the FOMC on the same Wednesday, Apple the next day, Palantir the following Monday. That clustering matters: there is nothing to react to for a month and then everything at once.",
+  "note": null
+ },
+ "provenance": {
+  "macro": {
+   "asof": "2026-09-25 09:59 UTC",
+   "age_min": null
+  },
+  "gex": {
+   "asof": "2026-09-25 09:59 UTC",
+   "age_min": null
+  },
+  "stocks": {
+   "asof": "2026-09-25 10:19 UTC",
+   "age_min": null
+  },
+  "institutional_holdings": {
+   "asof": "2026-09-25 10:26 UTC",
+   "quarter": "2026-06-30"
+  },
+  "congress_trades": {
+   "asof": "2026-09-25 10:25 UTC",
+   "status": {
+    "written": "2026-09-25",
+    "dropped_impossible_dates": 0,
+    "sources": {
+     "House Clerk PTR": {
+      "rows": 9534,
+      "last_30d": 28,
+      "newest_tx": "2026-09-22",
+      "newest_filed": "2026-09-22"
+     },
+     "OGE 278-T via Open Cabinet": {
+      "rows": 6448,
+      "last_30d": 0,
+      "newest_tx": "2026-06-24",
+      "newest_filed": "2026-08-12"
+     },
+     "Senate eFD": {
+      "rows": 995,
+      "last_30d": 3,
+      "newest_tx": "2026-09-01",
+      "newest_filed": "2026-09-21"
+     }
+    },
+    "quiet": [
+     "OGE 278-T via Open Cabinet"
+    ]
+   }
+  },
+  "wire": {
+   "asof": "2026-09-25 09:59 UTC"
+  }
+ },
+ "missing": [],
+ "changed": {
+  "first_pack": false,
+  "prev_date": "2026-09-24",
+  "changes": [
+   {
+    "kind": "screener",
+    "what": "new in the top setups",
+    "was": null,
+    "now": "SONO, FRO",
+    "why": "names the engine ranked highest that were not there yesterday"
+   }
+  ]
+ }
+}
