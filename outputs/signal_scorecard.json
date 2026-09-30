@@ -1,42 +1,42 @@
 {
- "n": 99,
- "e_price_R": -0.559,
- "stop_hit": 0.596,
+ "n": 101,
+ "e_price_R": -0.562,
+ "stop_hit": 0.594,
  "median_mfe_R": 0.24,
- "win_20d": 0.242,
+ "win_20d": 0.238,
  "fails": [
-  "E_price -0.559R < 0.054R",
+  "E_price -0.562R < 0.054R",
   "median MFE 0.24R < 1R (never reaches breakeven)"
  ],
  "verdict": "STOP",
  "decision_variable": "2.5x ATR, stop only, 20 bars",
  "atr_grid": {
   "1.5x": {
-   "n": 99,
-   "E_stop_R": -0.674,
-   "E_tp2_R": -0.672,
-   "E_tp3_R": -0.677,
-   "stop_hit": 0.808,
-   "tp2_first": 0.051,
+   "n": 101,
+   "E_stop_R": -0.681,
+   "E_tp2_R": -0.649,
+   "E_tp3_R": -0.683,
+   "stop_hit": 0.812,
+   "tp2_first": 0.059,
    "tp3_first": 0.03,
    "median_mfe_R": 0.41
   },
   "2.0x": {
-   "n": 99,
-   "E_stop_R": -0.635,
-   "E_tp2_R": -0.632,
-   "E_tp3_R": -0.63,
-   "stop_hit": 0.707,
+   "n": 101,
+   "E_stop_R": -0.643,
+   "E_tp2_R": -0.639,
+   "E_tp3_R": -0.638,
+   "stop_hit": 0.713,
    "tp2_first": 0.04,
    "tp3_first": 0.01,
    "median_mfe_R": 0.31
   },
   "2.5x": {
-   "n": 99,
-   "E_stop_R": -0.559,
-   "E_tp2_R": -0.564,
-   "E_tp3_R": -0.549,
-   "stop_hit": 0.596,
+   "n": 101,
+   "E_stop_R": -0.562,
+   "E_tp2_R": -0.567,
+   "E_tp3_R": -0.552,
+   "stop_hit": 0.594,
    "tp2_first": 0.02,
    "tp3_first": 0.01,
    "median_mfe_R": 0.24
@@ -108,6 +108,15 @@
     "median_mfe_R": 0.91
    },
    {
+    "group": "Miscellaneous",
+    "n": 3,
+    "thin": true,
+    "E_stop_R": -1.0,
+    "stop_hit": 1.0,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.22
+   },
+   {
     "group": "Commercial services",
     "n": 3,
     "thin": true,
@@ -115,15 +124,6 @@
     "stop_hit": 0.333,
     "tp2_first": 0.0,
     "median_mfe_R": 0.3
-   },
-   {
-    "group": "Miscellaneous",
-    "n": 2,
-    "thin": true,
-    "E_stop_R": -1.0,
-    "stop_hit": 1.0,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.59
    },
    {
     "group": "Retail trade",
@@ -142,6 +142,15 @@
     "stop_hit": 0.5,
     "tp2_first": 0.0,
     "median_mfe_R": 0.5
+   },
+   {
+    "group": "Process industries",
+    "n": 1,
+    "thin": true,
+    "E_stop_R": -0.405,
+    "stop_hit": 0.0,
+    "tp2_first": 0.0,
+    "median_mfe_R": 1.57
    },
    {
     "group": "Consumer non-durables",
@@ -236,6 +245,15 @@
     "median_mfe_R": 0.91
    },
    {
+    "group": "Investment trusts",
+    "n": 3,
+    "thin": true,
+    "E_stop_R": -1.0,
+    "stop_hit": 1.0,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.22
+   },
+   {
     "group": "Major banks",
     "n": 3,
     "thin": true,
@@ -252,15 +270,6 @@
     "stop_hit": 0.333,
     "tp2_first": 0.0,
     "median_mfe_R": 0.3
-   },
-   {
-    "group": "Investment trusts",
-    "n": 2,
-    "thin": true,
-    "E_stop_R": -1.0,
-    "stop_hit": 1.0,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.59
    },
    {
     "group": "Other consumer services",
@@ -306,6 +315,15 @@
     "stop_hit": 0.5,
     "tp2_first": 0.0,
     "median_mfe_R": 0.47
+   },
+   {
+    "group": "Chemicals: agricultural",
+    "n": 1,
+    "thin": true,
+    "E_stop_R": -0.405,
+    "stop_hit": 0.0,
+    "tp2_first": 0.0,
+    "median_mfe_R": 1.57
    },
    {
     "group": "Railroads",
@@ -464,10 +482,10 @@
    },
    {
     "group": "unknown",
-    "n": 10,
+    "n": 12,
     "thin": true,
-    "E_stop_R": -0.641,
-    "stop_hit": 0.4,
+    "E_stop_R": -0.651,
+    "stop_hit": 0.417,
     "tp2_first": 0.0,
     "median_mfe_R": 0.51
    },
@@ -485,12 +503,12 @@
   "atr": [
    {
     "group": "2-4%",
-    "n": 49,
+    "n": 50,
     "thin": false,
-    "E_stop_R": -0.591,
-    "stop_hit": 0.653,
-    "tp2_first": 0.041,
-    "median_mfe_R": 0.27
+    "E_stop_R": -0.587,
+    "stop_hit": 0.64,
+    "tp2_first": 0.04,
+    "median_mfe_R": 0.28
    },
    {
     "group": "4-7%",
@@ -503,12 +521,12 @@
    },
    {
     "group": "<2%",
-    "n": 4,
+    "n": 5,
     "thin": true,
     "E_stop_R": -1.0,
     "stop_hit": 1.0,
     "tp2_first": 0.0,
-    "median_mfe_R": 0.23
+    "median_mfe_R": 0.22
    },
    {
     "group": ">7%",
@@ -545,10 +563,10 @@
   "spx_vs_200d": [
    {
     "group": "above 200d",
-    "n": 99,
+    "n": 101,
     "thin": false,
-    "E_stop_R": -0.559,
-    "stop_hit": 0.596,
+    "E_stop_R": -0.562,
+    "stop_hit": 0.594,
     "tp2_first": 0.02,
     "median_mfe_R": 0.24
    }
@@ -556,10 +574,10 @@
   "breakout": [
    {
     "group": "no breakout",
-    "n": 86,
+    "n": 88,
     "thin": false,
-    "E_stop_R": -0.556,
-    "stop_hit": 0.605,
+    "E_stop_R": -0.559,
+    "stop_hit": 0.602,
     "tp2_first": 0.023,
     "median_mfe_R": 0.27
    },
@@ -585,10 +603,10 @@
    },
    {
     "group": "day 1",
-    "n": 5,
+    "n": 7,
     "thin": true,
-    "E_stop_R": -0.607,
-    "stop_hit": 0.4,
+    "E_stop_R": -0.634,
+    "stop_hit": 0.429,
     "tp2_first": 0.0,
     "median_mfe_R": 0.22
    },
@@ -605,21 +623,21 @@
   "time_in_trade": [
    {
     "group": "held 20",
-    "n": 40,
+    "n": 41,
     "thin": false,
-    "E_stop_R": 0.092,
+    "E_stop_R": 0.08,
     "stop_hit": 0.0,
-    "tp2_first": 0.05,
+    "tp2_first": 0.049,
     "median_mfe_R": 0.54
    },
    {
     "group": "stopped d4-10",
-    "n": 31,
+    "n": 32,
     "thin": false,
     "E_stop_R": -1.0,
     "stop_hit": 1.0,
     "tp2_first": 0.0,
-    "median_mfe_R": 0.16
+    "median_mfe_R": 0.17
    },
    {
     "group": "stopped d11-20",
@@ -643,6 +661,6 @@
  },
  "min_cell": 20,
  "logged_new": 303,
- "asof": "2026-09-29T12:49",
+ "asof": "2026-09-30T09:57",
  "note": "1.5x and 2.0x and the target policies are descriptive. The pre-registered verdict is the 2.5x stop-only column; choosing the best cell after the fact is not a result."
 }
