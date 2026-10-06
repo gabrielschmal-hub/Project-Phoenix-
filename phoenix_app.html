@@ -1024,6 +1024,16 @@
   .pxaccts[hidden]{display:none!important}   /* the profile popover is the one control; the chips only hold state */
   .hero-who{margin-top:14px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--inkFade)} .hero-who a{color:var(--gold)}
   .tb-auth{display:block!important;margin-left:6px}
+  .nm-sk,.nm-gk{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--inkFade);margin:8px 0 6px}
+  .nm-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .nm-chip{font-family:var(--mono);font-size:10.5px;padding:4px 9px;border-radius:7px;border:1px solid var(--line2);background:var(--card2);cursor:pointer}
+  .nm-chip b{margin-right:2px} .nm-chip.wall{border-color:var(--amber)} .nm-chip.flip{border-color:var(--red)} .nm-chip.near{border-color:var(--line2)}
+  .nm-chip.reg-red{color:var(--red)} .nm-chip.reg-amber{color:var(--amber)} .nm-chip.reg-green{color:var(--ink)}
+  .nm-tbl{font-family:var(--mono);font-size:10.5px;overflow-x:auto}
+  .nm-hd,.nm-row{display:grid;grid-template-columns:64px 1fr 1fr 1fr 1fr 1fr 1.2fr;gap:6px;padding:4px 2px;border-bottom:1px dashed var(--line2);min-width:520px}
+  .nm-hd{color:var(--inkFade);letter-spacing:.06em;text-transform:uppercase;font-size:9px} .nm-row{cursor:pointer} .nm-row:hover{background:var(--card2)}
+  .nm-row .t{font-weight:700} .nm-row .t i{font-style:normal;color:var(--inkFade);font-weight:400;font-size:9px;margin-left:3px} .nm-row .f{color:var(--gold)} .nm-row .neg{color:var(--red)} .nm-row .s{color:var(--amber);font-size:9.5px;letter-spacing:.05em}
+  .nm-row.on .t{color:var(--gold)} .nm-row.stale{opacity:.55} .nm-grp.a .nm-gk{color:var(--amber)} .nm-grp.r .nm-gk{color:var(--red)} .nm-grp.g .nm-gk{color:var(--green)}
   .tb-th{display:none;margin-left:auto;background:transparent;border:1px solid var(--line2);color:var(--inkFade);
     border-radius:8px;width:32px;height:32px;font-size:15px;line-height:1;cursor:pointer;flex:0 0 auto}
   .tb-th:active{border-color:var(--gold);color:var(--gold)}
@@ -10350,7 +10360,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // wire/; run_wire parses it into wire.json. This renders that document. The old generated
   // paragraph is kept ONLY as a fallback for a morning with no brief, and says so plainly —
   // a template that reads like prose is worse than an admission that today's brief is missing.
-  var MCB_ORDER=[["recap","In five minutes"],["stance","The stance"],["markets","The market"],["macro","The macro"],
+  var MCB_ORDER=[["recap","In five minutes"],["stance","The stance"],["markets","The market"],["map","The names"],["macro","The macro"],
                  ["smart_money","Smart money"],["screener","The screener"],["positions","Your positions"],
                  ["world","The world"],["changed","What changed"],["invalidation","What would change this"]];
   function mcbSec(s,fallbackKicker){
@@ -10379,6 +10389,49 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // Drawn by drawMktGex / drawVIX — the SAME functions the Markets page calls, with an "MC"
   // suffix so both can exist at once. Nothing is recomputed here, so the brief and Markets can
   // never show different levels for the same day.
+  // ---- THE NAMES: every ticker in the GEX universe against its walls and flip (outputs/mme_map.json) ----
+  var MME_MAP=null;
+  function mcbPlateNames(){
+    return '<div class="ed-sec mcb-plate" id="mcNamesPlate"><div class="ed-k"><span>The names</span>'+
+      '<span class="ed-n" id="mcNamesNote">loading\u2026</span></div><div id="mcNamesBody"></div></div>';
+  }
+  function mcbNamesFill(){
+    var body=document.getElementById("mcNamesBody"), note=document.getElementById("mcNamesNote"); if(!body) return;
+    getJSON("mme_map").then(function(d){
+      MME_MAP=d||{};
+      var g=d.groups||{}, st=d.standouts||[];
+      if(!d.covered){ note.textContent="no dealer reads on file"; body.innerHTML='<div class="ed-note">No per-ticker dealer read is on file yet \u2014 the GEX lane has not written any names. Nothing to map.</div>'; return; }
+      note.textContent=d.date+" \u00b7 "+d.covered+"/"+d.universe+" names"+(d.stale?" \u00b7 "+d.stale+" stale":"")+(d.missing&&d.missing.length?" \u00b7 missing "+d.missing.join(", "):"");
+      function pr(v){ return v==null?"\u2014":(+v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+      function lvl(v){ return v==null?"\u2014":(+v).toLocaleString(undefined,{maximumFractionDigits:2}); }
+      function chip(r){
+        var cls=r.status==="ON FLIP"||r.status==="NEAR FLIP"?"flip":(r.status==="AT WALL"?"wall":"near");
+        var where=r.status.indexOf("FLIP")>=0?"flip "+lvl(r.flip):((r.level===r.resist?"call wall ":"put wall ")+lvl(r.level));
+        return '<span class="nm-chip '+cls+' reg-'+r.regime+'" data-tk="'+r.ticker+'"><b>'+r.ticker+'</b> '+r.status.toLowerCase()+' \u00b7 '+where+'</span>';
+      }
+      var h='';
+      if(st.length){
+        h+='<div class="nm-stand"><div class="nm-sk">On a level \u00b7 '+st.length+'</div><div class="nm-chips">'+st.map(chip).join("")+'</div>'+
+           '<div class="ed-note">A name at a wall in positive gamma is where dealers sell strength or buy weakness \u2014 the level tends to hold. '+
+           'On or near the flip the hedging has no lean; a normal session decides which side. Below the flip, walls give way rather than hold.</div></div>';
+      }
+      function table(key,title,cls){
+        var rows=g[key]||[]; if(!rows.length) return '';
+        return '<div class="nm-grp '+cls+'"><div class="nm-gk">'+title+' \u00b7 '+rows.length+'</div>'+
+          '<div class="nm-tbl"><div class="nm-hd"><span>name</span><span>spot</span><span>support</span><span>flip</span><span>resist</span><span>dist flip</span><span>status</span></div>'+
+          rows.map(function(r){
+            return '<div class="nm-row'+(r.status?' on':'')+(r.stale_days>2?' stale':'')+'" data-tk="'+r.ticker+'">'+
+              '<span class="t">'+r.ticker+(r.stale_days>2?'<i title="dealer read is '+r.stale_days+' days old">\u00b7'+r.stale_days+'d</i>':'')+'</span>'+
+              '<span>'+pr(r.spot)+'</span><span>'+lvl(r.support)+'</span><span class="f">'+pr(r.flip)+'</span><span>'+lvl(r.resist)+'</span>'+
+              '<span class="'+(r.dist_flip_em<0?"neg":"")+'">'+(r.dist_flip_em>=0?"+":"")+r.dist_flip_em+' EM</span>'+
+              '<span class="s">'+(r.status||"")+'</span></div>'; }).join("")+'</div></div>';
+      }
+      h+=table("green","Green \u00b7 positive gamma","g")+table("amber","Amber \u00b7 flip within one move","a")+table("red","Red \u00b7 below the flip","r");
+      h+='<div class="ed-note" style="margin-top:8px">'+(d.note||"")+' Tap a name for its chart, levels and volatility.</div>';
+      body.innerHTML=h;
+      body.querySelectorAll("[data-tk]").forEach(function(el){ el.onclick=function(){ if(typeof dpOpen==="function") dpOpen(el.dataset.tk); }; });
+    }).catch(function(){ note.textContent="unavailable"; body.innerHTML='<div class="ed-note">mme_map.json could not be loaded.</div>'; });
+  }
   function mcbPlateGex(){
     return '<div class="ed-sec mcb-plate"><div class="ed-k"><span>The map</span>'+
       '<span class="ed-n" id="gexHNoteMC"></span></div>'+
@@ -10493,7 +10546,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
                  .map(function(x){
                    var html=mcbSec(d[x[0]],x[1]);
                    // the instruments sit directly under the prose that refers to them
-                   if(x[0]==="markets")     html+=mcbPlateGex();   // the map sits under the prose it serves
+                   if(x[0]==="markets")     html+=mcbPlateGex()+(d.map?"":mcbPlateNames());   // the map sits under the prose it serves
+                   if(x[0]==="map")         html+=mcbPlateNames();      // Cowork's read of the names, then the table
                    if(x[0]==="smart_money") html+=mcbPlateConf();
                    if(x[0]==="screener")    html+=mcbPlateRot();
                    if(x[0]==="changed")     html+=mcbPlateSince();
@@ -10513,7 +10567,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       bind();
       host.querySelectorAll("[data-go]").forEach(function(a){ a.style.cursor="pointer";
         a.onclick=function(){ location.hash="#"+this.dataset.go; }; });
-      mcbDrawPlates();
+      mcbDrawPlates(); mcbNamesFill();
     });
   }
 

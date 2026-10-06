@@ -2056,7 +2056,8 @@ def _wire_parse_html(raw):
                  ("the book", "positions"), ("the wire \u00b7 your positions", "positions"),
                  ("the wire", "positions"),
                  ("the war", "world"), ("the world", "world"),
-                 ("what's next", "ondeck"), ("whats next", "ondeck"), ("on deck", "ondeck"))
+                 ("what's next", "ondeck"), ("whats next", "ondeck"), ("on deck", "ondeck"),
+                 ("the map", "map"), ("the dealer map", "map"), ("dealer map", "map"), ("the names", "map"))
         slot = next((v for k, v in SLOTS if low.startswith(k)), None)
         if slot:
             if slot == "ondeck":                 # ondeck is a string slot, not a block
@@ -2687,7 +2688,7 @@ def compute_greeks(S, K, T, r, q, sigma):
     return gamma, vanna, charm
 
 
-def gex_engine(chain, spot, scale=1.0, floors=None):
+def gex_engine(chain, spot, scale=1.0):
     """
     PURE FUNCTION. Compute dealer gamma/vanna/charm exposure from an options chain.
 
@@ -2745,15 +2746,7 @@ def gex_engine(chain, spot, scale=1.0, floors=None):
     n_strikes = len(strikes)
     # A healthy SPX/SPY chain has hundreds of strikes and millions of OI near spot.
     # If we have very few strikes, tiny OI, or zero puts, the pull is broken.
-    # Floors are index-sized by default. The per-stock path passes its own
-    # (GEX_STOCKS) — until 22 Sep 2026 every single name was judged against the
-    # SPX floors here first, so anything under 50k OI in the band (OKTA, most
-    # mid-caps) came back "degenerate_chain" and never reached the stock floors.
-    _fl = floors or {}
-    _min_strikes = _fl.get("min_strikes", 20)
-    _min_oi = _fl.get("min_total_oi", 50000)
-    _min_put = _fl.get("min_put_oi", 1000)
-    bad_pull = (n_strikes < _min_strikes) or (total_oi < _min_oi) or (total_put_oi < _min_put)
+    bad_pull = (n_strikes < 20) or (total_oi < 50000) or (total_put_oi < 1000)
     if bad_pull:
         return {
             "asof": _now(),
@@ -3102,19 +3095,11 @@ def compute_sector_performance(stock_data, universe, daily_ret=None):
         def ret(nbars):
             return round((idx[-1] / idx[-1 - nbars] - 1) * 100, 2) if len(idx) > nbars else None
 
-        # Same trend flags the industry builder emits (10 weekly bars ≈ 50 days).
-        # Until 22 Sep 2026 sectors had no "above" key, so group_strength read
-        # every sector as below its 50-day and every sector failed the gate —
-        # Electronic Technology at +4.8% vs SPX was showing "lagging".
-        ma10 = _sma(idx, 10); ma10_prev = _sma(idx[:-4], 10)
-        above = ma10 is not None and idx[-1] > ma10
-        rising = ma10 is not None and ma10_prev is not None and ma10 > ma10_prev
         out.append({
             "sector": sec, "series": idx_norm, "n": len(series),
             "n_industries": len(inds), "mcap_B": round(W / 1e9, 1),
             "d1": (round(sum(d1s) / sum(d1w), 2) if d1w else None),
             "w1": ret(1), "m1": ret(4), "m3": ret(13),
-            "above": above, "rising": rising,
         })
     out.sort(key=lambda r: -(r.get("mcap_B") or 0))
     return out
@@ -9521,10 +9506,7 @@ def run_gex_stocks(tickers=None):
             old_band = GEX["otm_band"]
             GEX["otm_band"] = band
             try:
-                res = gex_engine(chain, spot, scale=1.0,
-                                 floors={"min_strikes": cfg["min_strikes"],
-                                         "min_total_oi": cfg["min_total_oi"],
-                                         "min_put_oi": cfg["min_put_oi"]})
+                res = gex_engine(chain, spot, scale=1.0)
             finally:
                 GEX["otm_band"] = old_band
             # per-ticker degenerate floors (thinner than index, but real)
@@ -10517,6 +10499,102 @@ def run_gex_ticker(sym, out_dir=None):
     return res, "ok"
 
 
+# ============================================================
+# THE DEALER MAP — every name in the GEX universe plus the book, one row each:
+# spot, nearest support and resistance walls, the flip, distance to the flip in
+# expected-move units, regime (green / amber / red) and a status flag when the
+# name is on a level. Then the standouts. Same shape as the MME "map" page, built
+# from Phoenix's own per-ticker reads, so a morning brief can say which names are
+# pressing a wall or sitting on a flip without anyone typing levels in.
+# ============================================================
+def _mme_row(tk, g, em1, stale_days):
+    ov = g.get("overview") or {}; lv = g.get("levels") or {}
+    spot = g.get("spot") or ov.get("spx_spot")
+    flip = ov.get("gamma_flip") or lv.get("gamma_flip")
+    if not spot or not flip:
+        return None
+    def strike(x): return (x or {}).get("strike")
+    sup = [strike(x) for x in (lv.get("supports") or []) if strike(x) and strike(x) < spot]
+    res = [strike(x) for x in (lv.get("resistances") or []) if strike(x) and strike(x) > spot]
+    pw, cw = strike(lv.get("put_wall")), strike(lv.get("call_wall"))
+    if pw and pw < spot: sup.append(pw)
+    if cw and cw > spot: res.append(cw)
+    support = max(sup) if sup else None
+    resist = min(res) if res else None
+    em = em1 or (spot * 0.015)                      # a 1.5%/day stand-in when no vol read exists
+    dist = (spot - flip) / em
+    # MME's own buckets: below the flip is red whatever the distance; above it, amber until a
+    # full expected move clears the flip, green beyond
+    regime = "red" if dist < 0 else ("amber" if dist < 1 else "green")
+    status, level = "", None
+    for lvl in (resist, support):
+        if lvl and abs(spot - lvl) / em <= 0.25: status, level = "AT WALL", lvl; break
+    if not status:
+        for lvl in (resist, support):
+            if lvl and abs(spot - lvl) / em <= 1.0: status, level = "NEARING WALL", lvl; break
+    if abs(dist) <= 0.15: status, level = "ON FLIP", flip
+    elif not status and abs(dist) < 1: status, level = "NEAR FLIP", flip
+    return {"ticker": tk, "spot": round(spot, 2), "support": support, "flip": round(flip, 2), "resist": resist,
+            "em": round(em, 2), "em_src": "options" if em1 else "1.5% stand-in",
+            "dist_flip_em": round(dist, 1), "regime": regime, "status": status, "level": level,
+            "net_gex_B": ov.get("net_gex_B"), "asof": g.get("asof"), "stale_days": stale_days,
+            "pct_to_resist": (round((resist / spot - 1) * 100, 1) if resist else None),
+            "pct_to_support": (round((support / spot - 1) * 100, 1) if support else None)}
+
+
+def run_mme_map():
+    import os, json
+    from datetime import datetime, timezone
+    names = []
+    try:
+        names += list(GEX_UNIVERSE.get("seed") or [])
+    except Exception:
+        pass
+    try:
+        names += [str(t.get("ticker")).upper() for t in _load_trades() if t.get("status") in ("open", "plan")]
+    except Exception:
+        pass
+    names = [t for t in dict.fromkeys(names) if t and t not in ("SPY", "QQQ", "IWM")]
+    try:
+        ivem = (json.load(open(os.path.join(OUTPUTS_DIR, "iv_em.json"))).get("tickers") or {})
+    except Exception:
+        ivem = {}
+    today = datetime.now(timezone.utc).date()
+    rows, missing = [], []
+    for tk in names:
+        safe = tk.replace("/", "-").replace(".", "-")
+        fp = os.path.join(OUTPUTS_DIR, "gex_stocks", safe + ".json")
+        try:
+            g = json.load(open(fp))
+        except Exception:
+            missing.append(tk); continue
+        try:
+            d = datetime.strptime(str(g.get("asof", ""))[:10], "%Y-%m-%d").date(); stale = (today - d).days
+        except Exception:
+            stale = None
+        em1 = (ivem.get(tk) or {}).get("iv_daily_abs")
+        r = _mme_row(tk, g, em1, stale)
+        if r: rows.append(r)
+        else: missing.append(tk)
+    rows.sort(key=lambda r: -r["dist_flip_em"])
+    groups = {k: [r for r in rows if r["regime"] == k] for k in ("green", "amber", "red")}
+    stand = [r for r in rows if r["status"]]
+    stand.sort(key=lambda r: {"ON FLIP": 0, "AT WALL": 1, "NEAR FLIP": 2, "NEARING WALL": 3}[r["status"]])
+    stale_n = sum(1 for r in rows if (r["stale_days"] or 0) > 2)
+    write_json("mme_map", {
+        "asof": _now(), "date": str(today), "universe": len(names), "covered": len(rows),
+        "missing": missing, "stale": stale_n,
+        "note": "Regime: green = spot a full expected move or more above the flip; amber = above but within one move; "
+                "red = below the flip. Status: AT WALL within 0.25 moves of a wall, NEARING within one, ON FLIP within 0.15, "
+                "NEAR FLIP within one. Distance in daily expected moves from the options chain (ATR stand-in where none).",
+        "groups": groups, "standouts": stand})
+    print(f"[mmemap] {len(rows)}/{len(names)} names · green {len(groups['green'])} amber {len(groups['amber'])} "
+          f"red {len(groups['red'])} · standouts {len(stand)} · stale {stale_n} · missing {','.join(missing) or 'none'}")
+    sb_heartbeat("mme_map", len(rows) >= max(5, len(names) // 2),
+                 f"{len(rows)}/{len(names)} · {len(stand)} standouts · {stale_n} stale · missing {len(missing)}")
+    return rows
+
+
 def run_gex_stocks_cboe(tickers=None, limit=None):
     """
     Per-ticker GEX for the names that matter: what you hold, then the screener's
@@ -10833,19 +10911,10 @@ def mme_flip_net(contracts, spot, scrape_date):
     pre = []
     tcache = {}
     iv_skipped = 0
-    # DIAGNOSTIC (22 Sep 2026): contracts with vendor IV <= 0 are dropped from the
-    # solve. If those cluster near the money and near expiry, they are exactly
-    # the contracts that move the flip. Count them by distance and DTE so a
-    # flip disagreement can be attributed rather than guessed at.
-    _skip_near, _skip_near_oi, _skip_oi, _skip_by_exp = 0, 0, 0, {}
     for c in contracts:
         sig = c["iv"]
         if sig <= 0:
             iv_skipped += 1
-            _skip_oi += c["oi"]
-            _skip_by_exp[c["expiry"]] = _skip_by_exp.get(c["expiry"], 0) + c["oi"]
-            if abs(c["K"] / spot - 1.0) <= 0.03:
-                _skip_near += 1; _skip_near_oi += c["oi"]
             continue
         T = tcache.get(c["expiry"])
         if T is None:
@@ -10880,15 +10949,7 @@ def mme_flip_net(contracts, spot, scrape_date):
             break
         prevL, prevG = L, g
     net_B = curve(spot) / 1e9
-    if iv_skipped:
-        _top = sorted(_skip_by_exp.items(), key=lambda kv: -kv[1])[:5]
-        print(f"[mme] iv<=0 skipped: {iv_skipped} contracts / {_skip_oi:,} OI; "
-              f"within 3% of spot: {_skip_near} contracts / {_skip_near_oi:,} OI; "
-              f"top expiries by skipped OI: " + ", ".join(f"{str(e)}={o:,}" for e, o in _top))
     return flip, round(net_B, 2), {"grid": n, "iv_skipped": iv_skipped,
-                                   "iv_skipped_oi": _skip_oi,
-                                   "iv_skipped_near_spot": _skip_near,
-                                   "iv_skipped_near_spot_oi": _skip_near_oi,
                                    "expiries": len(tcache)}
 
 
@@ -11270,9 +11331,6 @@ def run_gex_cboe(symbol="_SPX", label="SPX"):
             "spot_source": spot_source,
             "contracts": len(_contracts), "expiries": _meta["expiries"],
             "iv_skipped": _meta.get("iv_skipped", 0),
-            "iv_skipped_oi": _meta.get("iv_skipped_oi", 0),
-            "iv_skipped_near_spot": _meta.get("iv_skipped_near_spot", 0),
-            "iv_skipped_near_spot_oi": _meta.get("iv_skipped_near_spot_oi", 0),
             "call_tiered": _walls["call_tiered"], "put_tiered": _walls["put_tiered"],
             "magnets": _walls["magnets"],
             "call_wall_pin": _walls["call_wall_pin"],
@@ -13423,6 +13481,7 @@ def run_full():
     # --- earnings + fundamentals -------------------------------------------
     step("earnings_refresh", run_earnings_refresh)
     step("iv_em",          run_iv_em,         optional=True)   # implied vol + expected move, two-tier
+    step("mme_map",        run_mme_map,       optional=True)   # the dealer map: every name vs its walls and flip
     step("financials_all", run_financials_all)
     step("detail_bundle",  run_detail_bundle)
 
