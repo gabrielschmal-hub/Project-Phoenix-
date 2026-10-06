@@ -1024,6 +1024,10 @@
   .pxaccts[hidden]{display:none!important}   /* the profile popover is the one control; the chips only hold state */
   .hero-who{margin-top:14px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--inkFade)} .hero-who a{color:var(--gold)}
   .tb-auth{display:block!important;margin-left:6px}
+  .mc-top{display:flex;gap:6px;margin:0 0 14px;border-bottom:1px solid var(--line);padding-bottom:10px}
+  .mc-tab{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border-radius:9px;border:1px solid var(--line2);background:transparent;color:var(--inkFade);cursor:pointer}
+  .mc-tab.on{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700}
+  .mc-tab:not(.on):hover{color:var(--ink);border-color:var(--ink)}
   .nm-sk,.nm-gk{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--inkFade);margin:8px 0 6px}
   .nm-chips{display:flex;flex-wrap:wrap;gap:6px}
   .nm-chip{font-family:var(--mono);font-size:10.5px;padding:4px 9px;border-radius:7px;border:1px solid var(--line2);background:var(--card2);cursor:pointer}
@@ -10360,7 +10364,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // wire/; run_wire parses it into wire.json. This renders that document. The old generated
   // paragraph is kept ONLY as a fallback for a morning with no brief, and says so plainly —
   // a template that reads like prose is worse than an admission that today's brief is missing.
-  var MCB_ORDER=[["recap","In five minutes"],["stance","The stance"],["markets","The market"],["map","The names"],["macro","The macro"],
+  var MCB_ORDER=[["recap","In five minutes"],["stance","The stance"],["markets","The market"],["macro","The macro"],
                  ["smart_money","Smart money"],["screener","The screener"],["positions","Your positions"],
                  ["world","The world"],["changed","What changed"],["invalidation","What would change this"]];
   function mcbSec(s,fallbackKicker){
@@ -10546,8 +10550,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
                  .map(function(x){
                    var html=mcbSec(d[x[0]],x[1]);
                    // the instruments sit directly under the prose that refers to them
-                   if(x[0]==="markets")     html+=mcbPlateGex()+(d.map?"":mcbPlateNames());   // the map sits under the prose it serves
-                   if(x[0]==="map")         html+=mcbPlateNames();      // Cowork's read of the names, then the table
+                   if(x[0]==="markets")     html+=mcbPlateGex();   // the map sits under the prose it serves
                    if(x[0]==="smart_money") html+=mcbPlateConf();
                    if(x[0]==="screener")    html+=mcbPlateRot();
                    if(x[0]==="changed")     html+=mcbPlateSince();
@@ -10563,11 +10566,30 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           ' \u00b7 from Phoenix\u2019s fact pack \u00b7 <span class="mcb-file">'+(acct.file||"")+'</span></div>'+
         (stale?'<div class="mcb-stale">This brief is '+age+' days old. Nothing below has been re-checked against today\u2019s data \u2014 read it as a record of that morning, not as this morning.</div>':"");
       host.className="";
-      host.innerHTML=html;
+      // Mission Control has two sections: the Daily Brief (daily / weekly, as before) and MME —
+      // the dealer map of every name against its walls and flip, with Cowork's read of it.
+      var mmeHtml=(d.map?mcbSec(d.map,"The names"):'<div class="ed-sec"><div class="ed-k"><span>The names</span>'+
+                   '<span class="ed-n">no written read today</span></div><div class="ed-note">Cowork did not write a '+
+                   '\u201cThe names\u201d section in this brief. The table below is Phoenix\u2019s own read.</div></div>')+
+                  mcbPlateNames();
+      host.innerHTML='<div class="mc-top"><button class="mc-tab" data-pane="brief">Daily Brief</button>'+
+                     '<button class="mc-tab" data-pane="mme">MME</button></div>'+
+                     '<div id="mcPaneBrief">'+html+'</div><div id="mcPaneMme" style="display:none">'+mmeHtml+'</div>';
+      function showPane(p){
+        var isB=(p!=="mme");
+        document.getElementById("mcPaneBrief").style.display=isB?"":"none";
+        document.getElementById("mcPaneMme").style.display=isB?"none":"";
+        host.querySelectorAll(".mc-tab").forEach(function(b){ b.classList.toggle("on", b.dataset.pane===(isB?"brief":"mme")); });
+        try{ localStorage.setItem("phoenix.mc.pane", isB?"brief":"mme"); }catch(e){}
+        if(!isB) mcbNamesFill();
+      }
+      host.querySelectorAll(".mc-tab").forEach(function(b){ b.onclick=function(){ showPane(this.dataset.pane); }; });
+      var want="brief"; try{ want=localStorage.getItem("phoenix.mc.pane")||"brief"; }catch(e){}
+      showPane(want);
       bind();
       host.querySelectorAll("[data-go]").forEach(function(a){ a.style.cursor="pointer";
         a.onclick=function(){ location.hash="#"+this.dataset.go; }; });
-      mcbDrawPlates(); mcbNamesFill();
+      mcbDrawPlates();
     });
   }
 
@@ -10626,7 +10648,14 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           (nxt.time_et||nxt.time?" at "+(nxt.time_et||nxt.time):"")+'.</p>');
       }
       host.className="";
-      host.innerHTML = P.length?P.join("") : '<span class="mcna">Brief unavailable. Waiting on <code>macro.json</code> and <code>gex.json</code>.</span>';
+      var _mme='<div class="ed-sec"><div class="ed-k"><span>The names</span><span class="ed-n">no written read today</span></div></div>'+mcbPlateNames();
+      var _body = P.length?P.join("") : '<span class="mcna">Brief unavailable. Waiting on <code>macro.json</code> and <code>gex.json</code>.</span>';
+      host.innerHTML='<div class="mc-top"><button class="mc-tab on" data-pane="brief">Daily Brief</button><button class="mc-tab" data-pane="mme">MME</button></div>'+
+                     '<div id="mcPaneBrief">'+_body+'</div><div id="mcPaneMme" style="display:none">'+_mme+'</div>';
+      host.querySelectorAll(".mc-tab").forEach(function(b){ b.onclick=function(){
+        var isB=this.dataset.pane!=="mme";
+        document.getElementById("mcPaneBrief").style.display=isB?"":"none"; document.getElementById("mcPaneMme").style.display=isB?"none":"";
+        host.querySelectorAll(".mc-tab").forEach(function(x){ x.classList.toggle("on", x===b); }); if(!isB) mcbNamesFill(); }; });
     }).catch(function(){
       host.className="mcna";
       host.innerHTML='Brief unavailable. Waiting on <code>macro.json</code> and <code>gex.json</code>.';
