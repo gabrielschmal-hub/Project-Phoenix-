@@ -1,45 +1,45 @@
 {
  "trade_book": {
   "lane": "trade_book",
-  "ts": "2026-10-02T10:52:57.435537+00:00",
+  "ts": "2026-10-06T11:46:30.244310+00:00",
   "ok": true,
   "note": "51 rows \u00b7 aldemar closed:16 \u00b7 aldemar open:3 \u00b7 gabriel closed:26 \u00b7 gabriel open:3 \u00b7 gabriel plan:3"
  },
  "house_ptr": {
   "lane": "house_ptr",
-  "ts": "2026-10-02T11:17:33.300467+00:00",
-  "ok": false,
-  "note": "3 unseen filings \u00b7 1 PDFs parsed \u00b7 2 fetch/parse failures {'pdftotext empty': 2} \u00b7 0 rows"
+  "ts": "2026-10-06T12:14:41.014111+00:00",
+  "ok": true,
+  "note": "5 PDFs \u00b7 13 rows \u00b7 9 tickers \u00b7 2 failures {'pdftotext empty': 2}"
  },
  "senate_efd": {
   "lane": "senate_efd",
-  "ts": "2026-10-02T11:17:38.436705+00:00",
-  "ok": true,
-  "note": "14 PTRs parsed \u00b7 5 rows \u00b7 13 zero-row \u00b7 4 paper \u00b7 rejects {'no_ticker': 162, 'no_type': 1} \u00b7 no-ticker sample: Other: MH Built to Last LLC Company: MH Built t x22; Municipal Security: PENNSYLVANIA ST GO Rate/Coupon: 5% Matur x13; Stock: GS Managed Structured Note Strategy S&am x11; Stock: GS Managed Structured Note Strategy MSCI x10 \u00b7 merged 3"
+  "ts": "2026-10-06T12:14:45.564447+00:00",
+  "ok": false,
+  "note": "13 PTRs parsed \u00b7 0 rows \u00b7 13 zero-row \u00b7 4 paper \u00b7 rejects {'no_ticker': 162, 'no_type': 1} \u00b7 no-ticker sample: Other: MH Built to Last LLC Company: MH Built t x22; Municipal Security: PENNSYLVANIA ST GO Rate/Coupon: 5% Matur x13; Stock: GS Managed Structured Note Strategy S&am x11; Stock: GS Managed Structured Note Strategy MSCI x10"
  },
  "executive": {
   "lane": "executive",
-  "ts": "2026-10-02T11:17:39.832902+00:00",
+  "ts": "2026-10-06T12:14:46.869357+00:00",
   "ok": true,
   "note": "6485 rows \u00b7 merged 0 \u00b7 export 2026-09-25"
  },
  "insider": {
   "lane": "insider",
-  "ts": "2026-10-02T11:18:38.537398+00:00",
+  "ts": "2026-10-06T12:16:04.711031+00:00",
   "ok": true,
-  "note": "137 tickers \u00b7 165 new Form 4s \u00b7 378 rows \u00b7 97 new P/S \u00b7 3 no CIK \u00b7 0 failures"
+  "note": "139 tickers \u00b7 304 new Form 4s \u00b7 1235 rows \u00b7 940 new P/S \u00b7 1 no CIK \u00b7 0 failures"
  },
  "iv_em": {
   "lane": "iv_em",
-  "ts": "2026-10-02T11:23:17.496789+00:00",
+  "ts": "2026-10-06T12:21:00.158413+00:00",
   "ok": true,
-  "note": "160 requested (160 tier A) \u00b7 142 straddle \u00b7 0 iv-proxy \u00b7 13 no chain \u00b7 5 failures \u00b7 298 on file \u00b7 137s"
+  "note": "160 requested (160 tier A) \u00b7 145 straddle \u00b7 0 iv-proxy \u00b7 8 no chain \u00b7 7 failures \u00b7 309 on file \u00b7 152s"
  },
  "group_strength": {
   "lane": "group_strength",
-  "ts": "2026-10-02T11:17:25.025523+00:00",
+  "ts": "2026-10-06T12:14:33.299444+00:00",
   "ok": true,
-  "note": "15/121 industries ok \u00b7 3/20 sectors ok"
+  "note": "18/121 industries ok \u00b7 3/20 sectors ok"
  },
  "signal_log": {
   "lane": "signal_log",
@@ -49,20 +49,20 @@
  },
  "context_backfill": {
   "lane": "context_backfill",
-  "ts": "2026-10-02T11:31:38.729145+00:00",
+  "ts": "2026-10-06T12:31:57.807536+00:00",
   "ok": true,
   "note": "165 rows over 6 days \u00b7 165 were missing context"
  },
  "gex_stocks": {
   "lane": "gex_stocks",
-  "ts": "2026-10-02T10:55:13.002647+00:00",
+  "ts": "2026-10-06T11:48:41.486549+00:00",
   "ok": true,
-  "note": "26 written \u00b7 3 thin \u00b7 121 failed of 150 \u00b7 first names TSLA,AMZN,GOOG,AAPL,PLTR,OKTA,ALAB,AMD,ARM,AVGO,CRWD,HOOD \u00b7 files present 11/12 \u00b7 first failure: OKTA: degenerate_chain"
+  "note": "26 written \u00b7 1 thin \u00b7 123 failed of 150 \u00b7 first names TSLA,AMZN,GOOG,AAPL,PLTR,OKTA,ALAB,AMD,ARM,AVGO,CRWD,HOOD \u00b7 files present 11/12 \u00b7 first failure: OKTA: degenerate_chain"
  },
  "group_backfill": {
   "lane": "group_backfill",
-  "ts": "2026-10-02T11:30:10.512397+00:00",
+  "ts": "2026-10-06T12:30:24.547747+00:00",
   "ok": false,
-  "note": "0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026-08-16 -> 2026-10-02 (36 sessions)"
+  "note": "0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026-08-16 -> 2026-10-06 (37 sessions)"
  }
 }

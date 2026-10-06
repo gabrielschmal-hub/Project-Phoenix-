@@ -1,0 +1,694 @@
+{
+ "schema": "phoenix-fact-pack/1",
+ "date": "2026-10-06",
+ "asof": "2026-10-06 12:31 UTC",
+ "market": {
+  "regime": "POLICY_TIGHTENING",
+  "regime_held_weeks": 6,
+  "spx": {
+   "last": 7773.95,
+   "chg_1d_pct": 0.66,
+   "vs_50d_pct": 1.42,
+   "vs_200d_pct": 7.51
+  },
+  "vix": 15.32,
+  "dxy": null,
+  "us10y": null,
+  "gold": null,
+  "wti": null,
+  "gex": {
+   "net_B": 69.74,
+   "regime": "positive",
+   "flip": null,
+   "dist_to_flip_pct": -1.4,
+   "call_wall": null,
+   "put_wall": null,
+   "spot": 7773.95
+  }
+ },
+ "macro": {
+  "spx": {
+   "last": 7773.95,
+   "d1_pct": 0.66,
+   "w1_pct": 1.17,
+   "m1_pct": 0.34
+  },
+  "ndx": {
+   "last": 27477.31,
+   "d1_pct": 1.05,
+   "w1_pct": 2.45,
+   "m1_pct": 3.36
+  },
+  "dow": {
+   "last": 51267.9,
+   "d1_pct": 0.18,
+   "w1_pct": -0.41,
+   "m1_pct": -4.5
+  },
+  "rut": {
+   "last": 2847.14,
+   "d1_pct": 0.5,
+   "w1_pct": 1.04,
+   "m1_pct": -4.08
+  },
+  "gold": {
+   "last": 4156.8,
+   "d1_pct": -0.13,
+   "w1_pct": -0.28,
+   "m1_pct": -8.44
+  },
+  "wti": {
+   "last": 89.43,
+   "d1_pct": -1.84,
+   "w1_pct": -3.42,
+   "m1_pct": -2.05
+  },
+  "btc": {
+   "last": 85787.0,
+   "d1_pct": 1.53,
+   "w1_pct": 2.74,
+   "m1_pct": 5.56
+  },
+  "dxy": {
+   "last": 102.17,
+   "d1_pct": 0.24,
+   "w1_pct": 0.96,
+   "m1_pct": 3.2
+  },
+  "vix": {
+   "last": 15.52,
+   "d1_pct": 1.37,
+   "w1_pct": -3.42,
+   "m1_pct": 8.38
+  },
+  "usdjpy": {
+   "last": 157.73,
+   "d1_pct": -0.12,
+   "w1_pct": 0.17,
+   "m1_pct": -0.75
+  },
+  "tnx": {
+   "last": 5.31,
+   "d1_bp": 3,
+   "w1_bp": 7,
+   "m1_bp": 55
+  },
+  "us02": {
+   "last": 4.83,
+   "d1_bp": 0,
+   "w1_bp": -9,
+   "m1_bp": 49
+  },
+  "real10": {
+   "last": 2.92,
+   "d1_bp": 0,
+   "w1_bp": 2,
+   "m1_bp": 50
+  },
+  "hy": {
+   "last": 3.1,
+   "d1_bp": 0,
+   "w1_bp": 0,
+   "m1_bp": 0
+  },
+  "cpi_yoy": {
+   "last": 3.35,
+   "prev_print": 3.3
+  },
+  "curve_2s10s_bp": 48,
+  "curve_2s10s_chg_1m_bp": 6,
+  "absent": [],
+  "rows": 251
+ },
+ "regime_gates": {
+  "regime": "POLICY_TIGHTENING",
+  "held_weeks": 6,
+  "since": "2026-08-31",
+  "drivers": [
+   {
+    "key": "cpi_yoy",
+    "label": "CPI y/y",
+    "value": 3.35,
+    "op": ">",
+    "threshold": 2.5,
+    "clear_by": 0.85,
+    "ok": true
+   },
+   {
+    "key": "dd",
+    "label": "Drawdown",
+    "value": -0.15,
+    "op": ">",
+    "threshold": -12,
+    "clear_by": 11.85,
+    "ok": true
+   },
+   {
+    "key": "us02_3m",
+    "label": "2Y yield 3m change (bp)",
+    "value": 72.0,
+    "op": ">",
+    "threshold": 40,
+    "clear_by": 32.0,
+    "ok": true
+   },
+   {
+    "key": "real_3m",
+    "label": "Real 10Y 3m change (bp)",
+    "value": 69.0,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 44.0,
+    "ok": true
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI y/y falls below 2.5",
+    "now": 3.35,
+    "threshold": 2.5,
+    "distance": 0.85,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   },
+   {
+    "if": "Drawdown falls below -12",
+    "now": -0.15,
+    "threshold": -12,
+    "distance": 11.85,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   },
+   {
+    "if": "2Y yield 3m change (bp) falls below 40",
+    "now": 72.0,
+    "threshold": 40,
+    "distance": 32.0,
+    "then": "POLICY_TIGHTENING no longer qualifies"
+   }
+  ],
+  "runner_up": {
+   "regime": "ENERGY_GRIND",
+   "score": null,
+   "gates_missing": 1,
+   "needs": [
+    {
+     "label": "CPI 3m change",
+     "need": "> 0.3",
+     "now": 0.050000000000000266
+    }
+   ]
+  }
+ },
+ "screener": {
+  "n_candidates": 292,
+  "top": [
+   {
+    "ticker": "FRO",
+    "industry": "Marine shipping",
+    "trade_score": 65,
+    "atr14_pct": 3.73,
+    "mcap_B": 9.26,
+    "breakout": true,
+    "days_on_list": 58,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 93,
+    "dollar_vol_M": 202.8,
+    "stop_pct_2_5atr": 9.32
+   },
+   {
+    "ticker": "SN",
+    "industry": "Electronics/Appliances",
+    "trade_score": 63,
+    "atr14_pct": 3.26,
+    "mcap_B": 19.61,
+    "breakout": false,
+    "days_on_list": 57,
+    "profitability": "profitable",
+    "pos_vs_high": -4.5,
+    "surge": 24,
+    "dollar_vol_M": 351.3,
+    "stop_pct_2_5atr": 8.15
+   },
+   {
+    "ticker": "ECO",
+    "industry": "Marine shipping",
+    "trade_score": 62,
+    "atr14_pct": 4.38,
+    "mcap_B": 2.11,
+    "breakout": true,
+    "days_on_list": 58,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 77,
+    "dollar_vol_M": 67.5,
+    "stop_pct_2_5atr": 10.95
+   },
+   {
+    "ticker": "HAFN",
+    "industry": "Marine shipping",
+    "trade_score": 62,
+    "atr14_pct": 4.01,
+    "mcap_B": 3.74,
+    "breakout": true,
+    "days_on_list": 34,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 127,
+    "dollar_vol_M": 30.6,
+    "stop_pct_2_5atr": 10.02
+   },
+   {
+    "ticker": "NAT",
+    "industry": "Marine shipping",
+    "trade_score": 62,
+    "atr14_pct": 4.26,
+    "mcap_B": 1.31,
+    "breakout": false,
+    "days_on_list": 58,
+    "profitability": "marginal",
+    "pos_vs_high": -0.6,
+    "surge": 51,
+    "dollar_vol_M": 40.5,
+    "stop_pct_2_5atr": 10.65
+   },
+   {
+    "ticker": "PBF",
+    "industry": "Oil refining/Marketing",
+    "trade_score": 62,
+    "atr14_pct": 5.65,
+    "mcap_B": 4.65,
+    "breakout": false,
+    "days_on_list": 58,
+    "profitability": "investing",
+    "pos_vs_high": 0.0,
+    "surge": 51,
+    "dollar_vol_M": 311.2,
+    "stop_pct_2_5atr": 14.12
+   },
+   {
+    "ticker": "DHT",
+    "industry": "Marine shipping",
+    "trade_score": 61,
+    "atr14_pct": 4.06,
+    "mcap_B": 3.18,
+    "breakout": false,
+    "days_on_list": 58,
+    "profitability": "investing",
+    "pos_vs_high": 0.0,
+    "surge": 41,
+    "dollar_vol_M": 97.2,
+    "stop_pct_2_5atr": 10.15
+   },
+   {
+    "ticker": "TRMD",
+    "industry": "Marine shipping",
+    "trade_score": 61,
+    "atr14_pct": 4.09,
+    "mcap_B": 3.08,
+    "breakout": true,
+    "days_on_list": 49,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 253,
+    "dollar_vol_M": 79.3,
+    "stop_pct_2_5atr": 10.22
+   }
+  ],
+  "leaning": [],
+  "counts": {}
+ },
+ "smart_money": {
+  "quarter": "2026-06-30",
+  "accumulating": [],
+  "distributing": [],
+  "notable": [
+   {
+    "ticker": "GOOGL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 37764088383,
+    "sector": null
+   },
+   {
+    "ticker": "GE",
+    "manager": "TCI Fund (Hohn)",
+    "action": "TRIM",
+    "value_usd": 17725353519,
+    "sector": null
+   },
+   {
+    "ticker": "V",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 10462232091,
+    "sector": null
+   },
+   {
+    "ticker": "DVA",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "TRIM",
+    "value_usd": 6425268898,
+    "sector": null
+   },
+   {
+    "ticker": "SPGI",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 5735017808,
+    "sector": null
+   },
+   {
+    "ticker": "DAL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 5368591200,
+    "sector": null
+   },
+   {
+    "ticker": "IEP",
+    "manager": "Icahn Capital",
+    "action": "ADD",
+    "value_usd": 4458616003,
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 4389741007,
+    "sector": null
+   }
+  ],
+  "congress_recent": [
+   {
+    "ticker": "MSFT",
+    "member": "Michael Rulli",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-02",
+    "sector": null
+   },
+   {
+    "ticker": "WFC",
+    "member": "Michael Rulli",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-02",
+    "sector": null
+   },
+   {
+    "ticker": "GS",
+    "member": "Michael Rulli",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-02",
+    "sector": null
+   },
+   {
+    "ticker": "NFLX",
+    "member": "Cleo Fields",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-01",
+    "sector": null
+   },
+   {
+    "ticker": "AMGN",
+    "member": "David J. Taylor",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-01",
+    "sector": null
+   },
+   {
+    "ticker": "MSFT",
+    "member": "Cleo Fields",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-01",
+    "sector": null
+   },
+   {
+    "ticker": "GOOG",
+    "member": "Cleo Fields",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-01",
+    "sector": null
+   },
+   {
+    "ticker": "AAPL",
+    "member": "Cleo Fields",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-01",
+    "sector": null
+   },
+   {
+    "ticker": "HD",
+    "member": "David J. Taylor",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-01",
+    "sector": null
+   },
+   {
+    "ticker": "JPM",
+    "member": "Sheldon Whitehouse",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-10-01",
+    "sector": null
+   }
+  ],
+  "note": null,
+  "congress_status": {
+   "written": "2026-10-06",
+   "dropped_impossible_dates": 0,
+   "sources": {
+    "House Clerk PTR": {
+     "rows": 9622,
+     "last_30d": 38,
+     "newest_tx": "2026-09-28",
+     "newest_filed": "2026-10-02"
+    },
+    "OGE 278-T via Open Cabinet": {
+     "rows": 6448,
+     "last_30d": 0,
+     "newest_tx": "2026-06-24",
+     "newest_filed": "2026-08-12"
+    },
+    "Senate eFD": {
+     "rows": 998,
+     "last_30d": 0,
+     "newest_tx": "2026-09-04",
+     "newest_filed": "2026-10-01"
+    }
+   },
+   "quiet": [
+    "OGE 278-T via Open Cabinet",
+    "Senate eFD"
+   ]
+  }
+ },
+ "portfolio": {
+  "open": [
+   {
+    "ticker": "GOOG",
+    "entry": 325.86,
+    "stop": 305.67,
+    "last": null,
+    "R": null,
+    "managed": true,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "AAPL",
+    "entry": 321.97,
+    "stop": 301.26,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "PLTR",
+    "entry": 184.45,
+    "stop": 164.45,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "AAPL",
+    "entry": 321.96,
+    "stop": 301.99,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "OKTA",
+    "entry": 182.82,
+    "stop": 182.82,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "OKTA",
+    "entry": 182.73,
+    "stop": 162.61,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   }
+  ],
+  "heat_R": 5.05,
+  "cap_R": 3.0,
+  "unsized": 0,
+  "note": null,
+  "over_cap": true
+ },
+ "news": {
+  "date": "2026-10-05",
+  "asof": "2026-10-06 11:46 UTC",
+  "headline": "The Nasdaq closed at a record and the long end made a 52-week high \u2014 off the same report",
+  "standfirst": "ISM services came in at 54.9 against 55.0 expected, but its prices index rose 1.4 points to 74.0 against 72.9 expected \u2014 a second month above 72 \u2014 while employment fell to 50.1. The two ends of the curve each took a side: the two-year fell to 4.823% while the ten-year rose 3.8 basis points to 5.315% and the thirty-year 4.0 to 5.670%, both fresh 52-week highs, with the ten-year touching 5.35% intraday. That is the fourth steepening in five sessions. Equities went the other way entirely: the Nasdaq closed at a record 27,477.31, up 1.05%, and the S&P is 0.3% from its all-time high, lifted by two AI-pitched buyouts \u2014 Schneider Electric for PTC at $22.6bn and C.H. Robinson for RXO. In the book GOOG rose 1.02% to 343.83, its best close since entry, and OKTA rose 3.22% to 218.29 on another 52-week high with no news at all, reaching +1.77R. Heat 3.05R against 3.0R, unchanged for an eighteenth session.",
+  "themes": [
+   {
+    "kicker": "What's next",
+    "right": "CPI on the 13th \u00b7 then 28 October",
+    "title": "One print before the Fed, and nothing from the companies until the 28th",
+    "items": [
+     {
+      "tone": "c-cb",
+      "tag": "CPI",
+      "html": "<b>September CPI</b> \u2014 the only first-tier print before the Fed, and now the test of two rising ISM prices indices",
+      "when": "Tue \u00b7 2026-10-13",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-fomc",
+      "tag": "FOMC",
+      "html": "<b>Fed decision</b> \u2014 October hike odds collapsed to 16%; the long end has made new highs since",
+      "when": "Wed \u00b7 2026-10-28",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "GOOG",
+      "html": "<b>Alphabet Q3 earnings</b> \u2014 the first read on $195-205bn of capex and on Suncatcher, the same day as the Fed",
+      "when": "Wed \u00b7 2026-10-28",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "AAPL",
+      "html": "<b>Apple Q4 earnings</b> \u2014 the first iPhone 18 quarter and the first read on Ternus",
+      "when": "Thu \u00b7 2026-10-29",
+      "kind": "calendar"
+     }
+    ],
+    "note": "<b>September CPI on the 13th is the one thing that can settle this week's argument.</b> Two ISM prices indices have accelerated inside three sessions while core PCE missed to the downside. CPI is the referee. A hot print validates the long end and the <b>5.670% thirty-year</b> stops looking like a supply story and starts looking like an inflation one; a soft print leaves the long end rising on nothing identifiable, which is the harder version of the problem because there is no release to trade against it."
+   }
+  ],
+  "ondeck": "<b>September CPI on the 13th is the one thing that can settle this week's argument.</b> Two ISM prices indices have accelerated inside three sessions while core PCE missed to the downside. CPI is the referee. A hot print validates the long end and the <b>5.670% thirty-year</b> stops looking like a supply story and starts looking like an inflation one; a soft print leaves the long end rising on nothing identifiable, which is the harder version of the problem because there is no release to trade against it.",
+  "note": null
+ },
+ "provenance": {
+  "macro": {
+   "asof": "2026-10-06 11:46 UTC",
+   "age_min": null
+  },
+  "gex": {
+   "asof": "2026-10-06 11:46 UTC",
+   "age_min": null
+  },
+  "stocks": {
+   "asof": "2026-10-06 12:07 UTC",
+   "age_min": null
+  },
+  "institutional_holdings": {
+   "asof": "2026-10-06 12:16 UTC",
+   "quarter": "2026-06-30"
+  },
+  "congress_trades": {
+   "asof": "2026-10-06 12:14 UTC",
+   "status": {
+    "written": "2026-10-06",
+    "dropped_impossible_dates": 0,
+    "sources": {
+     "House Clerk PTR": {
+      "rows": 9622,
+      "last_30d": 38,
+      "newest_tx": "2026-09-28",
+      "newest_filed": "2026-10-02"
+     },
+     "OGE 278-T via Open Cabinet": {
+      "rows": 6448,
+      "last_30d": 0,
+      "newest_tx": "2026-06-24",
+      "newest_filed": "2026-08-12"
+     },
+     "Senate eFD": {
+      "rows": 998,
+      "last_30d": 0,
+      "newest_tx": "2026-09-04",
+      "newest_filed": "2026-10-01"
+     }
+    },
+    "quiet": [
+     "OGE 278-T via Open Cabinet",
+     "Senate eFD"
+    ]
+   }
+  },
+  "wire": {
+   "asof": "2026-10-06 11:46 UTC"
+  }
+ },
+ "missing": [],
+ "changed": {
+  "first_pack": false,
+  "prev_date": "2026-10-02",
+  "changes": [
+   {
+    "kind": "gex",
+    "what": "index gamma",
+    "was": "negative",
+    "now": "positive",
+    "why": "dealers switch between dampening and amplifying moves"
+   },
+   {
+    "kind": "screener",
+    "what": "new in the top setups",
+    "was": null,
+    "now": "SN",
+    "why": "names the engine ranked highest that were not there yesterday"
+   }
+  ]
+ }
+}
