@@ -10542,6 +10542,108 @@ def _mme_row(tk, g, em1, stale_days):
             "pct_to_support": (round((support / spot - 1) * 100, 1) if support else None)}
 
 
+def _stock_grid(spot):
+    """Round strikes a wall can sit on, the way the listed chains are spaced."""
+    if spot < 25:  return 0.5
+    if spot < 100: return 1.0
+    if spot < 250: return 2.5
+    if spot < 1000: return 5.0
+    return 10.0
+
+
+def _mme_compute_from_chains(ch):
+    """Every name in mme_chains.json through the MME method — the same functions as SPX."""
+    import math
+    from datetime import datetime, timezone
+    try:
+        scrape = datetime.strptime(str(ch.get("close_of") or ch.get("date"))[:10], "%Y-%m-%d").date()
+    except Exception:
+        scrape = datetime.now(timezone.utc).date()
+    out = {}
+    for tk, v in (ch.get("names") or {}).items():
+        spot = v.get("spot")
+        if not spot:
+            continue
+        contracts = []
+        for r in (v.get("rows") or []):
+            try:
+                contracts.append({"expiry": datetime.strptime(r[0], "%Y-%m-%d").date(), "cp": r[1], "K": float(r[2]),
+                                  "oi": float(r[3]), "iv": float(r[4]), "gamma_vendor": float(r[5])})
+            except Exception:
+                continue
+        if len(contracts) < 20:
+            continue
+        try:
+            flip, net_B, meta = mme_flip_net(contracts, spot, scrape)
+            walls = mme_walls(contracts, spot, grid=_stock_grid(spot), prox_pct=0.15)
+        except Exception as e:
+            print(f"[mmemap] {tk}: compute failed ({e})"); continue
+        # expected move: ATM IV of the nearest expiry with >= 3 business days
+        em = None
+        exps = sorted({c["expiry"] for c in contracts})
+        for e in exps:
+            if _mme_busdays(scrape, e) >= 3:
+                near = [c for c in contracts if c["expiry"] == e and c["iv"] > 0]
+                if near:
+                    atm = min(near, key=lambda c: abs(c["K"] - spot))
+                    em = spot * atm["iv"] * math.sqrt(1 / 252.0)
+                break
+        # roll-off: dollar gamma dated to the next Friday and the next monthly
+        def dgex(c): return c["gamma_vendor"] * c["oi"] * 100 * spot * spot * 0.01 * (1 if c["cp"] == "C" else -1)
+        fri = next((e for e in exps if e.weekday() == 4), None)
+        opex = next((e for e in exps if e.weekday() == 4 and 15 <= e.day <= 21), None)
+        roll_f = sum(dgex(c) for c in contracts if c["expiry"] == fri) / 1e9 if fri else None
+        roll_o = sum(dgex(c) for c in contracts if c["expiry"] == opex) / 1e9 if opex else None
+        out[tk] = {"spot": spot, "flip": flip, "net_gex_B": net_B, "em": em,
+                   "resist": walls.get("call_wall"), "support": walls.get("put_wall"),
+                   "resist_tiered": [x.get("strike") if isinstance(x, dict) else x for x in (walls.get("call_tiered") or [])][:3],
+                   "support_tiered": [x.get("strike") if isinstance(x, dict) else x for x in (walls.get("put_tiered") or [])][:3],
+                   "rolloff_friday_B": round(roll_f, 3) if roll_f is not None else None,
+                   "rolloff_opex_B": round(roll_o, 3) if roll_o is not None else None,
+                   "profile": walls.get("profile"), "contracts": len(contracts),
+                   "iv_skipped": (meta or {}).get("iv_skipped")}
+    return out
+
+
+def _mme_read(r):
+    """Elliott's read, written from the levels. Rules, not judgement — the same shape he uses."""
+    tk, spot, flip, em = r["ticker"], r["spot"], r.get("flip"), r.get("em") or (r["spot"] * 0.015)
+    sup, res, st, dist = r.get("support"), r.get("resist"), r.get("status") or "", r.get("dist_flip_em") or 0
+    f = lambda v: f"{v:,.2f}" if v is not None else "\u2014"
+    g = lambda v: f"{v:,.0f}" if v is not None and abs(v - round(v)) < 1e-6 else f(v)
+    if flip is None:
+        return f"{tk} closed ${f(spot)}. No flip inside \u00b120% \u2014 the chain is one-sided, so the hedging has a single lean across the whole range."
+    if st == "ON FLIP":
+        side = "above" if spot >= flip else "below"
+        return (f"{tk} closed ${f(spot)}. Its flip sits at ${f(flip)}, so spot is {abs(spot/flip-1)*100:.1f}% {side} the line where net dealer gamma crosses zero. "
+                f"With spot on that line the hedging has little lean, so a small move should decide which side holds. "
+                f"On its flip, a fraction of a normal move decides which regime {tk} trades in.")
+    if st in ("AT WALL", "NEARING WALL") and r.get("level") is not None:
+        L = r["level"]; is_call = (res is not None and abs(L - res) < 1e-9)
+        if dist >= 0 and is_call:
+            lead = (f"{tk} closed ${f(spot)}, pressing its {g(L)} wall from just below" if st == "AT WALL" else
+                    f"{tk} closed ${f(spot)}, within a normal session\u2019s move of its {g(L)} wall, about {abs(L-spot)/em:.1f} expected moves below it ({(L/spot-1)*100:.1f}% higher)")
+            tail = (f", where gamma concentrates and dealers sell into strength. On a hold above {g(L)}, the same dealers buy pullbacks back toward it, so the wall should firm up as support from above. "
+                    f"Its flip sits ${spot-flip:,.2f} lower at ${f(flip)}, so this is a wall test, not a flip story." if st == "AT WALL" else
+                    f", where gamma concentrates and dealers sell into strength. It is not being pressed yet. Its flip sits ${spot-flip:,.2f} lower at ${f(flip)}, so the wall is the level in play.")
+            return lead + tail
+        if dist >= 0:
+            return (f"{tk} closed ${f(spot)}, {abs(spot-L)/em:.1f} expected moves above its {g(L)} wall, where dealers buy into weakness, so it tends to support. "
+                    f"Its flip sits ${f(flip)}, {dist:.1f} moves below.")
+        return (f"{tk} closed ${f(spot)}, {'pressing' if st=='AT WALL' else 'near'} its {g(L)} wall from {'below' if L > spot else 'above'}. This wall sits below the flip in negative gamma, "
+                f"so it is a potential high-energy level, not {'resistance' if L > spot else 'support'}: a push through can run to the next shelf, and it is also where price can reverse sharply. "
+                f"Its flip sits ${abs(flip-spot):,.2f} higher at ${f(flip)}.")
+    if dist >= 0:
+        return (f"{tk} closed ${f(spot)}. It sits {dist:.1f} expected moves above its flip at ${f(flip)}. In positive gamma, dealers sell into strength and buy into weakness, "
+                f"so a tighter, more orderly range is the base case. Support at the {g(sup)} wall, resistance at the {g(res)} wall." if sup is not None and res is not None else
+                f"{tk} closed ${f(spot)}. It sits {dist:.1f} expected moves above its flip at ${f(flip)}. In positive gamma, a tighter, more orderly range is the base case.")
+    return (f"{tk} closed ${f(spot)}. It sits {abs(dist):.1f} expected moves below its flip at ${f(flip)}. In negative gamma, dealers sell into weakness and buy into strength, "
+            f"with less stable price action implied and moves more likely to run."
+            + (f" A potential high-energy level at the {g(sup)} wall below the flip, not support" if sup is not None else "")
+            + ((f"; resistance at the {g(res)} wall." if res > flip else f"; the {g(res)} wall is also below the flip, high-energy rather than resistance.")
+               if res is not None else "."))
+
+
 def _mme_uploaded():
     """
     One file, uploaded by hand to wire/: mme_map.json (or mme_map_YYYY-MM-DD.json). Accepts
@@ -10629,6 +10731,33 @@ def run_mme_map():
         except Exception:
             up_fresh = False
     rows = {r["ticker"]: r for r in (up_rows or [])} if up_fresh else {}
+    # PRIMARY: compute every name ourselves from the CBOE chains fetched this run (Elliott's method).
+    computed, chains_date = {}, None
+    try:
+        ch = json.load(open(os.path.join(OUTPUTS_DIR, "mme_chains.json")))
+        chains_date = ch.get("close_of") or ch.get("date")
+        computed = _mme_compute_from_chains(ch)
+    except Exception as e:
+        print(f"[mmemap] no chain file to compute from ({e})")
+    use_upload = bool(rows) and up_meta and chains_date and str(up_meta.get("date")) > str(chains_date)
+    if computed and not use_upload:
+        rows = {}
+        for tk, c in computed.items():
+            em = c["em"] or c["spot"] * 0.015
+            g = {"spot": c["spot"], "asof": chains_date,
+                 "overview": {"gamma_flip": c["flip"], "net_gex_B": c["net_gex_B"]},
+                 "levels": {"put_wall": {"strike": c["support"]}, "call_wall": {"strike": c["resist"]}}}
+            r = _mme_row(tk, g, em, 0) if c["flip"] else {
+                "ticker": tk, "spot": round(c["spot"], 2), "support": c["support"], "flip": None, "resist": c["resist"],
+                "em": round(em, 2), "dist_flip_em": 99.0, "regime": "green", "status": "", "level": None, "stale_days": 0}
+            r.update({"src": "phoenix", "em_src": "atm_iv" if c["em"] else "1.5% stand-in", "net_gex_B": c["net_gex_B"],
+                      "support_tiered": c["support_tiered"], "resist_tiered": c["resist_tiered"],
+                      "rolloff_friday_B": c["rolloff_friday_B"], "rolloff_opex_B": c["rolloff_opex_B"],
+                      "contracts": c["contracts"], "profile": c["profile"]})
+            r["read"] = _mme_read(r)
+            rows[tk] = r
+        up_fresh = False                        # the computation is the source; say so below
+        print(f"[mmemap] computed {len(rows)} names from the {chains_date} chains")
     if up_rows and not up_fresh:
         print(f"[mmemap] uploaded file is dated {up_meta.get('date')} — older than 3 days, not used")
     for tk in (up_rows and up_fresh and [r["ticker"] for r in up_rows] or []):
@@ -10664,8 +10793,12 @@ def run_mme_map():
     stale_n = sum(1 for r in out if (r.get("stale_days") or 0) > 2)
     n_up = sum(1 for r in out if r.get("src") == "upload")
     write_json("mme_map", {
-        "asof": _now(), "date": (up_meta or {}).get("date") if up_fresh else str(today),
-        "source": ((up_meta or {}).get("source") if up_fresh else None) or "Phoenix per-ticker dealer reads (CBOE chain)",
+        "asof": _now(), "date": (up_meta or {}).get("date") if up_fresh else (chains_date or str(today)),
+        "source": ((up_meta or {}).get("source") if up_fresh else None) or (
+            f"Phoenix, computed on the {chains_date} chain: CBOE delayed, all expiries to 180d, strikes within \u00b115%, "
+            "business-day T/262, sticky-strike BS gamma, dealers long calls / short puts, 120-pt 0.8-1.2x flip sweep, "
+            "walls = closest round strike at >=25% of side max (vendor gamma), EM from ATM IV of nearest expiry >=3bd"
+            if computed else "Phoenix per-ticker dealer reads (CBOE chain)"),
         "source_file": (up_meta or {}).get("path") if up_fresh else None,
         "from_upload": n_up, "from_phoenix": len(out) - n_up,
         "read": (up_meta or {}).get("read") if up_fresh else None,
@@ -11108,7 +11241,7 @@ def mme_flip_net(contracts, spot, scrape_date):
                                    "expiries": len(tcache)}
 
 
-def mme_walls(contracts, spot):
+def mme_walls(contracts, spot, grid=50.0, prox_pct=0.05):
     """
     PATH 2. Vendor gamma, scaled at spot only. Per-strike aggregation across
     all surviving expiries; bands off spot; strike%50==0; the TOP-1 wall is
@@ -11128,10 +11261,10 @@ def mme_walls(contracts, spot):
             a["put_gex"] += -d               # explicit -1: negative by construction
             a["put_oi"] += c["oi"]
 
-    margin, prox = spot * 0.0025, spot * 0.05
+    margin, prox = spot * 0.0025, spot * prox_pct
 
-    def is50(k):
-        return abs(k - round(k / 50.0) * 50.0) < 1e-6
+    def is50(k):                                  # the strike grid: 50 for SPX, the listed round strikes for a stock
+        return abs(k - round(k / grid) * grid) < 1e-6
 
     def side(kind):
         if kind == "put":

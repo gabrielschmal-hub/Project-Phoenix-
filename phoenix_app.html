@@ -1024,6 +1024,35 @@
   .pxaccts[hidden]{display:none!important}   /* the profile popover is the one control; the chips only hold state */
   .hero-who{margin-top:14px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--inkFade)} .hero-who a{color:var(--gold)}
   .tb-auth{display:block!important;margin-left:6px}
+  .mme-lede{border-left:3px solid var(--gold);padding:10px 14px;margin:4px 0 16px;background:var(--card2);border-radius:0 10px 10px 0}
+  .mme-lede .h{font-size:17px;font-weight:700;line-height:1.35} .mme-lede .s{font-size:14px;color:var(--inkFade);margin-top:6px;line-height:1.5}
+  .mme-sk{font-family:var(--mono);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink);font-weight:700;margin:20px 0 10px}
+  .mme-sk span{color:var(--inkFade);font-weight:400;letter-spacing:.04em;text-transform:none}
+  .mme-map{display:flex;flex-direction:column;gap:2px}
+  .mme-row{display:grid;grid-template-columns:62px 1fr 92px;align-items:center;gap:10px;padding:12px 8px 20px;border-radius:9px;cursor:pointer;border-left:4px solid var(--line2)}
+  .mme-row:hover{background:var(--card2)} .mme-row.sel{background:var(--card2);outline:1px solid var(--gold)}
+  .mme-row.reg-green{border-left-color:#2fae66} .mme-row.reg-amber{border-left-color:#d79a2b} .mme-row.reg-red{border-left-color:#d0574a}
+  .mme-row .tk{font-weight:800;font-size:16px;letter-spacing:.02em} .mme-row .tk:hover,.mme-tbl .tk:hover,.gh .tk:hover{color:var(--gold);text-decoration:underline}
+  .mme-row .st{font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--amber);text-align:right;font-weight:700}
+  .mme-row .track{position:relative;height:6px;background:var(--line2);border-radius:3px}
+  .mme-row .m{position:absolute;top:-5px;width:3px;height:16px;border-radius:2px;transform:translateX(-50%)}
+  .mme-row .m b,.mme-row .spot b{position:absolute;top:18px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:10.5px;font-weight:600;white-space:nowrap}
+  .mme-row .m.sup{background:#2fae66} .mme-row .m.sup b{color:#2fae66} .mme-row .m.res{background:#d0574a} .mme-row .m.res b{color:#d0574a}
+  .mme-row .m.flip{background:#e3c13a} .mme-row .m.flip b{color:#e3c13a;top:-17px}
+  .mme-row .spot{position:absolute;top:-6px;width:18px;height:18px;border-radius:50%;background:#4aa3df;border:3px solid var(--card);transform:translateX(-50%)}
+  .mme-row .spot b{color:#4aa3df;top:-19px}
+  .mme-graph{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}
+  .mme-graph .gh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;background:var(--card2)} .mme-graph .gh .tk{font-size:20px;font-weight:800;cursor:pointer}
+  .mme-graph .gh .st{margin-left:auto;font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--amber);font-weight:700}
+  .mme-plot{min-height:300px;padding:4px 6px}
+  .mm-note{padding:12px 14px;font-size:14.5px;line-height:1.6;border-top:1px solid var(--line)} .mm-note b{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-right:6px}
+  .mm-note.dim{color:var(--inkFade);font-size:12.5px} .mm-read{font-size:12.5px}
+  .mme-q{width:100%;box-sizing:border-box;font-size:16px;padding:11px 14px;border-radius:10px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:var(--mono);margin-bottom:8px}
+  .mme-tbl{overflow-x:auto;font-family:var(--mono);font-size:13px}
+  .mme-tbl .hd,.mme-tbl .r{display:grid;grid-template-columns:68px repeat(7,1fr);gap:8px;padding:10px 8px;min-width:640px;border-bottom:1px solid var(--line2);align-items:center}
+  .mme-tbl .hd{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--inkFade)} .mme-tbl .r{cursor:pointer;border-left:3px solid var(--line2)} .mme-tbl .r:hover{background:var(--card2)}
+  .mme-tbl .r.reg-green{border-left-color:#2fae66} .mme-tbl .r.reg-amber{border-left-color:#d79a2b} .mme-tbl .r.reg-red{border-left-color:#d0574a}
+  .mme-tbl .tk{font-weight:800;font-size:14px;cursor:pointer} .mme-tbl .f{color:var(--gold)} .mme-tbl .neg{color:var(--red)} .mme-tbl .st{color:var(--amber);font-size:11px;letter-spacing:.04em}
   .mm-cards{display:grid;grid-template-columns:1fr;gap:12px} @media(min-width:1100px){.mm-cards{grid-template-columns:1fr 1fr}}
   .mm-card{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden;border-top:3px solid var(--line2)}
   .mm-card.reg-green{border-top-color:var(--green)} .mm-card.reg-amber{border-top-color:var(--amber)} .mm-card.reg-red{border-top-color:var(--red)}
@@ -10419,93 +10448,139 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     return '<div class="ed-sec mcb-plate" id="mcNamesPlate"><div class="ed-k"><span>The names</span>'+
       '<span class="ed-n" id="mcNamesNote">loading\u2026</span></div><div id="mcNamesBody"></div></div>';
   }
+  function mmeOpen(tk){ try{ dpReturnTo="mission"; }catch(e){} go("trades"); setTimeout(function(){ trOpenTicker(tk); }, 60); }
+  var MME_SEL=null, MME_Q="", MME_TIMER=null, MME_LIVE={}, MME_LIVE_AT=null, MME_CHAINS=null, MME_WIRE=null;
+  function mmeLive(tks){
+    // spot moves every few minutes; the walls and the flip come from the morning's chain and do not
+    var list=encodeURIComponent(tks.join(","));
+    return Promise.all([
+      supaRows("/rest/v1/prices_live?select=ticker,last,updated_at&ticker=in.("+list+")").catch(function(){ return []; }),
+      supaRows("/rest/v1/prices_universe?select=ticker,last,updated_at&ticker=in.("+list+")").catch(function(){ return []; })
+    ]).then(function(r){
+      var out={}, newest=null;
+      (r[1]||[]).concat(r[0]||[]).forEach(function(x){ if(x&&x.last){ out[x.ticker]={last:+x.last,at:x.updated_at}; if(!newest||x.updated_at>newest) newest=x.updated_at; } });
+      MME_LIVE=out; MME_LIVE_AT=newest; return out;
+    });
+  }
+  function mmeRelive(r){
+    // re-place a row at the live spot: distance to the flip, regime and status move; levels do not
+    var L=MME_LIVE[r.ticker]; if(!L||!r.flip||!r.em) return r;
+    var spot=L.last, em=r.em, dist=(spot-r.flip)/em, x=Object.assign({},r,{spot:spot,dist_flip_em:Math.round(dist*10)/10,live:true});
+    x.regime=dist<0?"red":(dist<1?"amber":"green");
+    var st="", lv=null;
+    [r.resist,r.support].forEach(function(l){ if(!st&&l!=null&&Math.abs(spot-l)/em<=0.25){ st="AT WALL"; lv=l; } });
+    if(!st) [r.resist,r.support].forEach(function(l){ if(!st&&l!=null&&Math.abs(spot-l)/em<=1){ st="NEARING WALL"; lv=l; } });
+    if(Math.abs(dist)<=0.15){ st="ON FLIP"; lv=r.flip; } else if(!st&&Math.abs(dist)<1){ st="NEAR FLIP"; lv=r.flip; }
+    x.status=st; x.level=lv; return x;
+  }
   function mcbNamesFill(){
     var body=document.getElementById("mcNamesBody"), note=document.getElementById("mcNamesNote"); if(!body) return;
+    var rdHost=document.getElementById("mcNamesRead"); if(rdHost) rdHost.innerHTML="";
     getJSON("mme_map").then(function(d){
       MME_MAP=d||{};
-      var g=d.groups||{}, st=d.standouts||[];
-      if(!d.covered){ note.textContent="no dealer reads on file"; body.innerHTML='<div class="ed-note">No per-ticker dealer read is on file yet \u2014 the GEX lane has not written any names. Nothing to map.</div>'; return; }
-      note.textContent=d.date+" \u00b7 "+d.covered+"/"+d.universe+" names"+(d.from_upload?" \u00b7 "+d.from_upload+" from "+(d.source_file||"upload"):"")+(d.stale?" \u00b7 "+d.stale+" stale":"")+(d.missing&&d.missing.length?" \u00b7 missing "+d.missing.join(", "):"");
-      // the written read travels inside the same file
-      var rd=d.read||null, rdHost=document.getElementById("mcNamesRead");
-      if(rdHost){
-        if(rd && (rd.headline || (rd.rows&&rd.rows.length))){
-          function esc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
-          rdHost.innerHTML='<div class="ed-sec"><div class="ed-k"><span>The names</span><span class="ed-n">'+esc(d.source_file||"uploaded")+' \u00b7 '+esc(d.date)+'</span></div>'+
-            (rd.headline?'<h2 class="ed-hl">'+esc(rd.headline)+'</h2>':'')+
-            '<div class="ed-w-list">'+(rd.rows||[]).map(function(x,i){
-              var tk=(x.ticker||"").toUpperCase();
-              return '<div class="ed-w"><span class="w-tag'+(x.warn?' warn':'')+'">'+(x.tag||(i+1))+'</span><span>'+(tk?'<b data-tk="'+tk+'" style="cursor:pointer">'+tk+'</b> ':'')+esc(x.text).replace(/\n/g,"<br>")+'</span></div>'; }).join("")+'</div>'+
-            (rd.summary?'<p class="ed-body">'+esc(rd.summary)+'</p>':'')+'</div>';
-          rdHost.querySelectorAll("[data-tk]").forEach(function(el){ el.onclick=function(){ if(typeof dpOpen==="function") dpOpen(el.dataset.tk); }; });
-        } else rdHost.innerHTML="";
-      }
-      var srcLine=d.source?'<div class="ed-note" style="margin-bottom:8px">Levels: '+String(d.source).replace(/</g,"&lt;")+(d.dropped&&d.dropped.length?' \u00b7 dropped '+d.dropped.join(", ")+' (no spot or flip in the file)':'')+'</div>':'';
-      function pr(v){ return v==null?"\u2014":(+v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
-      function lvl(v){ return v==null?"\u2014":(+v).toLocaleString(undefined,{maximumFractionDigits:2}); }
-      function chip(r){
-        var cls=r.status==="ON FLIP"||r.status==="NEAR FLIP"?"flip":(r.status==="AT WALL"?"wall":"near");
-        var where=r.status.indexOf("FLIP")>=0?"flip "+lvl(r.flip):((r.level===r.resist?"call wall ":"put wall ")+lvl(r.level));
-        return '<span class="nm-chip '+cls+' reg-'+r.regime+'" data-tk="'+r.ticker+'"><b>'+r.ticker+'</b> '+r.status.toLowerCase()+' \u00b7 '+where+'</span>';
-      }
-      var h=srcLine;
-      if(st.length){
-        h+='<div class="nm-stand"><div class="nm-sk">On a level \u00b7 '+st.length+'</div><div class="nm-chips">'+st.map(chip).join("")+'</div>'+
-           '<div class="ed-note">A name at a wall in positive gamma is where dealers sell strength or buy weakness \u2014 the level tends to hold. '+
-           'On or near the flip the hedging has no lean; a normal session decides which side. Below the flip, walls give way rather than hold.</div></div>';
-      }
-      // ---- per-name cards, Elliott's layout: regime badge, stat strip, level ladder, the read ----
+      var g=d.groups||{}, base=(g.green||[]).concat(g.amber||[],g.red||[]);
+      if(!base.length){ note.textContent="no dealer levels on file"; body.innerHTML='<div class="ed-note">No map on file yet. Upload the morning file to wire/ or wait for the next run.</div>'; return; }
       var readBy={}; ((d.read&&d.read.rows)||[]).forEach(function(x){ if(x.ticker) readBy[String(x.ticker).toUpperCase()]=x; });
-      function money(v){ return v==null?"\u2014":(+v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
-      function netB(v){ if(v==null) return ""; var a=Math.abs(v); return (v>=0?"+":"\u2212")+(a>=1?"$"+a.toFixed(2)+"B":"$"+Math.round(a*1000)+"M"); }
-      function ladder(r){
-        var above=r.dist_flip_em>=0, rows=[];
-        if(r.resist!=null) rows.push({px:r.resist, tag:(r.status==="AT WALL"&&r.level===r.resist)?"AT WALL":(r.status==="NEARING WALL"&&r.level===r.resist)?"NEARING WALL":(above?"RESISTANCE":"HIGH-ENERGY"),
-          cls:above?"res":"hot", txt:above?"call gamma concentrates here, where dealers sell into strength as price rises into it, so it tends to resist":"below the flip: dealers buy into strength here, a potential high-energy level that can run to the next shelf or snap back, not resistance"});
-        rows.push({px:r.flip, tag:"THE FLIP", cls:"flip", txt:'<span class="g">positive gamma</span> above this level, <span class="r">negative gamma</span> below'});
-        rows.push({px:r.spot, tag:"SPOT \u00b7 LAST", cls:"spot", txt:""});
-        if(r.support!=null) rows.push({px:r.support, tag:(r.status==="AT WALL"&&r.level===r.support)?"AT WALL":(r.status==="NEARING WALL"&&r.level===r.support)?"NEARING WALL":(above?"SUPPORT":"HIGH-ENERGY"),
-          cls:above?"sup":"hot", txt:above?"put gamma concentrates here, where dealers buy into weakness as price falls into it, so it tends to support":"below the flip: dealers sell into weakness here, a potential high-energy level that can slide to the next shelf or snap back, not support"});
-        rows.sort(function(a,b){ return b.px-a.px; });
-        return '<div class="mm-ladder">'+rows.map(function(x){
-          return '<div class="mm-lv '+x.cls+'"><span class="px">'+money(x.px)+'</span><span class="tg">'+x.tag+'</span><span class="tx">'+x.txt+'</span></div>'; }).join("")+'</div>';
+      function esc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+      function n2(v){ return v==null?"\u2014":(+v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+      function lv(v){ return v==null?"\u2014":(+v).toLocaleString(undefined,{maximumFractionDigits:2}); }
+      var lede=(MME_WIRE&&(MME_WIRE.title||MME_WIRE.note))?{headline:MME_WIRE.title,summary:MME_WIRE.note}:(d.read||null);
+      var notesBy={}; ((MME_WIRE&&MME_WIRE.items)||[]).forEach(function(it){
+        var tk=(it.ticker||(String(it.html||"").match(/<b>([A-Z][A-Z0-9.\-]{0,6})<\/b>/)||[])[1]||"").toUpperCase();
+        if(tk) notesBy[tk]=String(it.html||"").replace(/^\s*<b>[^<]*<\/b>\s*/,""); });
+      body.innerHTML=
+        (lede&&(lede.headline||lede.summary)?'<div class="mme-lede">'+(lede.headline?'<div class="h">'+esc(lede.headline)+'</div>':'')+(lede.summary?'<div class="s">'+esc(lede.summary)+'</div>':'')+'</div>':'')+
+        '<div class="mme-sk">The map <span id="mmeLiveNote"></span></div><div class="mme-map" id="mmeMap"></div>'+
+        '<div class="mme-sk">The graph <span id="mmeGraphNote"></span></div><div class="mme-graph"><div id="mmeGraphHd"></div><div id="mmePlot" class="mme-plot"></div><div id="mmeGraphRead"></div></div>'+
+        '<div class="mme-sk">Every name</div><input id="mmeQ" class="mme-q" placeholder="Search ticker\u2026" autocomplete="off" autocapitalize="characters" value="'+esc(MME_Q)+'">'+
+        '<div class="mme-tbl" id="mmeTbl"></div>'+
+        '<div class="ed-note" style="margin-top:10px">Levels: '+esc(d.source||"\u2014")+' \u00b7 '+esc(d.date||"")+'. Spot refreshes every 5 minutes; walls and the flip come from the morning chain and change once a day.</div>';
+      note.textContent=(d.date||"")+" \u00b7 "+base.length+" names";
+      function rows(){ return base.map(mmeRelive).sort(function(a,b){ return b.dist_flip_em-a.dist_flip_em; }); }
+      function paintMap(){
+        var rs=rows(), host=document.getElementById("mmeMap"); if(!host) return;
+        host.innerHTML=rs.map(function(r){
+          var lo=Math.min(r.support!=null?r.support:r.spot, r.flip, r.spot), hi=Math.max(r.resist!=null?r.resist:r.spot, r.flip, r.spot), span=(hi-lo)||1;
+          lo-=span*0.06; hi+=span*0.06; span=hi-lo;
+          function pos(v){ return Math.max(0,Math.min(100,(v-lo)/span*100)).toFixed(1)+"%"; }
+          return '<div class="mme-row reg-'+r.regime+(MME_SEL===r.ticker?' sel':'')+'" data-sel="'+r.ticker+'">'+
+            '<span class="tk" data-open="'+r.ticker+'">'+r.ticker+'</span>'+
+            '<div class="track">'+
+              (r.support!=null?'<i class="m sup" style="left:'+pos(r.support)+'"><b>'+lv(r.support)+'</b></i>':'')+
+              '<i class="m flip" style="left:'+pos(r.flip)+'"><b>'+lv(r.flip)+'</b></i>'+
+              (r.resist!=null?'<i class="m res" style="left:'+pos(r.resist)+'"><b>'+lv(r.resist)+'</b></i>':'')+
+              '<i class="spot" style="left:'+pos(r.spot)+'"><b>'+n2(r.spot)+'</b></i>'+
+            '</div>'+
+            '<span class="st">'+(r.status?r.status.replace("NEARING ","NEAR "):"")+'</span></div>';
+        }).join("");
+        var ln=document.getElementById("mmeLiveNote");
+        if(ln) ln.textContent=MME_LIVE_AT?"\u00b7 spot live "+new Date(MME_LIVE_AT).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):"\u00b7 spot from the file";
+        host.querySelectorAll("[data-sel]").forEach(function(el){ el.onclick=function(e){
+          if(e.target.closest("[data-open]")){ mmeOpen(e.target.closest("[data-open]").dataset.open); return; }
+          MME_SEL=el.dataset.sel; paintMap(); paintGraph(); }; });
       }
-      function card(r){
-        var em=r.em||0, toWall=r.level!=null&&r.status.indexOf("WALL")>=0?Math.abs(r.spot-r.level)/em:(r.resist!=null?Math.abs(r.resist-r.spot)/em:null);
-        var rd=readBy[r.ticker];
-        return '<div class="mm-card reg-'+r.regime+'" data-tk="'+r.ticker+'">'+
-          '<div class="mm-h"><b class="t">'+r.ticker+'</b><span class="mm-badge '+r.regime+'">'+(r.regime==="red"?"NEGATIVE":"POSITIVE")+' GAMMA'+(r.net_gex_B!=null?' \u00b7 '+netB(r.net_gex_B):'')+'</span>'+
-            (r.status?'<span class="mm-st">'+r.status+(r.level!=null&&r.status.indexOf("WALL")>=0?' '+money(r.level):'')+'</span>':'')+(r.src==="phoenix"?'<span class="mm-src">phoenix read</span>':'')+'</div>'+
-          '<div class="mm-strip"><div><i>expected move</i><b>\u00b1'+money(em)+'</b></div><div><i>one move down</i><b>'+money(r.spot-em)+'</b></div><div><i>one move up</i><b>'+money(r.spot+em)+'</b></div>'+
-            '<div><i>to the wall</i><b>'+(toWall!=null?toWall.toFixed(1)+' EM':'\u2014')+'</b></div><div><i>to the flip</i><b>'+(r.dist_flip_em>=0?"+":"")+r.dist_flip_em+' EM</b></div></div>'+
-          ladder(r)+
-          (rd?'<div class="mm-read'+(rd.warn?' warn':'')+'"><b>The read</b> '+String(rd.text||"").replace(/</g,"&lt;")+'</div>':'')+
-        '</div>';
+      function paintTable(){
+        var rs=rows(), q=MME_Q.trim().toUpperCase(), host=document.getElementById("mmeTbl"); if(!host) return;
+        if(q) rs=rs.filter(function(r){ return r.ticker.indexOf(q)>=0; });
+        host.innerHTML='<div class="hd"><span>Name</span><span>Spot</span><span>Support</span><span>Flip</span><span>Resist</span><span>To flip</span><span>Move</span><span>Status</span></div>'+
+          (rs.length?rs.map(function(r){
+            return '<div class="r reg-'+r.regime+'" data-sel="'+r.ticker+'"><span class="tk" data-open="'+r.ticker+'">'+r.ticker+'</span><span>'+n2(r.spot)+'</span><span>'+lv(r.support)+'</span><span class="f">'+lv(r.flip)+'</span><span>'+lv(r.resist)+'</span>'+
+              '<span class="'+(r.dist_flip_em<0?"neg":"")+'">'+(r.dist_flip_em>=0?"+":"")+r.dist_flip_em+'</span><span>\u00b1'+n2(r.em)+'</span><span class="st">'+(r.status||"")+'</span></div>'; }).join(""):'<div class="ed-note">No match.</div>');
+        host.querySelectorAll("[data-sel]").forEach(function(el){ el.onclick=function(e){
+          if(e.target.closest("[data-open]")){ mmeOpen(e.target.closest("[data-open]").dataset.open); return; }
+          MME_SEL=el.dataset.sel; paintMap(); paintGraph(); document.getElementById("mmePlot").scrollIntoView({behavior:"smooth",block:"center"}); }; });
       }
-      var stKeys={}; st.forEach(function(r){ stKeys[r.ticker]=1; });
-      var held=(d.read&&d.read.rows||[]).filter(function(x){ return /\(held\)/.test(String(x.text||"")); }).map(function(x){ return String(x.ticker||"").toUpperCase(); });
-      var featured=st.slice(); (g.green||[]).concat(g.amber||[],g.red||[]).forEach(function(r){ if(held.indexOf(r.ticker)>=0 && !stKeys[r.ticker]) featured.push(r); });
-      if(featured.length){
-        h+='<div class="nm-sk" style="margin-top:14px">Featured \u00b7 on a level or held \u00b7 '+featured.length+'</div><div class="mm-cards">'+featured.map(card).join("")+'</div>';
-        var rest=(g.green||[]).concat(g.amber||[],g.red||[]).filter(function(r){ return !stKeys[r.ticker] && held.indexOf(r.ticker)<0; });
-        if(rest.length) h+='<details class="mm-more"><summary>Every other name \u00b7 '+rest.length+'</summary><div class="mm-cards">'+rest.map(card).join("")+'</div></details>';
+      function paintGraph(){
+        var rs=rows(); if(!MME_SEL){ var st=(d.standouts||[])[0]; MME_SEL=(st&&(st.ticker||st))||rs[0].ticker; }
+        var r=rs.filter(function(x){ return x.ticker===MME_SEL; })[0]; if(!r) return;
+        var hd=document.getElementById("mmeGraphHd"), rd=readBy[r.ticker];
+        hd.innerHTML='<div class="gh"><span class="tk" data-open="'+r.ticker+'">'+r.ticker+' \u2197</span><span class="mm-badge '+r.regime+'">'+(r.regime==="red"?"NEGATIVE":"POSITIVE")+' GAMMA</span>'+(r.status?'<span class="st">'+r.status+'</span>':'')+'</div>'+
+          '<div class="mm-strip"><div><i>expected move</i><b>\u00b1'+n2(r.em)+'</b></div><div><i>one move down</i><b>'+n2(r.spot-r.em)+'</b></div><div><i>one move up</i><b>'+n2(r.spot+r.em)+'</b></div><div><i>to the flip</i><b>'+(r.dist_flip_em>=0?"+":"")+r.dist_flip_em+' EM</b></div></div>';
+        hd.querySelector("[data-open]").onclick=function(){ mmeOpen(r.ticker); };
+        var levelRead=r.read||(rd&&rd.text)||"", note=notesBy[r.ticker]||"";
+        document.getElementById("mmeGraphRead").innerHTML=
+          (levelRead?'<div class="mm-read'+(r.regime==="red"||r.status==="ON FLIP"?' warn':'')+'"><b>The read</b> '+esc(levelRead)+'</div>':'')+
+          (note?'<div class="mm-note"><b>What to know</b> '+note.replace(/<(?!\/?b>)[^>]*>/g,"")+'</div>':
+                '<div class="mm-note dim"><b>What to know</b> No note for '+r.ticker+' in this morning\u2019s brief.</div>');
+        function draw(ch){
+          var el=document.getElementById("mmePlot"); if(!el||typeof Plotly==="undefined") return;
+          var css=getComputedStyle(document.documentElement), ink=css.getPropertyValue("--inkFade").trim()||"#888", line=css.getPropertyValue("--line").trim()||"#333";
+          var traces=[], shapes=[], ann=[];
+          var c=ch&&ch.names&&ch.names[r.ticker];
+          if(c&&c.rows&&c.rows.length){
+            // dollar gamma by strike at spot, dealers long calls / short puts, vendor gamma
+            var by={}, S=c.spot||r.spot;
+            c.rows.forEach(function(x){ var k=x[2], gv=x[5]*x[3]*100*S*S*0.01/1e9; by[k]=by[k]||{c:0,p:0}; if(x[1]==="C") by[k].c+=gv; else by[k].p-=gv; });
+            var ks=Object.keys(by).map(Number).sort(function(a,b){return a-b;});
+            traces.push({type:"bar",x:ks,y:ks.map(function(k){return by[k].c;}),name:"call GEX",marker:{color:"#6f8fd8"}});
+            traces.push({type:"bar",x:ks,y:ks.map(function(k){return by[k].p;}),name:"put GEX",marker:{color:"#e39b2f"}});
+            document.getElementById("mmeGraphNote").textContent="\u00b7 gamma by strike from the "+(ch.date||"")+" chain";
+          } else {
+            document.getElementById("mmeGraphNote").textContent="\u00b7 levels only (no chain file on hand)";
+            traces.push({type:"scatter",x:[r.support||r.flip,r.resist||r.flip],y:[0,0],mode:"markers",marker:{opacity:0},showlegend:false,hoverinfo:"skip"});
+          }
+          function vline(x,col,txt,dash){ if(x==null) return; shapes.push({type:"line",x0:x,x1:x,yref:"paper",y0:0,y1:1,line:{color:col,width:2,dash:dash||"solid"}});
+            ann.push({x:x,yref:"paper",y:1.02,text:txt,showarrow:false,font:{size:11,color:col},bgcolor:"rgba(0,0,0,0)"}); }
+          vline(r.flip,"#e3c13a","flip "+lv(r.flip),"dash"); vline(r.spot,"#4aa3df","spot "+n2(r.spot));
+          vline(r.support,"#2fae66","support "+lv(r.support),"dot"); vline(r.resist,"#d0574a","resist "+lv(r.resist),"dot");
+          Plotly.newPlot(el,traces,{barmode:"relative",height:300,margin:{l:40,r:10,t:26,b:30},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",
+            font:{color:ink,size:11},xaxis:{gridcolor:line,zeroline:false},yaxis:{gridcolor:line,title:{text:"$B / 1%",font:{size:10}}},showlegend:false,shapes:shapes,annotations:ann},
+            {displayModeBar:false,responsive:true});
+        }
+        if(MME_CHAINS) draw(MME_CHAINS);
+        else getJSON("mme_chains").then(function(ch){ MME_CHAINS=ch||{}; draw(MME_CHAINS); }).catch(function(){ MME_CHAINS={}; draw(null); });
       }
-      function table(key,title,cls){
-        var rows=g[key]||[]; if(!rows.length) return '';
-        return '<div class="nm-grp '+cls+'"><div class="nm-gk">'+title+' \u00b7 '+rows.length+'</div>'+
-          '<div class="nm-tbl"><div class="nm-hd"><span>name</span><span>spot</span><span>support</span><span>flip</span><span>resist</span><span>dist flip</span><span>status</span></div>'+
-          rows.map(function(r){
-            return '<div class="nm-row'+(r.status?' on':'')+(r.stale_days>2?' stale':'')+'" data-tk="'+r.ticker+'">'+
-              '<span class="t">'+r.ticker+(r.stale_days>2?'<i title="dealer read is '+r.stale_days+' days old">\u00b7'+r.stale_days+'d</i>':'')+'</span>'+
-              '<span>'+pr(r.spot)+'</span><span>'+lvl(r.support)+'</span><span class="f">'+pr(r.flip)+'</span><span>'+lvl(r.resist)+'</span>'+
-              '<span class="'+(r.dist_flip_em<0?"neg":"")+'">'+(r.dist_flip_em>=0?"+":"")+r.dist_flip_em+' EM</span>'+
-              '<span class="s">'+(r.status||"")+'</span></div>'; }).join("")+'</div></div>';
-      }
-      h+=table("green","Green \u00b7 positive gamma","g")+table("amber","Amber \u00b7 flip within one move","a")+table("red","Red \u00b7 below the flip","r");
-      h+='<div class="ed-note" style="margin-top:8px">'+(d.note||"")+' Tap a name for its chart, levels and volatility.</div>';
-      body.innerHTML=h;
-      body.querySelectorAll(".nm-chip[data-tk],.nm-row[data-tk]").forEach(function(el){ el.onclick=function(){ if(typeof dpOpen==="function") dpOpen(el.dataset.tk); }; });
-      body.querySelectorAll(".mm-card .t").forEach(function(el){ el.onclick=function(){ if(typeof dpOpen==="function") dpOpen(el.closest(".mm-card").dataset.tk); }; });
+      var q=document.getElementById("mmeQ");
+      if(q) q.oninput=function(){ MME_Q=this.value; paintTable(); };
+      paintMap(); paintTable(); paintGraph();
+      function tick(){ return mmeLive(base.map(function(r){ return r.ticker; })).then(function(){ paintMap(); paintTable(); }); }
+      tick();
+      if(MME_TIMER) clearInterval(MME_TIMER);
+      MME_TIMER=setInterval(function(){
+        var pane=document.getElementById("mcPaneMme");
+        if(!pane || pane.style.display==="none" || document.hidden) return;   // only while you are looking
+        tick();
+      }, 5*60*1000);
     }).catch(function(){ note.textContent="unavailable"; body.innerHTML='<div class="ed-note">mme_map.json could not be loaded.</div>'; });
   }
   function mcbPlateGex(){
@@ -10640,7 +10715,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       host.className="";
       // Mission Control has two sections: the Daily Brief (daily / weekly, as before) and MME —
       // the dealer map of every name against its walls and flip, with Cowork's read of it.
-      var mmeHtml='<div id="mcNamesRead"></div>'+(d.map?mcbSec(d.map,"The names"):'')+mcbPlateNames();
+      MME_WIRE=d.map||null;      // Cowork's paragraph per name rides in the morning wire
+      var mmeHtml='<div id="mcNamesRead"></div>'+mcbPlateNames();
       host.innerHTML='<div class="mc-top"><button class="mc-tab" data-pane="brief">Daily Brief</button>'+
                      '<button class="mc-tab" data-pane="mme">MME</button></div>'+
                      '<div id="mcPaneBrief">'+html+'</div><div id="mcPaneMme" style="display:none">'+mmeHtml+'</div>';
