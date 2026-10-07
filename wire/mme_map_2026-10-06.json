@@ -1,0 +1,994 @@
+{
+ "date": "2026-10-06",
+ "prev_date": null,
+ "source": "computed on the 2026-10-06 close: IBKR chain (Oct 9 weekly + Oct 16 monthly only, ~8 round strikes per side within \u00b115%, per-contract IV invalid pre-market), business-day T/262, sticky-strike BS gamma (r=0), dealers long calls/short puts, 120-pt 0.8-1.2x flip sweep, walls = closest strike within \u00b115% at >=25% of side max, EM from ATM IV of nearest expiry >=3bd; per-contract IV unavailable for 655 contracts \u2014 underlying IV used for them (and for EM where em_src=underlying_iv)",
+ "counts": {
+  "green": 17,
+  "amber": 6,
+  "red": 4
+ },
+ "regime_changes": [],
+ "names": [
+  {
+   "name": "NVDA",
+   "held": false,
+   "spot": 240.11,
+   "support": 240,
+   "flip": 229.83,
+   "resist": 250,
+   "support_tiered": [
+    230,
+    220
+   ],
+   "resist_tiered": [],
+   "em": 4.26,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 2.41,
+   "net_gex_B": 0.466,
+   "rolloff_friday_B": 0.234,
+   "rolloff_opex_B": 0.233,
+   "regime": "green",
+   "status": "AT WALL",
+   "level": 240,
+   "wall_type": "put",
+   "contracts": 16,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 16
+  },
+  {
+   "name": "META",
+   "held": false,
+   "spot": 739.7,
+   "support": 720,
+   "flip": 689.81,
+   "resist": 750,
+   "support_tiered": [
+    700
+   ],
+   "resist_tiered": [
+    775,
+    800
+   ],
+   "em": 19.92,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 2.5,
+   "net_gex_B": 0.171,
+   "rolloff_friday_B": 0.033,
+   "rolloff_opex_B": 0.138,
+   "regime": "green",
+   "status": "NEARING WALL",
+   "level": 750,
+   "wall_type": "call",
+   "contracts": 26,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 26
+  },
+  {
+   "name": "MSFT",
+   "held": false,
+   "spot": 529.5,
+   "support": 510,
+   "flip": 494.8,
+   "resist": 530,
+   "support_tiered": [
+    490
+   ],
+   "resist_tiered": [
+    550
+   ],
+   "em": 10.67,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 3.25,
+   "net_gex_B": 0.313,
+   "rolloff_friday_B": 0.072,
+   "rolloff_opex_B": 0.241,
+   "regime": "green",
+   "status": "AT WALL",
+   "level": 530,
+   "wall_type": "call",
+   "contracts": 16,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 16
+  },
+  {
+   "name": "AAPL",
+   "held": true,
+   "spot": 333.77,
+   "support": 330,
+   "flip": 318.73,
+   "resist": 340,
+   "support_tiered": [
+    320
+   ],
+   "resist_tiered": [],
+   "em": 5.53,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 2.72,
+   "net_gex_B": 0.358,
+   "rolloff_friday_B": 0.023,
+   "rolloff_opex_B": 0.335,
+   "regime": "green",
+   "status": "NEARING WALL",
+   "level": 330,
+   "wall_type": "put",
+   "contracts": 24,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 24
+  },
+  {
+   "name": "AMZN",
+   "held": false,
+   "spot": 256.63,
+   "support": 255,
+   "flip": 245.24,
+   "resist": 265,
+   "support_tiered": [
+    245,
+    235
+   ],
+   "resist_tiered": [
+    275,
+    285
+   ],
+   "em": 6.29,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 1.81,
+   "net_gex_B": 0.082,
+   "rolloff_friday_B": 0.018,
+   "rolloff_opex_B": 0.064,
+   "regime": "green",
+   "status": "NEARING WALL",
+   "level": 255,
+   "wall_type": "put",
+   "contracts": 18,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 18
+  },
+  {
+   "name": "GOOG",
+   "held": true,
+   "spot": 344.49,
+   "support": 340,
+   "flip": 342.97,
+   "resist": 350,
+   "support_tiered": [
+    330,
+    320
+   ],
+   "resist_tiered": [
+    360,
+    370
+   ],
+   "em": 7.58,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 0.2,
+   "net_gex_B": 0.008,
+   "rolloff_friday_B": 0.019,
+   "rolloff_opex_B": -0.011,
+   "regime": "amber",
+   "status": "NEAR FLIP",
+   "level": 342.97,
+   "wall_type": null,
+   "contracts": 24,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 24
+  },
+  {
+   "name": "AVGO",
+   "held": false,
+   "spot": 376.6,
+   "support": 370,
+   "flip": 359.57,
+   "resist": 380,
+   "support_tiered": [
+    360,
+    350
+   ],
+   "resist_tiered": [
+    390,
+    400
+   ],
+   "em": 8.31,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 2.05,
+   "net_gex_B": 0.099,
+   "rolloff_friday_B": 0.034,
+   "rolloff_opex_B": 0.065,
+   "regime": "green",
+   "status": "NEARING WALL",
+   "level": 380,
+   "wall_type": "call",
+   "contracts": 26,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 26
+  },
+  {
+   "name": "AMD",
+   "held": false,
+   "spot": 652.0,
+   "support": 650,
+   "flip": 619.32,
+   "resist": 670,
+   "support_tiered": [
+    630,
+    610
+   ],
+   "resist_tiered": [
+    690,
+    710
+   ],
+   "em": 22.0,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 1.49,
+   "net_gex_B": 0.022,
+   "rolloff_friday_B": 0.012,
+   "rolloff_opex_B": 0.011,
+   "regime": "green",
+   "status": "AT WALL",
+   "level": 650,
+   "wall_type": "put",
+   "contracts": 22,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 22
+  },
+  {
+   "name": "TSLA",
+   "held": false,
+   "spot": 378.37,
+   "support": 370,
+   "flip": 366.25,
+   "resist": 380,
+   "support_tiered": [
+    360,
+    350
+   ],
+   "resist_tiered": [
+    390,
+    400
+   ],
+   "em": 10.3,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 1.18,
+   "net_gex_B": 0.081,
+   "rolloff_friday_B": 0.055,
+   "rolloff_opex_B": 0.027,
+   "regime": "green",
+   "status": "AT WALL",
+   "level": 380,
+   "wall_type": "call",
+   "contracts": 26,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 26
+  },
+  {
+   "name": "MU",
+   "held": false,
+   "spot": 1039.7,
+   "support": 1000,
+   "flip": 1041.9,
+   "resist": 1050,
+   "support_tiered": [],
+   "resist_tiered": [
+    1100,
+    1150
+   ],
+   "em": 27.88,
+   "em_src": "underlying_iv",
+   "dist_flip_em": -0.08,
+   "net_gex_B": -0.006,
+   "rolloff_friday_B": 0.004,
+   "rolloff_opex_B": -0.01,
+   "regime": "red",
+   "status": "ON FLIP",
+   "level": 1041.9,
+   "wall_type": null,
+   "contracts": 27,
+   "iv_skipped": 1,
+   "stale_days": 0,
+   "iv_filled": 27
+  },
+  {
+   "name": "INTC",
+   "held": false,
+   "spot": 114.99,
+   "support": 109,
+   "flip": 105.65,
+   "resist": 115,
+   "support_tiered": [
+    100
+   ],
+   "resist_tiered": [
+    130
+   ],
+   "em": 4.77,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 1.96,
+   "net_gex_B": 0.026,
+   "rolloff_friday_B": 0.003,
+   "rolloff_opex_B": 0.023,
+   "regime": "green",
+   "status": "AT WALL",
+   "level": 115,
+   "wall_type": "call",
+   "contracts": 28,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 28
+  },
+  {
+   "name": "QCOM",
+   "held": false,
+   "spot": 180.35,
+   "support": 180,
+   "flip": 174.36,
+   "resist": 185,
+   "support_tiered": [
+    175,
+    170
+   ],
+   "resist_tiered": [
+    190,
+    195
+   ],
+   "em": 5.76,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 1.04,
+   "net_gex_B": 0.009,
+   "rolloff_friday_B": 0.002,
+   "rolloff_opex_B": 0.007,
+   "regime": "green",
+   "status": "AT WALL",
+   "level": 180,
+   "wall_type": "put",
+   "contracts": 28,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 28
+  },
+  {
+   "name": "ARM",
+   "held": false,
+   "spot": 300.36,
+   "support": 300,
+   "flip": 282.02,
+   "resist": 310,
+   "support_tiered": [
+    290,
+    280
+   ],
+   "resist_tiered": [
+    320,
+    330
+   ],
+   "em": 13.69,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 1.34,
+   "net_gex_B": 0.007,
+   "rolloff_friday_B": 0.003,
+   "rolloff_opex_B": 0.004,
+   "regime": "green",
+   "status": "AT WALL",
+   "level": 300,
+   "wall_type": "put",
+   "contracts": 20,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 20
+  },
+  {
+   "name": "MRVL",
+   "held": false,
+   "spot": 288.2,
+   "support": 280,
+   "flip": 242.9,
+   "resist": 290,
+   "support_tiered": [
+    270,
+    260
+   ],
+   "resist_tiered": [
+    300
+   ],
+   "em": 10.67,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 4.25,
+   "net_gex_B": 0.066,
+   "rolloff_friday_B": 0.018,
+   "rolloff_opex_B": 0.048,
+   "regime": "green",
+   "status": "AT WALL",
+   "level": 290,
+   "wall_type": "call",
+   "contracts": 22,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 22
+  },
+  {
+   "name": "LRCX",
+   "held": false,
+   "spot": 331.78,
+   "support": 330,
+   "flip": 327.89,
+   "resist": 340,
+   "support_tiered": [
+    320,
+    310
+   ],
+   "resist_tiered": [
+    350,
+    360
+   ],
+   "em": 12.04,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 0.32,
+   "net_gex_B": 0.002,
+   "rolloff_friday_B": -0.002,
+   "rolloff_opex_B": 0.004,
+   "regime": "amber",
+   "status": "AT WALL",
+   "level": 330,
+   "wall_type": "put",
+   "contracts": 24,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 24
+  },
+  {
+   "name": "ALAB",
+   "held": false,
+   "spot": 387.5,
+   "support": 360,
+   "flip": 340.58,
+   "resist": 390,
+   "support_tiered": [
+    350,
+    340
+   ],
+   "resist_tiered": [
+    400,
+    410
+   ],
+   "em": 19.14,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 2.45,
+   "net_gex_B": 0.008,
+   "rolloff_friday_B": 0.005,
+   "rolloff_opex_B": 0.004,
+   "regime": "green",
+   "status": "AT WALL",
+   "level": 390,
+   "wall_type": "call",
+   "contracts": 28,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 28
+  },
+  {
+   "name": "SNDK",
+   "held": false,
+   "spot": 1637.8,
+   "support": 1600,
+   "flip": 1667.66,
+   "resist": 1650,
+   "support_tiered": [
+    1550,
+    1500
+   ],
+   "resist_tiered": [
+    1700,
+    1750
+   ],
+   "em": 64.77,
+   "em_src": "underlying_iv",
+   "dist_flip_em": -0.46,
+   "net_gex_B": -0.012,
+   "rolloff_friday_B": -0.006,
+   "rolloff_opex_B": -0.006,
+   "regime": "red",
+   "status": "AT WALL",
+   "level": 1650,
+   "wall_type": "call",
+   "contracts": 22,
+   "iv_skipped": 2,
+   "stale_days": 0,
+   "iv_filled": 22
+  },
+  {
+   "name": "CRWD",
+   "held": false,
+   "spot": 279.31,
+   "support": 270,
+   "flip": 270.04,
+   "resist": 280,
+   "support_tiered": [
+    260,
+    250
+   ],
+   "resist_tiered": [
+    290,
+    300
+   ],
+   "em": 8.33,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 1.11,
+   "net_gex_B": 0.01,
+   "rolloff_friday_B": 0.001,
+   "rolloff_opex_B": 0.008,
+   "regime": "green",
+   "status": "AT WALL",
+   "level": 280,
+   "wall_type": "call",
+   "contracts": 20,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 20
+  },
+  {
+   "name": "SNOW",
+   "held": false,
+   "spot": 335.95,
+   "support": 330,
+   "flip": 330.69,
+   "resist": 340,
+   "support_tiered": [
+    320,
+    310
+   ],
+   "resist_tiered": [
+    350,
+    360
+   ],
+   "em": 9.78,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 0.54,
+   "net_gex_B": 0.004,
+   "rolloff_friday_B": 0.002,
+   "rolloff_opex_B": 0.002,
+   "regime": "amber",
+   "status": "NEAR FLIP",
+   "level": 330.69,
+   "wall_type": null,
+   "contracts": 24,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 24
+  },
+  {
+   "name": "PLTR",
+   "held": true,
+   "spot": 192.0,
+   "support": 190,
+   "flip": 185.67,
+   "resist": 195,
+   "support_tiered": [
+    185,
+    180
+   ],
+   "resist_tiered": [
+    200,
+    205
+   ],
+   "em": 6.62,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 0.96,
+   "net_gex_B": 0.03,
+   "rolloff_friday_B": 0.018,
+   "rolloff_opex_B": 0.011,
+   "regime": "amber",
+   "status": "NEAR FLIP",
+   "level": 185.67,
+   "wall_type": null,
+   "contracts": 28,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 28
+  },
+  {
+   "name": "ORCL",
+   "held": false,
+   "spot": 144.41,
+   "support": 135,
+   "flip": 127.67,
+   "resist": 145,
+   "support_tiered": [],
+   "resist_tiered": [
+    150,
+    155
+   ],
+   "em": 4.75,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 3.53,
+   "net_gex_B": 0.067,
+   "rolloff_friday_B": 0.012,
+   "rolloff_opex_B": 0.055,
+   "regime": "green",
+   "status": "AT WALL",
+   "level": 145,
+   "wall_type": "call",
+   "contracts": 31,
+   "iv_skipped": 1,
+   "stale_days": 0,
+   "iv_filled": 31
+  },
+  {
+   "name": "HOOD",
+   "held": false,
+   "spot": 110.95,
+   "support": 108,
+   "flip": 108.04,
+   "resist": 120,
+   "support_tiered": [
+    105,
+    95
+   ],
+   "resist_tiered": [],
+   "em": 4.43,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 0.66,
+   "net_gex_B": 0.004,
+   "rolloff_friday_B": 0.002,
+   "rolloff_opex_B": 0.002,
+   "regime": "amber",
+   "status": "NEAR FLIP",
+   "level": 108.04,
+   "wall_type": null,
+   "contracts": 27,
+   "iv_skipped": 1,
+   "stale_days": 0,
+   "iv_filled": 27
+  },
+  {
+   "name": "SOFI",
+   "held": false,
+   "spot": 15.77,
+   "support": 15.5,
+   "flip": 15.72,
+   "resist": 16,
+   "support_tiered": [
+    15
+   ],
+   "resist_tiered": [
+    16.5,
+    17
+   ],
+   "em": 0.53,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 0.1,
+   "net_gex_B": 0.0,
+   "rolloff_friday_B": 0.0,
+   "rolloff_opex_B": -0.0,
+   "regime": "amber",
+   "status": "ON FLIP",
+   "level": 15.72,
+   "wall_type": null,
+   "contracts": 24,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 24
+  },
+  {
+   "name": "IBM",
+   "held": false,
+   "spot": 221.4,
+   "support": 220,
+   "flip": 222.9,
+   "resist": 225,
+   "support_tiered": [
+    215,
+    210
+   ],
+   "resist_tiered": [
+    230,
+    235
+   ],
+   "em": 6.03,
+   "em_src": "underlying_iv",
+   "dist_flip_em": -0.25,
+   "net_gex_B": -0.003,
+   "rolloff_friday_B": -0.002,
+   "rolloff_opex_B": -0.001,
+   "regime": "red",
+   "status": "AT WALL",
+   "level": 220,
+   "wall_type": "put",
+   "contracts": 32,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 32
+  },
+  {
+   "name": "MP",
+   "held": false,
+   "spot": 48.72,
+   "support": 47,
+   "flip": 50.0,
+   "resist": 49,
+   "support_tiered": [
+    45
+   ],
+   "resist_tiered": [
+    51,
+    55
+   ],
+   "em": 1.73,
+   "em_src": "underlying_iv",
+   "dist_flip_em": -0.74,
+   "net_gex_B": -0.001,
+   "rolloff_friday_B": -0.0,
+   "rolloff_opex_B": -0.0,
+   "regime": "red",
+   "status": "AT WALL",
+   "level": 49,
+   "wall_type": "call",
+   "contracts": 16,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 16
+  },
+  {
+   "name": "IBIT",
+   "held": false,
+   "spot": 47.61,
+   "support": 46,
+   "flip": 43.68,
+   "resist": 48,
+   "support_tiered": [
+    44
+   ],
+   "resist_tiered": [
+    49,
+    50
+   ],
+   "em": 1.08,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 3.64,
+   "net_gex_B": 0.067,
+   "rolloff_friday_B": 0.02,
+   "rolloff_opex_B": 0.047,
+   "regime": "green",
+   "status": "NEARING WALL",
+   "level": 48,
+   "wall_type": "call",
+   "contracts": 24,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 24
+  },
+  {
+   "name": "OKTA",
+   "held": true,
+   "spot": 218.94,
+   "support": 210,
+   "flip": 198.14,
+   "resist": 220,
+   "support_tiered": [
+    205,
+    200
+   ],
+   "resist_tiered": [
+    230
+   ],
+   "em": 7.49,
+   "em_src": "underlying_iv",
+   "dist_flip_em": 2.78,
+   "net_gex_B": 0.004,
+   "rolloff_friday_B": -0.0,
+   "rolloff_opex_B": 0.005,
+   "regime": "green",
+   "status": "AT WALL",
+   "level": 220,
+   "wall_type": "call",
+   "contracts": 32,
+   "iv_skipped": 0,
+   "stale_days": 0,
+   "iv_filled": 32
+  }
+ ],
+ "standouts": [
+  "MU",
+  "SOFI",
+  "IBM",
+  "LRCX",
+  "SNDK",
+  "MP",
+  "QCOM",
+  "CRWD",
+  "TSLA",
+  "ARM",
+  "AMD",
+  "INTC",
+  "NVDA",
+  "ALAB",
+  "OKTA",
+  "MSFT",
+  "ORCL",
+  "MRVL",
+  "GOOG",
+  "SNOW",
+  "HOOD",
+  "PLTR",
+  "AMZN",
+  "AVGO",
+  "META",
+  "AAPL",
+  "IBIT"
+ ],
+ "read": {
+  "headline": "IBM, LRCX and SNDK are pressing their walls; MU and SOFI are on the flip.",
+  "rows": [
+   {
+    "ticker": "MU",
+    "tag": "1",
+    "warn": true,
+    "text": "below its flip at 1041.9, 0.1 moves \u2014 negative gamma; 1000 and 1050 are high-energy, not support or resistance. A close back above 1041.9 tips it positive."
+   },
+   {
+    "ticker": "SOFI",
+    "tag": "2",
+    "warn": true,
+    "text": "on its flip at 15.72, 0.1 moves \u2014 no hedging lean; a close above keeps it in positive gamma, a close below tips it negative."
+   },
+   {
+    "ticker": "IBM",
+    "tag": "3",
+    "warn": true,
+    "text": "below its flip at 222.9, 0.2 moves \u2014 negative gamma; 220 and 225 are high-energy, not support or resistance. A close back above 222.9 tips it positive."
+   },
+   {
+    "ticker": "LRCX",
+    "tag": "4",
+    "warn": false,
+    "text": "at its 330 put wall in positive gamma, 0.1 moves above it \u2014 dealers buy weakness here, so it tends to support."
+   },
+   {
+    "ticker": "SNDK",
+    "tag": "5",
+    "warn": true,
+    "text": "below its flip at 1667.66, 0.5 moves \u2014 negative gamma; 1600 and 1650 are high-energy, not support or resistance. A close back above 1667.66 tips it positive."
+   },
+   {
+    "ticker": "MP",
+    "tag": "6",
+    "warn": true,
+    "text": "below its flip at 50.0, 0.7 moves \u2014 negative gamma; 47 and 49 are high-energy, not support or resistance. A close back above 50.0 tips it positive."
+   },
+   {
+    "ticker": "QCOM",
+    "tag": "7",
+    "warn": false,
+    "text": "at its 180 put wall in positive gamma, 0.1 moves above it \u2014 dealers buy weakness here, so it tends to support."
+   },
+   {
+    "ticker": "CRWD",
+    "tag": "8",
+    "warn": false,
+    "text": "at its 280 call wall in positive gamma, 0.1 moves below it \u2014 dealers sell strength here, so it tends to resist; a close above turns it into support."
+   },
+   {
+    "ticker": "TSLA",
+    "tag": "9",
+    "warn": false,
+    "text": "at its 380 call wall in positive gamma, 0.2 moves below it \u2014 dealers sell strength here, so it tends to resist; a close above turns it into support."
+   },
+   {
+    "ticker": "ARM",
+    "tag": "10",
+    "warn": false,
+    "text": "at its 300 put wall in positive gamma, 0.0 moves above it \u2014 dealers buy weakness here, so it tends to support."
+   },
+   {
+    "ticker": "AMD",
+    "tag": "11",
+    "warn": false,
+    "text": "at its 650 put wall in positive gamma, 0.1 moves above it \u2014 dealers buy weakness here, so it tends to support."
+   },
+   {
+    "ticker": "INTC",
+    "tag": "12",
+    "warn": false,
+    "text": "at its 115 call wall in positive gamma, 0.0 moves below it \u2014 dealers sell strength here, so it tends to resist; a close above turns it into support."
+   },
+   {
+    "ticker": "NVDA",
+    "tag": "13",
+    "warn": false,
+    "text": "at its 240 put wall in positive gamma, 0.0 moves above it \u2014 dealers buy weakness here, so it tends to support."
+   },
+   {
+    "ticker": "ALAB",
+    "tag": "14",
+    "warn": false,
+    "text": "at its 390 call wall in positive gamma, 0.1 moves below it \u2014 dealers sell strength here, so it tends to resist; a close above turns it into support."
+   },
+   {
+    "ticker": "OKTA",
+    "tag": "15",
+    "warn": false,
+    "text": "(held) at its 220 call wall in positive gamma, 0.1 moves below it \u2014 dealers sell strength here, so it tends to resist; a close above turns it into support."
+   },
+   {
+    "ticker": "MSFT",
+    "tag": "16",
+    "warn": false,
+    "text": "at its 530 call wall in positive gamma, 0.0 moves below it \u2014 dealers sell strength here, so it tends to resist; a close above turns it into support."
+   },
+   {
+    "ticker": "ORCL",
+    "tag": "17",
+    "warn": false,
+    "text": "at its 145 call wall in positive gamma, 0.1 moves below it \u2014 dealers sell strength here, so it tends to resist; a close above turns it into support."
+   },
+   {
+    "ticker": "MRVL",
+    "tag": "18",
+    "warn": false,
+    "text": "at its 290 call wall in positive gamma, 0.2 moves below it \u2014 dealers sell strength here, so it tends to resist; a close above turns it into support."
+   },
+   {
+    "ticker": "GOOG",
+    "tag": "19",
+    "warn": false,
+    "text": "(held) near its flip at 342.97, 0.2 moves \u2014 no hedging lean; a close above keeps it in positive gamma, a close below tips it negative."
+   },
+   {
+    "ticker": "SNOW",
+    "tag": "20",
+    "warn": false,
+    "text": "near its flip at 330.69, 0.5 moves \u2014 no hedging lean; a close above keeps it in positive gamma, a close below tips it negative."
+   },
+   {
+    "ticker": "HOOD",
+    "tag": "21",
+    "warn": false,
+    "text": "near its flip at 108.04, 0.7 moves \u2014 no hedging lean; a close above keeps it in positive gamma, a close below tips it negative."
+   },
+   {
+    "ticker": "PLTR",
+    "tag": "22",
+    "warn": false,
+    "text": "(held) near its flip at 185.67, 1.0 moves \u2014 no hedging lean; a close above keeps it in positive gamma, a close below tips it negative."
+   },
+   {
+    "ticker": "AMZN",
+    "tag": "23",
+    "warn": false,
+    "text": "nearing its 255 put wall in positive gamma, 0.3 moves above it \u2014 dealers buy weakness here, so it tends to support."
+   },
+   {
+    "ticker": "AVGO",
+    "tag": "24",
+    "warn": false,
+    "text": "nearing its 380 call wall in positive gamma, 0.4 moves below it \u2014 dealers sell strength here, so it tends to resist; a close above turns it into support."
+   },
+   {
+    "ticker": "META",
+    "tag": "25",
+    "warn": false,
+    "text": "nearing its 750 call wall in positive gamma, 0.5 moves below it \u2014 dealers sell strength here, so it tends to resist; a close above turns it into support."
+   },
+   {
+    "ticker": "AAPL",
+    "tag": "26",
+    "warn": false,
+    "text": "(held) nearing its 330 put wall in positive gamma, 0.7 moves above it \u2014 dealers buy weakness here, so it tends to support."
+   },
+   {
+    "ticker": "IBIT",
+    "tag": "27",
+    "warn": false,
+    "text": "nearing its 48 call wall in positive gamma, 0.4 moves below it \u2014 dealers sell strength here, so it tends to resist; a close above turns it into support."
+   }
+  ],
+  "summary": "17 green, 6 amber, 4 red. First read."
+ }
+}
