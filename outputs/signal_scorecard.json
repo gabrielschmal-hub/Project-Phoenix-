@@ -1,91 +1,91 @@
 {
- "n": 206,
- "e_price_R": -0.412,
- "stop_hit": 0.544,
- "median_mfe_R": 0.38,
- "win_20d": 0.291,
+ "n": 221,
+ "e_price_R": -0.444,
+ "stop_hit": 0.566,
+ "median_mfe_R": 0.37,
+ "win_20d": 0.276,
  "fails": [
-  "E_price -0.412R < 0.054R",
-  "median MFE 0.38R < 1R (never reaches breakeven)"
+  "E_price -0.444R < 0.054R",
+  "median MFE 0.37R < 1R (never reaches breakeven)"
  ],
  "verdict": "STOP",
  "decision_variable": "2.5x ATR, stop only, 20 bars",
  "atr_grid": {
   "1.5x": {
-   "n": 206,
-   "E_stop_R": -0.488,
-   "E_tp2_R": -0.453,
-   "E_tp3_R": -0.472,
-   "stop_hit": 0.743,
-   "tp2_first": 0.117,
-   "tp3_first": 0.053,
-   "median_mfe_R": 0.63
+   "n": 221,
+   "E_stop_R": -0.522,
+   "E_tp2_R": -0.49,
+   "E_tp3_R": -0.508,
+   "stop_hit": 0.76,
+   "tp2_first": 0.109,
+   "tp3_first": 0.05,
+   "median_mfe_R": 0.61
   },
   "2.0x": {
-   "n": 206,
-   "E_stop_R": -0.469,
-   "E_tp2_R": -0.466,
-   "E_tp3_R": -0.44,
-   "stop_hit": 0.646,
-   "tp2_first": 0.068,
-   "tp3_first": 0.039,
-   "median_mfe_R": 0.47
+   "n": 221,
+   "E_stop_R": -0.5,
+   "E_tp2_R": -0.497,
+   "E_tp3_R": -0.473,
+   "stop_hit": 0.665,
+   "tp2_first": 0.063,
+   "tp3_first": 0.036,
+   "median_mfe_R": 0.46
   },
   "2.5x": {
-   "n": 206,
-   "E_stop_R": -0.412,
-   "E_tp2_R": -0.407,
-   "E_tp3_R": -0.385,
-   "stop_hit": 0.544,
-   "tp2_first": 0.053,
-   "tp3_first": 0.019,
-   "median_mfe_R": 0.38
+   "n": 221,
+   "E_stop_R": -0.444,
+   "E_tp2_R": -0.44,
+   "E_tp3_R": -0.419,
+   "stop_hit": 0.566,
+   "tp2_first": 0.05,
+   "tp3_first": 0.018,
+   "median_mfe_R": 0.37
   }
  },
  "lenses": {
   "sector": [
    {
     "group": "Health technology",
-    "n": 47,
+    "n": 48,
     "thin": false,
-    "E_stop_R": -0.474,
-    "stop_hit": 0.617,
+    "E_stop_R": -0.485,
+    "stop_hit": 0.625,
     "tp2_first": 0.021,
     "median_mfe_R": 0.47
    },
    {
     "group": "Finance",
-    "n": 31,
+    "n": 35,
     "thin": false,
-    "E_stop_R": -0.76,
-    "stop_hit": 0.645,
+    "E_stop_R": -0.771,
+    "stop_hit": 0.657,
     "tp2_first": 0.0,
-    "median_mfe_R": 0.21
+    "median_mfe_R": 0.19
    },
    {
     "group": "Transportation",
-    "n": 26,
+    "n": 27,
     "thin": false,
-    "E_stop_R": 0.647,
-    "stop_hit": 0.115,
-    "tp2_first": 0.308,
-    "median_mfe_R": 1.33
+    "E_stop_R": 0.586,
+    "stop_hit": 0.148,
+    "tp2_first": 0.296,
+    "median_mfe_R": 1.28
    },
    {
     "group": "Energy minerals",
-    "n": 18,
-    "thin": true,
-    "E_stop_R": -0.141,
-    "stop_hit": 0.278,
+    "n": 20,
+    "thin": false,
+    "E_stop_R": -0.227,
+    "stop_hit": 0.35,
     "tp2_first": 0.0,
-    "median_mfe_R": 0.74
+    "median_mfe_R": 0.63
    },
    {
     "group": "Non-energy minerals",
-    "n": 14,
+    "n": 18,
     "thin": true,
-    "E_stop_R": -0.791,
-    "stop_hit": 0.571,
+    "E_stop_R": -0.776,
+    "stop_hit": 0.611,
     "tp2_first": 0.0,
     "median_mfe_R": 0.16
    },
@@ -108,6 +108,15 @@
     "median_mfe_R": 0.41
    },
    {
+    "group": "Industrial services",
+    "n": 10,
+    "thin": true,
+    "E_stop_R": -1.0,
+    "stop_hit": 1.0,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.33
+   },
+   {
     "group": "Consumer services",
     "n": 10,
     "thin": true,
@@ -115,15 +124,6 @@
     "stop_hit": 1.0,
     "tp2_first": 0.1,
     "median_mfe_R": 0.27
-   },
-   {
-    "group": "Industrial services",
-    "n": 9,
-    "thin": true,
-    "E_stop_R": -1.0,
-    "stop_hit": 1.0,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.33
    },
    {
     "group": "Health services",
@@ -154,12 +154,21 @@
    },
    {
     "group": "Process industries",
+    "n": 3,
+    "thin": true,
+    "E_stop_R": -0.802,
+    "stop_hit": 0.667,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.17
+   },
+   {
+    "group": "Utilities",
     "n": 2,
     "thin": true,
-    "E_stop_R": -0.703,
-    "stop_hit": 0.5,
+    "E_stop_R": -1.0,
+    "stop_hit": 1.0,
     "tp2_first": 0.0,
-    "median_mfe_R": 1.57
+    "median_mfe_R": 0.42
    },
    {
     "group": "Retail trade",
@@ -189,15 +198,6 @@
     "median_mfe_R": 3.67
    },
    {
-    "group": "Utilities",
-    "n": 1,
-    "thin": true,
-    "E_stop_R": -1.0,
-    "stop_hit": 1.0,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.01
-   },
-   {
     "group": "Distribution services",
     "n": 1,
     "thin": true,
@@ -219,20 +219,20 @@
   "industry": [
    {
     "group": "Biotechnology",
-    "n": 24,
+    "n": 25,
     "thin": false,
-    "E_stop_R": -0.508,
-    "stop_hit": 0.667,
+    "E_stop_R": -0.527,
+    "stop_hit": 0.68,
     "tp2_first": 0.0,
     "median_mfe_R": 0.47
    },
    {
     "group": "Marine shipping",
-    "n": 24,
+    "n": 25,
     "thin": false,
-    "E_stop_R": 0.749,
-    "stop_hit": 0.083,
-    "tp2_first": 0.333,
+    "E_stop_R": 0.68,
+    "stop_hit": 0.12,
+    "tp2_first": 0.32,
     "median_mfe_R": 1.33
    },
    {
@@ -255,12 +255,21 @@
    },
    {
     "group": "Major banks",
-    "n": 11,
+    "n": 13,
     "thin": true,
-    "E_stop_R": -0.699,
-    "stop_hit": 0.545,
+    "E_stop_R": -0.745,
+    "stop_hit": 0.615,
     "tp2_first": 0.0,
-    "median_mfe_R": 0.19
+    "median_mfe_R": 0.15
+   },
+   {
+    "group": "Integrated oil",
+    "n": 10,
+    "thin": true,
+    "E_stop_R": -0.541,
+    "stop_hit": 0.5,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.47
    },
    {
     "group": "Packaged software",
@@ -281,22 +290,22 @@
     "median_mfe_R": 1.03
    },
    {
-    "group": "Integrated oil",
+    "group": "Other metals/Minerals",
     "n": 8,
     "thin": true,
-    "E_stop_R": -0.426,
-    "stop_hit": 0.375,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.48
-   },
-   {
-    "group": "Other metals/Minerals",
-    "n": 6,
-    "thin": true,
-    "E_stop_R": -0.92,
-    "stop_hit": 0.833,
+    "E_stop_R": -0.94,
+    "stop_hit": 0.875,
     "tp2_first": 0.0,
     "median_mfe_R": 0.16
+   },
+   {
+    "group": "Regional banks",
+    "n": 7,
+    "thin": true,
+    "E_stop_R": -0.655,
+    "stop_hit": 0.429,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.21
    },
    {
     "group": "Investment managers",
@@ -344,15 +353,6 @@
     "median_mfe_R": 1.88
    },
    {
-    "group": "Regional banks",
-    "n": 5,
-    "thin": true,
-    "E_stop_R": -0.632,
-    "stop_hit": 0.4,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.21
-   },
-   {
     "group": "Food: specialty/candy",
     "n": 5,
     "thin": true,
@@ -360,6 +360,24 @@
     "stop_hit": 0.6,
     "tp2_first": 0.0,
     "median_mfe_R": 0.25
+   },
+   {
+    "group": "Steel",
+    "n": 5,
+    "thin": true,
+    "E_stop_R": -0.598,
+    "stop_hit": 0.6,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.61
+   },
+   {
+    "group": "Chemicals: agricultural",
+    "n": 3,
+    "thin": true,
+    "E_stop_R": -0.802,
+    "stop_hit": 0.667,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.17
    },
    {
     "group": "Miscellaneous commercial services",
@@ -380,15 +398,6 @@
     "median_mfe_R": 0.38
    },
    {
-    "group": "Steel",
-    "n": 3,
-    "thin": true,
-    "E_stop_R": -0.7,
-    "stop_hit": 0.667,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.61
-   },
-   {
     "group": "Investment banks/Brokers",
     "n": 3,
     "thin": true,
@@ -396,15 +405,6 @@
     "stop_hit": 0.667,
     "tp2_first": 0.0,
     "median_mfe_R": 0.74
-   },
-   {
-    "group": "Chemicals: agricultural",
-    "n": 2,
-    "thin": true,
-    "E_stop_R": -0.703,
-    "stop_hit": 0.5,
-    "tp2_first": 0.0,
-    "median_mfe_R": 1.57
    },
    {
     "group": "Other consumer services",
@@ -587,6 +587,24 @@
     "median_mfe_R": 0.27
    },
    {
+    "group": "Oilfield services/Equipment",
+    "n": 1,
+    "thin": true,
+    "E_stop_R": -1.0,
+    "stop_hit": 1.0,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.23
+   },
+   {
+    "group": "Water utilities",
+    "n": 1,
+    "thin": true,
+    "E_stop_R": -1.0,
+    "stop_hit": 1.0,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.42
+   },
+   {
     "group": "Multi-line insurance",
     "n": 1,
     "thin": true,
@@ -626,21 +644,21 @@
   "profitability": [
    {
     "group": "profitable",
-    "n": 121,
+    "n": 131,
     "thin": false,
-    "E_stop_R": -0.428,
-    "stop_hit": 0.529,
-    "tp2_first": 0.033,
-    "median_mfe_R": 0.35
+    "E_stop_R": -0.459,
+    "stop_hit": 0.55,
+    "tp2_first": 0.031,
+    "median_mfe_R": 0.33
    },
    {
     "group": "marginal",
-    "n": 30,
+    "n": 32,
     "thin": false,
-    "E_stop_R": -0.109,
-    "stop_hit": 0.5,
-    "tp2_first": 0.133,
-    "median_mfe_R": 0.59
+    "E_stop_R": -0.165,
+    "stop_hit": 0.531,
+    "tp2_first": 0.125,
+    "median_mfe_R": 0.42
    },
    {
     "group": "unknown",
@@ -653,51 +671,51 @@
    },
    {
     "group": "lossmaking",
-    "n": 16,
+    "n": 17,
     "thin": true,
-    "E_stop_R": -0.774,
-    "stop_hit": 0.812,
+    "E_stop_R": -0.787,
+    "stop_hit": 0.824,
     "tp2_first": 0.0,
     "median_mfe_R": 0.2
    },
    {
     "group": "investing",
-    "n": 11,
+    "n": 13,
     "thin": true,
-    "E_stop_R": -0.13,
-    "stop_hit": 0.364,
-    "tp2_first": 0.091,
-    "median_mfe_R": 0.61
+    "E_stop_R": -0.264,
+    "stop_hit": 0.462,
+    "tp2_first": 0.077,
+    "median_mfe_R": 0.44
    }
   ],
   "mcap": [],
   "atr": [
    {
     "group": "2-4%",
-    "n": 94,
+    "n": 102,
     "thin": false,
-    "E_stop_R": -0.378,
-    "stop_hit": 0.574,
-    "tp2_first": 0.106,
-    "median_mfe_R": 0.44
+    "E_stop_R": -0.421,
+    "stop_hit": 0.598,
+    "tp2_first": 0.098,
+    "median_mfe_R": 0.39
    },
    {
     "group": "4-7%",
-    "n": 80,
+    "n": 83,
     "thin": false,
-    "E_stop_R": -0.358,
-    "stop_hit": 0.45,
+    "E_stop_R": -0.368,
+    "stop_hit": 0.458,
     "tp2_first": 0.0,
     "median_mfe_R": 0.38
    },
    {
     "group": "<2%",
-    "n": 26,
+    "n": 30,
     "thin": false,
-    "E_stop_R": -0.914,
-    "stop_hit": 0.846,
-    "tp2_first": 0.038,
-    "median_mfe_R": 0.23
+    "E_stop_R": -0.926,
+    "stop_hit": 0.867,
+    "tp2_first": 0.033,
+    "median_mfe_R": 0.22
    },
    {
     "group": ">7%",
@@ -712,12 +730,12 @@
   "regime": [
    {
     "group": "POLICY_TIGHTENING",
-    "n": 28,
+    "n": 43,
     "thin": false,
-    "E_stop_R": -0.111,
-    "stop_hit": 0.429,
-    "tp2_first": 0.107,
-    "median_mfe_R": 0.38
+    "E_stop_R": -0.382,
+    "stop_hit": 0.581,
+    "tp2_first": 0.07,
+    "median_mfe_R": 0.27
    },
    {
     "group": "NO_CLEAR",
@@ -732,12 +750,12 @@
   "gex_regime": [
    {
     "group": "positive",
-    "n": 23,
+    "n": 38,
     "thin": false,
-    "E_stop_R": -0.468,
-    "stop_hit": 0.522,
+    "E_stop_R": -0.634,
+    "stop_hit": 0.658,
     "tp2_first": 0.0,
-    "median_mfe_R": 0.38
+    "median_mfe_R": 0.28
    },
    {
     "group": "negative",
@@ -752,52 +770,52 @@
   "spx_vs_200d": [
    {
     "group": "above 200d",
-    "n": 206,
+    "n": 221,
     "thin": false,
-    "E_stop_R": -0.412,
-    "stop_hit": 0.544,
-    "tp2_first": 0.053,
-    "median_mfe_R": 0.38
+    "E_stop_R": -0.444,
+    "stop_hit": 0.566,
+    "tp2_first": 0.05,
+    "median_mfe_R": 0.37
    }
   ],
   "breakout": [
    {
     "group": "no breakout",
-    "n": 178,
+    "n": 192,
     "thin": false,
-    "E_stop_R": -0.405,
-    "stop_hit": 0.556,
-    "tp2_first": 0.056,
-    "median_mfe_R": 0.42
+    "E_stop_R": -0.44,
+    "stop_hit": 0.578,
+    "tp2_first": 0.052,
+    "median_mfe_R": 0.38
    },
    {
     "group": "breakout",
-    "n": 4,
+    "n": 5,
     "thin": true,
-    "E_stop_R": -0.567,
-    "stop_hit": 0.5,
+    "E_stop_R": -0.654,
+    "stop_hit": 0.6,
     "tp2_first": 0.0,
-    "median_mfe_R": 0.4
+    "median_mfe_R": 0.39
    }
   ],
   "days_on_list": [
    {
     "group": "6+",
-    "n": 153,
+    "n": 166,
     "thin": false,
-    "E_stop_R": -0.408,
-    "stop_hit": 0.542,
-    "tp2_first": 0.046,
-    "median_mfe_R": 0.42
+    "E_stop_R": -0.444,
+    "stop_hit": 0.566,
+    "tp2_first": 0.042,
+    "median_mfe_R": 0.4
    },
    {
     "group": "day 1",
-    "n": 25,
+    "n": 27,
     "thin": false,
-    "E_stop_R": -0.366,
-    "stop_hit": 0.6,
-    "tp2_first": 0.12,
-    "median_mfe_R": 0.37
+    "E_stop_R": -0.413,
+    "stop_hit": 0.63,
+    "tp2_first": 0.111,
+    "median_mfe_R": 0.33
    },
    {
     "group": "2-5",
@@ -812,34 +830,34 @@
   "time_in_trade": [
    {
     "group": "held 20",
-    "n": 94,
+    "n": 96,
     "thin": false,
-    "E_stop_R": 0.289,
+    "E_stop_R": 0.279,
     "stop_hit": 0.0,
-    "tp2_first": 0.106,
+    "tp2_first": 0.104,
     "median_mfe_R": 0.74
    },
    {
     "group": "stopped d4-10",
-    "n": 53,
+    "n": 61,
     "thin": false,
     "E_stop_R": -1.0,
     "stop_hit": 1.0,
     "tp2_first": 0.0,
-    "median_mfe_R": 0.19
+    "median_mfe_R": 0.18
    },
    {
     "group": "stopped d11-20",
-    "n": 46,
+    "n": 50,
     "thin": false,
     "E_stop_R": -1.0,
     "stop_hit": 1.0,
-    "tp2_first": 0.022,
-    "median_mfe_R": 0.22
+    "tp2_first": 0.02,
+    "median_mfe_R": 0.23
    },
    {
     "group": "stopped d1-3",
-    "n": 13,
+    "n": 14,
     "thin": true,
     "E_stop_R": -1.0,
     "stop_hit": 1.0,
@@ -850,6 +868,6 @@
  },
  "min_cell": 20,
  "logged_new": 303,
- "asof": "2026-10-06T13:17",
+ "asof": "2026-10-07T10:30",
  "note": "1.5x and 2.0x and the target policies are descriptive. The pre-registered verdict is the 2.5x stop-only column; choosing the best cell after the fact is not a result."
 }
