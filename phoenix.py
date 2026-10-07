@@ -10542,7 +10542,72 @@ def _mme_row(tk, g, em1, stale_days):
             "pct_to_support": (round((support / spot - 1) * 100, 1) if support else None)}
 
 
+def _mme_uploaded():
+    """
+    One file, uploaded by hand to wire/: mme_map.json (or mme_map_YYYY-MM-DD.json). Accepts
+    either shape — a flat `names` list (what Cowork writes) or Phoenix's own `groups` dict —
+    and an optional `read` block with the written analysis. Returns (rows, meta) or (None, None).
+    """
+    import os, json, glob
+    from datetime import datetime
+    cands = sorted(glob.glob(os.path.join(WIRE_DIR, "mme_map*.json")), key=os.path.getmtime)
+    if not cands:
+        return None, None
+    path = cands[-1]
+    try:
+        d = json.load(open(path, encoding="utf-8"))
+    except Exception as e:
+        print(f"[mmemap] {path}: unreadable ({e})")
+        return None, None
+    raw = []
+    if isinstance(d.get("names"), list):
+        raw = d["names"]
+    elif isinstance(d.get("groups"), dict):
+        for k in ("green", "amber", "red"):
+            raw += (d["groups"].get(k) or [])
+    rows = []
+    for r in raw:
+        tk = str(r.get("ticker") or r.get("name") or "").upper().strip()
+        spot, flip = r.get("spot"), r.get("flip")
+        if not tk or not spot or not flip:
+            continue                                     # a row with no spot or flip has nothing to place
+        em = r.get("em") or (spot * 0.015)
+        dist = r.get("dist_flip_em")
+        if dist is None:
+            dist = (spot - flip) / em
+        support, resist = r.get("support"), r.get("resist")
+        regime = "red" if dist < 0 else ("amber" if dist < 1 else "green")
+        status, level = (r.get("status") or ""), r.get("level")
+        if not status:                                   # derive it the way Phoenix does when the file left it blank
+            for lvl in (resist, support):
+                if lvl and abs(spot - lvl) / em <= 0.25: status, level = "AT WALL", lvl; break
+            if not status:
+                for lvl in (resist, support):
+                    if lvl and abs(spot - lvl) / em <= 1.0: status, level = "NEARING WALL", lvl; break
+            if abs(dist) <= 0.15: status, level = "ON FLIP", flip
+            elif not status and abs(dist) < 1: status, level = "NEAR FLIP", flip
+        rows.append({"ticker": tk, "spot": round(float(spot), 2), "support": support, "flip": round(float(flip), 2),
+                     "resist": resist, "em": round(float(em), 2), "em_src": "file",
+                     "dist_flip_em": round(float(dist), 1), "regime": regime, "status": status, "level": level,
+                     "wall_type": r.get("wall_type"), "net_gex_B": r.get("net_gex_B"),
+                     "asof": d.get("date"), "stale_days": r.get("stale_days"), "src": "upload",
+                     "pct_to_resist": (round((resist / spot - 1) * 100, 1) if resist else None),
+                     "pct_to_support": (round((support / spot - 1) * 100, 1) if support else None)})
+    meta = {"path": os.path.basename(path), "date": d.get("date"), "prev_date": d.get("prev_date"),
+            "source": d.get("source"), "read": d.get("read") if isinstance(d.get("read"), dict) else None,
+            "regime_changes": d.get("regime_changes") or [], "dropped": [str(r.get("ticker") or r.get("name")) for r in raw
+                                                                          if not (r.get("spot") and r.get("flip"))]}
+    print(f"[mmemap] uploaded {meta['path']} dated {meta['date']}: {len(rows)} usable rows"
+          + (f", dropped {','.join(meta['dropped'])} (no spot/flip)" if meta["dropped"] else ""))
+    return rows, meta
+
+
 def run_mme_map():
+    """
+    The dealer map. Source of truth, in order: the file uploaded to wire/ (one file, by hand —
+    what the morning MME task produces), then Phoenix's own per-ticker reads for any name the
+    file does not carry. Every row says where it came from.
+    """
     import os, json
     from datetime import datetime, timezone
     names = []
@@ -10555,13 +10620,28 @@ def run_mme_map():
     except Exception:
         pass
     names = [t for t in dict.fromkeys(names) if t and t not in ("SPY", "QQQ", "IWM")]
+    up_rows, up_meta = _mme_uploaded()
+    today = datetime.now(timezone.utc).date()
+    up_fresh = False
+    if up_meta and up_meta.get("date"):
+        try:
+            up_fresh = (today - datetime.strptime(str(up_meta["date"])[:10], "%Y-%m-%d").date()).days <= 3
+        except Exception:
+            up_fresh = False
+    rows = {r["ticker"]: r for r in (up_rows or [])} if up_fresh else {}
+    if up_rows and not up_fresh:
+        print(f"[mmemap] uploaded file is dated {up_meta.get('date')} — older than 3 days, not used")
+    for tk in (up_rows and up_fresh and [r["ticker"] for r in up_rows] or []):
+        if tk not in names:
+            names.append(tk)                             # the file may carry names the universe does not
     try:
         ivem = (json.load(open(os.path.join(OUTPUTS_DIR, "iv_em.json"))).get("tickers") or {})
     except Exception:
         ivem = {}
-    today = datetime.now(timezone.utc).date()
-    rows, missing = [], []
+    missing = []
     for tk in names:
+        if tk in rows:
+            continue
         safe = tk.replace("/", "-").replace(".", "-")
         fp = os.path.join(OUTPUTS_DIR, "gex_stocks", safe + ".json")
         try:
@@ -10572,27 +10652,102 @@ def run_mme_map():
             d = datetime.strptime(str(g.get("asof", ""))[:10], "%Y-%m-%d").date(); stale = (today - d).days
         except Exception:
             stale = None
-        em1 = (ivem.get(tk) or {}).get("iv_daily_abs")
-        r = _mme_row(tk, g, em1, stale)
-        if r: rows.append(r)
-        else: missing.append(tk)
-    rows.sort(key=lambda r: -r["dist_flip_em"])
-    groups = {k: [r for r in rows if r["regime"] == k] for k in ("green", "amber", "red")}
-    stand = [r for r in rows if r["status"]]
-    stand.sort(key=lambda r: {"ON FLIP": 0, "AT WALL": 1, "NEAR FLIP": 2, "NEARING WALL": 3}[r["status"]])
-    stale_n = sum(1 for r in rows if (r["stale_days"] or 0) > 2)
+        r = _mme_row(tk, g, (ivem.get(tk) or {}).get("iv_daily_abs"), stale)
+        if r:
+            r["src"] = "phoenix"; rows[tk] = r
+        else:
+            missing.append(tk)
+    out = sorted(rows.values(), key=lambda r: -r["dist_flip_em"])
+    groups = {k: [r for r in out if r["regime"] == k] for k in ("green", "amber", "red")}
+    stand = [r for r in out if r["status"]]
+    stand.sort(key=lambda r: {"ON FLIP": 0, "AT WALL": 1, "NEAR FLIP": 2, "NEARING WALL": 3}.get(r["status"], 9))
+    stale_n = sum(1 for r in out if (r.get("stale_days") or 0) > 2)
+    n_up = sum(1 for r in out if r.get("src") == "upload")
     write_json("mme_map", {
-        "asof": _now(), "date": str(today), "universe": len(names), "covered": len(rows),
-        "missing": missing, "stale": stale_n,
+        "asof": _now(), "date": (up_meta or {}).get("date") if up_fresh else str(today),
+        "source": ((up_meta or {}).get("source") if up_fresh else None) or "Phoenix per-ticker dealer reads (CBOE chain)",
+        "source_file": (up_meta or {}).get("path") if up_fresh else None,
+        "from_upload": n_up, "from_phoenix": len(out) - n_up,
+        "read": (up_meta or {}).get("read") if up_fresh else None,
+        "regime_changes": (up_meta or {}).get("regime_changes") if up_fresh else [],
+        "universe": len(names), "covered": len(out), "missing": missing, "dropped": (up_meta or {}).get("dropped") if up_fresh else [],
+        "stale": stale_n,
         "note": "Regime: green = spot a full expected move or more above the flip; amber = above but within one move; "
                 "red = below the flip. Status: AT WALL within 0.25 moves of a wall, NEARING within one, ON FLIP within 0.15, "
-                "NEAR FLIP within one. Distance in daily expected moves from the options chain (ATR stand-in where none).",
+                "NEAR FLIP within one.",
         "groups": groups, "standouts": stand})
-    print(f"[mmemap] {len(rows)}/{len(names)} names · green {len(groups['green'])} amber {len(groups['amber'])} "
-          f"red {len(groups['red'])} · standouts {len(stand)} · stale {stale_n} · missing {','.join(missing) or 'none'}")
-    sb_heartbeat("mme_map", len(rows) >= max(5, len(names) // 2),
-                 f"{len(rows)}/{len(names)} · {len(stand)} standouts · {stale_n} stale · missing {len(missing)}")
-    return rows
+    print(f"[mmemap] {len(out)}/{len(names)} names ({n_up} from upload, {len(out)-n_up} from Phoenix) · green {len(groups['green'])} "
+          f"amber {len(groups['amber'])} red {len(groups['red'])} · standouts {len(stand)} · missing {','.join(missing) or 'none'}")
+    sb_heartbeat("mme_map", len(out) >= max(5, len(names) // 2),
+                 f"{len(out)}/{len(names)} · {n_up} from upload · {len(stand)} standouts · missing {len(missing)}")
+    return out
+
+
+# ============================================================
+# MME CHAINS — the raw material for the MME map, fetched by Phoenix (which can reach
+# CBOE) and written as ONE file for a tool that cannot. Every contract the method
+# needs, nothing it does not: expiries to 180d, strikes within +/-15% of spot, OI > 0.
+# Compact rows so 27 names stay a few MB. Cowork computes from this; the numbers stay
+# its own, the data is the same chain Elliott reads.
+# ============================================================
+def run_mme_chains(max_dte=180, band=0.15):
+    import os, json, time, re
+    from datetime import datetime, timezone, date
+    names = []
+    try:
+        names += list(GEX_UNIVERSE.get("seed") or [])
+    except Exception:
+        pass
+    try:
+        names += [str(t.get("ticker")).upper() for t in _load_trades() if t.get("status") in ("open", "plan")]
+    except Exception:
+        pass
+    names = [t for t in dict.fromkeys(names) if t and t not in ("SPY", "QQQ", "IWM")]
+    today = datetime.now(timezone.utc).date()
+    out, fails = {}, []
+    t0 = time.time()
+    for tk in names:
+        try:
+            spot, chain, note = _cboe_chain(tk)
+        except Exception as e:
+            spot, chain, note = None, [], f"{type(e).__name__}: {e}"
+        if not spot or not chain:
+            fails.append(f"{tk}: {note}"); time.sleep(0.5); continue
+        rows, skipped = [], 0
+        for c in chain:
+            m = _OSI.search((c.get("option") or c.get("symbol") or "").replace(" ", ""))
+            if not m:
+                skipped += 1; continue
+            try:
+                expiry = datetime.strptime(m.group(2), "%y%m%d").date()
+                K = int(m.group(4)) / 1000.0
+                oi = float(c.get("open_interest") or 0)
+                iv = float(c.get("iv") or 0)
+                gm = float(c.get("gamma") or 0)
+                bid = float(c.get("bid") or 0); ask = float(c.get("ask") or 0)
+            except Exception:
+                skipped += 1; continue
+            dte = (expiry - today).days
+            if dte <= 0 or dte > max_dte or abs(K / spot - 1) > band or oi <= 0:
+                skipped += 1; continue
+            rows.append([str(expiry), m.group(3), K, int(oi), round(iv, 4), round(gm, 6), round(bid, 2), round(ask, 2)])
+        out[tk] = {"spot": round(spot, 2), "contracts": len(rows), "skipped": skipped,
+                   "expiries": sorted({r[0] for r in rows}), "rows": rows}
+        time.sleep(0.4)
+    write_json("mme_chains", {
+        "asof": _now(), "date": str(today), "close_of": str(today),
+        "source": "CBOE delayed quotes (cdn.cboe.com), one request per name",
+        "row": ["expiry", "cp", "strike", "open_interest", "iv", "gamma_vendor", "bid", "ask"],
+        "filters": {"max_dte": max_dte, "strike_band": band, "oi_min": 1},
+        "method_note": "Compute with the MME method: business-day T/262, sticky-strike BS gamma, dealers long calls / "
+                       "short puts, 120-pt 0.8-1.2x flip sweep; walls from gamma_vendor aggregated by strike at spot, "
+                       "closest strike at or above 25% of the side maximum.",
+        "names": out, "failed": fails})
+    n_ok = len(out); n_rows = sum(v["contracts"] for v in out.values())
+    print(f"[chains] {n_ok}/{len(names)} names, {n_rows} contracts, {len(fails)} failed in {int(time.time()-t0)}s"
+          + (f" — {'; '.join(fails[:4])}" if fails else ""))
+    sb_heartbeat("mme_chains", n_ok >= max(5, len(names) // 2), f"{n_ok}/{len(names)} names · {n_rows} contracts · failed {len(fails)}")
+    return out
 
 
 def run_gex_stocks_cboe(tickers=None, limit=None):
@@ -13481,6 +13636,7 @@ def run_full():
     # --- earnings + fundamentals -------------------------------------------
     step("earnings_refresh", run_earnings_refresh)
     step("iv_em",          run_iv_em,         optional=True)   # implied vol + expected move, two-tier
+    step("mme_chains",     run_mme_chains,    optional=True)   # raw CBOE chains for the universe, one file, for the MME task
     step("mme_map",        run_mme_map,       optional=True)   # the dealer map: every name vs its walls and flip
     step("financials_all", run_financials_all)
     step("detail_bundle",  run_detail_bundle)
@@ -13527,6 +13683,15 @@ def run_engine(name):
         run_gex_verify()
     elif name == "wire":
         run_wire()
+        # a push to wire/ is also how the MME file arrives; build the map in the same fast run
+        try:
+            run_mme_map()
+        except Exception as e:
+            print(f"[mmemap] skipped in the wire run: {e}")
+    elif name == "mme_map":
+        run_mme_map()
+    elif name == "mme_chains":
+        run_mme_chains()
     elif name == "dayscore":
         run_dayscore()
     elif name == "signals":
