@@ -1024,6 +1024,26 @@
   .pxaccts[hidden]{display:none!important}   /* the profile popover is the one control; the chips only hold state */
   .hero-who{margin-top:14px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--inkFade)} .hero-who a{color:var(--gold)}
   .tb-auth{display:block!important;margin-left:6px}
+  .mm-cards{display:grid;grid-template-columns:1fr;gap:12px} @media(min-width:1100px){.mm-cards{grid-template-columns:1fr 1fr}}
+  .mm-card{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden;border-top:3px solid var(--line2)}
+  .mm-card.reg-green{border-top-color:var(--green)} .mm-card.reg-amber{border-top-color:var(--amber)} .mm-card.reg-red{border-top-color:var(--red)}
+  .mm-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;background:var(--card2)} .mm-h .t{font-size:16px;font-weight:800;cursor:pointer;letter-spacing:.02em} .mm-h .t:hover{color:var(--gold)}
+  .mm-badge{font-family:var(--mono);font-size:10px;letter-spacing:.07em;padding:3px 8px;border-radius:5px;font-weight:700;color:#fff}
+  .mm-badge.green{background:#1f8f4e} .mm-badge.amber{background:#b7791f} .mm-badge.red{background:#c0392b}
+  .mm-st{margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.07em;color:var(--amber);font-weight:700} .mm-src{font-family:var(--mono);font-size:9px;color:var(--inkFade);letter-spacing:.06em}
+  .mm-strip{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--line);background:var(--card2)}
+  .mm-strip div{padding:8px 6px;text-align:center;border-right:1px solid var(--line)} .mm-strip div:last-child{border-right:0}
+  .mm-strip i{display:block;font-style:normal;font-family:var(--mono);font-size:8.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--inkFade)} .mm-strip b{font-family:var(--mono);font-size:12.5px}
+  .mm-strip div:first-child b{color:var(--sky,#4aa3df)}
+  .mm-ladder{padding:4px 0}
+  .mm-lv{display:grid;grid-template-columns:78px 112px 1fr;gap:8px;align-items:start;padding:7px 12px;border-bottom:1px solid var(--line2);border-left:3px solid transparent}
+  .mm-lv .px{font-family:var(--mono);font-weight:700;font-size:12.5px} .mm-lv .tg{font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;font-weight:700;padding-top:2px} .mm-lv .tx{font-family:var(--mono);font-size:10px;color:var(--inkFade);line-height:1.45}
+  .mm-lv.res{border-left-color:#5b7fb8} .mm-lv.sup{border-left-color:#5b7fb8} .mm-lv.hot{border-left-color:#5b7fb8} .mm-lv.hot .tg{color:var(--inkFade)}
+  .mm-lv.flip{border-left-color:var(--gold)} .mm-lv.flip .px,.mm-lv.flip .tg{color:var(--gold)} .mm-lv .tx .g{color:var(--green)} .mm-lv .tx .r{color:var(--red)}
+  .mm-lv.spot{border:1px solid var(--sky,#4aa3df);border-radius:7px;margin:4px 10px;padding:6px 10px;grid-template-columns:1fr auto} .mm-lv.spot .px{color:var(--sky,#4aa3df);text-align:right;order:2} .mm-lv.spot .tg{color:var(--sky,#4aa3df)} .mm-lv.spot .tx{display:none}
+  .mm-lv.res .tg,.mm-lv.sup .tg{color:var(--ink)} .mm-lv .tg:where(:not(.x)){}
+  .mm-read{padding:10px 12px;font-family:var(--mono);font-size:11px;line-height:1.55;border-top:1px solid var(--line);border-left:3px solid var(--green)} .mm-read.warn{border-left-color:var(--red)} .mm-read b{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--inkFade);margin-right:6px}
+  .mm-more summary{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--inkFade);cursor:pointer;padding:10px 0}
   .mc-top{display:flex;gap:6px;margin:0 0 14px;border-bottom:1px solid var(--line);padding-bottom:10px}
   .mc-tab{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border-radius:9px;border:1px solid var(--line2);background:transparent;color:var(--inkFade);cursor:pointer}
   .mc-tab.on{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700}
@@ -10405,7 +10425,22 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       MME_MAP=d||{};
       var g=d.groups||{}, st=d.standouts||[];
       if(!d.covered){ note.textContent="no dealer reads on file"; body.innerHTML='<div class="ed-note">No per-ticker dealer read is on file yet \u2014 the GEX lane has not written any names. Nothing to map.</div>'; return; }
-      note.textContent=d.date+" \u00b7 "+d.covered+"/"+d.universe+" names"+(d.stale?" \u00b7 "+d.stale+" stale":"")+(d.missing&&d.missing.length?" \u00b7 missing "+d.missing.join(", "):"");
+      note.textContent=d.date+" \u00b7 "+d.covered+"/"+d.universe+" names"+(d.from_upload?" \u00b7 "+d.from_upload+" from "+(d.source_file||"upload"):"")+(d.stale?" \u00b7 "+d.stale+" stale":"")+(d.missing&&d.missing.length?" \u00b7 missing "+d.missing.join(", "):"");
+      // the written read travels inside the same file
+      var rd=d.read||null, rdHost=document.getElementById("mcNamesRead");
+      if(rdHost){
+        if(rd && (rd.headline || (rd.rows&&rd.rows.length))){
+          function esc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+          rdHost.innerHTML='<div class="ed-sec"><div class="ed-k"><span>The names</span><span class="ed-n">'+esc(d.source_file||"uploaded")+' \u00b7 '+esc(d.date)+'</span></div>'+
+            (rd.headline?'<h2 class="ed-hl">'+esc(rd.headline)+'</h2>':'')+
+            '<div class="ed-w-list">'+(rd.rows||[]).map(function(x,i){
+              var tk=(x.ticker||"").toUpperCase();
+              return '<div class="ed-w"><span class="w-tag'+(x.warn?' warn':'')+'">'+(x.tag||(i+1))+'</span><span>'+(tk?'<b data-tk="'+tk+'" style="cursor:pointer">'+tk+'</b> ':'')+esc(x.text).replace(/\n/g,"<br>")+'</span></div>'; }).join("")+'</div>'+
+            (rd.summary?'<p class="ed-body">'+esc(rd.summary)+'</p>':'')+'</div>';
+          rdHost.querySelectorAll("[data-tk]").forEach(function(el){ el.onclick=function(){ if(typeof dpOpen==="function") dpOpen(el.dataset.tk); }; });
+        } else rdHost.innerHTML="";
+      }
+      var srcLine=d.source?'<div class="ed-note" style="margin-bottom:8px">Levels: '+String(d.source).replace(/</g,"&lt;")+(d.dropped&&d.dropped.length?' \u00b7 dropped '+d.dropped.join(", ")+' (no spot or flip in the file)':'')+'</div>':'';
       function pr(v){ return v==null?"\u2014":(+v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
       function lvl(v){ return v==null?"\u2014":(+v).toLocaleString(undefined,{maximumFractionDigits:2}); }
       function chip(r){
@@ -10413,11 +10448,47 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         var where=r.status.indexOf("FLIP")>=0?"flip "+lvl(r.flip):((r.level===r.resist?"call wall ":"put wall ")+lvl(r.level));
         return '<span class="nm-chip '+cls+' reg-'+r.regime+'" data-tk="'+r.ticker+'"><b>'+r.ticker+'</b> '+r.status.toLowerCase()+' \u00b7 '+where+'</span>';
       }
-      var h='';
+      var h=srcLine;
       if(st.length){
         h+='<div class="nm-stand"><div class="nm-sk">On a level \u00b7 '+st.length+'</div><div class="nm-chips">'+st.map(chip).join("")+'</div>'+
            '<div class="ed-note">A name at a wall in positive gamma is where dealers sell strength or buy weakness \u2014 the level tends to hold. '+
            'On or near the flip the hedging has no lean; a normal session decides which side. Below the flip, walls give way rather than hold.</div></div>';
+      }
+      // ---- per-name cards, Elliott's layout: regime badge, stat strip, level ladder, the read ----
+      var readBy={}; ((d.read&&d.read.rows)||[]).forEach(function(x){ if(x.ticker) readBy[String(x.ticker).toUpperCase()]=x; });
+      function money(v){ return v==null?"\u2014":(+v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+      function netB(v){ if(v==null) return ""; var a=Math.abs(v); return (v>=0?"+":"\u2212")+(a>=1?"$"+a.toFixed(2)+"B":"$"+Math.round(a*1000)+"M"); }
+      function ladder(r){
+        var above=r.dist_flip_em>=0, rows=[];
+        if(r.resist!=null) rows.push({px:r.resist, tag:(r.status==="AT WALL"&&r.level===r.resist)?"AT WALL":(r.status==="NEARING WALL"&&r.level===r.resist)?"NEARING WALL":(above?"RESISTANCE":"HIGH-ENERGY"),
+          cls:above?"res":"hot", txt:above?"call gamma concentrates here, where dealers sell into strength as price rises into it, so it tends to resist":"below the flip: dealers buy into strength here, a potential high-energy level that can run to the next shelf or snap back, not resistance"});
+        rows.push({px:r.flip, tag:"THE FLIP", cls:"flip", txt:'<span class="g">positive gamma</span> above this level, <span class="r">negative gamma</span> below'});
+        rows.push({px:r.spot, tag:"SPOT \u00b7 LAST", cls:"spot", txt:""});
+        if(r.support!=null) rows.push({px:r.support, tag:(r.status==="AT WALL"&&r.level===r.support)?"AT WALL":(r.status==="NEARING WALL"&&r.level===r.support)?"NEARING WALL":(above?"SUPPORT":"HIGH-ENERGY"),
+          cls:above?"sup":"hot", txt:above?"put gamma concentrates here, where dealers buy into weakness as price falls into it, so it tends to support":"below the flip: dealers sell into weakness here, a potential high-energy level that can slide to the next shelf or snap back, not support"});
+        rows.sort(function(a,b){ return b.px-a.px; });
+        return '<div class="mm-ladder">'+rows.map(function(x){
+          return '<div class="mm-lv '+x.cls+'"><span class="px">'+money(x.px)+'</span><span class="tg">'+x.tag+'</span><span class="tx">'+x.txt+'</span></div>'; }).join("")+'</div>';
+      }
+      function card(r){
+        var em=r.em||0, toWall=r.level!=null&&r.status.indexOf("WALL")>=0?Math.abs(r.spot-r.level)/em:(r.resist!=null?Math.abs(r.resist-r.spot)/em:null);
+        var rd=readBy[r.ticker];
+        return '<div class="mm-card reg-'+r.regime+'" data-tk="'+r.ticker+'">'+
+          '<div class="mm-h"><b class="t">'+r.ticker+'</b><span class="mm-badge '+r.regime+'">'+(r.regime==="red"?"NEGATIVE":"POSITIVE")+' GAMMA'+(r.net_gex_B!=null?' \u00b7 '+netB(r.net_gex_B):'')+'</span>'+
+            (r.status?'<span class="mm-st">'+r.status+(r.level!=null&&r.status.indexOf("WALL")>=0?' '+money(r.level):'')+'</span>':'')+(r.src==="phoenix"?'<span class="mm-src">phoenix read</span>':'')+'</div>'+
+          '<div class="mm-strip"><div><i>expected move</i><b>\u00b1'+money(em)+'</b></div><div><i>one move down</i><b>'+money(r.spot-em)+'</b></div><div><i>one move up</i><b>'+money(r.spot+em)+'</b></div>'+
+            '<div><i>to the wall</i><b>'+(toWall!=null?toWall.toFixed(1)+' EM':'\u2014')+'</b></div><div><i>to the flip</i><b>'+(r.dist_flip_em>=0?"+":"")+r.dist_flip_em+' EM</b></div></div>'+
+          ladder(r)+
+          (rd?'<div class="mm-read'+(rd.warn?' warn':'')+'"><b>The read</b> '+String(rd.text||"").replace(/</g,"&lt;")+'</div>':'')+
+        '</div>';
+      }
+      var stKeys={}; st.forEach(function(r){ stKeys[r.ticker]=1; });
+      var held=(d.read&&d.read.rows||[]).filter(function(x){ return /\(held\)/.test(String(x.text||"")); }).map(function(x){ return String(x.ticker||"").toUpperCase(); });
+      var featured=st.slice(); (g.green||[]).concat(g.amber||[],g.red||[]).forEach(function(r){ if(held.indexOf(r.ticker)>=0 && !stKeys[r.ticker]) featured.push(r); });
+      if(featured.length){
+        h+='<div class="nm-sk" style="margin-top:14px">Featured \u00b7 on a level or held \u00b7 '+featured.length+'</div><div class="mm-cards">'+featured.map(card).join("")+'</div>';
+        var rest=(g.green||[]).concat(g.amber||[],g.red||[]).filter(function(r){ return !stKeys[r.ticker] && held.indexOf(r.ticker)<0; });
+        if(rest.length) h+='<details class="mm-more"><summary>Every other name \u00b7 '+rest.length+'</summary><div class="mm-cards">'+rest.map(card).join("")+'</div></details>';
       }
       function table(key,title,cls){
         var rows=g[key]||[]; if(!rows.length) return '';
@@ -10433,7 +10504,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       h+=table("green","Green \u00b7 positive gamma","g")+table("amber","Amber \u00b7 flip within one move","a")+table("red","Red \u00b7 below the flip","r");
       h+='<div class="ed-note" style="margin-top:8px">'+(d.note||"")+' Tap a name for its chart, levels and volatility.</div>';
       body.innerHTML=h;
-      body.querySelectorAll("[data-tk]").forEach(function(el){ el.onclick=function(){ if(typeof dpOpen==="function") dpOpen(el.dataset.tk); }; });
+      body.querySelectorAll(".nm-chip[data-tk],.nm-row[data-tk]").forEach(function(el){ el.onclick=function(){ if(typeof dpOpen==="function") dpOpen(el.dataset.tk); }; });
+      body.querySelectorAll(".mm-card .t").forEach(function(el){ el.onclick=function(){ if(typeof dpOpen==="function") dpOpen(el.closest(".mm-card").dataset.tk); }; });
     }).catch(function(){ note.textContent="unavailable"; body.innerHTML='<div class="ed-note">mme_map.json could not be loaded.</div>'; });
   }
   function mcbPlateGex(){
@@ -10568,10 +10640,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       host.className="";
       // Mission Control has two sections: the Daily Brief (daily / weekly, as before) and MME —
       // the dealer map of every name against its walls and flip, with Cowork's read of it.
-      var mmeHtml=(d.map?mcbSec(d.map,"The names"):'<div class="ed-sec"><div class="ed-k"><span>The names</span>'+
-                   '<span class="ed-n">no written read today</span></div><div class="ed-note">Cowork did not write a '+
-                   '\u201cThe names\u201d section in this brief. The table below is Phoenix\u2019s own read.</div></div>')+
-                  mcbPlateNames();
+      var mmeHtml='<div id="mcNamesRead"></div>'+(d.map?mcbSec(d.map,"The names"):'')+mcbPlateNames();
       host.innerHTML='<div class="mc-top"><button class="mc-tab" data-pane="brief">Daily Brief</button>'+
                      '<button class="mc-tab" data-pane="mme">MME</button></div>'+
                      '<div id="mcPaneBrief">'+html+'</div><div id="mcPaneMme" style="display:none">'+mmeHtml+'</div>';
@@ -10648,7 +10717,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           (nxt.time_et||nxt.time?" at "+(nxt.time_et||nxt.time):"")+'.</p>');
       }
       host.className="";
-      var _mme='<div class="ed-sec"><div class="ed-k"><span>The names</span><span class="ed-n">no written read today</span></div></div>'+mcbPlateNames();
+      var _mme='<div id="mcNamesRead"></div>'+mcbPlateNames();
       var _body = P.length?P.join("") : '<span class="mcna">Brief unavailable. Waiting on <code>macro.json</code> and <code>gex.json</code>.</span>';
       host.innerHTML='<div class="mc-top"><button class="mc-tab on" data-pane="brief">Daily Brief</button><button class="mc-tab" data-pane="mme">MME</button></div>'+
                      '<div id="mcPaneBrief">'+_body+'</div><div id="mcPaneMme" style="display:none">'+_mme+'</div>';
