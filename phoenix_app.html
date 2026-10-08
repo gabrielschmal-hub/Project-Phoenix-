@@ -1094,8 +1094,8 @@
   .mme-cal .it.earn.est .tag{border-style:dashed;opacity:.8} .mme-cal .it .wh{color:var(--ink)} .mme-cal .it.est .wh{color:var(--inkFade)}
   .tr-cash .v{display:flex;align-items:baseline;gap:12px} .tr-cash .v .cash{font-size:.8em;font-weight:700}
   .tr-cash .d b{color:var(--ink)} .tr-cash .d.sub{font-size:10.5px;opacity:.8;margin-top:2px}
-  .mme-gnote .hatch{display:inline-block;width:14px;height:10px;vertical-align:-1px;border:1px solid var(--inkFade);
-    background:repeating-linear-gradient(135deg,var(--inkFade) 0 2px,transparent 2px 5px)}
+  .mme-gnote .hatch{display:inline-block;width:16px;height:11px;vertical-align:-1px;border:1px solid #2a4aa0;
+    background:repeating-linear-gradient(135deg,#2a4aa0 0 2px,#cdd9f6 2px 5px)}
   .mme-gnote{font-family:var(--mono);font-size:12px;color:var(--inkFade);padding:2px 16px 10px}
   .mm-note{padding:14px 16px;font-size:16px;line-height:1.6;border-top:1px solid var(--line)} .mm-note b{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-right:6px}
   .nt-hd{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px} .nt-hd b{margin-right:4px}
@@ -10678,8 +10678,13 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
               totAll+=Math.abs(gv); if(isF) totF+=Math.abs(gv);
             });
             var ks=Object.keys(by).map(Number).sort(function(a,b){return a-b;});
-            function col(f,base,pat){ return {type:"bar",x:ks,y:ks.map(function(k){ return by[k][f]; }),marker:{color:base,line:{width:0},
-              pattern:pat?{shape:"/",fgcolor:"rgba(255,255,255,.75)",bgcolor:base,size:6,solidity:0.35}:undefined},
+            // The Friday segment: a pale tint of the bar's own colour with dark stripes in the same hue,
+            // outlined. Light-on-dark and dark-on-light both read: the contrast is inside the bar,
+            // not against the page.
+            var HATCH={"#6f8fd8":{bg:"#cdd9f6",fg:"#2a4aa0"},"#e39b2f":{bg:"#f7dcae",fg:"#9a5a00"}};
+            function col(f,base,pat){ var h=HATCH[base]; return {type:"bar",x:ks,y:ks.map(function(k){ return by[k][f]; }),
+              marker:pat?{color:h.bg,line:{width:1.2,color:h.fg},pattern:{shape:"/",fgcolor:h.fg,bgcolor:h.bg,size:7,solidity:0.4}}
+                        :{color:base,line:{width:0}},
               hovertemplate:"%{x}: %{y:.2f}M<extra>"+(pat?"expires "+(fri||"")+" ":"")+(f[0]==="c"?"calls":"puts")+"</extra>"}; }
             traces.push(col("cR","#6f8fd8",false)); traces.push(col("cF","#6f8fd8",true));
             traces.push(col("pR","#e39b2f",false)); traces.push(col("pF","#e39b2f",true));
