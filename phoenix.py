@@ -10653,13 +10653,16 @@ def _mme_uploaded():
     import os, json, glob
     from datetime import datetime
     cands = sorted(glob.glob(os.path.join(WIRE_DIR, "mme_map*.json")), key=os.path.getmtime)
-    if not cands:
-        return None, None
-    path = cands[-1]
-    try:
-        d = json.load(open(path, encoding="utf-8"))
-    except Exception as e:
-        print(f"[mmemap] {path}: unreadable ({e})")
+    d = path = None
+    for pth in reversed(cands):                      # newest file that actually carries levels
+        try:
+            x = json.load(open(pth, encoding="utf-8"))
+        except Exception as e:
+            print(f"[mmemap] {pth}: unreadable ({e})"); continue
+        nm = x.get("names") if isinstance(x.get("names"), list) else []
+        if any(isinstance(r, dict) and r.get("spot") and r.get("flip") for r in nm) or isinstance(x.get("groups"), dict):
+            d, path = x, pth; break
+    if d is None:
         return None, None
     raw = []
     if isinstance(d.get("names"), list):
@@ -10702,6 +10705,46 @@ def _mme_uploaded():
     print(f"[mmemap] uploaded {meta['path']} dated {meta['date']}: {len(rows)} usable rows"
           + (f", dropped {','.join(meta['dropped'])} (no spot/flip)" if meta["dropped"] else ""))
     return rows, meta
+
+
+def _mme_commentary():
+    """
+    Cowork's morning commentary for the MME page: one paragraph per ticker plus a headline and a
+    week calendar. Uploaded to wire/ as JSON (mme_map_YYYY-MM-DD.json or mme_notes*.json) with a
+    `names` list of {ticker, read, earnings, events, news, chart, tag, tag_level, held, sources}.
+    A file with levels in it is the levels override, not commentary, and is skipped here.
+    """
+    import os, json, glob
+    cands = sorted(set(glob.glob(os.path.join(WIRE_DIR, "mme_map*.json")) + glob.glob(os.path.join(WIRE_DIR, "mme_notes*.json"))),
+                   key=os.path.getmtime)
+    for pth in reversed(cands):
+        try:
+            d = json.load(open(pth, encoding="utf-8"))
+        except Exception:
+            continue
+        nm = d.get("names") if isinstance(d.get("names"), list) else []
+        if not nm or any(isinstance(r, dict) and r.get("spot") and r.get("flip") for r in nm):
+            continue
+        notes = {}
+        for r in nm:
+            tk = str(r.get("ticker") or r.get("name") or "").upper().strip()
+            text = (r.get("read") or r.get("text") or r.get("note") or "").strip()
+            if not tk or not text:
+                continue
+            e = r.get("earnings") if isinstance(r.get("earnings"), dict) else {}
+            notes[tk] = {"text": text, "held": bool(r.get("held")), "tag": r.get("tag"), "tag_level": r.get("tag_level"),
+                         "earnings": e.get("date"), "earnings_status": e.get("status"),
+                         "events": [ev for ev in (r.get("events") or []) if isinstance(ev, dict)][:6],
+                         "news": [nw for nw in (r.get("news") or []) if isinstance(nw, dict)][:6],
+                         "chart": r.get("chart") if isinstance(r.get("chart"), dict) else None,
+                         "sources": [x for x in (r.get("sources") or []) if isinstance(x, str)][:6]}
+        meta = {"file": os.path.basename(pth), "date": d.get("date"), "brief_date": d.get("brief_date") or d.get("built"),
+                "headline": d.get("headline"), "calendar": d.get("calendar"), "source": d.get("source"),
+                "held": d.get("held") or [t for t, v in notes.items() if v["held"]]}
+        print(f"[mmemap] commentary {meta['file']} for {meta['date']}: {len(notes)} names"
+              + (f", {sum(1 for v in notes.values() if v['tag'])} tagged" if notes else ""))
+        return notes, meta
+    return {}, None
 
 
 def run_mme_map():
@@ -10787,6 +10830,13 @@ def run_mme_map():
         else:
             missing.append(tk)
     out = sorted(rows.values(), key=lambda r: -r["dist_flip_em"])
+    try:
+        _notes, _notes_meta = _mme_commentary()
+    except Exception as e:
+        print(f"[mmemap] commentary unreadable: {e}"); _notes, _notes_meta = {}, None
+    _unmatched = sorted(set(_notes) - {r["ticker"] for r in out})
+    if _unmatched:
+        print(f"[mmemap] commentary for names not on the map: {','.join(_unmatched)}")
     groups = {k: [r for r in out if r["regime"] == k] for k in ("green", "amber", "red")}
     stand = [r for r in out if r["status"]]
     stand.sort(key=lambda r: {"ON FLIP": 0, "AT WALL": 1, "NEAR FLIP": 2, "NEARING WALL": 3}.get(r["status"], 9))
@@ -10808,7 +10858,8 @@ def run_mme_map():
         "note": "Regime: green = spot a full expected move or more above the flip; amber = above but within one move; "
                 "red = below the flip. Status: AT WALL within 0.25 moves of a wall, NEARING within one, ON FLIP within 0.15, "
                 "NEAR FLIP within one.",
-        "groups": groups, "standouts": stand})
+        "groups": groups, "standouts": stand,
+        "notes": _notes, "notes_meta": _notes_meta})
     print(f"[mmemap] {len(out)}/{len(names)} names ({n_up} from upload, {len(out)-n_up} from Phoenix) · green {len(groups['green'])} "
           f"amber {len(groups['amber'])} red {len(groups['red'])} · standouts {len(stand)} · missing {','.join(missing) or 'none'}")
     sb_heartbeat("mme_map", len(out) >= max(5, len(names) // 2),

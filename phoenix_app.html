@@ -1038,20 +1038,26 @@
   .mme-row .st{font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:var(--amber);text-align:right;font-weight:700;line-height:1.2}
   .mme-row .track{position:relative;height:3px;background:var(--line2);border-radius:2px;margin:0 6px}
   .mme-row .m{position:absolute;top:-4px;width:2px;height:11px;transform:translateX(-50%)}
-  .mme-row .m b,.mme-row .spot b{position:absolute;top:12px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9.5px;font-weight:600;white-space:nowrap;font-style:normal}
+  .mme-row .m b,.mme-row .spot b{position:absolute;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9.5px;font-weight:600;white-space:nowrap;font-style:normal}
+  .mme-row .m b.dn,.mme-row .spot b.dn{top:12px} .mme-row .m b.up,.mme-row .spot b.up{top:-15px}
   .mme-row .m.sup{background:#2fae66} .mme-row .m.sup b{color:#2fae66} .mme-row .m.res{background:#d0574a} .mme-row .m.res b{color:#d0574a}
-  .mme-row .m.flip{background:#c9a227} .mme-row .m.flip b{color:#c9a227;top:-14px}
-  .mme-row .spot{position:absolute;top:-5px;width:11px;height:11px;border-radius:50%;background:#2f8fd6;border:2px solid var(--card);transform:translateX(-50%);box-shadow:0 0 0 1px #2f8fd6}
-  .mme-row .spot b{color:#2f8fd6;top:-15px} .mme-row .spot.low b{top:12px}
+  .mme-row .m.flip{background:#c9a227} .mme-row .m.flip b{color:#c9a227}
+  .mme-row .spot{position:absolute;top:-5px;width:11px;height:11px;border-radius:50%;background:#2f8fd6;border:2px solid var(--card);transform:translateX(-50%);box-shadow:0 0 0 1px #2f8fd6;z-index:2}
+  .mme-row .spot b{color:#2f8fd6}
   .mme-graph{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}
   .mme-graph .gh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:var(--card2)}
   .mme-graph .gh .tk{font-size:18px;font-weight:800;cursor:pointer} .mme-graph .gh .tk i{font-style:normal;font-size:13px;color:var(--inkFade)}
   .mme-graph .gh .lv{font-family:var(--mono);font-size:11px;color:#2f8fd6;border:1px solid #2f8fd6;border-radius:5px;padding:1px 6px}
   .mme-graph .gh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--amber);font-weight:700}
   .mme-graph .mm-strip b{font-size:12px} .mme-graph .mm-strip i{font-size:8px}
-  .mme-plot{min-height:340px;padding:0 4px}
+  .mme-plot{min-height:400px;padding:0 4px}
   .mme-gnote{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:0 14px 8px}
   .mm-note{padding:12px 14px;font-size:14.5px;line-height:1.6;border-top:1px solid var(--line)} .mm-note b{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-right:6px}
+  .nt-hd{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px} .nt-hd b{margin-right:4px}
+  .nt-chip{font-family:var(--mono);font-size:10px;letter-spacing:.05em;padding:2px 7px;border-radius:5px;border:1px solid var(--line2);color:var(--inkFade)}
+  .nt-chip.held{border-color:var(--gold);color:var(--gold)} .nt-chip.info{border-color:#2f8fd6;color:#2f8fd6} .nt-chip.warn{border-color:var(--red);color:var(--red)}
+  .nt-more summary{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--inkFade);cursor:pointer;margin-top:8px}
+  .nt-more ul{margin:6px 0 0;padding-left:16px;font-size:13px;line-height:1.5} .nt-more li b{font-family:var(--mono);font-size:11px;margin-right:4px} .nt-more li i{color:var(--inkFade);font-size:11px}
   .mm-note.dim{color:var(--inkFade);font-size:12.5px} .mm-read{font-size:12.5px}
   .mme-q{width:100%;box-sizing:border-box;font-size:16px;padding:11px 14px;border-radius:10px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:var(--mono);margin-bottom:8px}
   .mme-tbl{overflow-x:auto;font-family:var(--mono);font-size:13px}
@@ -10490,12 +10496,17 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       function esc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
       function n2(v){ return v==null?"\u2014":(+v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
       function lv(v){ return v==null?"\u2014":(+v).toLocaleString(undefined,{maximumFractionDigits:2}); }
-      var lede=(MME_WIRE&&(MME_WIRE.title||MME_WIRE.note))?{headline:MME_WIRE.title,summary:MME_WIRE.note}:(d.read||null);
-      var notesBy={}; ((MME_WIRE&&MME_WIRE.items)||[]).forEach(function(it){
+      function esc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+      var nm=d.notes_meta||null;
+      var lede=(nm&&(nm.headline||nm.calendar))?{headline:nm.headline,summary:nm.calendar,src:nm.date}:
+               (MME_WIRE&&(MME_WIRE.title||MME_WIRE.note))?{headline:MME_WIRE.title,summary:MME_WIRE.note}:(d.read||null);
+      var notesFull=d.notes||{};
+      var notesBy={}; Object.keys(notesFull).forEach(function(t){ notesBy[t]=esc(notesFull[t].text); });
+      if(!Object.keys(notesBy).length) ((MME_WIRE&&MME_WIRE.items)||[]).forEach(function(it){
         var tk=(it.ticker||(String(it.html||"").match(/<b>([A-Z][A-Z0-9.\-]{0,6})<\/b>/)||[])[1]||"").toUpperCase();
         if(tk) notesBy[tk]=String(it.html||"").replace(/^\s*<b>[^<]*<\/b>\s*/,""); });
       body.innerHTML=
-        (lede&&(lede.headline||lede.summary)?'<div class="mme-lede">'+(lede.headline?'<div class="h">'+esc(lede.headline)+'</div>':'')+(lede.summary?'<div class="s">'+esc(lede.summary)+'</div>':'')+'</div>':'')+
+        (lede&&(lede.headline||lede.summary)?'<div class="mme-lede">'+(lede.headline?'<div class="h">'+esc(lede.headline)+'</div>':'')+(lede.summary?'<div class="s">'+esc(lede.summary).replace(/\.\s+(?=(Mon|Tue|Wed|Thu|Fri|Sat|Sun|Around|Week)\b)/g,".<br>")+'</div>':'')+'</div>':'')+
         '<div class="mme-graph"><div id="mmeGraphHd"></div><div id="mmePlot" class="mme-plot"></div><div class="mme-gnote" id="mmeGraphNote"></div><div id="mmeGraphRead"></div></div>'+
         '<div class="mme-maphd"><span class="mme-sk">The map <span id="mmeLiveNote"></span></span>'+
           '<input id="mmeQ" class="mme-q" placeholder="Search ticker\u2026" autocomplete="off" autocapitalize="characters" value="'+esc(MME_Q)+'"></div>'+
@@ -10508,18 +10519,33 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         var q=MME_Q.trim().toUpperCase(); if(q) rs=rs.filter(function(r){ return r.ticker.indexOf(q)>=0; });
         if(!rs.length){ host.innerHTML='<div class="ed-note">No match.</div>'; return; }
         host.innerHTML=rs.map(function(r){
-          var lo=Math.min(r.support!=null?r.support:r.spot, r.flip, r.spot), hi=Math.max(r.resist!=null?r.resist:r.spot, r.flip, r.spot), span=(hi-lo)||1;
+          var pts=[r.support,r.flip,r.resist,r.spot].filter(function(v){ return v!=null; });
+          var lo=Math.min.apply(null,pts), hi=Math.max.apply(null,pts), span=(hi-lo)||Math.max(r.spot*0.02,1);
           lo-=span*0.06; hi+=span*0.06; span=hi-lo;
-          function pos(v){ return Math.max(0,Math.min(100,(v-lo)/span*100)).toFixed(1)+"%"; }
+          function p(v){ return Math.max(0,Math.min(100,(v-lo)/span*100)); }
+          // labels: spot and flip above the track, support and resist below; a label that would land within
+          // ~11% of a neighbour on the same side moves to the other side, or is dropped if both are taken
+          var marks=[{k:"spot",v:r.spot,t:n2(r.spot)}];
+          if(r.flip!=null) marks.push({k:"flip",v:r.flip,t:lv(r.flip)});
+          if(r.support!=null) marks.push({k:"sup",v:r.support,t:lv(r.support)});
+          if(r.resist!=null) marks.push({k:"res",v:r.resist,t:lv(r.resist)});
+          var taken={up:[],dn:[]};
+          marks.forEach(function(m){
+            var pref=(m.k==="spot"||m.k==="flip")?"up":"dn", alt=pref==="up"?"dn":"up", x=p(m.v);
+            function free(side){ return taken[side].every(function(o){ return Math.abs(o-x)>11; }); }
+            m.side=free(pref)?pref:(free(alt)?alt:null); if(m.side) taken[m.side].push(x);
+          });
+          function lab(m){ return m.side?'<b class="'+m.side+'">'+m.t+'</b>':''; }
+          var by={}; marks.forEach(function(m){ by[m.k]=m; });
           return '<div class="mme-row reg-'+r.regime+(MME_SEL===r.ticker?' sel':'')+'" data-sel="'+r.ticker+'">'+
             '<span class="tk" data-open="'+r.ticker+'">'+r.ticker+'</span>'+
             '<div class="track">'+
-              (r.support!=null?'<i class="m sup" style="left:'+pos(r.support)+'"><b>'+lv(r.support)+'</b></i>':'')+
-              '<i class="m flip" style="left:'+pos(r.flip)+'"><b>'+lv(r.flip)+'</b></i>'+
-              (r.resist!=null?'<i class="m res" style="left:'+pos(r.resist)+'"><b>'+lv(r.resist)+'</b></i>':'')+
-              '<i class="spot'+(Math.abs(parseFloat(pos(r.spot))-parseFloat(pos(r.flip)))<14?' low':'')+'" style="left:'+pos(r.spot)+'"><b>'+n2(r.spot)+'</b></i>'+
+              (by.sup?'<i class="m sup" style="left:'+p(by.sup.v).toFixed(1)+'%">'+lab(by.sup)+'</i>':'')+
+              (by.flip?'<i class="m flip" style="left:'+p(by.flip.v).toFixed(1)+'%">'+lab(by.flip)+'</i>':'')+
+              (by.res?'<i class="m res" style="left:'+p(by.res.v).toFixed(1)+'%">'+lab(by.res)+'</i>':'')+
+              '<i class="spot" style="left:'+p(r.spot).toFixed(1)+'%">'+lab(by.spot)+'</i>'+
             '</div>'+
-            '<span class="st">'+(r.status?r.status.replace("NEARING ","NEAR "):"")+'</span></div>';
+            '<span class="st">'+(r.status?r.status.replace("NEARING ","NEAR "):(r.flip==null?"NO FLIP":""))+'</span></div>';
         }).join("");
         var ln=document.getElementById("mmeLiveNote");
         if(ln) ln.textContent=MME_LIVE_AT?"\u00b7 spot live "+new Date(MME_LIVE_AT).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):"\u00b7 spot from the file";
@@ -10539,16 +10565,27 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         var levelRead=r.read||(rd&&rd.text)||"", note=notesBy[r.ticker]||"";
         document.getElementById("mmeGraphRead").innerHTML=
           (levelRead?'<div class="mm-read'+(r.regime==="red"||r.status==="ON FLIP"?' warn':'')+'"><b>The read</b> '+esc(levelRead)+'</div>':'')+
-          (note?'<div class="mm-note"><b>What to know</b> '+note.replace(/<(?!\/?b>)[^>]*>/g,"")+'</div>':
+          (note?(function(){
+            var nf=notesFull[r.ticker]||{}, chips='';
+            if(nf.held) chips+='<span class="nt-chip held">held</span>';
+            if(nf.tag) chips+='<span class="nt-chip '+(nf.tag_level==="warn"?"warn":"info")+'">'+esc(nf.tag)+'</span>';
+            if(nf.earnings&&/^\d{4}-\d{2}/.test(String(nf.earnings))&&!nf.tag) chips+='<span class="nt-chip">earnings '+esc(nf.earnings)+(nf.earnings_status&&nf.earnings_status!=="confirmed"?" ("+esc(nf.earnings_status)+")":"")+'</span>';
+            var more=(nf.events||[]).map(function(e){ return '<li><b>'+esc(e.date)+'</b> '+esc(e.what)+'</li>'; }).join("")+
+                     (nf.news||[]).map(function(n){ return '<li><b>'+esc(n.date)+'</b> '+esc(n.fact)+(n.source?' <i>'+esc(n.source)+'</i>':'')+'</li>'; }).join("");
+            return '<div class="mm-note"><div class="nt-hd"><b>What to know</b>'+chips+'</div>'+note+
+              (more?'<details class="nt-more"><summary>Events and news</summary><ul>'+more+'</ul></details>':'')+'</div>';
+          })():
                 '<div class="mm-note dim"><b>What to know</b> No note for '+r.ticker+' in this morning\u2019s brief.</div>');
         function draw(ch){
           var el=document.getElementById("mmePlot"); if(!el||typeof Plotly==="undefined") return;
           var css=getComputedStyle(document.documentElement), ink=css.getPropertyValue("--inkFade").trim()||"#888", line=css.getPropertyValue("--line2").trim()||"#ddd";
-          // the window: every level plus one expected move either side, never wider than +/-12%
+          var c=ch&&ch.names&&ch.names[r.ticker];
+          // wide enough to see what sits beyond the walls: +/-12% around the LIVE spot, stretched to take in
+          // every level and two expected moves past it, never beyond the +/-15% the chain carries
           var lvls=[r.support,r.flip,r.resist,r.spot].filter(function(v){ return v!=null; });
-          var lo=Math.min.apply(null,lvls)-r.em, hi=Math.max.apply(null,lvls)+r.em;
-          lo=Math.max(lo, r.spot*0.88); hi=Math.min(hi, r.spot*1.12);
-          var traces=[], gn=document.getElementById("mmeGraphNote"), c=ch&&ch.names&&ch.names[r.ticker];
+          var lo=Math.min(r.spot*0.88, Math.min.apply(null,lvls)-2*r.em), hi=Math.max(r.spot*1.12, Math.max.apply(null,lvls)+2*r.em);
+          var cs=(c&&c.spot)||r.spot; lo=Math.max(lo, cs*0.85); hi=Math.min(hi, cs*1.15);
+          var traces=[], gn=document.getElementById("mmeGraphNote");
           if(c&&c.rows&&c.rows.length){
             var by={}, S=c.spot||r.spot;
             c.rows.forEach(function(x){ var k=x[2]; if(k<lo||k>hi) return; var gv=x[5]*x[3]*100*S*S*0.01/1e6; by[k]=by[k]||{c:0,p:0}; if(x[1]==="C") by[k].c+=gv; else by[k].p-=gv; });
@@ -10571,7 +10608,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
                       text:"<b>"+o.t+"</b> "+(o.t==="spot"?n2(o.x):lv(o.x)),font:{size:11,color:o.c},
                       bgcolor:css.getPropertyValue("--card").trim()||"#fff",borderpad:2});
           });
-          var layout={barmode:"relative",bargap:0.25,height:340,margin:{l:44,r:12,t:58,b:34},
+          if(c&&c.spot&&Math.abs(r.spot/c.spot-1)>0.12 && gn) gn.textContent+=" \u00b7 spot has moved "+((r.spot/c.spot-1)*100).toFixed(1)+"% since the chain was pulled \u2014 strikes beyond \u00b115% of the morning price are not on file";
+          var layout={barmode:"relative",bargap:0.2,height:400,margin:{l:44,r:12,t:58,b:34},
             paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},
             xaxis:{range:[lo,hi],gridcolor:line,zeroline:false,tickfont:{size:11}},
             yaxis:{gridcolor:line,zeroline:true,zerolinecolor:ink,tickfont:{size:10}},
