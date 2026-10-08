@@ -1083,6 +1083,8 @@
   .mme-graph .gh .st{margin-left:auto;font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;color:var(--amber);font-weight:700}
   .mme-graph .mm-strip div{padding:10px 6px} .mme-graph .mm-strip b{font-size:16px} .mme-graph .mm-strip i{font-size:10.5px;margin-bottom:3px}
   .mme-plot{min-height:400px;padding:0 4px}
+  .mme-gnote .hatch{display:inline-block;width:14px;height:10px;vertical-align:-1px;border:1px solid var(--inkFade);
+    background:repeating-linear-gradient(135deg,var(--inkFade) 0 2px,transparent 2px 5px)}
   .mme-gnote{font-family:var(--mono);font-size:12px;color:var(--inkFade);padding:2px 16px 10px}
   .mm-note{padding:14px 16px;font-size:16px;line-height:1.6;border-top:1px solid var(--line)} .mm-note b{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-right:6px}
   .nt-hd{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px} .nt-hd b{margin-right:4px}
@@ -10629,15 +10631,29 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           // every level and two expected moves past it, never beyond the +/-15% the chain carries
           var lvls=[r.support,r.flip,r.resist,r.spot].filter(function(v){ return v!=null; });
           var lo=Math.min(r.spot*0.88, Math.min.apply(null,lvls)-2*r.em), hi=Math.max(r.spot*1.12, Math.max.apply(null,lvls)+2*r.em);
-          var cs=(c&&c.spot)||r.spot; lo=Math.max(lo, cs*0.85); hi=Math.min(hi, cs*1.15);
+          var cs=(c&&c.spot)||r.spot; lo=Math.max(lo, cs*0.65); hi=Math.min(hi, cs*1.35);
           var traces=[], gn=document.getElementById("mmeGraphNote");
           if(c&&c.rows&&c.rows.length){
-            var by={}, S=c.spot||r.spot;
-            c.rows.forEach(function(x){ var k=x[2]; if(k<lo||k>hi) return; var gv=x[5]*x[3]*100*S*S*0.01/1e6; by[k]=by[k]||{c:0,p:0}; if(x[1]==="C") by[k].c+=gv; else by[k].p-=gv; });
+            // split each strike into what expires this Friday (hatched, like Elliott's chart) and the rest
+            var fri=(c.rows.map(function(x){ return x[0]; }).filter(function(e){ return new Date(e+"T12:00:00Z").getUTCDay()===5; }).sort()[0])||null;
+            var by={}, S=c.spot||r.spot, totF=0, totAll=0;
+            c.rows.forEach(function(x){
+              var k=x[2]; if(k<lo||k>hi) return;
+              var gv=x[5]*x[3]*100*S*S*0.01/1e6, isF=(fri&&x[0]===fri);
+              var b=by[k]=by[k]||{cR:0,cF:0,pR:0,pF:0};
+              if(x[1]==="C"){ if(isF) b.cF+=gv; else b.cR+=gv; } else { if(isF) b.pF-=gv; else b.pR-=gv; }
+              totAll+=Math.abs(gv); if(isF) totF+=Math.abs(gv);
+            });
             var ks=Object.keys(by).map(Number).sort(function(a,b){return a-b;});
-            traces.push({type:"bar",x:ks,y:ks.map(function(k){return by[k].c;}),name:"calls",marker:{color:"#6f8fd8"},hovertemplate:"%{x}: %{y:.2f}M<extra>calls</extra>"});
-            traces.push({type:"bar",x:ks,y:ks.map(function(k){return by[k].p;}),name:"puts",marker:{color:"#e39b2f"},hovertemplate:"%{x}: %{y:.2f}M<extra>puts</extra>"});
-            if(gn) gn.textContent="Dealer gamma by strike, $M per 1% move \u00b7 calls up, puts down \u00b7 "+(ch.date||"")+" chain";
+            function col(f,base,pat){ return {type:"bar",x:ks,y:ks.map(function(k){ return by[k][f]; }),marker:{color:base,line:{width:0},
+              pattern:pat?{shape:"/",fgcolor:"rgba(255,255,255,.75)",bgcolor:base,size:6,solidity:0.35}:undefined},
+              hovertemplate:"%{x}: %{y:.2f}M<extra>"+(pat?"expires "+(fri||"")+" ":"")+(f[0]==="c"?"calls":"puts")+"</extra>"}; }
+            traces.push(col("cR","#6f8fd8",false)); traces.push(col("cF","#6f8fd8",true));
+            traces.push(col("pR","#e39b2f",false)); traces.push(col("pF","#e39b2f",true));
+            var friLbl=fri?new Date(fri+"T12:00:00Z").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"}):null;
+            if(gn) gn.innerHTML="Dealer gamma by strike, $M per 1% move \u00b7 calls up, puts down"+
+              (fri?" \u00b7 <span class=\"hatch\"></span> hatched = expires "+friLbl+" ("+(totAll?Math.round(totF/totAll*100):0)+"% of the gamma in view)":"")+
+              " \u00b7 "+(ch.date||"")+" chain";
           } else {
             traces.push({type:"scatter",x:[lo,hi],y:[0,0],mode:"lines",line:{color:line,width:1},hoverinfo:"skip"});
             if(gn) gn.textContent="Levels only \u2014 no chain file on hand yet.";
@@ -10653,7 +10669,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
                       text:"<b>"+o.t+"</b> "+(o.t==="spot"?n2(o.x):lv(o.x)),font:{size:13,color:o.c},
                       bgcolor:css.getPropertyValue("--card").trim()||"#fff",borderpad:2});
           });
-          if(c&&c.spot&&Math.abs(r.spot/c.spot-1)>0.12 && gn) gn.textContent+=" \u00b7 spot has moved "+((r.spot/c.spot-1)*100).toFixed(1)+"% since the chain was pulled \u2014 strikes beyond \u00b115% of the morning price are not on file";
+          if(c&&c.spot&&Math.abs(r.spot/c.spot-1)>0.25 && gn) gn.textContent+=" \u00b7 spot has moved "+((r.spot/c.spot-1)*100).toFixed(1)+"% since the chain was pulled \u2014 strikes beyond \u00b135% of the morning price are not on file";
           var layout={barmode:"relative",bargap:0.2,height:400,margin:{l:48,r:14,t:64,b:38},
             paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},
             xaxis:{range:[lo,hi],gridcolor:line,zeroline:false,tickfont:{size:13}},

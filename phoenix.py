@@ -8780,7 +8780,7 @@ GEX_UNIVERSE = {
     "seed": ["AAPL", "ALAB", "AMD", "AMZN", "ARM", "AVGO", "CRWD", "GOOG",
              "HOOD", "IBIT", "IBM", "INTC", "LRCX", "META", "MP", "MRVL",
              "MSFT", "MU", "NVDA", "ORCL", "PLTR", "QCOM", "SNDK", "SNOW",
-             "SOFI", "TSLA",
+             "SOFI", "TSLA", "SPCX",
              "SPY"],
     "seed_source": "GEX Daily Briefing 2026-07-02 .. 2026-08-13 (22 briefings, 26 tickers each)",
     # kept as a ceiling only; the list above is 26 and there is no fill
@@ -10574,7 +10574,7 @@ def _mme_compute_from_chains(ch):
         if len(contracts) < 20:
             continue
         try:
-            flip, net_B, meta = mme_flip_net(contracts, spot, scrape)
+            flip, net_B, meta = mme_flip_net(contracts, spot, scrape, lo_mult=0.6, hi_mult=1.4, n_pts=200, nearest=True)
             walls = mme_walls(contracts, spot, grid=_stock_grid(spot), prox_pct=0.15)
         except Exception as e:
             print(f"[mmemap] {tk}: compute failed ({e})"); continue
@@ -10874,7 +10874,7 @@ def run_mme_map():
 # Compact rows so 27 names stay a few MB. Cowork computes from this; the numbers stay
 # its own, the data is the same chain Elliott reads.
 # ============================================================
-def run_mme_chains(max_dte=180, band=0.15):
+def run_mme_chains(max_dte=180, band=0.35):
     import os, json, time, re
     from datetime import datetime, timezone, date
     names = []
@@ -11239,7 +11239,7 @@ def _mme_contracts_from_chain(chain, scrape_date):
     return out, skipped
 
 
-def mme_flip_net(contracts, spot, scrape_date):
+def mme_flip_net(contracts, spot, scrape_date, lo_mult=0.8, hi_mult=1.2, n_pts=120, nearest=False):
     """
     PATH 1. Sweep L over linspace(0.8*spot, 1.2*spot, 120); at each L recompute
     every contract's BS gamma from its own IV (sticky-strike) and dollar terms
@@ -11275,18 +11275,24 @@ def mme_flip_net(contracts, spot, scrape_date):
             s += w * math.exp(-0.5 * d1 * d1)
         return s * L * _MME_INV_SQRT2PI      # OI*100*L^2*0.01*gamma folds to this
 
-    lo, hi, n = 0.8 * spot, 1.2 * spot, 120
+    lo, hi, n = lo_mult * spot, hi_mult * spot, n_pts
     step = (hi - lo) / (n - 1)
     flip, prevL, prevG = None, None, None
+    crossings = []
     for i in range(n):
         L = lo + i * step
         g = curve(L)
         if prevG is not None and (prevG == 0 or (prevG < 0) != (g < 0)):
             K_neg, g_neg = (prevL, prevG) if prevG < 0 else (L, g)
             K_pos, g_pos = (L, g) if g > 0 else (prevL, prevG)
-            flip = K_pos - (K_pos - K_neg) * g_pos / (g_pos - g_neg)
-            break
+            crossings.append(K_pos - (K_pos - K_neg) * g_pos / (g_pos - g_neg))
+            if not nearest:
+                break
         prevL, prevG = L, g
+    if crossings:
+        # SPX keeps Elliott's "first sign change from the bottom". A single stock's curve can cross more
+        # than once (a put cluster far below spot); for stocks the flip is the crossing nearest spot.
+        flip = min(crossings, key=lambda x: abs(x - spot)) if nearest else crossings[0]
     net_B = curve(spot) / 1e9
     return flip, round(net_B, 2), {"grid": n, "iv_skipped": iv_skipped,
                                    "expiries": len(tcache)}
