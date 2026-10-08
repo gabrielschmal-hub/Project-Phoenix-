@@ -1,64 +1,64 @@
 {
- "n": 221,
- "e_price_R": -0.444,
- "stop_hit": 0.566,
- "median_mfe_R": 0.37,
- "win_20d": 0.276,
+ "n": 232,
+ "e_price_R": -0.454,
+ "stop_hit": 0.573,
+ "median_mfe_R": 0.36,
+ "win_20d": 0.272,
  "fails": [
-  "E_price -0.444R < 0.054R",
-  "median MFE 0.37R < 1R (never reaches breakeven)"
+  "E_price -0.454R < 0.054R",
+  "median MFE 0.36R < 1R (never reaches breakeven)"
  ],
  "verdict": "STOP",
  "decision_variable": "2.5x ATR, stop only, 20 bars",
  "atr_grid": {
   "1.5x": {
-   "n": 221,
-   "E_stop_R": -0.522,
-   "E_tp2_R": -0.49,
-   "E_tp3_R": -0.508,
-   "stop_hit": 0.76,
-   "tp2_first": 0.109,
-   "tp3_first": 0.05,
-   "median_mfe_R": 0.61
+   "n": 232,
+   "E_stop_R": -0.529,
+   "E_tp2_R": -0.497,
+   "E_tp3_R": -0.509,
+   "stop_hit": 0.763,
+   "tp2_first": 0.108,
+   "tp3_first": 0.052,
+   "median_mfe_R": 0.6
   },
   "2.0x": {
-   "n": 221,
-   "E_stop_R": -0.5,
-   "E_tp2_R": -0.497,
+   "n": 232,
+   "E_stop_R": -0.506,
+   "E_tp2_R": -0.5,
    "E_tp3_R": -0.473,
-   "stop_hit": 0.665,
-   "tp2_first": 0.063,
-   "tp3_first": 0.036,
-   "median_mfe_R": 0.46
+   "stop_hit": 0.668,
+   "tp2_first": 0.065,
+   "tp3_first": 0.039,
+   "median_mfe_R": 0.45
   },
   "2.5x": {
-   "n": 221,
-   "E_stop_R": -0.444,
-   "E_tp2_R": -0.44,
-   "E_tp3_R": -0.419,
-   "stop_hit": 0.566,
-   "tp2_first": 0.05,
-   "tp3_first": 0.018,
-   "median_mfe_R": 0.37
+   "n": 232,
+   "E_stop_R": -0.454,
+   "E_tp2_R": -0.445,
+   "E_tp3_R": -0.421,
+   "stop_hit": 0.573,
+   "tp2_first": 0.052,
+   "tp3_first": 0.022,
+   "median_mfe_R": 0.36
   }
  },
  "lenses": {
   "sector": [
    {
     "group": "Health technology",
-    "n": 48,
+    "n": 49,
     "thin": false,
-    "E_stop_R": -0.485,
-    "stop_hit": 0.625,
-    "tp2_first": 0.021,
+    "E_stop_R": -0.454,
+    "stop_hit": 0.612,
+    "tp2_first": 0.041,
     "median_mfe_R": 0.47
    },
    {
     "group": "Finance",
-    "n": 35,
+    "n": 36,
     "thin": false,
-    "E_stop_R": -0.771,
-    "stop_hit": 0.657,
+    "E_stop_R": -0.777,
+    "stop_hit": 0.667,
     "tp2_first": 0.0,
     "median_mfe_R": 0.19
    },
@@ -73,10 +73,10 @@
    },
    {
     "group": "Energy minerals",
-    "n": 20,
+    "n": 21,
     "thin": false,
-    "E_stop_R": -0.227,
-    "stop_hit": 0.35,
+    "E_stop_R": -0.264,
+    "stop_hit": 0.381,
     "tp2_first": 0.0,
     "median_mfe_R": 0.63
    },
@@ -91,12 +91,21 @@
    },
    {
     "group": "Miscellaneous",
-    "n": 14,
+    "n": 15,
     "thin": true,
-    "E_stop_R": -0.969,
-    "stop_hit": 0.929,
+    "E_stop_R": -0.899,
+    "stop_hit": 0.867,
     "tp2_first": 0.0,
     "median_mfe_R": 0.15
+   },
+   {
+    "group": "Industrial services",
+    "n": 13,
+    "thin": true,
+    "E_stop_R": -1.0,
+    "stop_hit": 1.0,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.23
    },
    {
     "group": "Technology services",
@@ -106,15 +115,6 @@
     "stop_hit": 0.364,
     "tp2_first": 0.0,
     "median_mfe_R": 0.41
-   },
-   {
-    "group": "Industrial services",
-    "n": 10,
-    "thin": true,
-    "E_stop_R": -1.0,
-    "stop_hit": 1.0,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.33
    },
    {
     "group": "Consumer services",
@@ -153,6 +153,15 @@
     "median_mfe_R": 0.3
    },
    {
+    "group": "Communications",
+    "n": 4,
+    "thin": true,
+    "E_stop_R": 0.221,
+    "stop_hit": 0.5,
+    "tp2_first": 0.25,
+    "median_mfe_R": 0.91
+   },
+   {
     "group": "Process industries",
     "n": 3,
     "thin": true,
@@ -163,16 +172,16 @@
    },
    {
     "group": "Utilities",
-    "n": 2,
+    "n": 3,
     "thin": true,
     "E_stop_R": -1.0,
     "stop_hit": 1.0,
     "tp2_first": 0.0,
-    "median_mfe_R": 0.42
+    "median_mfe_R": 0.13
    },
    {
     "group": "Retail trade",
-    "n": 2,
+    "n": 3,
     "thin": true,
     "E_stop_R": -1.0,
     "stop_hit": 1.0,
@@ -187,15 +196,6 @@
     "stop_hit": 0.5,
     "tp2_first": 0.0,
     "median_mfe_R": 0.5
-   },
-   {
-    "group": "Communications",
-    "n": 2,
-    "thin": true,
-    "E_stop_R": 1.052,
-    "stop_hit": 0.5,
-    "tp2_first": 0.5,
-    "median_mfe_R": 3.67
    },
    {
     "group": "Distribution services",
@@ -218,6 +218,15 @@
   ],
   "industry": [
    {
+    "group": "Biotechnology",
+    "n": 26,
+    "thin": false,
+    "E_stop_R": -0.467,
+    "stop_hit": 0.654,
+    "tp2_first": 0.038,
+    "median_mfe_R": 0.51
+   },
+   {
     "group": "Marine shipping",
     "n": 25,
     "thin": false,
@@ -225,15 +234,6 @@
     "stop_hit": 0.12,
     "tp2_first": 0.32,
     "median_mfe_R": 1.33
-   },
-   {
-    "group": "Biotechnology",
-    "n": 25,
-    "thin": false,
-    "E_stop_R": -0.527,
-    "stop_hit": 0.68,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.47
    },
    {
     "group": "Pharmaceuticals: major",
@@ -246,10 +246,10 @@
    },
    {
     "group": "Investment trusts",
-    "n": 14,
+    "n": 15,
     "thin": true,
-    "E_stop_R": -0.969,
-    "stop_hit": 0.929,
+    "E_stop_R": -0.899,
+    "stop_hit": 0.867,
     "tp2_first": 0.0,
     "median_mfe_R": 0.15
    },
@@ -263,15 +263,6 @@
     "median_mfe_R": 0.15
    },
    {
-    "group": "Integrated oil",
-    "n": 10,
-    "thin": true,
-    "E_stop_R": -0.541,
-    "stop_hit": 0.5,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.47
-   },
-   {
     "group": "Packaged software",
     "n": 10,
     "thin": true,
@@ -279,6 +270,15 @@
     "stop_hit": 0.3,
     "tp2_first": 0.0,
     "median_mfe_R": 0.41
+   },
+   {
+    "group": "Integrated oil",
+    "n": 10,
+    "thin": true,
+    "E_stop_R": -0.541,
+    "stop_hit": 0.5,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.47
    },
    {
     "group": "Other metals/Minerals",
@@ -299,6 +299,24 @@
     "median_mfe_R": 1.03
    },
    {
+    "group": "Oil & gas pipelines",
+    "n": 8,
+    "thin": true,
+    "E_stop_R": -1.0,
+    "stop_hit": 1.0,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.27
+   },
+   {
+    "group": "Investment managers",
+    "n": 7,
+    "thin": true,
+    "E_stop_R": -0.941,
+    "stop_hit": 0.857,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.05
+   },
+   {
     "group": "Regional banks",
     "n": 7,
     "thin": true,
@@ -306,24 +324,6 @@
     "stop_hit": 0.429,
     "tp2_first": 0.0,
     "median_mfe_R": 0.21
-   },
-   {
-    "group": "Investment managers",
-    "n": 6,
-    "thin": true,
-    "E_stop_R": -0.932,
-    "stop_hit": 0.833,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.18
-   },
-   {
-    "group": "Oil & gas pipelines",
-    "n": 6,
-    "thin": true,
-    "E_stop_R": -1.0,
-    "stop_hit": 1.0,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.33
    },
    {
     "group": "Medical/Nursing services",
@@ -371,6 +371,15 @@
     "median_mfe_R": 0.61
    },
    {
+    "group": "Wireless telecommunications",
+    "n": 4,
+    "thin": true,
+    "E_stop_R": 0.221,
+    "stop_hit": 0.5,
+    "tp2_first": 0.25,
+    "median_mfe_R": 0.91
+   },
+   {
     "group": "Chemicals: agricultural",
     "n": 3,
     "thin": true,
@@ -407,6 +416,15 @@
     "median_mfe_R": 0.74
    },
    {
+    "group": "Oil & gas production",
+    "n": 2,
+    "thin": true,
+    "E_stop_R": -1.0,
+    "stop_hit": 1.0,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.82
+   },
+   {
     "group": "Other consumer services",
     "n": 2,
     "thin": true,
@@ -414,6 +432,15 @@
     "stop_hit": 1.0,
     "tp2_first": 0.0,
     "median_mfe_R": 0.11
+   },
+   {
+    "group": "Discount stores",
+    "n": 2,
+    "thin": true,
+    "E_stop_R": -1.0,
+    "stop_hit": 1.0,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.21
    },
    {
     "group": "Electronics/Appliances",
@@ -432,15 +459,6 @@
     "stop_hit": 1.0,
     "tp2_first": 0.5,
     "median_mfe_R": 16.13
-   },
-   {
-    "group": "Wireless telecommunications",
-    "n": 2,
-    "thin": true,
-    "E_stop_R": 1.052,
-    "stop_hit": 0.5,
-    "tp2_first": 0.5,
-    "median_mfe_R": 3.67
    },
    {
     "group": "Finance/Rental/Leasing",
@@ -470,6 +488,15 @@
     "median_mfe_R": -0.1
    },
    {
+    "group": "Oilfield services/Equipment",
+    "n": 2,
+    "thin": true,
+    "E_stop_R": -1.0,
+    "stop_hit": 1.0,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.23
+   },
+   {
     "group": "Publishing: books/magazines",
     "n": 2,
     "thin": true,
@@ -477,6 +504,15 @@
     "stop_hit": 1.0,
     "tp2_first": 0.0,
     "median_mfe_R": 0.37
+   },
+   {
+    "group": "Water utilities",
+    "n": 2,
+    "thin": true,
+    "E_stop_R": -1.0,
+    "stop_hit": 1.0,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.42
    },
    {
     "group": "Gas distributors",
@@ -497,13 +533,13 @@
     "median_mfe_R": 0.07
    },
    {
-    "group": "Oil & gas production",
+    "group": "Personnel services",
     "n": 1,
     "thin": true,
     "E_stop_R": -1.0,
     "stop_hit": 1.0,
     "tp2_first": 0.0,
-    "median_mfe_R": 0.35
+    "median_mfe_R": 0.19
    },
    {
     "group": "Food distributors",
@@ -515,13 +551,13 @@
     "median_mfe_R": 0.31
    },
    {
-    "group": "Personnel services",
+    "group": "Hotels/Resorts/Cruise lines",
     "n": 1,
     "thin": true,
     "E_stop_R": -1.0,
     "stop_hit": 1.0,
     "tp2_first": 0.0,
-    "median_mfe_R": 0.19
+    "median_mfe_R": 0.22
    },
    {
     "group": "Casinos/Gaming",
@@ -531,24 +567,6 @@
     "stop_hit": 1.0,
     "tp2_first": 0.0,
     "median_mfe_R": 0.28
-   },
-   {
-    "group": "Discount stores",
-    "n": 1,
-    "thin": true,
-    "E_stop_R": -1.0,
-    "stop_hit": 1.0,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.07
-   },
-   {
-    "group": "Hotels/Resorts/Cruise lines",
-    "n": 1,
-    "thin": true,
-    "E_stop_R": -1.0,
-    "stop_hit": 1.0,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.22
    },
    {
     "group": "Air freight/Couriers",
@@ -585,24 +603,6 @@
     "stop_hit": 1.0,
     "tp2_first": 0.0,
     "median_mfe_R": 0.27
-   },
-   {
-    "group": "Oilfield services/Equipment",
-    "n": 1,
-    "thin": true,
-    "E_stop_R": -1.0,
-    "stop_hit": 1.0,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.23
-   },
-   {
-    "group": "Water utilities",
-    "n": 1,
-    "thin": true,
-    "E_stop_R": -1.0,
-    "stop_hit": 1.0,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.42
    },
    {
     "group": "Multi-line insurance",
@@ -644,29 +644,29 @@
   "profitability": [
    {
     "group": "profitable",
-    "n": 131,
+    "n": 137,
     "thin": false,
-    "E_stop_R": -0.459,
-    "stop_hit": 0.55,
-    "tp2_first": 0.031,
-    "median_mfe_R": 0.33
+    "E_stop_R": -0.483,
+    "stop_hit": 0.569,
+    "tp2_first": 0.029,
+    "median_mfe_R": 0.28
    },
    {
     "group": "marginal",
-    "n": 32,
+    "n": 33,
     "thin": false,
-    "E_stop_R": -0.165,
-    "stop_hit": 0.531,
-    "tp2_first": 0.125,
+    "E_stop_R": -0.129,
+    "stop_hit": 0.515,
+    "tp2_first": 0.152,
     "median_mfe_R": 0.42
    },
    {
     "group": "unknown",
-    "n": 28,
+    "n": 30,
     "thin": false,
-    "E_stop_R": -0.57,
-    "stop_hit": 0.571,
-    "tp2_first": 0.071,
+    "E_stop_R": -0.537,
+    "stop_hit": 0.533,
+    "tp2_first": 0.067,
     "median_mfe_R": 0.38
    },
    {
@@ -680,11 +680,11 @@
    },
    {
     "group": "investing",
-    "n": 13,
+    "n": 15,
     "thin": true,
-    "E_stop_R": -0.264,
-    "stop_hit": 0.462,
-    "tp2_first": 0.077,
+    "E_stop_R": -0.362,
+    "stop_hit": 0.533,
+    "tp2_first": 0.067,
     "median_mfe_R": 0.44
    }
   ],
@@ -692,29 +692,29 @@
   "atr": [
    {
     "group": "2-4%",
-    "n": 102,
+    "n": 107,
     "thin": false,
-    "E_stop_R": -0.421,
-    "stop_hit": 0.598,
-    "tp2_first": 0.098,
-    "median_mfe_R": 0.39
+    "E_stop_R": -0.441,
+    "stop_hit": 0.607,
+    "tp2_first": 0.093,
+    "median_mfe_R": 0.37
    },
    {
     "group": "4-7%",
-    "n": 83,
+    "n": 84,
     "thin": false,
-    "E_stop_R": -0.368,
-    "stop_hit": 0.458,
-    "tp2_first": 0.0,
+    "E_stop_R": -0.351,
+    "stop_hit": 0.452,
+    "tp2_first": 0.012,
     "median_mfe_R": 0.38
    },
    {
     "group": "<2%",
-    "n": 30,
+    "n": 35,
     "thin": false,
-    "E_stop_R": -0.926,
-    "stop_hit": 0.867,
-    "tp2_first": 0.033,
+    "E_stop_R": -0.906,
+    "stop_hit": 0.857,
+    "tp2_first": 0.029,
     "median_mfe_R": 0.22
    },
    {
@@ -730,11 +730,11 @@
   "regime": [
    {
     "group": "POLICY_TIGHTENING",
-    "n": 43,
+    "n": 54,
     "thin": false,
-    "E_stop_R": -0.382,
-    "stop_hit": 0.581,
-    "tp2_first": 0.07,
+    "E_stop_R": -0.436,
+    "stop_hit": 0.611,
+    "tp2_first": 0.074,
     "median_mfe_R": 0.27
    },
    {
@@ -759,33 +759,33 @@
    },
    {
     "group": "negative",
-    "n": 21,
+    "n": 32,
     "thin": false,
-    "E_stop_R": -0.022,
-    "stop_hit": 0.429,
-    "tp2_first": 0.143,
+    "E_stop_R": -0.237,
+    "stop_hit": 0.531,
+    "tp2_first": 0.125,
     "median_mfe_R": 0.27
    }
   ],
   "spx_vs_200d": [
    {
     "group": "above 200d",
-    "n": 221,
+    "n": 232,
     "thin": false,
-    "E_stop_R": -0.444,
-    "stop_hit": 0.566,
-    "tp2_first": 0.05,
+    "E_stop_R": -0.454,
+    "stop_hit": 0.573,
+    "tp2_first": 0.052,
     "median_mfe_R": 0.37
    }
   ],
   "breakout": [
    {
     "group": "no breakout",
-    "n": 192,
+    "n": 203,
     "thin": false,
-    "E_stop_R": -0.44,
-    "stop_hit": 0.578,
-    "tp2_first": 0.052,
+    "E_stop_R": -0.451,
+    "stop_hit": 0.586,
+    "tp2_first": 0.054,
     "median_mfe_R": 0.38
    },
    {
@@ -801,20 +801,20 @@
   "days_on_list": [
    {
     "group": "6+",
-    "n": 166,
+    "n": 175,
     "thin": false,
-    "E_stop_R": -0.444,
-    "stop_hit": 0.566,
-    "tp2_first": 0.042,
-    "median_mfe_R": 0.4
+    "E_stop_R": -0.457,
+    "stop_hit": 0.577,
+    "tp2_first": 0.046,
+    "median_mfe_R": 0.38
    },
    {
     "group": "day 1",
-    "n": 27,
+    "n": 29,
     "thin": false,
-    "E_stop_R": -0.413,
-    "stop_hit": 0.63,
-    "tp2_first": 0.111,
+    "E_stop_R": -0.416,
+    "stop_hit": 0.621,
+    "tp2_first": 0.103,
     "median_mfe_R": 0.33
    },
    {
@@ -830,44 +830,44 @@
   "time_in_trade": [
    {
     "group": "held 20",
-    "n": 96,
+    "n": 99,
     "thin": false,
-    "E_stop_R": 0.279,
+    "E_stop_R": 0.28,
     "stop_hit": 0.0,
-    "tp2_first": 0.104,
+    "tp2_first": 0.111,
     "median_mfe_R": 0.74
    },
    {
     "group": "stopped d4-10",
-    "n": 61,
+    "n": 63,
     "thin": false,
     "E_stop_R": -1.0,
     "stop_hit": 1.0,
     "tp2_first": 0.0,
-    "median_mfe_R": 0.18
+    "median_mfe_R": 0.19
    },
    {
     "group": "stopped d11-20",
-    "n": 50,
+    "n": 53,
     "thin": false,
     "E_stop_R": -1.0,
     "stop_hit": 1.0,
-    "tp2_first": 0.02,
-    "median_mfe_R": 0.23
+    "tp2_first": 0.019,
+    "median_mfe_R": 0.22
    },
    {
     "group": "stopped d1-3",
-    "n": 14,
+    "n": 17,
     "thin": true,
     "E_stop_R": -1.0,
     "stop_hit": 1.0,
     "tp2_first": 0.0,
-    "median_mfe_R": 0.27
+    "median_mfe_R": 0.18
    }
   ]
  },
  "min_cell": 20,
  "logged_new": 303,
- "asof": "2026-10-07T13:17",
+ "asof": "2026-10-08T10:51",
  "note": "1.5x and 2.0x and the target policies are descriptive. The pre-registered verdict is the 2.5x stop-only column; choosing the best cell after the fact is not a result."
 }
