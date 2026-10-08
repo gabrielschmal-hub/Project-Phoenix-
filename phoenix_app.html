@@ -1024,27 +1024,33 @@
   .pxaccts[hidden]{display:none!important}   /* the profile popover is the one control; the chips only hold state */
   .hero-who{margin-top:14px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--inkFade)} .hero-who a{color:var(--gold)}
   .tb-auth{display:block!important;margin-left:6px}
-  .mme-lede{border-left:3px solid var(--gold);padding:10px 14px;margin:4px 0 16px;background:var(--card2);border-radius:0 10px 10px 0}
-  .mme-lede .h{font-size:17px;font-weight:700;line-height:1.35} .mme-lede .s{font-size:14px;color:var(--inkFade);margin-top:6px;line-height:1.5}
-  .mme-sk{font-family:var(--mono);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink);font-weight:700;margin:20px 0 10px}
-  .mme-sk span{color:var(--inkFade);font-weight:400;letter-spacing:.04em;text-transform:none}
-  .mme-map{display:flex;flex-direction:column;gap:2px}
-  .mme-row{display:grid;grid-template-columns:62px 1fr 92px;align-items:center;gap:10px;padding:12px 8px 20px;border-radius:9px;cursor:pointer;border-left:4px solid var(--line2)}
-  .mme-row:hover{background:var(--card2)} .mme-row.sel{background:var(--card2);outline:1px solid var(--gold)}
+  .mme-lede{border-left:3px solid var(--gold);padding:8px 12px;margin:2px 0 14px;background:var(--card2);border-radius:0 8px 8px 0}
+  .mme-lede .h{font-size:15px;font-weight:700;line-height:1.35} .mme-lede .s{font-size:12.5px;color:var(--inkFade);margin-top:3px}
+  .mme-sk{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink);font-weight:700}
+  .mme-sk span{color:var(--inkFade);font-weight:400;letter-spacing:.03em;text-transform:none}
+  .mme-maphd{display:flex;align-items:center;gap:12px;margin:22px 0 8px;flex-wrap:wrap} .mme-maphd .mme-sk{flex:1;min-width:160px}
+  .mme-q{flex:0 1 240px;font-size:14px;padding:7px 12px;border-radius:8px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:var(--mono)}
+  .mme-map{column-gap:26px} @media(min-width:1000px){.mme-map{columns:2}} .mme-map .mme-row{break-inside:avoid}
+  .mme-row{display:grid;grid-template-columns:52px 1fr 64px;align-items:center;gap:8px;padding:15px 6px 15px 8px;cursor:pointer;border-left:3px solid var(--line2);border-bottom:1px solid var(--line2)}
+  .mme-row:hover{background:var(--card2)} .mme-row.sel{background:var(--card2);box-shadow:inset 0 0 0 1px var(--gold)}
   .mme-row.reg-green{border-left-color:#2fae66} .mme-row.reg-amber{border-left-color:#d79a2b} .mme-row.reg-red{border-left-color:#d0574a}
-  .mme-row .tk{font-weight:800;font-size:16px;letter-spacing:.02em} .mme-row .tk:hover,.mme-tbl .tk:hover,.gh .tk:hover{color:var(--gold);text-decoration:underline}
-  .mme-row .st{font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--amber);text-align:right;font-weight:700}
-  .mme-row .track{position:relative;height:6px;background:var(--line2);border-radius:3px}
-  .mme-row .m{position:absolute;top:-5px;width:3px;height:16px;border-radius:2px;transform:translateX(-50%)}
-  .mme-row .m b,.mme-row .spot b{position:absolute;top:18px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:10.5px;font-weight:600;white-space:nowrap}
+  .mme-row .tk{font-weight:800;font-size:13.5px;letter-spacing:.02em} .mme-row .tk:hover,.gh .tk:hover{color:var(--gold)}
+  .mme-row .st{font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:var(--amber);text-align:right;font-weight:700;line-height:1.2}
+  .mme-row .track{position:relative;height:3px;background:var(--line2);border-radius:2px;margin:0 6px}
+  .mme-row .m{position:absolute;top:-4px;width:2px;height:11px;transform:translateX(-50%)}
+  .mme-row .m b,.mme-row .spot b{position:absolute;top:12px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9.5px;font-weight:600;white-space:nowrap;font-style:normal}
   .mme-row .m.sup{background:#2fae66} .mme-row .m.sup b{color:#2fae66} .mme-row .m.res{background:#d0574a} .mme-row .m.res b{color:#d0574a}
-  .mme-row .m.flip{background:#e3c13a} .mme-row .m.flip b{color:#e3c13a;top:-17px}
-  .mme-row .spot{position:absolute;top:-6px;width:18px;height:18px;border-radius:50%;background:#4aa3df;border:3px solid var(--card);transform:translateX(-50%)}
-  .mme-row .spot b{color:#4aa3df;top:-19px}
+  .mme-row .m.flip{background:#c9a227} .mme-row .m.flip b{color:#c9a227;top:-14px}
+  .mme-row .spot{position:absolute;top:-5px;width:11px;height:11px;border-radius:50%;background:#2f8fd6;border:2px solid var(--card);transform:translateX(-50%);box-shadow:0 0 0 1px #2f8fd6}
+  .mme-row .spot b{color:#2f8fd6;top:-15px} .mme-row .spot.low b{top:12px}
   .mme-graph{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}
-  .mme-graph .gh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;background:var(--card2)} .mme-graph .gh .tk{font-size:20px;font-weight:800;cursor:pointer}
-  .mme-graph .gh .st{margin-left:auto;font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--amber);font-weight:700}
-  .mme-plot{min-height:300px;padding:4px 6px}
+  .mme-graph .gh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:var(--card2)}
+  .mme-graph .gh .tk{font-size:18px;font-weight:800;cursor:pointer} .mme-graph .gh .tk i{font-style:normal;font-size:13px;color:var(--inkFade)}
+  .mme-graph .gh .lv{font-family:var(--mono);font-size:11px;color:#2f8fd6;border:1px solid #2f8fd6;border-radius:5px;padding:1px 6px}
+  .mme-graph .gh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--amber);font-weight:700}
+  .mme-graph .mm-strip b{font-size:12px} .mme-graph .mm-strip i{font-size:8px}
+  .mme-plot{min-height:340px;padding:0 4px}
+  .mme-gnote{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:0 14px 8px}
   .mm-note{padding:12px 14px;font-size:14.5px;line-height:1.6;border-top:1px solid var(--line)} .mm-note b{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-right:6px}
   .mm-note.dim{color:var(--inkFade);font-size:12.5px} .mm-read{font-size:12.5px}
   .mme-q{width:100%;box-sizing:border-box;font-size:16px;padding:11px 14px;border-radius:10px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:var(--mono);margin-bottom:8px}
@@ -10490,15 +10496,17 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         if(tk) notesBy[tk]=String(it.html||"").replace(/^\s*<b>[^<]*<\/b>\s*/,""); });
       body.innerHTML=
         (lede&&(lede.headline||lede.summary)?'<div class="mme-lede">'+(lede.headline?'<div class="h">'+esc(lede.headline)+'</div>':'')+(lede.summary?'<div class="s">'+esc(lede.summary)+'</div>':'')+'</div>':'')+
-        '<div class="mme-sk">The map <span id="mmeLiveNote"></span></div><div class="mme-map" id="mmeMap"></div>'+
-        '<div class="mme-sk">The graph <span id="mmeGraphNote"></span></div><div class="mme-graph"><div id="mmeGraphHd"></div><div id="mmePlot" class="mme-plot"></div><div id="mmeGraphRead"></div></div>'+
-        '<div class="mme-sk">Every name</div><input id="mmeQ" class="mme-q" placeholder="Search ticker\u2026" autocomplete="off" autocapitalize="characters" value="'+esc(MME_Q)+'">'+
-        '<div class="mme-tbl" id="mmeTbl"></div>'+
+        '<div class="mme-graph"><div id="mmeGraphHd"></div><div id="mmePlot" class="mme-plot"></div><div class="mme-gnote" id="mmeGraphNote"></div><div id="mmeGraphRead"></div></div>'+
+        '<div class="mme-maphd"><span class="mme-sk">The map <span id="mmeLiveNote"></span></span>'+
+          '<input id="mmeQ" class="mme-q" placeholder="Search ticker\u2026" autocomplete="off" autocapitalize="characters" value="'+esc(MME_Q)+'"></div>'+
+        '<div class="mme-map" id="mmeMap"></div>'+
         '<div class="ed-note" style="margin-top:10px">Levels: '+esc(d.source||"\u2014")+' \u00b7 '+esc(d.date||"")+'. Spot refreshes every 5 minutes; walls and the flip come from the morning chain and change once a day.</div>';
       note.textContent=(d.date||"")+" \u00b7 "+base.length+" names";
       function rows(){ return base.map(mmeRelive).sort(function(a,b){ return b.dist_flip_em-a.dist_flip_em; }); }
       function paintMap(){
         var rs=rows(), host=document.getElementById("mmeMap"); if(!host) return;
+        var q=MME_Q.trim().toUpperCase(); if(q) rs=rs.filter(function(r){ return r.ticker.indexOf(q)>=0; });
+        if(!rs.length){ host.innerHTML='<div class="ed-note">No match.</div>'; return; }
         host.innerHTML=rs.map(function(r){
           var lo=Math.min(r.support!=null?r.support:r.spot, r.flip, r.spot), hi=Math.max(r.resist!=null?r.resist:r.spot, r.flip, r.spot), span=(hi-lo)||1;
           lo-=span*0.06; hi+=span*0.06; span=hi-lo;
@@ -10509,7 +10517,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
               (r.support!=null?'<i class="m sup" style="left:'+pos(r.support)+'"><b>'+lv(r.support)+'</b></i>':'')+
               '<i class="m flip" style="left:'+pos(r.flip)+'"><b>'+lv(r.flip)+'</b></i>'+
               (r.resist!=null?'<i class="m res" style="left:'+pos(r.resist)+'"><b>'+lv(r.resist)+'</b></i>':'')+
-              '<i class="spot" style="left:'+pos(r.spot)+'"><b>'+n2(r.spot)+'</b></i>'+
+              '<i class="spot'+(Math.abs(parseFloat(pos(r.spot))-parseFloat(pos(r.flip)))<14?' low':'')+'" style="left:'+pos(r.spot)+'"><b>'+n2(r.spot)+'</b></i>'+
             '</div>'+
             '<span class="st">'+(r.status?r.status.replace("NEARING ","NEAR "):"")+'</span></div>';
         }).join("");
@@ -10517,24 +10525,15 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         if(ln) ln.textContent=MME_LIVE_AT?"\u00b7 spot live "+new Date(MME_LIVE_AT).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):"\u00b7 spot from the file";
         host.querySelectorAll("[data-sel]").forEach(function(el){ el.onclick=function(e){
           if(e.target.closest("[data-open]")){ mmeOpen(e.target.closest("[data-open]").dataset.open); return; }
-          MME_SEL=el.dataset.sel; paintMap(); paintGraph(); }; });
+          MME_SEL=el.dataset.sel; paintMap(); paintGraph();
+          var gp=document.querySelector(".mme-graph"); if(gp) gp.scrollIntoView({behavior:"smooth",block:"start"}); }; });
       }
-      function paintTable(){
-        var rs=rows(), q=MME_Q.trim().toUpperCase(), host=document.getElementById("mmeTbl"); if(!host) return;
-        if(q) rs=rs.filter(function(r){ return r.ticker.indexOf(q)>=0; });
-        host.innerHTML='<div class="hd"><span>Name</span><span>Spot</span><span>Support</span><span>Flip</span><span>Resist</span><span>To flip</span><span>Move</span><span>Status</span></div>'+
-          (rs.length?rs.map(function(r){
-            return '<div class="r reg-'+r.regime+'" data-sel="'+r.ticker+'"><span class="tk" data-open="'+r.ticker+'">'+r.ticker+'</span><span>'+n2(r.spot)+'</span><span>'+lv(r.support)+'</span><span class="f">'+lv(r.flip)+'</span><span>'+lv(r.resist)+'</span>'+
-              '<span class="'+(r.dist_flip_em<0?"neg":"")+'">'+(r.dist_flip_em>=0?"+":"")+r.dist_flip_em+'</span><span>\u00b1'+n2(r.em)+'</span><span class="st">'+(r.status||"")+'</span></div>'; }).join(""):'<div class="ed-note">No match.</div>');
-        host.querySelectorAll("[data-sel]").forEach(function(el){ el.onclick=function(e){
-          if(e.target.closest("[data-open]")){ mmeOpen(e.target.closest("[data-open]").dataset.open); return; }
-          MME_SEL=el.dataset.sel; paintMap(); paintGraph(); document.getElementById("mmePlot").scrollIntoView({behavior:"smooth",block:"center"}); }; });
-      }
+      function paintTable(){}
       function paintGraph(){
         var rs=rows(); if(!MME_SEL){ var st=(d.standouts||[])[0]; MME_SEL=(st&&(st.ticker||st))||rs[0].ticker; }
         var r=rs.filter(function(x){ return x.ticker===MME_SEL; })[0]; if(!r) return;
         var hd=document.getElementById("mmeGraphHd"), rd=readBy[r.ticker];
-        hd.innerHTML='<div class="gh"><span class="tk" data-open="'+r.ticker+'">'+r.ticker+' \u2197</span><span class="mm-badge '+r.regime+'">'+(r.regime==="red"?"NEGATIVE":"POSITIVE")+' GAMMA</span>'+(r.status?'<span class="st">'+r.status+'</span>':'')+'</div>'+
+        hd.innerHTML='<div class="gh"><span class="tk" data-open="'+r.ticker+'">'+r.ticker+' <i>\u2197</i></span>'+(r.live?'<span class="lv">live '+n2(r.spot)+'</span>':'')+'<span class="mm-badge '+r.regime+'">'+(r.regime==="red"?"NEGATIVE":"POSITIVE")+' GAMMA</span>'+(r.status?'<span class="st">'+r.status+'</span>':'')+'</div>'+
           '<div class="mm-strip"><div><i>expected move</i><b>\u00b1'+n2(r.em)+'</b></div><div><i>one move down</i><b>'+n2(r.spot-r.em)+'</b></div><div><i>one move up</i><b>'+n2(r.spot+r.em)+'</b></div><div><i>to the flip</i><b>'+(r.dist_flip_em>=0?"+":"")+r.dist_flip_em+' EM</b></div></div>';
         hd.querySelector("[data-open]").onclick=function(){ mmeOpen(r.ticker); };
         var levelRead=r.read||(rd&&rd.text)||"", note=notesBy[r.ticker]||"";
@@ -10544,36 +10543,49 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
                 '<div class="mm-note dim"><b>What to know</b> No note for '+r.ticker+' in this morning\u2019s brief.</div>');
         function draw(ch){
           var el=document.getElementById("mmePlot"); if(!el||typeof Plotly==="undefined") return;
-          var css=getComputedStyle(document.documentElement), ink=css.getPropertyValue("--inkFade").trim()||"#888", line=css.getPropertyValue("--line").trim()||"#333";
-          var traces=[], shapes=[], ann=[];
-          var c=ch&&ch.names&&ch.names[r.ticker];
+          var css=getComputedStyle(document.documentElement), ink=css.getPropertyValue("--inkFade").trim()||"#888", line=css.getPropertyValue("--line2").trim()||"#ddd";
+          // the window: every level plus one expected move either side, never wider than +/-12%
+          var lvls=[r.support,r.flip,r.resist,r.spot].filter(function(v){ return v!=null; });
+          var lo=Math.min.apply(null,lvls)-r.em, hi=Math.max.apply(null,lvls)+r.em;
+          lo=Math.max(lo, r.spot*0.88); hi=Math.min(hi, r.spot*1.12);
+          var traces=[], gn=document.getElementById("mmeGraphNote"), c=ch&&ch.names&&ch.names[r.ticker];
           if(c&&c.rows&&c.rows.length){
-            // dollar gamma by strike at spot, dealers long calls / short puts, vendor gamma
             var by={}, S=c.spot||r.spot;
-            c.rows.forEach(function(x){ var k=x[2], gv=x[5]*x[3]*100*S*S*0.01/1e9; by[k]=by[k]||{c:0,p:0}; if(x[1]==="C") by[k].c+=gv; else by[k].p-=gv; });
+            c.rows.forEach(function(x){ var k=x[2]; if(k<lo||k>hi) return; var gv=x[5]*x[3]*100*S*S*0.01/1e6; by[k]=by[k]||{c:0,p:0}; if(x[1]==="C") by[k].c+=gv; else by[k].p-=gv; });
             var ks=Object.keys(by).map(Number).sort(function(a,b){return a-b;});
-            traces.push({type:"bar",x:ks,y:ks.map(function(k){return by[k].c;}),name:"call GEX",marker:{color:"#6f8fd8"}});
-            traces.push({type:"bar",x:ks,y:ks.map(function(k){return by[k].p;}),name:"put GEX",marker:{color:"#e39b2f"}});
-            document.getElementById("mmeGraphNote").textContent="\u00b7 gamma by strike from the "+(ch.date||"")+" chain";
+            traces.push({type:"bar",x:ks,y:ks.map(function(k){return by[k].c;}),name:"calls",marker:{color:"#6f8fd8"},hovertemplate:"%{x}: %{y:.2f}M<extra>calls</extra>"});
+            traces.push({type:"bar",x:ks,y:ks.map(function(k){return by[k].p;}),name:"puts",marker:{color:"#e39b2f"},hovertemplate:"%{x}: %{y:.2f}M<extra>puts</extra>"});
+            if(gn) gn.textContent="Dealer gamma by strike, $M per 1% move \u00b7 calls up, puts down \u00b7 "+(ch.date||"")+" chain";
           } else {
-            document.getElementById("mmeGraphNote").textContent="\u00b7 levels only (no chain file on hand)";
-            traces.push({type:"scatter",x:[r.support||r.flip,r.resist||r.flip],y:[0,0],mode:"markers",marker:{opacity:0},showlegend:false,hoverinfo:"skip"});
+            traces.push({type:"scatter",x:[lo,hi],y:[0,0],mode:"lines",line:{color:line,width:1},hoverinfo:"skip"});
+            if(gn) gn.textContent="Levels only \u2014 no chain file on hand yet.";
           }
-          function vline(x,col,txt,dash){ if(x==null) return; shapes.push({type:"line",x0:x,x1:x,yref:"paper",y0:0,y1:1,line:{color:col,width:2,dash:dash||"solid"}});
-            ann.push({x:x,yref:"paper",y:1.02,text:txt,showarrow:false,font:{size:11,color:col},bgcolor:"rgba(0,0,0,0)"}); }
-          vline(r.flip,"#e3c13a","flip "+lv(r.flip),"dash"); vline(r.spot,"#4aa3df","spot "+n2(r.spot));
-          vline(r.support,"#2fae66","support "+lv(r.support),"dot"); vline(r.resist,"#d0574a","resist "+lv(r.resist),"dot");
-          Plotly.newPlot(el,traces,{barmode:"relative",height:300,margin:{l:40,r:10,t:26,b:30},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",
-            font:{color:ink,size:11},xaxis:{gridcolor:line,zeroline:false},yaxis:{gridcolor:line,title:{text:"$B / 1%",font:{size:10}}},showlegend:false,shapes:shapes,annotations:ann},
-            {displayModeBar:false,responsive:true});
+          // labels in two rows, ordered by price, so neighbours never sit on each other
+          var L=[{x:r.support,c:"#2fae66",t:"support",d:"dot"},{x:r.flip,c:"#c9a227",t:"flip",d:"dash"},
+                 {x:r.resist,c:"#d0574a",t:"resist",d:"dot"},{x:r.spot,c:"#2f8fd6",t:"spot",d:"solid",w:3}]
+                 .filter(function(o){ return o.x!=null; }).sort(function(a,b){ return a.x-b.x; });
+          var shapes=[], ann=[];
+          L.forEach(function(o,i){
+            shapes.push({type:"line",x0:o.x,x1:o.x,yref:"paper",y0:0,y1:1,line:{color:o.c,width:o.w||1.6,dash:o.d}});
+            ann.push({x:o.x,yref:"paper",y:(i%2?1.0:1.13),yanchor:"bottom",showarrow:false,
+                      text:"<b>"+o.t+"</b> "+(o.t==="spot"?n2(o.x):lv(o.x)),font:{size:11,color:o.c},
+                      bgcolor:css.getPropertyValue("--card").trim()||"#fff",borderpad:2});
+          });
+          var layout={barmode:"relative",bargap:0.25,height:340,margin:{l:44,r:12,t:58,b:34},
+            paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},
+            xaxis:{range:[lo,hi],gridcolor:line,zeroline:false,tickfont:{size:11}},
+            yaxis:{gridcolor:line,zeroline:true,zerolinecolor:ink,tickfont:{size:10}},
+            showlegend:false,shapes:shapes,annotations:ann};
+          if(el.data) Plotly.react(el,traces,layout,{displayModeBar:false,responsive:true});
+          else Plotly.newPlot(el,traces,layout,{displayModeBar:false,responsive:true});
         }
         if(MME_CHAINS) draw(MME_CHAINS);
         else getJSON("mme_chains").then(function(ch){ MME_CHAINS=ch||{}; draw(MME_CHAINS); }).catch(function(){ MME_CHAINS={}; draw(null); });
       }
       var q=document.getElementById("mmeQ");
-      if(q) q.oninput=function(){ MME_Q=this.value; paintTable(); };
+      if(q) q.oninput=function(){ MME_Q=this.value; paintMap(); };
       paintMap(); paintTable(); paintGraph();
-      function tick(){ return mmeLive(base.map(function(r){ return r.ticker; })).then(function(){ paintMap(); paintTable(); }); }
+      function tick(){ return mmeLive(base.map(function(r){ return r.ticker; })).then(function(){ paintMap(); paintGraph(); }); }
       tick();
       if(MME_TIMER) clearInterval(MME_TIMER);
       MME_TIMER=setInterval(function(){
