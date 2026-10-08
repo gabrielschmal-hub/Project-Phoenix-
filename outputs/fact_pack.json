@@ -1,7 +1,7 @@
 {
  "schema": "phoenix-fact-pack/1",
  "date": "2026-10-08",
- "asof": "2026-10-08 09:25 UTC",
+ "asof": "2026-10-08 12:23 UTC",
  "market": {
   "regime": "POLICY_TIGHTENING",
   "regime_held_weeks": 6,
@@ -11,16 +11,16 @@
    "vs_50d_pct": 1.58,
    "vs_200d_pct": 7.74
   },
-  "vix": 15.59,
+  "vix": 15.85,
   "dxy": null,
   "us10y": null,
   "gold": null,
   "wti": null,
   "gex": {
-   "net_B": 77.12,
+   "net_B": 77.83,
    "regime": "positive",
    "flip": null,
-   "dist_to_flip_pct": -1.33,
+   "dist_to_flip_pct": -0.95,
    "call_wall": null,
    "put_wall": null,
    "spot": 7801.77
@@ -576,9 +576,21 @@
     "dist_stop_pct": null,
     "sector": null,
     "event_in_days": null
+   },
+   {
+    "ticker": "AMZN",
+    "entry": 251.84,
+    "stop": 244.99,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
    }
   ],
-  "heat_R": 6.06,
+  "heat_R": 7.09,
   "cap_R": 3.0,
   "unsized": 0,
   "note": null,
@@ -586,7 +598,7 @@
  },
  "news": {
   "date": "2026-10-07",
-  "asof": "2026-10-08 08:51 UTC",
+  "asof": "2026-10-08 11:46 UTC",
   "headline": "The ten-year touched its highest since 2002 \u2014 and the reason was French, Japanese and American debt at once",
   "standfirst": "Tuesday\u2019s relief in the long end lasted exactly one session. The ten-year spiked to 5.35% in the morning, up nearly eight basis points and its highest since 2002, before closing at 5.29% \u2014 a fresh 52-week high \u2014 with the thirty-year at 5.671% and the two-year falling again to 4.777%. The fifth steepening in six sessions, and this time the framing was global: rising yields worldwide, record public debt, and France\u2019s index down 1.2% amid mass protests over a budget whose \u20ac74.5bn of interest payments exceed its education spending. The September Fed minutes then said the committee expects another hike before year-end. Equities gave back the record: S&P \u22120.22%, Russell \u22121.31%, two-thirds of issues lower. In the book GOOG crossed +1R at 347.37, a third consecutive closing high, and the stop question parked on 21 September is live again; AAPL rose 0.91% to its best close since the Ternus news and OKTA was the only holding to fall, at +1.75R. Heat 3.05R against 3.0R, unchanged for a twentieth session.",
   "themes": [
@@ -632,23 +644,23 @@
  },
  "provenance": {
   "macro": {
-   "asof": "2026-10-08 08:51 UTC",
+   "asof": "2026-10-08 11:46 UTC",
    "age_min": null
   },
   "gex": {
-   "asof": "2026-10-08 08:51 UTC",
+   "asof": "2026-10-08 11:46 UTC",
    "age_min": null
   },
   "stocks": {
-   "asof": "2026-10-08 09:08 UTC",
+   "asof": "2026-10-08 12:06 UTC",
    "age_min": null
   },
   "institutional_holdings": {
-   "asof": "2026-10-08 09:16 UTC",
+   "asof": "2026-10-08 12:13 UTC",
    "quarter": "2026-06-30"
   },
   "congress_trades": {
-   "asof": "2026-10-08 09:14 UTC",
+   "asof": "2026-10-08 12:12 UTC",
    "status": {
     "written": "2026-10-08",
     "dropped_impossible_dates": 0,
@@ -679,7 +691,7 @@
    }
   },
   "wire": {
-   "asof": "2026-10-08 08:51 UTC"
+   "asof": "2026-10-08 11:46 UTC"
   }
  },
  "missing": [],
@@ -687,6 +699,13 @@
   "first_pack": false,
   "prev_date": "2026-10-07",
   "changes": [
+   {
+    "kind": "portfolio",
+    "what": "open heat",
+    "was": 6.06,
+    "now": 7.09,
+    "why": "committed risk moved materially"
+   },
    {
     "kind": "screener",
     "what": "new in the top setups",
