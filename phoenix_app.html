@@ -9,6 +9,38 @@
 <meta name="apple-mobile-web-app-title" content="Phoenix">
 <title>Phoenix</title>
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script>
+/* Every chart sizes itself to the box it is in, whenever that box changes.
+   Plotly measures its container once, when it is drawn. A chart drawn inside a
+   hidden pane (Mission Control's MME tab, a page not yet shown) measures 0x0,
+   falls back to its 700x450 default and spills out of its card: the VIX curve
+   running down through Confluence, the SPX map overflowing on Markets. A
+   ResizeObserver on each chart re-fits it the moment its box becomes visible
+   or changes size. One wrapper, every chart in the app. */
+(function(){
+  if(typeof Plotly==="undefined" || typeof ResizeObserver==="undefined") return;
+  var ro=new ResizeObserver(function(entries){
+    entries.forEach(function(e){
+      var gd=e.target, r=e.contentRect;
+      if(r.width<2||r.height<2) return;                  // still hidden: wait
+      if(gd.__pxW===Math.round(r.width) && gd.__pxH===Math.round(r.height)) return;
+      gd.__pxW=Math.round(r.width); gd.__pxH=Math.round(r.height);
+      clearTimeout(gd.__pxT);
+      gd.__pxT=setTimeout(function(){ try{ if(gd.data) Plotly.Plots.resize(gd); }catch(x){} }, 30);
+    });
+  });
+  function watch(gd){ try{ var el=(typeof gd==="string")?document.getElementById(gd):gd; if(el&&!el.__pxObs){ el.__pxObs=1; ro.observe(el); } }catch(x){} }
+  ["newPlot","react"].forEach(function(fn){
+    var orig=Plotly[fn];
+    Plotly[fn]=function(gd,data,layout,config){
+      var el=(typeof gd==="string")?document.getElementById(gd):gd;
+      // drawn while hidden: do not let Plotly invent a size; draw at the box size once it has one
+      if(el && layout && !layout.height && el.clientHeight<2){ el.__pxPending=[data,layout,config]; }
+      var p=orig.apply(Plotly, arguments); watch(el); return p;
+    };
+  });
+})();
+</script>
 <style>
   :root{
     /* Palette sampled directly from the reference render:
@@ -1026,20 +1058,20 @@
   .tb-auth{display:block!important;margin-left:6px}
   .mme-lede{border-left:3px solid var(--gold);padding:8px 12px;margin:2px 0 14px;background:var(--card2);border-radius:0 8px 8px 0}
   .mme-lede .h{font-size:15px;font-weight:700;line-height:1.35} .mme-lede .s{font-size:12.5px;color:var(--inkFade);margin-top:3px}
-  .mme-sk{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink);font-weight:700}
-  .mme-sk span{color:var(--inkFade);font-weight:400;letter-spacing:.03em;text-transform:none}
+  .mme-sk{font-family:var(--mono);font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink);font-weight:700}
+  .mme-sk span{color:var(--inkFade);font-weight:400;letter-spacing:.03em;text-transform:none;font-size:12px}
   .mme-maphd{display:flex;align-items:center;gap:12px;margin:22px 0 8px;flex-wrap:wrap} .mme-maphd .mme-sk{flex:1;min-width:160px}
-  .mme-q{flex:0 1 240px;font-size:14px;padding:7px 12px;border-radius:8px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:var(--mono)}
+  .mme-q{flex:0 1 190px;font-size:13px;padding:5px 10px;border-radius:7px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:var(--mono)}
   .mme-map{column-gap:26px} @media(min-width:1000px){.mme-map{columns:2}} .mme-map .mme-row{break-inside:avoid}
-  .mme-row{display:grid;grid-template-columns:52px 1fr 64px;align-items:center;gap:8px;padding:15px 6px 15px 8px;cursor:pointer;border-left:3px solid var(--line2);border-bottom:1px solid var(--line2)}
+  .mme-row{display:grid;grid-template-columns:58px 1fr 76px;align-items:center;gap:8px;padding:20px 6px 20px 8px;cursor:pointer;border-left:3px solid var(--line2);border-bottom:1px solid var(--line2)}
   .mme-row:hover{background:var(--card2)} .mme-row.sel{background:var(--card2);box-shadow:inset 0 0 0 1px var(--gold)}
   .mme-row.reg-green{border-left-color:#2fae66} .mme-row.reg-amber{border-left-color:#d79a2b} .mme-row.reg-red{border-left-color:#d0574a}
-  .mme-row .tk{font-weight:800;font-size:13.5px;letter-spacing:.02em} .mme-row .tk:hover,.gh .tk:hover{color:var(--gold)}
-  .mme-row .st{font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:var(--amber);text-align:right;font-weight:700;line-height:1.2}
+  .mme-row .tk{font-weight:800;font-size:15px;letter-spacing:.02em} .mme-row .tk:hover,.gh .tk:hover{color:var(--gold)}
+  .mme-row .st{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--amber);text-align:right;font-weight:700;line-height:1.2}
   .mme-row .track{position:relative;height:3px;background:var(--line2);border-radius:2px;margin:0 6px}
   .mme-row .m{position:absolute;top:-4px;width:2px;height:11px;transform:translateX(-50%)}
-  .mme-row .m b,.mme-row .spot b{position:absolute;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9.5px;font-weight:600;white-space:nowrap;font-style:normal}
-  .mme-row .m b.dn,.mme-row .spot b.dn{top:12px} .mme-row .m b.up,.mme-row .spot b.up{top:-15px}
+  .mme-row .m b,.mme-row .spot b{position:absolute;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:11.5px;font-weight:600;white-space:nowrap;font-style:normal}
+  .mme-row .m b.dn,.mme-row .spot b.dn{top:13px} .mme-row .m b.up,.mme-row .spot b.up{top:-18px} .mme-row .spot b{font-size:12.5px;font-weight:700}
   .mme-row .m.sup{background:#2fae66} .mme-row .m.sup b{color:#2fae66} .mme-row .m.res{background:#d0574a} .mme-row .m.res b{color:#d0574a}
   .mme-row .m.flip{background:#c9a227} .mme-row .m.flip b{color:#c9a227}
   .mme-row .spot{position:absolute;top:-5px;width:11px;height:11px;border-radius:50%;background:#2f8fd6;border:2px solid var(--card);transform:translateX(-50%);box-shadow:0 0 0 1px #2f8fd6;z-index:2}
@@ -1048,17 +1080,17 @@
   .mme-graph .gh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:var(--card2)}
   .mme-graph .gh .tk{font-size:18px;font-weight:800;cursor:pointer} .mme-graph .gh .tk i{font-style:normal;font-size:13px;color:var(--inkFade)}
   .mme-graph .gh .lv{font-family:var(--mono);font-size:11px;color:#2f8fd6;border:1px solid #2f8fd6;border-radius:5px;padding:1px 6px}
-  .mme-graph .gh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--amber);font-weight:700}
-  .mme-graph .mm-strip b{font-size:12px} .mme-graph .mm-strip i{font-size:8px}
+  .mme-graph .gh .st{margin-left:auto;font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;color:var(--amber);font-weight:700}
+  .mme-graph .mm-strip div{padding:10px 6px} .mme-graph .mm-strip b{font-size:16px} .mme-graph .mm-strip i{font-size:10.5px;margin-bottom:3px}
   .mme-plot{min-height:400px;padding:0 4px}
-  .mme-gnote{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:0 14px 8px}
-  .mm-note{padding:12px 14px;font-size:14.5px;line-height:1.6;border-top:1px solid var(--line)} .mm-note b{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-right:6px}
+  .mme-gnote{font-family:var(--mono);font-size:12px;color:var(--inkFade);padding:2px 16px 10px}
+  .mm-note{padding:14px 16px;font-size:16px;line-height:1.6;border-top:1px solid var(--line)} .mm-note b{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-right:6px}
   .nt-hd{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px} .nt-hd b{margin-right:4px}
-  .nt-chip{font-family:var(--mono);font-size:10px;letter-spacing:.05em;padding:2px 7px;border-radius:5px;border:1px solid var(--line2);color:var(--inkFade)}
+  .nt-chip{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;padding:2px 7px;border-radius:5px;border:1px solid var(--line2);color:var(--inkFade)}
   .nt-chip.held{border-color:var(--gold);color:var(--gold)} .nt-chip.info{border-color:#2f8fd6;color:#2f8fd6} .nt-chip.warn{border-color:var(--red);color:var(--red)}
-  .nt-more summary{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--inkFade);cursor:pointer;margin-top:8px}
-  .nt-more ul{margin:6px 0 0;padding-left:16px;font-size:13px;line-height:1.5} .nt-more li b{font-family:var(--mono);font-size:11px;margin-right:4px} .nt-more li i{color:var(--inkFade);font-size:11px}
-  .mm-note.dim{color:var(--inkFade);font-size:12.5px} .mm-read{font-size:12.5px}
+  .nt-more summary{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--inkFade);cursor:pointer;margin-top:8px}
+  .nt-more ul{margin:6px 0 0;padding-left:16px;font-size:14.5px;line-height:1.5} .nt-more li b{font-family:var(--mono);font-size:11px;margin-right:4px} .nt-more li i{color:var(--inkFade);font-size:11px}
+  .mm-note.dim{color:var(--inkFade);font-size:14px} .mme-graph .mm-read{font-size:14.5px;line-height:1.6;padding:12px 16px}
   .mme-q{width:100%;box-sizing:border-box;font-size:16px;padding:11px 14px;border-radius:10px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:var(--mono);margin-bottom:8px}
   .mme-tbl{overflow-x:auto;font-family:var(--mono);font-size:13px}
   .mme-tbl .hd,.mme-tbl .r{display:grid;grid-template-columns:68px repeat(7,1fr);gap:8px;padding:10px 8px;min-width:640px;border-bottom:1px solid var(--line2);align-items:center}
@@ -2486,6 +2518,7 @@ html:not(.light) .ed-chartk{color:#E8EDF2;font-size:11.5px}
 .ed-vix{border:1px solid var(--line);border-radius:3px;background:var(--card);
   height:250px;position:relative;padding:8px;margin-bottom:14px}
 .ed-vix .plot{position:absolute;inset:8px}
+.ed-vix,.ed-map,.mkt-grid .tile.a-vix .tbody,.mkt-grid .tile.a-spx .tbody{overflow:hidden}   /* a chart can never paint over the next card */
 .ed-note{font-size:13px;line-height:1.6;color:var(--inkFade);border-left:2px solid var(--line2);
   padding:8px 0 8px 12px;margin:10px 0 4px;font-style:italic}
 html:not(.light) .ed-note{color:#E8EDF2;font-size:13.5px}
@@ -10461,7 +10494,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       '<span class="ed-n" id="mcNamesNote">loading\u2026</span></div><div id="mcNamesBody"></div></div>';
   }
   function mmeOpen(tk){ try{ dpReturnTo="mission"; }catch(e){} go("trades"); setTimeout(function(){ trOpenTicker(tk); }, 60); }
-  var MME_SEL=null, MME_Q="", MME_TIMER=null, MME_LIVE={}, MME_LIVE_AT=null, MME_CHAINS=null, MME_WIRE=null;
+  var MME_SEL=null, MME_Q="", MME_TIMER=null, MME_LIVE={}, MME_LIVE_AT=null, MME_LIVE_STALE=0, MME_CHAINS=null, MME_WIRE=null;
   function mmeLive(tks){
     // spot moves every few minutes; the walls and the flip come from the morning's chain and do not
     var list=encodeURIComponent(tks.join(","));
@@ -10469,9 +10502,20 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       supaRows("/rest/v1/prices_live?select=ticker,last,updated_at&ticker=in.("+list+")").catch(function(){ return []; }),
       supaRows("/rest/v1/prices_universe?select=ticker,last,updated_at&ticker=in.("+list+")").catch(function(){ return []; })
     ]).then(function(r){
-      var out={}, newest=null;
-      (r[1]||[]).concat(r[0]||[]).forEach(function(x){ if(x&&x.last){ out[x.ticker]={last:+x.last,at:x.updated_at}; if(!newest||x.updated_at>newest) newest=x.updated_at; } });
-      MME_LIVE=out; MME_LIVE_AT=newest; return out;
+      // newest quote per name wins, and only if it is newer than the map itself. On 8 Oct ALAB showed
+      // 390.54 against a 372 tape: the universe lane had stopped on 6 Oct, its two-day-old price was
+      // applied on top of the morning chain's 368.68, and the order of the merge let it win.
+      var floor=MME_MAP&&(MME_MAP.asof||MME_MAP.date)?Date.parse(String(MME_MAP.asof||MME_MAP.date).replace(" UTC","Z").replace(" ","T")):0;
+      if(!isFinite(floor)) floor=0;
+      var out={}, newest=null, stale=0;
+      (r[0]||[]).concat(r[1]||[]).forEach(function(x){
+        if(!x||!x.last||!x.updated_at) return;
+        var t=Date.parse(x.updated_at); if(!isFinite(t)) return;
+        if(t<floor){ stale++; return; }
+        if(!out[x.ticker]||t>out[x.ticker].t){ out[x.ticker]={last:+x.last,at:x.updated_at,t:t}; }
+        if(!newest||x.updated_at>newest) newest=x.updated_at;
+      });
+      MME_LIVE=out; MME_LIVE_AT=newest; MME_LIVE_STALE=stale; return out;
     });
   }
   function mmeRelive(r){
@@ -10548,7 +10592,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
             '<span class="st">'+(r.status?r.status.replace("NEARING ","NEAR "):(r.flip==null?"NO FLIP":""))+'</span></div>';
         }).join("");
         var ln=document.getElementById("mmeLiveNote");
-        if(ln) ln.textContent=MME_LIVE_AT?"\u00b7 spot live "+new Date(MME_LIVE_AT).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):"\u00b7 spot from the file";
+        var nLive=Object.keys(MME_LIVE).length;
+        if(ln) ln.textContent=MME_LIVE_AT?"\u00b7 spot live "+new Date(MME_LIVE_AT).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})+" for "+nLive+" of "+base.length+(nLive<base.length?" (the rest at the morning close)":""):"\u00b7 spot from the morning chain";
         host.querySelectorAll("[data-sel]").forEach(function(el){ el.onclick=function(e){
           if(e.target.closest("[data-open]")){ mmeOpen(e.target.closest("[data-open]").dataset.open); return; }
           MME_SEL=el.dataset.sel; paintMap(); paintGraph();
@@ -10605,14 +10650,14 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           L.forEach(function(o,i){
             shapes.push({type:"line",x0:o.x,x1:o.x,yref:"paper",y0:0,y1:1,line:{color:o.c,width:o.w||1.6,dash:o.d}});
             ann.push({x:o.x,yref:"paper",y:(i%2?1.0:1.13),yanchor:"bottom",showarrow:false,
-                      text:"<b>"+o.t+"</b> "+(o.t==="spot"?n2(o.x):lv(o.x)),font:{size:11,color:o.c},
+                      text:"<b>"+o.t+"</b> "+(o.t==="spot"?n2(o.x):lv(o.x)),font:{size:13,color:o.c},
                       bgcolor:css.getPropertyValue("--card").trim()||"#fff",borderpad:2});
           });
           if(c&&c.spot&&Math.abs(r.spot/c.spot-1)>0.12 && gn) gn.textContent+=" \u00b7 spot has moved "+((r.spot/c.spot-1)*100).toFixed(1)+"% since the chain was pulled \u2014 strikes beyond \u00b115% of the morning price are not on file";
-          var layout={barmode:"relative",bargap:0.2,height:400,margin:{l:44,r:12,t:58,b:34},
+          var layout={barmode:"relative",bargap:0.2,height:400,margin:{l:48,r:14,t:64,b:38},
             paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},
-            xaxis:{range:[lo,hi],gridcolor:line,zeroline:false,tickfont:{size:11}},
-            yaxis:{gridcolor:line,zeroline:true,zerolinecolor:ink,tickfont:{size:10}},
+            xaxis:{range:[lo,hi],gridcolor:line,zeroline:false,tickfont:{size:13}},
+            yaxis:{gridcolor:line,zeroline:true,zerolinecolor:ink,tickfont:{size:12}},
             showlegend:false,shapes:shapes,annotations:ann};
           if(el.data) Plotly.react(el,traces,layout,{displayModeBar:false,responsive:true});
           else Plotly.newPlot(el,traces,layout,{displayModeBar:false,responsive:true});
