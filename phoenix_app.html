@@ -1083,15 +1083,22 @@
   .mme-graph .gh .st{margin-left:auto;font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;color:var(--amber);font-weight:700}
   .mme-graph .mm-strip div{padding:10px 6px} .mme-graph .mm-strip b{font-size:16px} .mme-graph .mm-strip i{font-size:10.5px;margin-bottom:3px}
   .mme-plot{min-height:400px;padding:0 4px}
-  .mme-cal{display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:18px} @media(min-width:1000px){.mme-cal{grid-template-columns:1fr 1fr}}
-  .mme-cal .cd{display:grid;grid-template-columns:70px 1fr;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--card)}
-  .mme-cal .cd.soon{border-left:3px solid var(--gold)}
-  .mme-cal .dt b{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase} .mme-cal .dt span{font-family:var(--mono);font-size:12px;color:var(--inkFade)}
-  .mme-cal .ev{display:flex;flex-direction:column;gap:4px}
-  .mme-cal .it{display:flex;gap:8px;align-items:baseline;font-size:13.5px;line-height:1.4}
-  .mme-cal .it .tk{font-family:var(--mono);font-weight:800;font-size:12.5px;min-width:46px;cursor:pointer} .mme-cal .it .tk:hover{color:var(--gold)}
-  .mme-cal .it .tag{font-family:var(--mono);font-size:11px;letter-spacing:.05em;padding:1px 7px;border-radius:5px;border:1px solid #2f8fd6;color:#2f8fd6}
-  .mme-cal .it.earn.est .tag{border-style:dashed;opacity:.8} .mme-cal .it .wh{color:var(--ink)} .mme-cal .it.est .wh{color:var(--inkFade)}
+  .mcal{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:8px 10px 6px;margin:4px 0 14px}
+  .mcal-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .mcal-f{display:flex;gap:4px} .mcal-f button{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--line2);background:transparent;color:var(--inkFade);cursor:pointer}
+  .mcal-f button.on{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700}
+  .mcal-k{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap} .mcal-k span{font-family:var(--mono);font-size:10.5px;display:inline-flex;align-items:center;gap:5px;color:var(--inkFade)}
+  .mcal-k span:before{content:"";width:9px;height:9px;border-radius:2px;background:var(--kc)}
+  .mcal-l{max-height:190px;overflow-y:auto}
+  .mcal-r{display:grid;grid-template-columns:62px 104px 1fr;gap:8px;align-items:center;padding:5px 4px 5px 8px;border-left:3px solid var(--kc);border-bottom:1px solid var(--line2);font-size:13px}
+  .mcal-r .dt{font-family:var(--mono);font-size:11.5px;color:var(--inkFade)} .mcal-r.soon .dt{color:var(--ink);font-weight:700}
+  .mcal-r .tk{font-family:var(--mono);font-weight:800;font-size:12.5px;cursor:pointer} .mcal-r .tk:hover{color:var(--gold)}
+  .mcal .mcal-r .kd{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--kc)!important;font-weight:700;white-space:nowrap}
+  .mcal-r .wh .tk{margin-right:6px} .mcal-r .tks{display:flex;gap:12px;flex-wrap:wrap} .mcal-r .tks .tk.est{opacity:.7} .mcal-r .tks i{font-style:normal;font-size:9.5px;color:var(--inkFade);margin-left:3px}
+  .mcal-r .wh{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)} .mcal-r.est .wh,.mcal-r.est .kd{opacity:.7}
+  .k-earn{--kc:#2f8fd6} .k-div{--kc:#2D8A55} .k-prod{--kc:#8a6fd1} .k-conf{--kc:#c98a1b} .k-legal{--kc:#c0392b} .k-other{--kc:#8a8f98}
+  .mme-key{padding:4px 16px 2px;font-size:12px} .mme-key .hatch{width:14px;height:10px;border:1px solid #2a4aa0;background:repeating-linear-gradient(135deg,#2a4aa0 0 2px,#cdd9f6 2px 5px)}
+  .mme-key .lv em{font-style:normal;color:var(--inkFade)} .mme-key .lv b{font-family:var(--mono)} .mme-key .lv.off{opacity:.55} .mme-key .lv s{font-size:10px;margin-left:3px}
   .tr-cash .v{display:flex;align-items:baseline;gap:12px} .tr-cash .v .cash{font-size:.8em;font-weight:700}
   .tr-cash .d b{color:var(--ink)} .tr-cash .d.sub{font-size:10.5px;opacity:.8;margin-top:2px}
   .mme-gnote .hatch{display:inline-block;width:16px;height:11px;vertical-align:-1px;border:1px solid #2a4aa0;
@@ -10507,7 +10514,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       '<span class="ed-n" id="mcNamesNote">loading\u2026</span></div><div id="mcNamesBody"></div></div>';
   }
   function mmeOpen(tk){ try{ dpReturnTo="mission"; }catch(e){} go("trades"); setTimeout(function(){ trOpenTicker(tk); }, 60); }
-  var MME_SEL=null, MME_Q="", MME_TIMER=null, MME_LIVE={}, MME_LIVE_AT=null, MME_LIVE_STALE=0, MME_CHAINS=null, MME_WIRE=null;
+  var MME_CALM; var MME_SEL=null, MME_Q="", MME_TIMER=null, MME_LIVE={}, MME_LIVE_AT=null, MME_LIVE_STALE=0, MME_CHAINS=null, MME_WIRE=null;
   function mmeLive(tks){
     // spot moves every few minutes; the walls and the flip come from the morning's chain and do not
     var list=encodeURIComponent(tks.join(","));
@@ -10562,31 +10569,47 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(!Object.keys(notesBy).length) ((MME_WIRE&&MME_WIRE.items)||[]).forEach(function(it){
         var tk=(it.ticker||(String(it.html||"").match(/<b>([A-Z][A-Z0-9.\-]{0,6})<\/b>/)||[])[1]||"").toUpperCase();
         if(tk) notesBy[tk]=String(it.html||"").replace(/^\s*<b>[^<]*<\/b>\s*/,""); });
-      // the calendar: every dated earnings and event in the commentary, grouped by day, next 45 days
-      var cal={}, today=new Date().toISOString().slice(0,10), horizon=new Date(Date.now()+45*864e5).toISOString().slice(0,10);
-      function addCal(d,tk,what,kind,est){ if(!/^\d{4}-\d{2}-\d{2}$/.test(String(d||""))||d<today||d>horizon) return;
-        (cal[d]=cal[d]||[]).push({tk:tk,what:what,kind:kind,est:est}); }
+      // the calendar: every dated earnings and event in the commentary, compact, filterable by month
+      var cal=[], today=new Date().toISOString().slice(0,10);
+      function kindOf(w){ w=String(w||"").toLowerCase();
+        if(/earning|results|quarter|q[1-4]\b/.test(w)) return "earn";
+        if(/dividend|ex-div/.test(w)) return "div";
+        if(/court|judg|ruling|fcc|ftc|doj|sec\b|lawsuit|regulat|vote|antitrust/.test(w)) return "legal";
+        if(/investor day|conference|meeting|summit|keynote|webcast|presentation/.test(w)) return "conf";
+        if(/launch|unveil|release|product|announce|pre-order|deliver/.test(w)) return "prod";
+        return "other"; }
       Object.keys(notesFull).forEach(function(t){ var n=notesFull[t]||{};
-        if(n.earnings) addCal(n.earnings,t,"earnings","earn",n.earnings_status&&n.earnings_status!=="confirmed");
-        (n.events||[]).forEach(function(e){ if(!/earnings|results/i.test(e.what||"")||!n.earnings) addCal(e.date,t,e.what,"event",/unconfirm|reported|est/i.test(e.what||"")); }); });
-      var calDays=Object.keys(cal).sort();
+        if(/^\d{4}-\d{2}-\d{2}$/.test(String(n.earnings||""))) cal.push({d:n.earnings,tk:t,k:"earn",w:"Earnings",est:n.earnings_status&&n.earnings_status!=="confirmed"});
+        (n.events||[]).forEach(function(e){ var k=kindOf(e.what);
+          if(k==="earn"&&n.earnings) return;
+          if(/^\d{4}-\d{2}-\d{2}$/.test(String(e.date||""))) cal.push({d:e.date,tk:t,k:k,w:e.what,est:/unconfirm|reported|reportedly|estimat/i.test(e.what||"")}); }); });
+      cal=cal.filter(function(x){ return x.d>=today; }).sort(function(a,b){ return a.d<b.d?-1:a.d>b.d?1:(a.k==="earn"?-1:1); });
+      var months=[]; cal.forEach(function(x){ var m=x.d.slice(0,7); if(months.indexOf(m)<0) months.push(m); });
+      if(typeof MME_CALM==="undefined"||(MME_CALM!=="all"&&months.indexOf(MME_CALM)<0)) MME_CALM=months[0]||"all";
+      var KN={earn:"Earnings",div:"Dividend",prod:"Product",conf:"Event",legal:"Legal",other:"News"};
       function calHTML(){
-        if(!calDays.length) return "";
-        var wk=function(d){ var x=new Date(d+"T12:00:00Z"); return x.toLocaleDateString(undefined,{weekday:"short"}); },
-            dm=function(d){ var x=new Date(d+"T12:00:00Z"); return x.toLocaleDateString(undefined,{day:"numeric",month:"short"}); };
-        return '<div class="mme-cal">'+calDays.map(function(d){
-          var items=cal[d].sort(function(a,b){ return (a.kind==="earn"?0:1)-(b.kind==="earn"?0:1); });
-          var soon=(Date.parse(d)-Date.parse(today))/864e5<=7;
-          return '<div class="cd'+(soon?' soon':'')+'"><div class="dt"><b>'+wk(d)+'</b><span>'+dm(d)+'</span></div><div class="ev">'+
-            items.map(function(it){ return '<div class="it '+it.kind+(it.est?' est':'')+'"><span class="tk" data-open="'+it.tk+'">'+it.tk+'</span>'+
-              (it.kind==="earn"?'<span class="tag">earnings'+(it.est?' \u00b7 est.':'')+'</span>':'<span class="wh">'+esc(it.what)+'</span>')+'</div>'; }).join("")+
-            '</div></div>'; }).join("")+'</div>';
+        if(!cal.length) return "";
+        var mlab=function(m){ return new Date(m+"-15T12:00:00Z").toLocaleDateString(undefined,{month:"short",year:"2-digit"}); };
+        var rows0=cal.filter(function(x){ return MME_CALM==="all"||x.d.slice(0,7)===MME_CALM; }), rows=[], ei={};
+        rows0.forEach(function(x){                       // one row per day for earnings: "IBM · LRCX · TSLA"
+          if(x.k!=="earn"){ rows.push(x); return; }
+          var key=x.d; if(ei[key]==null){ ei[key]=rows.length; rows.push({d:x.d,k:"earn",tks:[],w:""}); }
+          rows[ei[key]].tks.push({tk:x.tk,est:x.est}); });
+        var kinds={}; cal.forEach(function(x){ kinds[x.k]=1; });
+        return '<div class="mcal"><div class="mcal-hd"><span class="mme-sk">The calendar</span>'+
+          '<div class="mcal-f">'+months.map(function(m){ return '<button data-m="'+m+'"'+(MME_CALM===m?' class="on"':'')+'>'+mlab(m)+'</button>'; }).join("")+
+          '<button data-m="all"'+(MME_CALM==="all"?' class="on"':'')+'>All</button></div>'+
+          '<div class="mcal-k">'+Object.keys(KN).filter(function(k){ return kinds[k]; }).map(function(k){ return '<span class="k-'+k+'">'+KN[k]+'</span>'; }).join("")+'</div></div>'+
+          '<div class="mcal-l">'+rows.map(function(x){ var dd=new Date(x.d+"T12:00:00Z");
+            var soon=(Date.parse(x.d)-Date.parse(today))/864e5<=7;
+            return '<div class="mcal-r k-'+x.k+(x.est?' est':'')+(soon?' soon':'')+'"><span class="dt">'+dd.toLocaleDateString(undefined,{weekday:"short"})+' '+dd.getUTCDate()+'</span>'+
+              (x.tks?'<span class="kd">'+KN.earn+'</span><span class="wh tks">'+x.tks.map(function(t){ return '<span class="tk'+(t.est?' est':'')+'" data-open="'+t.tk+'">'+t.tk+(t.est?'<i>est</i>':'')+'</span>'; }).join("")+'</span>'
+                     :'<span class="kd">'+KN[x.k]+(x.est?' \u00b7 est':'')+'</span><span class="wh" title="'+esc(x.w)+'"><span class="tk" data-open="'+x.tk+'">'+x.tk+'</span> '+esc(x.w)+'</span>')+'</div>'; }).join("")+'</div></div>';
       }
       body.innerHTML=
         (lede&&lede.headline?'<div class="mme-lede"><div class="h">'+esc(lede.headline)+'</div></div>':'')+
-        '<div class="mme-graph"><div id="mmeGraphHd"></div><div id="mmePlot" class="mme-plot"></div><div class="mme-gnote" id="mmeGraphNote"></div><div id="mmeGraphRead"></div></div>'+
-        (calDays.length?'<div class="mme-sk" style="margin:22px 0 8px;display:block">The calendar <span>\u00b7 earnings and events for the names, next 45 days \u00b7 tap a ticker for its page</span></div>'+calHTML():
-          (lede&&lede.summary?'<div class="mme-lede" style="margin-top:16px"><div class="s">'+esc(lede.summary)+'</div></div>':''))+
+        '<div id="mmeCal">'+calHTML()+'</div>'+
+        '<div class="mme-graph"><div id="mmeGraphHd"></div><div id="mmePlot" class="mme-plot"></div><div class="gexh-key mme-key" id="mmeKey"></div><div class="mme-gnote" id="mmeGraphNote"></div><div id="mmeGraphRead"></div></div>'+
         '<div class="mme-maphd"><span class="mme-sk">The map <span id="mmeLiveNote"></span></span>'+
           '<input id="mmeQ" class="mme-q" placeholder="Search ticker\u2026" autocomplete="off" autocapitalize="characters" value="'+esc(MME_Q)+'"></div>'+
         '<div class="mme-map" id="mmeMap"></div>'+
@@ -10690,25 +10713,29 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
             traces.push(col("pR","#e39b2f",false)); traces.push(col("pF","#e39b2f",true));
             var friLbl=fri?new Date(fri+"T12:00:00Z").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"}):null;
             if(gn) gn.innerHTML="Dealer gamma by strike, $M per 1% move \u00b7 calls up, puts down"+
-              (fri?" \u00b7 <span class=\"hatch\"></span> hatched = expires "+friLbl+" ("+(totAll?Math.round(totF/totAll*100):0)+"% of the gamma in view)":"")+
+              (fri?" \u00b7 "+(totAll?Math.round(totF/totAll*100):0)+"% of the gamma in view expires "+friLbl:"")+
               " \u00b7 "+(ch.date||"")+" chain";
           } else {
             traces.push({type:"scatter",x:[lo,hi],y:[0,0],mode:"lines",line:{color:line,width:1},hoverinfo:"skip"});
             if(gn) gn.textContent="Levels only \u2014 no chain file on hand yet.";
           }
-          // labels in two rows, ordered by price, so neighbours never sit on each other
-          var L=[{x:r.support,c:"#2fae66",t:"support",d:"dot"},{x:r.flip,c:"#c9a227",t:"flip",d:"dash"},
-                 {x:r.resist,c:"#d0574a",t:"resist",d:"dot"},{x:r.spot,c:"#2f8fd6",t:"spot",d:"solid",w:3}]
-                 .filter(function(o){ return o.x!=null; }).sort(function(a,b){ return a.x-b.x; });
-          var shapes=[], ann=[];
-          L.forEach(function(o,i){
-            shapes.push({type:"line",x0:o.x,x1:o.x,yref:"paper",y0:0,y1:1,line:{color:o.c,width:o.w||1.6,dash:o.d}});
-            ann.push({x:o.x,yref:"paper",y:(i%2?1.0:1.13),yanchor:"bottom",showarrow:false,
-                      text:"<b>"+o.t+"</b> "+(o.t==="spot"?n2(o.x):lv(o.x)),font:{size:13,color:o.c},
-                      bgcolor:css.getPropertyValue("--card").trim()||"#fff",borderpad:2});
+          // lines only inside the plot; every value lives in the key underneath, as on the Markets GEX
+          var L=[{x:r.spot,c:"#3b6fb0",t:"Spot",w:3,d:"solid",f:n2},{x:r.flip,c:"#E8C34A",t:"G-Flip",w:3,d:"dash",f:lv},
+                 {x:r.support,c:"#2D8A55",t:"Support",w:2.4,d:"dot",f:lv},{x:r.resist,c:"#B03030",t:"Resistance",w:2.4,d:"dot",f:lv}];
+          var shapes=[], ann=[], key=[];
+          L.forEach(function(o){
+            if(o.x==null) return;
+            var off=(o.x<lo||o.x>hi);
+            if(!off) shapes.push({type:"line",x0:o.x,x1:o.x,yref:"paper",y0:0,y1:1,line:{color:o.c,width:o.w,dash:o.d}});
+            key.push('<span class="lv'+(off?' off':'')+'"><i style="'+(o.d==="solid"?'background:'+o.c:
+              'background:repeating-linear-gradient(90deg,'+o.c+' 0 '+(o.d==="dash"?5:3)+'px,transparent '+(o.d==="dash"?5:3)+'px '+(o.d==="dash"?9:6)+'px)')+';height:'+Math.max(3,Math.round(o.w))+'px"></i>'+
+              '<em>'+o.t+'</em><b>'+o.f(o.x)+'</b>'+(off?'<s>off-chart</s>':'')+'</span>');
           });
-          if(c&&c.spot&&Math.abs(r.spot/c.spot-1)>0.25 && gn) gn.textContent+=" \u00b7 spot has moved "+((r.spot/c.spot-1)*100).toFixed(1)+"% since the chain was pulled \u2014 strikes beyond \u00b135% of the morning price are not on file";
-          var layout={barmode:"relative",bargap:0.2,height:400,margin:{l:48,r:14,t:64,b:38},
+          var kEl=document.getElementById("mmeKey");
+          if(kEl) kEl.innerHTML='<span class="k-swatch"><i style="background:#6f8fd8"></i>Call gamma</span>'+
+            '<span class="k-swatch"><i style="background:#e39b2f"></i>Put gamma</span>'+
+            '<span class="k-swatch"><i class="hatch"></i>Expires this Friday</span>'+key.join("");
+          var layout={barmode:"relative",bargap:0.2,height:380,margin:{l:48,r:14,t:14,b:38},
             paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},
             xaxis:{range:[lo,hi],gridcolor:line,zeroline:false,tickfont:{size:13}},
             yaxis:{gridcolor:line,zeroline:true,zerolinecolor:ink,tickfont:{size:12}},
@@ -10719,7 +10746,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         if(MME_CHAINS) draw(MME_CHAINS);
         else getJSON("mme_chains").then(function(ch){ MME_CHAINS=ch||{}; draw(MME_CHAINS); }).catch(function(){ MME_CHAINS={}; draw(null); });
       }
-      body.querySelectorAll(".mme-cal [data-open]").forEach(function(el){ el.onclick=function(){ mmeOpen(el.dataset.open); }; });
+      function wireCal(){ var c=document.getElementById("mmeCal"); if(!c) return;
+        c.querySelectorAll("[data-m]").forEach(function(b){ b.onclick=function(){ MME_CALM=this.dataset.m; c.innerHTML=calHTML(); wireCal(); }; });
+        c.querySelectorAll("[data-open]").forEach(function(el){ el.onclick=function(){ mmeOpen(el.dataset.open); }; }); }
+      wireCal();
       var q=document.getElementById("mmeQ");
       if(q) q.oninput=function(){ MME_Q=this.value; paintMap(); };
       paintMap(); paintTable(); paintGraph();
