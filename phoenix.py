@@ -2207,6 +2207,18 @@ def run_wire():
                    + sum(len(t.get("items") or []) for t in payload.get("themes") or [])
                    + len((payload.get("world") or {}).get("items") or []))
         payload.update({"date": d, "file": p, "parser": parser})
+        # The daily used to be reduced to a fixed schema (title, items, one note per section) — every
+        # block Cowork added since (position cards, tape rows with z-scores, multi-paragraph sections,
+        # the calendar strip) was dropped, which is why the daily looked broken next to the weekly.
+        # Keep each section's markup verbatim too, exactly as the weekly does, and render from that.
+        try:
+            vs = _wire_parse_weekly(raw)
+            payload["sections"] = [x for x in (vs.get("sections") or [])
+                                   if not str(x.get("kicker", "")).lower().startswith(("the names", "the map", "dealer map"))]
+            payload["headline"] = payload.get("headline") or vs.get("headline")
+            payload["standfirst"] = payload.get("standfirst") or vs.get("standfirst")
+        except Exception as e:
+            print(f"[wire] {acct}: verbatim sections unavailable ({e})")
         accounts[acct] = payload
         print(f"[wire] {acct}: daily {d} via {parser} — "
               f"headline {'ok' if payload.get('headline') else 'MISSING'}, "

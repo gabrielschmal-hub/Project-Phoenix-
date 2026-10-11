@@ -10820,6 +10820,24 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     }).catch(function(){ host.innerHTML='<div class="mcna">industry.json unavailable.</div>'; });
   }
 
+  function mcbDailyVerbatim(d){
+    var placed={};
+    function plateFor(k){
+      k=String(k||"").toLowerCase();
+      if(!placed.gex && /^(the tape|the market|markets)/.test(k)){ placed.gex=1; return mcbPlateGex(); }
+      if(!placed.conf && /^(smart money|positioning)/.test(k)){ placed.conf=1; return mcbPlateConf(); }
+      if(!placed.rot && /^(the screener|opportunities|rotation)/.test(k)){ placed.rot=1; return mcbPlateRot(); }
+      if(!placed.since && /^(what changed|what actually mattered)/.test(k)){ placed.since=1; return mcbPlateSince(); }
+      return "";
+    }
+    var h=d.sections.map(function(sc){
+      return '<div class="ed-sec"><div class="ed-k"><span>'+(sc.kicker||"")+'</span><span class="ed-n">'+(sc.right||"")+'</span></div>'+
+             (sc.html||"")+'</div>'+plateFor(sc.kicker);
+    }).join("");
+    // instruments with no section to sit under still appear, at the end
+    if(!placed.gex) h+=mcbPlateGex();
+    return h;
+  }
   function mcbWeekly(wk,tabs){
     return tabs+
       (wk.headline?'<div class="ed-call">'+wk.headline+'</div>':"")+
@@ -10859,7 +10877,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         }
       }catch(e){}
       var stale=(age!=null&&age>=2);
-      var recap=d.recap;
+      var recap=(d.sections&&d.sections.length)?null:d.recap;
       var html=
         tabs+
         '<div class="mcb-top">'+
@@ -10873,6 +10891,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           (d.headline?'<div class="ed-call">'+d.headline+'</div>':"")+
           (d.standfirst?'<div class="ed-vwhy">'+d.standfirst+'</div>':"")+
         '</div>'+
+        (d.sections&&d.sections.length ? mcbDailyVerbatim(d) :
         MCB_ORDER.filter(function(x){ return x[0]!=="recap"; })
                  .map(function(x){
                    var html=mcbSec(d[x[0]],x[1]);
@@ -10884,7 +10903,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
                    return html;
                  }).join("")+
         (d.themes||[]).map(function(t){ return mcbSec(t); }).join("")+
-        (d.ondeck?'<p class="ed-body"><b>On deck.</b> '+d.ondeck+'</p>':"")+
+        (d.ondeck?'<p class="ed-body"><b>On deck.</b> '+d.ondeck+'</p>':""))+
         '<div class="ed-jump mcb-jump"><a data-go="launch">Launch Control</a><a data-go="markets">Markets</a>'+
           '<a data-go="screeners">Screeners</a><a data-go="trades">Trade</a>'+
           '<a data-go="smart">Smart Money</a><a data-go="portfolio">Portfolio</a></div>'+
