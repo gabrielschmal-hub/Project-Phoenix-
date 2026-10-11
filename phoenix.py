@@ -2215,6 +2215,12 @@ def run_wire():
             vs = _wire_parse_weekly(raw)
             payload["sections"] = [x for x in (vs.get("sections") or [])
                                    if not str(x.get("kicker", "")).lower().startswith(("the names", "the map", "dealer map"))]
+            for x in payload["sections"]:                # balance the fragment: the split leaves the section's own closer
+                h = x.get("html") or ""
+                extra = len(_re.findall(r"</div>", h)) - len(_re.findall(r"<div\b", h))
+                while extra > 0 and h.rstrip().endswith("</div>"):
+                    h = h.rstrip()[:-len("</div>")]; extra -= 1
+                x["html"] = h
             payload["headline"] = payload.get("headline") or vs.get("headline")
             payload["standfirst"] = payload.get("standfirst") or vs.get("standfirst")
         except Exception as e:

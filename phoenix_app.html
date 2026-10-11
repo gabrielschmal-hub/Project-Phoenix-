@@ -10820,6 +10820,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     }).catch(function(){ host.innerHTML='<div class="mcna">industry.json unavailable.</div>'; });
   }
 
+  // Verbatim section markup arrives with its own closing tags, and the last section runs into the page
+  // furniture: on 9 Oct every daily section carried one more </div> than it opened, "What's next" three.
+  // Inside Mission Control those strays closed the Daily Brief pane early and swallowed the MME tab.
+  // The browser's own parser balances a fragment: open what is unclosed, drop what closes nothing.
+  function mcbBalance(h){ var t=document.createElement("template"); t.innerHTML=String(h||""); return t.innerHTML; }
   function mcbDailyVerbatim(d){
     var placed={};
     function plateFor(k){
@@ -10832,7 +10837,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     }
     var h=d.sections.map(function(sc){
       return '<div class="ed-sec"><div class="ed-k"><span>'+(sc.kicker||"")+'</span><span class="ed-n">'+(sc.right||"")+'</span></div>'+
-             (sc.html||"")+'</div>'+plateFor(sc.kicker);
+             mcbBalance(sc.html)+'</div>'+plateFor(sc.kicker);
     }).join("");
     // instruments with no section to sit under still appear, at the end
     if(!placed.gex) h+=mcbPlateGex();
@@ -10844,7 +10849,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       (wk.standfirst?'<div class="ed-vwhy">'+wk.standfirst+'</div>':"")+
       (wk.sections||[]).map(function(s){
         return '<div class="ed-sec"><div class="ed-k"><span>'+(s.kicker||"")+'</span>'+
-               '<span class="ed-n">'+(s.right||"")+'</span></div>'+(s.html||"")+'</div>'; }).join("")+
+               '<span class="ed-n">'+(s.right||"")+'</span></div>'+mcbBalance(s.html)+'</div>'; }).join("")+
       '<div class="mcb-src">Weekly \u00b7 written '+(wk.date||"\u2014")+' \u00b7 <span class="mcb-file">'+(wk.file||"")+'</span></div>';
   }
   function mcBrief(st){
