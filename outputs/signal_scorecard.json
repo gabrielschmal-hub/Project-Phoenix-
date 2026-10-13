@@ -1,42 +1,42 @@
 {
- "n": 248,
- "e_price_R": -0.442,
- "stop_hit": 0.569,
+ "n": 251,
+ "e_price_R": -0.439,
+ "stop_hit": 0.57,
  "median_mfe_R": 0.37,
- "win_20d": 0.274,
+ "win_20d": 0.275,
  "fails": [
-  "E_price -0.442R < 0.054R",
+  "E_price -0.439R < 0.054R",
   "median MFE 0.37R < 1R (never reaches breakeven)"
  ],
  "verdict": "STOP",
  "decision_variable": "2.5x ATR, stop only, 20 bars",
  "atr_grid": {
   "1.5x": {
-   "n": 248,
-   "E_stop_R": -0.526,
-   "E_tp2_R": -0.505,
-   "E_tp3_R": -0.508,
-   "stop_hit": 0.77,
-   "tp2_first": 0.109,
+   "n": 251,
+   "E_stop_R": -0.518,
+   "E_tp2_R": -0.499,
+   "E_tp3_R": -0.501,
+   "stop_hit": 0.769,
+   "tp2_first": 0.112,
    "tp3_first": 0.056,
-   "median_mfe_R": 0.62
+   "median_mfe_R": 0.61
   },
   "2.0x": {
-   "n": 248,
-   "E_stop_R": -0.494,
-   "E_tp2_R": -0.491,
-   "E_tp3_R": -0.462,
+   "n": 251,
+   "E_stop_R": -0.489,
+   "E_tp2_R": -0.486,
+   "E_tp3_R": -0.458,
    "stop_hit": 0.669,
-   "tp2_first": 0.069,
+   "tp2_first": 0.068,
    "tp3_first": 0.036,
    "median_mfe_R": 0.46
   },
   "2.5x": {
-   "n": 248,
-   "E_stop_R": -0.442,
-   "E_tp2_R": -0.433,
-   "E_tp3_R": -0.411,
-   "stop_hit": 0.569,
+   "n": 251,
+   "E_stop_R": -0.439,
+   "E_tp2_R": -0.43,
+   "E_tp3_R": -0.409,
+   "stop_hit": 0.57,
    "tp2_first": 0.056,
    "tp3_first": 0.02,
    "median_mfe_R": 0.37
@@ -55,10 +55,10 @@
    },
    {
     "group": "Finance",
-    "n": 37,
+    "n": 38,
     "thin": false,
-    "E_stop_R": -0.783,
-    "stop_hit": 0.676,
+    "E_stop_R": -0.789,
+    "stop_hit": 0.684,
     "tp2_first": 0.0,
     "median_mfe_R": 0.19
    },
@@ -109,10 +109,10 @@
    },
    {
     "group": "Technology services",
-    "n": 11,
+    "n": 13,
     "thin": true,
-    "E_stop_R": -0.047,
-    "stop_hit": 0.364,
+    "E_stop_R": -0.011,
+    "stop_hit": 0.385,
     "tp2_first": 0.0,
     "median_mfe_R": 0.41
    },
@@ -254,6 +254,15 @@
     "median_mfe_R": 0.42
    },
    {
+    "group": "Major banks",
+    "n": 14,
+    "thin": true,
+    "E_stop_R": -0.763,
+    "stop_hit": 0.643,
+    "tp2_first": 0.0,
+    "median_mfe_R": 0.15
+   },
+   {
     "group": "Integrated oil",
     "n": 13,
     "thin": true,
@@ -261,15 +270,6 @@
     "stop_hit": 0.462,
     "tp2_first": 0.077,
     "median_mfe_R": 0.46
-   },
-   {
-    "group": "Major banks",
-    "n": 13,
-    "thin": true,
-    "E_stop_R": -0.745,
-    "stop_hit": 0.615,
-    "tp2_first": 0.0,
-    "median_mfe_R": 0.15
    },
    {
     "group": "Packaged software",
@@ -380,15 +380,6 @@
     "median_mfe_R": 0.64
    },
    {
-    "group": "Wireless telecommunications",
-    "n": 4,
-    "thin": true,
-    "E_stop_R": 0.221,
-    "stop_hit": 0.5,
-    "tp2_first": 0.25,
-    "median_mfe_R": 0.91
-   },
-   {
     "group": "Investment banks/Brokers",
     "n": 4,
     "thin": true,
@@ -396,6 +387,15 @@
     "stop_hit": 0.75,
     "tp2_first": 0.0,
     "median_mfe_R": 0.74
+   },
+   {
+    "group": "Wireless telecommunications",
+    "n": 4,
+    "thin": true,
+    "E_stop_R": 0.221,
+    "stop_hit": 0.5,
+    "tp2_first": 0.25,
+    "median_mfe_R": 0.91
    },
    {
     "group": "Chemicals: agricultural",
@@ -432,6 +432,15 @@
     "stop_hit": 1.0,
     "tp2_first": 0.0,
     "median_mfe_R": 0.38
+   },
+   {
+    "group": "Information technology services",
+    "n": 3,
+    "thin": true,
+    "E_stop_R": -0.207,
+    "stop_hit": 0.667,
+    "tp2_first": 0.0,
+    "median_mfe_R": 1.09
    },
    {
     "group": "Other consumer services",
@@ -578,15 +587,6 @@
     "median_mfe_R": 0.24
    },
    {
-    "group": "Information technology services",
-    "n": 1,
-    "thin": true,
-    "E_stop_R": -1.0,
-    "stop_hit": 1.0,
-    "tp2_first": 0.0,
-    "median_mfe_R": 1.09
-   },
-   {
     "group": "Life/Health insurance",
     "n": 1,
     "thin": true,
@@ -653,21 +653,21 @@
   "profitability": [
    {
     "group": "profitable",
-    "n": 144,
+    "n": 146,
     "thin": false,
-    "E_stop_R": -0.453,
-    "stop_hit": 0.562,
-    "tp2_first": 0.042,
+    "E_stop_R": -0.461,
+    "stop_hit": 0.568,
+    "tp2_first": 0.041,
     "median_mfe_R": 0.31
    },
    {
     "group": "unknown",
-    "n": 37,
+    "n": 38,
     "thin": false,
-    "E_stop_R": -0.541,
-    "stop_hit": 0.541,
-    "tp2_first": 0.054,
-    "median_mfe_R": 0.38
+    "E_stop_R": -0.49,
+    "stop_hit": 0.526,
+    "tp2_first": 0.053,
+    "median_mfe_R": 0.47
    },
    {
     "group": "marginal",
@@ -701,21 +701,21 @@
   "atr": [
    {
     "group": "2-4%",
-    "n": 115,
+    "n": 117,
     "thin": false,
-    "E_stop_R": -0.445,
-    "stop_hit": 0.609,
-    "tp2_first": 0.087,
+    "E_stop_R": -0.435,
+    "stop_hit": 0.607,
+    "tp2_first": 0.085,
     "median_mfe_R": 0.37
    },
    {
     "group": "4-7%",
-    "n": 90,
+    "n": 91,
     "thin": false,
-    "E_stop_R": -0.312,
-    "stop_hit": 0.444,
+    "E_stop_R": -0.319,
+    "stop_hit": 0.451,
     "tp2_first": 0.033,
-    "median_mfe_R": 0.4
+    "median_mfe_R": 0.38
    },
    {
     "group": "<2%",
@@ -739,12 +739,12 @@
   "regime": [
    {
     "group": "POLICY_TIGHTENING",
-    "n": 70,
+    "n": 73,
     "thin": false,
-    "E_stop_R": -0.399,
-    "stop_hit": 0.586,
-    "tp2_first": 0.086,
-    "median_mfe_R": 0.35
+    "E_stop_R": -0.391,
+    "stop_hit": 0.589,
+    "tp2_first": 0.082,
+    "median_mfe_R": 0.32
    },
    {
     "group": "NO_CLEAR",
@@ -768,10 +768,10 @@
    },
    {
     "group": "positive",
-    "n": 38,
+    "n": 41,
     "thin": false,
-    "E_stop_R": -0.634,
-    "stop_hit": 0.658,
+    "E_stop_R": -0.602,
+    "stop_hit": 0.659,
     "tp2_first": 0.0,
     "median_mfe_R": 0.28
    }
@@ -779,22 +779,22 @@
   "spx_vs_200d": [
    {
     "group": "above 200d",
-    "n": 248,
+    "n": 251,
     "thin": false,
-    "E_stop_R": -0.442,
-    "stop_hit": 0.569,
+    "E_stop_R": -0.439,
+    "stop_hit": 0.57,
     "tp2_first": 0.056,
-    "median_mfe_R": 0.38
+    "median_mfe_R": 0.37
    }
   ],
   "breakout": [
    {
     "group": "no breakout",
-    "n": 216,
+    "n": 219,
     "thin": false,
-    "E_stop_R": -0.434,
-    "stop_hit": 0.579,
-    "tp2_first": 0.06,
+    "E_stop_R": -0.431,
+    "stop_hit": 0.58,
+    "tp2_first": 0.059,
     "median_mfe_R": 0.38
    },
    {
@@ -810,21 +810,21 @@
   "days_on_list": [
    {
     "group": "6+",
-    "n": 187,
+    "n": 189,
     "thin": false,
-    "E_stop_R": -0.445,
-    "stop_hit": 0.572,
+    "E_stop_R": -0.438,
+    "stop_hit": 0.571,
     "tp2_first": 0.053,
     "median_mfe_R": 0.39
    },
    {
     "group": "day 1",
-    "n": 30,
+    "n": 31,
     "thin": false,
-    "E_stop_R": -0.371,
-    "stop_hit": 0.6,
-    "tp2_first": 0.1,
-    "median_mfe_R": 0.37
+    "E_stop_R": -0.391,
+    "stop_hit": 0.613,
+    "tp2_first": 0.097,
+    "median_mfe_R": 0.33
    },
    {
     "group": "2-5",
@@ -839,11 +839,11 @@
   "time_in_trade": [
    {
     "group": "held 20",
-    "n": 107,
+    "n": 108,
     "thin": false,
-    "E_stop_R": 0.293,
+    "E_stop_R": 0.303,
     "stop_hit": 0.0,
-    "tp2_first": 0.121,
+    "tp2_first": 0.12,
     "median_mfe_R": 0.74
    },
    {
@@ -857,7 +857,7 @@
    },
    {
     "group": "stopped d11-20",
-    "n": 58,
+    "n": 60,
     "thin": false,
     "E_stop_R": -1.0,
     "stop_hit": 1.0,
@@ -877,6 +877,6 @@
  },
  "min_cell": 20,
  "logged_new": 303,
- "asof": "2026-10-10T12:26",
+ "asof": "2026-10-13T10:54",
  "note": "1.5x and 2.0x and the target policies are descriptive. The pre-registered verdict is the 2.5x stop-only column; choosing the best cell after the fact is not a result."
 }
