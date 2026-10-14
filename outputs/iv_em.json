@@ -1,11 +1,11 @@
 {
- "asof": "2026-10-14 07:19 UTC",
+ "asof": "2026-10-14 10:33 UTC",
  "date": "2026-10-14",
  "source": "Yahoo option chains; expected move from the ATM straddle mid, IV x S x sqrt(T) when quotes are unusable (method on every row)",
  "note": "Rows carry the spot they were computed against and the earnings date known then. A row is stale by age, and INVALID once earnings have passed or spot has moved far from the quote \u2014 the app decides which.",
  "tier_a": 160,
  "tier_b_refreshed": false,
- "ticker_count": 776,
+ "ticker_count": 777,
  "tickers": {
   "GOOG": {
    "asof": "2026-10-08",
@@ -18562,6 +18562,37 @@
    "tier": "A",
    "coverage": "failed",
    "reason": "ValueError: cannot convert float NaN to integer"
+  },
+  "MSM": {
+   "asof": "2026-10-14",
+   "tier": "A",
+   "coverage": "straddle",
+   "spot": 132.17,
+   "atm_strike": 130.0,
+   "expiry": "2026-11-20",
+   "dte": 36,
+   "em_abs": 12.14,
+   "em_pct": 9.19,
+   "em_daily_pct": 1.53,
+   "iv_annual_pct": 1.6,
+   "iv_daily_pct": 0.1,
+   "iv_daily_abs": 0.13,
+   "rv30_pct": 22.1,
+   "spread_pts": -20.5,
+   "iv_percentile_52w": null,
+   "iv_hist_days": 1,
+   "atr14": 3.16,
+   "atr14_pct": 2.39,
+   "rv_daily_pct": 1.39,
+   "stop_basis": "realised",
+   "stop_floor_pct": 2.39,
+   "next_earnings": "2026-10-22",
+   "em_to_earnings": {
+    "expiry": "2026-11-20",
+    "dte": 36,
+    "pct": 9.19
+   },
+   "quality": "quoted"
   }
  }
 }
