@@ -10670,7 +10670,7 @@ def _mme_uploaded():
     """
     import os, json, glob
     from datetime import datetime
-    cands = sorted(glob.glob(os.path.join(WIRE_DIR, "mme_map*.json")), key=os.path.getmtime)
+    cands = sorted(glob.glob(os.path.join(WIRE_DIR, "mme_map*.json")), key=_wire_file_date_key)
     d = path = None
     for pth in reversed(cands):                      # newest file that actually carries levels
         try:
@@ -10725,6 +10725,22 @@ def _mme_uploaded():
     return rows, meta
 
 
+def _wire_file_date_key(pth):
+    """Order wire/ files by the date in their NAME (…_2026-10-13.json), then by the date inside them.
+    Never by mtime: a GitHub checkout stamps every file with the same checkout time, so 'newest by
+    mtime' picked an arbitrary file — on 13 Oct the MME page showed the 8 and 9 Oct commentary while
+    the 13 Oct file sat in the folder."""
+    import os, re, json
+    m = re.search(r"(\d{4}-\d{2}-\d{2})", os.path.basename(pth))
+    if m:
+        return (m.group(1), os.path.basename(pth))
+    try:
+        d = json.load(open(pth, encoding="utf-8")).get("date") or ""
+    except Exception:
+        d = ""
+    return (str(d)[:10], os.path.basename(pth))
+
+
 def _mme_commentary():
     """
     Cowork's morning commentary for the MME page: one paragraph per ticker plus a headline and a
@@ -10734,7 +10750,7 @@ def _mme_commentary():
     """
     import os, json, glob
     cands = sorted(set(glob.glob(os.path.join(WIRE_DIR, "mme_map*.json")) + glob.glob(os.path.join(WIRE_DIR, "mme_notes*.json"))),
-                   key=os.path.getmtime)
+                   key=_wire_file_date_key)
     for pth in reversed(cands):
         try:
             d = json.load(open(pth, encoding="utf-8"))
