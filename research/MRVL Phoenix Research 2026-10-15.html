@@ -1,0 +1,250 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>MRVL &middot; Phoenix Equity Research &middot; 23 Aug 2026</title>
+<style>
+:root{
+  --bg:#020F1F; --card:#08192B; --card2:#0C2137; --line:#14304A; --line2:#1E4462;
+  --ink:#E7EEF6; --inkMed:#C4D2DF; --inkLight:#94A8BA; --inkFade:#6B8299; --inkGhost:#47596C;
+  --gold:#D37736; --green:#3FBF77; --greenBg:rgba(63,191,119,.13);
+  --red:#D9534F; --redBg:rgba(217,83,79,.13);
+  --amber:#D8A24A; --amberBg:rgba(216,162,74,.13);
+  --rail:#010A15; --railLine:#0E2942;
+  --gCall:#2D8A55; --gPut:#C43A30; --gSpot:#3B82C4; --gFlip:#E8C34A; --gPin:#9B7BD4;
+  --serif:Georgia,'Times New Roman',serif; --mono:'Courier New',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:#020F1F;color-scheme:dark}
+html.light{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:15.5px;line-height:1.62}
+.shell{display:grid;grid-template-columns:236px 1fr;max-width:1420px;margin:0 auto}
+.rail{background:var(--rail);border-right:1px solid var(--railLine);padding:22px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.rail .logo{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--gold);font-weight:700;padding:0 20px 15px;border-bottom:1px solid var(--railLine)}
+.rail .logo span{color:var(--inkFade);letter-spacing:.16em}
+.toc{list-style:none;margin:12px 0 0;padding:0}
+.toc a{display:flex;gap:10px;padding:7px 20px;color:var(--inkLight);text-decoration:none;font-family:var(--mono);font-size:11.5px;border-left:2px solid transparent}
+.toc a:hover{color:var(--ink);background:rgba(211,119,54,.07);border-left-color:var(--gold)}
+.toc a b{color:var(--inkGhost);font-weight:400;min-width:16px}
+.grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--inkGhost);padding:15px 20px 4px;text-transform:uppercase}
+.rail .stat{margin:16px 20px 0;padding-top:13px;border-top:1px solid var(--railLine);font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.85}
+.rail .stat b{color:var(--red)}
+main{padding:0 40px 90px;min-width:0}
+.mast{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:24px 0 13px;border-bottom:2px solid var(--gold)}
+.mast .t{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--inkFade);text-transform:uppercase}
+.mast .r{font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);text-align:right;line-height:1.8}
+h1{font-weight:400;font-size:clamp(31px,4.8vw,50px);line-height:1.08;letter-spacing:-.015em;margin:24px 0 6px}
+h1 em{font-style:italic;color:var(--gold)}
+h2{font-weight:400;font-size:26px;letter-spacing:-.01em;margin:0 0 3px}
+h3{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 9px}
+p{color:var(--inkMed);margin:0 0 13px}
+.lede{font-size:18.5px;line-height:1.58;color:var(--ink)}
+.mono{font-family:var(--mono)} a{color:var(--gold)}
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+.sh{display:flex;gap:14px;align-items:baseline;margin-bottom:19px}
+.sh .n{font-family:var(--mono);font-size:11px;color:var(--gold);font-weight:700;padding-top:8px;min-width:24px}
+.sh p{margin:2px 0 0;font-size:14px;color:var(--inkLight)}
+.verdict{border:1px solid var(--red);border-left:3px solid var(--red);background:var(--redBg);padding:16px 20px;margin:22px 0 0}
+.verdict .l{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--red);font-weight:700;text-transform:uppercase}
+.verdict .t{font-size:24px;margin:5px 0 7px;line-height:1.2}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:24px 0 0}
+.cell{background:var(--card);padding:11px 13px}
+.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade)}
+.cell .v{font-family:var(--mono);font-size:17.5px;font-weight:700;margin-top:3px}
+.cell .s{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:1px}
+.up{color:var(--green)}.dn{color:var(--red)}.am{color:var(--gold)}.wr{color:var(--amber)}
+.gexp{border:1px solid var(--line2);background:var(--card)}
+.gexh{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--card2)}
+.gexh .tk{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.07em}
+.badge{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;padding:4px 11px;border-radius:3px;background:var(--gCall);color:#02160C}
+.b-out{border:1px solid var(--line2);color:var(--inkLight);padding:4px 10px;font-family:var(--mono);font-size:10.5px;border-radius:3px}
+.gexh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--inkLight)}
+.gexsub{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);padding:8px 15px;border-bottom:1px solid var(--line)}
+.ggrid{stroke:#0F2438;stroke-width:1}
+.gax{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.gaxr{font-family:var(--mono);font-size:9.5px;fill:var(--inkLight);opacity:.75}
+.gaxt{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;fill:var(--inkGhost)}
+.gcall{fill:var(--gCall)} .gput{fill:var(--gPut)}
+.gcurve{fill:none;stroke:var(--ink);stroke-width:1.6;opacity:.9}
+.garea{fill:#2A4A78;opacity:.16;stroke:none}
+.gkey{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:9px 15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--inkFade)}
+.gkey span{display:inline-flex;align-items:center;gap:6px}
+.gkey i{width:11px;height:3px;border-radius:2px;display:inline-block}
+.gkey .note{display:block !important;color:var(--inkGhost);flex-basis:100%;width:100%;line-height:1.6;font-size:10px;padding-top:4px}
+.gkey .note b{display:inline;color:var(--inkFade)}
+.lad{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:74px 176px 1fr;gap:12px;align-items:center;padding:9px 15px;border-bottom:1px solid #0E2438;border-left:3px solid transparent;font-family:var(--mono);font-size:12.5px}
+.lrow:last-child{border-bottom:none}
+.lrow .p{font-weight:700}
+.lrow .d{color:var(--inkFade);font-size:11.5px;font-family:var(--serif)}
+.lrow .lab{letter-spacing:.08em;font-weight:700;font-size:10.5px}
+.l-call{border-left-color:var(--gCall)} .l-put{border-left-color:var(--gPut)}
+.l-spot{border-left-color:var(--gSpot);background:rgba(59,130,196,.10);border-top:1px solid #2C5C86;border-bottom:1px solid #2C5C86}
+.l-flip{border-left-color:var(--gFlip);background:rgba(232,195,74,.07)}
+.narr{padding:14px 15px;border-top:1px solid var(--line);background:var(--card2);font-size:14px;color:var(--inkMed);line-height:1.6}
+.chart{border:1px solid var(--line);background:var(--card);padding:14px 10px 6px;margin:6px 0 14px}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:#0F2438;stroke-width:1}
+.axl{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.pl{fill:none;stroke:var(--ink);stroke-width:1.6}
+.m50{fill:none;stroke:var(--gold);stroke-width:1.2}
+.m200{fill:none;stroke:#5E7C99;stroke-width:1.4;stroke-dasharray:5 3}
+.ar{fill:url(#g1)}
+.lbl{font-family:var(--mono);font-size:10px;font-weight:700}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:5px 4px 7px}
+.legend i{display:inline-block;width:13px;height:2px;vertical-align:middle;margin-right:5px}
+.tw{border:1px solid var(--line);background:var(--card);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #0E2438;color:var(--inkMed)}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.hl td{background:rgba(63,191,119,.08)} tr.hlr td{background:rgba(217,83,79,.07)}
+tr.me td{background:rgba(211,119,54,.10)}
+.gates{border:1px solid var(--line);background:var(--card)}
+.gate{display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:13px 17px;border-bottom:1px solid #0E2438}
+.gate:last-child{border-bottom:none} .gate.f{background:rgba(217,83,79,.05)}
+.gate .idx{font-family:var(--mono);font-size:10px;color:var(--inkGhost)}
+.gate .nm{font-family:var(--mono);font-size:13px;font-weight:700}
+.gate .dt{font-size:12.5px;color:var(--inkLight);margin-top:2px;line-height:1.45}
+.tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border:1px solid;white-space:nowrap;border-radius:2px}
+.t-fail{color:var(--red);border-color:var(--red);background:var(--redBg)}
+.t-warn{color:var(--amber);border-color:var(--amber);background:var(--amberBg)}
+.t-pass{color:var(--green);border-color:var(--green);background:var(--greenBg)}
+.stamp{border:1px solid var(--line);border-top:none;background:var(--card2);padding:13px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.stamp .x{font-family:var(--mono);font-size:12px;color:var(--inkLight)}
+.stamp .o{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--red);letter-spacing:.08em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);background:var(--card);padding:16px 18px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #0E2438;font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv span:first-child{color:var(--inkLight)} .kv span:last-child{font-family:var(--mono);font-weight:700}
+.rule{border-left:2px solid var(--gold);background:rgba(211,119,54,.05);padding:11px 15px;margin:14px 0;font-size:13.5px;color:var(--inkMed)}
+.rule .rid{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px}
+.note{border-left:2px solid var(--line2);padding:2px 0 2px 15px;margin:15px 0;color:var(--inkMed)}
+.note b{color:var(--ink)}
+.news{border:1px solid var(--line);background:var(--card)}
+.nhdr{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);padding:10px 16px;background:var(--card2);border-bottom:1px solid var(--line)}
+.nrow{display:grid;grid-template-columns:86px 1fr;gap:14px;padding:11px 16px;border-bottom:1px solid #0E2438}
+.nrow:last-child{border-bottom:none}
+.nrow .dt{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding-top:2px}
+.nrow .hd{font-size:14.5px;color:var(--ink);margin-bottom:3px}
+.nrow .bd{font-size:12.8px;color:var(--inkLight);line-height:1.5}
+.pill{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.09em;padding:2px 7px;border:1px solid var(--line2);color:var(--inkFade);margin-right:7px;vertical-align:1px;border-radius:2px}
+.pill.bull{border-color:var(--green);color:var(--green)}
+.pill.bear{border-color:var(--red);color:var(--red)}
+.pill.neu{border-color:var(--amber);color:var(--amber)}
+ul{margin:0 0 12px;padding-left:17px;color:var(--inkMed)}li{margin-bottom:5px}
+.foot{padding:28px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);line-height:1.9}
+/* strip: fixed column counts so the last cell never orphans */
+.strip{grid-template-columns:repeat(8,1fr)}
+@media(max-width:1500px){.strip{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:620px){.strip{grid-template-columns:repeat(2,1fr)}}
+/* tablet landscape: rail becomes a compact top bar, not a dead column */
+@media(max-width:1200px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:none;border-bottom:1px solid var(--railLine);
+        display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:12px 24px}
+  .rail .logo{border-bottom:none;padding:0;font-size:10.5px;line-height:1.5}
+  .rail .stat{margin:0;padding:0;border-top:none;font-size:10.5px;line-height:1.7;text-align:right}
+  main{padding:0 24px 70px}
+}
+@media(max-width:760px){
+  .two,.three{grid-template-columns:1fr}
+  .lrow{grid-template-columns:66px 1fr}.lrow .d{display:none}
+  main{padding:0 18px 60px}
+  .rail{padding:10px 18px}
+}
+
+/* ===== light theme : colours only, toggled by html.light — sampled from phoenix_app.html ===== */
+html.light{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15);
+  --rail:#F3EADC; --railLine:rgba(122,96,68,.22);
+  --gCall:#1E7A4E; --gPut:#B4362F; --gSpot:#2C5A82; --gFlip:#A87A1C; --gPin:#7A5CA8;
+}
+html.light,html.light body,html.light .shell,html.light main{background:#F6EFE4}
+html.light body{color:#2C2118}
+html.light .rail{background:#F3EADC}
+html.light .card,html.light .tw,html.light .gates,html.light .news,html.light .gexp,html.light .chart,html.light .cell{background:rgba(255,253,249,.86)}
+html.light .stamp,html.light .gexh,html.light .narr,html.light .nhdr,html.light .gexsub{background:rgba(248,241,231,.94)}
+html.light .pxtheme{background:rgba(248,241,231,.96)}
+html.light .ggrid,html.light .grid{stroke:rgba(122,96,68,.16)}
+html.light .pl{stroke:#2C2118}
+html.light .gcurve{stroke:#2C2118}
+html.light .garea{fill:#7A6044;opacity:.16}
+html.light .m200{stroke:#8C7A67}
+html.light .badge{background:var(--gCall);color:#FFFDF9}
+html.light .lrow.l-spot{background:rgba(44,90,130,.10);border-top-color:rgba(44,90,130,.4);border-bottom-color:rgba(44,90,130,.4)}
+html.light .lrow.l-flip{background:rgba(168,122,28,.10)}
+html.light .gate.f{background:rgba(180,54,47,.055)}
+html.light tr.hl td{background:rgba(30,122,78,.09)}
+html.light tr.hlr td{background:rgba(180,54,47,.07)}
+html.light tr.me td{background:rgba(194,99,42,.10)}
+html.light td{border-bottom-color:rgba(122,96,68,.14)}
+html.light .gate,html.light .nrow,html.light .lrow{border-bottom-color:rgba(122,96,68,.14)}
+html.light .rule{background:rgba(194,99,42,.06)}
+html.light .toc a:hover{background:rgba(194,99,42,.09)}
+/* theme switch */
+.pxtheme{z-index:40;display:flex;gap:0;border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:var(--card2)}
+.pxtheme button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 12px;border:0;background:transparent;color:var(--inkFade);cursor:pointer}
+.pxtheme button.on{background:var(--gold);color:#FFFDF9;font-weight:700}
+.pxtheme button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+@media print{.pxtheme,.rail{display:none}.shell{grid-template-columns:1fr}main{padding:0}}
+
+/* ===== theme switch hardening — must stay last in the sheet ===== */
+.pxtheme{position:fixed;top:14px;right:18px;bottom:auto;left:auto;
+  height:auto;width:auto;max-height:34px;align-items:center;line-height:1}
+.pxtheme button{height:28px;line-height:28px;padding:0 12px;white-space:nowrap;flex:0 0 auto}
+@media(max-width:1200px){
+  .pxtheme{top:auto;bottom:14px;right:14px}
+}
+@media print{.pxtheme{display:none}}
+</style></head><body><div class="shell">
+<nav class="rail"><div class="logo">PHOENIX<br><span>EQUITY RESEARCH</span></div>
+<div class="stat" style="margin-top:20px;border-top:none;padding-top:0">MRVL &middot; $240.77<br>L3 SINGLE NAME<br>23 AUG 2026<br><br>GATES: <b>1 FAIL</b><br>SCORE: &mdash;/100<br>VERDICT: <b>4/5 &middot; ON THE 10-WEEK</b></div></nav>
+<main>
+<div class="pxtheme" role="group" aria-label="Theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></div>
+<div class="mast"><div class="t">NASDAQ : MRVL &middot; Marvell Technology, Inc. &middot; L3 single-name thesis</div>
+<div class="r">THU 15 OCT 2026 &middot; GATES ON WEEKLY CLOSE 9 OCT &middot; LIVE THU 15 OCT &middot; INDUSTRY = SPX<br>IBKR LIVE &middot; FULL-CHAIN GEX &middot; WEEKLY GATES</div></div>
+<section id="verdict"><h1>Four of five on Friday.<br>Today it sits on the 10-week<br><em>to the cent</em>.</h1><p class="lede" style="max-width:76ch;margin-top:18px">Marvell closed the 9 October week at $275.28 &mdash; 4 of 5 with SPX as industry, after nearly tripling from $79 in February. Wednesday's &minus;8.7% was the third-worst move in the map, and at $240.77 it is <b>exactly on its rising 10-week ($240.78)</b>. <b style="color:var(--ink)">Friday's close against that average decides whether it stays at 4/5 or drops to 3/5.</b></p>
+<div class="verdict" style="border-color:var(--amber);background:var(--amberBg);border-left-color:var(--amber)"><div class="l" style="color:var(--amber)">Phoenix gate stack &middot; weekly &middot; industry = SPX</div><div class="t">4 OF 5 &mdash; NO ENTRY. near_high is 26% away; the 10-week is the line this week.</div><p style="margin:0;font-size:14px">Even on the close, <span class="mono">near_high</span> needs <b>$303.49</b>. A 6.1% ATR. <b style="color:var(--ink)">The long trend is strong; the setup is not near a trigger.</b> Earnings est. 1 December.</p></div>
+<div class="strip"><div class="cell"><div class="k">Live Thu 15 Oct</div><div class="v dn">240.77</div><div class="s ">map close 245.28 (-8.73%)</div></div><div class="cell"><div class="k">Weekly close 9 Oct</div><div class="v ">275.28</div><div class="s ">gates run on this</div></div><div class="cell"><div class="k">10-week</div><div class="v dn">240.78</div><div class="s ">-0.0% live</div></div><div class="cell"><div class="k">30-week</div><div class="v up">207.19</div><div class="s ">+16.2% live</div></div><div class="cell"><div class="k">40-week</div><div class="v up">175.90</div><div class="s ">+36.9% live</div></div><div class="cell"><div class="k">104w high</div><div class="v ">329.88</div><div class="s ">-27.0% live</div></div><div class="cell"><div class="k">Gates</div><div class="v wr">4/5</div><div class="s ">live 3/5</div></div><div class="cell"><div class="k">Next binary</div><div class="v dn">WED 28 OCT</div><div class="s dn">Fed &middot; 9 sessions</div></div></div></section>
+<section id="company"><div class="sh"><div class="n">B</div><div><h2>The business in depth</h2><p>The second-largest designer of custom AI chips after Broadcom, and the leader in the optical-signal chips that connect AI servers to one another.</p></div></div>
+<div class="two"><div class="card"><h3>What it sells</h3><p style="font-size:13.5px;margin:0"><b>Data Center</b> (~75% of revenue): <b>custom AI accelerators</b> ("XPUs") co-designed for hyperscalers; <b>electro-optics</b> &mdash; DSPs and drivers inside the 800G and 1.6T optical modules that link GPUs across a cluster; Ethernet switches; and storage controllers. Smaller lines in enterprise networking, carrier infrastructure, consumer and automotive Ethernet.</p></div><div class="card"><h3>Who buys it &mdash; customers</h3><p style="font-size:13.5px;margin:0">The hyperscalers: <b>Amazon</b> (Trainium-related custom silicon), <b>Microsoft</b> (Maia), Google and Meta. Optical module makers such as <b>Coherent, Innolight and Eoptolink</b> buy its DSPs. A handful of customers account for a large share of revenue.</p></div></div><div class="two" style="margin-top:18px"><div class="card"><h3>Who it depends on &mdash; suppliers</h3><p style="font-size:13.5px;margin:0">Fabless: <b>TSMC</b> makes its leading chips; advanced packaging and HBM are sourced through TSMC and the memory makers for custom accelerators.</p></div><div class="card"><h3>Who it fights &mdash; competitors</h3><p style="font-size:13.5px;margin:0"><b>Broadcom</b> in custom AI chips and switching; <b>Nvidia</b> in networking and as the alternative to custom silicon; <b>Credo</b> in connectivity; Asian ASIC design houses <b>Alchip and GUC</b>; MediaTek.</p></div></div>
+<div class="rule" style="border-left-width:3px"><span class="rid">Why this matters for the trade</span>Revenue is lumpy because <b>custom-chip programmes are won and lost one at a time</b> &mdash; a single hyperscaler's design choice can move the next year. The optical business grows with cluster size, which makes it a steadier proxy for AI capex. Earnings are not until about 1 December.</div></section><section id="chartpat"><div class="sh"><div class="n">C</div><div><h2>Chart &amp; pattern analysis</h2><p>Thirty weekly bars: a June peak, an August low, and three rising lows that confirmed in late September.</p></div></div><div class="chart"><svg viewBox="0 0 1000 320" role="img" aria-label="30-week candlestick chart"><line x1="60" y1="272.0" x2="976" y2="272.0" stroke="#14304A" stroke-width="1"/><text class="gax" x="54" y="275.5" text-anchor="end">100</text><line x1="60" y1="220.5" x2="976" y2="220.5" stroke="#14304A" stroke-width="1"/><text class="gax" x="54" y="224.0" text-anchor="end">150</text><line x1="60" y1="169.0" x2="976" y2="169.0" stroke="#14304A" stroke-width="1"/><text class="gax" x="54" y="172.5" text-anchor="end">200</text><line x1="60" y1="117.5" x2="976" y2="117.5" stroke="#14304A" stroke-width="1"/><text class="gax" x="54" y="121.0" text-anchor="end">250</text><line x1="60" y1="66.1" x2="976" y2="66.1" stroke="#14304A" stroke-width="1"/><text class="gax" x="54" y="69.6" text-anchor="end">300</text><line x1="60.0" y1="271.3" x2="60.0" y2="283.6" stroke="#3FBF77" stroke-width="1.2"/><rect x="54.0" y="277.3" width="12" height="1.5" fill="#3FBF77"/><line x1="91.6" y1="263.9" x2="91.6" y2="285.8" stroke="#3FBF77" stroke-width="1.2"/><rect x="85.6" y="264.7" width="12" height="12.6" fill="#3FBF77"/><line x1="123.2" y1="241.3" x2="123.2" y2="265.8" stroke="#3FBF77" stroke-width="1.2"/><rect x="117.2" y="242.7" width="12" height="22.0" fill="#3FBF77"/><line x1="154.8" y1="230.9" x2="154.8" y2="242.7" stroke="#3FBF77" stroke-width="1.2"/><rect x="148.8" y="231.1" width="12" height="11.5" fill="#3FBF77"/><line x1="186.3" y1="199.1" x2="186.3" y2="226.8" stroke="#3FBF77" stroke-width="1.2"/><rect x="180.3" y="205.8" width="12" height="25.4" fill="#3FBF77"/><line x1="217.9" y1="203.6" x2="217.9" y2="223.8" stroke="#3FBF77" stroke-width="1.2"/><rect x="211.9" y="205.1" width="12" height="1.5" fill="#3FBF77"/><line x1="249.5" y1="193.9" x2="249.5" y2="211.7" stroke="#3FBF77" stroke-width="1.2"/><rect x="243.5" y="199.8" width="12" height="5.3" fill="#3FBF77"/><line x1="281.1" y1="177.1" x2="281.1" y2="212.3" stroke="#3FBF77" stroke-width="1.2"/><rect x="275.1" y="192.8" width="12" height="7.0" fill="#3FBF77"/><line x1="312.7" y1="170.7" x2="312.7" y2="207.3" stroke="#3FBF77" stroke-width="1.2"/><rect x="306.7" y="172.8" width="12" height="20.0" fill="#3FBF77"/><line x1="344.3" y1="150.2" x2="344.3" y2="174.5" stroke="#3FBF77" stroke-width="1.2"/><rect x="338.3" y="163.9" width="12" height="8.9" fill="#3FBF77"/><line x1="375.9" y1="41.2" x2="375.9" y2="174.1" stroke="#3FBF77" stroke-width="1.2"/><rect x="369.9" y="103.7" width="12" height="60.2" fill="#3FBF77"/><line x1="407.4" y1="60.9" x2="407.4" y2="123.7" stroke="#3FBF77" stroke-width="1.2"/><rect x="401.4" y="87.0" width="12" height="16.7" fill="#3FBF77"/><line x1="439.0" y1="35.3" x2="439.0" y2="88.6" stroke="#3FBF77" stroke-width="1.2"/><rect x="433.0" y="55.2" width="12" height="31.8" fill="#3FBF77"/><line x1="470.6" y1="51.5" x2="470.6" y2="105.2" stroke="#D9534F" stroke-width="1.2"/><rect x="464.6" y="55.2" width="12" height="45.1" fill="#D9534F"/><line x1="502.2" y1="66.1" x2="502.2" y2="130.7" stroke="#D9534F" stroke-width="1.2"/><rect x="496.2" y="100.3" width="12" height="22.1" fill="#D9534F"/><line x1="533.8" y1="106.8" x2="533.8" y2="145.4" stroke="#D9534F" stroke-width="1.2"/><rect x="527.8" y="122.4" width="12" height="9.8" fill="#D9534F"/><line x1="565.4" y1="136.1" x2="565.4" y2="191.7" stroke="#D9534F" stroke-width="1.2"/><rect x="559.4" y="132.2" width="12" height="48.5" fill="#D9534F"/><line x1="597.0" y1="153.7" x2="597.0" y2="178.0" stroke="#3FBF77" stroke-width="1.2"/><rect x="591.0" y="175.0" width="12" height="5.7" fill="#3FBF77"/><line x1="628.6" y1="167.7" x2="628.6" y2="207.2" stroke="#D9534F" stroke-width="1.2"/><rect x="622.6" y="175.0" width="12" height="6.9" fill="#D9534F"/><line x1="660.1" y1="145.7" x2="660.1" y2="192.1" stroke="#3FBF77" stroke-width="1.2"/><rect x="654.1" y="149.8" width="12" height="32.1" fill="#3FBF77"/><line x1="691.7" y1="136.7" x2="691.7" y2="162.4" stroke="#3FBF77" stroke-width="1.2"/><rect x="685.7" y="146.4" width="12" height="3.4" fill="#3FBF77"/><line x1="723.3" y1="114.9" x2="723.3" y2="157.6" stroke="#3FBF77" stroke-width="1.2"/><rect x="717.3" y="130.9" width="12" height="15.5" fill="#3FBF77"/><line x1="754.9" y1="112.8" x2="754.9" y2="153.0" stroke="#D9534F" stroke-width="1.2"/><rect x="748.9" y="130.9" width="12" height="21.0" fill="#D9534F"/><line x1="786.5" y1="144.7" x2="786.5" y2="168.4" stroke="#3FBF77" stroke-width="1.2"/><rect x="780.5" y="144.8" width="12" height="7.1" fill="#3FBF77"/><line x1="818.1" y1="125.9" x2="818.1" y2="145.8" stroke="#3FBF77" stroke-width="1.2"/><rect x="812.1" y="131.9" width="12" height="12.9" fill="#3FBF77"/><line x1="849.7" y1="119.7" x2="849.7" y2="155.0" stroke="#3FBF77" stroke-width="1.2"/><rect x="843.7" y="123.5" width="12" height="8.4" fill="#3FBF77"/><line x1="881.2" y1="99.5" x2="881.2" y2="122.7" stroke="#3FBF77" stroke-width="1.2"/><rect x="875.2" y="105.2" width="12" height="18.2" fill="#3FBF77"/><line x1="912.8" y1="86.6" x2="912.8" y2="119.5" stroke="#3FBF77" stroke-width="1.2"/><rect x="906.8" y="94.6" width="12" height="10.7" fill="#3FBF77"/><line x1="944.4" y1="64.7" x2="944.4" y2="101.3" stroke="#3FBF77" stroke-width="1.2"/><rect x="938.4" y="91.5" width="12" height="3.1" fill="#3FBF77"/><line x1="976.0" y1="88.7" x2="976.0" y2="127.8" stroke="#D9534F" stroke-width="1.2"/><rect x="970.0" y="91.5" width="12" height="35.5" fill="#D9534F"/><path d="M60.0,287.4 L91.6,286.1 L123.2,283.8 L154.8,281.2 L186.3,277.6 L217.9,274.3 L249.5,271.1 L281.1,267.8 L312.7,264.0 L344.3,260.2 L375.9,254.4 L407.4,248.4 L439.0,241.7 L470.6,237.0 L502.2,232.0 L533.8,226.8 L565.4,223.2 L597.0,219.5 L628.6,216.1 L660.1,211.5 L691.7,206.6 L723.3,201.2 L754.9,196.5 L786.5,191.6 L818.1,186.2 L849.7,180.5 L881.2,174.3 L912.8,168.1 L944.4,161.6 L976.0,156.4" fill="none" stroke="#5E7C99" stroke-width="1.8"/><path d="M60.0,288.5 L91.6,285.8 L123.2,280.7 L154.8,274.5 L186.3,265.7 L217.9,256.9 L249.5,247.8 L281.1,238.8 L312.7,227.7 L344.3,215.6 L375.9,198.2 L407.4,180.5 L439.0,161.7 L470.6,148.6 L502.2,140.3 L533.8,133.0 L565.4,131.1 L597.0,129.3 L628.6,130.2 L660.1,128.8 L691.7,133.1 L723.3,137.4 L754.9,147.1 L786.5,151.6 L818.1,152.5 L849.7,151.6 L881.2,144.1 L912.8,136.1 L944.4,127.0 L976.0,124.8" fill="none" stroke="#D8A24A" stroke-width="1.8"/><line x1="628.6" y1="207.2" x2="849.7" y2="155.0" stroke="#D37736" stroke-width="2" stroke-dasharray="6 4"/><text class="gax" x="853.7" y="150.0" fill="#D37736">rising valleys</text><line x1="754.9" y1="112.8" x2="976.0" y2="112.8" stroke="#D37736" stroke-width="2" stroke-dasharray="6 4"/><text class="gax" x="980.0" y="107.8" fill="#D37736">confirmation $254.6</text><circle cx="628.6" cy="207.2" r="5" fill="none" stroke="#E8C34A" stroke-width="2"/><text class="gax" x="628.6" y="197.2" text-anchor="middle" fill="#E8C34A">1</text><circle cx="786.5" cy="168.4" r="5" fill="none" stroke="#E8C34A" stroke-width="2"/><text class="gax" x="786.5" y="158.4" text-anchor="middle" fill="#E8C34A">2</text><circle cx="849.7" cy="155.0" r="5" fill="none" stroke="#E8C34A" stroke-width="2"/><text class="gax" x="849.7" y="145.0" text-anchor="middle" fill="#E8C34A">3</text></svg><div class="legend"><span><i style="background:#3FBF77"></i>Up week</span><span><i style="background:#D9534F"></i>Down week</span><span><i style="background:#D8A24A"></i>10-week</span><span><i style="background:#5E7C99"></i>30-week</span><span><i style="background:#D37736"></i>Pattern lines</span></div></div>
+<div class="two" style="margin-top:18px"><div class="card"><h3>What the chart shows</h3><p style="font-size:13.5px;margin:0">Marvell peaked at <b>$329.88 in June</b> and fell to <b>$162.90 in August</b>. Each pullback since has stopped higher &mdash; $162.90, $200.62, $213.62 &mdash; and in late September it closed above the $254.60 peak, reaching $301 in October. This week it has dropped back to $241.</p></div>
+<div class="card" style="border-left:2px solid var(--amber)"><h3 style="color:var(--amber)">The pattern call &mdash; and what to do with it</h3><p style="font-size:13.5px;margin:0">Bulkowski's <b>three rising valleys</b>: rank 6/39, average rise 51% &mdash; one of his best bullish continuations. It confirmed on the close above $254.60. This week's drop is a <b>throwback</b> to just below that confirmation level, which he says hurts performance but does not invalidate the pattern. <b>Invalidation is a close below the lowest valley, $162.90</b> &mdash; far below. The live test is the rising 10-week at $240.78, which price is sitting on.</p></div></div>
+<div class="rule"><span class="rid">Bulkowski &middot; Three rising valleys</span>Rank 6/39, avg rise 51% &mdash; one of his top bullish continuations. Confirms on a close above the highest peak; a close below the lowest valley invalidates.</div>
+<div class="tw" style="margin-top:14px"><table><tr><th>Level</th><th class="n">Price</th><th>Why it matters</th></tr><tr><td>October high</td><td class="n mono">$301.27</td><td>Prior swing high</td></tr><tr><td>Confirmation</td><td class="n mono">$254.60</td><td>Reclaim on a weekly close</td></tr><tr><td>10-week</td><td class="n mono">$240.78</td><td>Price is on it</td></tr><tr><td>Third valley</td><td class="n mono">$213.62</td><td>Last higher low</td></tr><tr><td>Lowest valley</td><td class="n mono">$162.90</td><td>Close below invalidates</td></tr></table></div></section><section id="biz"><div class="sh"><div class="n">01</div><div><h2>What changed this cycle</h2><p>What matters this week.</p></div></div><div class="two"><div class="card"><h3>The run</h3><div class="kv"><span>Feb low</span><span class="">~$76</span></div><div class="kv"><span>June high</span><span class="up">$329.88</span></div><div class="kv"><span>9 Oct close</span><span class="">$275.28</span></div><div class="kv"><span>40-week</span><span class="up">$175.90 &middot; price +37%</span></div></div><div class="card"><h3>Context</h3><p style="font-size:13.5px;margin:0">Custom AI silicon, riding the same capex cycle as the rest of the map's semis. <b style="color:var(--ink)">No company catalyst before December</b> &mdash; this week's move is the CPI. Not scored &mdash; first review.</p></div></div></section>
+<section id="gex"><div class="sh"><div class="n">02</div><div><h2>Options positioning</h2><p>Open interest by strike was not retrieved this run &mdash; the chain request was not approved. What follows is from the live snapshot only.</p></div></div><div class="three"><div class="card"><h3>Today&rsquo;s option volume</h3><div class="kv"><span>Calls</span><span class="">68,342</span></div><div class="kv"><span>Puts</span><span class="">53,784</span></div><div class="kv"><span>Call / put</span><span class="">1.27</span></div><div class="kv"><span>vs average</span><span class="">calls 57%, puts 69%</span></div></div><div class="card" style="grid-column:span 2"><h3>Reading</h3><p style="font-size:13.5px;margin:0">Light &mdash; 57% and 69% of average. Implied 66.1% vs realised 68.7%, aligned.</p></div></div></section>
+<section id="gates"><div class="sh"><div class="n">03</div><div><h2>The gate stack</h2><p>Weekly bars as <span class="mono">phoenix.py</span> computes them, on the last full weekly close. <b>Industry is SPX</b> for every name in this batch.</p></div></div>
+<div class="gates"><div class="gate"><div class="idx">01</div><div><div class="nm">trend200 &mdash; above 40-week</div><div class="dt">$275.28 vs 40-week <b class="mono">$175.90</b>, +56.5%, rising (was $158.16). Live +36.9%.</div></div><div class="tag t-pass">PASS</div></div><div class="gate"><div class="idx">02</div><div><div class="nm">stage2 &mdash; Weinstein</div><div class="dt">30-week <b class="mono">$207.19</b>, rising (was $183.35); close +32.9%, live +16.2%.</div></div><div class="tag t-pass">PASS</div></div><div class="gate"><div class="idx">03</div><div><div class="nm">trend50 &mdash; above 10-week</div><div class="dt">10-week <b class="mono">$240.78</b>, rising (was $216.03); close +14.3%, live -0.0%.</div></div><div class="tag t-pass">PASS</div></div><div class="gate f"><div class="idx">04</div><div><div class="nm">near_high &mdash; 104-week</div><div class="dt">104-week high <b>$329.88</b>. Close -16.6%, live -27.0%; band is &minus;8% to &minus;1% or a new high. Trigger <b class="mono">$303.49</b>.</div></div><div class="tag t-fail">FAIL</div></div><div class="gate"><div class="idx">05</div><div><div class="nm">industry &mdash; SPX</div><div class="dt">SPY above a rising 30-week, +3.8% live. Passes for the whole batch.</div></div><div class="tag t-pass">PASS</div></div></div><div class="stamp" style="border-color:var(--amber)"><div class="x">4 PASS of 5 on the 9 Oct close &middot; 3 of 5 at today&rsquo;s price</div><div class="o" style="color:var(--amber)">NEAR-CANDIDATE</div></div></section>
+<section id="vol"><div class="sh"><div class="n">V</div><div><h2>Volatility profile</h2></div></div><div class="strip" style="margin-top:0"><div class="cell"><div class="k">Implied vol</div><div class="v ">66.1%</div><div class="s ">options market</div></div><div class="cell"><div class="k">Realised vol</div><div class="v ">68.7%</div><div class="s ">what it did</div></div><div class="cell"><div class="k">Spread</div><div class="v ">-2.6</div><div class="s ">implied below realised</div></div><div class="cell"><div class="k">IV pctile 52w</div><div class="v ">47th</div><div class="s ">46th on 13w</div></div><div class="cell"><div class="k">Daily ATR</div><div class="v ">~14.71</div><div class="s ">6.1% of price</div></div><div class="cell"><div class="k">RSI 14 (daily)</div><div class="v ">43</div><div class="s ">from the map</div></div><div class="cell"><div class="k">vs 20-day / 50-day</div><div class="v ">-7.1% / +2.2%</div><div class="s ">daily averages</div></div><div class="cell"><div class="k">Stop basis</div><div class="v ">ATR</div><div class="s ">per &sect;5c</div></div></div></section>
+<section id="rr"><div class="sh"><div class="n">04</div><div><h2>Reward-to-risk</h2></div></div>
+<div class="tw"><table><tr><th>Scenario</th><th class="n">Entry</th><th class="n">Stop</th><th class="n">Stop dist</th><th class="n">R:R &rarr; 301.27</th><th class="n">R:R &rarr; 329.88</th><th class="n">Shares</th><th class="n">Position</th></tr><tr class="hlr"><td>Today, 1 ATR stop</td><td class="n">240.77</td><td class="n">226.06</td><td class="n">6.1%</td><td class="n">4.11 : 1</td><td class="n">6.06 : 1</td><td class="n">1.36</td><td class="n">$327 &middot; 16%</td></tr><tr class=""><td>Today, 2 ATR stop</td><td class="n">240.77</td><td class="n">211.36</td><td class="n">12.2%</td><td class="n">2.06 : 1</td><td class="n">3.03 : 1</td><td class="n">0.68</td><td class="n">$164 &middot; 8%</td></tr><tr class=""><td>Stop under 20-day low $224.58</td><td class="n">240.77</td><td class="n">223.46</td><td class="n">7.2%</td><td class="n">3.49 : 1</td><td class="n">5.15 : 1</td><td class="n">1.16</td><td class="n">$278 &middot; 14%</td></tr></table></div>
+<div class="note" style="border-left-color:var(--gold)"><b>Stop dist</b> is the stop as a share of price, not account risk. <b style="color:var(--ink)">Account risk is 1.00% in every row</b> &mdash; $20 on a $2,000 book; <span class="mono">shares = $20 &divide; (entry &minus; stop)</span>.</div></section>
+<section id="news"><div class="sh"><div class="n">05</div><div><h2>News and calendar</h2></div></div><div class="news"><div class="nrow"><div class="dt">14 OCT</div><div><div class="hd"><span class="pill neu">NEWS</span>MRVL closed 245.28, down 8.72% (-23.45) in the chip sell-off.</div><div class="bd">stockanalysis.com</div></div></div><div class="nrow"><div class="dt">13 OCT</div><div><div class="hd"><span class="pill neu">NEWS</span>Marvell, Microsoft and Oracle established an OCP working group to standardize data center hardware security.</div><div class="bd">Business Wire</div></div></div><div class="nrow"><div class="dt">13 OCT</div><div><div class="hd"><span class="pill neu">NEWS</span>Marvell added a 3.2T protocol-aware retimer and second-gen 1.6T AEC DSP to its connectivity portfolio.</div><div class="bd">Business Wire</div></div></div><div class="nrow"><div class="dt">12 OCT</div><div><div class="hd"><span class="pill neu">NEWS</span>Marvell unveiled second-gen Structera X, six-channel CXL 3.2 memory expanders for AI inference.</div><div class="bd">Business Wire</div></div></div><div class="nrow"><div class="dt">TUE 01 DEC</div><div><div class="hd"><span class="pill neu">EARNINGS</span>Next report &mdash; estimated</div><div class="bd">33 sessions away.</div></div></div><div class="nrow"><div class="dt">WED 28 OCT</div><div><div class="hd"><span class="pill bear">EVENT</span>Fed decision &mdash; hike odds ~44% after hot CPI</div><div class="bd">9 sessions away.</div></div></div></div><div class="rule"><span class="rid">From the 14 Oct map</span>Closed $245.28 (−8.7%) on 1.11× volume, one of the day's worst, and back below its 20-day average ($263.95) for the first time since the Investor Day rally. It is 25.6% under the June high with RSI 43, and the 50-day ($240.09) is the immediate support, with the 20-day low at $224.58 below. The OCP security working group with Microsoft and Oracle and the new 3.2T retimer did not offset the chip selloff. Earnings est. Dec 1.</div></section>
+<section id="risk"><div class="sh"><div class="n">06</div><div><h2>Risk register</h2></div></div><div class="tw"><table><tr><th>Risk</th><th style="width:96px">Severity</th><th>Mitigation &mdash; and the residual</th></tr><tr><td><b style="color:var(--ink)">6.1% ATR</b></td><td><span class="tag t-warn">MED-HIGH</span></td><td>0.68 shares at a 1-ATR stop.</td></tr><tr><td><b style="color:var(--ink)">Far from trigger</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>near_high 26% away live.</td></tr><tr><td><b style="color:var(--ink)">Fed 28 Oct</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>~44% hike odds after a 3.7% CPI. Market-wide gap risk inside any new position's first fortnight.</td></tr></table></div></section>
+<section id="inval" style="border-bottom:none"><div class="sh"><div class="n">07</div><div><h2>Invalidation and next step</h2></div></div>
+<div class="two"><div class="card" style="border-left:2px solid var(--green)"><h3 style="color:var(--green)">Improves if</h3><ul style="margin-bottom:0"><li>Friday close above the 10-week at <b class="mono">$240.78</b></li><li>A close above <b class="mono">$303.49</b> for the full stack</li></ul></div><div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Breaks if</h3><ul style="margin-bottom:0"><li>Weekly close below <b class="mono">$240.78</b> &mdash; 3/5</li><li>Close below the 30-week at <b class="mono">$207.19</b></li></ul></div></div>
+<div class="verdict" style="border-color:var(--amber);background:var(--amberBg);border-left-color:var(--amber);margin-top:26px"><div class="l" style="color:var(--amber)">The answer</div><p style="margin:8px 0 0;font-size:16px;color:var(--ink)"><b>Strong trend, no trigger.</b> 4/5 on the close; on the 10-week to the cent today.</p><p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)"><b class="mono am">Watch Friday's close against $240.78.</b> Even if it holds, the full stack needs $303 &mdash; weeks away.</p></div></section><div class="foot">
+PHOENIX EQUITY RESEARCH &middot; L3 SINGLE-NAME THESIS &middot; MRVL &middot; 15 OCT 2026 &middot; PREPARED TO RESEARCH_REPORT_METHOD v1<br>
+PRICE, VOLUME, OPTION OPEN INTEREST, IMPLIED VOLATILITY AND SECTOR DATA: INTERACTIVE BROKERS API, RETRIEVED 15 OCT 2026, THROUGH FRI 21 AUG CLOSE.<br>
+GATES COMPUTED ON WEEKLY BARS PER phoenix.py: 40-WEEK, 30-WEEK AND 10-WEEK SMA AGAINST THE 104-WEEK HIGH. GEX COMPUTED FROM IBKR OPEN INTEREST ACROSS THE LIVE CHAIN USING THE PHOENIX METHOD &mdash; WALLS ON OPEN INTEREST, FLIP FROM THE CUMULATIVE PROFILE.<br>
+LIMITATIONS &mdash; GATES USE THE LAST FULL WEEKLY CLOSE (FRI 9 OCT 2026); LIVE THU 15 OCT PRICING IS USED FOR VOLATILITY, SIZING AND REWARD-TO-RISK AND IS LABELLED. THE INDUSTRY GATE USES SPX (SPY ABOVE A RISING 30-WEEK), AS INSTRUCTED FOR THIS BATCH. OPTION OPEN INTEREST WAS NOT RETRIEVED; NO GAMMA LEVELS ARE SHOWN. NEWS AND THE DAILY CHART PICTURE ARE FROM THE USER'S MME MAP OF 14 OCT 2026, SUPPLEMENTED BY WEB SEARCH. <br>
+NOT INVESTMENT ADVICE. PREPARED FOR ONE SYSTEMATIC LONG-ONLY EQUITY BOOK AND CALIBRATED TO ITS RULES, ACCOUNT SIZE AND COST BASE.
+</div>
+</main></div>
+<script>
+(function(){var root=document.documentElement,d=document.getElementById("thDark"),l=document.getElementById("thLight");
+function set(m){var g=(m==="light");root.classList.toggle("light",g);root.style.colorScheme=g?"light":"dark";
+d.className=g?"":"on";l.className=g?"on":"";try{localStorage.setItem("pxTheme",m);}catch(e){}}
+var s=null;try{s=localStorage.getItem("pxTheme");}catch(e){}set(s||"dark");
+d.addEventListener("click",function(){set("dark");});l.addEventListener("click",function(){set("light");});})();
+</script></body></html>

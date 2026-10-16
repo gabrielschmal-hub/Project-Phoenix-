@@ -1,0 +1,250 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>IBIT &middot; Phoenix Equity Research &middot; 23 Aug 2026</title>
+<style>
+:root{
+  --bg:#020F1F; --card:#08192B; --card2:#0C2137; --line:#14304A; --line2:#1E4462;
+  --ink:#E7EEF6; --inkMed:#C4D2DF; --inkLight:#94A8BA; --inkFade:#6B8299; --inkGhost:#47596C;
+  --gold:#D37736; --green:#3FBF77; --greenBg:rgba(63,191,119,.13);
+  --red:#D9534F; --redBg:rgba(217,83,79,.13);
+  --amber:#D8A24A; --amberBg:rgba(216,162,74,.13);
+  --rail:#010A15; --railLine:#0E2942;
+  --gCall:#2D8A55; --gPut:#C43A30; --gSpot:#3B82C4; --gFlip:#E8C34A; --gPin:#9B7BD4;
+  --serif:Georgia,'Times New Roman',serif; --mono:'Courier New',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:#020F1F;color-scheme:dark}
+html.light{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:15.5px;line-height:1.62}
+.shell{display:grid;grid-template-columns:236px 1fr;max-width:1420px;margin:0 auto}
+.rail{background:var(--rail);border-right:1px solid var(--railLine);padding:22px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.rail .logo{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--gold);font-weight:700;padding:0 20px 15px;border-bottom:1px solid var(--railLine)}
+.rail .logo span{color:var(--inkFade);letter-spacing:.16em}
+.toc{list-style:none;margin:12px 0 0;padding:0}
+.toc a{display:flex;gap:10px;padding:7px 20px;color:var(--inkLight);text-decoration:none;font-family:var(--mono);font-size:11.5px;border-left:2px solid transparent}
+.toc a:hover{color:var(--ink);background:rgba(211,119,54,.07);border-left-color:var(--gold)}
+.toc a b{color:var(--inkGhost);font-weight:400;min-width:16px}
+.grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--inkGhost);padding:15px 20px 4px;text-transform:uppercase}
+.rail .stat{margin:16px 20px 0;padding-top:13px;border-top:1px solid var(--railLine);font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.85}
+.rail .stat b{color:var(--red)}
+main{padding:0 40px 90px;min-width:0}
+.mast{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:24px 0 13px;border-bottom:2px solid var(--gold)}
+.mast .t{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--inkFade);text-transform:uppercase}
+.mast .r{font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);text-align:right;line-height:1.8}
+h1{font-weight:400;font-size:clamp(31px,4.8vw,50px);line-height:1.08;letter-spacing:-.015em;margin:24px 0 6px}
+h1 em{font-style:italic;color:var(--gold)}
+h2{font-weight:400;font-size:26px;letter-spacing:-.01em;margin:0 0 3px}
+h3{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 9px}
+p{color:var(--inkMed);margin:0 0 13px}
+.lede{font-size:18.5px;line-height:1.58;color:var(--ink)}
+.mono{font-family:var(--mono)} a{color:var(--gold)}
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+.sh{display:flex;gap:14px;align-items:baseline;margin-bottom:19px}
+.sh .n{font-family:var(--mono);font-size:11px;color:var(--gold);font-weight:700;padding-top:8px;min-width:24px}
+.sh p{margin:2px 0 0;font-size:14px;color:var(--inkLight)}
+.verdict{border:1px solid var(--red);border-left:3px solid var(--red);background:var(--redBg);padding:16px 20px;margin:22px 0 0}
+.verdict .l{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--red);font-weight:700;text-transform:uppercase}
+.verdict .t{font-size:24px;margin:5px 0 7px;line-height:1.2}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:24px 0 0}
+.cell{background:var(--card);padding:11px 13px}
+.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade)}
+.cell .v{font-family:var(--mono);font-size:17.5px;font-weight:700;margin-top:3px}
+.cell .s{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:1px}
+.up{color:var(--green)}.dn{color:var(--red)}.am{color:var(--gold)}.wr{color:var(--amber)}
+.gexp{border:1px solid var(--line2);background:var(--card)}
+.gexh{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--card2)}
+.gexh .tk{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.07em}
+.badge{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;padding:4px 11px;border-radius:3px;background:var(--gCall);color:#02160C}
+.b-out{border:1px solid var(--line2);color:var(--inkLight);padding:4px 10px;font-family:var(--mono);font-size:10.5px;border-radius:3px}
+.gexh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--inkLight)}
+.gexsub{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);padding:8px 15px;border-bottom:1px solid var(--line)}
+.ggrid{stroke:#0F2438;stroke-width:1}
+.gax{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.gaxr{font-family:var(--mono);font-size:9.5px;fill:var(--inkLight);opacity:.75}
+.gaxt{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;fill:var(--inkGhost)}
+.gcall{fill:var(--gCall)} .gput{fill:var(--gPut)}
+.gcurve{fill:none;stroke:var(--ink);stroke-width:1.6;opacity:.9}
+.garea{fill:#2A4A78;opacity:.16;stroke:none}
+.gkey{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:9px 15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--inkFade)}
+.gkey span{display:inline-flex;align-items:center;gap:6px}
+.gkey i{width:11px;height:3px;border-radius:2px;display:inline-block}
+.gkey .note{display:block !important;color:var(--inkGhost);flex-basis:100%;width:100%;line-height:1.6;font-size:10px;padding-top:4px}
+.gkey .note b{display:inline;color:var(--inkFade)}
+.lad{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:74px 176px 1fr;gap:12px;align-items:center;padding:9px 15px;border-bottom:1px solid #0E2438;border-left:3px solid transparent;font-family:var(--mono);font-size:12.5px}
+.lrow:last-child{border-bottom:none}
+.lrow .p{font-weight:700}
+.lrow .d{color:var(--inkFade);font-size:11.5px;font-family:var(--serif)}
+.lrow .lab{letter-spacing:.08em;font-weight:700;font-size:10.5px}
+.l-call{border-left-color:var(--gCall)} .l-put{border-left-color:var(--gPut)}
+.l-spot{border-left-color:var(--gSpot);background:rgba(59,130,196,.10);border-top:1px solid #2C5C86;border-bottom:1px solid #2C5C86}
+.l-flip{border-left-color:var(--gFlip);background:rgba(232,195,74,.07)}
+.narr{padding:14px 15px;border-top:1px solid var(--line);background:var(--card2);font-size:14px;color:var(--inkMed);line-height:1.6}
+.chart{border:1px solid var(--line);background:var(--card);padding:14px 10px 6px;margin:6px 0 14px}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:#0F2438;stroke-width:1}
+.axl{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.pl{fill:none;stroke:var(--ink);stroke-width:1.6}
+.m50{fill:none;stroke:var(--gold);stroke-width:1.2}
+.m200{fill:none;stroke:#5E7C99;stroke-width:1.4;stroke-dasharray:5 3}
+.ar{fill:url(#g1)}
+.lbl{font-family:var(--mono);font-size:10px;font-weight:700}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:5px 4px 7px}
+.legend i{display:inline-block;width:13px;height:2px;vertical-align:middle;margin-right:5px}
+.tw{border:1px solid var(--line);background:var(--card);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #0E2438;color:var(--inkMed)}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.hl td{background:rgba(63,191,119,.08)} tr.hlr td{background:rgba(217,83,79,.07)}
+tr.me td{background:rgba(211,119,54,.10)}
+.gates{border:1px solid var(--line);background:var(--card)}
+.gate{display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:13px 17px;border-bottom:1px solid #0E2438}
+.gate:last-child{border-bottom:none} .gate.f{background:rgba(217,83,79,.05)}
+.gate .idx{font-family:var(--mono);font-size:10px;color:var(--inkGhost)}
+.gate .nm{font-family:var(--mono);font-size:13px;font-weight:700}
+.gate .dt{font-size:12.5px;color:var(--inkLight);margin-top:2px;line-height:1.45}
+.tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border:1px solid;white-space:nowrap;border-radius:2px}
+.t-fail{color:var(--red);border-color:var(--red);background:var(--redBg)}
+.t-warn{color:var(--amber);border-color:var(--amber);background:var(--amberBg)}
+.t-pass{color:var(--green);border-color:var(--green);background:var(--greenBg)}
+.stamp{border:1px solid var(--line);border-top:none;background:var(--card2);padding:13px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.stamp .x{font-family:var(--mono);font-size:12px;color:var(--inkLight)}
+.stamp .o{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--red);letter-spacing:.08em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);background:var(--card);padding:16px 18px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #0E2438;font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv span:first-child{color:var(--inkLight)} .kv span:last-child{font-family:var(--mono);font-weight:700}
+.rule{border-left:2px solid var(--gold);background:rgba(211,119,54,.05);padding:11px 15px;margin:14px 0;font-size:13.5px;color:var(--inkMed)}
+.rule .rid{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px}
+.note{border-left:2px solid var(--line2);padding:2px 0 2px 15px;margin:15px 0;color:var(--inkMed)}
+.note b{color:var(--ink)}
+.news{border:1px solid var(--line);background:var(--card)}
+.nhdr{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);padding:10px 16px;background:var(--card2);border-bottom:1px solid var(--line)}
+.nrow{display:grid;grid-template-columns:86px 1fr;gap:14px;padding:11px 16px;border-bottom:1px solid #0E2438}
+.nrow:last-child{border-bottom:none}
+.nrow .dt{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding-top:2px}
+.nrow .hd{font-size:14.5px;color:var(--ink);margin-bottom:3px}
+.nrow .bd{font-size:12.8px;color:var(--inkLight);line-height:1.5}
+.pill{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.09em;padding:2px 7px;border:1px solid var(--line2);color:var(--inkFade);margin-right:7px;vertical-align:1px;border-radius:2px}
+.pill.bull{border-color:var(--green);color:var(--green)}
+.pill.bear{border-color:var(--red);color:var(--red)}
+.pill.neu{border-color:var(--amber);color:var(--amber)}
+ul{margin:0 0 12px;padding-left:17px;color:var(--inkMed)}li{margin-bottom:5px}
+.foot{padding:28px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);line-height:1.9}
+/* strip: fixed column counts so the last cell never orphans */
+.strip{grid-template-columns:repeat(8,1fr)}
+@media(max-width:1500px){.strip{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:620px){.strip{grid-template-columns:repeat(2,1fr)}}
+/* tablet landscape: rail becomes a compact top bar, not a dead column */
+@media(max-width:1200px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:none;border-bottom:1px solid var(--railLine);
+        display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:12px 24px}
+  .rail .logo{border-bottom:none;padding:0;font-size:10.5px;line-height:1.5}
+  .rail .stat{margin:0;padding:0;border-top:none;font-size:10.5px;line-height:1.7;text-align:right}
+  main{padding:0 24px 70px}
+}
+@media(max-width:760px){
+  .two,.three{grid-template-columns:1fr}
+  .lrow{grid-template-columns:66px 1fr}.lrow .d{display:none}
+  main{padding:0 18px 60px}
+  .rail{padding:10px 18px}
+}
+
+/* ===== light theme : colours only, toggled by html.light — sampled from phoenix_app.html ===== */
+html.light{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15);
+  --rail:#F3EADC; --railLine:rgba(122,96,68,.22);
+  --gCall:#1E7A4E; --gPut:#B4362F; --gSpot:#2C5A82; --gFlip:#A87A1C; --gPin:#7A5CA8;
+}
+html.light,html.light body,html.light .shell,html.light main{background:#F6EFE4}
+html.light body{color:#2C2118}
+html.light .rail{background:#F3EADC}
+html.light .card,html.light .tw,html.light .gates,html.light .news,html.light .gexp,html.light .chart,html.light .cell{background:rgba(255,253,249,.86)}
+html.light .stamp,html.light .gexh,html.light .narr,html.light .nhdr,html.light .gexsub{background:rgba(248,241,231,.94)}
+html.light .pxtheme{background:rgba(248,241,231,.96)}
+html.light .ggrid,html.light .grid{stroke:rgba(122,96,68,.16)}
+html.light .pl{stroke:#2C2118}
+html.light .gcurve{stroke:#2C2118}
+html.light .garea{fill:#7A6044;opacity:.16}
+html.light .m200{stroke:#8C7A67}
+html.light .badge{background:var(--gCall);color:#FFFDF9}
+html.light .lrow.l-spot{background:rgba(44,90,130,.10);border-top-color:rgba(44,90,130,.4);border-bottom-color:rgba(44,90,130,.4)}
+html.light .lrow.l-flip{background:rgba(168,122,28,.10)}
+html.light .gate.f{background:rgba(180,54,47,.055)}
+html.light tr.hl td{background:rgba(30,122,78,.09)}
+html.light tr.hlr td{background:rgba(180,54,47,.07)}
+html.light tr.me td{background:rgba(194,99,42,.10)}
+html.light td{border-bottom-color:rgba(122,96,68,.14)}
+html.light .gate,html.light .nrow,html.light .lrow{border-bottom-color:rgba(122,96,68,.14)}
+html.light .rule{background:rgba(194,99,42,.06)}
+html.light .toc a:hover{background:rgba(194,99,42,.09)}
+/* theme switch */
+.pxtheme{z-index:40;display:flex;gap:0;border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:var(--card2)}
+.pxtheme button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 12px;border:0;background:transparent;color:var(--inkFade);cursor:pointer}
+.pxtheme button.on{background:var(--gold);color:#FFFDF9;font-weight:700}
+.pxtheme button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+@media print{.pxtheme,.rail{display:none}.shell{grid-template-columns:1fr}main{padding:0}}
+
+/* ===== theme switch hardening — must stay last in the sheet ===== */
+.pxtheme{position:fixed;top:14px;right:18px;bottom:auto;left:auto;
+  height:auto;width:auto;max-height:34px;align-items:center;line-height:1}
+.pxtheme button{height:28px;line-height:28px;padding:0 12px;white-space:nowrap;flex:0 0 auto}
+@media(max-width:1200px){
+  .pxtheme{top:auto;bottom:14px;right:14px}
+}
+@media print{.pxtheme{display:none}}
+</style></head><body><div class="shell">
+<nav class="rail"><div class="logo">PHOENIX<br><span>EQUITY RESEARCH</span></div>
+<div class="stat" style="margin-top:20px;border-top:none;padding-top:0">IBIT &middot; $45.49<br>L3 SINGLE NAME<br>23 AUG 2026<br><br>GATES: <b>1 FAIL</b><br>SCORE: &mdash;/100<br>VERDICT: <b>4/5 &middot; 35% OFF HIGH</b></div></nav>
+<main>
+<div class="pxtheme" role="group" aria-label="Theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></div>
+<div class="mast"><div class="t">NASDAQ : IBIT &middot; iShares Bitcoin Trust ETF &middot; L3 single-name thesis</div>
+<div class="r">THU 15 OCT 2026 &middot; GATES ON WEEKLY CLOSE 9 OCT &middot; LIVE THU 15 OCT &middot; INDUSTRY = SPX<br>IBKR LIVE &middot; FULL-CHAIN GEX &middot; WEEKLY GATES</div></div>
+<section id="verdict"><h1>Above every average.<br>Below the high by <em>35%</em>.<br>And the 40-week is still falling.</h1><p class="lede" style="max-width:76ch;margin-top:18px">IBIT closed the 9 October week at $46.55 &mdash; above the 10-week, the 30-week and the 40-week. With SPX as industry that is <b>4 of 5</b>; only <span class="mono">near_high</span> fails, and by a wide margin: the 104-week high is $71.82 from October 2025. <b style="color:var(--ink)">The 40-week is still sloping down</b> &mdash; price is above it, but the long trend has not turned.</p>
+<div class="verdict" style="border-color:var(--amber);background:var(--amberBg);border-left-color:var(--amber)"><div class="l" style="color:var(--amber)">Phoenix gate stack &middot; weekly &middot; industry = SPX</div><div class="t">4 OF 5 &mdash; NO ENTRY. A recovery above a falling 40-week, 35% from the high.</div><p style="margin:0;font-size:14px">The August break &mdash; from ~$36 to ~$44 in one week on the Treasury buyback announcement &mdash; has held and extended to $49. <b style="color:var(--ink)">The full stack needs $66.07</b>, a 45% advance. A base still forming, not a breakout.</p></div>
+<div class="strip"><div class="cell"><div class="k">Live Thu 15 Oct</div><div class="v dn">45.49</div><div class="s ">map close 46.24 (-1.89%)</div></div><div class="cell"><div class="k">Weekly close 9 Oct</div><div class="v ">46.55</div><div class="s ">gates run on this</div></div><div class="cell"><div class="k">10-week</div><div class="v up">43.69</div><div class="s ">+4.1% live</div></div><div class="cell"><div class="k">30-week</div><div class="v up">40.67</div><div class="s ">+11.9% live</div></div><div class="cell"><div class="k">40-week</div><div class="v up">41.42</div><div class="s ">+9.8% live</div></div><div class="cell"><div class="k">104w high</div><div class="v ">71.82</div><div class="s ">-36.7% live</div></div><div class="cell"><div class="k">Gates</div><div class="v wr">4/5</div><div class="s ">live 4/5</div></div><div class="cell"><div class="k">Next binary</div><div class="v dn">WED 28 OCT</div><div class="s dn">Fed &middot; 9 sessions</div></div></div></section>
+<section id="company"><div class="sh"><div class="n">B</div><div><h2>The business in depth</h2><p>BlackRock's spot bitcoin ETF &mdash; the largest of its kind &mdash; giving brokerage-account investors direct exposure to the price of bitcoin.</p></div></div>
+<div class="two"><div class="card"><h3>What it sells</h3><p style="font-size:13.5px;margin:0">A share in a trust that <b>holds bitcoin</b>, for a 0.25% annual fee. Shares are created and redeemed daily by large broker-dealers, keeping the price close to the value of the bitcoin held. There is no business underneath: the ETF's performance <i>is</i> bitcoin's, less the fee.</p></div><div class="card"><h3>Who buys it &mdash; customers</h3><p style="font-size:13.5px;margin:0">Retail investors, financial advisers and their clients, hedge funds, pension and endowment allocators, and corporate treasuries &mdash; anyone who wants bitcoin exposure inside a regulated brokerage account. Flows into the ETF are a visible gauge of institutional demand.</p></div></div><div class="two" style="margin-top:18px"><div class="card"><h3>Who it depends on &mdash; suppliers</h3><p style="font-size:13.5px;margin:0"><b>Coinbase Prime</b> is the bitcoin custodian; <b>BNY</b> handles cash custody and fund administration; <b>authorised participants</b> such as JPMorgan and Jane Street create and redeem shares; market makers keep spreads tight.</p></div><div class="card"><h3>Who it fights &mdash; competitors</h3><p style="font-size:13.5px;margin:0">Other spot bitcoin ETFs &mdash; <b>Fidelity FBTC, Grayscale GBTC, ARK 21Shares, Bitwise</b>; buying bitcoin directly on exchanges such as Coinbase; and equity proxies such as <b>Strategy (MicroStrategy)</b> and the bitcoin miners.</p></div></div>
+<div class="rule" style="border-left-width:3px"><span class="rid">Why this matters for the trade</span>The August dollar report found bitcoin trading as <b>~1.5-beta risk, not digital gold</b> &mdash; a &minus;0.88 correlation with gold at one point. That makes rates and risk appetite the drivers: a hawkish Fed on 28 October would hit it like a high-growth stock.</div></section><section id="chartpat"><div class="sh"><div class="n">C</div><div><h2>Chart &amp; pattern analysis</h2><p>Thirty weekly bars: an eleven-week base from June to August, a breakout gap on the Treasury-buyback news, and a higher range since.</p></div></div><div class="chart"><svg viewBox="0 0 1000 320" role="img" aria-label="30-week candlestick chart"><line x1="60" y1="247.0" x2="976" y2="247.0" stroke="#14304A" stroke-width="1"/><text class="gax" x="54" y="250.5" text-anchor="end">35</text><line x1="60" y1="178.7" x2="976" y2="178.7" stroke="#14304A" stroke-width="1"/><text class="gax" x="54" y="182.2" text-anchor="end">40</text><line x1="60" y1="110.4" x2="976" y2="110.4" stroke="#14304A" stroke-width="1"/><text class="gax" x="54" y="113.9" text-anchor="end">45</text><line x1="60" y1="42.0" x2="976" y2="42.0" stroke="#14304A" stroke-width="1"/><text class="gax" x="54" y="45.5" text-anchor="end">50</text><line x1="60.0" y1="167.8" x2="60.0" y2="217.9" stroke="#3FBF77" stroke-width="1.2"/><rect x="54.0" y="214.2" width="12" height="1.5" fill="#3FBF77"/><line x1="91.6" y1="189.5" x2="91.6" y2="216.5" stroke="#3FBF77" stroke-width="1.2"/><rect x="85.6" y="206.4" width="12" height="7.8" fill="#3FBF77"/><line x1="123.2" y1="157.0" x2="123.2" y2="201.0" stroke="#3FBF77" stroke-width="1.2"/><rect x="117.2" y="157.4" width="12" height="49.1" fill="#3FBF77"/><line x1="154.8" y1="117.7" x2="154.8" y2="176.9" stroke="#3FBF77" stroke-width="1.2"/><rect x="148.8" y="124.8" width="12" height="32.5" fill="#3FBF77"/><line x1="186.3" y1="109.3" x2="186.3" y2="146.7" stroke="#3FBF77" stroke-width="1.2"/><rect x="180.3" y="123.8" width="12" height="1.5" fill="#3FBF77"/><line x1="217.9" y1="113.2" x2="217.9" y2="145.3" stroke="#3FBF77" stroke-width="1.2"/><rect x="211.9" y="117.6" width="12" height="6.1" fill="#3FBF77"/><line x1="249.5" y1="89.7" x2="249.5" y2="117.6" stroke="#3FBF77" stroke-width="1.2"/><rect x="243.5" y="104.2" width="12" height="13.4" fill="#3FBF77"/><line x1="281.1" y1="89.0" x2="281.1" y2="117.2" stroke="#D9534F" stroke-width="1.2"/><rect x="275.1" y="104.2" width="12" height="8.6" fill="#D9534F"/><line x1="312.7" y1="121.0" x2="312.7" y2="140.3" stroke="#D9534F" stroke-width="1.2"/><rect x="306.7" y="112.8" width="12" height="25.4" fill="#D9534F"/><line x1="344.3" y1="120.7" x2="344.3" y2="164.9" stroke="#D9534F" stroke-width="1.2"/><rect x="338.3" y="138.2" width="12" height="18.2" fill="#D9534F"/><line x1="375.9" y1="168.4" x2="375.9" y2="267.8" stroke="#D9534F" stroke-width="1.2"/><rect x="369.9" y="156.4" width="12" height="102.4" fill="#D9534F"/><line x1="407.4" y1="226.8" x2="407.4" y2="255.4" stroke="#3FBF77" stroke-width="1.2"/><rect x="401.4" y="232.8" width="12" height="26.0" fill="#3FBF77"/><line x1="439.0" y1="204.5" x2="439.0" y2="244.0" stroke="#D9534F" stroke-width="1.2"/><rect x="433.0" y="232.8" width="12" height="5.7" fill="#D9534F"/><line x1="470.6" y1="217.8" x2="470.6" y2="276.5" stroke="#D9534F" stroke-width="1.2"/><rect x="464.6" y="238.5" width="12" height="24.2" fill="#D9534F"/><line x1="502.2" y1="243.7" x2="502.2" y2="276.0" stroke="#3FBF77" stroke-width="1.2"/><rect x="496.2" y="248.8" width="12" height="13.9" fill="#3FBF77"/><line x1="533.8" y1="224.3" x2="533.8" y2="251.4" stroke="#3FBF77" stroke-width="1.2"/><rect x="527.8" y="230.2" width="12" height="18.6" fill="#3FBF77"/><line x1="565.4" y1="217.8" x2="565.4" y2="247.6" stroke="#3FBF77" stroke-width="1.2"/><rect x="559.4" y="228.6" width="12" height="1.6" fill="#3FBF77"/><line x1="597.0" y1="207.0" x2="597.0" y2="232.7" stroke="#3FBF77" stroke-width="1.2"/><rect x="591.0" y="228.6" width="12" height="1.5" fill="#3FBF77"/><line x1="628.6" y1="217.0" x2="628.6" y2="243.1" stroke="#D9534F" stroke-width="1.2"/><rect x="622.6" y="228.6" width="12" height="9.7" fill="#D9534F"/><line x1="660.1" y1="219.6" x2="660.1" y2="242.0" stroke="#3FBF77" stroke-width="1.2"/><rect x="654.1" y="222.4" width="12" height="15.9" fill="#3FBF77"/><line x1="691.7" y1="223.1" x2="691.7" y2="242.1" stroke="#D9534F" stroke-width="1.2"/><rect x="685.7" y="222.4" width="12" height="16.0" fill="#D9534F"/><line x1="723.3" y1="122.3" x2="723.3" y2="234.9" stroke="#3FBF77" stroke-width="1.2"/><rect x="717.3" y="128.4" width="12" height="110.0" fill="#3FBF77"/><line x1="754.9" y1="99.3" x2="754.9" y2="130.6" stroke="#3FBF77" stroke-width="1.2"/><rect x="748.9" y="125.4" width="12" height="3.0" fill="#3FBF77"/><line x1="786.5" y1="91.6" x2="786.5" y2="134.6" stroke="#3FBF77" stroke-width="1.2"/><rect x="780.5" y="107.2" width="12" height="18.2" fill="#3FBF77"/><line x1="818.1" y1="107.4" x2="818.1" y2="132.0" stroke="#D9534F" stroke-width="1.2"/><rect x="812.1" y="107.2" width="12" height="20.0" fill="#D9534F"/><line x1="849.7" y1="94.8" x2="849.7" y2="146.3" stroke="#3FBF77" stroke-width="1.2"/><rect x="843.7" y="96.4" width="12" height="30.7" fill="#3FBF77"/><line x1="881.2" y1="52.7" x2="881.2" y2="82.3" stroke="#3FBF77" stroke-width="1.2"/><rect x="875.2" y="75.2" width="12" height="21.2" fill="#3FBF77"/><line x1="912.8" y1="50.4" x2="912.8" y2="87.0" stroke="#3FBF77" stroke-width="1.2"/><rect x="906.8" y="73.1" width="12" height="2.2" fill="#3FBF77"/><line x1="944.4" y1="54.1" x2="944.4" y2="104.4" stroke="#D9534F" stroke-width="1.2"/><rect x="938.4" y="73.1" width="12" height="16.1" fill="#D9534F"/><line x1="976.0" y1="77.0" x2="976.0" y2="107.6" stroke="#D9534F" stroke-width="1.2"/><rect x="970.0" y="89.2" width="12" height="14.5" fill="#D9534F"/><path d="M60.0,109.3 L91.6,114.7 L123.2,116.9 L154.8,117.3 L186.3,117.6 L217.9,117.6 L249.5,117.0 L281.1,116.9 L312.7,117.7 L344.3,119.2 L375.9,124.4 L407.4,128.3 L439.0,132.1 L470.6,136.4 L502.2,143.6 L533.8,150.4 L565.4,156.6 L597.0,162.7 L628.6,169.6 L660.1,176.2 L691.7,184.6 L723.3,187.8 L754.9,189.5 L786.5,187.0 L818.1,184.8 L849.7,181.3 L881.2,176.6 L912.8,172.4 L944.4,169.6 L976.0,167.0" fill="none" stroke="#5E7C99" stroke-width="1.8"/><path d="M60.0,167.0 L91.6,184.3 L123.2,192.5 L154.8,186.6 L186.3,179.7 L217.9,171.5 L249.5,160.2 L281.1,151.7 L312.7,148.1 L344.3,145.6 L375.9,150.0 L407.4,152.7 L439.0,160.8 L470.6,174.6 L502.2,187.1 L533.8,198.4 L565.4,210.8 L597.0,222.4 L628.6,232.4 L660.1,239.0 L691.7,236.9 L723.3,226.5 L754.9,215.2 L786.5,199.6 L818.1,187.5 L849.7,174.1 L881.2,158.8 L912.8,143.2 L944.4,128.3 L976.0,116.4" fill="none" stroke="#D8A24A" stroke-width="1.8"/><line x1="470.6" y1="207.0" x2="723.3" y2="207.0" stroke="#D37736" stroke-width="2" stroke-dasharray="6 4"/><text class="gax" x="727.3" y="202.0" fill="#D37736">base top $37.9</text><line x1="470.6" y1="276.5" x2="723.3" y2="276.5" stroke="#D37736" stroke-width="2" stroke-dasharray="6 4"/><text class="gax" x="727.3" y="271.5" fill="#D37736">base floor $32.8</text><circle cx="723.3" cy="128.4" r="5" fill="none" stroke="#E8C34A" stroke-width="2"/><text class="gax" x="723.3" y="118.4" text-anchor="middle" fill="#E8C34A">Aug gap</text></svg><div class="legend"><span><i style="background:#3FBF77"></i>Up week</span><span><i style="background:#D9534F"></i>Down week</span><span><i style="background:#D8A24A"></i>10-week</span><span><i style="background:#5E7C99"></i>30-week</span><span><i style="background:#D37736"></i>Pattern lines</span></div></div>
+<div class="two" style="margin-top:18px"><div class="card"><h3>What the chart shows</h3><p style="font-size:13.5px;margin:0">After falling from the $50s, IBIT spent eleven weeks from June to August in a tight base between <b>$32.84 and $37.93</b>. The week of the Treasury's buyback announcement it <b>jumped from $35.6 to $43.7</b>, and has since built a higher range between roughly <b>$42 and $49.4</b>. Today $45.49.</p></div>
+<div class="card" style="border-left:2px solid var(--amber)"><h3 style="color:var(--amber)">The pattern call &mdash; and what to do with it</h3><p style="font-size:13.5px;margin:0">The summer base is a <b>rectangle bottom</b>, which broke upward on the August gap &mdash; Bulkowski rank 8/39 for up breakouts, average rise 48%. Its measured target (height added to the top, ~$43) was met within a week. Since then price has <b>held above the base and built a second, higher range</b> &mdash; constructive, but the 40-week is still falling. A weekly close above <b>$49.39</b> would break the new range; a close back below the August gap (~$42) would put the breakout at risk.</p></div></div>
+<div class="rule"><span class="rid">Bulkowski &middot; Rectangle bottom</span>Up: rank 8/39, failure 15%, avg rise 48%. Down: rank 14/36. Busted bottoms work well.</div>
+<div class="tw" style="margin-top:14px"><table><tr><th>Level</th><th class="n">Price</th><th>Why it matters</th></tr><tr><td>Range high</td><td class="n mono">$49.39</td><td>Close above = new breakout</td></tr><tr><td>10-week</td><td class="n mono">$43.69</td><td>Trend gate</td></tr><tr><td>August gap</td><td class="n mono">~$42</td><td>Close below = breakout at risk</td></tr><tr><td>30-week</td><td class="n mono">$40.67</td><td>Stage line</td></tr><tr><td>Base top</td><td class="n mono">$37.93</td><td>Old resistance, now support</td></tr></table></div></section><section id="biz"><div class="sh"><div class="n">01</div><div><h2>What changed this cycle</h2><p>What matters this week.</p></div></div><div class="two"><div class="card"><h3>Since the August dollar read</h3><div class="kv"><span>Oct 2025 high</span><span class="">$71.82</span></div><div class="kv"><span>July low</span><span class="dn">$32.84</span></div><div class="kv"><span>Week of 17 Aug</span><span class="up">$35.91 &rarr; $43.68</span></div><div class="kv"><span>Late Sept high</span><span class="up">$49.39</span></div><div class="kv"><span>Today</span><span class="">$45.49</span></div><p style="font-size:13px;margin:10px 0 0;color:var(--inkLight)">The August report called the bitcoin move the weakest evidence on its page &mdash; a $4bn short squeeze. <b style="color:var(--ink)">It held.</b> The squeeze level is now the floor of the range.</p></div><div class="card" style="border-left:2px solid var(--amber)"><h3 style="color:var(--amber)">Is SPX the right industry here?</h3><p style="font-size:13.5px;margin:0">Applied as instructed for the batch. <b style="color:var(--ink)">For a bitcoin ETF it is a reasonable proxy</b> &mdash; the August read found bitcoin trading as ~1.5-beta risk, not digital gold &mdash; but a weaker fit than for the equities. Not scored &mdash; an ETF.</p></div></div></section>
+<section id="gex"><div class="sh"><div class="n">02</div><div><h2>Options positioning</h2><p>Open interest by strike was not retrieved this run &mdash; the chain request was not approved. What follows is from the live snapshot only.</p></div></div><div class="three"><div class="card"><h3>Today&rsquo;s option volume</h3><div class="kv"><span>Snapshot</span><span class="">not pulled</span></div></div><div class="card" style="grid-column:span 2"><h3>Reading</h3><p style="font-size:13.5px;margin:0">Volatility snapshot not pulled; the panel uses the map's daily figures. ATR 3.1%.</p></div></div></section>
+<section id="gates"><div class="sh"><div class="n">03</div><div><h2>The gate stack</h2><p>Weekly bars as <span class="mono">phoenix.py</span> computes them, on the last full weekly close. <b>Industry is SPX</b> for every name in this batch.</p></div></div>
+<div class="gates"><div class="gate"><div class="idx">01</div><div><div class="nm">trend200 &mdash; above 40-week</div><div class="dt">$46.55 vs 40-week <b class="mono">$41.42</b>, +12.4%, <b style="color:var(--red)">falling</b> (was $41.76). Live +9.8%.</div></div><div class="tag t-pass">PASS</div></div><div class="gate"><div class="idx">02</div><div><div class="nm">stage2 &mdash; Weinstein</div><div class="dt">30-week <b class="mono">$40.67</b>, rising (was $39.56); close +14.5%, live +11.9%.</div></div><div class="tag t-pass">PASS</div></div><div class="gate"><div class="idx">03</div><div><div class="nm">trend50 &mdash; above 10-week</div><div class="dt">10-week <b class="mono">$43.69</b>, rising (was $39.36); close +6.6%, live +4.1%.</div></div><div class="tag t-pass">PASS</div></div><div class="gate f"><div class="idx">04</div><div><div class="nm">near_high &mdash; 104-week</div><div class="dt">104-week high <b>$71.82</b>. Close -35.2%, live -36.7%; band is &minus;8% to &minus;1% or a new high. Trigger <b class="mono">$66.07</b>.</div></div><div class="tag t-fail">FAIL</div></div><div class="gate"><div class="idx">05</div><div><div class="nm">industry &mdash; SPX</div><div class="dt">SPY above a rising 30-week, +3.8% live. Passes for the whole batch.</div></div><div class="tag t-pass">PASS</div></div></div><div class="stamp" style="border-color:var(--amber)"><div class="x">4 PASS of 5 on the 9 Oct close &middot; 4 of 5 at today&rsquo;s price</div><div class="o" style="color:var(--amber)">NEAR-CANDIDATE</div></div><div class="rule" style="border-left-width:3px"><span class="rid">trend200 passing above a falling average</span>Price is 12% above the 40-week, but the 40-week is still declining as the late-2025 highs roll through it. <b style="color:var(--ink)">That is a Stage 1 base, not Stage 2</b> &mdash; the 30-week has turned up, the 40-week has not.</div></section>
+<section id="vol"><div class="sh"><div class="n">V</div><div><h2>Volatility profile</h2></div></div><div class="strip" style="margin-top:0"><div class="cell"><div class="k">Implied vol</div><div class="v ">n/a</div><div class="s ">snapshot not pulled</div></div><div class="cell"><div class="k">Realised vol</div><div class="v ">n/a</div><div class="s ">snapshot not pulled</div></div><div class="cell"><div class="k">Daily ATR</div><div class="v ">~1.43</div><div class="s ">3.1% of price</div></div><div class="cell"><div class="k">RSI 14 (daily)</div><div class="v ">38</div><div class="s ">from the map</div></div><div class="cell"><div class="k">vs 20-day / 50-day</div><div class="v ">-2.2% / +5.8%</div><div class="s ">daily averages</div></div><div class="cell"><div class="k">vs 200-day</div><div class="v ">+10.5%</div><div class="s ">daily</div></div><div class="cell"><div class="k">From 52w high</div><div class="v ">-29.9%</div><div class="s ">map</div></div><div class="cell"><div class="k">Stop basis</div><div class="v ">ATR</div><div class="s ">per &sect;5c</div></div></div></section>
+<section id="rr"><div class="sh"><div class="n">04</div><div><h2>Reward-to-risk</h2></div></div>
+<div class="tw"><table><tr><th>Scenario</th><th class="n">Entry</th><th class="n">Stop</th><th class="n">Stop dist</th><th class="n">R:R &rarr; 49.39</th><th class="n">R:R &rarr; 71.82</th><th class="n">Shares</th><th class="n">Position</th></tr><tr class="hlr"><td>Today, 1 ATR stop</td><td class="n">45.49</td><td class="n">44.06</td><td class="n">3.1%</td><td class="n">2.73 : 1</td><td class="n">18.46 : 1</td><td class="n">14.02</td><td class="n">$638 &middot; 32%</td></tr><tr class=""><td>Today, 2 ATR stop</td><td class="n">45.49</td><td class="n">42.64</td><td class="n">6.3%</td><td class="n">1.37 : 1</td><td class="n">9.23 : 1</td><td class="n">7.01</td><td class="n">$319 &middot; 16%</td></tr><tr class=""><td>Stop under 20-day low $42.42</td><td class="n">45.49</td><td class="n">42.21</td><td class="n">7.2%</td><td class="n">1.19 : 1</td><td class="n">8.02 : 1</td><td class="n">6.09</td><td class="n">$277 &middot; 14%</td></tr></table></div>
+<div class="note" style="border-left-color:var(--gold)"><b>Stop dist</b> is the stop as a share of price, not account risk. <b style="color:var(--ink)">Account risk is 1.00% in every row</b> &mdash; $20 on a $2,000 book; <span class="mono">shares = $20 &divide; (entry &minus; stop)</span>.</div></section>
+<section id="news"><div class="sh"><div class="n">05</div><div><h2>News and calendar</h2></div></div><div class="news"><div class="nrow"><div class="dt">APPROX 2026-</div><div><div class="hd"><span class="pill neu">NEWS</span>Headline only (article not fetched): 'A bond selloff that argues for bitcoin, not against it'.</div><div class="bd">ETF Trends</div></div></div><div class="nrow"><div class="dt">02 OCT</div><div><div class="hd"><span class="pill neu">NEWS</span>Headline only (article fetch failed): US market regulator seeks to make it easier for funds, advisers to hold crypto.</div><div class="bd">CNBC</div></div></div><div class="nrow"><div class="dt">01 OCT</div><div><div class="hd"><span class="pill neu">NEWS</span>Headline only: 'Cryptocurrencies: Bitcoin Decreased 3% This Week'.</div><div class="bd">ETF Trends</div></div></div><div class="nrow"><div class="dt">21 SEP</div><div><div class="hd"><span class="pill neu">NEWS</span>Headlines only: bitcoin hit highest level since January at $85,000, an 8-month high (article fetches failed).</div><div class="bd">CNBC/WSJ</div></div></div><div class="nrow"><div class="dt">WED 28 OCT</div><div><div class="hd"><span class="pill bear">EVENT</span>Fed decision &mdash; hike odds ~44% after hot CPI</div><div class="bd">9 sessions away.</div></div></div></div><div class="rule"><span class="rid">From the 14 Oct map</span>Closed $46.24 (−1.9%), slipping under the 20-day average ($47.26) with RSI 38. The 50-day ($43.71) remains above the 200-day ($41.83), so the 50-day is the trend support, and the 20-day high at $49.39 is the cap; it is 29.9% under its 52-week high. Bitcoin's late-September $85,000 high and the SEC's move to ease fund crypto holdings remain the backdrop, with a hot CPI and higher hike odds weighing on risk. No scheduled crypto dates were found.</div></section>
+<section id="risk"><div class="sh"><div class="n">06</div><div><h2>Risk register</h2></div></div><div class="tw"><table><tr><th>Risk</th><th style="width:96px">Severity</th><th>Mitigation &mdash; and the residual</th></tr><tr><td><b style="color:var(--ink)">Far from high</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>near_high needs +45%.</td></tr><tr><td><b style="color:var(--ink)">40-week still falling</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>Long trend not yet turned.</td></tr><tr><td><b style="color:var(--ink)">Rates</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>High-beta risk asset into a ~44%-odds hike.</td></tr><tr><td><b style="color:var(--ink)">Fed 28 Oct</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>~44% hike odds after a 3.7% CPI. Market-wide gap risk inside any new position's first fortnight.</td></tr></table></div></section>
+<section id="inval" style="border-bottom:none"><div class="sh"><div class="n">07</div><div><h2>Invalidation and next step</h2></div></div>
+<div class="two"><div class="card" style="border-left:2px solid var(--green)"><h3 style="color:var(--green)">Improves if</h3><ul style="margin-bottom:0"><li>The 40-week turning up</li><li>A weekly close above <b class="mono">$49.39</b>, the September high</li></ul></div><div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Breaks if</h3><ul style="margin-bottom:0"><li>Weekly close below the 10-week at <b class="mono">$43.69</b></li><li>Close below the 30-week at <b class="mono">$40.67</b> &mdash; the August break fails</li></ul></div></div>
+<div class="verdict" style="border-color:var(--amber);background:var(--amberBg);border-left-color:var(--amber);margin-top:26px"><div class="l" style="color:var(--amber)">The answer</div><p style="margin:8px 0 0;font-size:16px;color:var(--ink)"><b>A base, not a breakout.</b> Four of five, above all three averages, but the 40-week is still falling and the high is 35% away.</p><p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)"><b class="mono am">Watch for the 40-week to turn and a close above $49.39.</b></p></div></section><div class="foot">
+PHOENIX EQUITY RESEARCH &middot; L3 SINGLE-NAME THESIS &middot; IBIT &middot; 15 OCT 2026 &middot; PREPARED TO RESEARCH_REPORT_METHOD v1<br>
+PRICE, VOLUME, OPTION OPEN INTEREST, IMPLIED VOLATILITY AND SECTOR DATA: INTERACTIVE BROKERS API, RETRIEVED 15 OCT 2026, THROUGH FRI 21 AUG CLOSE.<br>
+GATES COMPUTED ON WEEKLY BARS PER phoenix.py: 40-WEEK, 30-WEEK AND 10-WEEK SMA AGAINST THE 104-WEEK HIGH. GEX COMPUTED FROM IBKR OPEN INTEREST ACROSS THE LIVE CHAIN USING THE PHOENIX METHOD &mdash; WALLS ON OPEN INTEREST, FLIP FROM THE CUMULATIVE PROFILE.<br>
+LIMITATIONS &mdash; GATES USE THE LAST FULL WEEKLY CLOSE (FRI 9 OCT 2026); LIVE THU 15 OCT PRICING IS USED FOR VOLATILITY, SIZING AND REWARD-TO-RISK AND IS LABELLED. THE INDUSTRY GATE USES SPX (SPY ABOVE A RISING 30-WEEK), AS INSTRUCTED FOR THIS BATCH. OPTION OPEN INTEREST WAS NOT RETRIEVED; NO GAMMA LEVELS ARE SHOWN. NEWS AND THE DAILY CHART PICTURE ARE FROM THE USER'S MME MAP OF 14 OCT 2026, SUPPLEMENTED BY WEB SEARCH. VOLATILITY SNAPSHOT NOT PULLED. SPX AS INDUSTRY IS APPLIED AS INSTRUCTED; FOR A BITCOIN ETF IT IS A PROXY.<br>
+NOT INVESTMENT ADVICE. PREPARED FOR ONE SYSTEMATIC LONG-ONLY EQUITY BOOK AND CALIBRATED TO ITS RULES, ACCOUNT SIZE AND COST BASE.
+</div>
+</main></div>
+<script>
+(function(){var root=document.documentElement,d=document.getElementById("thDark"),l=document.getElementById("thLight");
+function set(m){var g=(m==="light");root.classList.toggle("light",g);root.style.colorScheme=g?"light":"dark";
+d.className=g?"":"on";l.className=g?"on":"";try{localStorage.setItem("pxTheme",m);}catch(e){}}
+var s=null;try{s=localStorage.getItem("pxTheme");}catch(e){}set(s||"dark");
+d.addEventListener("click",function(){set("dark");});l.addEventListener("click",function(){set("light");});})();
+</script></body></html>

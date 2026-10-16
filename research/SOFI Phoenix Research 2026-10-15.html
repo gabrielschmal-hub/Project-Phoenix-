@@ -1,0 +1,250 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>SOFI &middot; Phoenix Equity Research &middot; 23 Aug 2026</title>
+<style>
+:root{
+  --bg:#020F1F; --card:#08192B; --card2:#0C2137; --line:#14304A; --line2:#1E4462;
+  --ink:#E7EEF6; --inkMed:#C4D2DF; --inkLight:#94A8BA; --inkFade:#6B8299; --inkGhost:#47596C;
+  --gold:#D37736; --green:#3FBF77; --greenBg:rgba(63,191,119,.13);
+  --red:#D9534F; --redBg:rgba(217,83,79,.13);
+  --amber:#D8A24A; --amberBg:rgba(216,162,74,.13);
+  --rail:#010A15; --railLine:#0E2942;
+  --gCall:#2D8A55; --gPut:#C43A30; --gSpot:#3B82C4; --gFlip:#E8C34A; --gPin:#9B7BD4;
+  --serif:Georgia,'Times New Roman',serif; --mono:'Courier New',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;background:#020F1F;color-scheme:dark}
+html.light{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);font-size:15.5px;line-height:1.62}
+.shell{display:grid;grid-template-columns:236px 1fr;max-width:1420px;margin:0 auto}
+.rail{background:var(--rail);border-right:1px solid var(--railLine);padding:22px 0 40px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.rail .logo{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--gold);font-weight:700;padding:0 20px 15px;border-bottom:1px solid var(--railLine)}
+.rail .logo span{color:var(--inkFade);letter-spacing:.16em}
+.toc{list-style:none;margin:12px 0 0;padding:0}
+.toc a{display:flex;gap:10px;padding:7px 20px;color:var(--inkLight);text-decoration:none;font-family:var(--mono);font-size:11.5px;border-left:2px solid transparent}
+.toc a:hover{color:var(--ink);background:rgba(211,119,54,.07);border-left-color:var(--gold)}
+.toc a b{color:var(--inkGhost);font-weight:400;min-width:16px}
+.grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--inkGhost);padding:15px 20px 4px;text-transform:uppercase}
+.rail .stat{margin:16px 20px 0;padding-top:13px;border-top:1px solid var(--railLine);font-family:var(--mono);font-size:10.5px;color:var(--inkFade);line-height:1.85}
+.rail .stat b{color:var(--red)}
+main{padding:0 40px 90px;min-width:0}
+.mast{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:24px 0 13px;border-bottom:2px solid var(--gold)}
+.mast .t{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--inkFade);text-transform:uppercase}
+.mast .r{font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);text-align:right;line-height:1.8}
+h1{font-weight:400;font-size:clamp(31px,4.8vw,50px);line-height:1.08;letter-spacing:-.015em;margin:24px 0 6px}
+h1 em{font-style:italic;color:var(--gold)}
+h2{font-weight:400;font-size:26px;letter-spacing:-.01em;margin:0 0 3px}
+h3{font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0 0 9px}
+p{color:var(--inkMed);margin:0 0 13px}
+.lede{font-size:18.5px;line-height:1.58;color:var(--ink)}
+.mono{font-family:var(--mono)} a{color:var(--gold)}
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+.sh{display:flex;gap:14px;align-items:baseline;margin-bottom:19px}
+.sh .n{font-family:var(--mono);font-size:11px;color:var(--gold);font-weight:700;padding-top:8px;min-width:24px}
+.sh p{margin:2px 0 0;font-size:14px;color:var(--inkLight)}
+.verdict{border:1px solid var(--red);border-left:3px solid var(--red);background:var(--redBg);padding:16px 20px;margin:22px 0 0}
+.verdict .l{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--red);font-weight:700;text-transform:uppercase}
+.verdict .t{font-size:24px;margin:5px 0 7px;line-height:1.2}
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:24px 0 0}
+.cell{background:var(--card);padding:11px 13px}
+.cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade)}
+.cell .v{font-family:var(--mono);font-size:17.5px;font-weight:700;margin-top:3px}
+.cell .s{font-family:var(--mono);font-size:10px;color:var(--inkFade);margin-top:1px}
+.up{color:var(--green)}.dn{color:var(--red)}.am{color:var(--gold)}.wr{color:var(--amber)}
+.gexp{border:1px solid var(--line2);background:var(--card)}
+.gexh{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--card2)}
+.gexh .tk{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:.07em}
+.badge{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;padding:4px 11px;border-radius:3px;background:var(--gCall);color:#02160C}
+.b-out{border:1px solid var(--line2);color:var(--inkLight);padding:4px 10px;font-family:var(--mono);font-size:10.5px;border-radius:3px}
+.gexh .st{margin-left:auto;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;color:var(--inkLight)}
+.gexsub{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);padding:8px 15px;border-bottom:1px solid var(--line)}
+.ggrid{stroke:#0F2438;stroke-width:1}
+.gax{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.gaxr{font-family:var(--mono);font-size:9.5px;fill:var(--inkLight);opacity:.75}
+.gaxt{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;fill:var(--inkGhost)}
+.gcall{fill:var(--gCall)} .gput{fill:var(--gPut)}
+.gcurve{fill:none;stroke:var(--ink);stroke-width:1.6;opacity:.9}
+.garea{fill:#2A4A78;opacity:.16;stroke:none}
+.gkey{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:9px 15px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--inkFade)}
+.gkey span{display:inline-flex;align-items:center;gap:6px}
+.gkey i{width:11px;height:3px;border-radius:2px;display:inline-block}
+.gkey .note{display:block !important;color:var(--inkGhost);flex-basis:100%;width:100%;line-height:1.6;font-size:10px;padding-top:4px}
+.gkey .note b{display:inline;color:var(--inkFade)}
+.lad{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:74px 176px 1fr;gap:12px;align-items:center;padding:9px 15px;border-bottom:1px solid #0E2438;border-left:3px solid transparent;font-family:var(--mono);font-size:12.5px}
+.lrow:last-child{border-bottom:none}
+.lrow .p{font-weight:700}
+.lrow .d{color:var(--inkFade);font-size:11.5px;font-family:var(--serif)}
+.lrow .lab{letter-spacing:.08em;font-weight:700;font-size:10.5px}
+.l-call{border-left-color:var(--gCall)} .l-put{border-left-color:var(--gPut)}
+.l-spot{border-left-color:var(--gSpot);background:rgba(59,130,196,.10);border-top:1px solid #2C5C86;border-bottom:1px solid #2C5C86}
+.l-flip{border-left-color:var(--gFlip);background:rgba(232,195,74,.07)}
+.narr{padding:14px 15px;border-top:1px solid var(--line);background:var(--card2);font-size:14px;color:var(--inkMed);line-height:1.6}
+.chart{border:1px solid var(--line);background:var(--card);padding:14px 10px 6px;margin:6px 0 14px}
+svg{width:100%;height:auto;display:block}
+.grid{stroke:#0F2438;stroke-width:1}
+.axl{font-family:var(--mono);font-size:9.5px;fill:var(--inkFade)}
+.pl{fill:none;stroke:var(--ink);stroke-width:1.6}
+.m50{fill:none;stroke:var(--gold);stroke-width:1.2}
+.m200{fill:none;stroke:#5E7C99;stroke-width:1.4;stroke-dasharray:5 3}
+.ar{fill:url(#g1)}
+.lbl{font-family:var(--mono);font-size:10px;font-weight:700}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:10px;color:var(--inkFade);padding:5px 4px 7px}
+.legend i{display:inline-block;width:13px;height:2px;vertical-align:middle;margin-right:5px}
+.tw{border:1px solid var(--line);background:var(--card);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--inkFade);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:700;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #0E2438;color:var(--inkMed)}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.hl td{background:rgba(63,191,119,.08)} tr.hlr td{background:rgba(217,83,79,.07)}
+tr.me td{background:rgba(211,119,54,.10)}
+.gates{border:1px solid var(--line);background:var(--card)}
+.gate{display:grid;grid-template-columns:28px 1fr auto;gap:14px;align-items:center;padding:13px 17px;border-bottom:1px solid #0E2438}
+.gate:last-child{border-bottom:none} .gate.f{background:rgba(217,83,79,.05)}
+.gate .idx{font-family:var(--mono);font-size:10px;color:var(--inkGhost)}
+.gate .nm{font-family:var(--mono);font-size:13px;font-weight:700}
+.gate .dt{font-size:12.5px;color:var(--inkLight);margin-top:2px;line-height:1.45}
+.tag{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;padding:4px 10px;border:1px solid;white-space:nowrap;border-radius:2px}
+.t-fail{color:var(--red);border-color:var(--red);background:var(--redBg)}
+.t-warn{color:var(--amber);border-color:var(--amber);background:var(--amberBg)}
+.t-pass{color:var(--green);border-color:var(--green);background:var(--greenBg)}
+.stamp{border:1px solid var(--line);border-top:none;background:var(--card2);padding:13px 17px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.stamp .x{font-family:var(--mono);font-size:12px;color:var(--inkLight)}
+.stamp .o{font-family:var(--mono);font-weight:700;font-size:19px;color:var(--red);letter-spacing:.08em}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);background:var(--card);padding:16px 18px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #0E2438;font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv span:first-child{color:var(--inkLight)} .kv span:last-child{font-family:var(--mono);font-weight:700}
+.rule{border-left:2px solid var(--gold);background:rgba(211,119,54,.05);padding:11px 15px;margin:14px 0;font-size:13.5px;color:var(--inkMed)}
+.rule .rid{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;color:var(--gold);font-weight:700;text-transform:uppercase;display:block;margin-bottom:4px}
+.note{border-left:2px solid var(--line2);padding:2px 0 2px 15px;margin:15px 0;color:var(--inkMed)}
+.note b{color:var(--ink)}
+.news{border:1px solid var(--line);background:var(--card)}
+.nhdr{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);padding:10px 16px;background:var(--card2);border-bottom:1px solid var(--line)}
+.nrow{display:grid;grid-template-columns:86px 1fr;gap:14px;padding:11px 16px;border-bottom:1px solid #0E2438}
+.nrow:last-child{border-bottom:none}
+.nrow .dt{font-family:var(--mono);font-size:10px;color:var(--inkFade);padding-top:2px}
+.nrow .hd{font-size:14.5px;color:var(--ink);margin-bottom:3px}
+.nrow .bd{font-size:12.8px;color:var(--inkLight);line-height:1.5}
+.pill{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.09em;padding:2px 7px;border:1px solid var(--line2);color:var(--inkFade);margin-right:7px;vertical-align:1px;border-radius:2px}
+.pill.bull{border-color:var(--green);color:var(--green)}
+.pill.bear{border-color:var(--red);color:var(--red)}
+.pill.neu{border-color:var(--amber);color:var(--amber)}
+ul{margin:0 0 12px;padding-left:17px;color:var(--inkMed)}li{margin-bottom:5px}
+.foot{padding:28px 0 0;font-family:var(--mono);font-size:10.5px;color:var(--inkGhost);line-height:1.9}
+/* strip: fixed column counts so the last cell never orphans */
+.strip{grid-template-columns:repeat(8,1fr)}
+@media(max-width:1500px){.strip{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:620px){.strip{grid-template-columns:repeat(2,1fr)}}
+/* tablet landscape: rail becomes a compact top bar, not a dead column */
+@media(max-width:1200px){
+  .shell{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:none;border-bottom:1px solid var(--railLine);
+        display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:12px 24px}
+  .rail .logo{border-bottom:none;padding:0;font-size:10.5px;line-height:1.5}
+  .rail .stat{margin:0;padding:0;border-top:none;font-size:10.5px;line-height:1.7;text-align:right}
+  main{padding:0 24px 70px}
+}
+@media(max-width:760px){
+  .two,.three{grid-template-columns:1fr}
+  .lrow{grid-template-columns:66px 1fr}.lrow .d{display:none}
+  main{padding:0 18px 60px}
+  .rail{padding:10px 18px}
+}
+
+/* ===== light theme : colours only, toggled by html.light — sampled from phoenix_app.html ===== */
+html.light{
+  --bg:#F6EFE4; --card:rgba(255,253,249,.82); --card2:rgba(248,241,231,.92);
+  --line:rgba(122,96,68,.20); --line2:rgba(122,96,68,.34);
+  --ink:#2C2118; --inkMed:#43352A; --inkLight:#6A5949; --inkFade:#8C7A67; --inkGhost:#B3A493;
+  --gold:#C2632A; --green:#1E7A4E; --greenBg:rgba(30,122,78,.13);
+  --red:#B4362F; --redBg:rgba(180,54,47,.13);
+  --amber:#A87A1C; --amberBg:rgba(168,122,28,.15);
+  --rail:#F3EADC; --railLine:rgba(122,96,68,.22);
+  --gCall:#1E7A4E; --gPut:#B4362F; --gSpot:#2C5A82; --gFlip:#A87A1C; --gPin:#7A5CA8;
+}
+html.light,html.light body,html.light .shell,html.light main{background:#F6EFE4}
+html.light body{color:#2C2118}
+html.light .rail{background:#F3EADC}
+html.light .card,html.light .tw,html.light .gates,html.light .news,html.light .gexp,html.light .chart,html.light .cell{background:rgba(255,253,249,.86)}
+html.light .stamp,html.light .gexh,html.light .narr,html.light .nhdr,html.light .gexsub{background:rgba(248,241,231,.94)}
+html.light .pxtheme{background:rgba(248,241,231,.96)}
+html.light .ggrid,html.light .grid{stroke:rgba(122,96,68,.16)}
+html.light .pl{stroke:#2C2118}
+html.light .gcurve{stroke:#2C2118}
+html.light .garea{fill:#7A6044;opacity:.16}
+html.light .m200{stroke:#8C7A67}
+html.light .badge{background:var(--gCall);color:#FFFDF9}
+html.light .lrow.l-spot{background:rgba(44,90,130,.10);border-top-color:rgba(44,90,130,.4);border-bottom-color:rgba(44,90,130,.4)}
+html.light .lrow.l-flip{background:rgba(168,122,28,.10)}
+html.light .gate.f{background:rgba(180,54,47,.055)}
+html.light tr.hl td{background:rgba(30,122,78,.09)}
+html.light tr.hlr td{background:rgba(180,54,47,.07)}
+html.light tr.me td{background:rgba(194,99,42,.10)}
+html.light td{border-bottom-color:rgba(122,96,68,.14)}
+html.light .gate,html.light .nrow,html.light .lrow{border-bottom-color:rgba(122,96,68,.14)}
+html.light .rule{background:rgba(194,99,42,.06)}
+html.light .toc a:hover{background:rgba(194,99,42,.09)}
+/* theme switch */
+.pxtheme{z-index:40;display:flex;gap:0;border:1px solid var(--line2);border-radius:4px;overflow:hidden;background:var(--card2)}
+.pxtheme button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 12px;border:0;background:transparent;color:var(--inkFade);cursor:pointer}
+.pxtheme button.on{background:var(--gold);color:#FFFDF9;font-weight:700}
+.pxtheme button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+@media print{.pxtheme,.rail{display:none}.shell{grid-template-columns:1fr}main{padding:0}}
+
+/* ===== theme switch hardening — must stay last in the sheet ===== */
+.pxtheme{position:fixed;top:14px;right:18px;bottom:auto;left:auto;
+  height:auto;width:auto;max-height:34px;align-items:center;line-height:1}
+.pxtheme button{height:28px;line-height:28px;padding:0 12px;white-space:nowrap;flex:0 0 auto}
+@media(max-width:1200px){
+  .pxtheme{top:auto;bottom:14px;right:14px}
+}
+@media print{.pxtheme{display:none}}
+</style></head><body><div class="shell">
+<nav class="rail"><div class="logo">PHOENIX<br><span>EQUITY RESEARCH</span></div>
+<div class="stat" style="margin-top:20px;border-top:none;padding-top:0">SOFI &middot; $13.97<br>L3 SINGLE NAME<br>23 AUG 2026<br><br>GATES: <b>4 FAIL</b><br>SCORE: 70/100<br>VERDICT: <b>1/5 &middot; NEW 52W LOW</b></div></nav>
+<main>
+<div class="pxtheme" role="group" aria-label="Theme"><button id="thDark" class="on" type="button">Dark</button><button id="thLight" type="button">Light</button></div>
+<div class="mast"><div class="t">NASDAQ : SOFI &middot; SoFi Technologies, Inc. &middot; L3 single-name thesis</div>
+<div class="r">THU 15 OCT 2026 &middot; GATES ON WEEKLY CLOSE 9 OCT &middot; LIVE THU 15 OCT &middot; INDUSTRY = SPX<br>IBKR LIVE &middot; FULL-CHAIN GEX &middot; WEEKLY GATES</div></div>
+<section id="verdict"><h1>A new 52-week low,<br>RSI 13, and earnings<br>in <em>eight sessions</em>.</h1><p class="lede" style="max-width:76ch;margin-top:18px">SoFi was the first name in the library, on 23 August: 0 of 4. <b>It has not improved.</b> Wednesday it closed at a new 52-week low of $14.22 on twice its usual volume, RSI 13, 57% below its November 2025 high. Today $13.97. <b style="color:var(--ink)">Below a falling 10-, 30- and 40-week; SPX is the only pass. Q3 earnings 27 October.</b></p>
+<div class="verdict" style="border-color:var(--red);background:var(--redBg);border-left-color:var(--red)"><div class="l" style="color:var(--red)">Phoenix gate stack &middot; weekly &middot; industry = SPX</div><div class="t">1 OF 5 &mdash; NO TRADE. Stage 4, at a new low.</div><p style="margin:0;font-size:14px">RSI 13 is the most oversold reading in the map. <b style="color:var(--ink)">Oversold in Stage 4 is a description, not an entry.</b></p></div>
+<div class="strip"><div class="cell"><div class="k">Live Thu 15 Oct</div><div class="v dn">13.97</div><div class="s ">map close 14.22 (-6.69%)</div></div><div class="cell"><div class="k">Weekly close 9 Oct</div><div class="v ">15.80</div><div class="s ">gates run on this</div></div><div class="cell"><div class="k">10-week</div><div class="v dn">17.43</div><div class="s ">-19.8% live</div></div><div class="cell"><div class="k">30-week</div><div class="v dn">17.12</div><div class="s ">-18.4% live</div></div><div class="cell"><div class="k">40-week</div><div class="v dn">18.24</div><div class="s ">-23.4% live</div></div><div class="cell"><div class="k">104w high</div><div class="v ">32.73</div><div class="s ">-57.3% live</div></div><div class="cell"><div class="k">Gates</div><div class="v dn">1/5</div><div class="s ">live 1/5</div></div><div class="cell"><div class="k">Next binary</div><div class="v dn">TUE 27 OCT</div><div class="s dn">earnings &middot; 8 sessions</div></div></div></section>
+<section id="company"><div class="sh"><div class="n">B</div><div><h2>The business in depth</h2><p>A digital-only bank for young, high-earning professionals &mdash; lending, deposits and investing in one app &mdash; plus a technology platform it sells to other fintechs.</p></div></div>
+<div class="two"><div class="card"><h3>What it sells</h3><p style="font-size:13.5px;margin:0"><b>Lending</b> &mdash; personal loans (the largest line), student-loan refinancing and home loans; increasingly originated and <b>sold to private-credit buyers</b> through its Loan Platform Business. <b>Financial Services</b> &mdash; SoFi Money (checking/savings, funded by its bank charter), SoFi Invest, credit cards, crypto. <b>Technology Platform</b> &mdash; Galileo and Technisys, providing payment and banking infrastructure to other fintechs and banks.</p></div><div class="card"><h3>Who buys it &mdash; customers</h3><p style="font-size:13.5px;margin:0">Over 11 million members, mostly younger with above-average incomes. Galileo's customers are fintech companies and banks that issue cards and run accounts on its rails.</p></div></div><div class="two" style="margin-top:18px"><div class="card"><h3>Who it depends on &mdash; suppliers</h3><p style="font-size:13.5px;margin:0">Its funding: <b>customer deposits</b> (the bank charter lets it fund loans more cheaply) and <b>private-credit investors</b> such as Blue Owl and Fortress who buy its loans. Credit bureaus and data providers for underwriting.</p></div><div class="card"><h3>Who it fights &mdash; competitors</h3><p style="font-size:13.5px;margin:0">Lending: <b>LendingClub, Upstart</b>, and big banks such as Chase and American Express. Deposits and investing: <b>Ally, Chime, Robinhood</b>, Schwab. Platform: <b>Marqeta, Fiserv</b>, FIS.</p></div></div>
+<div class="rule" style="border-left-width:3px"><span class="rid">Why this matters for the trade</span>SoFi is a <b>rate- and credit-sensitive lender</b>: higher rates squeeze loan demand and gain-on-sale margins, and a weaker consumer raises losses. A hiking Fed is the worst macro for it. Earnings 27 October, the day before the Fed.</div></section><section id="chartpat"><div class="sh"><div class="n">C</div><div><h2>Chart &amp; pattern analysis</h2><p>Thirty weekly bars: a six-month range, falling tops since August, and a break to a new low this week.</p></div></div><div class="chart"><svg viewBox="0 0 1000 320" role="img" aria-label="30-week candlestick chart"><line x1="60" y1="272.2" x2="976" y2="272.2" stroke="#14304A" stroke-width="1"/><text class="gax" x="54" y="275.7" text-anchor="end">14</text><line x1="60" y1="200.5" x2="976" y2="200.5" stroke="#14304A" stroke-width="1"/><text class="gax" x="54" y="204.0" text-anchor="end">16</text><line x1="60" y1="128.8" x2="976" y2="128.8" stroke="#14304A" stroke-width="1"/><text class="gax" x="54" y="132.3" text-anchor="end">18</text><line x1="60" y1="57.1" x2="976" y2="57.1" stroke="#14304A" stroke-width="1"/><text class="gax" x="54" y="60.6" text-anchor="end">20</text><line x1="60.0" y1="150.0" x2="60.0" y2="230.9" stroke="#3FBF77" stroke-width="1.2"/><rect x="54.0" y="228.1" width="12" height="1.5" fill="#3FBF77"/><line x1="91.6" y1="189.0" x2="91.6" y2="238.8" stroke="#3FBF77" stroke-width="1.2"/><rect x="85.6" y="205.9" width="12" height="22.2" fill="#3FBF77"/><line x1="123.2" y1="134.2" x2="123.2" y2="204.8" stroke="#3FBF77" stroke-width="1.2"/><rect x="117.2" y="192.6" width="12" height="13.3" fill="#3FBF77"/><line x1="154.8" y1="52.5" x2="154.8" y2="201.9" stroke="#3FBF77" stroke-width="1.2"/><rect x="148.8" y="77.6" width="12" height="115.0" fill="#3FBF77"/><line x1="186.3" y1="65.4" x2="186.3" y2="131.3" stroke="#D9534F" stroke-width="1.2"/><rect x="180.3" y="77.6" width="12" height="35.5" fill="#D9534F"/><line x1="217.9" y1="86.9" x2="217.9" y2="218.4" stroke="#D9534F" stroke-width="1.2"/><rect x="211.9" y="113.0" width="12" height="72.0" fill="#D9534F"/><line x1="249.5" y1="172.5" x2="249.5" y2="217.7" stroke="#D9534F" stroke-width="1.2"/><rect x="243.5" y="185.1" width="12" height="24.4" fill="#D9534F"/><line x1="281.1" y1="188.7" x2="281.1" y2="228.8" stroke="#D9534F" stroke-width="1.2"/><rect x="275.1" y="209.4" width="12" height="5.0" fill="#D9534F"/><line x1="312.7" y1="189.0" x2="312.7" y2="239.2" stroke="#3FBF77" stroke-width="1.2"/><rect x="306.7" y="214.1" width="12" height="1.5" fill="#3FBF77"/><line x1="344.3" y1="107.7" x2="344.3" y2="206.9" stroke="#3FBF77" stroke-width="1.2"/><rect x="338.3" y="120.9" width="12" height="93.2" fill="#3FBF77"/><line x1="375.9" y1="100.1" x2="375.9" y2="212.0" stroke="#D9534F" stroke-width="1.2"/><rect x="369.9" y="120.9" width="12" height="78.5" fill="#D9534F"/><line x1="407.4" y1="161.1" x2="407.4" y2="213.0" stroke="#3FBF77" stroke-width="1.2"/><rect x="401.4" y="179.7" width="12" height="19.7" fill="#3FBF77"/><line x1="439.0" y1="103.7" x2="439.0" y2="164.3" stroke="#3FBF77" stroke-width="1.2"/><rect x="433.0" y="132.0" width="12" height="47.7" fill="#3FBF77"/><line x1="470.6" y1="113.4" x2="470.6" y2="174.7" stroke="#D9534F" stroke-width="1.2"/><rect x="464.6" y="132.0" width="12" height="1.5" fill="#D9534F"/><line x1="502.2" y1="86.2" x2="502.2" y2="146.7" stroke="#3FBF77" stroke-width="1.2"/><rect x="496.2" y="120.2" width="12" height="12.9" fill="#3FBF77"/><line x1="533.8" y1="66.4" x2="533.8" y2="161.8" stroke="#3FBF77" stroke-width="1.2"/><rect x="527.8" y="100.9" width="12" height="19.4" fill="#3FBF77"/><line x1="565.4" y1="84.4" x2="565.4" y2="183.6" stroke="#D9534F" stroke-width="1.2"/><rect x="559.4" y="100.9" width="12" height="53.8" fill="#D9534F"/><line x1="597.0" y1="140.6" x2="597.0" y2="188.7" stroke="#D9534F" stroke-width="1.2"/><rect x="591.0" y="154.6" width="12" height="29.4" fill="#D9534F"/><line x1="628.6" y1="146.7" x2="628.6" y2="240.6" stroke="#D9534F" stroke-width="1.2"/><rect x="622.6" y="184.0" width="12" height="5.4" fill="#D9534F"/><line x1="660.1" y1="98.0" x2="660.1" y2="184.4" stroke="#3FBF77" stroke-width="1.2"/><rect x="654.1" y="115.2" width="12" height="74.2" fill="#3FBF77"/><line x1="691.7" y1="105.5" x2="691.7" y2="141.3" stroke="#D9534F" stroke-width="1.2"/><rect x="685.7" y="115.2" width="12" height="3.2" fill="#D9534F"/><line x1="723.3" y1="86.9" x2="723.3" y2="141.7" stroke="#3FBF77" stroke-width="1.2"/><rect x="717.3" y="96.2" width="12" height="22.2" fill="#3FBF77"/><line x1="754.9" y1="75.0" x2="754.9" y2="127.7" stroke="#D9534F" stroke-width="1.2"/><rect x="748.9" y="96.2" width="12" height="30.5" fill="#D9534F"/><line x1="786.5" y1="103.4" x2="786.5" y2="167.5" stroke="#3FBF77" stroke-width="1.2"/><rect x="780.5" y="120.9" width="12" height="5.7" fill="#3FBF77"/><line x1="818.1" y1="116.3" x2="818.1" y2="167.2" stroke="#D9534F" stroke-width="1.2"/><rect x="812.1" y="120.9" width="12" height="32.3" fill="#D9534F"/><line x1="849.7" y1="137.8" x2="849.7" y2="181.5" stroke="#D9534F" stroke-width="1.2"/><rect x="843.7" y="153.2" width="12" height="12.9" fill="#D9534F"/><line x1="881.2" y1="130.2" x2="881.2" y2="193.3" stroke="#D9534F" stroke-width="1.2"/><rect x="875.2" y="166.1" width="12" height="13.6" fill="#D9534F"/><line x1="912.8" y1="185.4" x2="912.8" y2="217.3" stroke="#D9534F" stroke-width="1.2"/><rect x="906.8" y="179.7" width="12" height="29.0" fill="#D9534F"/><line x1="944.4" y1="193.7" x2="944.4" y2="227.4" stroke="#3FBF77" stroke-width="1.2"/><rect x="938.4" y="207.7" width="12" height="1.5" fill="#3FBF77"/><line x1="976.0" y1="212.0" x2="976.0" y2="275.0" stroke="#D9534F" stroke-width="1.2"/><rect x="970.0" y="207.7" width="12" height="65.6" fill="#D9534F"/><path d="M60.0,-37.9 L91.6,-24.3 L123.2,-12.9 L154.8,-8.4 L186.3,-2.6 L217.9,5.9 L249.5,14.8 L281.1,23.1 L312.7,30.7 L344.3,34.2 L375.9,40.3 L407.4,45.3 L439.0,48.3 L470.6,51.1 L502.2,62.5 L533.8,72.7 L565.4,84.6 L597.0,97.2 L628.6,110.6 L660.1,121.3 L691.7,130.7 L723.3,139.0 L754.9,144.7 L786.5,147.8 L818.1,150.6 L849.7,153.0 L881.2,154.4 L912.8,158.2 L944.4,160.5 L976.0,164.0" fill="none" stroke="#5E7C99" stroke-width="1.8"/><path d="M60.0,76.1 L91.6,112.0 L123.2,135.6 L154.8,140.7 L186.3,144.9 L217.9,154.2 L249.5,161.4 L281.1,173.2 L312.7,180.8 L344.3,176.1 L375.9,173.2 L407.4,170.6 L439.0,164.6 L470.6,170.1 L502.2,170.8 L533.8,162.4 L565.4,156.9 L597.0,153.9 L628.6,151.4 L660.1,150.8 L691.7,142.7 L723.3,134.4 L754.9,133.9 L786.5,132.6 L818.1,135.9 L849.7,142.5 L881.2,145.0 L912.8,147.4 L944.4,149.3 L976.0,165.1" fill="none" stroke="#D8A24A" stroke-width="1.8"/><line x1="533.8" y1="66.4" x2="944.4" y2="193.7" stroke="#D37736" stroke-width="2" stroke-dasharray="6 4"/><text class="gax" x="948.4" y="188.7" fill="#D37736">falling tops</text><line x1="312.7" y1="239.2" x2="976.0" y2="239.2" stroke="#D37736" stroke-width="2" stroke-dasharray="6 4"/><text class="gax" x="980.0" y="234.2" fill="#D37736">range floor $14.92</text><circle cx="976.0" cy="273.2" r="5" fill="none" stroke="#E8C34A" stroke-width="2"/><text class="gax" x="976.0" y="263.2" text-anchor="middle" fill="#E8C34A">new low</text></svg><div class="legend"><span><i style="background:#3FBF77"></i>Up week</span><span><i style="background:#D9534F"></i>Down week</span><span><i style="background:#D8A24A"></i>10-week</span><span><i style="background:#5E7C99"></i>30-week</span><span><i style="background:#D37736"></i>Pattern lines</span></div></div>
+<div class="two" style="margin-top:18px"><div class="card"><h3>What the chart shows</h3><p style="font-size:13.5px;margin:0">From April to September SoFi traded between roughly <b>$14.92 and $19.74</b>. The tops have fallen since August &mdash; $19.74, $19.50, $18.35, $17.96, $16.42 &mdash; while the floor held. This week it broke below it to a <b>new 52-week low of $13.92</b>, on twice-normal volume, RSI 13.</p></div>
+<div class="card" style="border-left:2px solid var(--amber)"><h3 style="color:var(--amber)">The pattern call &mdash; and what to do with it</h3><p style="font-size:13.5px;margin:0">Falling tops over a flat floor is a <b>descending triangle</b>, and this week is the <b>down breakout</b>, confirmed if Friday closes below $14.92. Bulkowski: down breakouts rank 15/36, average decline 15%, and those near the yearly low do well. Measure rule: 50% of the ~$4.80 height gives <b class="mono">~$12.50</b>. An extreme RSI is not a reason to buy into a confirmed breakdown before earnings.</p></div></div>
+<div class="rule"><span class="rid">Bulkowski &middot; Descending triangle</span>Up breakouts 53% (63% if price rose into it): rank 33/39, failure 22%, avg rise 38%. Down: rank 15/36, failure 23%, avg decline 15%, target met 50%. Breakout usually 61&ndash;65% of the way to the apex; price turns at the apex 60% of the time. A triangle resting on support is an easy win; overhead resistance kills up breakouts. Busted breakouts lead to powerful moves the other way.</div>
+<div class="tw" style="margin-top:14px"><table><tr><th>Level</th><th class="n">Price</th><th>Why it matters</th></tr><tr><td>Falling top line</td><td class="n mono">~$16.2</td><td>Close above = pattern repaired</td></tr><tr><td>10-week</td><td class="n mono">$17.43</td><td>Trend gate</td></tr><tr><td>Range floor</td><td class="n mono">$14.92</td><td>Weekly close below confirms</td></tr><tr><td>New low</td><td class="n mono">$13.92</td><td>This week</td></tr><tr><td>Measured target</td><td class="n mono">~$12.50</td><td>50% of height</td></tr></table></div></section><section id="biz"><div class="sh"><div class="n">01</div><div><h2>What changed this cycle</h2><p>What matters this week.</p></div></div><div class="two"><div class="card"><h3>Since August</h3><div class="kv"><span>23 Aug</span><span class="">~$18 &middot; 0/4</span></div><div class="kv"><span>Today</span><span class="dn">$13.97 &middot; new low</span></div><div class="kv"><span>From Nov 2025 high</span><span class="dn">&minus;57%</span></div></div><div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">The rate link</h3><p style="font-size:13.5px;margin:0">A consumer lender funding at deposit rates is directly exposed to the hiking cycle &mdash; and this week's CPI pushed hike odds toward even. <b style="color:var(--ink)">The macro and the chart agree.</b> Quality score carried at 70.</p></div></div></section>
+<section id="gex"><div class="sh"><div class="n">02</div><div><h2>Options positioning</h2><p>Open interest by strike was not retrieved this run &mdash; the chain request was not approved. What follows is from the live snapshot only.</p></div></div><div class="three"><div class="card"><h3>Today&rsquo;s option volume</h3><div class="kv"><span>Snapshot</span><span class="">not pulled</span></div></div><div class="card" style="grid-column:span 2"><h3>Reading</h3><p style="font-size:13.5px;margin:0">Volatility snapshot not pulled for this name; the panel uses the map's daily figures.</p></div></div></section>
+<section id="gates"><div class="sh"><div class="n">03</div><div><h2>The gate stack</h2><p>Weekly bars as <span class="mono">phoenix.py</span> computes them, on the last full weekly close. <b>Industry is SPX</b> for every name in this batch.</p></div></div>
+<div class="gates"><div class="gate f"><div class="idx">01</div><div><div class="nm">trend200 &mdash; above 40-week</div><div class="dt">$15.80 vs 40-week <b class="mono">$18.24</b>, -13.4%, <b style="color:var(--red)">falling</b> (was $19.34). Live -23.4%.</div></div><div class="tag t-fail">FAIL</div></div><div class="gate f"><div class="idx">02</div><div><div class="nm">stage2 &mdash; Weinstein</div><div class="dt">30-week <b class="mono">$17.12</b>, <b style="color:var(--red)">falling</b> (was $17.39); close -7.7%, live -18.4%.</div></div><div class="tag t-fail">FAIL</div></div><div class="gate f"><div class="idx">03</div><div><div class="nm">trend50 &mdash; above 10-week</div><div class="dt">10-week <b class="mono">$17.43</b>, <b style="color:var(--red)">falling</b> (was $17.80); close -9.3%, live -19.8%.</div></div><div class="tag t-fail">FAIL</div></div><div class="gate f"><div class="idx">04</div><div><div class="nm">near_high &mdash; 104-week</div><div class="dt">104-week high <b>$32.73</b>. Close -51.7%, live -57.3%; band is &minus;8% to &minus;1% or a new high. Trigger <b class="mono">$30.11</b>.</div></div><div class="tag t-fail">FAIL</div></div><div class="gate"><div class="idx">05</div><div><div class="nm">industry &mdash; SPX</div><div class="dt">SPY above a rising 30-week, +3.8% live. Passes for the whole batch.</div></div><div class="tag t-pass">PASS</div></div></div><div class="stamp" style="border-color:var(--red)"><div class="x">1 PASS of 5 on the 9 Oct close &middot; 1 of 5 at today&rsquo;s price</div><div class="o" style="color:var(--red)">NO CANDIDATE</div></div></section>
+<section id="vol"><div class="sh"><div class="n">V</div><div><h2>Volatility profile</h2></div></div><div class="strip" style="margin-top:0"><div class="cell"><div class="k">Implied vol</div><div class="v ">n/a</div><div class="s ">snapshot not pulled</div></div><div class="cell"><div class="k">Realised vol</div><div class="v ">n/a</div><div class="s ">snapshot not pulled</div></div><div class="cell"><div class="k">Daily ATR</div><div class="v ">~0.80</div><div class="s ">5.7% of price</div></div><div class="cell"><div class="k">RSI 14 (daily)</div><div class="v dn">13</div><div class="s ">from the map</div></div><div class="cell"><div class="k">vs 20-day / 50-day</div><div class="v ">-11.2% / -17.5%</div><div class="s ">daily averages</div></div><div class="cell"><div class="k">vs 200-day</div><div class="v ">-23.1%</div><div class="s ">daily</div></div><div class="cell"><div class="k">From 52w high</div><div class="v ">-56.6%</div><div class="s ">map</div></div><div class="cell"><div class="k">Stop basis</div><div class="v ">ATR</div><div class="s ">per &sect;5c</div></div></div></section>
+<section id="rr"><div class="sh"><div class="n">04</div><div><h2>Reward-to-risk</h2></div></div>
+<div class="tw"><table><tr><th>Scenario</th><th class="n">Entry</th><th class="n">Stop</th><th class="n">Stop dist</th><th class="n">R:R &rarr; 17.96</th><th class="n">R:R &rarr; 32.73</th><th class="n">Shares</th><th class="n">Position</th></tr><tr class="hlr"><td>Today, 1 ATR stop</td><td class="n">13.97</td><td class="n">13.17</td><td class="n">5.7%</td><td class="n">4.97 : 1</td><td class="n">23.37 : 1</td><td class="n">24.92</td><td class="n">$348 &middot; 17%</td></tr><tr class=""><td>Today, 2 ATR stop</td><td class="n">13.97</td><td class="n">12.36</td><td class="n">11.5%</td><td class="n">2.49 : 1</td><td class="n">11.69 : 1</td><td class="n">12.46</td><td class="n">$174 &middot; 9%</td></tr></table></div>
+<div class="note" style="border-left-color:var(--gold)"><b>Stop dist</b> is the stop as a share of price, not account risk. <b style="color:var(--ink)">Account risk is 1.00% in every row</b> &mdash; $20 on a $2,000 book; <span class="mono">shares = $20 &divide; (entry &minus; stop)</span>.</div></section>
+<section id="news"><div class="sh"><div class="n">05</div><div><h2>News and calendar</h2></div></div><div class="news"><div class="nrow"><div class="dt">14 OCT</div><div><div class="hd"><span class="pill neu">NEWS</span>SOFI closed Oct 14 at $14.22, down $1.02 (-6.69%).</div><div class="bd">stockanalysis.com</div></div></div><div class="nrow"><div class="dt">08 OCT</div><div><div class="hd"><span class="pill neu">NEWS</span>SoFi Tech Solutions, Orbi and Mastercard partner to launch crypto-linked card in Mexico.</div><div class="bd">Business Wire</div></div></div><div class="nrow"><div class="dt">29 SEP</div><div><div class="hd"><span class="pill neu">NEWS</span>SoFi schedules conference call to discuss Q3 2026 results (Oct 27).</div><div class="bd">Business Wire</div></div></div><div class="nrow"><div class="dt">22 SEP</div><div><div class="hd"><span class="pill neu">NEWS</span>SoFi becomes first national bank to go live with stablecoin settlement on Mastercard's global payments network.</div><div class="bd">Business Wire</div></div></div><div class="nrow"><div class="dt">TUE 27 OCT</div><div><div class="hd"><span class="pill bear">EARNINGS</span>Next report &mdash; confirmed</div><div class="bd">8 sessions away.</div></div></div><div class="nrow"><div class="dt">WED 28 OCT</div><div><div class="hd"><span class="pill bear">EVENT</span>Fed decision &mdash; hike odds ~44% after hot CPI</div><div class="bd">9 sessions away.</div></div></div></div><div class="rule"><span class="rid">From the 14 Oct map</span>Closed $14.22 (−6.7%) on 2.08× volume, breaking to a new 52-week low below $14.88, with RSI 13 and 56.6% under its November 2025 high. It is below every average (20-day $16.02, 50-day $17.23, 200-day $18.49), and there is no prior support in the one-year data below this level. Rate-sensitive fintech names fell on the hot CPI and higher hike odds. There is no company-specific news since the Mexico crypto card. Q3 results Oct 27 before the open.</div></section>
+<section id="risk"><div class="sh"><div class="n">06</div><div><h2>Risk register</h2></div></div><div class="tw"><table><tr><th>Risk</th><th style="width:96px">Severity</th><th>Mitigation &mdash; and the residual</th></tr><tr><td><b style="color:var(--ink)">Earnings in 8 sessions</b></td><td><span class="tag t-fail">HIGH</span></td><td>A stop cannot span an earnings gap. Decisive for timing.</td></tr><tr><td><b style="color:var(--ink)">Stage 4 at new low</b></td><td><span class="tag t-fail">HIGH</span></td><td>Every average falling.</td></tr><tr><td><b style="color:var(--ink)">Earnings 27 Oct, Fed 28 Oct</b></td><td><span class="tag t-fail">HIGH</span></td><td>Back-to-back binaries on a rate-sensitive lender.</td></tr><tr><td><b style="color:var(--ink)">Fed 28 Oct</b></td><td><span class="tag t-warn">MEDIUM</span></td><td>~44% hike odds after a 3.7% CPI. Market-wide gap risk inside any new position's first fortnight.</td></tr></table></div></section>
+<section id="inval" style="border-bottom:none"><div class="sh"><div class="n">07</div><div><h2>Invalidation and next step</h2></div></div>
+<div class="two"><div class="card" style="border-left:2px solid var(--green)"><h3 style="color:var(--green)">Improves if</h3><ul style="margin-bottom:0"><li>A weekly close back above the 10-week at <b class="mono">$17.43</b></li></ul></div><div class="card" style="border-left:2px solid var(--red)"><h3 style="color:var(--red)">Breaks if</h3><ul style="margin-bottom:0"><li>Any further weekly close below <b class="mono">$14.22</b></li></ul></div></div>
+<div class="verdict" style="border-color:var(--red);background:var(--redBg);border-left-color:var(--red);margin-top:26px"><div class="l" style="color:var(--red)">The answer</div><p style="margin:8px 0 0;font-size:16px;color:var(--ink)"><b>No trade.</b> One of five, a new 52-week low, RSI 13.</p><p style="margin:10px 0 0;font-size:16px;color:var(--inkMed)"><b class="mono am">Not a watchlist name.</b> Revisit only after the 30-week turns up.</p></div></section><div class="foot">
+PHOENIX EQUITY RESEARCH &middot; L3 SINGLE-NAME THESIS &middot; SOFI &middot; 15 OCT 2026 &middot; PREPARED TO RESEARCH_REPORT_METHOD v1<br>
+PRICE, VOLUME, OPTION OPEN INTEREST, IMPLIED VOLATILITY AND SECTOR DATA: INTERACTIVE BROKERS API, RETRIEVED 15 OCT 2026, THROUGH FRI 21 AUG CLOSE.<br>
+GATES COMPUTED ON WEEKLY BARS PER phoenix.py: 40-WEEK, 30-WEEK AND 10-WEEK SMA AGAINST THE 104-WEEK HIGH. GEX COMPUTED FROM IBKR OPEN INTEREST ACROSS THE LIVE CHAIN USING THE PHOENIX METHOD &mdash; WALLS ON OPEN INTEREST, FLIP FROM THE CUMULATIVE PROFILE.<br>
+LIMITATIONS &mdash; GATES USE THE LAST FULL WEEKLY CLOSE (FRI 9 OCT 2026); LIVE THU 15 OCT PRICING IS USED FOR VOLATILITY, SIZING AND REWARD-TO-RISK AND IS LABELLED. THE INDUSTRY GATE USES SPX (SPY ABOVE A RISING 30-WEEK), AS INSTRUCTED FOR THIS BATCH. OPTION OPEN INTEREST WAS NOT RETRIEVED; NO GAMMA LEVELS ARE SHOWN. NEWS AND THE DAILY CHART PICTURE ARE FROM THE USER'S MME MAP OF 14 OCT 2026, SUPPLEMENTED BY WEB SEARCH. QUALITY SCORE CARRIED FROM 23 AUG. VOLATILITY SNAPSHOT NOT PULLED.<br>
+NOT INVESTMENT ADVICE. PREPARED FOR ONE SYSTEMATIC LONG-ONLY EQUITY BOOK AND CALIBRATED TO ITS RULES, ACCOUNT SIZE AND COST BASE.
+</div>
+</main></div>
+<script>
+(function(){var root=document.documentElement,d=document.getElementById("thDark"),l=document.getElementById("thLight");
+function set(m){var g=(m==="light");root.classList.toggle("light",g);root.style.colorScheme=g?"light":"dark";
+d.className=g?"":"on";l.className=g?"on":"";try{localStorage.setItem("pxTheme",m);}catch(e){}}
+var s=null;try{s=localStorage.getItem("pxTheme");}catch(e){}set(s||"dark");
+d.addEventListener("click",function(){set("dark");});l.addEventListener("click",function(){set("light");});})();
+</script></body></html>
