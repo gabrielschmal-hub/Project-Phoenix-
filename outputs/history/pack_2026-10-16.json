@@ -1,0 +1,680 @@
+{
+ "schema": "phoenix-fact-pack/1",
+ "date": "2026-10-16",
+ "asof": "2026-10-16 10:05 UTC",
+ "market": {
+  "regime": "ENERGY_GRIND",
+  "regime_held_weeks": 2,
+  "spx": {
+   "last": 7744.06,
+   "chg_1d_pct": 0.33,
+   "vs_50d_pct": 0.48,
+   "vs_200d_pct": 6.56
+  },
+  "vix": 16.0,
+  "dxy": null,
+  "us10y": null,
+  "gold": null,
+  "wti": null,
+  "gex": {
+   "net_B": -7.69,
+   "regime": "negative",
+   "flip": null,
+   "dist_to_flip_pct": -0.3,
+   "call_wall": null,
+   "put_wall": null,
+   "spot": 7744.06
+  }
+ },
+ "macro": {
+  "spx": {
+   "last": 7744.06,
+   "d1_pct": 0.33,
+   "w1_pct": -0.27,
+   "m1_pct": 2.55
+  },
+  "ndx": {
+   "last": 26713.03,
+   "d1_pct": 0.08,
+   "w1_pct": -1.77,
+   "m1_pct": 2.83
+  },
+  "dow": {
+   "last": 52177.69,
+   "d1_pct": 1.08,
+   "w1_pct": 1.85,
+   "m1_pct": 1.39
+  },
+  "rut": {
+   "last": 2767.27,
+   "d1_pct": 1.38,
+   "w1_pct": -0.96,
+   "m1_pct": -3.2
+  },
+  "gold": {
+   "last": 4170.1,
+   "d1_pct": 1.51,
+   "w1_pct": 0.32,
+   "m1_pct": -4.95
+  },
+  "wti": {
+   "last": 97.97,
+   "d1_pct": 3.03,
+   "w1_pct": 7.08,
+   "m1_pct": -4.35
+  },
+  "btc": {
+   "last": 82141.0,
+   "d1_pct": 0.71,
+   "w1_pct": 0.57,
+   "m1_pct": 7.87
+  },
+  "dxy": {
+   "last": 102.0,
+   "d1_pct": -0.54,
+   "w1_pct": -0.14,
+   "m1_pct": 1.68
+  },
+  "vix": {
+   "last": 16.46,
+   "d1_pct": -2.43,
+   "w1_pct": 6.81,
+   "m1_pct": -7.06
+  },
+  "usdjpy": {
+   "last": 157.96,
+   "d1_pct": -0.23,
+   "w1_pct": -0.07,
+   "m1_pct": 1.73
+  },
+  "tnx": {
+   "last": 5.09,
+   "d1_bp": -10,
+   "w1_bp": -14,
+   "m1_bp": 8
+  },
+  "us02": {
+   "last": 4.82,
+   "d1_bp": 0,
+   "w1_bp": 7,
+   "m1_bp": 8
+  },
+  "real10": {
+   "last": 2.84,
+   "d1_bp": 0,
+   "w1_bp": -3,
+   "m1_bp": 16
+  },
+  "hy": {
+   "last": 3.25,
+   "d1_bp": 0,
+   "w1_bp": 0,
+   "m1_bp": 1
+  },
+  "cpi_yoy": {
+   "last": 3.72,
+   "prev_print": 3.35
+  },
+  "curve_2s10s_bp": 27,
+  "curve_2s10s_chg_1m_bp": 0,
+  "absent": [],
+  "rows": 251
+ },
+ "regime_gates": {
+  "regime": "ENERGY_GRIND",
+  "held_weeks": 2,
+  "since": "2026-10-05",
+  "drivers": [
+   {
+    "key": "cpi_chg_3m",
+    "label": "CPI 3m change",
+    "value": 0.42,
+    "op": ">",
+    "threshold": 0.3,
+    "clear_by": 0.12,
+    "ok": true
+   },
+   {
+    "key": "wti_vs_2yr",
+    "label": "WTI vs 2yr",
+    "value": 30.47,
+    "op": ">",
+    "threshold": 0,
+    "clear_by": 30.47,
+    "ok": true
+   },
+   {
+    "key": "wti_12m",
+    "label": "WTI 12m",
+    "value": 65.78,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 40.78,
+    "ok": true
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI 3m change falls below 0.3",
+    "now": 0.42,
+    "threshold": 0.3,
+    "distance": 0.12,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI vs 2yr falls below 0",
+    "now": 30.47,
+    "threshold": 0,
+    "distance": 30.47,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI 12m falls below 25",
+    "now": 65.78,
+    "threshold": 25,
+    "distance": 40.78,
+    "then": "ENERGY_GRIND no longer qualifies"
+   }
+  ],
+  "runner_up": {
+   "regime": "POLICY_TIGHTENING",
+   "score": 51.7,
+   "behind_by": 17.2
+  }
+ },
+ "screener": {
+  "n_candidates": 364,
+  "top": [
+   {
+    "ticker": "CRL",
+    "industry": "Miscellaneous commercial services",
+    "trade_score": 67,
+    "atr14_pct": 3.92,
+    "mcap_B": 8.75,
+    "breakout": false,
+    "days_on_list": 68,
+    "profitability": "marginal",
+    "pos_vs_high": 0.0,
+    "surge": 17,
+    "dollar_vol_M": 304.8,
+    "stop_pct_2_5atr": 9.8
+   },
+   {
+    "ticker": "TWLO",
+    "industry": "Packaged software",
+    "trade_score": 66,
+    "atr14_pct": 5.64,
+    "mcap_B": 27.87,
+    "breakout": false,
+    "days_on_list": 59,
+    "profitability": "profitable",
+    "pos_vs_high": -7.2,
+    "surge": 159,
+    "dollar_vol_M": 1353.2,
+    "stop_pct_2_5atr": 14.1
+   },
+   {
+    "ticker": "CDNA",
+    "industry": "Medical specialties",
+    "trade_score": 64,
+    "atr14_pct": 6.03,
+    "mcap_B": 1.29,
+    "breakout": false,
+    "days_on_list": 59,
+    "profitability": "profitable",
+    "pos_vs_high": -0.7,
+    "surge": 41,
+    "dollar_vol_M": 98.1,
+    "stop_pct_2_5atr": 15.08
+   },
+   {
+    "ticker": "PAGS",
+    "industry": "Miscellaneous commercial services",
+    "trade_score": 62,
+    "atr14_pct": 4.67,
+    "mcap_B": 2.44,
+    "breakout": true,
+    "days_on_list": 1,
+    "profitability": "profitable",
+    "pos_vs_high": -0.4,
+    "surge": 71,
+    "dollar_vol_M": 46.8,
+    "stop_pct_2_5atr": 11.68
+   },
+   {
+    "ticker": "DT",
+    "industry": "Packaged software",
+    "trade_score": 59,
+    "atr14_pct": 2.81,
+    "mcap_B": 11.79,
+    "breakout": false,
+    "days_on_list": 4,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 14,
+    "dollar_vol_M": 450.3,
+    "stop_pct_2_5atr": 7.03
+   },
+   {
+    "ticker": "EL",
+    "industry": "Household/Personal care",
+    "trade_score": 59,
+    "atr14_pct": 3.12,
+    "mcap_B": 30.58,
+    "breakout": false,
+    "days_on_list": 1,
+    "profitability": "profitable",
+    "pos_vs_high": -8.0,
+    "surge": -3,
+    "dollar_vol_M": 292.8,
+    "stop_pct_2_5atr": 7.8
+   },
+   {
+    "ticker": "RVTY",
+    "industry": "Medical specialties",
+    "trade_score": 59,
+    "atr14_pct": 3.92,
+    "mcap_B": 11.05,
+    "breakout": false,
+    "days_on_list": 66,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 27,
+    "dollar_vol_M": 318.0,
+    "stop_pct_2_5atr": 9.8
+   },
+   {
+    "ticker": "HURN",
+    "industry": "Miscellaneous commercial services",
+    "trade_score": 58,
+    "atr14_pct": 3.55,
+    "mcap_B": 1.47,
+    "breakout": false,
+    "days_on_list": 1,
+    "profitability": "unknown",
+    "pos_vs_high": -4.4,
+    "surge": -11,
+    "dollar_vol_M": 46.0,
+    "stop_pct_2_5atr": 8.88
+   }
+  ],
+  "leaning": [],
+  "counts": {}
+ },
+ "smart_money": {
+  "quarter": "2026-06-30",
+  "accumulating": [],
+  "distributing": [],
+  "notable": [
+   {
+    "ticker": "GOOGL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 37764088383,
+    "sector": null
+   },
+   {
+    "ticker": "GE",
+    "manager": "TCI Fund (Hohn)",
+    "action": "TRIM",
+    "value_usd": 17725353519,
+    "sector": null
+   },
+   {
+    "ticker": "V",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 10462232091,
+    "sector": null
+   },
+   {
+    "ticker": "DVA",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "TRIM",
+    "value_usd": 6425268898,
+    "sector": null
+   },
+   {
+    "ticker": "SPGI",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 5735017808,
+    "sector": null
+   },
+   {
+    "ticker": "DAL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 5368591200,
+    "sector": null
+   },
+   {
+    "ticker": "IEP",
+    "manager": "Icahn Capital",
+    "action": "ADD",
+    "value_usd": 4458616003,
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 4389741007,
+    "sector": null
+   }
+  ],
+  "congress_recent": [
+   {
+    "ticker": "AZO",
+    "member": "Richard W. Allen",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-10-14",
+    "sector": null
+   },
+   {
+    "ticker": "NVDA",
+    "member": "Daniel Meuser",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-14",
+    "sector": null
+   },
+   {
+    "ticker": "BRK.B",
+    "member": "Richard Dean Dr McCormick",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-14",
+    "sector": null
+   },
+   {
+    "ticker": "COST",
+    "member": "Richard W. Allen",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-14",
+    "sector": null
+   },
+   {
+    "ticker": "EMR",
+    "member": "Kevin Hern",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-10-13",
+    "sector": null
+   },
+   {
+    "ticker": "HD",
+    "member": "Kevin Hern",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-13",
+    "sector": null
+   },
+   {
+    "ticker": "ROK",
+    "member": "Kevin Hern",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-10-13",
+    "sector": null
+   },
+   {
+    "ticker": "CB",
+    "member": "Kevin Hern",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-13",
+    "sector": null
+   },
+   {
+    "ticker": "LIN",
+    "member": "Kevin Hern",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-10-13",
+    "sector": null
+   },
+   {
+    "ticker": "LMT",
+    "member": "Kevin Hern",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-10-13",
+    "sector": null
+   }
+  ],
+  "note": null,
+  "congress_status": {
+   "written": "2026-10-16",
+   "dropped_impossible_dates": 0,
+   "sources": {
+    "House Clerk PTR": {
+     "rows": 9749,
+     "last_30d": 109,
+     "newest_tx": "2026-10-08",
+     "newest_filed": "2026-10-14"
+    },
+    "OGE 278-T via Open Cabinet": {
+     "rows": 6448,
+     "last_30d": 0,
+     "newest_tx": "2026-06-24",
+     "newest_filed": "2026-08-12"
+    },
+    "Senate eFD": {
+     "rows": 998,
+     "last_30d": 0,
+     "newest_tx": "2026-09-04",
+     "newest_filed": "2026-10-01"
+    }
+   },
+   "quiet": [
+    "OGE 278-T via Open Cabinet",
+    "Senate eFD"
+   ]
+  }
+ },
+ "portfolio": {
+  "open": [
+   {
+    "ticker": "GOOG",
+    "entry": 325.86,
+    "stop": 305.67,
+    "last": null,
+    "R": null,
+    "managed": true,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "AAPL",
+    "entry": 321.97,
+    "stop": 301.26,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "OKTA",
+    "entry": 182.82,
+    "stop": 198.08,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "OKTA",
+    "entry": 182.73,
+    "stop": 162.61,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "AMZN",
+    "entry": 251.84,
+    "stop": 244.99,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   }
+  ],
+  "heat_R": 4.84,
+  "cap_R": 3.0,
+  "unsized": 0,
+  "note": null,
+  "over_cap": true
+ },
+ "news": {
+  "date": "2026-10-15",
+  "asof": "2026-10-16 09:29 UTC",
+  "headline": "AMZN stopped out in the gap \u2014 and the stock closed higher on the day",
+  "standfirst": "Amazon gapped below its breakeven stop at the open and was taken out 95 cents under it, at 250.89 against a 251.84 line \u2014 realising \u22122.85, or \u22120.14R, rather than nothing \u2014 before falling to 248.65 and recovering six dollars to close 254.76, up 0.27% and above the stop. Behind it, the week's argument resolved: PPI came in at nearly three times forecast and retail sales rose 0.8% against 0.3% expected, but the control group managed only 0.1% and ex-petrol the gain was 0.2%, so the ten-year fell about 12 basis points to roughly 5.07% and the thirty-year to 5.41% \u2014 a fifth consecutive session of the long end easing, and 26 basis points below its 7 October level. Hike odds for 28 October fell back from about 50% to roughly 27%. The Russell rose 1.38% and the Dow 1.08% while the Nasdaq managed 0.08%; over the week the Dow is the only index up. WTI jumped 3.03% to $97.97 on a US inventory draw while Brent fell to $105.92, collapsing the spread to $7.95. In the book GOOG recovered to +0.37%, OKTA fell 1.60% after being down 4.2% at its low, and AAPL was the only holding that did not bounce. A net of -12.67. Heat 3.05R against 3.0R, unchanged even after a position closed \u2014 the stop sat at the fill and carried no risk. The foldable opens for pre-order on Friday.",
+  "themes": [
+   {
+    "kicker": "What's next",
+    "right": "the pre-order today \u00b7 the Fed on the 28th",
+    "title": "The pre-order opens in a few hours, and it is the only checkable thing on the list",
+    "items": [
+     {
+      "tone": "c-er",
+      "tag": "AAPL",
+      "html": "<b>iPhone Duo pre-orders open</b>, 5am Pacific \u2014 sell-through and shipping-date slippage are visible within hours, and BofA calls it the indicator of premium demand",
+      "when": "Fri \u00b7 2026-10-16",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-er",
+      "tag": "AAPL",
+      "html": "<b>iPhone Duo on sale</b> in the US and 70-plus countries from <b>$1,999</b>, with 28 more countries on the 30th",
+      "when": "Fri \u00b7 2026-10-23",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-fomc",
+      "tag": "FOMC",
+      "html": "<b>Fed decision</b> and <b>Alphabet Q3</b> on the same day \u2014 hike odds went 22% to 50% to about 27% in three sessions",
+      "when": "Wed \u00b7 2026-10-28",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "AAPL \u00b7 AMZN",
+      "html": "<b>Apple Q4 and Amazon Q3 earnings</b> \u2014 the first iPhone 18 quarter against two contradictory supply-chain reports",
+      "when": "Thu \u00b7 2026-10-29",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "CPI",
+      "html": "<b>October CPI</b> \u2014 with crude three dollars higher than when this week began",
+      "when": "Tue \u00b7 2026-11-10",
+      "kind": "calendar"
+     }
+    ],
+    "note": "<b>Friday is the first thing in three weeks that produces evidence rather than sourcing.</b> <b>iPhone Duo pre-orders open at 5am Pacific</b>, with sale on the <b>23rd</b> at <b>$1,999</b> for 256GB rising to $3,199 for 2TB, and 28 further countries on the 30th. Three parties now disagree about iPhone 18 demand and all three are working from supply-chain contacts: <b>Nikkei</b> says Pro production is being cut; <b>Securities Times</b> says Pro supply targets are unchanged and <b>Duo orders were raised 30%</b> toward 10 million units; <b>Bank of America</b>, Buy at <b>$370</b>, reports Pro delivery times shorter than a year ago. Pre-order sell-through and how fast shipping dates slip are checkable facts, and they arrive thirteen days before Apple has to explain the quarter."
+   }
+  ],
+  "ondeck": "<b>Friday is the first thing in three weeks that produces evidence rather than sourcing.</b> <b>iPhone Duo pre-orders open at 5am Pacific</b>, with sale on the <b>23rd</b> at <b>$1,999</b> for 256GB rising to $3,199 for 2TB, and 28 further countries on the 30th. Three parties now disagree about iPhone 18 demand and all three are working from supply-chain contacts: <b>Nikkei</b> says Pro production is being cut; <b>Securities Times</b> says Pro supply targets are unchanged and <b>Duo orders were raised 30%</b> toward 10 million units; <b>Bank of America</b>, Buy at <b>$370</b>, reports Pro delivery times shorter than a year ago. Pre-order sell-through and how fast shipping dates slip are checkable facts, and they arrive thirteen days before Apple has to explain the quarter.",
+  "note": null
+ },
+ "provenance": {
+  "macro": {
+   "asof": "2026-10-16 09:29 UTC",
+   "age_min": null
+  },
+  "gex": {
+   "asof": "2026-10-16 09:29 UTC",
+   "age_min": null
+  },
+  "stocks": {
+   "asof": "2026-10-16 09:47 UTC",
+   "age_min": null
+  },
+  "institutional_holdings": {
+   "asof": "2026-10-16 09:55 UTC",
+   "quarter": "2026-06-30"
+  },
+  "congress_trades": {
+   "asof": "2026-10-16 09:53 UTC",
+   "status": {
+    "written": "2026-10-16",
+    "dropped_impossible_dates": 0,
+    "sources": {
+     "House Clerk PTR": {
+      "rows": 9749,
+      "last_30d": 109,
+      "newest_tx": "2026-10-08",
+      "newest_filed": "2026-10-14"
+     },
+     "OGE 278-T via Open Cabinet": {
+      "rows": 6448,
+      "last_30d": 0,
+      "newest_tx": "2026-06-24",
+      "newest_filed": "2026-08-12"
+     },
+     "Senate eFD": {
+      "rows": 998,
+      "last_30d": 0,
+      "newest_tx": "2026-09-04",
+      "newest_filed": "2026-10-01"
+     }
+    },
+    "quiet": [
+     "OGE 278-T via Open Cabinet",
+     "Senate eFD"
+    ]
+   }
+  },
+  "wire": {
+   "asof": "2026-10-16 09:29 UTC"
+  }
+ },
+ "missing": [],
+ "changed": {
+  "first_pack": false,
+  "prev_date": "2026-10-15",
+  "changes": [
+   {
+    "kind": "portfolio",
+    "what": "open heat",
+    "was": 6.19,
+    "now": 4.84,
+    "why": "committed risk moved materially"
+   },
+   {
+    "kind": "portfolio",
+    "what": "PLTR",
+    "was": "open",
+    "now": "closed",
+    "why": "the position left the book"
+   },
+   {
+    "kind": "screener",
+    "what": "new in the top setups",
+    "was": null,
+    "now": "CRL, TWLO, CDNA, PAGS, DT, EL",
+    "why": "names the engine ranked highest that were not there yesterday"
+   }
+  ]
+ }
+}
