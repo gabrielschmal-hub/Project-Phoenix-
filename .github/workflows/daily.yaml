@@ -2,24 +2,14 @@ name: Phoenix Daily Run
 
 on:
   schedule:
-    - cron: '0 5 * * 1-5'     # full pipeline
-    # GEX refresh. At 05:00 UTC neither the prior cash close nor the overnight
-    # OI update is available, so the 05:00 run republishes yesterday's gex.json
-    # (the publish gate holds the last good file). 10:30 UTC = 06:30 ET, after
-    # CBOE's OI refresh, is when the chain is complete for the new session.
-    - cron: '30 10 * * 1-5'   # gex only
+    - cron: '0 5 * * 1-5'
   workflow_dispatch:
   # Dropping the morning wire files IS the publish: any commit touching
   # wire/** triggers a fast wire-only run, live on the dashboard in ~2 min.
   push:
     paths:
       - 'wire/**'
-
-# One Phoenix run at a time. A wire push landing during the scheduled run
-# queues behind it instead of racing it for the commit to main.
-concurrency:
-  group: phoenix-daily
-  cancel-in-progress: false
+      - 'research/**'      # a new report is live in ~2 minutes, not at tomorrow's 05:00 run
 
 jobs:
   run-pipeline:
@@ -29,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0          # full history: the context backfill and GEX history read past commits via git log/show
+          fetch-depth: 0          # full history: the context backfill reads each signal day's files from git
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -43,15 +33,9 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SEC_IDENTITY: "Phoenix Research gabriel@example.com"
-          # Optional. phoenix.py skips the theses and alerts steps with a
-          # printed notice when these are empty, so an unset secret is safe.
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
             python phoenix.py --engine wire
-          elif [ "${{ github.event.schedule }}" = "30 10 * * 1-5" ]; then
-            python phoenix.py --engine gex
           else
             python phoenix.py --full
           fi
@@ -60,9 +44,6 @@ jobs:
           git config user.name  "phoenix-bot"
           git config user.email "phoenix-bot@users.noreply.github.com"
           git pull --rebase origin main || true
-          # macro_weekly.csv is the committed fallback the macro engine writes
-          # at the repo root; it was never being added, so the fallback never
-          # updated after the first commit.
-          git add outputs/ macroflow.db macro_weekly.csv || true
+          git add outputs/ macroflow.db || true
           git commit -m "Phoenix run $(date -u +%Y-%m-%dT%H:%M) (${{ github.event_name }})" || echo "No changes"
           git push || echo "Nothing to push"
