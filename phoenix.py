@@ -13907,6 +13907,11 @@ def run_engine(name):
         run_gex_verify()
     elif name == "wire":
         run_wire()
+        # a push to research/ also triggers this fast run: re-index the library so new reports show in minutes
+        try:
+            run_research_library()
+        except Exception as e:
+            print(f"[research] index skipped in the wire run: {e}")
         # a push to wire/ is also how the MME file arrives; build the map in the same fast run
         try:
             run_mme_map()
