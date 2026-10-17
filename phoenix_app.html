@@ -3017,6 +3017,13 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
 #page-research .rs-stat b{color:var(--ink);font-weight:400}
 #page-research .rs-group{font-family:'Courier New',monospace;font-size:10px;letter-spacing:.26em;color:var(--inkMed)}
 #page-research .rs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+#page-research .rs-dayhd{grid-column:1/-1;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:18px 0 -2px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+#page-research .rs-dayhd:first-child{margin-top:0}
+#page-research .rs-dayhd .d{font-size:17px;font-weight:700;color:var(--ink)}
+#page-research .rs-dayhd .n,#page-research .rs-dayhd .ago{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--inkFade);text-transform:uppercase}
+#page-research .rs-dayhd .ago{margin-left:auto}
+#page-research .rs-dayhd .new{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:var(--gold);color:#fff;font-weight:700}
+#page-research .rs-dayhd[hidden]{display:none}
 #page-research .rs-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 19px 16px;
   display:flex;flex-direction:column;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 #page-research .rs-card:hover{border-color:var(--line2)}
@@ -4264,6 +4271,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(!active && c.className.indexOf("rsHeroDupe")>-1) ok=false;
       c.hidden=!ok; if(ok)n++;
     });
+    Array.prototype.forEach.call(grid.querySelectorAll(".rs-dayhd"),function(h){
+      var any=false, el=h.nextElementSibling;
+      while(el && !el.classList.contains("rs-dayhd")){ if(el.classList.contains("rs-card")&&!el.hidden){ any=true; break; } el=el.nextElementSibling; }
+      h.hidden=!any; });
     var hz=document.getElementById("rsHero"); if(hz) hz.className=active?"rs-hidden":"";
     var st=document.getElementById("rsStat"); if(st) st.className=active?"rs-stat rs-hidden":"rs-stat";
     var g=document.getElementById("rsGroup");
@@ -5329,7 +5340,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var grid=document.getElementById("rsGrid");
     getJSON("research_index").then(function(d){
       RS.data=d;
-      var rows=(d.reports||[]);
+      var rows=(d.reports||[]).slice().sort(function(a,b){            // newest first, then A-Z within a day
+        var da=String(a.date||""), db=String(b.date||""); if(da!==db) return da<db?1:-1;
+        return String(a.ticker||"").localeCompare(String(b.ticker||"")); });
       if(!rows.length){ grid.innerHTML='<div class="rs-loading">No reports indexed yet. Commit HTML into research/ and run the pipeline.</div>'; return; }
       var hero=rows[0];
       document.getElementById("rsHero").innerHTML=rsHero(hero);
@@ -5346,7 +5359,17 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
             rsEsc(v.label)+' <b>'+v.n+'</b></button>';
       });
       document.getElementById("rsKinds").innerHTML=kb;
-      grid.innerHTML=rows.map(function(r){ return rsCard(r, r===hero); }).join("");
+      // grouped by day, newest first: a heading per date so the latest batch is obvious
+      var byDay={}, days=[]; rows.forEach(function(r){ var k=String(r.date||"undated"); if(!byDay[k]){ byDay[k]=[]; days.push(k); } byDay[k].push(r); });
+      var today=new Date().toISOString().slice(0,10);
+      grid.innerHTML=days.map(function(k,i){
+        var age=(k!=="undated")?Math.round((Date.parse(today)-Date.parse(k))/864e5):null;
+        var lbl=(k==="undated")?"Undated":new Date(k+"T12:00:00Z").toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+        return '<div class="rs-dayhd" data-day="'+k+'"><span class="d">'+lbl+'</span><span class="n">'+byDay[k].length+' report'+(byDay[k].length===1?'':'s')+'</span>'+
+               (i===0&&age!=null&&age<=7?'<span class="new">Latest</span>':'')+
+               (age!=null&&age>=0?'<span class="ago">'+(age===0?'today':age===1?'yesterday':age+' days ago')+'</span>':'')+'</div>'+
+               byDay[k].map(function(r){ return rsCard(r, r===hero); }).join("");
+      }).join("");
       rsWire(document.getElementById("page-research"));
 
       var q=document.getElementById("rsQ");
