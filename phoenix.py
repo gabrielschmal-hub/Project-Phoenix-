@@ -4341,6 +4341,17 @@ def compute_research_index():
 
     for path in files:
         r = _rl_parse_report(path)
+        # The filename is the record of when a report was written. Reports whose meta block has no
+        # date, and every file named with spaces ("AAPL Phoenix Research 2026-08-23.html") rather than
+        # underscores, came through undated and the Research page filed them all under "Undated".
+        _b = os.path.basename(path)
+        _fd = __import__("re").search(r"(\d{4}-\d{2}-\d{2})", _b)
+        if _fd and not r.get("date"):
+            r["date"] = _fd.group(1)
+        if not r.get("ticker"):
+            _ft = __import__("re").match(r"([A-Z][A-Z0-9\.\-]{0,9})[ _]", _b)
+            if _ft:
+                r["ticker"] = _ft.group(1)
         tk = (r.get("ticker") or "").upper()
         r["ticker"] = tk or None
         r["url"] = f"{RESEARCH_DIR}/{r['file']}"

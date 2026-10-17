@@ -5340,6 +5340,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var grid=document.getElementById("rsGrid");
     getJSON("research_index").then(function(d){
       RS.data=d;
+      (d.reports||[]).forEach(function(r){                           // the date in the filename is the fallback
+        if(!r.date){ var m=String(r.file||r.url||"").match(/(\d{4}-\d{2}-\d{2})/); if(m) r.date=m[1]; } });
       var rows=(d.reports||[]).slice().sort(function(a,b){            // newest first, then A-Z within a day
         var da=String(a.date||""), db=String(b.date||""); if(da!==db) return da<db?1:-1;
         return String(a.ticker||"").localeCompare(String(b.ticker||"")); });
