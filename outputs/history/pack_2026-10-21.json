@@ -1,0 +1,654 @@
+{
+ "schema": "phoenix-fact-pack/1",
+ "date": "2026-10-21",
+ "asof": "2026-10-21 10:29 UTC",
+ "market": {
+  "regime": "ENERGY_GRIND",
+  "regime_held_weeks": 3,
+  "spx": {
+   "last": 7712.57,
+   "chg_1d_pct": 0.28,
+   "vs_50d_pct": 0.11,
+   "vs_200d_pct": 5.94
+  },
+  "vix": 17.33,
+  "dxy": null,
+  "us10y": null,
+  "gold": null,
+  "wti": null,
+  "gex": {
+   "net_B": -16.61,
+   "regime": "negative",
+   "flip": null,
+   "dist_to_flip_pct": -0.08,
+   "call_wall": null,
+   "put_wall": null,
+   "spot": 7712.57
+  }
+ },
+ "macro": {
+  "spx": {
+   "last": 7712.57,
+   "d1_pct": 0.28,
+   "w1_pct": -1.19,
+   "m1_pct": -0.67
+  },
+  "ndx": {
+   "last": 26424.82,
+   "d1_pct": -0.02,
+   "w1_pct": -2.87,
+   "m1_pct": -2.57
+  },
+  "dow": {
+   "last": 52495.88,
+   "d1_pct": 1.02,
+   "w1_pct": 1.6,
+   "m1_pct": 0.86
+  },
+  "rut": {
+   "last": 2773.42,
+   "d1_pct": 1.65,
+   "w1_pct": -0.36,
+   "m1_pct": -3.55
+  },
+  "gold": {
+   "last": 4142.6,
+   "d1_pct": -0.42,
+   "w1_pct": -0.83,
+   "m1_pct": -5.5
+  },
+  "wti": {
+   "last": 101.79,
+   "d1_pct": -1.8,
+   "w1_pct": 8.13,
+   "m1_pct": 6.27
+  },
+  "btc": {
+   "last": 82941.0,
+   "d1_pct": 1.33,
+   "w1_pct": -0.19,
+   "m1_pct": -4.23
+  },
+  "dxy": {
+   "last": 101.73,
+   "d1_pct": -0.25,
+   "w1_pct": -0.44,
+   "m1_pct": 1.29
+  },
+  "vix": {
+   "last": 17.31,
+   "d1_pct": -6.13,
+   "w1_pct": 13.36,
+   "m1_pct": 16.41
+  },
+  "usdjpy": {
+   "last": 158.52,
+   "d1_pct": 0.45,
+   "w1_pct": 0.0,
+   "m1_pct": 0.94
+  },
+  "tnx": {
+   "last": 5.12,
+   "d1_bp": -2,
+   "w1_bp": -10,
+   "m1_bp": 15
+  },
+  "us02": {
+   "last": 4.77,
+   "d1_bp": 0,
+   "w1_bp": -2,
+   "m1_bp": 1
+  },
+  "real10": {
+   "last": 2.8,
+   "d1_bp": 0,
+   "w1_bp": -8,
+   "m1_bp": 18
+  },
+  "hy": {
+   "last": 3.29,
+   "d1_bp": 0,
+   "w1_bp": 0,
+   "m1_bp": 1
+  },
+  "cpi_yoy": {
+   "last": 3.72,
+   "prev_print": 3.35
+  },
+  "curve_2s10s_bp": 35,
+  "curve_2s10s_chg_1m_bp": 14,
+  "absent": [],
+  "rows": 251
+ },
+ "regime_gates": {
+  "regime": "ENERGY_GRIND",
+  "held_weeks": 3,
+  "since": "2026-10-05",
+  "drivers": [
+   {
+    "key": "cpi_chg_3m",
+    "label": "CPI 3m change",
+    "value": 0.42,
+    "op": ">",
+    "threshold": 0.3,
+    "clear_by": 0.12,
+    "ok": true
+   },
+   {
+    "key": "wti_vs_2yr",
+    "label": "WTI vs 2yr",
+    "value": 34.94,
+    "op": ">",
+    "threshold": 0,
+    "clear_by": 34.94,
+    "ok": true
+   },
+   {
+    "key": "wti_12m",
+    "label": "WTI 12m",
+    "value": 61.12,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 36.12,
+    "ok": true
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI 3m change falls below 0.3",
+    "now": 0.42,
+    "threshold": 0.3,
+    "distance": 0.12,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI vs 2yr falls below 0",
+    "now": 34.94,
+    "threshold": 0,
+    "distance": 34.94,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI 12m falls below 25",
+    "now": 61.12,
+    "threshold": 25,
+    "distance": 36.12,
+    "then": "ENERGY_GRIND no longer qualifies"
+   }
+  ],
+  "runner_up": {
+   "regime": "POLICY_TIGHTENING",
+   "score": 51.1,
+   "behind_by": 14.1
+  }
+ },
+ "screener": {
+  "n_candidates": 377,
+  "top": [
+   {
+    "ticker": "TALO",
+    "industry": "Oil & gas production",
+    "trade_score": 67,
+    "atr14_pct": 3.49,
+    "mcap_B": 2.35,
+    "breakout": false,
+    "days_on_list": 56,
+    "profitability": "marginal",
+    "pos_vs_high": 0.0,
+    "surge": 68,
+    "dollar_vol_M": 56.8,
+    "stop_pct_2_5atr": 8.73
+   },
+   {
+    "ticker": "PAGS",
+    "industry": "Miscellaneous commercial services",
+    "trade_score": 66,
+    "atr14_pct": 4.7,
+    "mcap_B": 2.44,
+    "breakout": true,
+    "days_on_list": 6,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 83,
+    "dollar_vol_M": 46.8,
+    "stop_pct_2_5atr": 11.75
+   },
+   {
+    "ticker": "MDT",
+    "industry": "Medical specialties",
+    "trade_score": 63,
+    "atr14_pct": 2.67,
+    "mcap_B": 101.47,
+    "breakout": false,
+    "days_on_list": 6,
+    "profitability": "profitable",
+    "pos_vs_high": -7.2,
+    "surge": 414,
+    "dollar_vol_M": 3105.0,
+    "stop_pct_2_5atr": 6.67
+   },
+   {
+    "ticker": "PBR",
+    "industry": "Integrated oil",
+    "trade_score": 62,
+    "atr14_pct": 3.27,
+    "mcap_B": 103.1,
+    "breakout": false,
+    "days_on_list": 50,
+    "profitability": "profitable",
+    "pos_vs_high": -1.2,
+    "surge": 36,
+    "dollar_vol_M": 572.7,
+    "stop_pct_2_5atr": 8.18
+   },
+   {
+    "ticker": "OXY",
+    "industry": "Integrated oil",
+    "trade_score": 61,
+    "atr14_pct": 2.53,
+    "mcap_B": 51.72,
+    "breakout": false,
+    "days_on_list": 61,
+    "profitability": "profitable",
+    "pos_vs_high": -2.8,
+    "surge": 11,
+    "dollar_vol_M": 530.3,
+    "stop_pct_2_5atr": 6.32
+   },
+   {
+    "ticker": "RXO",
+    "industry": "Packaged software",
+    "trade_score": 61,
+    "atr14_pct": 4.06,
+    "mcap_B": 4.26,
+    "breakout": false,
+    "days_on_list": 8,
+    "profitability": "marginal",
+    "pos_vs_high": -4.9,
+    "surge": 181,
+    "dollar_vol_M": 120.3,
+    "stop_pct_2_5atr": 10.15
+   },
+   {
+    "ticker": "APPN",
+    "industry": "Packaged software",
+    "trade_score": 60,
+    "atr14_pct": 5.73,
+    "mcap_B": 1.46,
+    "breakout": false,
+    "days_on_list": 6,
+    "profitability": "unknown",
+    "pos_vs_high": 0.0,
+    "surge": 0,
+    "dollar_vol_M": 33.2,
+    "stop_pct_2_5atr": 14.33
+   },
+   {
+    "ticker": "HAE",
+    "industry": "Medical specialties",
+    "trade_score": 60,
+    "atr14_pct": 3.65,
+    "mcap_B": 3.3,
+    "breakout": false,
+    "days_on_list": 73,
+    "profitability": "marginal",
+    "pos_vs_high": -0.4,
+    "surge": 8,
+    "dollar_vol_M": 80.8,
+    "stop_pct_2_5atr": 9.12
+   }
+  ],
+  "leaning": [],
+  "counts": {}
+ },
+ "smart_money": {
+  "quarter": "2026-06-30",
+  "accumulating": [],
+  "distributing": [],
+  "notable": [
+   {
+    "ticker": "GOOGL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 37764088383,
+    "sector": null
+   },
+   {
+    "ticker": "GE",
+    "manager": "TCI Fund (Hohn)",
+    "action": "TRIM",
+    "value_usd": 17725353519,
+    "sector": null
+   },
+   {
+    "ticker": "V",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 10462232091,
+    "sector": null
+   },
+   {
+    "ticker": "DVA",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "TRIM",
+    "value_usd": 6425268898,
+    "sector": null
+   },
+   {
+    "ticker": "SPGI",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 5735017808,
+    "sector": null
+   },
+   {
+    "ticker": "DAL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 5368591200,
+    "sector": null
+   },
+   {
+    "ticker": "IEP",
+    "manager": "Icahn Capital",
+    "action": "ADD",
+    "value_usd": 4458616003,
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 4389741007,
+    "sector": null
+   }
+  ],
+  "congress_recent": [
+   {
+    "ticker": "GOOG",
+    "member": "Michael Rulli",
+    "side": "sell",
+    "amount": "$50,001 - $100,000",
+    "filed": "2026-10-19",
+    "sector": null
+   },
+   {
+    "ticker": "DDOG",
+    "member": "Jonathan Jackson",
+    "side": "buy",
+    "amount": "$50,001 - $100,000",
+    "filed": "2026-10-19",
+    "sector": null
+   },
+   {
+    "ticker": "WMT",
+    "member": "Jonathan Jackson",
+    "side": "sell",
+    "amount": "$50,001 - $100,000",
+    "filed": "2026-10-19",
+    "sector": null
+   },
+   {
+    "ticker": "EL",
+    "member": "Jonathan Jackson",
+    "side": "buy",
+    "amount": "$50,001 - $100,000",
+    "filed": "2026-10-19",
+    "sector": null
+   },
+   {
+    "ticker": "VSAT",
+    "member": "Jonathan Jackson",
+    "side": "sell",
+    "amount": "$50,001 - $100,000",
+    "filed": "2026-10-19",
+    "sector": null
+   },
+   {
+    "ticker": "WSBC",
+    "member": "Michael Rulli",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-19",
+    "sector": null
+   },
+   {
+    "ticker": "GH",
+    "member": "Jonathan Jackson",
+    "side": "buy",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-10-19",
+    "sector": null
+   },
+   {
+    "ticker": "TYG",
+    "member": "Jonathan Jackson",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-19",
+    "sector": null
+   },
+   {
+    "ticker": "BAC",
+    "member": "Laurel Lee",
+    "side": "sell",
+    "amount": "$50,001 - $100,000",
+    "filed": "2026-10-16",
+    "sector": null
+   },
+   {
+    "ticker": "NOKBF",
+    "member": "Laurel Lee",
+    "side": "buy",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-10-16",
+    "sector": null
+   }
+  ],
+  "note": null,
+  "congress_status": {
+   "written": "2026-10-21",
+   "dropped_impossible_dates": 0,
+   "sources": {
+    "House Clerk PTR": {
+     "rows": 9763,
+     "last_30d": 89,
+     "newest_tx": "2026-10-16",
+     "newest_filed": "2026-10-19"
+    },
+    "OGE 278-T via Open Cabinet": {
+     "rows": 6448,
+     "last_30d": 0,
+     "newest_tx": "2026-06-24",
+     "newest_filed": "2026-08-12"
+    },
+    "Senate eFD": {
+     "rows": 998,
+     "last_30d": 0,
+     "newest_tx": "2026-09-04",
+     "newest_filed": "2026-10-01"
+    }
+   },
+   "quiet": [
+    "OGE 278-T via Open Cabinet",
+    "Senate eFD"
+   ]
+  }
+ },
+ "portfolio": {
+  "open": [
+   {
+    "ticker": "GOOG",
+    "entry": 325.86,
+    "stop": 305.67,
+    "last": null,
+    "R": null,
+    "managed": true,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "AAPL",
+    "entry": 321.97,
+    "stop": 301.26,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "OKTA",
+    "entry": 182.73,
+    "stop": 162.61,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   },
+   {
+    "ticker": "AMZN",
+    "entry": 251.84,
+    "stop": 244.99,
+    "last": null,
+    "R": null,
+    "managed": false,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   }
+  ],
+  "heat_R": 4.08,
+  "cap_R": 3.0,
+  "unsized": 0,
+  "note": null,
+  "over_cap": true
+ },
+ "news": {
+  "date": "2026-10-20",
+  "asof": "2026-10-21 09:49 UTC",
+  "headline": "France got worse and American yields fell \u2014 because the number that moved them was housing",
+  "standfirst": "The money went where the AI money is not: the Dow rose 1.02%, 529.85 points, and the Russell 2000 1.65%, while the Nasdaq fell 0.02% and the Philadelphia semiconductor index 0.29% with 19 of its 30 members lower. Meta fell 1.63%, a fifth straight losing session, and reports after Wednesday's close. The S&P managed +0.28% on earnings from Equifax and Hasbro and a rally in 3M; GM fell 7%. That is the second time in four sessions this pair has led. The bond market broke Monday's story: France deteriorated \u2014 the ten-year OAT at 4.93%, the spread over Germany 8.5bp wider at 150.8, 2,400-plus arrests, more curfews, a Moody's review on Friday \u2014 and US Treasuries rallied: thirty-year \u22126bp to 5.42%, ten-year \u22123bp to 5.12%, two-year +2bp to 4.79%. What moved them was American: September housing starts \u22125.2% to a 1.221m pace against 1.305m expected, with single-family permits at a three-and-a-half-year low and the thirty-year mortgage at 7.40%. Crude reversed off a five-month high \u2014 Brent $108.79, WTI's expiring November contract $101.79 \u2014 after Iran's president met Pakistan's army chief, while Hormuz crude flows recovered to about 10.3m barrels a day, 76% of pre-war. In the book OKTA rose 2.15%, closing 5.7% above its low, while GOOG fell 1.11% to its lowest close since 1 October and AAPL 1.00% on a Loop Capital downgrade. A net of -3.11. Heat 3.05R against 3.0R, unchanged for a twenty-ninth session. Apple has dropped back below +1R.",
+  "themes": [
+   {
+    "kicker": "What's next",
+    "right": "Meta tonight \u00b7 the foldable Friday \u00b7 then the Fed",
+    "title": "Meta tests the AI question before anything in this book does",
+    "items": [
+     {
+      "tone": "c-er",
+      "tag": "META",
+      "html": "<b>Meta Q3 after the close</b> \u2014 a fifth straight losing session into it; the question is whether full-year capex guidance holds, consensus EPS $5.94",
+      "when": "Wed \u00b7 2026-10-21",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-er",
+      "tag": "AAPL",
+      "html": "<b>iPhone Duo first shipments</b> and retail availability in the US and 70-plus countries, 28 more on the 30th \u2014 the test is whether store stock lasts the morning",
+      "when": "Fri \u00b7 2026-10-23",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-fomc",
+      "tag": "FRA",
+      "html": "<b>Moody's reviews France</b> at Aa3 negative \u2014 a one-notch cut takes it to A1, with the OAT spread already 150.8bp",
+      "when": "Fri \u00b7 2026-10-23",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-fomc",
+      "tag": "FOMC \u00b7 GOOG",
+      "html": "<b>Fed decision and Alphabet Q3 on the same afternoon</b> \u2014 a hold is expected, December is 94% priced for a hike, and Alphabet carries $195-205bn of capex into it",
+      "when": "Wed \u00b7 2026-10-28",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "AAPL",
+      "html": "<b>Apple Q4</b> \u2014 a question about mix and margin after the Loop downgrade, with the foldable selling and the Pro's lead times at zero in China",
+      "when": "Mon \u00b7 2026-11-02",
+      "kind": "calendar"
+     }
+    ],
+    "note": "<b>Tonight is Meta's, and it is the cleanest test of the AI question this week.</b> It reports after Wednesday's close having fallen five sessions in a row, and what is being asked is not whether revenue grew but whether <b>full-year capital-expenditure guidance holds</b>. That is the same question the Nasdaq has been answering and un-answering for four sessions, and it is the question Alphabet faces on the 28th with <b>$195-205bn</b> of its own. Nothing in this book reports tonight, which makes it a free read: a market that punishes Meta for spending will punish Alphabet for spending."
+   }
+  ],
+  "ondeck": "<b>Tonight is Meta's, and it is the cleanest test of the AI question this week.</b> It reports after Wednesday's close having fallen five sessions in a row, and what is being asked is not whether revenue grew but whether <b>full-year capital-expenditure guidance holds</b>. That is the same question the Nasdaq has been answering and un-answering for four sessions, and it is the question Alphabet faces on the 28th with <b>$195-205bn</b> of its own. Nothing in this book reports tonight, which makes it a free read: a market that punishes Meta for spending will punish Alphabet for spending.",
+  "note": null
+ },
+ "provenance": {
+  "macro": {
+   "asof": "2026-10-21 09:49 UTC",
+   "age_min": null
+  },
+  "gex": {
+   "asof": "2026-10-21 09:49 UTC",
+   "age_min": null
+  },
+  "stocks": {
+   "asof": "2026-10-21 10:08 UTC",
+   "age_min": null
+  },
+  "institutional_holdings": {
+   "asof": "2026-10-21 10:17 UTC",
+   "quarter": "2026-06-30"
+  },
+  "congress_trades": {
+   "asof": "2026-10-21 10:15 UTC",
+   "status": {
+    "written": "2026-10-21",
+    "dropped_impossible_dates": 0,
+    "sources": {
+     "House Clerk PTR": {
+      "rows": 9763,
+      "last_30d": 89,
+      "newest_tx": "2026-10-16",
+      "newest_filed": "2026-10-19"
+     },
+     "OGE 278-T via Open Cabinet": {
+      "rows": 6448,
+      "last_30d": 0,
+      "newest_tx": "2026-06-24",
+      "newest_filed": "2026-08-12"
+     },
+     "Senate eFD": {
+      "rows": 998,
+      "last_30d": 0,
+      "newest_tx": "2026-09-04",
+      "newest_filed": "2026-10-01"
+     }
+    },
+    "quiet": [
+     "OGE 278-T via Open Cabinet",
+     "Senate eFD"
+    ]
+   }
+  },
+  "wire": {
+   "asof": "2026-10-21 09:49 UTC"
+  }
+ },
+ "missing": [],
+ "changed": {
+  "first_pack": false,
+  "prev_date": "2026-10-20",
+  "changes": [
+   {
+    "kind": "screener",
+    "what": "new in the top setups",
+    "was": null,
+    "now": "PAGS, MDT",
+    "why": "names the engine ranked highest that were not there yesterday"
+   }
+  ]
+ }
+}
