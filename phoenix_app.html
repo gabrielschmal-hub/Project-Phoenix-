@@ -1083,6 +1083,37 @@
   .mme-graph .gh .st{margin-left:auto;font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;color:var(--amber);font-weight:700}
   .mme-graph .mm-strip div{padding:10px 6px} .mme-graph .mm-strip b{font-size:16px} .mme-graph .mm-strip i{font-size:10.5px;margin-bottom:3px}
   .mme-plot{min-height:400px;padding:0 4px}
+  .ic-wrap{margin-top:26px}
+  .icl{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden;margin-bottom:12px}
+  .icl-ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;background:var(--card2);border-bottom:1px solid var(--line)}
+  .icl-ctl select{font-family:var(--mono);font-size:13px;padding:5px 8px;border-radius:7px;border:1px solid var(--line2);background:var(--card);color:var(--ink)}
+  .icl-leg{display:flex;align-items:center;gap:4px;border:1px solid var(--line2);border-radius:8px;padding:2px 4px;background:var(--card)}
+  .icl-leg i{font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--inkFade);margin:0 2px}
+  .icl-leg b{font-family:var(--mono);font-size:14px;min-width:44px;text-align:center} .icl .icl-leg.p b{color:#d08a1c!important} .icl .icl-leg.c b{color:#4a86d0!important}
+  .icl-leg button,.icl-reset{border:0;background:transparent;color:var(--ink);cursor:pointer;font-size:12px;padding:3px 5px;border-radius:5px} .icl-leg button:hover{background:var(--card2)}
+  .icl-reset{margin-left:auto;border:1px solid var(--gold);color:var(--gold);font-family:var(--mono);font-size:11px;letter-spacing:.05em;padding:5px 10px}
+  .icl .mm-strip.icl-strip{display:grid;grid-template-columns:repeat(8,1fr)} .icl-strip b small{font-size:10px;color:var(--inkFade);font-weight:400}
+  .icl .mm-strip.icl-strip div{padding:10px 6px} .icl .mm-strip.icl-strip b{font-size:15px} .icl .mm-strip.icl-strip i{font-size:10px}
+  @media(max-width:900px){.icl .mm-strip.icl-strip{grid-template-columns:repeat(4,1fr)}}
+  .icl-warn{padding:8px 14px;color:var(--red);font-size:13px;border-bottom:1px solid var(--line)}
+  .icl-plot{min-height:360px;padding:0 6px}
+  .icl-day{display:flex;align-items:center;gap:12px;padding:4px 16px 2px} .icl-day span{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--inkFade)}
+  .icl-day{flex-wrap:wrap} .icl-day input{flex:1;min-width:140px;accent-color:#E8C34A} .icl-day b{font-family:var(--mono);font-size:12.5px;margin-left:auto;text-align:right}
+  .ic-sm .hd,.ic-sm .r{grid-template-columns:70px 96px minmax(200px,1.5fr) 96px 90px 80px 70px;min-width:700px;padding:7px 12px;font-size:12.5px}
+
+  .ic-hd{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px} .ic-rules{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--inkFade)}
+  .ic-tbl{overflow-x:auto;font-family:var(--mono);font-size:13px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+  .ic-tbl .hd,.ic-tbl .r{display:grid;grid-template-columns:70px 92px minmax(220px,1.6fr) 96px 90px 80px 80px 70px;gap:8px;padding:9px 12px;min-width:820px;align-items:center}
+  .ic-tbl .hd{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--inkFade);border-bottom:1px solid var(--line)}
+  .ic-tbl .r{border-bottom:1px solid var(--line2);cursor:pointer} .ic-tbl .r:hover,.ic-tbl .r.on{background:var(--card2)}
+  .ic-tbl .r .tk{font-weight:800;cursor:pointer} .ic-tbl .r .tk:hover{color:var(--gold)} .ic-tbl i{font-style:normal;color:var(--inkFade);font-size:11px}
+  .ic-tbl .ev{color:var(--green);font-weight:700} .ic-tbl .r.neg .ev{color:var(--red)} .ic-tbl .evi{color:var(--inkFade)}
+  .ic-tbl .pp{color:#d08a1c} .ic-tbl .cc{color:#4a86d0}
+  .ic-det{padding:10px 14px 14px;background:var(--card2);border-bottom:1px solid var(--line)}
+  .ic-facts{font-size:12.5px;line-height:1.6;margin-bottom:8px} .ic-sub{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--inkFade);margin:10px 0 4px}
+  .ic-lad .lr{display:grid;grid-template-columns:70px minmax(220px,1.6fr) 80px 120px 80px;gap:8px;padding:5px 4px;border-bottom:1px dashed var(--line2);font-size:12.5px;min-width:600px}
+  .ic-lad .lr.hd{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--inkFade)} .ic-lad .lr.cur{background:var(--card);font-weight:700;box-shadow:inset 3px 0 0 var(--gold)}
+  .ic-lad .lr.na{opacity:.55} .ic-lad .nt{grid-column:3/6;color:var(--inkFade)}
   .mcal{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:8px 10px 6px;margin:4px 0 14px}
   .mcal-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
   .mcal-f{display:flex;gap:4px} .mcal-f button{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid var(--line2);background:transparent;color:var(--inkFade);cursor:pointer}
@@ -10574,6 +10605,170 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(Math.abs(dist)<=0.15){ st="ON FLIP"; lv=r.flip; } else if(!st&&Math.abs(dist)<1){ st="NEAR FLIP"; lv=r.flip; }
     x.status=st; x.level=lv; return x;
   }
+  // ---- IRON CONDOR LAB: pick a name, see the condor through time, move the strikes yourself ----
+  var IC_LAB=null, IC_DATA=null, IC_CH=null, IC_RV={};
+  var ICC={green:"#2D8A55",red:"#B03030",gold:"#E8C34A",blue:"#3b6fb0",put:"#c07a12",call:"#3b6fb0"};
+  function icN(x){ return 0.5*(1+(function(z){ var t=1/(1+0.3275911*Math.abs(z)), y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-z*z); return z>=0?y:-y; })(x/Math.SQRT2)); }
+  function icBS(S,K,T,s,cp){ if(T<=0||s<=0) return cp==="C"?Math.max(0,S-K):Math.max(0,K-S);
+    var st=s*Math.sqrt(T), d1=(Math.log(S/K)+0.5*st*st)/st, d2=d1-st;
+    return cp==="C"?S*icN(d1)-K*icN(d2):K*icN(-d2)-S*icN(-d1); }
+  function icChain(tk,exp){
+    var c=IC_CH&&IC_CH.names&&IC_CH.names[tk]; if(!c) return null;
+    var out={S:c.spot,P:{},C:{},exps:{}};
+    (c.rows||[]).forEach(function(r){ out.exps[r[0]]=1; if(exp&&r[0]!==exp) return;
+      if(+r[4]>0&&+r[7]>0) out[r[1]][+r[2]]={iv:+r[4],bid:+r[6],ask:+r[7],oi:+r[3]}; });
+    return out;
+  }
+  function icMonthly(d){ var x=new Date(d+"T12:00:00Z"); return x.getUTCDay()===5&&x.getUTCDate()>=15&&x.getUTCDate()<=21; }
+  function icCalc(st){
+    var ch=icChain(st.tk,st.exp); if(!ch) return null;
+    var L=[[st.lp,"P",1],[st.sp,"P",-1],[st.sc,"C",-1],[st.lc,"C",1]].map(function(l){ var q=ch[l[1]][l[0]]; return q?{K:l[0],cp:l[1],sg:l[2],iv:q.iv,bid:q.bid,ask:q.ask}:null; });
+    if(L.some(function(x){ return !x; })) return {err:"a strike is not quoted at this expiry"};
+    var S=(typeof MME_LIVE!=="undefined"&&MME_LIVE[st.tk]&&MME_LIVE[st.tk].last)||ch.S;
+    var today=new Date(new Date().toISOString().slice(0,10)+"T12:00:00Z"), ex=new Date(st.exp+"T12:00:00Z");
+    var dte=Math.round((ex-today)/864e5);
+    var mid=function(l){ return (l.bid+l.ask)/2; }, spreads=L.reduce(function(a,l){ return a+(l.ask-l.bid); },0);
+    var creditMid=-L.reduce(function(a,l){ return a+l.sg*mid(l); },0), credit=creditMid-0.25*spreads;
+    var width=Math.max(st.sp-st.lp, st.lc-st.sc), maxLoss=(width-credit)*100;
+    var n=maxLoss>0?Math.max(1,Math.floor(((IC_DATA&&IC_DATA.risk_per_trade)||2000)/maxLoss)):1;
+    function value(Sx,Tleft,dv){ return L.reduce(function(a,l){ return a-l.sg*icBS(Sx,l.K,Tleft,l.iv+(dv||0),l.cp); },0); }  // cost to buy back
+    var rv=IC_RV[st.tk]||0.85*((L[1].iv+L[2].iv)/2), exitDay=Math.max(0,dte-((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.exit_dte)||19));
+    function ev(sig){ var h=exitDay/365, tot=0, wsum=0;
+      for(var i=-60;i<=60;i++){ var z=i/12, w=Math.exp(-z*z/2); var Sx=S*Math.exp(-0.5*sig*sig*h+sig*Math.sqrt(h)*z);
+        tot+=w*(credit-value(Sx,(dte-exitDay)/365)-0.25*spreads); wsum+=w; } return tot/wsum*100; }
+    var beLo=st.sp-credit, beHi=st.sc+credit, hE=dte/365;
+    var pop=icN(Math.log(beHi/S)/(rv*Math.sqrt(hE))+0.5*rv*Math.sqrt(hE))-icN(Math.log(beLo/S)/(rv*Math.sqrt(hE))+0.5*rv*Math.sqrt(hE));
+    var vega=(value(S,dte/365,0)-value(S,dte/365,0.01))*100;
+    var comm=8*(((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.commission_leg)||0.65))*n;   // 4 legs in, 4 out
+    return {S:S,L:L,dte:dte,exitDay:exitDay,credit:credit,creditMid:creditMid,spreads:spreads,width:width,maxLoss:maxLoss,n:n,comm:comm,
+            ev:ev(rv)*n-comm,evIV:ev((L[1].iv+L[2].iv)/2)*n-comm,beLo:beLo,beHi:beHi,pop:pop,vega:vega*n,rv:rv,value:value,
+            otm:(st.sp<S&&st.sc>S)};
+  }
+  function icDraw(){
+    var st=IC_LAB, host=document.getElementById("icLab"); if(!st||!host) return;
+    var ch=icChain(st.tk,st.exp), r=icCalc(st);
+    function k(v){ return (+v).toLocaleString(undefined,{maximumFractionDigits:2}); }
+    function m(v){ return (v<0?"\u2212$":"$")+Math.abs(Math.round(v)).toLocaleString(); }
+    var exps=Object.keys((icChain(st.tk)||{exps:{}}).exps).sort().filter(function(e){ return e>new Date().toISOString().slice(0,10); });
+    var names=Object.keys((IC_CH&&IC_CH.names)||{}).sort();
+    var pickTk={}; ((IC_DATA&&IC_DATA.picks)||[]).forEach(function(p){ pickTk[p.ticker]=p; });
+    var dd=function(e){ return new Date(e+"T12:00:00Z").toLocaleDateString(undefined,{day:"numeric",month:"short",year:"2-digit"}); };
+    function stepper(key,label,cls){ return '<div class="icl-leg '+cls+'"><i>'+label+'</i><button data-mv="'+key+'" data-d="-1">\u25C0</button><b>'+k(st[key])+'</b><button data-mv="'+key+'" data-d="1">\u25B6</button></div>'; }
+    host.innerHTML=
+      '<div class="icl-ctl">'+
+        '<select id="iclTk">'+names.map(function(t){ return '<option'+(t===st.tk?' selected':'')+' value="'+t+'">'+t+(pickTk[t]?' \u2605':'')+'</option>'; }).join("")+'</select>'+
+        '<select id="iclExp">'+exps.map(function(e){ var d=Math.round((new Date(e+"T12:00:00Z")-new Date())/864e5);
+          return '<option'+(e===st.exp?' selected':'')+' value="'+e+'">'+dd(e)+' \u00b7 '+d+'d'+(icMonthly(e)?' \u00b7 monthly':'')+'</option>'; }).join("")+'</select>'+
+        stepper("lp","buy put","p")+stepper("sp","sell put","p")+stepper("sc","sell call","c")+stepper("lc","buy call","c")+
+        '<div class="icl-leg all"><i>all strikes</i><button data-all="-1">\u25C0</button><button data-all="1">\u25B6</button></div>'+
+        (pickTk[st.tk]?'<button class="icl-reset">Phoenix pick</button>':'')+
+      '</div>'+
+      (r&&!r.err?
+        '<div class="mm-strip icl-strip"><div><i>credit</i><b>$'+r.credit.toFixed(2)+'</b></div><div><i>max profit</i><b style="color:'+"var(--green)"+'">'+m(r.credit*100*r.n)+'</b></div>'+
+        '<div><i>max loss \u00d7'+r.n+'</i><b style="color:'+"var(--red)"+'">'+m(-r.maxLoss*r.n)+'</b></div><div><i>EV (realised vol)</i><b style="color:'+(r.ev>0?"var(--green)":"var(--red)")+'">'+m(r.ev)+'</b></div>'+
+        '<div><i>EV at IV</i><b>'+m(r.evIV)+'</b></div><div><i>prob. of profit</i><b>'+Math.round(r.pop*100)+'%</b></div>'+
+        '<div><i>spreads \u00b7 fees</i><b>'+m(r.spreads*100*r.n)+' <small>'+Math.round(r.spreads/Math.max(r.creditMid,0.01)*100)+'% \u00b7 '+m(r.comm)+'</small></b></div>'+
+        '<div><i>vol +1 pt</i><b style="color:'+"var(--red)"+'">'+m(r.vega)+'</b></div></div>'+
+        (r.otm?'':'<div class="icl-warn">A short strike is in the money at today\u2019s price \u2014 Phoenix would not open this.</div>')+
+        '<div id="iclPlot" class="icl-plot"></div>'+
+        '<div class="icl-day"><span>Through time</span><input type="range" id="iclDay" min="0" max="'+r.dte+'" value="'+(st.day!=null?Math.min(st.day,r.dte):r.exitDay)+'"><b id="iclDayLbl"></b></div>'+
+        '<div class="gexh-key mme-key" id="iclKey"></div>'
+      :'<div class="ed-note">'+((r&&r.err)||"No chain on file for "+st.tk+".")+'</div>');
+    // wiring
+    document.getElementById("iclTk").onchange=function(){ icLoad(this.value); };
+    document.getElementById("iclExp").onchange=function(){ var c=icChain(st.tk,this.value);
+      function near(side,K){ var ks=Object.keys(c[side]).map(Number); return ks.length?ks.reduce(function(a,b){ return Math.abs(b-K)<Math.abs(a-K)?b:a; }):K; }
+      st.exp=this.value; st.lp=near("P",st.lp); st.sp=near("P",st.sp); st.sc=near("C",st.sc); st.lc=near("C",st.lc); st.day=null; icDraw(); };
+    host.querySelectorAll("[data-mv]").forEach(function(b){ b.onclick=function(){ icMove(this.dataset.mv,+this.dataset.d); }; });
+    host.querySelectorAll("[data-all]").forEach(function(b){ b.onclick=function(){ var d=+this.dataset.all; ["lp","sp","sc","lc"].forEach(function(x){ icMove(x,d,true); }); icDraw(); }; });
+    var rs=host.querySelector(".icl-reset"); if(rs) rs.onclick=function(){ icLoad(st.tk,true); };
+    if(!r||r.err) return;
+    var sl=document.getElementById("iclDay");
+    sl.oninput=function(){ st.day=+this.value; icPlot(r); };
+    icPlot(r);
+  }
+  function icMove(key,d,quiet){
+    var st=IC_LAB, c=icChain(st.tk,st.exp), side=(key==="lp"||key==="sp")?"P":"C";
+    var ks=Object.keys(c[side]).map(Number).sort(function(a,b){ return a-b; }), i=ks.indexOf(st[key]);
+    if(i<0) i=ks.reduce(function(bi,v,j){ return Math.abs(v-st[key])<Math.abs(ks[bi]-st[key])?j:bi; },0);
+    var nv=ks[Math.max(0,Math.min(ks.length-1,i+d))];
+    var t=Object.assign({},st); t[key]=nv;
+    if(t.lp<t.sp && t.sp<t.sc && t.sc<t.lc){ st[key]=nv; }         // the legs never cross
+    if(!quiet) icDraw();
+  }
+  function icPlot(r){
+    var el=document.getElementById("iclPlot"); if(!el) return;
+    var st=IC_LAB, day=(st.day!=null?Math.min(st.day,r.dte):r.exitDay), n=r.n;
+    var lo=Math.min(st.lp, r.S)*0.97, hi=Math.max(st.lc, r.S)*1.03, N=240, xs=[], yE=[], yD=[], y0=[];
+    for(var i=0;i<=N;i++){ var x=lo+(hi-lo)*i/N; xs.push(x);
+      yE.push((r.credit-r.value(x,0))*100*n); yD.push((r.credit-r.value(x,(r.dte-day)/365))*100*n); y0.push((r.credit-r.value(x,r.dte/365))*100*n); }
+    var css=getComputedStyle(document.documentElement), ink=css.getPropertyValue("--inkFade").trim()||"#888", line=css.getPropertyValue("--line2").trim()||"#ddd";
+    var pos=yE.map(function(v){ return v>0?v:0; }), neg=yE.map(function(v){ return v<0?v:0; });
+    var dDate=new Date(Date.now()+day*864e5).toLocaleDateString(undefined,{day:"numeric",month:"short"});
+    document.getElementById("iclDayLbl").textContent=dDate+" \u00b7 "+(r.dte-day)+" days to expiry"+(day===r.exitDay?" \u00b7 Phoenix exit":"");
+    var traces=[
+      {x:xs,y:pos,type:"scatter",mode:"lines",line:{width:0},fill:"tozeroy",fillcolor:"rgba(45,138,85,.22)",hoverinfo:"skip"},
+      {x:xs,y:neg,type:"scatter",mode:"lines",line:{width:0},fill:"tozeroy",fillcolor:"rgba(176,48,48,.20)",hoverinfo:"skip"},
+      {x:xs,y:yE,type:"scatter",mode:"lines",line:{color:ink,width:2.4},hovertemplate:"%{x:.2f}: %{y:$,.0f}<extra>at expiry</extra>"},
+      {x:xs,y:y0,type:"scatter",mode:"lines",line:{color:ICC.blue,width:1.4,dash:"dot"},hovertemplate:"%{x:.2f}: %{y:$,.0f}<extra>today</extra>"},
+      {x:xs,y:yD,type:"scatter",mode:"lines",line:{color:ICC.gold,width:2.6},hovertemplate:"%{x:.2f}: %{y:$,.0f}<extra>"+dDate+"</extra>"}];
+    function vl(x,c,w,d){ return {type:"line",x0:x,x1:x,yref:"paper",y0:0,y1:1,line:{color:c,width:w,dash:d}}; }
+    var shapes=[vl(r.S,ICC.blue,2.5,"solid"),vl(st.sp,ICC.put,1.5,"dot"),vl(st.sc,ICC.call,1.5,"dot"),vl(r.beLo,ink,1,"dash"),vl(r.beHi,ink,1,"dash"),
+      {type:"line",xref:"paper",x0:0,x1:1,y0:0,y1:0,line:{color:ink,width:1}}];
+    var mm=(typeof MME_MAP!=="undefined"&&MME_MAP)?MME_MAP:null, mr=null;
+    if(mm){ ["green","amber","red"].forEach(function(g){ ((mm.groups||{})[g]||[]).forEach(function(x){ if(x.ticker===st.tk) mr=x; }); }); if(!mr&&mm.etf_rows) mr=mm.etf_rows[st.tk]; }
+    if(mr){ if(mr.support) shapes.push(vl(mr.support,"#2D8A55",1,"dashdot")); if(mr.resist) shapes.push(vl(mr.resist,"#B03030",1,"dashdot")); }
+    var layout={height:360,margin:{l:58,r:14,t:10,b:36},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:12},
+      xaxis:{range:[lo,hi],gridcolor:line,zeroline:false,tickfont:{size:12}},yaxis:{gridcolor:line,zeroline:false,tickprefix:"$",tickfont:{size:11}},showlegend:false,shapes:shapes};
+    if(typeof Plotly!=="undefined"){ if(el.data) Plotly.react(el,traces,layout,{displayModeBar:false,responsive:true}); else Plotly.newPlot(el,traces,layout,{displayModeBar:false,responsive:true}); }
+    function sw(c,d,w){ return '<i style="background:'+(d?'repeating-linear-gradient(90deg,'+c+' 0 4px,transparent 4px 7px)':c)+';height:'+(w||3)+'px"></i>'; }
+    document.getElementById("iclKey").innerHTML=
+      '<span class="lv">'+sw("var(--inkFade)")+'<em>At expiry</em></span><span class="lv">'+sw(ICC.gold)+'<em>On</em><b>'+dDate+'</b></span><span class="lv">'+sw(ICC.blue,1,2)+'<em>Today</em></span>'+
+      '<span class="lv">'+sw(ICC.blue,0,3)+'<em>Spot</em><b>'+(+r.S).toFixed(2)+'</b></span>'+
+      '<span class="lv">'+sw(ICC.put,1,2)+'<em>Short put</em><b>'+st.sp+'</b></span><span class="lv">'+sw(ICC.call,1,2)+'<em>Short call</em><b>'+st.sc+'</b></span>'+
+      '<span class="lv">'+sw("var(--inkFade)",1,1)+'<em>Breakevens</em><b>'+r.beLo.toFixed(2)+' / '+r.beHi.toFixed(2)+'</b></span>'+
+      (mr&&mr.support?'<span class="lv">'+sw("#2D8A55",1,1)+'<em>Put wall</em><b>'+mr.support+'</b></span>':'')+(mr&&mr.resist?'<span class="lv">'+sw("#B03030",1,1)+'<em>Call wall</em><b>'+mr.resist+'</b></span>':'');
+  }
+  function icLoad(tk,reset){
+    var p=((IC_DATA&&IC_DATA.picks)||[]).filter(function(x){ return x.ticker===tk; })[0];
+    if(p){ IC_LAB={tk:tk,exp:p.expiry,lp:p.legs.long_put,sp:p.legs.short_put,sc:p.legs.short_call,lc:p.legs.long_call,day:null}; }
+    else {                                                     // no pick: a sensible starting condor at the nearest monthly
+      var c=icChain(tk), exps=Object.keys((c||{exps:{}}).exps).sort().filter(function(e){ var d=(new Date(e+"T12:00:00Z")-new Date())/864e5; return d>=35&&d<=90&&icMonthly(e); });
+      var e=exps[0]||Object.keys((c||{exps:{}}).exps).sort().pop(); var q=icChain(tk,e); if(!q){ IC_LAB={tk:tk}; icDraw(); return; }
+      var S=q.S, pk=Object.keys(q.P).map(Number).sort(function(a,b){return a-b;}), ck=Object.keys(q.C).map(Number).sort(function(a,b){return a-b;});
+      function nr(ks,t){ return ks.reduce(function(a,b){ return Math.abs(b-t)<Math.abs(a-t)?b:a; }); }
+      var sp=nr(pk.filter(function(k){return k<S;}),S*0.93), sc=nr(ck.filter(function(k){return k>S;}),S*1.07);
+      IC_LAB={tk:tk,exp:e,sp:sp,sc:sc,lp:nr(pk.filter(function(k){return k<sp;}),sp-S*0.03),lc:nr(ck.filter(function(k){return k>sc;}),sc+S*0.03),day:null};
+    }
+    icDraw();
+    if(reset!==false){ var t=document.getElementById("icLab"); if(t&&reset) t.scrollIntoView({behavior:"smooth",block:"start"}); }
+  }
+  function mmeICFill(){
+    var host=document.getElementById("mmeIC"); if(!host) return;
+    Promise.all([getJSON("ic_screen").catch(function(){return null;}), MME_CHAINS?Promise.resolve(MME_CHAINS):getJSON("mme_chains").catch(function(){return null;}),
+                 getJSON("iv_em").catch(function(){return null;})]).then(function(res){
+      IC_DATA=res[0]||{picks:[]}; IC_CH=res[1]; if(res[1]) MME_CHAINS=res[1];
+      IC_RV={}; var iv=(res[2]&&res[2].tickers)||{}; Object.keys(iv).forEach(function(t){ if(iv[t].rv30_pct) IC_RV[t]=iv[t].rv30_pct/100; });
+      var P=IC_DATA.picks||[], R=IC_DATA.rules||{};
+      function m(v){ return v==null?"\u2014":(v<0?"\u2212$":"$")+Math.abs(Math.round(v)).toLocaleString(); }
+      function k(v){ return (+v).toLocaleString(undefined,{maximumFractionDigits:2}); }
+      host.innerHTML='<div class="ic-wrap"><div class="ic-hd"><span class="mme-sk">Iron condors <span>\u00b7 '+(IC_DATA.date||"")+'</span></span>'+
+        '<span class="ic-rules">monthlies '+(R.dte_min||35)+'\u2013'+(R.dte_max||90)+'d \u00b7 exit at '+(R.exit_dte||19)+' DTE \u00b7 shorts out of the money \u00b7 up to $'+(IC_DATA.risk_per_trade||2000).toLocaleString()+' max loss per trade</span></div>'+
+        '<div id="icLab" class="icl"></div>'+
+        (P.length?'<div class="ic-tbl ic-sm"><div class="hd"><span>Name</span><span>Expiry</span><span>Structure</span><span>Credit</span><span>Max loss</span><span>EV</span><span>Spreads</span></div>'+
+          P.map(function(p,i){ return '<div class="r'+(p.ev_total>0?'':' neg')+(IC_LAB&&IC_LAB.tk===p.ticker?' on':'')+'" data-ic="'+p.ticker+'"><span class="tk">'+(i===0&&p.ev_total>0?'\u2605 ':'')+p.ticker+'</span>'+
+            '<span>'+new Date(p.expiry+"T12:00:00Z").toLocaleDateString(undefined,{day:"numeric",month:"short"})+' <i>'+p.dte+'d</i></span>'+
+            '<span><span class="pp">'+k(p.legs.long_put)+'/'+k(p.legs.short_put)+'P</span> <span class="cc">'+k(p.legs.short_call)+'/'+k(p.legs.long_call)+'C</span></span>'+
+            '<span>$'+(+p.credit).toFixed(2)+' <i>\u00d7'+p.contracts+'</i></span><span>'+m(-p.max_loss_1*p.contracts)+'</span><span class="ev">'+m(p.ev_total)+'</span>'+
+            '<span>'+(p.spread_pct_credit!=null?Math.round(p.spread_pct_credit*100)+'%':'\u2014')+'</span></div>'; }).join("")+'</div>':
+          '<div class="ed-note">No condor passed the screen today'+(IC_DATA.skipped?' \u2014 '+Object.keys(IC_DATA.skipped).length+' names did not qualify':'')+'. You can still build one in the lab above.</div>')+
+        '<div class="ed-note" style="margin-top:8px">Credit is filled at mid less a quarter of the four spreads. EV assumes the stock moves at its 30-day realised vol until the exit date and the condor is closed there; EV at IV is the same at implied vol \u2014 the gap is the volatility premium the trade depends on. Spreads are what the four legs cost to cross, as a share of the credit; EV is after IBKR fees ($0.65 per contract per leg, in and out). Tap a row to load it above; move any strike with \u25C0 \u25B6.</div></div>';
+      host.querySelectorAll("[data-ic]").forEach(function(el){ el.onclick=function(){ icLoad(el.dataset.ic,true);
+        host.querySelectorAll("[data-ic]").forEach(function(x){ x.classList.toggle("on",x===el); }); }; });
+      if(!IC_CH){ document.getElementById("icLab").innerHTML='<div class="ed-note">The chain file is not on hand yet \u2014 the lab needs mme_chains.json.</div>'; return; }
+      icLoad(IC_LAB&&IC_LAB.tk?IC_LAB.tk:(P[0]?P[0].ticker:Object.keys(IC_CH.names||{})[0]),false);
+    }).catch(function(e){ host.innerHTML=""; });
+  }
   function mcbNamesFill(){
     var body=document.getElementById("mcNamesBody"), note=document.getElementById("mcNamesNote"); if(!body) return;
     var rdHost=document.getElementById("mcNamesRead"); if(rdHost) rdHost.innerHTML="";
@@ -10638,7 +10833,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '<div class="mme-maphd"><span class="mme-sk">The map <span id="mmeLiveNote"></span></span>'+
           '<input id="mmeQ" class="mme-q" placeholder="Search ticker\u2026" autocomplete="off" autocapitalize="characters" value="'+esc(MME_Q)+'"></div>'+
         '<div class="mme-map" id="mmeMap"></div>'+
-        '<div class="ed-note" style="margin-top:10px">Levels: '+esc(d.source||"\u2014")+' \u00b7 '+esc(d.date||"")+'. Spot refreshes every 5 minutes; walls and the flip come from the morning chain and change once a day.</div>';
+        '<div class="ed-note" style="margin-top:10px">Levels: '+esc(d.source||"\u2014")+' \u00b7 '+esc(d.date||"")+'. Spot refreshes every 5 minutes; walls and the flip come from the morning chain and change once a day.</div>'+
+        '<div id="mmeIC"></div>';
       note.textContent=(d.date||"")+" \u00b7 "+base.length+" names";
       function rows(){ return base.map(mmeRelive).sort(function(a,b){ return b.dist_flip_em-a.dist_flip_em; }); }
       function paintMap(){
@@ -10777,7 +10973,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       wireCal();
       var q=document.getElementById("mmeQ");
       if(q) q.oninput=function(){ MME_Q=this.value; paintMap(); };
-      paintMap(); paintTable(); paintGraph();
+      paintMap(); paintTable(); paintGraph(); mmeICFill();
       function tick(){ return mmeLive(base.map(function(r){ return r.ticker; })).then(function(){ paintMap(); paintGraph(); }); }
       tick();
       if(MME_TIMER) clearInterval(MME_TIMER);

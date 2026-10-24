@@ -8807,7 +8807,7 @@ GEX_UNIVERSE = {
     # briefing has to carry it first; then it goes here. The OCC Rules 1-3
     # below still confirm or reject each name with data; this list nominates.
     "seed": ["AAPL", "ALAB", "AMD", "AMZN", "ARM", "AVGO", "CRWD", "GOOG",
-             "HOOD", "IBIT", "IBM", "INTC", "LRCX", "META", "MP", "MRVL",
+             "HOOD", "IBIT", "IBM", "INTC", "LRCX", "META", "DELL", "MRVL",
              "MSFT", "MU", "NVDA", "ORCL", "PLTR", "QCOM", "SNDK", "SNOW",
              "SOFI", "TSLA", "SPCX",
              "SPY"],
@@ -10828,6 +10828,7 @@ def run_mme_map():
     except Exception as e:
         print(f"[mmemap] no chain file to compute from ({e})")
     use_upload = bool(rows) and up_meta and chains_date and str(up_meta.get("date")) > str(chains_date)
+    etf_rows = {}
     if computed and not use_upload:
         rows = {}
         for tk, c in computed.items():
@@ -10843,7 +10844,10 @@ def run_mme_map():
                       "rolloff_friday_B": c["rolloff_friday_B"], "rolloff_opex_B": c["rolloff_opex_B"],
                       "contracts": c["contracts"], "profile": c["profile"]})
             r["read"] = _mme_read(r)
-            rows[tk] = r
+            if tk in IC.get("extra", []) and tk not in names:
+                etf_rows[tk] = r                 # index ETFs: priced for the condor screen, kept off Elliott's map
+            else:
+                rows[tk] = r
         up_fresh = False                        # the computation is the source; say so below
         print(f"[mmemap] computed {len(rows)} names from the {chains_date} chains")
     if up_rows and not up_fresh:
@@ -10904,7 +10908,7 @@ def run_mme_map():
                 "red = below the flip. Status: AT WALL within 0.25 moves of a wall, NEARING within one, ON FLIP within 0.15, "
                 "NEAR FLIP within one.",
         "groups": groups, "standouts": stand,
-        "notes": _notes, "notes_meta": _notes_meta})
+        "notes": _notes, "notes_meta": _notes_meta, "etf_rows": etf_rows})
     print(f"[mmemap] {len(out)}/{len(names)} names ({n_up} from upload, {len(out)-n_up} from Phoenix) · green {len(groups['green'])} "
           f"amber {len(groups['amber'])} red {len(groups['red'])} · standouts {len(stand)} · missing {','.join(missing) or 'none'}")
     sb_heartbeat("mme_map", len(out) >= max(5, len(names) // 2),
@@ -10932,6 +10936,7 @@ def run_mme_chains(max_dte=180, band=0.35):
     except Exception:
         pass
     names = [t for t in dict.fromkeys(names) if t and t not in ("SPY", "QQQ", "IWM")]
+    names += [t for t in IC.get("extra", []) if t not in names]       # index ETFs for the condor screen
     today = datetime.now(timezone.utc).date()
     out, fails = {}, []
     t0 = time.time()
@@ -10977,6 +10982,246 @@ def run_mme_chains(max_dte=180, band=0.35):
           + (f" — {'; '.join(fails[:4])}" if fails else ""))
     sb_heartbeat("mme_chains", n_ok >= max(5, len(names) // 2), f"{n_ok}/{len(names)} names · {n_rows} contracts · failed {len(fails)}")
     return out
+
+
+# ============================================================
+# IRON CONDORS — Phoenix's screen for defined-risk range trades on the MME names (+ index ETFs).
+#
+# Rules (20 Oct 2026, Gabriel):
+#   expiries   monthly (third-Friday) only, 35-90 days out
+#   exit       around 16-22 days to expiry (modelled at IC["exit_dte"])
+#   strikes    both short strikes out of the money at entry, always
+#   sleeve     $1,000 for condors, IC["risk_per_trade"] per position
+#   winner     the highest expected value for the position sized to that budget
+#   compare    every expiry x short-put x short-call x wing width, and for the winner the same
+#              structure shifted up and down the strike grid
+#
+# The expected value is the honest part. Priced with the same implied vol the options carry, every
+# condor is worth roughly nothing minus the spread you pay: that is what a fair price means. The edge
+# a seller has is that implied vol usually runs above the vol the stock then delivers. So:
+#   - the price at entry is each leg's mid, less a quarter of the four bid-ask spreads (a fill you get)
+#   - the stock at the exit date is drawn from a lognormal at REALISED vol (30-day, from the vol grid)
+#   - the condor is revalued at the exit date with each leg's own implied vol (sticky strike)
+#   - the exit pays another quarter of the spreads
+#   EV = credit - E[value at exit] - exit friction, per share; x100 per contract.
+# It is a model with stated assumptions, not a promise: no early management, no vol crush or spike,
+# no drift. The EV under implied vol is shown next to it so the size of the assumed edge is visible.
+# ============================================================
+IC = {"dte_min": 35, "dte_max": 90, "exit_dte": 19, "sleeve": 2000, "risk_per_trade": 2000,
+      # spreads decide whether an edge survives the fill: a leg wider than this share of its own mid is
+      # untradeable, and a condor whose four spreads eat more than this share of the credit is skipped
+      "max_leg_spread": 0.35, "max_spread_of_credit": 0.45,
+      "commission_leg": 0.65,          # IBKR, per contract per leg, each way: a condor in and out is 8 x this
+      "slip": 0.25, "short_band_em": (0.5, 2.2), "max_short_cands": 12,
+      "width_pct": (0.02, 0.035, 0.05), "min_short_bid": 0.05, "min_short_oi": 50,
+      "extra": ["QQQ", "SPY", "IWM"], "gh_nodes": 48, "shift_steps": 3}
+
+
+def _ic_bs(S, K, T, sig, cp):
+    import math
+    if T <= 0 or sig <= 0:
+        return max(0.0, S - K) if cp == "C" else max(0.0, K - S)
+    st = sig * math.sqrt(T)
+    d1 = (math.log(S / K) + 0.5 * st * st) / st
+    d2 = d1 - st
+    N = lambda x: 0.5 * (1 + math.erf(x / math.sqrt(2)))
+    return S * N(d1) - K * N(d2) if cp == "C" else K * N(-d2) - S * N(-d1)
+
+
+def _ic_gh(n):
+    """Gauss-Hermite nodes/weights for E[f(Z)], Z ~ N(0,1)."""
+    import numpy as np
+    x, w = np.polynomial.hermite.hermgauss(n)
+    return [float(v) * 2 ** 0.5 for v in x], [float(v) / (np.pi ** 0.5) for v in w]
+
+
+def _ic_monthly(d):
+    return d.weekday() == 4 and 15 <= d.day <= 21
+
+
+def _ic_eval(S, legs, T_exit_left, h_years, sig_phys, nodes, slip):
+    """legs: [(K, cp, sign, iv, bid, ask)], sign +1 long, -1 short. Returns dict of per-share figures."""
+    import math
+    mid = lambda l: (l[4] + l[5]) / 2.0
+    credit_mid = -sum(l[2] * mid(l) for l in legs)
+    spreads = sum(max(0.0, l[5] - l[4]) for l in legs)
+    credit = credit_mid - slip * spreads
+    xs, ws = nodes
+    def exp_value(sig):
+        ev = 0.0
+        for z, w in zip(xs, ws):
+            St = S * math.exp(-0.5 * sig * sig * h_years + sig * math.sqrt(h_years) * z)
+            v = sum(-l[2] * _ic_bs(St, l[0], T_exit_left, l[3], l[1]) for l in legs)   # what it costs to buy back
+            ev += w * v
+        return ev
+    cost_phys = exp_value(sig_phys)
+    atm_iv = sum(l[3] for l in legs if l[2] < 0) / 2.0
+    cost_iv = exp_value(atm_iv)
+    exit_fric = slip * spreads
+    return {"credit": credit, "credit_mid": credit_mid, "ev": credit - cost_phys - exit_fric,
+            "ev_iv": credit - cost_iv - exit_fric, "spreads": spreads}
+
+
+def run_ic_screen():
+    import os, json, math
+    from datetime import datetime, timezone, timedelta
+    try:
+        ch = json.load(open(os.path.join(OUTPUTS_DIR, "mme_chains.json")))
+    except Exception as e:
+        print(f"[ic] no chain file ({e}) — skipped"); return None
+    try:
+        mm = json.load(open(os.path.join(OUTPUTS_DIR, "mme_map.json")))
+        mmrows = {r["ticker"]: r for g in (mm.get("groups") or {}).values() for r in g}
+        mmrows.update(mm.get("etf_rows") or {})
+    except Exception:
+        mmrows = {}
+    try:
+        ivem = json.load(open(os.path.join(OUTPUTS_DIR, "iv_em.json"))).get("tickers") or {}
+    except Exception:
+        ivem = {}
+    today = datetime.strptime(str(ch.get("close_of") or ch.get("date"))[:10], "%Y-%m-%d").date()
+    nodes = _ic_gh(IC["gh_nodes"])
+    picks, skipped = [], {}
+    for tk, c in (ch.get("names") or {}).items():
+        S = c.get("spot")
+        if not S:
+            continue
+        mr = mmrows.get(tk) or {}
+        # gate 1: positive gamma — spot at or above its flip (a pinned, range-bound tape)
+        if mr and (mr.get("regime") == "red" or (mr.get("dist_flip_em") or 0) < 0):
+            skipped[tk] = "below its flip (negative gamma)"; continue
+        iv_row = ivem.get(tk) or {}
+        rv = (iv_row.get("rv30_pct") or 0) / 100.0
+        # contracts by expiry
+        by = {}
+        for r in c.get("rows") or []:
+            try:
+                e = datetime.strptime(r[0], "%Y-%m-%d").date()
+            except Exception:
+                continue
+            dte = (e - today).days
+            if not (IC["dte_min"] <= dte <= IC["dte_max"]) or not _ic_monthly(e):
+                continue
+            K, cp, oi, iv, bid, ask = float(r[2]), r[1], r[3], float(r[4] or 0), float(r[6] or 0), float(r[7] or 0)
+            if iv <= 0 or ask <= 0:
+                continue
+            by.setdefault(e, {}).setdefault(cp, {})[K] = (iv, bid, ask, oi)
+        if not by:
+            skipped[tk] = "no monthly expiry 35-90 days out with quotes"; continue
+        earn = iv_row.get("next_earnings")
+        best_name, per_exp = None, []
+        for e, sides in sorted(by.items()):
+            dte = (e - today).days
+            exit_date = e - timedelta(days=IC["exit_dte"])
+            if earn and str(today) <= str(earn) <= str(exit_date):
+                per_exp.append({"expiry": str(e), "dte": dte, "skip": f"earnings {earn} before the exit date"}); continue
+            P, Cc = sides.get("P") or {}, sides.get("C") or {}
+            if not P or not Cc:
+                continue
+            atm = min(list(P.items()) + list(Cc.items()), key=lambda kv: abs(kv[0] - S))[1][0]
+            T, h = dte / 365.0, (dte - IC["exit_dte"]) / 365.0
+            sig_phys = rv if rv > 0 else 0.85 * atm               # no realised read: assume the usual premium
+            emT = S * atm * math.sqrt(T)
+            lo_b, hi_b = IC["short_band_em"]
+            def spread_out(ks, n):                  # cover the whole band, not just the strikes nearest spot
+                if len(ks) <= n: return ks
+                return sorted({ks[round(i * (len(ks) - 1) / (n - 1))] for i in range(n)})
+            sp_c = spread_out(sorted([k for k, v in P.items() if S - hi_b * emT <= k <= S - lo_b * emT and k < S
+                           and v[1] >= IC["min_short_bid"] and v[3] >= IC["min_short_oi"]]), IC["max_short_cands"])
+            sc_c = spread_out(sorted([k for k, v in Cc.items() if S + lo_b * emT <= k <= S + hi_b * emT and k > S
+                           and v[1] >= IC["min_short_bid"] and v[3] >= IC["min_short_oi"]]), IC["max_short_cands"])
+            kp, kc = sorted(P), sorted(Cc)
+            def wing(strikes, k, w, down):
+                tgt = k - w if down else k + w
+                cands = [x for x in strikes if (x < k if down else x > k)]
+                return min(cands, key=lambda x: abs(x - tgt)) if cands else None
+            best_e = None
+            for sp in sp_c:
+                for sc in sc_c:
+                    # wing widths: a few % of spot, plus 1-4 listed strikes — on QQQ or SPY even 2% wide is a
+                    # max loss above the per-trade budget, so the narrow listed widths are what fit $1,000
+                    step = min([b - a for a, b in zip(kp, kp[1:]) if b > a] or [S * 0.01])
+                    for wabs in sorted(set([S * x for x in IC["width_pct"]] + [step * m for m in (1, 2, 3, 4)])):
+                        lp, lc = wing(kp, sp, wabs, True), wing(kc, sc, wabs, False)
+                        if lp is None or lc is None:
+                            continue
+                        width = max(sp - lp, lc - sc)
+                        legs = [(lp, "P", +1) + P[lp][:3], (sp, "P", -1) + P[sp][:3],
+                                (sc, "C", -1) + Cc[sc][:3], (lc, "C", +1) + Cc[lc][:3]]
+                        if any((l[5] - l[4]) > IC["max_leg_spread"] * max((l[4] + l[5]) / 2, 0.01) for l in legs):
+                            continue                                    # a leg you cannot fill near its mid
+                        r = _ic_eval(S, legs, IC["exit_dte"] / 365.0, h, sig_phys, nodes, IC["slip"])
+                        if r["credit"] <= 0 or r["spreads"] > IC["max_spread_of_credit"] * max(r["credit_mid"], 0.01):
+                            continue                                    # the spreads would eat the trade
+                        # vega: what one vol point on every leg does to the position today (sticky strike)
+                        v0 = sum(-l[2] * _ic_bs(S, l[0], T, l[3], l[1]) for l in legs)
+                        v1 = sum(-l[2] * _ic_bs(S, l[0], T, l[3] + 0.01, l[1]) for l in legs)
+                        max_loss = (width - r["credit"]) * 100
+                        n = int(IC["risk_per_trade"] // max_loss) if max_loss > 0 else 0
+                        if n < 1:
+                            continue
+                        cand = {"ticker": tk, "expiry": str(e), "dte": dte, "exit_date": str(exit_date),
+                                "legs": {"long_put": lp, "short_put": sp, "short_call": sc, "long_call": lc},
+                                "width": round(width, 2), "credit": round(r["credit"], 2), "credit_mid": round(r["credit_mid"], 2),
+                                "max_loss_1": round(max_loss, 0), "contracts": n,
+                                "ev_1": round(r["ev"] * 100, 2), "ev_iv_1": round(r["ev_iv"] * 100, 2),
+                                "commission": round(8 * IC["commission_leg"] * n, 2),
+                                "ev_total": round(r["ev"] * 100 * n - 8 * IC["commission_leg"] * n, 2), "ev_per_risk": round(r["ev"] * 100 / max_loss, 4),
+                                "credit_to_width": round(r["credit"] / width, 3),
+                                "short_put_em": round((S - sp) / emT, 2), "short_call_em": round((sc - S) / emT, 2),
+                                "be_low": round(sp - r["credit"], 2), "be_high": round(sc + r["credit"], 2),
+                                "iv_atm": round(atm * 100, 1), "rv": round(sig_phys * 100, 1), "rv_src": "rv30" if rv > 0 else "0.85 x IV",
+                                "spread_cost_1": round(r["spreads"] * 100, 2), "spread_pct_credit": round(r["spreads"] / max(r["credit_mid"], 0.01), 3),
+                                "vega_1": round((v0 - v1) * 100, 2)}   # $ the short condor loses per +1 vol point
+                        if best_e is None or cand["ev_total"] > best_e["ev_total"]:
+                            best_e = cand
+            if best_e:
+                per_exp.append({k: best_e[k] for k in ("expiry", "dte", "legs", "credit", "contracts", "ev_total", "ev_per_risk", "max_loss_1")})
+                if best_name is None or best_e["ev_total"] > best_name["ev_total"]:
+                    best_name = dict(best_e, _ctx=(e, P, Cc, h, sig_phys, kp, kc))
+        if not best_name:
+            skipped.setdefault(tk, "no condor with positive credit inside the budget"); continue
+        # the ladder: the winning structure moved up and down the strike grid, same expiry, same widths
+        e, P, Cc, h, sig_phys, kp, kc = best_name.pop("_ctx")
+        L = best_name["legs"]
+        grid = sorted(set(kp) | set(kc))
+        def shift(k, n):
+            if k not in grid: return None
+            i = grid.index(k) + n
+            return grid[i] if 0 <= i < len(grid) else None
+        ladder = []
+        for n in range(-IC["shift_steps"], IC["shift_steps"] + 1):
+            lp, sp, sc, lc = (shift(L["long_put"], n), shift(L["short_put"], n), shift(L["short_call"], n), shift(L["long_call"], n))
+            row = {"shift": n, "legs": {"long_put": lp, "short_put": sp, "short_call": sc, "long_call": lc}}
+            if None in (lp, sp, sc, lc) or lp not in P or sp not in P or sc not in Cc or lc not in Cc:
+                row["note"] = "strike not listed"; ladder.append(row); continue
+            if sp >= S or sc <= S:
+                row["note"] = "a short strike would be in the money — not allowed"; ladder.append(row); continue
+            legs = [(lp, "P", +1) + P[lp][:3], (sp, "P", -1) + P[sp][:3], (sc, "C", -1) + Cc[sc][:3], (lc, "C", +1) + Cc[lc][:3]]
+            r = _ic_eval(S, legs, IC["exit_dte"] / 365.0, h, sig_phys, nodes, IC["slip"])
+            width = max(sp - lp, lc - sc); ml = (width - r["credit"]) * 100
+            ncon = int(IC["risk_per_trade"] // ml) if ml > 0 else 0
+            row.update({"credit": round(r["credit"], 2), "max_loss_1": round(ml, 0), "contracts": ncon,
+                        "ev_1": round(r["ev"] * 100, 2), "ev_total": round((r["ev"] * 100 - 8 * IC["commission_leg"]) * max(ncon, 0), 2)})
+            ladder.append(row)
+        best_name.update({"spot": S, "regime": mr.get("regime"), "flip": mr.get("flip"),
+                          "put_wall": mr.get("support"), "call_wall": mr.get("resist"),
+                          "next_earnings": earn, "by_expiry": per_exp, "ladder": ladder})
+        picks.append(best_name)
+    picks.sort(key=lambda p: -p["ev_total"])
+    positive = [p for p in picks if p["ev_total"] > 0]
+    write_json("ic_screen", {
+        "asof": _now(), "date": str(today), "rules": IC,
+        "method": "Credit at mid less 25% of the four spreads; stock at the exit date (expiry minus "
+                  f"{IC['exit_dte']} days) lognormal at 30-day realised vol; condor revalued at exit with each leg's "
+                  "own implied vol; exit pays another 25% of spreads. EV = credit - expected buy-back - exit cost. "
+                  "EV at IV is the same at implied vol: the gap between the two is the assumed volatility premium.",
+        "sleeve": IC["sleeve"], "risk_per_trade": IC["risk_per_trade"],
+        "picks": picks, "positive": len(positive), "skipped": skipped})
+    print(f"[ic] {len(picks)} names priced, {len(positive)} with positive EV, {len(skipped)} skipped"
+          + (f" · best {picks[0]['ticker']} {picks[0]['expiry']} EV ${picks[0]['ev_total']:.0f}" if picks else ""))
+    sb_heartbeat("ic_screen", bool(picks), f"{len(picks)} priced · {len(positive)} positive EV · {len(skipped)} skipped")
+    return picks
 
 
 def run_gex_stocks_cboe(tickers=None, limit=None):
@@ -11327,10 +11572,15 @@ def mme_flip_net(contracts, spot, scrape_date, lo_mult=0.8, hi_mult=1.2, n_pts=1
     for i in range(n):
         L = lo + i * step
         g = curve(L)
-        if prevG is not None and (prevG == 0 or (prevG < 0) != (g < 0)):
-            K_neg, g_neg = (prevL, prevG) if prevG < 0 else (L, g)
-            K_pos, g_pos = (L, g) if g > 0 else (prevL, prevG)
-            crossings.append(K_pos - (K_pos - K_neg) * g_pos / (g_pos - g_neg))
+        # A real sign change only. Far from every strike the curve underflows to exactly 0 on both
+        # grid points (the 0.6-1.4x stock sweep reaches there) and the old test divided 0 by 0.
+        if prevG is not None and ((prevG < 0 < g) or (prevG > 0 > g) or (g == 0 and prevG != 0)):
+            if g == 0:
+                crossings.append(L)
+            else:
+                K_neg, g_neg = (prevL, prevG) if prevG < 0 else (L, g)
+                K_pos, g_pos = (L, g) if g > 0 else (prevL, prevG)
+                crossings.append(K_pos - (K_pos - K_neg) * g_pos / (g_pos - g_neg))
             if not nearest:
                 break
         prevL, prevG = L, g
@@ -13873,6 +14123,7 @@ def run_full():
     step("iv_em",          run_iv_em,         optional=True)   # implied vol + expected move, two-tier
     step("mme_chains",     run_mme_chains,    optional=True)   # raw CBOE chains for the universe, one file, for the MME task
     step("mme_map",        run_mme_map,       optional=True)   # the dealer map: every name vs its walls and flip
+    step("ic_screen",      run_ic_screen,     optional=True)   # iron condors: every monthly 35-90d x strikes, ranked by EV
     step("financials_all", run_financials_all)
     step("detail_bundle",  run_detail_bundle)
 
@@ -13932,6 +14183,8 @@ def run_engine(name):
         run_mme_map()
     elif name == "mme_chains":
         run_mme_chains()
+    elif name == "ic_screen":
+        run_ic_screen()
     elif name == "dayscore":
         run_dayscore()
     elif name == "signals":
