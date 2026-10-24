@@ -1,0 +1,1195 @@
+{
+ "asof": "2026-10-24 15:13 UTC",
+ "date": "2026-10-24",
+ "rules": {
+  "dte_min": 35,
+  "dte_max": 90,
+  "exit_dte": 19,
+  "sleeve": 2000,
+  "risk_per_trade": 2000,
+  "max_leg_spread": 0.35,
+  "max_spread_of_credit": 0.45,
+  "commission_leg": 0.65,
+  "slip": 0.25,
+  "short_band_em": [
+   0.5,
+   2.2
+  ],
+  "max_short_cands": 12,
+  "width_pct": [
+   0.02,
+   0.035,
+   0.05
+  ],
+  "min_short_bid": 0.05,
+  "min_short_oi": 50,
+  "extra": [
+   "QQQ",
+   "SPY",
+   "IWM"
+  ],
+  "gh_nodes": 48,
+  "shift_steps": 3
+ },
+ "method": "Credit at mid less 25% of the four spreads; stock at the exit date (expiry minus 19 days) lognormal at 30-day realised vol; condor revalued at exit with each leg's own implied vol; exit pays another 25% of spreads. EV = credit - expected buy-back - exit cost. EV at IV is the same at implied vol: the gap between the two is the assumed volatility premium.",
+ "sleeve": 2000,
+ "risk_per_trade": 2000,
+ "picks": [
+  {
+   "ticker": "TSLA",
+   "expiry": "2027-01-15",
+   "dte": 83,
+   "exit_date": "2026-12-27",
+   "legs": {
+    "long_put": 280.0,
+    "short_put": 300.0,
+    "short_call": 420.0,
+    "long_call": 440.0
+   },
+   "width": 20.0,
+   "credit": 5.88,
+   "credit_mid": 6.07,
+   "max_loss_1": 1412.0,
+   "contracts": 1,
+   "ev_1": 81.26,
+   "ev_iv_1": -64.62,
+   "commission": 5.2,
+   "ev_total": 76.06,
+   "ev_per_risk": 0.0575,
+   "credit_to_width": 0.294,
+   "short_put_em": 1.04,
+   "short_call_em": 0.68,
+   "be_low": 294.12,
+   "be_high": 425.88,
+   "iv_atm": 39.2,
+   "rv": 32.5,
+   "rv_src": "rv30",
+   "spread_cost_1": 78.0,
+   "spread_pct_credit": 0.129,
+   "vega_1": -20.29,
+   "spot": 372.45,
+   "regime": "amber",
+   "flip": 367.86,
+   "put_wall": 370.0,
+   "call_wall": 375.0,
+   "next_earnings": "2026-10-21",
+   "by_expiry": [
+    {
+     "expiry": "2026-12-18",
+     "dte": 55,
+     "legs": {
+      "long_put": 285.0,
+      "short_put": 305.0,
+      "short_call": 415.0,
+      "long_call": 435.0
+     },
+     "credit": 5.01,
+     "contracts": 1,
+     "ev_total": 72.01,
+     "ev_per_risk": 0.0515,
+     "max_loss_1": 1499.0
+    },
+    {
+     "expiry": "2027-01-15",
+     "dte": 83,
+     "legs": {
+      "long_put": 280.0,
+      "short_put": 300.0,
+      "short_call": 420.0,
+      "long_call": 440.0
+     },
+     "credit": 5.88,
+     "contracts": 1,
+     "ev_total": 76.06,
+     "ev_per_risk": 0.0575,
+     "max_loss_1": 1412.0
+    }
+   ],
+   "ladder": [
+    {
+     "shift": -3,
+     "legs": {
+      "long_put": 250.0,
+      "short_put": 270.0,
+      "short_call": 390.0,
+      "long_call": 410.0
+     },
+     "credit": 7.08,
+     "max_loss_1": 1292.0,
+     "contracts": 1,
+     "ev_1": -0.95,
+     "ev_total": -6.15
+    },
+    {
+     "shift": -2,
+     "legs": {
+      "long_put": 260.0,
+      "short_put": 280.0,
+      "short_call": 400.0,
+      "long_call": 420.0
+     },
+     "credit": 6.61,
+     "max_loss_1": 1339.0,
+     "contracts": 1,
+     "ev_1": 62.92,
+     "ev_total": 57.72
+    },
+    {
+     "shift": -1,
+     "legs": {
+      "long_put": 270.0,
+      "short_put": 290.0,
+      "short_call": 410.0,
+      "long_call": 430.0
+     },
+     "credit": 6.11,
+     "max_loss_1": 1390.0,
+     "contracts": 1,
+     "ev_1": 14.27,
+     "ev_total": 9.07
+    },
+    {
+     "shift": 0,
+     "legs": {
+      "long_put": 280.0,
+      "short_put": 300.0,
+      "short_call": 420.0,
+      "long_call": 440.0
+     },
+     "credit": 5.88,
+     "max_loss_1": 1412.0,
+     "contracts": 1,
+     "ev_1": 81.26,
+     "ev_total": 76.06
+    },
+    {
+     "shift": 1,
+     "legs": {
+      "long_put": 290.0,
+      "short_put": 310.0,
+      "short_call": 430.0,
+      "long_call": 450.0
+     },
+     "credit": 4.95,
+     "max_loss_1": 1505.0,
+     "contracts": 1,
+     "ev_1": -52.34,
+     "ev_total": -57.54
+    },
+    {
+     "shift": 2,
+     "legs": {
+      "long_put": 300.0,
+      "short_put": 320.0,
+      "short_call": 440.0,
+      "long_call": 460.0
+     },
+     "credit": 5.86,
+     "max_loss_1": 1414.0,
+     "contracts": 1,
+     "ev_1": 51.02,
+     "ev_total": 45.82
+    },
+    {
+     "shift": 3,
+     "legs": {
+      "long_put": 310.0,
+      "short_put": 330.0,
+      "short_call": 450.0,
+      "long_call": 470.0
+     },
+     "credit": 6.2,
+     "max_loss_1": 1380.0,
+     "contracts": 1,
+     "ev_1": 12.2,
+     "ev_total": 7.0
+    }
+   ]
+  },
+  {
+   "ticker": "META",
+   "expiry": "2027-01-15",
+   "dte": 83,
+   "exit_date": "2026-12-27",
+   "legs": {
+    "long_put": 510.0,
+    "short_put": 540.0,
+    "short_call": 710.0,
+    "long_call": 740.0
+   },
+   "width": 30.0,
+   "credit": 10.32,
+   "credit_mid": 10.85,
+   "max_loss_1": 1968.0,
+   "contracts": 1,
+   "ev_1": 69.02,
+   "ev_iv_1": -123.83,
+   "commission": 5.2,
+   "ev_total": 63.82,
+   "ev_per_risk": 0.0351,
+   "credit_to_width": 0.344,
+   "short_put_em": 0.9,
+   "short_call_em": 0.63,
+   "be_low": 529.67,
+   "be_high": 720.33,
+   "iv_atm": 36.4,
+   "rv": 31.0,
+   "rv_src": "0.85 x IV",
+   "spread_cost_1": 210.0,
+   "spread_pct_credit": 0.194,
+   "vega_1": -34.28,
+   "spot": 640.1,
+   "regime": "green",
+   "flip": 588.61,
+   "put_wall": 635.0,
+   "call_wall": 650.0,
+   "next_earnings": null,
+   "by_expiry": [
+    {
+     "expiry": "2026-12-18",
+     "dte": 55,
+     "legs": {
+      "long_put": 525.0,
+      "short_put": 555.0,
+      "short_call": 690.0,
+      "long_call": 720.0
+     },
+     "credit": 10.46,
+     "contracts": 1,
+     "ev_total": 45.18,
+     "ev_per_risk": 0.0258,
+     "max_loss_1": 1954.0
+    },
+    {
+     "expiry": "2027-01-15",
+     "dte": 83,
+     "legs": {
+      "long_put": 510.0,
+      "short_put": 540.0,
+      "short_call": 710.0,
+      "long_call": 740.0
+     },
+     "credit": 10.32,
+     "contracts": 1,
+     "ev_total": 63.82,
+     "ev_per_risk": 0.0351,
+     "max_loss_1": 1968.0
+    }
+   ],
+   "ladder": [
+    {
+     "shift": -3,
+     "legs": {
+      "long_put": 480.0,
+      "short_put": 510.0,
+      "short_call": 680.0,
+      "long_call": 710.0
+     },
+     "credit": 11.34,
+     "max_loss_1": 1866.0,
+     "contracts": 1,
+     "ev_1": 90.89,
+     "ev_total": 85.69
+    },
+    {
+     "shift": -2,
+     "legs": {
+      "long_put": 490.0,
+      "short_put": 520.0,
+      "short_call": 690.0,
+      "long_call": 720.0
+     },
+     "credit": 10.82,
+     "max_loss_1": 1918.0,
+     "contracts": 1,
+     "ev_1": 78.79,
+     "ev_total": 73.59
+    },
+    {
+     "shift": -1,
+     "legs": {
+      "long_put": 500.0,
+      "short_put": 530.0,
+      "short_call": 700.0,
+      "long_call": 730.0
+     },
+     "credit": 10.6,
+     "max_loss_1": 1940.0,
+     "contracts": 1,
+     "ev_1": 85.93,
+     "ev_total": 80.73
+    },
+    {
+     "shift": 0,
+     "legs": {
+      "long_put": 510.0,
+      "short_put": 540.0,
+      "short_call": 710.0,
+      "long_call": 740.0
+     },
+     "credit": 10.32,
+     "max_loss_1": 1968.0,
+     "contracts": 1,
+     "ev_1": 69.02,
+     "ev_total": 63.82
+    },
+    {
+     "shift": 1,
+     "legs": {
+      "long_put": 520.0,
+      "short_put": 550.0,
+      "short_call": 720.0,
+      "long_call": 750.0
+     },
+     "credit": 10.29,
+     "max_loss_1": 1971.0,
+     "contracts": 1,
+     "ev_1": 66.35,
+     "ev_total": 61.15
+    },
+    {
+     "shift": 2,
+     "legs": {
+      "long_put": 530.0,
+      "short_put": 560.0,
+      "short_call": 730.0,
+      "long_call": 760.0
+     },
+     "credit": 10.11,
+     "max_loss_1": 1989.0,
+     "contracts": 1,
+     "ev_1": 25.38,
+     "ev_total": 20.18
+    },
+    {
+     "shift": 3,
+     "legs": {
+      "long_put": 540.0,
+      "short_put": 570.0,
+      "short_call": 740.0,
+      "long_call": 770.0
+     },
+     "credit": 10.22,
+     "max_loss_1": 1977.0,
+     "contracts": 1,
+     "ev_1": 9.65,
+     "ev_total": 4.45
+    }
+   ]
+  },
+  {
+   "ticker": "IBIT",
+   "expiry": "2026-12-18",
+   "dte": 55,
+   "exit_date": "2026-11-29",
+   "legs": {
+    "long_put": 30.0,
+    "short_put": 34.0,
+    "short_call": 50.0,
+    "long_call": 54.0
+   },
+   "width": 4.0,
+   "credit": 0.85,
+   "credit_mid": 0.86,
+   "max_loss_1": 315.0,
+   "contracts": 6,
+   "ev_1": 14.03,
+   "ev_iv_1": -10.34,
+   "commission": 31.2,
+   "ev_total": 52.97,
+   "ev_per_risk": 0.0445,
+   "credit_to_width": 0.212,
+   "short_put_em": 1.76,
+   "short_call_em": 0.6,
+   "be_low": 33.15,
+   "be_high": 50.85,
+   "iv_atm": 38.1,
+   "rv": 32.4,
+   "rv_src": "0.85 x IV",
+   "spread_cost_1": 7.0,
+   "spread_pct_credit": 0.081,
+   "vega_1": -2.87,
+   "spot": 45.91,
+   "regime": "green",
+   "flip": 44.15,
+   "put_wall": 45.0,
+   "call_wall": 47.0,
+   "next_earnings": null,
+   "by_expiry": [
+    {
+     "expiry": "2026-12-18",
+     "dte": 55,
+     "legs": {
+      "long_put": 30.0,
+      "short_put": 34.0,
+      "short_call": 50.0,
+      "long_call": 54.0
+     },
+     "credit": 0.85,
+     "contracts": 6,
+     "ev_total": 52.97,
+     "ev_per_risk": 0.0445,
+     "max_loss_1": 315.0
+    },
+    {
+     "expiry": "2027-01-15",
+     "dte": 83,
+     "legs": {
+      "long_put": 30.0,
+      "short_put": 34.0,
+      "short_call": 51.0,
+      "long_call": 55.0
+     },
+     "credit": 0.91,
+     "contracts": 6,
+     "ev_total": 26.69,
+     "ev_per_risk": 0.0312,
+     "max_loss_1": 309.0
+    }
+   ],
+   "ladder": [
+    {
+     "shift": -3,
+     "legs": {
+      "long_put": null,
+      "short_put": 31.0,
+      "short_call": 47.0,
+      "long_call": 51.0
+     },
+     "note": "strike not listed"
+    },
+    {
+     "shift": -2,
+     "legs": {
+      "long_put": null,
+      "short_put": 32.0,
+      "short_call": 48.0,
+      "long_call": 52.0
+     },
+     "note": "strike not listed"
+    },
+    {
+     "shift": -1,
+     "legs": {
+      "long_put": null,
+      "short_put": 33.0,
+      "short_call": 49.0,
+      "long_call": 53.0
+     },
+     "note": "strike not listed"
+    },
+    {
+     "shift": 0,
+     "legs": {
+      "long_put": 30.0,
+      "short_put": 34.0,
+      "short_call": 50.0,
+      "long_call": 54.0
+     },
+     "credit": 0.85,
+     "max_loss_1": 315.0,
+     "contracts": 6,
+     "ev_1": 14.03,
+     "ev_total": 52.97
+    },
+    {
+     "shift": 1,
+     "legs": {
+      "long_put": 31.0,
+      "short_put": 35.0,
+      "short_call": 51.0,
+      "long_call": 55.0
+     },
+     "credit": 0.73,
+     "max_loss_1": 327.0,
+     "contracts": 6,
+     "ev_1": 12.92,
+     "ev_total": 46.33
+    },
+    {
+     "shift": 2,
+     "legs": {
+      "long_put": 32.0,
+      "short_put": 36.0,
+      "short_call": 52.0,
+      "long_call": 56.0
+     },
+     "credit": 0.64,
+     "max_loss_1": 336.0,
+     "contracts": 5,
+     "ev_1": 11.81,
+     "ev_total": 33.07
+    },
+    {
+     "shift": 3,
+     "legs": {
+      "long_put": 33.0,
+      "short_put": 37.0,
+      "short_call": 53.0,
+      "long_call": 57.0
+     },
+     "credit": 0.58,
+     "max_loss_1": 342.0,
+     "contracts": 5,
+     "ev_1": 10.23,
+     "ev_total": 25.16
+    }
+   ]
+  },
+  {
+   "ticker": "SNOW",
+   "expiry": "2026-12-18",
+   "dte": 55,
+   "exit_date": "2026-11-29",
+   "legs": {
+    "long_put": 240.0,
+    "short_put": 270.0,
+    "short_call": 370.0,
+    "long_call": 400.0
+   },
+   "width": 30.0,
+   "credit": 11.04,
+   "credit_mid": 12.08,
+   "max_loss_1": 1896.0,
+   "contracts": 1,
+   "ev_1": 14.27,
+   "ev_iv_1": -220.48,
+   "commission": 5.2,
+   "ev_total": 9.07,
+   "ev_per_risk": 0.0075,
+   "credit_to_width": 0.368,
+   "short_put_em": 0.69,
+   "short_call_em": 0.56,
+   "be_low": 258.96,
+   "be_high": 381.04,
+   "iv_atm": 63.5,
+   "rv": 47.8,
+   "rv_src": "rv30",
+   "spread_cost_1": 415.0,
+   "spread_pct_credit": 0.344,
+   "vega_1": -20.12,
+   "spot": 325.43,
+   "regime": "green",
+   "flip": 253.85,
+   "put_wall": 320.0,
+   "call_wall": 330.0,
+   "next_earnings": "2026-12-02",
+   "by_expiry": [
+    {
+     "expiry": "2026-12-18",
+     "dte": 55,
+     "legs": {
+      "long_put": 240.0,
+      "short_put": 270.0,
+      "short_call": 370.0,
+      "long_call": 400.0
+     },
+     "credit": 11.04,
+     "contracts": 1,
+     "ev_total": 9.07,
+     "ev_per_risk": 0.0075,
+     "max_loss_1": 1896.0
+    },
+    {
+     "expiry": "2027-01-15",
+     "dte": 83,
+     "skip": "earnings 2026-12-02 before the exit date"
+    }
+   ],
+   "ladder": [
+    {
+     "shift": -3,
+     "legs": {
+      "long_put": null,
+      "short_put": 240.0,
+      "short_call": 340.0,
+      "long_call": 370.0
+     },
+     "note": "strike not listed"
+    },
+    {
+     "shift": -2,
+     "legs": {
+      "long_put": 220.0,
+      "short_put": 250.0,
+      "short_call": 350.0,
+      "long_call": 380.0
+     },
+     "credit": 11.61,
+     "max_loss_1": 1839.0,
+     "contracts": 1,
+     "ev_1": 22.63,
+     "ev_total": 17.43
+    },
+    {
+     "shift": -1,
+     "legs": {
+      "long_put": 230.0,
+      "short_put": 260.0,
+      "short_call": 360.0,
+      "long_call": 390.0
+     },
+     "credit": 10.94,
+     "max_loss_1": 1906.0,
+     "contracts": 1,
+     "ev_1": -53.3,
+     "ev_total": -58.5
+    },
+    {
+     "shift": 0,
+     "legs": {
+      "long_put": 240.0,
+      "short_put": 270.0,
+      "short_call": 370.0,
+      "long_call": 400.0
+     },
+     "credit": 11.04,
+     "max_loss_1": 1896.0,
+     "contracts": 1,
+     "ev_1": 14.27,
+     "ev_total": 9.07
+    },
+    {
+     "shift": 1,
+     "legs": {
+      "long_put": 250.0,
+      "short_put": 280.0,
+      "short_call": 380.0,
+      "long_call": 410.0
+     },
+     "credit": 10.93,
+     "max_loss_1": 1907.0,
+     "contracts": 1,
+     "ev_1": -42.98,
+     "ev_total": -48.18
+    },
+    {
+     "shift": 2,
+     "legs": {
+      "long_put": 260.0,
+      "short_put": 290.0,
+      "short_call": 390.0,
+      "long_call": 420.0
+     },
+     "credit": 10.84,
+     "max_loss_1": 1916.0,
+     "contracts": 1,
+     "ev_1": -213.43,
+     "ev_total": -218.63
+    },
+    {
+     "shift": 3,
+     "legs": {
+      "long_put": 270.0,
+      "short_put": 300.0,
+      "short_call": 400.0,
+      "long_call": 430.0
+     },
+     "credit": 12.04,
+     "max_loss_1": 1796.0,
+     "contracts": 1,
+     "ev_1": -106.79,
+     "ev_total": -111.99
+    }
+   ]
+  },
+  {
+   "ticker": "IBM",
+   "expiry": "2026-12-18",
+   "dte": 55,
+   "exit_date": "2026-11-29",
+   "legs": {
+    "long_put": 195.0,
+    "short_put": 215.0,
+    "short_call": 300.0,
+    "long_call": 320.0
+   },
+   "width": 20.0,
+   "credit": 2.34,
+   "credit_mid": 2.62,
+   "max_loss_1": 1766.0,
+   "contracts": 1,
+   "ev_1": 7.42,
+   "ev_iv_1": -69.7,
+   "commission": 5.2,
+   "ev_total": 2.22,
+   "ev_per_risk": 0.0042,
+   "credit_to_width": 0.117,
+   "short_put_em": 1.12,
+   "short_call_em": 1.38,
+   "be_low": 212.66,
+   "be_high": 302.34,
+   "iv_atm": 34.7,
+   "rv": 29.9,
+   "rv_src": "rv30",
+   "spread_cost_1": 113.0,
+   "spread_pct_credit": 0.43,
+   "vega_1": -19.36,
+   "spot": 253.07,
+   "regime": "green",
+   "flip": 230.55,
+   "put_wall": 250.0,
+   "call_wall": 255.0,
+   "next_earnings": "2026-10-21",
+   "by_expiry": [
+    {
+     "expiry": "2026-12-18",
+     "dte": 55,
+     "legs": {
+      "long_put": 195.0,
+      "short_put": 215.0,
+      "short_call": 300.0,
+      "long_call": 320.0
+     },
+     "credit": 2.34,
+     "contracts": 1,
+     "ev_total": 2.22,
+     "ev_per_risk": 0.0042,
+     "max_loss_1": 1766.0
+    },
+    {
+     "expiry": "2027-01-15",
+     "dte": 83,
+     "legs": {
+      "long_put": 205.0,
+      "short_put": 225.0,
+      "short_call": 320.0,
+      "long_call": 340.0
+     },
+     "credit": 3.8,
+     "contracts": 1,
+     "ev_total": -32.89,
+     "ev_per_risk": -0.0171,
+     "max_loss_1": 1620.0
+    }
+   ],
+   "ladder": [
+    {
+     "shift": -3,
+     "legs": {
+      "long_put": 180.0,
+      "short_put": 200.0,
+      "short_call": 285.0,
+      "long_call": 305.0
+     },
+     "credit": 1.97,
+     "max_loss_1": 1803.0,
+     "contracts": 1,
+     "ev_1": -80.86,
+     "ev_total": -86.06
+    },
+    {
+     "shift": -2,
+     "legs": {
+      "long_put": 185.0,
+      "short_put": 205.0,
+      "short_call": 290.0,
+      "long_call": 310.0
+     },
+     "credit": 2.05,
+     "max_loss_1": 1795.0,
+     "contracts": 1,
+     "ev_1": -47.29,
+     "ev_total": -52.49
+    },
+    {
+     "shift": -1,
+     "legs": {
+      "long_put": 190.0,
+      "short_put": 210.0,
+      "short_call": 295.0,
+      "long_call": 315.0
+     },
+     "credit": 2.02,
+     "max_loss_1": 1798.0,
+     "contracts": 1,
+     "ev_1": -51.07,
+     "ev_total": -56.27
+    },
+    {
+     "shift": 0,
+     "legs": {
+      "long_put": 195.0,
+      "short_put": 215.0,
+      "short_call": 300.0,
+      "long_call": 320.0
+     },
+     "credit": 2.34,
+     "max_loss_1": 1766.0,
+     "contracts": 1,
+     "ev_1": 7.42,
+     "ev_total": 2.22
+    },
+    {
+     "shift": 1,
+     "legs": {
+      "long_put": 200.0,
+      "short_put": 220.0,
+      "short_call": 305.0,
+      "long_call": 325.0
+     },
+     "credit": 1.87,
+     "max_loss_1": 1813.0,
+     "contracts": 1,
+     "ev_1": -106.35,
+     "ev_total": -111.55
+    },
+    {
+     "shift": 2,
+     "legs": {
+      "long_put": 205.0,
+      "short_put": 225.0,
+      "short_call": 310.0,
+      "long_call": 330.0
+     },
+     "credit": 2.57,
+     "max_loss_1": 1743.0,
+     "contracts": 1,
+     "ev_1": -51.08,
+     "ev_total": -56.28
+    },
+    {
+     "shift": 3,
+     "legs": {
+      "long_put": 210.0,
+      "short_put": 230.0,
+      "short_call": 315.0,
+      "long_call": 335.0
+     },
+     "credit": 2.66,
+     "max_loss_1": 1734.0,
+     "contracts": 1,
+     "ev_1": -129.06,
+     "ev_total": -134.26
+    }
+   ]
+  },
+  {
+   "ticker": "CRWD",
+   "expiry": "2026-12-18",
+   "dte": 55,
+   "exit_date": "2026-11-29",
+   "legs": {
+    "long_put": 177.5,
+    "short_put": 190.0,
+    "short_call": 300.0,
+    "long_call": 310.0
+   },
+   "width": 12.5,
+   "credit": 3.2,
+   "credit_mid": 3.56,
+   "max_loss_1": 930.0,
+   "contracts": 2,
+   "ev_1": -71.11,
+   "ev_iv_1": -76.2,
+   "commission": 10.4,
+   "ev_total": -152.62,
+   "ev_per_risk": -0.0765,
+   "credit_to_width": 0.256,
+   "short_put_em": 1.06,
+   "short_call_em": 0.64,
+   "be_low": 186.8,
+   "be_high": 303.2,
+   "iv_atm": 64.4,
+   "rv": 64.9,
+   "rv_src": "rv30",
+   "spread_cost_1": 145.0,
+   "spread_pct_credit": 0.407,
+   "vega_1": -7.24,
+   "spot": 258.4,
+   "regime": "green",
+   "flip": 226.22,
+   "put_wall": 255.0,
+   "call_wall": 260.0,
+   "next_earnings": "2026-12-01",
+   "by_expiry": [
+    {
+     "expiry": "2026-12-18",
+     "dte": 55,
+     "legs": {
+      "long_put": 177.5,
+      "short_put": 190.0,
+      "short_call": 300.0,
+      "long_call": 310.0
+     },
+     "credit": 3.2,
+     "contracts": 2,
+     "ev_total": -152.62,
+     "ev_per_risk": -0.0765,
+     "max_loss_1": 930.0
+    },
+    {
+     "expiry": "2027-01-15",
+     "dte": 83,
+     "skip": "earnings 2026-12-01 before the exit date"
+    }
+   ],
+   "ladder": [
+    {
+     "shift": -3,
+     "legs": {
+      "long_put": 170.0,
+      "short_put": 182.5,
+      "short_call": 285.0,
+      "long_call": 287.5
+     },
+     "credit": 1.31,
+     "max_loss_1": 1119.0,
+     "contracts": 1,
+     "ev_1": -92.09,
+     "ev_total": -97.29
+    },
+    {
+     "shift": -2,
+     "legs": {
+      "long_put": 172.5,
+      "short_put": 185.0,
+      "short_call": 287.5,
+      "long_call": 290.0
+     },
+     "credit": 1.67,
+     "max_loss_1": 1083.0,
+     "contracts": 1,
+     "ev_1": -117.4,
+     "ev_total": -122.6
+    },
+    {
+     "shift": -1,
+     "legs": {
+      "long_put": 175.0,
+      "short_put": 187.5,
+      "short_call": 290.0,
+      "long_call": 300.0
+     },
+     "credit": 2.71,
+     "max_loss_1": 979.0,
+     "contracts": 2,
+     "ev_1": -162.31,
+     "ev_total": -335.01
+    },
+    {
+     "shift": 0,
+     "legs": {
+      "long_put": 177.5,
+      "short_put": 190.0,
+      "short_call": 300.0,
+      "long_call": 310.0
+     },
+     "credit": 3.2,
+     "max_loss_1": 930.0,
+     "contracts": 2,
+     "ev_1": -71.11,
+     "ev_total": -152.62
+    },
+    {
+     "shift": 1,
+     "legs": {
+      "long_put": 180.0,
+      "short_put": 192.5,
+      "short_call": 310.0,
+      "long_call": 320.0
+     },
+     "credit": 3.11,
+     "max_loss_1": 939.0,
+     "contracts": 2,
+     "ev_1": -92.98,
+     "ev_total": -196.35
+    },
+    {
+     "shift": 2,
+     "legs": {
+      "long_put": 182.5,
+      "short_put": 195.0,
+      "short_call": 320.0,
+      "long_call": 330.0
+     },
+     "credit": 2.02,
+     "max_loss_1": 1048.0,
+     "contracts": 1,
+     "ev_1": -149.12,
+     "ev_total": -154.32
+    },
+    {
+     "shift": 3,
+     "legs": {
+      "long_put": 185.0,
+      "short_put": 197.5,
+      "short_call": 330.0,
+      "long_call": 340.0
+     },
+     "credit": 2.8,
+     "max_loss_1": 970.0,
+     "contracts": 2,
+     "ev_1": -107.86,
+     "ev_total": -226.13
+    }
+   ]
+  },
+  {
+   "ticker": "LRCX",
+   "expiry": "2027-01-15",
+   "dte": 83,
+   "exit_date": "2026-12-27",
+   "legs": {
+    "long_put": 150.0,
+    "short_put": 170.0,
+    "short_call": 260.0,
+    "long_call": 280.0
+   },
+   "width": 20.0,
+   "credit": 5.98,
+   "credit_mid": 6.74,
+   "max_loss_1": 1402.0,
+   "contracts": 1,
+   "ev_1": -225.69,
+   "ev_iv_1": -146.74,
+   "commission": 5.2,
+   "ev_total": -230.89,
+   "ev_per_risk": -0.1609,
+   "credit_to_width": 0.299,
+   "short_put_em": 1.01,
+   "short_call_em": 0.52,
+   "be_low": 164.02,
+   "be_high": 265.98,
+   "iv_atm": 53.7,
+   "rv": 61.9,
+   "rv_src": "rv30",
+   "spread_cost_1": 303.0,
+   "spread_pct_credit": 0.45,
+   "vega_1": -14.72,
+   "spot": 229.37,
+   "regime": "green",
+   "flip": null,
+   "put_wall": 220.0,
+   "call_wall": 230.0,
+   "next_earnings": "2026-10-21",
+   "by_expiry": [
+    {
+     "expiry": "2027-01-15",
+     "dte": 83,
+     "legs": {
+      "long_put": 150.0,
+      "short_put": 170.0,
+      "short_call": 260.0,
+      "long_call": 280.0
+     },
+     "credit": 5.98,
+     "contracts": 1,
+     "ev_total": -230.89,
+     "ev_per_risk": -0.1609,
+     "max_loss_1": 1402.0
+    }
+   ],
+   "ladder": [
+    {
+     "shift": -3,
+     "legs": {
+      "long_put": null,
+      "short_put": 155.0,
+      "short_call": 230.0,
+      "long_call": 250.0
+     },
+     "note": "strike not listed"
+    },
+    {
+     "shift": -2,
+     "legs": {
+      "long_put": null,
+      "short_put": 160.0,
+      "short_call": 240.0,
+      "long_call": 260.0
+     },
+     "note": "strike not listed"
+    },
+    {
+     "shift": -1,
+     "legs": {
+      "long_put": null,
+      "short_put": 165.0,
+      "short_call": 250.0,
+      "long_call": 270.0
+     },
+     "note": "strike not listed"
+    },
+    {
+     "shift": 0,
+     "legs": {
+      "long_put": 150.0,
+      "short_put": 170.0,
+      "short_call": 260.0,
+      "long_call": 280.0
+     },
+     "credit": 5.98,
+     "max_loss_1": 1402.0,
+     "contracts": 1,
+     "ev_1": -225.69,
+     "ev_total": -230.89
+    },
+    {
+     "shift": 1,
+     "legs": {
+      "long_put": 155.0,
+      "short_put": 175.0,
+      "short_call": 270.0,
+      "long_call": 290.0
+     },
+     "credit": 5.56,
+     "max_loss_1": 1444.0,
+     "contracts": 1,
+     "ev_1": -243.2,
+     "ev_total": -248.4
+    },
+    {
+     "shift": 2,
+     "legs": {
+      "long_put": 160.0,
+      "short_put": 180.0,
+      "short_call": 280.0,
+      "long_call": 300.0
+     },
+     "credit": 4.05,
+     "max_loss_1": 1595.0,
+     "contracts": 1,
+     "ev_1": -385.88,
+     "ev_total": -391.08
+    },
+    {
+     "shift": 3,
+     "legs": {
+      "long_put": 165.0,
+      "short_put": 185.0,
+      "short_call": 290.0,
+      "long_call": null
+     },
+     "note": "strike not listed"
+    }
+   ]
+  }
+ ],
+ "positive": 5,
+ "skipped": {
+  "AAPL": "no condor with positive credit inside the budget",
+  "ALAB": "below its flip (negative gamma)",
+  "AMD": "below its flip (negative gamma)",
+  "AMZN": "no condor with positive credit inside the budget",
+  "ARM": "no condor with positive credit inside the budget",
+  "AVGO": "below its flip (negative gamma)",
+  "GOOG": "below its flip (negative gamma)",
+  "HOOD": "below its flip (negative gamma)",
+  "INTC": "below its flip (negative gamma)",
+  "DELL": "below its flip (negative gamma)",
+  "MRVL": "below its flip (negative gamma)",
+  "MSFT": "no condor with positive credit inside the budget",
+  "MU": "below its flip (negative gamma)",
+  "NVDA": "no condor with positive credit inside the budget",
+  "ORCL": "below its flip (negative gamma)",
+  "PLTR": "no condor with positive credit inside the budget",
+  "QCOM": "below its flip (negative gamma)",
+  "SNDK": "no condor with positive credit inside the budget",
+  "SOFI": "below its flip (negative gamma)",
+  "SPCX": "below its flip (negative gamma)",
+  "QQQ": "below its flip (negative gamma)",
+  "SPY": "below its flip (negative gamma)",
+  "IWM": "below its flip (negative gamma)"
+ }
+}

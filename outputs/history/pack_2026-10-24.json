@@ -1,0 +1,616 @@
+{
+ "schema": "phoenix-fact-pack/1",
+ "date": "2026-10-24",
+ "asof": "2026-10-24 15:24 UTC",
+ "market": {
+  "regime": "ENERGY_GRIND",
+  "regime_held_weeks": 3,
+  "spx": {
+   "last": 7623.68,
+   "chg_1d_pct": -0.52,
+   "vs_50d_pct": -0.99,
+   "vs_200d_pct": 4.56
+  },
+  "vix": 19.45,
+  "dxy": null,
+  "us10y": null,
+  "gold": null,
+  "wti": null,
+  "gex": {
+   "net_B": -70.59,
+   "regime": "negative",
+   "flip": null,
+   "dist_to_flip_pct": 1.06,
+   "call_wall": null,
+   "put_wall": null,
+   "spot": 7623.68
+  }
+ },
+ "macro": {
+  "spx": {
+   "last": 7623.68,
+   "d1_pct": -0.52,
+   "w1_pct": -0.47,
+   "m1_pct": -1.04
+  },
+  "ndx": {
+   "last": 25955.34,
+   "d1_pct": -0.21,
+   "w1_pct": -0.71,
+   "m1_pct": -3.65
+  },
+  "dow": {
+   "last": 52215.16,
+   "d1_pct": -1.23,
+   "w1_pct": 0.41,
+   "m1_pct": 1.68
+  },
+  "rut": {
+   "last": 2775.9,
+   "d1_pct": -0.29,
+   "w1_pct": 2.0,
+   "m1_pct": -2.1
+  },
+  "gold": {
+   "last": 4007.9,
+   "d1_pct": -1.29,
+   "w1_pct": -4.14,
+   "m1_pct": -6.75
+  },
+  "wti": {
+   "last": 103.27,
+   "d1_pct": 3.82,
+   "w1_pct": 1.83,
+   "m1_pct": 9.15
+  },
+  "btc": {
+   "last": 81074.0,
+   "d1_pct": -0.29,
+   "w1_pct": -0.52,
+   "m1_pct": -3.92
+  },
+  "dxy": {
+   "last": 101.81,
+   "d1_pct": 0.2,
+   "w1_pct": -0.03,
+   "m1_pct": 0.51
+  },
+  "vix": {
+   "last": 19.45,
+   "d1_pct": 2.21,
+   "w1_pct": -2.7,
+   "m1_pct": 24.12
+  },
+  "usdjpy": {
+   "last": 156.81,
+   "d1_pct": -0.83,
+   "w1_pct": -0.84,
+   "m1_pct": -0.92
+  },
+  "tnx": {
+   "last": 4.99,
+   "d1_bp": 4,
+   "w1_bp": -11,
+   "m1_bp": -17
+  },
+  "us02": {
+   "last": 4.65,
+   "d1_bp": 0,
+   "w1_bp": -9,
+   "m1_bp": -22
+  },
+  "real10": {
+   "last": 2.64,
+   "d1_bp": 0,
+   "w1_bp": -10,
+   "m1_bp": -21
+  },
+  "hy": {
+   "last": 3.4,
+   "d1_bp": 0,
+   "w1_bp": 0,
+   "m1_bp": 1
+  },
+  "cpi_yoy": {
+   "last": 3.72,
+   "prev_print": 3.35
+  },
+  "curve_2s10s_bp": 34,
+  "curve_2s10s_chg_1m_bp": 5,
+  "absent": [],
+  "rows": 251
+ },
+ "regime_gates": {
+  "regime": "ENERGY_GRIND",
+  "held_weeks": 3,
+  "since": "2026-10-05",
+  "drivers": [
+   {
+    "key": "cpi_chg_3m",
+    "label": "CPI 3m change",
+    "value": 0.42,
+    "op": ">",
+    "threshold": 0.3,
+    "clear_by": 0.12,
+    "ok": true
+   },
+   {
+    "key": "wti_vs_2yr",
+    "label": "WTI vs 2yr",
+    "value": 40.56,
+    "op": ">",
+    "threshold": 0,
+    "clear_by": 40.56,
+    "ok": true
+   },
+   {
+    "key": "wti_12m",
+    "label": "WTI 12m",
+    "value": 67.92,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 42.92,
+    "ok": true
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI 3m change falls below 0.3",
+    "now": 0.42,
+    "threshold": 0.3,
+    "distance": 0.12,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI vs 2yr falls below 0",
+    "now": 40.56,
+    "threshold": 0,
+    "distance": 40.56,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI 12m falls below 25",
+    "now": 67.92,
+    "threshold": 25,
+    "distance": 42.92,
+    "then": "ENERGY_GRIND no longer qualifies"
+   }
+  ],
+  "runner_up": {
+   "regime": "POLICY_TIGHTENING",
+   "score": 51.1,
+   "behind_by": 19.5
+  }
+ },
+ "screener": {
+  "n_candidates": 398,
+  "top": [
+   {
+    "ticker": "HAFN",
+    "industry": "Marine shipping",
+    "trade_score": 67,
+    "atr14_pct": 3.78,
+    "mcap_B": 3.74,
+    "breakout": false,
+    "days_on_list": 52,
+    "profitability": "profitable",
+    "pos_vs_high": -2.1,
+    "surge": 77,
+    "dollar_vol_M": 31.4,
+    "stop_pct_2_5atr": 9.45
+   },
+   {
+    "ticker": "TALO",
+    "industry": "Oil & gas production",
+    "trade_score": 67,
+    "atr14_pct": 3.66,
+    "mcap_B": 2.35,
+    "breakout": false,
+    "days_on_list": 59,
+    "profitability": "marginal",
+    "pos_vs_high": 0.0,
+    "surge": 68,
+    "dollar_vol_M": 61.0,
+    "stop_pct_2_5atr": 9.15
+   },
+   {
+    "ticker": "PAGS",
+    "industry": "Miscellaneous commercial services",
+    "trade_score": 66,
+    "atr14_pct": 3.77,
+    "mcap_B": 2.44,
+    "breakout": true,
+    "days_on_list": 9,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 83,
+    "dollar_vol_M": 50.9,
+    "stop_pct_2_5atr": 9.43
+   },
+   {
+    "ticker": "ECO",
+    "industry": "Marine shipping",
+    "trade_score": 65,
+    "atr14_pct": 5.21,
+    "mcap_B": 2.11,
+    "breakout": false,
+    "days_on_list": 76,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 36,
+    "dollar_vol_M": 74.9,
+    "stop_pct_2_5atr": 13.03
+   },
+   {
+    "ticker": "DHT",
+    "industry": "Marine shipping",
+    "trade_score": 64,
+    "atr14_pct": 4.88,
+    "mcap_B": 3.18,
+    "breakout": false,
+    "days_on_list": 76,
+    "profitability": "investing",
+    "pos_vs_high": -0.2,
+    "surge": 52,
+    "dollar_vol_M": 125.8,
+    "stop_pct_2_5atr": 12.2
+   },
+   {
+    "ticker": "TEN",
+    "industry": "Marine shipping",
+    "trade_score": 64,
+    "atr14_pct": 4.54,
+    "mcap_B": 1.17,
+    "breakout": false,
+    "days_on_list": 46,
+    "profitability": "unknown",
+    "pos_vs_high": 0.0,
+    "surge": 39,
+    "dollar_vol_M": 22.5,
+    "stop_pct_2_5atr": 11.35
+   },
+   {
+    "ticker": "TRMD",
+    "industry": "Marine shipping",
+    "trade_score": 63,
+    "atr14_pct": 3.85,
+    "mcap_B": 3.08,
+    "breakout": false,
+    "days_on_list": 67,
+    "profitability": "profitable",
+    "pos_vs_high": -0.3,
+    "surge": 106,
+    "dollar_vol_M": 82.4,
+    "stop_pct_2_5atr": 9.62
+   },
+   {
+    "ticker": "UGP",
+    "industry": "Specialty stores",
+    "trade_score": 63,
+    "atr14_pct": 3.06,
+    "mcap_B": 5.32,
+    "breakout": false,
+    "days_on_list": 2,
+    "profitability": "profitable",
+    "pos_vs_high": -2.0,
+    "surge": 46,
+    "dollar_vol_M": 35.2,
+    "stop_pct_2_5atr": 7.65
+   }
+  ],
+  "leaning": [],
+  "counts": {}
+ },
+ "smart_money": {
+  "quarter": "2026-06-30",
+  "accumulating": [],
+  "distributing": [],
+  "notable": [
+   {
+    "ticker": "GOOGL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 37764088383,
+    "sector": null
+   },
+   {
+    "ticker": "GE",
+    "manager": "TCI Fund (Hohn)",
+    "action": "TRIM",
+    "value_usd": 17725353519,
+    "sector": null
+   },
+   {
+    "ticker": "V",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 10462232091,
+    "sector": null
+   },
+   {
+    "ticker": "DVA",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "TRIM",
+    "value_usd": 6425268898,
+    "sector": null
+   },
+   {
+    "ticker": "SPGI",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 5735017808,
+    "sector": null
+   },
+   {
+    "ticker": "DAL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 5368591200,
+    "sector": null
+   },
+   {
+    "ticker": "IEP",
+    "manager": "Icahn Capital",
+    "action": "ADD",
+    "value_usd": 4458616003,
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 4389741007,
+    "sector": null
+   }
+  ],
+  "congress_recent": [
+   {
+    "ticker": "WMB",
+    "member": "Alan Armstrong",
+    "side": "sell",
+    "amount": "Williams Companies, Inc. (The) Common Stock Option Type: Call Strike price: $80.00 Expires: 2026-12-18",
+    "filed": "2026-10-22",
+    "sector": null
+   },
+   {
+    "ticker": "CSCO",
+    "member": "John Boozman",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-21",
+    "sector": null
+   },
+   {
+    "ticker": "MU",
+    "member": "John Boozman",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-21",
+    "sector": null
+   },
+   {
+    "ticker": "MU",
+    "member": "John Boozman",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-21",
+    "sector": null
+   },
+   {
+    "ticker": "O",
+    "member": "John Boozman",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-21",
+    "sector": null
+   },
+   {
+    "ticker": "APTV",
+    "member": "John Boozman",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-21",
+    "sector": null
+   },
+   {
+    "ticker": "VEA",
+    "member": "John Boozman",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-21",
+    "sector": null
+   },
+   {
+    "ticker": "EFA",
+    "member": "John Boozman",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-21",
+    "sector": null
+   },
+   {
+    "ticker": "SPYM",
+    "member": "John Boozman",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-21",
+    "sector": null
+   },
+   {
+    "ticker": "IEF",
+    "member": "John Boozman",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-21",
+    "sector": null
+   }
+  ],
+  "note": null,
+  "congress_status": {
+   "written": "2026-10-24",
+   "dropped_impossible_dates": 0,
+   "sources": {
+    "House Clerk PTR": {
+     "rows": 9763,
+     "last_30d": 69,
+     "newest_tx": "2026-10-16",
+     "newest_filed": "2026-10-19"
+    },
+    "OGE 278-T via Open Cabinet": {
+     "rows": 6448,
+     "last_30d": 0,
+     "newest_tx": "2026-06-24",
+     "newest_filed": "2026-08-12"
+    },
+    "Senate eFD": {
+     "rows": 1016,
+     "last_30d": 4,
+     "newest_tx": "2026-09-25",
+     "newest_filed": "2026-10-22"
+    }
+   },
+   "quiet": [
+    "OGE 278-T via Open Cabinet"
+   ]
+  }
+ },
+ "portfolio": {
+  "open": [
+   {
+    "ticker": "GOOG",
+    "entry": 325.86,
+    "stop": 305.67,
+    "last": null,
+    "R": null,
+    "managed": true,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   }
+  ],
+  "heat_R": 1.01,
+  "cap_R": 3.0,
+  "unsized": 0,
+  "note": null,
+  "over_cap": false
+ },
+ "news": {
+  "date": "2026-10-23",
+  "asof": "2026-10-24 14:32 UTC",
+  "headline": "Brent at a six-month high and the oil majors at records \u2014 and the market's new test is cash flow, not capex",
+  "standfirst": "The Dow did Friday's falling: \u22121.23%, 652.82 points, its largest move in thirty sessions, while the Nasdaq slipped only 0.21% because the AI complex rose \u2014 Micron +2.5%, AMD +1.7%, Intel +1.7%, CrowdStrike +8.25%, Palo Alto +7.22%. The S&P fell 0.52% with nearly three of four of its shares lower on light volume. What was punished was cash flow rather than technology: Bloom Energy fell 11.24%, the index's worst, on record revenue with negative free cash flow; American Express 3.68% after beating and cutting 5% of its workforce to prepare for AI; Caterpillar 2.4%, JPMorgan and Citigroup 1.5% each. Energy went the other way to records: Brent settled $116.72, up 3.14%, its highest since late April, WTI $103.27, up 3.82%, and Exxon, Chevron and ConocoPhillips all closed at all-time highs \u2014 with the Strategic Petroleum Reserve at its lowest level since 1982 and 400,000 barrels of it just committed to one refinery. Yields gave back a quarter of Thursday's rally, the ten-year +4bp to 5.00%. Moody's held France at Aa3 negative \u2014 no downgrade \u2014 and the iPhone Duo drew overnight queues with limited walk-in stock. In the book GOOG fell a fourth consecutive session, 1.08% to 317.28, closing 29 cents off its low at -0.42R. The day -3.48; Q4 +26.06 with +34.64 realised. Heat 1.01R against 3.0R, 1.99R spare. The Fed and Alphabet share Wednesday afternoon.",
+  "themes": [
+   {
+    "kicker": "What's next",
+    "right": "the Fed and Alphabet Wednesday",
+    "title": "Four dated events in five sessions, and the first one is the whole week",
+    "items": [
+     {
+      "tone": "c-fomc",
+      "tag": "FOMC \u00b7 GOOG",
+      "html": "<b>Fed decision and Alphabet Q3 on the same afternoon</b> \u2014 a hold at 3.75-4.00% is 90.6% priced, and Alphabet brings $195-205bn of capex and a $3.00 consensus into a market that spent the week pricing cash flow",
+      "when": "Wed \u00b7 2026-10-28",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "PCE \u00b7 AMZN",
+      "html": "<b>September PCE and Amazon Q3</b> \u2014 the inflation measure the Fed prefers, on the same day as the second hyperscaler to defend its spending",
+      "when": "Thu \u00b7 2026-10-29",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-er",
+      "tag": "AAPL",
+      "html": "<b>iPhone Duo in 28 more countries</b> \u2014 the second wave, after launch-day queues and limited walk-in stock",
+      "when": "Fri \u00b7 2026-10-30",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "EARNINGS",
+      "html": "<b>Apple Q4 and Palantir Q3</b> \u2014 both out of this book now, both read for the consumer and the software cycle rather than for exposure",
+      "when": "Mon \u00b7 2026-11-02",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-fomc",
+      "tag": "VOTE",
+      "html": "<b>US midterms</b> \u2014 the date the reported Iran strike plans sit behind, and the deadline the fuel-price politics is working to",
+      "when": "Tue \u00b7 2026-11-03",
+      "kind": "calendar"
+     }
+    ],
+    "note": "<b>Wednesday is the week.</b> The <b>Fed decides and Alphabet reports on the same afternoon</b>. A hold at <b>3.75-4.00%</b> is <b>90.6% priced</b> with <b>9.4%</b> on a hike, and December is where the increase sits. Alphabet brings <b>$195-205bn of capex</b> and a consensus near <b>$3.00 a share</b> into a market that has just spent two sessions deciding that forward spending commitments are a liability and that negative free cash flow is punished on record revenue. Six days ago its chief executive said the cloud line is being held back on purpose. Those facts are in tension and they resolve inside one hour."
+   }
+  ],
+  "ondeck": "<b>Wednesday is the week.</b> The <b>Fed decides and Alphabet reports on the same afternoon</b>. A hold at <b>3.75-4.00%</b> is <b>90.6% priced</b> with <b>9.4%</b> on a hike, and December is where the increase sits. Alphabet brings <b>$195-205bn of capex</b> and a consensus near <b>$3.00 a share</b> into a market that has just spent two sessions deciding that forward spending commitments are a liability and that negative free cash flow is punished on record revenue. Six days ago its chief executive said the cloud line is being held back on purpose. Those facts are in tension and they resolve inside one hour.",
+  "note": null
+ },
+ "provenance": {
+  "macro": {
+   "asof": "2026-10-24 14:32 UTC",
+   "age_min": null
+  },
+  "gex": {
+   "asof": "2026-10-24 14:32 UTC",
+   "age_min": null
+  },
+  "stocks": {
+   "asof": "2026-10-24 14:52 UTC",
+   "age_min": null
+  },
+  "institutional_holdings": {
+   "asof": "2026-10-24 15:00 UTC",
+   "quarter": "2026-06-30"
+  },
+  "congress_trades": {
+   "asof": "2026-10-24 14:59 UTC",
+   "status": {
+    "written": "2026-10-24",
+    "dropped_impossible_dates": 0,
+    "sources": {
+     "House Clerk PTR": {
+      "rows": 9763,
+      "last_30d": 69,
+      "newest_tx": "2026-10-16",
+      "newest_filed": "2026-10-19"
+     },
+     "OGE 278-T via Open Cabinet": {
+      "rows": 6448,
+      "last_30d": 0,
+      "newest_tx": "2026-06-24",
+      "newest_filed": "2026-08-12"
+     },
+     "Senate eFD": {
+      "rows": 1016,
+      "last_30d": 4,
+      "newest_tx": "2026-09-25",
+      "newest_filed": "2026-10-22"
+     }
+    },
+    "quiet": [
+     "OGE 278-T via Open Cabinet"
+    ]
+   }
+  },
+  "wire": {
+   "asof": "2026-10-24 14:32 UTC"
+  }
+ },
+ "missing": [],
+ "changed": {
+  "first_pack": false,
+  "prev_date": "2026-10-23",
+  "changes": [
+   {
+    "kind": "screener",
+    "what": "new in the top setups",
+    "was": null,
+    "now": "HAFN, ECO, DHT, TEN, TRMD",
+    "why": "names the engine ranked highest that were not there yesterday"
+   }
+  ]
+ }
+}

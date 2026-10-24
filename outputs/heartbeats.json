@@ -1,80 +1,86 @@
 {
  "trade_book": {
   "lane": "trade_book",
-  "ts": "2026-10-23T09:45:34.371960+00:00",
+  "ts": "2026-10-24T14:32:42.203452+00:00",
   "ok": true,
   "note": "50 rows \u00b7 aldemar closed:20 \u00b7 gabriel closed:29 \u00b7 gabriel open:1"
  },
  "house_ptr": {
   "lane": "house_ptr",
-  "ts": "2026-10-23T10:12:01.011651+00:00",
+  "ts": "2026-10-24T14:59:05.988043+00:00",
   "ok": false,
   "note": "pdftotext missing on runner (apt-get install poppler-utils)"
  },
  "senate_efd": {
   "lane": "senate_efd",
-  "ts": "2026-10-23T10:12:06.173519+00:00",
-  "ok": true,
-  "note": "15 PTRs parsed \u00b7 1 rows \u00b7 14 zero-row \u00b7 3 paper \u00b7 rejects {'no_ticker': 164, 'no_type': 1} \u00b7 no-ticker sample: Other: MH Built to Last LLC Company: MH Built t x22; Municipal Security: PENNSYLVANIA ST GO Rate/Coupon: 5% Matur x13; Stock: GS Managed Structured Note Strategy S&am x11; Stock: GS Managed Structured Note Strategy MSCI x10 \u00b7 merged 1"
+  "ts": "2026-10-24T14:59:06.829944+00:00",
+  "ok": false,
+  "note": "agreement HTTP 403"
  },
  "executive": {
   "lane": "executive",
-  "ts": "2026-10-23T10:12:07.569328+00:00",
+  "ts": "2026-10-24T14:59:08.377107+00:00",
   "ok": true,
   "note": "6485 rows \u00b7 merged 0 \u00b7 export 2026-09-25"
  },
  "insider": {
   "lane": "insider",
-  "ts": "2026-10-23T10:12:54.108761+00:00",
+  "ts": "2026-10-24T14:59:45.062828+00:00",
   "ok": true,
-  "note": "138 tickers \u00b7 86 new Form 4s \u00b7 127 rows \u00b7 86 new P/S \u00b7 2 no CIK \u00b7 0 failures"
+  "note": "138 tickers \u00b7 29 new Form 4s \u00b7 71 rows \u00b7 36 new P/S \u00b7 2 no CIK \u00b7 0 failures"
  },
  "iv_em": {
   "lane": "iv_em",
-  "ts": "2026-10-23T10:20:23.595190+00:00",
+  "ts": "2026-10-24T15:13:17.552233+00:00",
   "ok": true,
-  "note": "160 requested (160 tier A) \u00b7 144 straddle \u00b7 0 iv-proxy \u00b7 14 no chain \u00b7 2 failures \u00b7 812 on file \u00b7 135s"
+  "note": "627 requested (160 tier A, S&P 500 refreshed) \u00b7 601 straddle \u00b7 0 iv-proxy \u00b7 16 no chain \u00b7 10 failures \u00b7 814 on file \u00b7 501s"
  },
  "group_strength": {
   "lane": "group_strength",
-  "ts": "2026-10-23T10:11:49.735517+00:00",
+  "ts": "2026-10-24T14:58:59.719784+00:00",
   "ok": true,
-  "note": "69/121 industries ok \u00b7 0/20 sectors ok"
+  "note": "64/121 industries ok \u00b7 0/20 sectors ok"
  },
  "signal_log": {
   "lane": "signal_log",
-  "ts": "2026-10-17T18:48:06.095396+00:00",
+  "ts": "2026-10-24T14:52:43.007069+00:00",
   "ok": true,
-  "note": "2026-10-17 not a trading day \u2014 skipped"
+  "note": "2026-10-24 not a trading day \u2014 skipped"
  },
  "context_backfill": {
   "lane": "context_backfill",
-  "ts": "2026-10-23T10:31:19.396956+00:00",
+  "ts": "2026-10-24T15:24:42.202505+00:00",
   "ok": true,
   "note": "165 rows over 6 days \u00b7 165 were missing context"
  },
  "gex_stocks": {
   "lane": "gex_stocks",
-  "ts": "2026-10-23T09:47:58.840887+00:00",
+  "ts": "2026-10-24T14:34:56.226499+00:00",
   "ok": true,
-  "note": "27 written \u00b7 0 thin \u00b7 123 failed of 150 \u00b7 first names GOOG,AAPL,ALAB,AMD,AMZN,ARM,AVGO,CRWD,HOOD,IBIT,IBM,INTC \u00b7 files present 11/12 \u00b7 first failure: ALAB: degenerate_chain"
+  "note": "28 written \u00b7 0 thin \u00b7 122 failed of 150 \u00b7 first names GOOG,AAPL,ALAB,AMD,AMZN,ARM,AVGO,CRWD,HOOD,IBIT,IBM,INTC \u00b7 files present 11/12 \u00b7 first failure: ALAB: degenerate_chain"
  },
  "group_backfill": {
   "lane": "group_backfill",
-  "ts": "2026-10-23T10:29:46.905409+00:00",
+  "ts": "2026-10-24T15:23:03.132559+00:00",
   "ok": false,
   "note": "0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026-08-16 -> 2026-10-23 (48 sessions)"
  },
  "mme_map": {
   "lane": "mme_map",
-  "ts": "2026-10-24T06:19:10.277661+00:00",
+  "ts": "2026-10-24T15:13:48.435435+00:00",
   "ok": true,
-  "note": "27/27 \u00b7 0 from upload \u00b7 23 standouts \u00b7 missing 0"
+  "note": "27/27 \u00b7 0 from upload \u00b7 24 standouts \u00b7 missing 0"
  },
  "mme_chains": {
   "lane": "mme_chains",
-  "ts": "2026-10-23T10:20:48.714940+00:00",
+  "ts": "2026-10-24T15:13:47.317558+00:00",
   "ok": true,
-  "note": "27/27 names \u00b7 26503 contracts \u00b7 failed 0"
+  "note": "30/30 names \u00b7 39753 contracts \u00b7 failed 0"
+ },
+ "ic_screen": {
+  "lane": "ic_screen",
+  "ts": "2026-10-24T15:13:50.951842+00:00",
+  "ok": true,
+  "note": "7 priced \u00b7 5 positive EV \u00b7 23 skipped"
  }
 }
