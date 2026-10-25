@@ -1095,7 +1095,8 @@
   .icl-tag{position:absolute;transform:translateX(-50%);pointer-events:auto;cursor:ew-resize;touch-action:none;user-select:none;
     font-family:var(--mono);font-size:10.5px;line-height:1.25;text-align:center;padding:3px 7px;border-radius:5px;border:1.5px solid var(--tc);background:var(--card);color:var(--tc);box-shadow:0 1px 3px rgba(0,0,0,.18)}
   .icl-tag b{display:block;font-weight:700;white-space:nowrap} .icl-tag span{color:var(--inkFade);font-size:9.5px}
-  .icl-tag.top{top:4px} .icl-tag.bot{bottom:4px} .icl-tag.sell{background:var(--tc);color:#fff} .icl-tag.sell span{color:rgba(255,255,255,.85)}
+  .icl-tag.top{top:4px} .icl-tag.bot{bottom:2px}
+  @media(max-width:700px){ .icl-tag{font-size:9.5px;padding:2px 5px} .icl-tag span{font-size:8.5px} } .icl-tag.sell{background:var(--tc);color:#fff} .icl-tag.sell span{color:rgba(255,255,255,.85)}
   .icl-tag.drag{box-shadow:0 0 0 3px rgba(232,195,74,.5);z-index:3}
   .icl-sub{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);font-weight:700;padding:12px 16px 0}
   .icl-sub span{font-weight:400;color:var(--inkFade);text-transform:none;letter-spacing:.02em}
@@ -1115,7 +1116,7 @@
   .icl-plot{min-height:360px;padding:0 6px}
   .icl-day{display:flex;align-items:center;gap:12px;padding:4px 16px 2px} .icl-day span{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--inkFade)}
   .icl-day{flex-wrap:wrap} .icl-day input{flex:1;min-width:140px;accent-color:#E8C34A} .icl-day b{font-family:var(--mono);font-size:12.5px;margin-left:auto;text-align:right}
-  .ic-sm .hd,.ic-sm .r{grid-template-columns:70px 96px minmax(200px,1.5fr) 96px 90px 80px 70px;min-width:700px;padding:7px 12px;font-size:12.5px}
+  .ic-sm .hd,.ic-sm .r{grid-template-columns:62px 86px minmax(170px,1.5fr) 88px 84px 52px 76px 64px;min-width:700px;padding:7px 12px;font-size:12.5px}
 
   .ic-hd{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px} .ic-rules{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--inkFade)}
   .ic-tbl{overflow-x:auto;font-family:var(--mono);font-size:13px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
@@ -10651,15 +10652,19 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var n=st.n?Math.max(1,st.n):nMax;
     function value(Sx,Tleft,dv){ return L.reduce(function(a,l){ return a-l.sg*icBS(Sx,l.K,Tleft,l.iv+(dv||0),l.cp); },0); }  // cost to buy back
     var rv=IC_RV[st.tk]||0.85*((L[1].iv+L[2].iv)/2), exitDay=Math.max(0,dte-((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.exit_dte)||19));
-    function ev(sig){ var h=exitDay/365, tot=0, wsum=0;
-      for(var i=-60;i<=60;i++){ var z=i/12, w=Math.exp(-z*z/2); var Sx=S*Math.exp(-0.5*sig*sig*h+sig*Math.sqrt(h)*z);
-        tot+=w*(credit-value(Sx,(dte-exitDay)/365)-0.25*spreads); wsum+=w; } return tot/wsum*100; }
+    function outcome(sig){ var h=exitDay/365, pw=0, pl=0, sw=0, sl=0, wsum=0;     // EV = P(win) x avg win - P(loss) x avg loss
+      for(var i=-60;i<=60;i++){ var z=i/10, w=Math.exp(-z*z/2); var Sx=S*Math.exp(-0.5*sig*sig*h+sig*Math.sqrt(h)*z);
+        var pnl=(credit-value(Sx,(dte-exitDay)/365)-0.25*spreads)*100; wsum+=w; if(pnl>0){ pw+=w; sw+=w*pnl; } else { pl+=w; sl+=w*pnl; } }
+      pw/=wsum; pl/=wsum; sw/=wsum; sl/=wsum;
+      var aw=pw?sw/pw:0, al=pl?-sl/pl:0; return {pop:pw,avgW:aw,avgL:al,ev:pw*aw-pl*al}; }
+    function ev(sig){ return outcome(sig).ev; }
     var beLo=st.sp-credit, beHi=st.sc+credit, hE=dte/365;
     var pop=icN(Math.log(beHi/S)/(rv*Math.sqrt(hE))+0.5*rv*Math.sqrt(hE))-icN(Math.log(beLo/S)/(rv*Math.sqrt(hE))+0.5*rv*Math.sqrt(hE));
     var vega=(value(S,dte/365,0)-value(S,dte/365,0.01))*100;
     var comm=8*(((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.commission_leg)||0.65))*n;   // 4 legs in, 4 out
+    var oc=outcome(rv), feePer=8*(((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.commission_leg)||0.65));
     return {S:S,L:L,dte:dte,exitDay:exitDay,credit:credit,creditMid:creditMid,spreads:spreads,width:width,maxLoss:maxLoss,n:n,nMax:nMax,risk:risk,comm:comm,
-            ev:ev(rv)*n-comm,evIV:ev((L[1].iv+L[2].iv)/2)*n-comm,beLo:beLo,beHi:beHi,pop:pop,vega:vega*n,rv:rv,value:value,
+            ev:oc.ev*n-comm,evIV:ev((L[1].iv+L[2].iv)/2)*n-comm,popX:oc.pop,avgW:oc.avgW-feePer,avgL:oc.avgL+feePer,beLo:beLo,beHi:beHi,pop:pop,vega:vega*n,rv:rv,value:value,
             otm:(st.sp<S&&st.sc>S)};
   }
   function icDraw(){
@@ -10688,7 +10693,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       (r&&!r.err?
         '<div class="mm-strip icl-strip"><div><i>credit</i><b>$'+r.credit.toFixed(2)+'</b></div><div><i>max profit</i><b style="color:var(--green)">'+m(r.credit*100*r.n)+'</b></div>'+
         '<div><i>max loss \u00d7'+r.n+'</i><b style="color:var(--red)">'+m(-r.maxLoss*r.n)+'</b>'+(r.maxLoss*r.n>r.risk+0.5?'<small class="over">over your $'+r.risk.toLocaleString()+'</small>':'')+'</div><div><i>EV after fees</i><b style="color:'+(r.ev>0?'var(--green)':'var(--red)')+'">'+m(r.ev)+'</b></div>'+
-        '<div><i>EV at IV</i><b>'+m(r.evIV)+'</b></div><div><i>prob. of profit</i><b>'+Math.round(r.pop*100)+'%</b></div>'+
+        '<div><i>EV at IV</i><b>'+m(r.evIV)+'</b></div><div><i>win rate at exit</i><b>'+Math.round(r.popX*100)+'%</b></div>'+
         '<div><i>spreads \u00b7 fees</i><b>'+m(r.spreads*100*r.n)+' <small>'+Math.round(r.spreads/Math.max(r.creditMid,0.01)*100)+'% \u00b7 '+m(r.comm)+'</small></b></div>'+
         '<div><i>vol +1 pt</i><b style="color:var(--red)">'+m(r.vega)+'</b></div></div>'+
         (r.otm?'':'<div class="icl-warn">A short strike is in the money at today\u2019s price \u2014 Phoenix would not open this.</div>')+
@@ -10738,11 +10743,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       'The '+new Date(st.exp+"T12:00:00Z").toLocaleDateString(undefined,{day:"numeric",month:"short"})+' expiry, '+r.dte+' days out, closed by '+exitD+'. '+
       'The short put at '+f(st.sp)+' sits '+dP+' expected moves below spot'+wallP+'; the short call at '+f(st.sc)+' sits '+dC+' moves above'+wallC+'. '+
       'It collects $'+r.credit.toFixed(2)+' a share, '+Math.round(r.credit/r.width*100)+'% of the $'+f(r.width)+' width. '+
-      '<b>EV '+m(r.ev)+'</b> after fees, because the options are priced at '+Math.round((r.L[1].iv+r.L[2].iv)/2*100)+'% implied vol against '+Math.round(r.rv*100)+'% realised \u2014 '+
+      '<b>EV '+m(r.ev)+'</b> = '+Math.round(r.popX*100)+'% \u00d7 '+m(r.avgW*r.n)+' average win \u2212 '+Math.round((1-r.popX)*100)+'% \u00d7 '+m(r.avgL*r.n)+' average loss, after fees, at the exit date. It is positive because the options are priced at '+Math.round((r.L[1].iv+r.L[2].iv)/2*100)+'% implied vol against '+Math.round(r.rv*100)+'% realised \u2014 '+
       (vp>0?'a '+vp+'-point premium the seller collects; ':'no premium to collect, which is why EV is weak; ')+
       'priced at implied vol the same trade is worth '+m(r.evIV)+'. '+
       '<b>Risk '+m(r.maxLoss*r.n)+'</b> ('+r.n+' contract'+(r.n>1?'s':'')+') if the stock finishes below '+f(st.lp)+' or above '+f(st.lc)+'; '+
-      'it profits at expiry between '+f(r.beLo)+' and '+f(r.beHi)+', a '+Math.round(r.pop*100)+'% chance at realised vol.';
+      'held to expiry it profits between '+f(r.beLo)+' and '+f(r.beHi)+' ('+Math.round(r.pop*100)+'% at realised vol), but Phoenix closes it at the exit date, where the win rate is '+Math.round(r.popX*100)+'%.';
   }
   function icPlot(r){
     var el=document.getElementById("iclPlot"); if(!el) return;
@@ -10762,13 +10767,15 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       {x:xs,y:y0,type:"scatter",mode:"lines",line:{color:ICC.blue,width:1.4,dash:"dot"},hovertemplate:"%{x:.2f}: %{y:$,.0f}<extra>today</extra>"},
       {x:xs,y:yD,type:"scatter",mode:"lines",line:{color:ICC.gold,width:2.6},hovertemplate:"%{x:.2f}: %{y:$,.0f}<extra>"+dDate+"</extra>"}];
     function vl(x,c,w,d){ return {type:"line",x0:x,x1:x,yref:"paper",y0:0,y1:1,line:{color:c,width:w,dash:d}}; }
+    var narrow=(el.clientWidth||600)<700;                     // a phone: only the lines that answer a question
     var shapes=[vl(r.S,ICC.blue,2.5,"solid"),{type:"line",xref:"paper",x0:0,x1:1,y0:0,y1:0,line:{color:ink,width:1}}];
-    [st.lp,st.sp].forEach(function(x){ shapes.push(vl(x,"#d08a1c",1.2,"dot")); }); [st.sc,st.lc].forEach(function(x){ shapes.push(vl(x,"#4a86d0",1.2,"dot")); });
+    if(!narrow){ [st.lp,st.sp].forEach(function(x){ shapes.push(vl(x,"#d08a1c",1,"dot")); }); [st.sc,st.lc].forEach(function(x){ shapes.push(vl(x,"#4a86d0",1,"dot")); }); }
     if(beD){ shapes.push(vl(beD[0],ICC.gold,1.4,"dash")); shapes.push(vl(beD[1],ICC.gold,1.4,"dash")); }
     var mm=(typeof MME_MAP!=="undefined"&&MME_MAP)?MME_MAP:null, mr=null;
     if(mm){ ["green","amber","red"].forEach(function(g){ ((mm.groups||{})[g]||[]).forEach(function(x){ if(x.ticker===st.tk) mr=x; }); }); if(!mr&&mm.etf_rows) mr=mm.etf_rows[st.tk]; }
-    if(mr){ if(mr.support) shapes.push(vl(mr.support,"#2D8A55",1,"dashdot")); if(mr.resist) shapes.push(vl(mr.resist,"#B03030",1,"dashdot")); }
-    var layout={height:380,margin:{l:58,r:14,t:42,b:44},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:12},
+    if(mr&&!narrow){ if(mr.support) shapes.push(vl(mr.support,"#2D8A55",1,"dashdot")); if(mr.resist) shapes.push(vl(mr.resist,"#B03030",1,"dashdot")); }
+    if(narrow){ traces[3].line.width=1; traces[2].line.width=2; }
+    var layout={height:narrow?340:380,margin:{l:narrow?48:58,r:10,t:50,b:72},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:12},
       xaxis:{range:[lo,hi],gridcolor:line,zeroline:false,tickfont:{size:12},fixedrange:true},yaxis:{gridcolor:line,zeroline:false,tickprefix:"$",tickfont:{size:11},fixedrange:true},showlegend:false,shapes:shapes};
     function sw(c,d,w){ return '<i style="background:'+(d?'repeating-linear-gradient(90deg,'+c+' 0 4px,transparent 4px 7px)':c)+';height:'+(w||3)+'px"></i>'; }
     document.getElementById("iclKey").innerHTML=
@@ -10790,6 +10797,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var legs=[["lp","BUY","P","#d08a1c","top"],["sp","SELL","P","#d08a1c","bot"],["sc","SELL","C","#4a86d0","bot"],["lc","BUY","C","#4a86d0","top"]];
     host.innerHTML=legs.map(function(L){ var q=ch[L[2]][st[L[0]]]||{}; var mid=q.bid!=null?((q.bid+q.ask)/2).toFixed(2):"";
       return '<div class="icl-tag '+L[4]+' '+(L[1]==="SELL"?'sell':'buy')+'" data-leg="'+L[0]+'" style="left:'+px(st[L[0]])+'px;--tc:'+L[3]+'"><b>'+L[1]+' '+(+st[L[0]]).toLocaleString(undefined,{maximumFractionDigits:2})+' '+(L[2]==="P"?'Put':'Call')+'</b><span>'+mid+'</span></div>'; }).join("");
+    (function(){ var W=host.clientWidth;                         // never past the chart's edges
+      host.querySelectorAll(".icl-tag").forEach(function(tag){ var w=tag.offsetWidth, x=parseFloat(tag.style.left);
+        tag.style.left=Math.max(w/2+2, Math.min(W-w/2-2, x))+"px"; }); })();
     (function(){ var rows={top:[],bot:[]};                        // de-collide tags that share a row
       host.querySelectorAll(".icl-tag").forEach(function(tag){ var row=tag.classList.contains("top")?"top":"bot", x=parseFloat(tag.style.left), lvl=0;
         while(rows[row].some(function(o){ return o.l===lvl && Math.abs(o.x-x)<118; })) lvl++;
@@ -10864,14 +10874,15 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       host.innerHTML='<div class="ic-wrap"><div class="ic-hd"><span class="mme-sk">Iron condors <span>\u00b7 '+(IC_DATA.date||"")+'</span></span>'+
         '<span class="ic-rules">monthlies '+(R.dte_min||35)+'\u2013'+(R.dte_max||90)+'d \u00b7 exit at '+(R.exit_dte||19)+' DTE \u00b7 shorts out of the money \u00b7 up to $'+(IC_DATA.risk_per_trade||2000).toLocaleString()+' max loss per trade</span></div>'+
         '<div id="icLab" class="icl"></div>'+
-        (P.length?'<div class="ic-tbl ic-sm"><div class="hd"><span>Name</span><span>Expiry</span><span>Structure</span><span>Credit</span><span>Max loss</span><span>EV</span><span>Spreads</span></div>'+
+        (P.length?'<div class="ic-tbl ic-sm"><div class="hd"><span>Name</span><span>Expiry</span><span>Structure</span><span>Credit</span><span>Max loss</span><span>Win</span><span>EV</span><span>Spreads</span></div>'+
           P.map(function(p,i){ return '<div class="r'+(p.ev_total>0?'':' neg')+(IC_LAB&&IC_LAB.tk===p.ticker?' on':'')+'" data-ic="'+p.ticker+'"><span class="tk">'+(i===0&&p.ev_total>0?'\u2605 ':'')+p.ticker+'</span>'+
             '<span>'+new Date(p.expiry+"T12:00:00Z").toLocaleDateString(undefined,{day:"numeric",month:"short"})+' <i>'+p.dte+'d</i></span>'+
             '<span><span class="pp">'+k(p.legs.long_put)+'/'+k(p.legs.short_put)+'P</span> <span class="cc">'+k(p.legs.short_call)+'/'+k(p.legs.long_call)+'C</span></span>'+
-            '<span>$'+(+p.credit).toFixed(2)+' <i>\u00d7'+p.contracts+'</i></span><span>'+m(-p.max_loss_1*p.contracts)+'</span><span class="ev">'+m(p.ev_total)+'</span>'+
+            '<span>$'+(+p.credit).toFixed(2)+' <i>\u00d7'+p.contracts+'</i></span><span>'+m(-p.max_loss_1*p.contracts)+'</span>'+
+            '<span>'+(p.pop_exit!=null?Math.round(p.pop_exit*100)+'%':'\u2014')+'</span><span class="ev">'+m(p.ev_total)+'</span>'+
             '<span>'+(p.spread_pct_credit!=null?Math.round(p.spread_pct_credit*100)+'%':'\u2014')+'</span></div>'; }).join("")+'</div>':
           '<div class="ed-note">No condor passed the screen today'+(IC_DATA.skipped?' \u2014 '+Object.keys(IC_DATA.skipped).length+' names did not qualify':'')+'. You can still build one in the lab above.</div>')+
-        '<div class="ed-note" style="margin-top:8px">Credit is filled at mid less a quarter of the four spreads. EV assumes the stock moves at its 30-day realised vol until the exit date and the condor is closed there; EV at IV is the same at implied vol \u2014 the gap is the volatility premium the trade depends on. Spreads are what the four legs cost to cross, as a share of the credit; EV is after IBKR fees ($0.65 per contract per leg, in and out). Tap a row to load it above; move any strike with \u25C0 \u25B6.</div></div>';
+        '<div class="ed-note" style="margin-top:8px">Credit is filled at mid less a quarter of the four spreads. EV assumes the stock moves at its 30-day realised vol until the exit date and the condor is closed there; EV at IV is the same at implied vol \u2014 the gap is the volatility premium the trade depends on. Spreads are what the four legs cost to cross, as a share of the credit; EV is after IBKR fees ($0.65 per contract per leg, in and out). Tap a row to load it above; drag a strike tag on the chart to move it.</div></div>';
       host.querySelectorAll("[data-ic]").forEach(function(el){ el.onclick=function(){ icLoad(el.dataset.ic,true);
         host.querySelectorAll("[data-ic]").forEach(function(x){ x.classList.toggle("on",x===el); }); }; });
       if(!IC_CH){ document.getElementById("icLab").innerHTML='<div class="ed-note">The chain file is not on hand yet \u2014 the lab needs mme_chains.json.</div>'; return; }

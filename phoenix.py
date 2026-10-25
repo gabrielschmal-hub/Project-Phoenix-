@@ -11012,6 +11012,9 @@ IC = {"dte_min": 35, "dte_max": 90, "exit_dte": 19, "sleeve": 2000, "risk_per_tr
       # untradeable, and a condor whose four spreads eat more than this share of the credit is skipped
       "max_leg_spread": 0.35, "max_spread_of_credit": 0.45,
       "commission_leg": 0.65,          # IBKR, per contract per leg, each way: a condor in and out is 8 x this
+      # max profit must be worth the max loss: credit at least this share of the width (0.25 = risk 3 to
+      # make 1). IBM on 24 Oct was ranked at 11% — $200 to make, $1,800 to lose — and should never compete.
+      "min_credit_width": 0.25,
       "slip": 0.25, "short_band_em": (0.5, 2.2), "max_short_cands": 12,
       "width_pct": (0.02, 0.035, 0.05), "min_short_bid": 0.05, "min_short_oi": 50,
       "extra": ["QQQ", "SPY", "IWM"], "gh_nodes": 48, "shift_steps": 3}
@@ -11028,11 +11031,16 @@ def _ic_bs(S, K, T, sig, cp):
     return S * N(d1) - K * N(d2) if cp == "C" else K * N(-d2) - S * N(-d1)
 
 
-def _ic_gh(n):
-    """Gauss-Hermite nodes/weights for E[f(Z)], Z ~ N(0,1)."""
-    import numpy as np
-    x, w = np.polynomial.hermite.hermgauss(n)
-    return [float(v) * 2 ** 0.5 for v in x], [float(v) / (np.pi ** 0.5) for v in w]
+def _ic_gh(n=None):
+    """Nodes/weights for E[f(Z)], Z ~ N(0,1): an even grid z = -6..6 step 0.1 with normal-pdf weights.
+    Gauss-Hermite is exact for smooth payoffs but lands only a few dozen points across the win/loss
+    boundary, so the win RATE it gave was coarse (78% where the dense grid says 73%). The app uses the
+    identical grid, so the screen and the lab agree to the dollar."""
+    import math
+    xs = [i / 10.0 for i in range(-60, 61)]
+    ws = [math.exp(-z * z / 2) for z in xs]
+    t = sum(ws)
+    return xs, [w / t for w in ws]
 
 
 def _ic_monthly(d):
@@ -11047,19 +11055,24 @@ def _ic_eval(S, legs, T_exit_left, h_years, sig_phys, nodes, slip):
     spreads = sum(max(0.0, l[5] - l[4]) for l in legs)
     credit = credit_mid - slip * spreads
     xs, ws = nodes
-    def exp_value(sig):
-        ev = 0.0
+    exit_fric = slip * spreads
+    def outcome(sig):
+        """P&L per share at the exit date across the price distribution, split into wins and losses:
+        EV = P(win) x average win - P(loss) x average loss."""
+        pw = pl = sw = sl = 0.0
         for z, w in zip(xs, ws):
             St = S * math.exp(-0.5 * sig * sig * h_years + sig * math.sqrt(h_years) * z)
-            v = sum(-l[2] * _ic_bs(St, l[0], T_exit_left, l[3], l[1]) for l in legs)   # what it costs to buy back
-            ev += w * v
-        return ev
-    cost_phys = exp_value(sig_phys)
+            pnl = credit - sum(-l[2] * _ic_bs(St, l[0], T_exit_left, l[3], l[1]) for l in legs) - exit_fric
+            if pnl > 0: pw += w; sw += w * pnl
+            else:       pl += w; sl += w * pnl
+        avg_w = sw / pw if pw else 0.0
+        avg_l = -sl / pl if pl else 0.0
+        return {"pop": pw, "avg_win": avg_w, "avg_loss": avg_l, "ev": pw * avg_w - pl * avg_l}
+    phys = outcome(sig_phys)
     atm_iv = sum(l[3] for l in legs if l[2] < 0) / 2.0
-    cost_iv = exp_value(atm_iv)
-    exit_fric = slip * spreads
-    return {"credit": credit, "credit_mid": credit_mid, "ev": credit - cost_phys - exit_fric,
-            "ev_iv": credit - cost_iv - exit_fric, "spreads": spreads}
+    at_iv = outcome(atm_iv)
+    return {"credit": credit, "credit_mid": credit_mid, "ev": phys["ev"], "ev_iv": at_iv["ev"], "spreads": spreads,
+            "pop": phys["pop"], "avg_win": phys["avg_win"], "avg_loss": phys["avg_loss"]}
 
 
 def run_ic_screen():
@@ -11153,6 +11166,8 @@ def run_ic_screen():
                         r = _ic_eval(S, legs, IC["exit_dte"] / 365.0, h, sig_phys, nodes, IC["slip"])
                         if r["credit"] <= 0 or r["spreads"] > IC["max_spread_of_credit"] * max(r["credit_mid"], 0.01):
                             continue                                    # the spreads would eat the trade
+                        if r["credit"] < IC["min_credit_width"] * width:
+                            continue                                    # too little to make for what it can lose
                         # vega: what one vol point on every leg does to the position today (sticky strike)
                         v0 = sum(-l[2] * _ic_bs(S, l[0], T, l[3], l[1]) for l in legs)
                         v1 = sum(-l[2] * _ic_bs(S, l[0], T, l[3] + 0.01, l[1]) for l in legs)
@@ -11166,6 +11181,7 @@ def run_ic_screen():
                                 "max_loss_1": round(max_loss, 0), "contracts": n,
                                 "ev_1": round(r["ev"] * 100, 2), "ev_iv_1": round(r["ev_iv"] * 100, 2),
                                 "commission": round(8 * IC["commission_leg"] * n, 2),
+                                "pop_exit": round(r["pop"], 3), "avg_win_1": round(r["avg_win"] * 100, 2), "avg_loss_1": round(r["avg_loss"] * 100, 2),
                                 "ev_total": round(r["ev"] * 100 * n - 8 * IC["commission_leg"] * n, 2), "ev_per_risk": round(r["ev"] * 100 / max_loss, 4),
                                 "credit_to_width": round(r["credit"] / width, 3),
                                 "short_put_em": round((S - sp) / emT, 2), "short_call_em": round((sc - S) / emT, 2),
@@ -11176,7 +11192,7 @@ def run_ic_screen():
                         if best_e is None or cand["ev_total"] > best_e["ev_total"]:
                             best_e = cand
             if best_e:
-                per_exp.append({k: best_e[k] for k in ("expiry", "dte", "legs", "credit", "contracts", "ev_total", "ev_per_risk", "max_loss_1")})
+                per_exp.append({k: best_e[k] for k in ("expiry", "dte", "legs", "credit", "contracts", "ev_total", "ev_per_risk", "max_loss_1", "pop_exit")})
                 if best_name is None or best_e["ev_total"] > best_name["ev_total"]:
                     best_name = dict(best_e, _ctx=(e, P, Cc, h, sig_phys, kp, kc))
         if not best_name:
@@ -11212,7 +11228,8 @@ def run_ic_screen():
     positive = [p for p in picks if p["ev_total"] > 0]
     write_json("ic_screen", {
         "asof": _now(), "date": str(today), "rules": IC,
-        "method": "Credit at mid less 25% of the four spreads; stock at the exit date (expiry minus "
+        "method": "EV = P(win) x average win - P(loss) x average loss, at the exit date, after spreads and fees. "
+                  "Credit at mid less 25% of the four spreads; stock at the exit date (expiry minus "
                   f"{IC['exit_dte']} days) lognormal at 30-day realised vol; condor revalued at exit with each leg's "
                   "own implied vol; exit pays another 25% of spreads. EV = credit - expected buy-back - exit cost. "
                   "EV at IV is the same at implied vol: the gap between the two is the assumed volatility premium.",
