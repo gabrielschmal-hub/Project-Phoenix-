@@ -1,34 +1,34 @@
 {
- "asof": "2026-10-24 14:32 UTC",
+ "asof": "2026-10-27 14:59 UTC",
  "regime": "ENERGY_GRIND",
- "confidence": 70.6,
+ "confidence": 68.0,
  "confidence_note": "regime score, not a calibrated probability (A4)",
  "scores": {
-  "ENERGY_GRIND": 70.6,
-  "POLICY_TIGHTENING": 51.1
+  "ENERGY_GRIND": 68.0,
+  "POLICY_TIGHTENING": 41.1
  },
  "secondary_tag": null,
  "inputs": {
-  "wti_12m": 67.92,
-  "wti_3m": 15.63,
-  "wti_vs_2yr": 40.56,
+  "wti_12m": 64.68,
+  "wti_3m": 18.6,
+  "wti_vs_2yr": 36.13,
   "cpi_yoy": 3.72,
   "cpi_chg_3m": 0.42,
-  "spx_3m": 2.86,
-  "spx_1m": -1.55,
-  "dd": -2.4,
-  "trail_dd": -2.4,
-  "spx_off_low": 0.0,
+  "spx_3m": 2.97,
+  "spx_1m": -0.14,
+  "dd": -1.27,
+  "trail_dd": -1.27,
+  "spx_off_low": 1.16,
   "fresh_high": true,
-  "us02_3m": 60.0,
-  "real_3m": 48.0,
-  "vix": 19.45,
-  "vix_3m_chg": 4.68,
-  "hy": 321.0
+  "us02_3m": 44.0,
+  "real_3m": 34.0,
+  "vix": 17.72,
+  "vix_3m_chg": 10.82,
+  "hy": 333.0
  },
  "explain": {
   "regime": "ENERGY_GRIND",
-  "held_weeks": 3,
+  "held_weeks": 4,
   "since": "2026-10-05",
   "drivers": [
    {
@@ -43,19 +43,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 40.56,
+    "value": 36.13,
     "op": ">",
     "threshold": 0,
-    "clear_by": 40.56,
+    "clear_by": 36.13,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 67.92,
+    "value": 64.68,
     "op": ">",
     "threshold": 25,
-    "clear_by": 42.92,
+    "clear_by": 39.68,
     "ok": true
    }
   ],
@@ -69,23 +69,23 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 40.56,
+    "now": 36.13,
     "threshold": 0,
-    "distance": 40.56,
+    "distance": 36.13,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 67.92,
+    "now": 64.68,
     "threshold": 25,
-    "distance": 42.92,
+    "distance": 39.68,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
   "runner_up": {
    "regime": "POLICY_TIGHTENING",
-   "score": 51.1,
-   "behind_by": 19.5
+   "score": 41.1,
+   "behind_by": 26.9
   }
  }
 }
