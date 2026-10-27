@@ -1084,6 +1084,9 @@
   .mme-graph .mm-strip div{padding:10px 6px} .mme-graph .mm-strip b{font-size:16px} .mme-graph .mm-strip i{font-size:10.5px;margin-bottom:3px}
   .mme-plot{min-height:400px;padding:0 4px}
   .ic-wrap{margin-top:26px}
+  .ic-fw .hd,.ic-fw .r{grid-template-columns:70px 70px 80px 110px 110px 100px;min-width:560px;padding:7px 12px;font-size:12.5px}
+  .icb .hd,.icb .r{grid-template-columns:26px 78px minmax(230px,1.6fr) 62px 74px repeat(6,62px) 62px;min-width:980px;padding:6px 10px;font-size:12px}
+  .icb .ev.best{text-decoration:underline;text-underline-offset:3px}
   .icl-fine summary{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--inkFade);cursor:pointer;padding:6px 12px}
   .icl-fine .icl-ctl.in{background:transparent;border-bottom:0;padding-top:0}
   .icl-risk{display:flex;align-items:center;gap:3px} .icl-risk i{font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--inkFade);margin-right:3px}
@@ -1116,7 +1119,7 @@
   .icl-plot{min-height:360px;padding:0 6px}
   .icl-day{display:flex;align-items:center;gap:12px;padding:4px 16px 2px} .icl-day span{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--inkFade)}
   .icl-day{flex-wrap:wrap} .icl-day input{flex:1;min-width:140px;accent-color:#E8C34A} .icl-day b{font-family:var(--mono);font-size:12.5px;margin-left:auto;text-align:right}
-  .ic-sm .hd,.ic-sm .r{grid-template-columns:62px 86px minmax(170px,1.5fr) 88px 84px 52px 76px 64px;min-width:700px;padding:7px 12px;font-size:12.5px}
+  .ic-sm .hd,.ic-sm .r{grid-template-columns:62px 86px minmax(170px,1.5fr) 70px 80px 50px 72px 72px 46px;min-width:740px;padding:7px 12px;font-size:12.5px}
 
   .ic-hd{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px} .ic-rules{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--inkFade)}
   .ic-tbl{overflow-x:auto;font-family:var(--mono);font-size:13px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
@@ -1124,7 +1127,7 @@
   .ic-tbl .hd{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--inkFade);border-bottom:1px solid var(--line)}
   .ic-tbl .r{border-bottom:1px solid var(--line2);cursor:pointer} .ic-tbl .r:hover,.ic-tbl .r.on{background:var(--card2)}
   .ic-tbl .r .tk{font-weight:800;cursor:pointer} .ic-tbl .r .tk:hover{color:var(--gold)} .ic-tbl i{font-style:normal;color:var(--inkFade);font-size:11px}
-  .ic-tbl .ev{color:var(--green);font-weight:700} .ic-tbl .r.neg .ev{color:var(--red)} .ic-tbl .evi{color:var(--inkFade)}
+  .ic-tbl .ev{color:var(--green);font-weight:700} .ic-tbl .ev.neg,.ic-tbl .r.neg .ev{color:var(--red)} .ic-tbl .evi{color:var(--inkFade)}
   .ic-tbl .pp{color:#d08a1c} .ic-tbl .cc{color:#4a86d0}
   .ic-det{padding:10px 14px 14px;background:var(--card2);border-bottom:1px solid var(--line)}
   .ic-facts{font-size:12.5px;line-height:1.6;margin-bottom:8px} .ic-sub{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--inkFade);margin:10px 0 4px}
@@ -10646,12 +10649,14 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var dte=Math.round((ex-today)/864e5);
     var mid=function(l){ return (l.bid+l.ask)/2; }, spreads=L.reduce(function(a,l){ return a+(l.ask-l.bid); },0);
     var creditMid=-L.reduce(function(a,l){ return a+l.sg*mid(l); },0), credit=creditMid-0.25*spreads;
-    var width=Math.max(st.sp-st.lp, st.lc-st.sc), maxLoss=(width-credit)*100;
+    var width=Math.max(st.sp-st.lp, st.lc-st.sc), maxLoss=(width-credit)*100+8*(((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.commission_leg)||0.65));
     var risk=st.risk||((IC_DATA&&IC_DATA.risk_per_trade)||2000);
     var nMax=maxLoss>0?Math.max(1,Math.floor(risk/maxLoss)):1;
     var n=st.n?Math.max(1,st.n):nMax;
     function value(Sx,Tleft,dv){ return L.reduce(function(a,l){ return a-l.sg*icBS(Sx,l.K,Tleft,l.iv+(dv||0),l.cp); },0); }  // cost to buy back
-    var rv=IC_RV[st.tk]||0.85*((L[1].iv+L[2].iv)/2), exitDay=Math.max(0,dte-((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.exit_dte)||19));
+    var atmQ=null; ["P","C"].forEach(function(sd){ Object.keys(ch[sd]).forEach(function(k){ k=+k; if(!atmQ||Math.abs(k-ch.S)<Math.abs(atmQ.k-ch.S)) atmQ={k:k,iv:ch[sd][k].iv}; }); });
+    var atmIV=atmQ?atmQ.iv:(L[1].iv+L[2].iv)/2;
+    var rv=IC_RV[st.tk]||0, exitDte=st.exitDte||((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.exit_dte)||18), exitDay=Math.max(0,dte-exitDte);
     function outcome(sig){ var h=exitDay/365, pw=0, pl=0, sw=0, sl=0, wsum=0;     // EV = P(win) x avg win - P(loss) x avg loss
       for(var i=-60;i<=60;i++){ var z=i/10, w=Math.exp(-z*z/2); var Sx=S*Math.exp(-0.5*sig*sig*h+sig*Math.sqrt(h)*z);
         var pnl=(credit-value(Sx,(dte-exitDay)/365)-0.25*spreads)*100; wsum+=w; if(pnl>0){ pw+=w; sw+=w*pnl; } else { pl+=w; sl+=w*pnl; } }
@@ -10662,9 +10667,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var pop=icN(Math.log(beHi/S)/(rv*Math.sqrt(hE))+0.5*rv*Math.sqrt(hE))-icN(Math.log(beLo/S)/(rv*Math.sqrt(hE))+0.5*rv*Math.sqrt(hE));
     var vega=(value(S,dte/365,0)-value(S,dte/365,0.01))*100;
     var comm=8*(((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.commission_leg)||0.65))*n;   // 4 legs in, 4 out
-    var oc=outcome(rv), feePer=8*(((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.commission_leg)||0.65));
+    var feePer=8*(((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.commission_leg)||0.65));
+    var oc=outcome(atmIV), och=rv>0?outcome(rv):null;          // market probabilities first, historical beside them
     return {S:S,L:L,dte:dte,exitDay:exitDay,credit:credit,creditMid:creditMid,spreads:spreads,width:width,maxLoss:maxLoss,n:n,nMax:nMax,risk:risk,comm:comm,
-            ev:oc.ev*n-comm,evIV:ev((L[1].iv+L[2].iv)/2)*n-comm,popX:oc.pop,avgW:oc.avgW-feePer,avgL:oc.avgL+feePer,beLo:beLo,beHi:beHi,pop:pop,vega:vega*n,rv:rv,value:value,
+            ev:oc.ev*n-comm,evHV:och?och.ev*n-comm:null,popHV:och?och.pop:null,atmIV:atmIV,exitDte:exitDte,popX:oc.pop,avgW:oc.avgW-feePer,avgL:oc.avgL+feePer,
+            netDelta:L.reduce(function(a,l){ var T=dte/365, s_=l.iv*Math.sqrt(T), d1=(Math.log(S/l.K)+0.5*s_*s_)/s_, dl=l.cp==="C"?icN(d1):icN(d1)-1; return a+l.sg*dl; },0)*100,beLo:beLo,beHi:beHi,pop:pop,vega:vega*n,rv:rv,value:value,
             otm:(st.sp<S&&st.sc>S)};
   }
   function icDraw(){
@@ -10684,6 +10691,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '<select id="iclExp">'+exps.map(function(e){ var d=Math.round((new Date(e+"T12:00:00Z")-new Date())/864e5);
           return '<option'+(e===st.exp?' selected':'')+' value="'+e+'">'+dd(e)+' \u00b7 '+d+'d'+(icMonthly(e)?' \u00b7 monthly':'')+'</option>'; }).join("")+'</select>'+
         '<div class="icl-risk"><i>risk</i>'+risks.map(function(x){ return '<button data-risk="'+x+'"'+((r&&!r.err&&!st.n&&r.risk===x)?' class="on"':'')+'>$'+(x>=1000?(x/1000)+'k':x)+'</button>'; }).join("")+'</div>'+
+        (r&&!r.err?'<div class="icl-risk"><i>exit</i>'+[25,18,10].map(function(x){ return '<button data-exit="'+x+'"'+(r.exitDte===x?' class="on"':'')+'>'+x+'d</button>'; }).join("")+'</div>':'')+
         (r&&!r.err?'<div class="icl-leg n"><i>contracts</i><button data-n="-1">\u2212</button><b>'+r.n+'</b><button data-n="1">+</button></div>':'')+
         (pickTk[st.tk]?'<button class="icl-reset">Phoenix pick</button>':'')+
       '</div>'+
@@ -10692,8 +10700,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '<div class="icl-leg all"><i>all strikes</i><button data-all="-1">\u25C0</button><button data-all="1">\u25B6</button></div></div></details>'+
       (r&&!r.err?
         '<div class="mm-strip icl-strip"><div><i>credit</i><b>$'+r.credit.toFixed(2)+'</b></div><div><i>max profit</i><b style="color:var(--green)">'+m(r.credit*100*r.n)+'</b></div>'+
-        '<div><i>max loss \u00d7'+r.n+'</i><b style="color:var(--red)">'+m(-r.maxLoss*r.n)+'</b>'+(r.maxLoss*r.n>r.risk+0.5?'<small class="over">over your $'+r.risk.toLocaleString()+'</small>':'')+'</div><div><i>EV after fees</i><b style="color:'+(r.ev>0?'var(--green)':'var(--red)')+'">'+m(r.ev)+'</b></div>'+
-        '<div><i>EV at IV</i><b>'+m(r.evIV)+'</b></div><div><i>win rate at exit</i><b>'+Math.round(r.popX*100)+'%</b></div>'+
+        '<div><i>max loss \u00d7'+r.n+'</i><b style="color:var(--red)">'+m(-r.maxLoss*r.n)+'</b>'+(r.maxLoss*r.n>r.risk+0.5?'<small class="over">over your $'+r.risk.toLocaleString()+'</small>':'')+'</div><div><i>EV market prob.</i><b style="color:'+(r.ev>0?'var(--green)':'var(--red)')+'">'+m(r.ev)+'</b></div>'+
+        '<div><i>EV historical vol</i><b style="color:'+(r.evHV==null?'var(--inkFade)':(r.evHV>0?'var(--green)':'var(--red)'))+'">'+(r.evHV==null?'\u2014':m(r.evHV))+'</b></div><div><i>win rate at exit</i><b>'+Math.round(r.popX*100)+'%</b></div>'+
         '<div><i>spreads \u00b7 fees</i><b>'+m(r.spreads*100*r.n)+' <small>'+Math.round(r.spreads/Math.max(r.creditMid,0.01)*100)+'% \u00b7 '+m(r.comm)+'</small></b></div>'+
         '<div><i>vol +1 pt</i><b style="color:var(--red)">'+m(r.vega)+'</b></div></div>'+
         (r.otm?'':'<div class="icl-warn">A short strike is in the money at today\u2019s price \u2014 Phoenix would not open this.</div>')+
@@ -10702,7 +10710,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '<div class="icl-day"><span>Through time</span><input type="range" id="iclDay" min="0" max="'+r.dte+'" value="'+(st.day!=null?Math.min(st.day,r.dte):r.exitDay)+'"><b id="iclDayLbl"></b></div>'+
         '<div class="gexh-key mme-key" id="iclKey"></div>'+
         '<div class="icl-sub">Breakevens through time <span>\u00b7 the profit zone from today to expiry \u2014 it widens as time passes and the options lose their value</span></div>'+
-        '<div id="iclCone" class="icl-cone"></div>'
+        '<div id="iclCone" class="icl-cone"></div><div id="iclBoard"></div>'
       :'<div class="ed-note">'+((r&&r.err)||"No chain on file for "+st.tk+".")+'</div>');
     document.getElementById("iclTk").onchange=function(){ icLoad(this.value); };
     document.getElementById("iclExp").onchange=function(){ var c=icChain(st.tk,this.value);
@@ -10712,10 +10720,12 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     host.querySelectorAll("[data-mv]").forEach(function(b){ b.onclick=function(){ icMove(this.dataset.mv,+this.dataset.d); }; });
     host.querySelectorAll("[data-all]").forEach(function(b){ b.onclick=function(){ var d=+this.dataset.all; ["lp","sp","sc","lc"].forEach(function(x){ icMove(x,d,true); }); icDraw(); }; });
     host.querySelectorAll("[data-risk]").forEach(function(b){ b.onclick=function(){ st.risk=+this.dataset.risk; st.n=null; icDraw(); }; });
+    host.querySelectorAll("[data-exit]").forEach(function(b){ b.onclick=function(){ st.exitDte=+this.dataset.exit; st.day=null; icDraw(); }; });
     host.querySelectorAll("[data-n]").forEach(function(b){ b.onclick=function(){ st.n=Math.max(1,(r.n||1)+(+this.dataset.n)); icDraw(); }; });
     var rs=host.querySelector(".icl-reset"); if(rs) rs.onclick=function(){ var keep={risk:st.risk}; icLoad(st.tk,true); IC_LAB.risk=keep.risk; icDraw(); };
     if(!r||r.err) return;
     icWhy(r, pickTk[st.tk]);
+    icBoard(pickTk[st.tk]);
     document.getElementById("iclDay").oninput=function(){ st.day=+this.value; icPlot(r); };
     icPlot(r); icCone(r);
   }
@@ -10726,6 +10736,25 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(prev && ((prev.y<0)!==(y<0))) out.push(prev.x+(x-prev.x)*(0-prev.y)/(y-prev.y));
       prev={x:x,y:y}; }
     return out.length>=2?[out[0],out[out.length-1]]:null;
+  }
+  function icBoard(p){
+    var el=document.getElementById("iclBoard"); if(!el) return;
+    if(!p||!p.board||!p.board.length){ el.innerHTML=""; return; }
+    function m(v){ return v==null?"\u2014":(v<0?"\u2212$":"$")+Math.abs(Math.round(v)).toLocaleString(); }
+    function d(x){ return Math.round(Math.abs(x)*100); }
+    var ex=(IC_DATA.rules&&IC_DATA.rules.exits)||[25,18,10];
+    el.innerHTML='<div class="icl-sub">The tournament <span>\u00b7 the best '+p.board.length+' of every short at 25\u201345 delta and long at 5\u201320 delta, ranked on market EV per $ of risk \u00b7 tap one to load it</span></div>'+
+      '<div class="ic-tbl icb"><div class="hd"><span>#</span><span>Expiry</span><span>Structure \u00b7 deltas</span><span>Credit</span><span>Max loss</span>'+ex.map(function(x){ return '<span>Mkt '+x+'d</span>'; }).join("")+ex.map(function(x){ return '<span>Hist '+x+'d</span>'; }).join("")+'<span>Lean</span></div>'+
+      p.board.map(function(b,i){ var L=b.legs, D=b.deltas, E=b.ev||{};
+        return '<div class="r" data-bi="'+i+'"><span>'+(i+1)+'</span><span>'+new Date(b.expiry+"T12:00:00Z").toLocaleDateString(undefined,{day:"numeric",month:"short"})+' <i>'+b.dte+'d</i></span>'+
+          '<span><span class="pp">'+L.long_put+'/'+L.short_put+'P</span> <span class="cc">'+L.short_call+'/'+L.long_call+'C</span> <i>'+d(D.long_put)+'/'+d(D.short_put)+' \u00b7 '+d(D.short_call)+'/'+d(D.long_call)+'\u0394</i></span>'+
+          '<span>$'+(+b.credit).toFixed(2)+'</span><span>'+m(-b.max_loss_1)+'</span>'+
+          ex.map(function(x){ var v=((E.market||{})[x]||{}).ev_1; return '<span class="ev'+(v>0?'':' neg')+(x===b.best_exit_dte?' best':'')+'">'+m(v)+'</span>'; }).join("")+
+          ex.map(function(x){ var v=((E.historical||{})[x]||{}).ev_1; return '<span class="ev'+(v>0?'':' neg')+'">'+m(v)+'</span>'; }).join("")+
+          '<span>'+b.lean+'</span></div>'; }).join("")+'</div>';
+    el.querySelectorAll("[data-bi]").forEach(function(row){ row.onclick=function(){ var b=p.board[+this.dataset.bi];
+      IC_LAB.exp=b.expiry; IC_LAB.lp=b.legs.long_put; IC_LAB.sp=b.legs.short_put; IC_LAB.sc=b.legs.short_call; IC_LAB.lc=b.legs.long_call; IC_LAB.exitDte=b.best_exit_dte; IC_LAB.day=null; icDraw();
+      var t=document.getElementById("icLab"); if(t) t.scrollIntoView({behavior:"smooth",block:"start"}); }; });
   }
   function icWhy(r,pick){
     var st=IC_LAB, el=document.getElementById("iclWhy"); if(!el) return;
@@ -10743,7 +10772,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       'The '+new Date(st.exp+"T12:00:00Z").toLocaleDateString(undefined,{day:"numeric",month:"short"})+' expiry, '+r.dte+' days out, closed by '+exitD+'. '+
       'The short put at '+f(st.sp)+' sits '+dP+' expected moves below spot'+wallP+'; the short call at '+f(st.sc)+' sits '+dC+' moves above'+wallC+'. '+
       'It collects $'+r.credit.toFixed(2)+' a share, '+Math.round(r.credit/r.width*100)+'% of the $'+f(r.width)+' width. '+
-      '<b>EV '+m(r.ev)+'</b> = '+Math.round(r.popX*100)+'% \u00d7 '+m(r.avgW*r.n)+' average win \u2212 '+Math.round((1-r.popX)*100)+'% \u00d7 '+m(r.avgL*r.n)+' average loss, after fees, at the exit date. It is positive because the options are priced at '+Math.round((r.L[1].iv+r.L[2].iv)/2*100)+'% implied vol against '+Math.round(r.rv*100)+'% realised \u2014 '+
+      '<b>EV '+m(r.ev)+'</b> on market probabilities = '+Math.round(r.popX*100)+'% \u00d7 '+m(r.avgW*r.n)+' average win \u2212 '+Math.round((1-r.popX)*100)+'% \u00d7 '+m(r.avgL*r.n)+' average loss, closed at '+r.exitDte+' DTE, after slippage and fees'+
+      (r.evHV!=null?'; on the stock\u2019s own 30-day vol it is <b>'+m(r.evHV)+'</b>':'')+'. '+
+      'Net delta '+(r.netDelta>=0?'+':'')+r.netDelta.toFixed(0)+' shares a contract \u2014 '+(Math.abs(r.netDelta)<5?'a neutral, time-decay trade':(r.netDelta>0?'a bullish lean':'a bearish lean'))+'. '+
+      'The options are priced at '+Math.round((r.L[1].iv+r.L[2].iv)/2*100)+'% implied vol against '+Math.round(r.rv*100)+'% realised \u2014 '+
       (vp>0?'a '+vp+'-point premium the seller collects; ':'no premium to collect, which is why EV is weak; ')+
       'priced at implied vol the same trade is worth '+m(r.evIV)+'. '+
       '<b>Risk '+m(r.maxLoss*r.n)+'</b> ('+r.n+' contract'+(r.n>1?'s':'')+') if the stock finishes below '+f(st.lp)+' or above '+f(st.lc)+'; '+
@@ -10850,7 +10882,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   }
   function icLoad(tk,reset){
     var p=((IC_DATA&&IC_DATA.picks)||[]).filter(function(x){ return x.ticker===tk; })[0];
-    if(p){ IC_LAB={tk:tk,exp:p.expiry,lp:p.legs.long_put,sp:p.legs.short_put,sc:p.legs.short_call,lc:p.legs.long_call,day:null}; }
+    if(p){ IC_LAB={tk:tk,exp:p.expiry,lp:p.legs.long_put,sp:p.legs.short_put,sc:p.legs.short_call,lc:p.legs.long_call,day:null,exitDte:p.best_exit_dte||null}; }
     else {                                                     // no pick: a sensible starting condor at the nearest monthly
       var c=icChain(tk), exps=Object.keys((c||{exps:{}}).exps).sort().filter(function(e){ var d=(new Date(e+"T12:00:00Z")-new Date())/864e5; return d>=35&&d<=90&&icMonthly(e); });
       var e=exps[0]||Object.keys((c||{exps:{}}).exps).sort().pop(); var q=icChain(tk,e); if(!q){ IC_LAB={tk:tk}; icDraw(); return; }
@@ -10861,6 +10893,22 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     }
     icDraw();
     if(reset!==false){ var t=document.getElementById("icLab"); if(t&&reset) t.scrollIntoView({behavior:"smooth",block:"start"}); }
+  }
+  // the forward test: every tournament winner, marked each morning, realised P&L at 25 / 18 / 10 DTE
+  function icForwardFill(){
+    var el=document.getElementById("icFwd"); if(!el) return;
+    supaRows("/rest/v1/ic_forward?select=opened,ticker,expiry,legs,credit,max_loss_1,model,result,status,marks&order=opened.desc&limit=500").then(function(rows){
+      rows=rows||[]; function m(v){ return v==null?"\u2014":(v<0?"\u2212$":"$")+Math.abs(Math.round(v)).toLocaleString(); }
+      if(!rows.length){ el.innerHTML='<div class="icl-sub" style="padding-left:0">Forward test <span>\u00b7 starts with the next morning run: each day\u2019s winners are opened on paper and marked every morning</span></div>'; return; }
+      var ex=[25,18,10], agg={};
+      rows.forEach(function(r){ ex.forEach(function(x){ var v=(r.result||{})[x]; if(v==null) return; var p=((((r.model||{}).ev||{}).market||{})[x]||{}).ev_1;
+        var a=agg[x]=agg[x]||{n:0,sum:0,win:0,pred:0}; a.n++; a.sum+=+v; a.win+=(v>0?1:0); a.pred+=(p||0); }); });
+      var open=rows.filter(function(r){ return r.status==="open"; }).length;
+      el.innerHTML='<div class="icl-sub" style="padding-left:0">Forward test <span>\u00b7 '+rows.length+' condors opened since '+rows[rows.length-1].opened+' \u00b7 '+open+' open \u00b7 realised per contract after slippage and fees</span></div>'+
+        '<div class="ic-tbl ic-fw"><div class="hd"><span>Exit</span><span>Closed</span><span>Win rate</span><span>Avg realised</span><span>Avg predicted</span><span>Total</span></div>'+
+        ex.map(function(x){ var a=agg[x]; if(!a) return '<div class="r"><span>'+x+' DTE</span><span>0</span><span>\u2014</span><span>\u2014</span><span>\u2014</span><span>\u2014</span></div>';
+          return '<div class="r"><span>'+x+' DTE</span><span>'+a.n+'</span><span>'+Math.round(a.win/a.n*100)+'%</span><span class="ev'+(a.sum>0?'':' neg')+'">'+m(a.sum/a.n)+'</span><span>'+m(a.pred/a.n)+'</span><span class="ev'+(a.sum>0?'':' neg')+'">'+m(a.sum)+'</span></div>'; }).join("")+'</div>';
+    }).catch(function(){ el.innerHTML=""; });
   }
   function mmeICFill(){
     var host=document.getElementById("mmeIC"); if(!host) return;
@@ -10874,15 +10922,17 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       host.innerHTML='<div class="ic-wrap"><div class="ic-hd"><span class="mme-sk">Iron condors <span>\u00b7 '+(IC_DATA.date||"")+'</span></span>'+
         '<span class="ic-rules">monthlies '+(R.dte_min||35)+'\u2013'+(R.dte_max||90)+'d \u00b7 exit at '+(R.exit_dte||19)+' DTE \u00b7 shorts out of the money \u00b7 up to $'+(IC_DATA.risk_per_trade||2000).toLocaleString()+' max loss per trade</span></div>'+
         '<div id="icLab" class="icl"></div>'+
-        (P.length?'<div class="ic-tbl ic-sm"><div class="hd"><span>Name</span><span>Expiry</span><span>Structure</span><span>Credit</span><span>Max loss</span><span>Win</span><span>EV</span><span>Spreads</span></div>'+
+        (P.length?'<div class="ic-tbl ic-sm"><div class="hd"><span>Name</span><span>Expiry</span><span>Structure</span><span>Credit</span><span>Max loss</span><span>Win</span><span>EV mkt</span><span>EV hist</span><span>Exit</span></div>'+
           P.map(function(p,i){ return '<div class="r'+(p.ev_total>0?'':' neg')+(IC_LAB&&IC_LAB.tk===p.ticker?' on':'')+'" data-ic="'+p.ticker+'"><span class="tk">'+(i===0&&p.ev_total>0?'\u2605 ':'')+p.ticker+'</span>'+
             '<span>'+new Date(p.expiry+"T12:00:00Z").toLocaleDateString(undefined,{day:"numeric",month:"short"})+' <i>'+p.dte+'d</i></span>'+
             '<span><span class="pp">'+k(p.legs.long_put)+'/'+k(p.legs.short_put)+'P</span> <span class="cc">'+k(p.legs.short_call)+'/'+k(p.legs.long_call)+'C</span></span>'+
-            '<span>$'+(+p.credit).toFixed(2)+' <i>\u00d7'+p.contracts+'</i></span><span>'+m(-p.max_loss_1*p.contracts)+'</span>'+
-            '<span>'+(p.pop_exit!=null?Math.round(p.pop_exit*100)+'%':'\u2014')+'</span><span class="ev">'+m(p.ev_total)+'</span>'+
-            '<span>'+(p.spread_pct_credit!=null?Math.round(p.spread_pct_credit*100)+'%':'\u2014')+'</span></div>'; }).join("")+'</div>':
+            '<span>$'+(+p.credit).toFixed(2)+'</span><span>'+m(-p.max_loss_1)+'</span>'+
+            '<span>'+(p.pop_exit!=null?Math.round(p.pop_exit*100)+'%':'\u2014')+'</span><span class="ev'+(p.ev_1>0?'':' neg')+'">'+m(p.ev_1)+'</span>'+
+            '<span class="ev'+(p.ev_hv_1>0?'':' neg')+'">'+(p.ev_hv_1==null?'\u2014':m(p.ev_hv_1))+'</span><span>'+(p.best_exit_dte||'')+'d</span></div>'; }).join("")+'</div>':
           '<div class="ed-note">No condor passed the screen today'+(IC_DATA.skipped?' \u2014 '+Object.keys(IC_DATA.skipped).length+' names did not qualify':'')+'. You can still build one in the lab above.</div>')+
+        '<div id="icFwd"></div>'+
         '<div class="ed-note" style="margin-top:8px">Credit is filled at mid less a quarter of the four spreads. EV assumes the stock moves at its 30-day realised vol until the exit date and the condor is closed there; EV at IV is the same at implied vol \u2014 the gap is the volatility premium the trade depends on. Spreads are what the four legs cost to cross, as a share of the credit; EV is after IBKR fees ($0.65 per contract per leg, in and out). Tap a row to load it above; drag a strike tag on the chart to move it.</div></div>';
+      icForwardFill();
       host.querySelectorAll("[data-ic]").forEach(function(el){ el.onclick=function(){ icLoad(el.dataset.ic,true);
         host.querySelectorAll("[data-ic]").forEach(function(x){ x.classList.toggle("on",x===el); }); }; });
       if(!IC_CH){ document.getElementById("icLab").innerHTML='<div class="ed-note">The chain file is not on hand yet \u2014 the lab needs mme_chains.json.</div>'; return; }
