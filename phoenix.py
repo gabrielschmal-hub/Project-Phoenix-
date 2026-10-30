@@ -11480,7 +11480,8 @@ def run_ic_screen():
             ivh.setdefault(r["ticker"], []).append((str(r["d"])[:10], float(r["iv30"])))
     except Exception as e:
         print(f"[ic] vol history unavailable: {e}")
-    Z = np.arange(-60, 61) / 10.0
+    # price nodes every 0.025 sigma: at 0.1 the win odds moved in 4-point steps and many names showed the same 70.9%
+    Z = np.arange(-240, 241) / 40.0
     W = np.exp(-Z * Z / 2); W = W / W.sum()
     from math import erf, sqrt, log
     def ncdf(x): return 0.5 * (1 + erf(x / sqrt(2)))

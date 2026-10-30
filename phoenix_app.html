@@ -1130,13 +1130,14 @@
   .ic-tbl .ev{color:var(--green);font-weight:700} .ic-tbl .ev.neg,.ic-tbl .r.neg .ev{color:var(--red)} .ic-tbl .evi{color:var(--inkFade)}
   .ic-tbl .pp{color:#d08a1c} .ic-tbl .cc{color:#4a86d0}
   /* ---- Options tab (Mission Control) ---- */
-  .opt{margin-top:6px}
-  .opt-hero{background:var(--card2);color:var(--ink);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;padding:18px 22px;margin-bottom:12px}
+  #mcPaneOpt{max-width:100%;overflow-x:hidden}
+  .opt{margin-top:6px;max-width:100%;min-width:0}
+  .opt-hero{background:var(--card2,#0C2137);color:var(--ink,#E7EEF6);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;padding:18px 22px;margin-bottom:12px}
   .opt-hero .opt-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
   .opt-hero .opt-h{font-size:22px;font-weight:700;margin-top:4px;line-height:1.25} .opt-hero .opt-sub{font-size:15px;opacity:.85;margin-top:4px}
   .opt-meta{font-family:var(--mono);font-size:12px;color:var(--inkFade);margin:4px 2px 8px}
-  .opt-evs{font-size:13px;font-style:italic;color:var(--ink);margin:0 2px 14px;line-height:1.7}
-  .opt-evr span{white-space:nowrap} .opt-evr i{color:var(--inkFade);margin:0 7px;font-style:normal}
+  .opt-evs{font-size:13px;font-style:italic;color:var(--ink);margin:0 2px 14px;line-height:1.7;overflow-wrap:anywhere}
+  .opt-evr{margin-bottom:4px} .opt-evr span{white-space:nowrap;display:inline-block} .opt-evr i{color:var(--inkFade);margin:0 4px;font-style:normal}
   .opt-sec{margin-top:18px;padding-top:6px;border-top:2px solid var(--line)}
   .opt-sk{font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--inkFade);margin:6px 2px 12px;display:flex;align-items:center;gap:8px}
   .opt-sk b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--gold);color:var(--bg);font-size:12px}
@@ -11025,8 +11026,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var asof=IC_DATA.asof?String(IC_DATA.asof).replace(" UTC",""):(IC_DATA.date||"");
       // events before each proposed expiry, the way the trade will have to sit through them
       var EV=IC_DATA.events||{};
-      var evHTML=Object.keys(EV).sort().map(function(e){ var xs=EV[e]||[]; if(!xs.length) return "";
-        return '<div class="opt-evr"><b>\ud83d\uddd3 '+optDate(e)+':</b> '+xs.map(function(x){ return '<span>'+optEsc(x.label)+' '+optDate(x.date)+'</span>'; }).join('<i>|</i>')+'</div>'; }).join("");
+      // each expiry lists only what it adds to the one before: the later expiries sit through everything above them too
+      var seen={}, evHTML=Object.keys(EV).sort().map(function(e,ix){ var xs=(EV[e]||[]).filter(function(x){ var k=x.label+x.date; if(seen[k]) return false; seen[k]=1; return true; });
+        if(!xs.length) return "";
+        return '<div class="opt-evr"><b>\ud83d\uddd3 '+optDate(e)+(ix?' adds':'')+':</b> '+xs.map(function(x){ return '<span>'+optEsc(x.label)+' '+optDate(x.date)+'</span>'; }).join(' <i>|</i> ')+'</div>'; }).join("");
       host.innerHTML=
         '<div class="opt">'+
         '<div class="opt-hero"><div class="opt-k">Options \u00b7 '+optEsc(IC_DATA.date||"")+'</div>'+
