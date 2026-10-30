@@ -7067,6 +7067,16 @@ CPI_2026 = ["2026-01-13", "2026-02-11", "2026-03-11", "2026-04-10",
             "2026-09-11", "2026-10-13", "2026-11-10", "2026-12-10"]
 
 
+# The other dates an option seller holds through (28 Oct 2026, from the coach's screen). Central banks and
+# releases publish their calendars a year ahead: check and extend these each January — a missing date
+# silently drops off the options page, it does not raise an error.
+NFP_2026 = ["2026-11-06", "2026-12-04"]
+FOMC_MINUTES_2026 = ["2026-11-18", "2026-12-30"]
+ECB_2026 = ["2026-10-29", "2026-12-17"]
+BOJ_2026 = ["2026-10-30", "2026-12-18"]
+OTHER_EVENTS_2026 = [("2026-11-01", "OPEC+", "OPEC+ meeting"), ("2026-11-03", "Election", "US midterm elections")]
+
+
 def _third_friday(year, month):
     from datetime import date, timedelta
     d = date(year, month, 1)
@@ -7654,6 +7664,14 @@ def run_calendar():
         out.append({"date": d, "type": "CPI", "label": "CPI release",
                     "detail": "08:30 ET. The regime's tightest gate is CPI y/y.",
                     "importance": "high"})
+    for lst, typ, lab, det in ((NFP_2026, "NFP", "Payrolls (NFP)", "08:30 ET. US jobs report."),
+                               (FOMC_MINUTES_2026, "Minutes", "FOMC minutes", "14:00 ET. Minutes of the last Fed meeting."),
+                               (ECB_2026, "ECB", "ECB decision", "Rate decision 14:15 CET."),
+                               (BOJ_2026, "BoJ", "BoJ decision", "Bank of Japan rate decision.")):
+        for d in lst:
+            out.append({"date": d, "type": typ, "label": lab, "detail": det, "importance": "medium"})
+    for d, typ, lab in OTHER_EVENTS_2026:
+        out.append({"date": d, "type": typ, "label": lab, "detail": lab, "importance": "medium"})
 
     for yr in (today.year, today.year + 1):
         for mo in range(1, 13):
@@ -7672,6 +7690,8 @@ def run_calendar():
                 "importance": "high" if triple else "medium"})
 
     out = [e for e in out if e["date"] >= (today - timedelta(days=2)).isoformat()]
+    for e in out:                                            # "ECB Oct 29": how the options page lists them
+        e["short"] = e["type"] if e["type"] not in ("OPEX",) else e["label"]
     out.sort(key=lambda e: e["date"])
     write_json("calendar", {"asof": _now(), "count": len(out), "events": out})
     nxt = out[0] if out else None
@@ -10822,7 +10842,7 @@ def run_mme_map():
     # PRIMARY: compute every name ourselves from the CBOE chains fetched this run (Elliott's method).
     computed, chains_date = {}, None
     try:
-        ch = json.load(open(os.path.join(OUTPUTS_DIR, "mme_chains.json")))
+        ch = _ic_load_chains() or json.load(open(os.path.join(OUTPUTS_DIR, "mme_chains.json")))
         chains_date = ch.get("close_of") or ch.get("date")
         computed = _mme_compute_from_chains(ch)
     except Exception as e:
@@ -10844,8 +10864,12 @@ def run_mme_map():
                       "rolloff_friday_B": c["rolloff_friday_B"], "rolloff_opex_B": c["rolloff_opex_B"],
                       "contracts": c["contracts"], "profile": c["profile"]})
             r["read"] = _mme_read(r)
-            if tk in IC.get("extra", []) and tk not in names:
-                etf_rows[tk] = r                 # index ETFs: priced for the condor screen, kept off Elliott's map
+            if tk not in names:
+                # index ETFs and the options screen's extra names: priced for the screen, kept off Elliott's map.
+                # Only the index ETFs keep their gamma profile — the rest would add a megabyte nobody draws.
+                if tk not in IC.get("extra", []):
+                    r.pop("profile", None)
+                etf_rows[tk] = r
             else:
                 rows[tk] = r
         up_fresh = False                        # the computation is the source; say so below
@@ -10937,6 +10961,9 @@ def run_mme_chains(max_dte=180, band=0.35):
         pass
     names = [t for t in dict.fromkeys(names) if t and t not in ("SPY", "QQQ", "IWM")]
     names += [t for t in IC.get("extra", []) if t not in names]       # index ETFs for the condor screen
+    mme_set = set(names)
+    uni = _ic_universe()                                               # + the options screen's ETFs and stocks
+    names += [t for t in uni if t not in mme_set]
     today = datetime.now(timezone.utc).date()
     out, fails = {}, []
     t0 = time.time()
@@ -10968,6 +10995,35 @@ def run_mme_chains(max_dte=180, band=0.35):
         out[tk] = {"spot": round(spot, 2), "contracts": len(rows), "skipped": skipped,
                    "expiries": sorted({r[0] for r in rows}), "rows": rows}
         time.sleep(0.4)
+    groups = {t: ("etf" if t in IC.get("extra", []) else uni.get(t, "mme")) for t in out}
+    # 1. the full set for the options screen, record and dealer map — this run only, not committed
+    try:
+        os.makedirs("_work", exist_ok=True)
+        with open(os.path.join("_work", "ic_chains_full.json"), "w") as f:
+            json.dump({"asof": _now(), "date": str(today), "close_of": str(today), "groups": groups,
+                       "row": ["expiry", "cp", "strike", "open_interest", "iv", "gamma_vendor", "bid", "ask"],
+                       "names": out, "failed": fails}, f, separators=(",", ":"))
+    except Exception as e:
+        print(f"[chains] full chain file not written: {e}")
+    # 2. one small file per name for the app's options lab: the screen's window only (20-100 days)
+    try:
+        lab_dir = os.path.join(OUTPUTS_DIR, "ic_chains"); os.makedirs(lab_dir, exist_ok=True)
+        for fn in os.listdir(lab_dir):
+            if fn.endswith(".json") and fn[:-5] not in {t.replace("/", "-").replace(".", "-") for t in out}:
+                os.remove(os.path.join(lab_dir, fn))
+        idx = {}
+        for t, c in out.items():
+            rows = [r for r in c["rows"] if 20 <= (datetime.strptime(r[0], "%Y-%m-%d").date() - today).days <= 100
+                    and r[7] > 0 and abs(r[2] / c["spot"] - 1) <= 0.30]
+            safe = t.replace("/", "-").replace(".", "-")
+            with open(os.path.join(lab_dir, safe + ".json"), "w") as f:
+                json.dump({"ticker": t, "spot": c["spot"], "date": str(today), "rows": rows}, f, separators=(",", ":"))
+            idx[t] = {"group": groups[t], "spot": c["spot"], "file": safe}
+        write_json("ic_universe", {"asof": _now(), "date": str(today), "names": idx})
+    except Exception as e:
+        print(f"[chains] lab chain files not written: {e}")
+    out_all = out
+    out = {t: v for t, v in out.items() if t in mme_set}               # mme_chains.json stays the MME set
     write_json("mme_chains", {
         "asof": _now(), "date": str(today), "close_of": str(today),
         "source": "CBOE delayed quotes (cdn.cboe.com), one request per name",
@@ -10977,7 +11033,7 @@ def run_mme_chains(max_dte=180, band=0.35):
                        "short puts, 120-pt 0.8-1.2x flip sweep; walls from gamma_vendor aggregated by strike at spot, "
                        "closest strike at or above 25% of the side maximum.",
         "names": out, "failed": fails})
-    n_ok = len(out); n_rows = sum(v["contracts"] for v in out.values())
+    n_ok = len(out_all); n_rows = sum(v["contracts"] for v in out_all.values())
     print(f"[chains] {n_ok}/{len(names)} names, {n_rows} contracts, {len(fails)} failed in {int(time.time()-t0)}s"
           + (f" — {'; '.join(fails[:4])}" if fails else ""))
     sb_heartbeat("mme_chains", n_ok >= max(5, len(names) // 2), f"{n_ok}/{len(names)} names · {n_rows} contracts · failed {len(fails)}")
@@ -11009,7 +11065,7 @@ def run_mme_chains(max_dte=180, band=0.35):
 # ============================================================
 IC = {"dte_min": 25, "dte_max": 95, "exit_dte": 18, "sleeve": 2000, "risk_per_trade": 2000,
       "tiers": [(25, 45, "1 month"), (46, 95, "2-3 months")], "exits": [25, 18, 10],
-      "short_delta": (0.25, 0.45), "long_delta": (0.05, 0.20), "board_size": 20,
+      "short_delta": (0.25, 0.45), "long_delta": (0.05, 0.20), "board_size": 12,
       # spreads decide whether an edge survives the fill: a leg wider than this share of its own mid is
       # untradeable, and a condor whose four spreads eat more than this share of the credit is skipped
       "max_leg_spread": 0.35, "max_spread_of_credit": 0.45,
@@ -11019,7 +11075,41 @@ IC = {"dte_min": 25, "dte_max": 95, "exit_dte": 18, "sleeve": 2000, "risk_per_tr
       "min_credit_width": 0.25,
       "slip": 0.25, "short_band_em": (0.5, 2.2), "max_short_cands": 12,
       "width_pct": (0.02, 0.035, 0.05), "min_short_bid": 0.05, "min_short_oi": 50,
-      "extra": ["QQQ", "SPY", "IWM"], "gh_nodes": 48, "shift_steps": 3}
+      "extra": ["QQQ", "SPY", "IWM"], "gh_nodes": 48, "shift_steps": 3,
+      # candidates per leg type per side: SPY/QQQ list a strike every dollar, so 25-45 delta can be 40 strikes and
+      # every-combination would be millions of condors x 121 price nodes. Thinned evenly across the delta band.
+      "max_leg_cands": 14,
+      # one open forward-test condor per name and expiry: a winner that repeats on the same expiry is the same
+      # trade, and counting it every morning inflates the sample without adding information
+      "forward_one_per_expiry": True,
+      # STRUCTURES (28 Oct 2026, Gabriel): iron condors with EQUAL wings only — a broken wing (1 wide on the
+      # put side, 6.5 on the call side, IBIT 27 Oct) is a directional bet dressed as a condor. Directional
+      # trades are their own structures and the CHART decides the side (_ic_chart_read): a bullish chart
+      # gets a bull put spread, a bearish one a bear call spread, a range an iron condor. Not a moving
+      # average and not the gamma flip — the flip still gates the condor, which needs a pinned tape.
+      "structures": ["IC", "PCS", "CCS"],
+      # the coach's starting guidelines for every structure: shorts 25-45 delta, longs 5-20 (to be tuned later)
+      "short_delta_ic": (0.25, 0.45), "short_delta_vert": (0.25, 0.45), "long_delta_any": (0.05, 0.20),
+      "min_credit_width_vertical": 0.25, "max_widths": 10,
+      # condor shorts within this many delta points of each other, so a condor stays neutral
+      "ic_max_delta_gap": 0.08,
+      # THE PROPOSED LIST: implied vol above what the stock delivers (realised vol with event days stripped),
+      # positive EV on the stock's own vol, ranked by EV as a share of the money at risk.
+      "min_iv_hv": 1.0, "rank_measure": "historical",
+      "event_types": ["FOMC", "CPI", "NFP", "ECB", "BoJ", "Minutes", "OPEC+", "Election"]}
+
+# THE CONDOR UNIVERSE (27 Oct 2026, Gabriel): not only the MME names — ETFs and other liquid US stocks too.
+# The MME names come from GEX_UNIVERSE; everything below is added for the condor tests only and is kept OFF
+# Elliott's map. To change the list without touching this file, put ic_universe.txt in the repo root:
+# one ticker per line, "ETF" after a ticker marks it as a fund (no earnings), "#" starts a comment.
+IC_UNIVERSE_DEFAULT = {
+    "etf": ["SPY", "QQQ", "IWM", "DIA", "GLD", "SLV", "TLT", "IEF", "LQD", "HYG", "EEM", "EFA", "FXI", "XLF", "XLE",
+            "XLK", "XLV", "XLI", "XLY", "XLP", "XLU", "XLB", "SMH", "SOXX", "XBI", "KRE", "GDX", "USO", "ARKK"],
+    "stock": ["JPM", "BAC", "WFC", "C", "GS", "MS", "V", "MA", "AXP", "PYPL", "COIN",
+              "XOM", "CVX", "OXY", "UNH", "LLY", "JNJ", "PFE", "MRK", "ABBV",
+              "KO", "PEP", "WMT", "COST", "TGT", "HD", "LOW", "MCD", "SBUX", "NKE", "DIS", "NFLX",
+              "CRM", "ADBE", "NOW", "CSCO", "BA", "CAT", "DE", "GE", "UBER", "ABNB", "SHOP", "VLO", "MPC", "TER", "TXN"],
+}
 
 
 def _ic_bs(S, K, T, sig, cp):
@@ -11077,42 +11167,289 @@ def _ic_eval(S, legs, T_exit_left, h_years, sig_phys, nodes, slip):
             "pop": phys["pop"], "avg_win": phys["avg_win"], "avg_loss": phys["avg_loss"]}
 
 
+def _ic_universe():
+    """{ticker: group} for the options screen. 'mme' = the MME names (seed + open/planned trades),
+    'etf' / 'stock' = the condor-only additions: IC_UNIVERSE_DEFAULT, or ic_universe.txt in the repo
+    root when it exists (one ticker per line, 'ETF' after a ticker for a fund, '#' starts a comment)."""
+    import os
+    mme = []
+    try:
+        mme += list(GEX_UNIVERSE.get("seed") or [])
+    except Exception:
+        pass
+    try:
+        mme += [str(t.get("ticker")).upper() for t in _load_trades() if t.get("status") in ("open", "plan")]
+    except Exception:
+        pass
+    out = {t: "mme" for t in dict.fromkeys(mme) if t and t not in ("SPY", "QQQ", "IWM")}
+    extra = {}
+    if os.path.exists("ic_universe.txt"):
+        for line in open("ic_universe.txt"):
+            line = line.split("#")[0].strip()
+            if not line:
+                continue
+            parts = line.replace(",", " ").split()
+            extra[parts[0].upper()] = "etf" if any(x.upper() == "ETF" for x in parts[1:]) else "stock"
+    else:
+        for g, tks in IC_UNIVERSE_DEFAULT.items():
+            for t in tks:
+                extra[t] = g
+    for t in IC.get("extra", []):
+        extra.setdefault(t, "etf")
+    for t, g in extra.items():
+        out.setdefault(t, g)
+    return out
+
+
+def _ic_strip_vol(rets):
+    """Annualised vol of daily log returns with event days removed: a return further than 4 robust sigmas
+    (1.4826 x median absolute deviation) from the median is an earnings gap or a one-off shock, not the
+    vol the stock delivers day to day. At most two are removed per window."""
+    import statistics, math
+    r = [x for x in rets if x is not None]
+    if len(r) < 10:
+        return None
+    med = statistics.median(r)
+    mad = statistics.median([abs(x - med) for x in r]) * 1.4826 or 1e-9
+    out = sorted(r, key=lambda x: -abs(x - med))
+    drop = [x for x in out[:2] if abs(x - med) > 4 * mad]
+    keep = list(r)
+    for x in drop:
+        keep.remove(x)
+    m = sum(keep) / len(keep)
+    return math.sqrt(sum((x - m) ** 2 for x in keep) / (len(keep) - 1)) * math.sqrt(252)
+
+
+def _ic_chart_read(H, L, C, D=None, k=4, lookback=130):
+    """THE CHART READ for directional trades (28 Oct 2026, Gabriel: "from the chart", not a moving average
+    or the gamma flip). Price structure on daily bars, in rules a person can check by eye:
+      swings      a swing high is a bar whose high is the highest of the k bars either side; a swing low
+                  likewise. Only the last `lookback` bars count.
+      support     the highest swing low below the last close; resistance the lowest swing high above it.
+      bias, first rule that fits:
+        breakout    the close is above the highest swing high of the window       -> bullish
+        breakdown   the close is below the lowest swing low of the window         -> bearish
+        uptrend     the last two swing highs AND the last two swing lows rise, and the close holds
+                    above the last swing low                                      -> bullish
+        downtrend   both fall, and the close is below the last swing high          -> bearish
+        otherwise   range between support and resistance                           -> neutral
+    Returns {bias, why, support, resistance, swings_high, swings_low}. Neutral picks the iron condor;
+    bullish a bull put spread, bearish a bear call spread — whichever the chart says, on either side."""
+    n = len(C)
+    if n < 2 * k + 10:
+        return {"bias": None, "why": "not enough history"}
+    s0 = max(k, n - lookback)
+    sh, sl = [], []
+    for i in range(s0, n - k):
+        if H[i] > max(H[i - k:i]) and H[i] >= max(H[i + 1:i + k + 1]):      # ties go to the first bar
+            sh.append((i, H[i]))
+        if L[i] < min(L[i - k:i]) and L[i] <= min(L[i + 1:i + k + 1]):
+            sl.append((i, L[i]))
+    last = C[-1]
+    dt = (lambda i: str(D[i])[:10]) if D is not None else (lambda i: i)
+    sup = max([v for _, v in sl if v < last], default=None)
+    res = min([v for _, v in sh if v > last], default=None)
+    out = {"support": round(sup, 2) if sup else None, "resistance": round(res, 2) if res else None,
+           "swings_high": [(dt(i), round(v, 2)) for i, v in sh[-6:]], "swings_low": [(dt(i), round(v, 2)) for i, v in sl[-6:]]}
+    if sh and last > max(v for _, v in sh):
+        return dict(out, bias="bullish", why=f"breakout: closed {last:.2f} above the highest swing high of the window ({max(v for _, v in sh):.2f})")
+    if sl and last < min(v for _, v in sl):
+        return dict(out, bias="bearish", why=f"breakdown: closed {last:.2f} below the lowest swing low of the window ({min(v for _, v in sl):.2f})")
+    if len(sh) >= 2 and len(sl) >= 2:
+        hh, hl = sh[-1][1] > sh[-2][1], sl[-1][1] > sl[-2][1]
+        lh, ll = sh[-1][1] < sh[-2][1], sl[-1][1] < sl[-2][1]
+        if hh and hl and last > sl[-1][1]:
+            return dict(out, bias="bullish", why=f"uptrend: higher highs ({sh[-2][1]:.2f} \u2192 {sh[-1][1]:.2f}) and higher lows ({sl[-2][1]:.2f} \u2192 {sl[-1][1]:.2f})")
+        if lh and ll and last < sh[-1][1]:
+            return dict(out, bias="bearish", why=f"downtrend: lower highs ({sh[-2][1]:.2f} \u2192 {sh[-1][1]:.2f}) and lower lows ({sl[-2][1]:.2f} \u2192 {sl[-1][1]:.2f})")
+    rng = f" between {sup:.2f} and {res:.2f}" if sup and res else ""
+    return dict(out, bias="neutral", why="range: no clean trend in the swings" + rng)
+
+
+def _ic_hist(tickers, today):
+    """{ticker: {hv30s, hv30, hv60s, close, chart, closes}} from Yahoo daily bars, one batch request.
+    hv30s is the event-stripped 30-day vol the screen compares implied vol against; chart is the price-structure
+    read that picks the direction (_ic_chart_read). Cached per day in outputs/ic_hist.json."""
+    import os, json, math
+    fp = os.path.join(OUTPUTS_DIR, "ic_hist.json")
+    try:
+        cache = json.load(open(fp))
+        if cache.get("date") == str(today) and set(tickers) <= set(cache.get("names") or {}):
+            return cache["names"]
+    except Exception:
+        cache = {}
+    out = {}
+    try:
+        import yfinance as yf
+        df = yf.download(list(tickers), period="1y", interval="1d", auto_adjust=True, progress=False, group_by="column", threads=True)
+        for tk in tickers:
+            try:
+                sub = {f: (df[f][tk] if hasattr(df[f], "columns") else df[f]) for f in ("High", "Low", "Close")}
+                frame = sub["Close"].to_frame("C").join(sub["High"].rename("H")).join(sub["Low"].rename("L")).dropna()
+                C = [float(v) for v in frame["C"].values]; H = [float(v) for v in frame["H"].values]; L = [float(v) for v in frame["L"].values]
+                D = [str(x)[:10] for x in frame.index]
+            except Exception:
+                continue
+            if len(C) < 60:
+                continue
+            rets = [math.log(C[i] / C[i - 1]) for i in range(1, len(C)) if C[i - 1] > 0]
+            raw30 = _realised_vol(C, 30)
+            out[tk] = {"hv30s": round(_ic_strip_vol(rets[-30:]) or 0, 4) or None, "hv60s": round(_ic_strip_vol(rets[-60:]) or 0, 4) or None,
+                       "hv30": round(raw30 / 100, 4) if raw30 else None, "close": round(C[-1], 2),
+                       "chart": _ic_chart_read(H, L, C, D),
+                       "bars": {"t": D[-130:], "h": [round(x, 2) for x in H[-130:]], "l": [round(x, 2) for x in L[-130:]], "c": [round(x, 2) for x in C[-130:]]}}
+    except Exception as e:
+        print(f"[ic] Yahoo bars unavailable ({e}) — no chart read, so no directional trades today")
+    write_json("ic_hist", {"asof": _now(), "date": str(today), "names": out})
+    return out
+
+
+def _ic_earnings(stocks, today, ivem):
+    """{ticker: {"date": YYYY-MM-DD, "src": ...}} for single stocks. Known dates from the earnings state and
+    iv_em first; any stock still without a future date is asked of Yahoo (capped, cached a week). A date
+    in the past means the next one is unknown: it is estimated a quarter (91 days) later and marked so."""
+    import os, json
+    from datetime import datetime, timedelta
+    known = dict((_load_earnings_state() or {}).get("next_dates") or {})
+    fp = os.path.join(OUTPUTS_DIR, "ic_earnings.json")
+    try:
+        cache = json.load(open(fp)).get("names") or {}
+    except Exception:
+        cache = {}
+    out = {}
+    def fut(ds):
+        return ds and str(ds)[:10] >= str(today)
+    ask = []
+    for tk in stocks:
+        cands = [(known.get(tk), "earnings state"), ((ivem.get(tk) or {}).get("next_earnings"), "iv_em"), ((cache.get(tk) or {}).get("date"), "yahoo")]
+        best = next(((d, s) for d, s in cands if fut(d)), None)
+        if best:
+            out[tk] = {"date": str(best[0])[:10], "src": best[1]}; continue
+        chk = (cache.get(tk) or {}).get("checked")
+        if not chk or (today - datetime.strptime(chk, "%Y-%m-%d").date()).days >= 7:
+            ask.append(tk)
+        past = next((d for d, s in cands if d), None)
+        if past:
+            est = datetime.strptime(str(past)[:10], "%Y-%m-%d").date()
+            while est < today:
+                est += timedelta(days=91)
+            out[tk] = {"date": str(est), "src": "estimated (last + 91d)"}
+    if ask:
+        try:
+            import yfinance as yf
+            for tk in ask[:60]:
+                ed = None
+                try:
+                    cal = yf.Ticker(tk).calendar
+                    if isinstance(cal, dict):
+                        ed = cal.get("Earnings Date")
+                        if isinstance(ed, list) and ed:
+                            ed = ed[0]
+                except Exception:
+                    pass
+                ds = (ed.strftime("%Y-%m-%d") if hasattr(ed, "strftime") else str(ed)[:10]) if ed is not None else None
+                cache[tk] = {"date": ds, "checked": str(today)}
+                if fut(ds):
+                    out[tk] = {"date": ds, "src": "yahoo"}
+        except Exception as e:
+            print(f"[ic] Yahoo earnings lookup failed: {e}")
+    write_json("ic_earnings", {"asof": _now(), "names": cache})
+    return out
+
+
+def _ic_load_chains():
+    """The full chain set for the options screen: _work/ic_chains_full.json (every name the screen
+    covers, written by run_mme_chains this run, not committed), else mme_chains.json."""
+    import os, json
+    for fp in (os.path.join("_work", "ic_chains_full.json"), os.path.join(OUTPUTS_DIR, "mme_chains.json")):
+        try:
+            return json.load(open(fp))
+        except Exception:
+            continue
+    return None
+
+
+def _ic_iv30(rows, S, today):
+    """30-day at-the-money implied vol: the ATM IV of the expiries either side of 30 days, interpolated
+    in total variance. One expiry only -> its ATM IV."""
+    from datetime import datetime
+    import math
+    atm = {}
+    for r in rows or []:
+        if not r[4]:
+            continue
+        if r[0] not in atm or abs(float(r[2]) - S) < abs(atm[r[0]][0] - S):
+            atm[r[0]] = (float(r[2]), float(r[4]))
+    pts = []
+    for e, (_, v) in atm.items():
+        try:
+            d = (datetime.strptime(e, "%Y-%m-%d").date() - today).days
+        except Exception:
+            continue
+        if d >= 5:
+            pts.append((d, v))
+    if not pts:
+        return None
+    pts.sort()
+    lo = [p for p in pts if p[0] <= 30]; hi = [p for p in pts if p[0] >= 30]
+    if lo and hi:
+        (d1, v1), (d2, v2) = lo[-1], hi[0]
+        if d1 == d2:
+            return round(v1, 4)
+        w = (30 - d1) / (d2 - d1)
+        var = v1 * v1 * d1 + w * (v2 * v2 * d2 - v1 * v1 * d1)
+        return round(math.sqrt(max(var, 0) / 30), 4)
+    return round((lo[-1] if lo else hi[0])[1], 4)
+
+
+def _ic_label(row):
+    """The trade in one line, the way it is read off the screen.
+    IC Dec18 90/93 ±2 · 32%   (shorts, wing width, credit as a share of the width)
+    Dec18 −340P +280P · 9.65   (sell the 340 put, buy the 280, for 9.65 a share)"""
+    from datetime import datetime
+    e = datetime.strptime(row["expiry"], "%Y-%m-%d").strftime("%b%d").replace(" ", "")
+    L = row["legs"]
+    f = lambda v: ("%g" % float(v))
+    if row["structure"] == "IC":
+        return f"IC {e} {f(L['short_put'])}/{f(L['short_call'])} \u00b1{f(row['width'])} \u00b7 {round(row['credit_to_width'] * 100)}%"
+    if row["structure"] == "PCS":
+        return f"{e} \u2212{f(L['short_put'])}P +{f(L['long_put'])}P \u00b7 {row['credit']:.2f}"
+    return f"{e} \u2212{f(L['short_call'])}C +{f(L['long_call'])}C \u00b7 {row['credit']:.2f}"
+
+
 def run_ic_screen():
     """
-    IRON CONDOR TOURNAMENT (coach call, 26 Oct 2026).
+    OPTIONS TOURNAMENT (coach call 26 Oct 2026; structures and universe 28 Oct 2026).
 
-    Data. Option chain: CBOE delayed quotes (cdn.cboe.com/api/global/delayed_quotes/options/<T>.json),
-    fetched by run_mme_chains in the morning run — bid, ask, open interest and implied vol per contract.
-    Implied vol: each contract's own IV from that feed. Historical vol: 30-day close-to-close realised vol
-    from Yahoo daily closes, computed in run_iv_em (iv_em.json, rv30_pct).
+    Universe: the MME names plus liquid ETFs and US stocks (_ic_universe). Chains: CBOE delayed quotes,
+    fetched by run_mme_chains this run — bid, ask, open interest and implied vol per contract.
 
-    Strikes, by delta (Black-Scholes with each contract's own IV, to expiry):
-      short legs  |delta| between 0.25 and 0.45, and out of the money — never in the money
-      long legs   |delta| between 0.05 and 0.20, beyond their short leg
-    Every short put x long put x short call x long call inside those bands competes ("the tournament"),
-    each expiry tier separately: about one month (25-45 DTE) first, then two to three months (45-95).
+    The chart picks the structure (_ic_chart_read, price structure on daily bars):
+      range    -> IC   iron condor with EQUAL wings, both shorts at similar deltas (and spot above its flip)
+      bullish  -> PCS  bull put spread (sell a put, buy a lower one)
+      bearish  -> CCS  bear call spread (sell a call, buy a higher one)
+    Strikes by delta (Black-Scholes, each contract's own IV), the coach's starting guidelines: shorts
+    25-45 delta, longs 5-20 delta beyond their short. Every short x wing width inside those bands competes.
 
-    EV, per structure, at three exits — 25, 18 and 10 days to expiry:
-      the stock at the exit date is drawn from a lognormal, the condor is revalued there with each leg's
-      own IV (sticky strike), and EV = P(win) x average win - P(loss) x average loss, after slippage
-      (a quarter of each leg's spread, in and out) and fees ($0.65 per contract per leg, in and out).
-      Two probability measures:
-        market      the distribution the options imply — the at-the-money IV of that expiry
-        historical  the stock's own 30-day realised vol
-      Ranked on the market measure first, as agreed; the historical figure sits beside it. Under market
-      probabilities a fairly priced condor is worth about minus its costs, so most of these will be
-      negative: what is left over is the skew and the term structure. A positive historical EV says
-      the options are expensive relative to how the stock has actually moved.
-    Size is per contract; the ranking uses EV per dollar of max loss so a narrow condor and a wide one
-    compete on the same footing. Negative results are kept and shown, not hidden.
+    EV per structure at three exits (25, 18, 10 days to expiry): the stock at the exit date is drawn from a
+    lognormal, the position is revalued there with each leg's own IV (sticky strike), and
+    EV = P(win) x average win - P(loss) x average loss, after slippage (a quarter of each leg's spread, in
+    and out) and fees ($0.65 per contract per leg, in and out). Two measures:
+      market      the at-the-money IV of that expiry — what the options themselves imply
+      historical  the stock's own 30-day realised vol with event days stripped — what it actually delivers
+    A seller's edge is implied above delivered, so the ranking uses the historical measure (EV as a share of
+    max loss); the market figure sits beside it as the cost of the trade at a fair price.
+
+    The proposed list: each name's winner where implied vol is above the stripped realised vol, EV is
+    positive, and no earnings date falls before the exit. Single stocks with no known earnings date are
+    left out rather than assumed safe.
     """
     import os, json, math
     import numpy as np
     from datetime import datetime, timedelta
-    try:
-        ch = json.load(open(os.path.join(OUTPUTS_DIR, "mme_chains.json")))
-    except Exception as e:
-        print(f"[ic] no chain file ({e}) — skipped"); return None
+    ch = _ic_load_chains()
+    if not ch:
+        print("[ic] no chain file — skipped"); return None
     try:
         mm = json.load(open(os.path.join(OUTPUTS_DIR, "mme_map.json")))
         mmrows = {r["ticker"]: r for g in (mm.get("groups") or {}).values() for r in g}
@@ -11123,7 +11460,26 @@ def run_ic_screen():
         ivem = json.load(open(os.path.join(OUTPUTS_DIR, "iv_em.json"))).get("tickers") or {}
     except Exception:
         ivem = {}
+    try:
+        cal = json.load(open(os.path.join(OUTPUTS_DIR, "calendar.json"))).get("events") or []
+    except Exception:
+        cal = []
     today = datetime.strptime(str(ch.get("close_of") or ch.get("date"))[:10], "%Y-%m-%d").date()
+    names = ch.get("names") or {}
+    groups = dict(ch.get("groups") or {})
+    uni = _ic_universe()
+    for t in names:
+        groups.setdefault(t, uni.get(t, "mme"))
+    hist = _ic_hist(sorted(names), today)
+    earn_all = _ic_earnings([t for t in names if groups.get(t) != "etf"], today, ivem)
+    # implied-vol history: a week ago, and the 1-year rank once enough of it has been recorded
+    ivh = {}
+    try:
+        for r in _sb_get("ic_vol_history", {"select": "d,ticker,iv30", "iv30": "not.is.null",
+                                            "d": f"gte.{today - timedelta(days=370)}"}, limit=60000) or []:
+            ivh.setdefault(r["ticker"], []).append((str(r["d"])[:10], float(r["iv30"])))
+    except Exception as e:
+        print(f"[ic] vol history unavailable: {e}")
     Z = np.arange(-60, 61) / 10.0
     W = np.exp(-Z * Z / 2); W = W / W.sum()
     from math import erf, sqrt, log
@@ -11142,18 +11498,55 @@ def run_ic_screen():
             y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * np.exp(-z * z)
             return 0.5 * (1 + np.where(x >= 0, y, -y))
         return Sv * ndtr(d1) - K * ndtr(d2) if cp == "C" else K * ndtr(-d2) - Sv * ndtr(-d1)
-    fee = 8 * IC["commission_leg"]                         # per contract, four legs in and out
-    picks, skipped, boards = [], {}, {}
-    for tk, c in (ch.get("names") or {}).items():
+    def thin(xs, n):
+        """at most n items, spread evenly through the list"""
+        xs = list(xs)
+        if len(xs) <= n:
+            return xs
+        return [xs[round(i * (len(xs) - 1) / (n - 1))] for i in range(n)]
+    fee_v = 4 * IC["commission_leg"]                       # per contract: two legs in, two out
+    slip = IC["slip"]
+    picks, skipped, vol = [], {}, {}
+    n_struct = {"IC": 0, "PCS": 0, "CCS": 0}
+    for tk, c in names.items():
         S = c.get("spot")
         if not S:
             continue
+        grp = groups.get(tk, "mme")
         mr = mmrows.get(tk) or {}
-        if mr and (mr.get("regime") == "red" or (mr.get("dist_flip_em") or 0) < 0):
-            skipped[tk] = "below its flip (negative gamma)"; continue
+        h = hist.get(tk) or {}
         iv_row = ivem.get(tk) or {}
-        hv = (iv_row.get("rv30_pct") or 0) / 100.0
-        earn = iv_row.get("next_earnings")
+        hv = h.get("hv30s") or ((iv_row.get("rv30_pct") or 0) / 100.0) or None
+        chart = h.get("chart") or {}
+        bias = chart.get("bias")
+        iv30 = _ic_iv30(c.get("rows"), S, today)
+        hx = sorted(ivh.get(tk) or [])
+        wk = [v for d_, v in hx if d_ <= str(today - timedelta(days=7))]
+        iv30_wk = wk[-1] if wk else None
+        allv = [v for _, v in hx] + ([iv30] if iv30 else [])
+        ivr = ivr_wk = None
+        if len(allv) >= 60 and max(allv) > min(allv):        # a rank needs a range: three months of recorded history first
+            lo_, hi_ = min(allv), max(allv)
+            ivr = round((iv30 - lo_) / (hi_ - lo_) * 100) if iv30 else None
+            ivr_wk = round((iv30_wk - lo_) / (hi_ - lo_) * 100) if iv30_wk else None
+        e_info = earn_all.get(tk) if grp != "etf" else None
+        earn = (e_info or {}).get("date")
+        vol[tk] = {"group": grp, "spot": S, "iv30": iv30, "iv30_wk": iv30_wk, "ivr": ivr, "ivr_wk": ivr_wk, "ivr_days": len(allv),
+                   "hv30s": hv, "hv30": h.get("hv30"), "bias": bias, "chart_why": chart.get("why"),
+                   "support": chart.get("support"), "resistance": chart.get("resistance"),
+                   "regime": mr.get("regime"), "flip": mr.get("flip"), "earnings": earn, "earnings_src": (e_info or {}).get("src")}
+        red = bool(mr) and (mr.get("regime") == "red" or (mr.get("dist_flip_em") or 0) < 0)
+        # the chart picks the structure: a range -> iron condor, a bullish chart -> bull put spread, a bearish
+        # one -> bear call spread. The gamma flip gates only the condor (it needs a tape dealers pin).
+        want = {"neutral": "IC", "bullish": "PCS", "bearish": "CCS"}.get(bias)
+        allowed = {want} & set(IC["structures"]) if want else set()
+        if "IC" in allowed and red:
+            allowed = set()
+        if not allowed:
+            skipped[tk] = ("below its flip (negative gamma) with a range-bound chart" if (red and bias == "neutral")
+                           else "no chart read (price history unavailable)"); continue
+        if grp != "etf" and not earn:
+            skipped[tk] = "earnings date unknown"; continue
         by = {}
         for r in c.get("rows") or []:
             try:
@@ -11163,8 +11556,6 @@ def run_ic_screen():
             dte = (e - today).days
             if not (IC["tiers"][0][0] <= dte <= IC["tiers"][-1][1]):
                 continue
-            # the one-month tier takes any Friday expiry: between monthlies there is often no third Friday
-            # 25-45 days out (on 26 Oct the nearest were 24 and 53 days). Longer tiers stay on monthlies.
             if dte > IC["tiers"][0][1] and not _ic_monthly(e):
                 continue
             if dte <= IC["tiers"][0][1] and e.weekday() != 4:
@@ -11173,128 +11564,200 @@ def run_ic_screen():
             if iv <= 0 or ask <= 0 or bid < 0:
                 continue
             if (ask - bid) > IC["max_leg_spread"] * max((ask + bid) / 2, 0.01):
-                continue                                  # a leg that cannot be filled near its mid never enters
+                continue
             by.setdefault(e, {}).setdefault(r[1], {})[K] = (iv, bid, ask, oi)
-        board, why = [], {"no_quotes": 0, "earnings": 0, "thin": 0, "spread": 0}
+        board, why = [], {"no_quotes": 0, "earnings": 0, "thin": 0, "spread": 0, "budget": 0}
         for e, sides in sorted(by.items()):
             dte = (e - today).days
             tier = next((lab for lo, hi, lab in IC["tiers"] if lo <= dte <= hi), None)
             P, Cc = sides.get("P") or {}, sides.get("C") or {}
-            if not P or not Cc or not tier:
-                why["no_quotes"] += 1; continue
             exits = [x for x in IC["exits"] if x < dte - 2]
-            if earn and str(today) <= str(earn) <= str(e - timedelta(days=min(exits or [0]))):
+            if not tier or not exits:
+                why["no_quotes"] += 1; continue
+            if earn and str(today) <= str(earn) <= str(e - timedelta(days=min(exits))):
                 why["earnings"] += 1; continue
             T = dte / 365.0
-            dP = {K: delta(S, K, T, v[0], "P") for K, v in P.items()}
-            dC = {K: delta(S, K, T, v[0], "C") for K, v in Cc.items()}
-            sd_lo, sd_hi = IC["short_delta"]; ld_lo, ld_hi = IC["long_delta"]
-            shortsP = [K for K in P if K < S and sd_lo <= -dP[K] <= sd_hi and P[K][1] >= IC["min_short_bid"]]
-            shortsC = [K for K in Cc if K > S and sd_lo <= dC[K] <= sd_hi and Cc[K][1] >= IC["min_short_bid"]]
-            longsP = [K for K in P if K < S and ld_lo <= -dP[K] <= ld_hi]
-            longsC = [K for K in Cc if K > S and ld_lo <= dC[K] <= ld_hi]
-            pairsP = [(sp, lp) for sp in shortsP for lp in longsP if lp < sp]
-            pairsC = [(sc, lc) for sc in shortsC for lc in longsC if lc > sc]
-            if not pairsP or not pairsC:
-                why["no_quotes"] += 1; continue
-            atm = min(list(P.items()) + list(Cc.items()), key=lambda kv: abs(kv[0] - S))[1][0]
             mid = lambda q: (q[1] + q[2]) / 2
             spr = lambda q: q[2] - q[1]
-            # per spread: credit at mid, spread cost, width, deltas
-            cpP = np.array([mid(P[sp]) - mid(P[lp]) for sp, lp in pairsP]); spP = np.array([spr(P[sp]) + spr(P[lp]) for sp, lp in pairsP])
-            cpC = np.array([mid(Cc[sc]) - mid(Cc[lc]) for sc, lc in pairsC]); spC = np.array([spr(Cc[sc]) + spr(Cc[lc]) for sc, lc in pairsC])
-            wP = np.array([sp - lp for sp, lp in pairsP]); wC = np.array([lc - sc for sc, lc in pairsC])
-            credit_mid = cpP[:, None] + cpC[None, :]
-            spreads = spP[:, None] + spC[None, :]
-            credit = credit_mid - IC["slip"] * spreads
-            width = np.maximum(wP[:, None], wC[None, :])
-            max_loss = (width - credit) * 100 + fee
-            ok = (credit > 0) & (credit >= IC["min_credit_width"] * width) & (spreads <= IC["max_spread_of_credit"] * np.maximum(credit_mid, 0.01)) \
-                 & (max_loss <= IC["risk_per_trade"])                   # one contract must fit the per-trade risk
-            why["budget"] = why.get("budget", 0) + int((max_loss > IC["risk_per_trade"]).sum())
-            why["thin"] += int(((credit < IC["min_credit_width"] * width)).sum())
-            why["spread"] += int((spreads > IC["max_spread_of_credit"] * np.maximum(credit_mid, 0.01)).sum())
+            allq = list(P.items()) + list(Cc.items())
+            if not allq:
+                why["no_quotes"] += 1; continue
+            atm = min(allq, key=lambda kv: abs(kv[0] - S))[1][0]
+            dP = {K: delta(S, K, T, v[0], "P") for K, v in P.items()}
+            dC = {K: delta(S, K, T, v[0], "C") for K, v in Cc.items()}
+            ld_lo, ld_hi = IC["long_delta_any"]
+            def side_pairs(Q, D, cp, band):
+                lo, hi = band
+                if cp == "P":
+                    shorts = sorted([K for K in Q if K < S and lo <= -D[K] <= hi and Q[K][1] >= IC["min_short_bid"]], key=lambda K: -D[K])
+                    longs = [K for K in Q if K < S and ld_lo <= -D[K] <= ld_hi]
+                    pairs = [(sp, lp) for sp in shorts for lp in longs if lp < sp]
+                    width = lambda pr: round(pr[0] - pr[1], 4)
+                else:
+                    shorts = sorted([K for K in Q if K > S and lo <= D[K] <= hi and Q[K][1] >= IC["min_short_bid"]], key=lambda K: D[K])
+                    longs = [K for K in Q if K > S and ld_lo <= D[K] <= ld_hi]
+                    pairs = [(sc, lc) for sc in shorts for lc in longs if lc > sc]
+                    width = lambda pr: round(pr[1] - pr[0], 4)
+                keep_s = set(thin(shorts, IC["max_leg_cands"]))
+                return [pr for pr in pairs if pr[0] in keep_s], width
+            cands = []                                         # (structure, put pair or None, call pair or None)
+            if "IC" in allowed:
+                pp, wP = side_pairs(P, dP, "P", IC["short_delta_ic"]); cc, wC = side_pairs(Cc, dC, "C", IC["short_delta_ic"])
+                common = sorted(set(map(wP, pp)) & set(map(wC, cc)))
+                common = thin(common, IC["max_widths"])
+                for w in common:
+                    for a in [x for x in pp if wP(x) == w]:
+                        for b in [x for x in cc if wC(x) == w]:
+                            # a condor is the neutral trade: its two shorts at similar deltas. A lean is a spread's job.
+                            if abs(-dP[a[0]] - dC[b[0]]) <= IC["ic_max_delta_gap"]:
+                                cands.append(("IC", a, b))
+            if "PCS" in allowed:
+                pp, wP = side_pairs(P, dP, "P", IC["short_delta_vert"])
+                ws = set(thin(sorted(set(map(wP, pp))), IC["max_widths"]))
+                cands += [("PCS", a, None) for a in pp if wP(a) in ws]
+            if "CCS" in allowed:
+                cc, wC = side_pairs(Cc, dC, "C", IC["short_delta_vert"])
+                ws = set(thin(sorted(set(map(wC, cc))), IC["max_widths"]))
+                cands += [("CCS", None, b) for b in cc if wC(b) in ws]
+            if not cands:
+                why["no_quotes"] += 1; continue
+            n = len(cands)
+            cm = np.zeros(n); sp_ = np.zeros(n); wd = np.zeros(n); nl = np.zeros(n)
+            for i, (stc, a, b) in enumerate(cands):
+                if a:
+                    cm[i] += mid(P[a[0]]) - mid(P[a[1]]); sp_[i] += spr(P[a[0]]) + spr(P[a[1]]); wd[i] = max(wd[i], a[0] - a[1]); nl[i] += 2
+                if b:
+                    cm[i] += mid(Cc[b[0]]) - mid(Cc[b[1]]); sp_[i] += spr(Cc[b[0]]) + spr(Cc[b[1]]); wd[i] = max(wd[i], b[1] - b[0]); nl[i] += 2
+            fee = nl * 2 * IC["commission_leg"]
+            credit = cm - slip * sp_
+            max_loss = (wd - credit) * 100 + fee
+            min_cw = np.array([IC["min_credit_width"] if c_[0] == "IC" else IC["min_credit_width_vertical"] for c_ in cands])
+            ok_thin = credit >= min_cw * wd
+            ok_spread = sp_ <= IC["max_spread_of_credit"] * np.maximum(cm, 0.01)
+            ok_budget = max_loss <= IC["risk_per_trade"]
+            ok = (credit > 0) & ok_thin & ok_spread & ok_budget
+            why["thin"] += int((~ok_thin).sum()); why["spread"] += int((~ok_spread).sum()); why["budget"] += int((~ok_budget).sum())
             if not ok.any():
                 continue
+            idx = np.where(ok)[0]
+            cands = [cands[i] for i in idx]; credit, cm, sp_, wd, fee, max_loss = credit[idx], cm[idx], sp_[idx], wd[idx], fee[idx], max_loss[idx]
+            upP = sorted({a for _, a, _ in cands if a}); upC = sorted({b for _, _, b in cands if b})
+            pos_p = {a: i + 1 for i, a in enumerate(upP)}; pos_c = {b: i + 1 for i, b in enumerate(upC)}
+            ip = np.array([pos_p.get(a, 0) if a else 0 for _, a, _ in cands]); icx = np.array([pos_c.get(b, 0) if b else 0 for _, _, b in cands])
             res = {}
-            for meas, sig in (("market", atm), ("historical", hv if hv > 0 else None)):
+            for meas, sig in (("market", atm), ("historical", hv)):
                 if not sig:
                     continue
                 for x in exits:
-                    h = (dte - x) / 365.0; Tl = x / 365.0
-                    Sv = S * np.exp(-0.5 * sig * sig * h + sig * math.sqrt(h) * Z)
-                    vP = {K: bs_vec(Sv, K, Tl, P[K][0], "P") for K in set(k for pr in pairsP for k in pr)}
-                    vC = {K: bs_vec(Sv, K, Tl, Cc[K][0], "C") for K in set(k for pr in pairsC for k in pr)}
-                    buyP = np.array([vP[sp] - vP[lp] for sp, lp in pairsP])      # cost to buy each put spread back
-                    buyC = np.array([vC[sc] - vC[lc] for sc, lc in pairsC])
-                    pnl = (credit[:, :, None] - buyP[:, None, :] - buyC[None, :, :] - IC["slip"] * spreads[:, :, None]) * 100 - fee
+                    hh = (dte - x) / 365.0; Tl = x / 365.0
+                    Sv = S * np.exp(-0.5 * sig * sig * hh + sig * math.sqrt(hh) * Z)
+                    val = {}
+                    def v(cp, K):
+                        if (cp, K) not in val:
+                            val[(cp, K)] = bs_vec(Sv, K, Tl, (P if cp == "P" else Cc)[K][0], cp)
+                        return val[(cp, K)]
+                    # each vertical is valued once; a condor is its put spread plus its call spread (row 0 = none)
+                    vp = np.vstack([np.zeros(len(Z))] + [v("P", a[0]) - v("P", a[1]) for a in upP])
+                    vc = np.vstack([np.zeros(len(Z))] + [v("C", b[0]) - v("C", b[1]) for b in upC])
+                    buy = vp[ip] + vc[icx]
+                    pnl = (credit[:, None] - buy - slip * sp_[:, None]) * 100 - fee[:, None]
                     win = pnl > 0
                     pw = (win * W).sum(-1); pl = 1 - pw
                     aw = np.where(pw > 0, (np.where(win, pnl, 0) * W).sum(-1) / np.maximum(pw, 1e-12), 0)
                     al = np.where(pl > 0, -(np.where(~win, pnl, 0) * W).sum(-1) / np.maximum(pl, 1e-12), 0)
                     res[(meas, x)] = (pw * aw - pl * al, pw, aw, al)
-            if ("market", exits[0]) not in res:
-                continue
-            # the ranking: market EV per $ of max loss, best exit
-            best_by_combo = np.full(credit.shape, -np.inf); best_exit = np.zeros(credit.shape, dtype=int)
+            rank_meas = "historical" if (IC["rank_measure"] == "historical" and hv) else "market"
+            best = np.full(len(cands), -np.inf); bx = np.zeros(len(cands), dtype=int)
             for x in exits:
-                ev = res[("market", x)][0] / np.maximum(max_loss, 1)
-                better = ev > best_by_combo
-                best_by_combo = np.where(better, ev, best_by_combo); best_exit = np.where(better, x, best_exit)
-            best_by_combo = np.where(ok, best_by_combo, -np.inf)
-            flat = np.argsort(best_by_combo, axis=None)[::-1][:IC["board_size"]]
-            for idx in flat:
-                i, j = np.unravel_index(idx, credit.shape)
-                if not np.isfinite(best_by_combo[i, j]):
-                    break
-                sp, lp = pairsP[i]; sc, lc = pairsC[j]; xb = int(best_exit[i, j])
-                net_delta = round((-dP[sp] + dP[lp] - dC[sc] + dC[lc]) * 100, 1)          # shares-equivalent per contract
-                row = {"ticker": tk, "expiry": str(e), "dte": dte, "tier": tier,
-                       "legs": {"long_put": lp, "short_put": sp, "short_call": sc, "long_call": lc},
-                       "deltas": {"long_put": round(dP[lp], 3), "short_put": round(dP[sp], 3), "short_call": round(dC[sc], 3), "long_call": round(dC[lc], 3)},
-                       "credit": round(float(credit[i, j]), 2), "credit_mid": round(float(credit_mid[i, j]), 2),
-                       "width": round(float(width[i, j]), 2), "put_width": round(sp - lp, 2), "call_width": round(lc - sc, 2),
-                       "credit_to_width": round(float(credit[i, j] / width[i, j]), 3),
-                       "max_loss_1": round(float(max_loss[i, j]), 0), "max_profit_1": round(float(credit[i, j] * 100 - fee), 0),
-                       "spread_cost_1": round(float(spreads[i, j] * 100), 2), "spread_pct_credit": round(float(spreads[i, j] / max(credit_mid[i, j], 0.01)), 3),
-                       "fees_1": fee, "net_delta": net_delta,
-                       "lean": "neutral" if abs(net_delta) < 5 else ("bullish" if net_delta > 0 else "bearish"),
-                       "best_exit_dte": xb, "exit_date": str(e - timedelta(days=xb)),
+                sc = res[(rank_meas, x)][0] / np.maximum(max_loss, 1)
+                better = sc > best
+                best = np.where(better, sc, best); bx = np.where(better, x, bx)
+            order, per_s = [], {}
+            for i in np.argsort(-best):                        # the best of EACH structure, not just the overall top
+                k_ = cands[i][0]
+                if per_s.get(k_, 0) < IC["board_size"] // 2 and np.isfinite(best[i]):
+                    order.append(i); per_s[k_] = per_s.get(k_, 0) + 1
+            for i in order:
+                stc, a, b = cands[i]; xb = int(bx[i])
+                legs, dl = {}, {}
+                if a:
+                    legs.update({"long_put": a[1], "short_put": a[0]}); dl.update({"long_put": round(dP[a[1]], 3), "short_put": round(dP[a[0]], 3)})
+                if b:
+                    legs.update({"short_call": b[0], "long_call": b[1]}); dl.update({"short_call": round(dC[b[0]], 3), "long_call": round(dC[b[1]], 3)})
+                nd = round(((-dP[a[0]] + dP[a[1]]) if a else 0) * 100 + ((-dC[b[0]] + dC[b[1]]) if b else 0) * 100, 1)
+                row = {"ticker": tk, "group": grp, "structure": stc, "expiry": str(e), "dte": dte, "tier": tier,
+                       "legs": legs, "deltas": dl,
+                       "credit": round(float(credit[i]), 2), "credit_mid": round(float(cm[i]), 2), "width": round(float(wd[i]), 2),
+                       "put_width": round(a[0] - a[1], 2) if a else None, "call_width": round(b[1] - b[0], 2) if b else None,
+                       "credit_to_width": round(float(credit[i] / wd[i]), 3),
+                       "max_loss_1": round(float(max_loss[i]), 0), "max_profit_1": round(float(credit[i] * 100 - fee[i]), 0),
+                       "spread_cost_1": round(float(sp_[i] * 100), 2), "spread_pct_credit": round(float(sp_[i] / max(cm[i], 0.01)), 3),
+                       "fees_1": round(float(fee[i]), 2), "net_delta": nd,
+                       "lean": "neutral" if abs(nd) < 5 else ("bullish" if nd > 0 else "bearish"),
+                       "best_exit_dte": xb, "exit_date": str(e - timedelta(days=xb)), "rank_measure": rank_meas,
                        "ev": {}, "iv_atm": round(atm * 100, 1), "hv": round(hv * 100, 1) if hv else None}
                 for (meas, x), (ev, pw, aw, al) in res.items():
-                    row["ev"].setdefault(meas, {})[str(x)] = {"ev_1": round(float(ev[i, j]), 2), "pop": round(float(pw[i, j]), 3),
-                                                              "avg_win_1": round(float(aw[i, j]), 2), "avg_loss_1": round(float(al[i, j]), 2)}
+                    row["ev"].setdefault(meas, {})[str(x)] = {"ev_1": round(float(ev[i]), 2), "pop": round(float(pw[i]), 3),
+                                                              "avg_win_1": round(float(aw[i]), 2), "avg_loss_1": round(float(al[i]), 2)}
                 m_ = row["ev"]["market"][str(xb)]; h_ = (row["ev"].get("historical") or {}).get(str(xb)) or {}
                 row.update({"ev_1": m_["ev_1"], "pop_exit": m_["pop"], "avg_win_1": m_["avg_win_1"], "avg_loss_1": m_["avg_loss_1"],
-                            "ev_hv_1": h_.get("ev_1"), "pop_hv": h_.get("pop"), "ev_per_risk": round(m_["ev_1"] / max(row["max_loss_1"], 1), 4)})
+                            "ev_hv_1": h_.get("ev_1"), "pop_hv": h_.get("pop"),
+                            "ev_pct": round((h_.get("ev_1") if h_ else m_["ev_1"]) / max(row["max_loss_1"], 1), 4),
+                            "ev_per_risk": round(float(best[i]), 4)})
+                row["label"] = _ic_label(row)
                 board.append(row)
         if not board:
             parts = [f"{v} {k.replace('_', ' ')}" for k, v in why.items() if v]
             skipped[tk] = "no structure qualified" + (" — " + ", ".join(parts) if parts else ""); continue
         board.sort(key=lambda r: -r["ev_per_risk"])
-        best = dict(board[0])
-        n = max(1, int(IC["risk_per_trade"] // max(best["max_loss_1"], 1)))
-        best.update({"contracts": n, "ev_total": round(best["ev_1"] * n, 2), "ev_iv_1": best["ev_1"],
+        # the board keeps the best of each structure in view, not twenty versions of one
+        per = {}
+        for r in board:
+            per.setdefault(r["structure"], [])
+            if len(per[r["structure"]]) < max(4, IC["board_size"] // 2):
+                per[r["structure"]].append(r)
+        top = sorted([r for v in per.values() for r in v], key=lambda r: -r["ev_per_risk"])[:IC["board_size"]]
+        win_ = dict(board[0])
+        n = max(1, int(IC["risk_per_trade"] // max(win_["max_loss_1"], 1)))
+        L = win_["legs"]
+        win_.update({"contracts": n, "ev_total": round((win_["ev_hv_1"] if win_["ev_hv_1"] is not None else win_["ev_1"]) * n, 2),
                      "spot": S, "regime": mr.get("regime"), "flip": mr.get("flip"), "put_wall": mr.get("support"),
-                     "call_wall": mr.get("resist"), "next_earnings": earn,
-                     "be_low": round(best["legs"]["short_put"] - best["credit"], 2), "be_high": round(best["legs"]["short_call"] + best["credit"], 2),
-                     "board": board[:IC["board_size"]],
-                     "by_tier": {t: next((r for r in board if r["tier"] == t), None) for _, _, t in IC["tiers"]}})
-        picks.append(best)
+                     "call_wall": mr.get("resist"), "next_earnings": earn, "bias": bias, "chart_why": chart.get("why"),
+                     "support": chart.get("support"), "resistance": chart.get("resistance"),
+                     "iv30": iv30, "iv30_wk": iv30_wk, "ivr": ivr, "ivr_wk": ivr_wk, "hv30s": hv,
+                     "be_low": round(L["short_put"] - win_["credit"], 2) if "short_put" in L else None,
+                     "be_high": round(L["short_call"] + win_["credit"], 2) if "short_call" in L else None,
+                     "board": top, "by_structure": {s_: next((r for r in board if r["structure"] == s_), None) for s_ in IC["structures"]}})
+        n_struct[win_["structure"]] += 1
+        picks.append(win_)
     picks.sort(key=lambda p: -p["ev_per_risk"])
+    proposed = [p for p in picks if p.get("ev_hv_1") is not None and p["ev_hv_1"] > 0
+                and p.get("hv30s") and p["iv_atm"] / 100 >= IC["min_iv_hv"] * p["hv30s"]]
+    proposed.sort(key=lambda p: -p["ev_pct"])
+    # macro events before each proposed expiry
+    evx = {}
+    for e in sorted({p["expiry"] for p in proposed}):
+        evx[e] = [{"date": v["date"], "label": v.get("short") or v.get("type"), "type": v.get("type")} for v in cal
+                  if v.get("type") in IC["event_types"] and str(today) <= v["date"] <= e]
     write_json("ic_screen", {
         "asof": _now(), "date": str(today), "rules": IC, "sleeve": IC["sleeve"], "risk_per_trade": IC["risk_per_trade"],
         "sources": {"chain": "CBOE delayed quotes (cdn.cboe.com), morning run: bid, ask, OI, IV per contract",
-                    "implied_vol": "each contract's own IV from the CBOE feed; market measure uses the at-the-money IV of the expiry",
-                    "historical_vol": "30-day close-to-close realised vol from Yahoo daily closes (iv_em.json rv30_pct)"},
-        "method": "Tournament: shorts at 25-45 delta, longs at 5-20 delta, every combination, tiers 25-45 and 45-95 DTE. "
-                  "EV = P(win) x average win - P(loss) x average loss at exits of 25, 18 and 10 DTE, after a quarter-spread "
-                  "slippage per leg in and out and $0.65 per contract per leg in and out. Ranked by market-probability EV per "
-                  "dollar of max loss; historical-vol EV shown beside it. Negative EVs are kept.",
-        "picks": picks, "positive": sum(1 for p in picks if p["ev_1"] > 0), "skipped": skipped})
-    print(f"[ic] tournament: {len(picks)} names with a qualifying condor, {sum(1 for p in picks if p['ev_1'] > 0)} positive on market EV, "
-          f"{len(skipped)} skipped" + (f" · best {picks[0]['ticker']} {picks[0]['expiry']} EV ${picks[0]['ev_1']:.0f}/contract at {picks[0]['best_exit_dte']} DTE" if picks else ""))
-    sb_heartbeat("ic_screen", bool(picks), f"{len(picks)} names · {sum(1 for p in picks if p['ev_1'] > 0)} positive · {len(skipped)} skipped")
+                    "implied_vol": "each contract's own IV from the CBOE feed; market measure uses the at-the-money IV of the expiry; IV 30 interpolated between the expiries either side of 30 days",
+                    "historical_vol": "30-day realised vol from Yahoo daily closes with event days stripped (returns beyond 4 robust sigmas, at most two)",
+                    "earnings": "earnings state, iv_em, then Yahoo's calendar; stocks with no known date are skipped",
+                    "events": "calendar.json"},
+        "method": "Tournament: the chart picks the structure (range -> iron condor with equal wings, bullish -> bull put spread, bearish -> bear call spread); shorts 25-45 delta, longs 5-20. "
+                  "EV = P(win) x average win - P(loss) x average loss at exits of 25, 18 and 10 DTE, after a quarter-spread slippage per "
+                  "leg in and out and $0.65 per contract per leg in and out. Ranked by EV on the stock's own (event-stripped) vol as a share "
+                  "of max loss; the market-probability EV is shown beside it. Proposed = implied vol above realised and positive EV.",
+        "universe": {t: groups.get(t) for t in names}, "counts": {"screened": len(names), "with_winner": len(picks),
+                                                                  "proposed": len(proposed), "skipped": len(skipped), "winners_by_structure": n_struct},
+        "picks": picks, "proposed": proposed, "events": evx, "vol": vol,
+        "bars": {t: (hist.get(t) or {}).get("bars") for t in names if (hist.get(t) or {}).get("bars")},
+        "positive": sum(1 for p in picks if (p.get("ev_hv_1") or -1) > 0), "skipped": skipped})
+    print(f"[ic] tournament: {len(names)} names · {len(picks)} with a qualifying structure ({n_struct}) · {len(proposed)} proposed · "
+          f"{len(skipped)} skipped" + (f" · best {proposed[0]['ticker']} {proposed[0]['label']} EV {proposed[0]['ev_pct']*100:.1f}%" if proposed else ""))
+    sb_heartbeat("ic_screen", bool(picks), f"{len(names)} names · {len(picks)} winners · {len(proposed)} proposed · {len(skipped)} skipped")
     return picks
 
 
@@ -11369,7 +11832,8 @@ def _ic_quotes(chain_rows, expiry):
 def _ic_mark(legs, credit, fees_1, quotes, spot, dte):
     """P&L per contract if closed now: buy back at mid plus a quarter of each spread, less fees.
     At or after expiry the legs settle at intrinsic value."""
-    L = [("P", legs["long_put"], +1), ("P", legs["short_put"], -1), ("C", legs["short_call"], -1), ("C", legs["long_call"], +1)]
+    L = [(cp, legs[k], sg) for k, cp, sg in (("long_put", "P", +1), ("short_put", "P", -1), ("short_call", "C", -1), ("long_call", "C", +1))
+         if legs.get(k) is not None]                           # a condor has four legs, a credit spread two
     if dte <= 0:
         intr = lambda cp, K: max(0.0, K - spot) if cp == "P" else max(0.0, spot - K)
         cost = sum(-sg * intr(cp, K) for cp, K, sg in L)
@@ -11387,10 +11851,9 @@ def _ic_mark(legs, credit, fees_1, quotes, spot, dte):
 def run_ic_record():
     import os, json, gzip
     from datetime import datetime, date
-    try:
-        ch = json.load(open(os.path.join(OUTPUTS_DIR, "mme_chains.json")))
-    except Exception as e:
-        print(f"[icrec] no chains ({e})"); return
+    ch = _ic_load_chains()
+    if not ch:
+        print("[icrec] no chains"); return
     d = str(ch.get("close_of") or ch.get("date"))[:10]
     today = datetime.strptime(d, "%Y-%m-%d").date()
     try:
@@ -11404,7 +11867,13 @@ def run_ic_record():
     notes = []
     # 1. archive
     try:
-        _sb_storage_put(f"chains/{d}.json.gz", gzip.compress(json.dumps(ch).encode()))
+        # the archive keeps what a replay needs — expiries to 100 days — not the dealer map's 180-day chains:
+        # a hundred names a day at full depth would fill the free storage in a few months
+        slim = dict(ch); slim["names"] = {}
+        for tk_, c_ in (ch.get("names") or {}).items():
+            rr = [r for r in c_.get("rows") or [] if (datetime.strptime(r[0], "%Y-%m-%d").date() - today).days <= 100]
+            slim["names"][tk_] = dict(c_, rows=rr, contracts=len(rr))
+        _sb_storage_put(f"chains/{d}.json.gz", gzip.compress(json.dumps(slim, separators=(",", ":")).encode()))
         _sb_storage_put(f"screens/{d}.json.gz", gzip.compress(json.dumps({"screen": scr, "vol": {t: {k: v.get(k) for k in ("rv30_pct", "iv_annual_pct", "spot", "next_earnings")} for t, v in ivem.items()}}).encode()))
         notes.append("archived")
     except Exception as e:
@@ -11417,8 +11886,12 @@ def run_ic_record():
             for r in c.get("rows") or []:
                 if r[4] and (r[0] not in atm or abs(float(r[2]) - S) < abs(atm[r[0]][0] - S)):
                     atm[r[0]] = (float(r[2]), float(r[4]))
+            vv = (scr.get("vol") or {}).get(tk) or {}
+            iv30 = vv.get("iv30") or _ic_iv30(c.get("rows"), S, today)
             rows.append({"d": d, "ticker": tk, "spot": S, "hv30": (ivem.get(tk) or {}).get("rv30_pct"),
-                         "iv_atm": {e: round(v[1] * 100, 2) for e, v in sorted(atm.items())}})
+                         "iv_atm": {e: round(v[1] * 100, 2) for e, v in sorted(atm.items())},
+                         "iv30": round(iv30, 4) if iv30 else None, "hv30s": vv.get("hv30s"),
+                         "grp": vv.get("group") or (ch.get("groups") or {}).get(tk)})
         if rows:
             _sb_write("POST", "ic_vol_history", rows, extra_headers={"Prefer": "resolution=merge-duplicates,return=minimal"})
         notes.append(f"vol {len(rows)}")
@@ -11446,30 +11919,42 @@ def run_ic_record():
                     patch.update({"status": "broken", "closed": d}); broken += 1
             else:
                 marks.append({"date": d, "dte": dte, "spot": c.get("spot"), "pnl_1": pnl})
+                res["last"] = {"date": d, "dte": dte, "spot": c.get("spot"), "pnl_1": pnl}   # the app lists from this
                 for x in IC["exits"]:
                     if str(x) not in res and dte <= x:
                         res[str(x)] = pnl                        # first mark at or inside each exit
-                if all(str(x) in res for x in IC["exits"]) or dte <= 0:
+                if all(str(x) in res for x in IC["exits"] if x < (row.get("model") or {}).get("dte_entry", 999) - 2) or dte <= 0:
                     patch.update({"status": "closed", "closed": d}); closed += 1
             patch.update({"marks": marks, "result": res})
             _sb_write("PATCH", "ic_forward", patch, params={"id": f"eq.{row['id']}"})
             marked += 1
     except Exception as e:
         notes.append(f"mark failed: {e}")
-    # 3b. open today's winners
+    # 3b. open today's trades: the proposed list ("proposed") and every other name's winner ("calibration",
+    # so the model is tested where it says no as well). One open trade per name and expiry: a winner that
+    # repeats on the same expiry is the same trade and is not counted twice.
     opened = 0
     try:
+        held = {(r["ticker"], str(r["expiry"])[:10]) for r in (_sb_get("ic_forward", {"status": "eq.open", "select": "ticker,expiry"}) or [])}
+        prop = {(p["ticker"], p["expiry"]) for p in scr.get("proposed") or []}
         new = []
         for rank, p in enumerate(scr.get("picks") or [], 1):
+            if IC.get("forward_one_per_expiry") and (p["ticker"], p["expiry"]) in held:
+                continue
             c = (ch.get("names") or {}).get(p["ticker"]) or {}
             q = _ic_quotes(c.get("rows"), p["expiry"])
             L = p["legs"]
             eq = {k: dict(zip(("bid", "ask", "iv"), q.get(("P" if "put" in k else "C", float(L[k])), (None, None, None)))) for k in L}
-            new.append({"opened": d, "ticker": p["ticker"], "expiry": p["expiry"], "rank_on_day": rank, "role": "winner",
+            new.append({"opened": d, "ticker": p["ticker"], "expiry": p["expiry"], "rank_on_day": rank,
+                        "role": "proposed" if (p["ticker"], p["expiry"]) in prop else "calibration",
+                        "structure": p.get("structure", "IC"), "grp": p.get("group"),
                         "legs": L, "entry_quotes": eq, "spot_entry": p.get("spot"), "credit": p["credit"],
                         "max_loss_1": p["max_loss_1"], "fees_1": p.get("fees_1", 8 * IC["commission_leg"]),
                         "model": {"ev": p.get("ev"), "best_exit_dte": p.get("best_exit_dte"), "lean": p.get("lean"),
-                                  "net_delta": p.get("net_delta"), "deltas": p.get("deltas")},
+                                  "net_delta": p.get("net_delta"), "deltas": p.get("deltas"), "label": p.get("label"),
+                                  "ev_pct": p.get("ev_pct"), "rank_measure": p.get("rank_measure"), "dte_entry": p.get("dte"),
+                                  "structure": p.get("structure", "IC"), "group": p.get("group"), "bias": p.get("bias"), "chart_why": p.get("chart_why"),
+                                  "iv30": p.get("iv30"), "hv30s": p.get("hv30s")},
                         "iv_atm": p.get("iv_atm"), "hv": p.get("hv")})
         if new:
             _sb_write("POST", "ic_forward", new, extra_headers={"Prefer": "resolution=ignore-duplicates,return=minimal"})

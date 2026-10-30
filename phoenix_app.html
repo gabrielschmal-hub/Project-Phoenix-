@@ -1129,6 +1129,50 @@
   .ic-tbl .r .tk{font-weight:800;cursor:pointer} .ic-tbl .r .tk:hover{color:var(--gold)} .ic-tbl i{font-style:normal;color:var(--inkFade);font-size:11px}
   .ic-tbl .ev{color:var(--green);font-weight:700} .ic-tbl .ev.neg,.ic-tbl .r.neg .ev{color:var(--red)} .ic-tbl .evi{color:var(--inkFade)}
   .ic-tbl .pp{color:#d08a1c} .ic-tbl .cc{color:#4a86d0}
+  /* ---- Options tab (Mission Control) ---- */
+  .opt{margin-top:6px}
+  .opt-hero{background:var(--ink);color:var(--bg);border-radius:12px;padding:18px 22px;margin-bottom:12px}
+  .opt-hero .opt-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
+  .opt-hero .opt-h{font-size:22px;font-weight:700;margin-top:4px;line-height:1.25} .opt-hero .opt-sub{font-size:15px;opacity:.85;margin-top:4px}
+  .opt-meta{font-family:var(--mono);font-size:12px;color:var(--inkFade);margin:4px 2px 8px}
+  .opt-evs{font-size:13px;font-style:italic;color:var(--ink);margin:0 2px 14px;line-height:1.7}
+  .opt-evr span{white-space:nowrap} .opt-evr i{color:var(--inkFade);margin:0 7px;font-style:normal}
+  .opt-sec{margin-top:18px;padding-top:6px;border-top:2px solid var(--line)}
+  .opt-sk{font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--inkFade);margin:6px 2px 12px;display:flex;align-items:center;gap:8px}
+  .opt-sk b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--gold);color:var(--bg);font-size:12px}
+  .opt-grp{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 8px}
+  .opt-grp button{font-family:var(--mono);font-size:11.5px;padding:6px 12px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--inkFade);cursor:pointer}
+  .opt-grp button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)} .opt-grp button i{font-style:normal;opacity:.7;margin-left:3px}
+  .opt-tbl{overflow-x:auto;font-size:13.5px;border-top:2px solid var(--ink);background:transparent}
+  .opt-tbl .hd,.opt-tbl .r{display:grid;gap:10px;padding:10px 8px;align-items:center}
+  .opt-tbl .hd{font-weight:700;font-size:13px;border-bottom:1.5px solid var(--ink)}
+  .opt-tbl .r{border-bottom:1px solid var(--line2);cursor:pointer;font-family:var(--mono);font-size:13px} .opt-tbl .r:nth-child(even){background:var(--card2)}
+  .opt-tbl .r:hover,.opt-tbl .r.on{background:var(--card);box-shadow:inset 3px 0 0 var(--gold)}
+  .opt-tbl .tk{font-weight:800;font-family:var(--sans,inherit)} .opt-tbl .tk i{display:block;font-style:normal;font-weight:400;font-size:10px;color:var(--inkFade);letter-spacing:.05em;text-transform:uppercase}
+  .opt-tbl .tr{white-space:nowrap} .opt-tbl i{font-style:normal;color:var(--inkFade)}
+  .opt-tbl .ev{color:var(--green);font-weight:700} .opt-tbl .ev.neg{color:var(--red)} .opt-tbl .ev.best{text-decoration:underline}
+  .opt-tbl .r.prop{box-shadow:inset 3px 0 0 var(--green)}
+  #optList .opt-tbl .hd,#optList .opt-tbl .r{grid-template-columns:90px minmax(230px,2.2fr) 80px 92px 70px 60px;min-width:640px}
+  #optList .opt-tbl .hd span:nth-child(n+3),#optList .opt-tbl .r span:nth-child(n+3){text-align:center} #optList .opt-tbl .ev{text-align:right}
+  .opt-ivr b{font-weight:700} .opt-ivr i{font-size:10px}
+  .opt-legend{font-size:12px;font-style:italic;color:var(--inkFade);line-height:1.6;margin:10px 4px 4px}
+  .opt-legend b{color:var(--ink);font-style:italic}
+  .opt-sub2{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);font-weight:700;margin:18px 2px 8px}
+  .opt-sub2 span{text-transform:none;letter-spacing:0;font-weight:400;color:var(--inkFade)} .opt-sub2 select{margin:0 6px;font-family:var(--mono)}
+  .opt-sub3{font-family:var(--mono);font-size:11.5px;color:var(--ink);font-weight:700;margin:12px 2px 6px} .opt-sub3 span{font-weight:400;color:var(--inkFade)}
+  .opt-kpi{grid-template-columns:repeat(5,1fr);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .opt-kpi small{display:block;font-size:10px;color:var(--inkFade);font-family:var(--mono);margin-top:2px}
+  .opt-tbl.fw .hd,.opt-tbl.fw .r{grid-template-columns:70px 64px 74px 100px 100px 100px 90px;min-width:640px}
+  .opt-tbl.op .hd,.opt-tbl.op .r{grid-template-columns:70px minmax(220px,2fr) 70px 50px 80px 80px 90px;min-width:700px}
+  .opt-tbl.wn .hd,.opt-tbl.wn .r{grid-template-columns:90px minmax(220px,2fr) 54px 80px 80px 80px 84px 66px;min-width:800px}
+  .opt-tbl.bd .hd,.opt-tbl.bd .r{grid-template-columns:28px minmax(210px,2fr) 110px 66px 76px repeat(6,70px);min-width:1000px}
+  .opt-tbl.vl .hd,.opt-tbl.vl .r{grid-template-columns:90px 70px 90px 70px 70px 100px 90px;min-width:640px}
+  .opt-tbl.bt .hd,.opt-tbl.bt .r{grid-template-columns:110px repeat(12,64px);min-width:900px}
+  .opt-det{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--card)}
+  .opt-det summary{cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+  .opt-det summary span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--inkFade)}
+  .opt-skip{font-size:12.5px;line-height:1.6;margin-top:8px;columns:2} .opt-skip b{font-family:var(--mono)}
+  @media(max-width:700px){.opt-hero .opt-h{font-size:18px}.opt-kpi{grid-template-columns:repeat(2,1fr)}.opt-skip{columns:1}}
   .ic-det{padding:10px 14px 14px;background:var(--card2);border-bottom:1px solid var(--line)}
   .ic-facts{font-size:12.5px;line-height:1.6;margin-bottom:8px} .ic-sub{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--inkFade);margin:10px 0 4px}
   .ic-lad .lr{display:grid;grid-template-columns:70px minmax(220px,1.6fr) 80px 120px 80px;gap:8px;padding:5px 4px;border-bottom:1px dashed var(--line2);font-size:12.5px;min-width:600px}
@@ -10639,23 +10683,30 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(+r[4]>0&&+r[7]>0) out[r[1]][+r[2]]={iv:+r[4],bid:+r[6],ask:+r[7],oi:+r[3]}; });
     return out;
   }
+  // which legs a structure carries: an iron condor all four, a bull put spread the puts, a bear call the calls
+  function icKeys(st){ var k=(st&&st.kind)||"IC"; return k==="PCS"?["lp","sp"]:(k==="CCS"?["sc","lc"]:["lp","sp","sc","lc"]); }
+  function icHas(st,key){ return icKeys(st).indexOf(key)>=0; }
+  function icKindName(k){ return k==="PCS"?"bull put spread":(k==="CCS"?"bear call spread":"iron condor"); }
   function icMonthly(d){ var x=new Date(d+"T12:00:00Z"); return x.getUTCDay()===5&&x.getUTCDate()>=15&&x.getUTCDate()<=21; }
   function icCalc(st){
     var ch=icChain(st.tk,st.exp); if(!ch) return null;
-    var L=[[st.lp,"P",1],[st.sp,"P",-1],[st.sc,"C",-1],[st.lc,"C",1]].map(function(l){ var q=ch[l[1]][l[0]]; return q?{K:l[0],cp:l[1],sg:l[2],iv:q.iv,bid:q.bid,ask:q.ask}:null; });
+    var spec={lp:["P",1],sp:["P",-1],sc:["C",-1],lc:["C",1]};
+    var L=icKeys(st).map(function(k){ var l=[st[k],spec[k][0],spec[k][1]]; var q=ch[l[1]][l[0]]; return q?{K:l[0],cp:l[1],sg:l[2],iv:q.iv,bid:q.bid,ask:q.ask}:null; });
+    var shorts=L.filter(function(l){ return l&&l.sg<0; });
     if(L.some(function(x){ return !x; })) return {err:"a strike is not quoted at this expiry"};
     var S=(typeof MME_LIVE!=="undefined"&&MME_LIVE[st.tk]&&MME_LIVE[st.tk].last)||ch.S;
     var today=new Date(new Date().toISOString().slice(0,10)+"T12:00:00Z"), ex=new Date(st.exp+"T12:00:00Z");
     var dte=Math.round((ex-today)/864e5);
     var mid=function(l){ return (l.bid+l.ask)/2; }, spreads=L.reduce(function(a,l){ return a+(l.ask-l.bid); },0);
     var creditMid=-L.reduce(function(a,l){ return a+l.sg*mid(l); },0), credit=creditMid-0.25*spreads;
-    var width=Math.max(st.sp-st.lp, st.lc-st.sc), maxLoss=(width-credit)*100+8*(((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.commission_leg)||0.65));
+    var kind=st.kind||"IC", nLeg=L.length, cl=((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.commission_leg)||0.65);
+    var width=kind==="PCS"?st.sp-st.lp:(kind==="CCS"?st.lc-st.sc:Math.max(st.sp-st.lp, st.lc-st.sc)), maxLoss=(width-credit)*100+2*nLeg*cl;
     var risk=st.risk||((IC_DATA&&IC_DATA.risk_per_trade)||2000);
     var nMax=maxLoss>0?Math.max(1,Math.floor(risk/maxLoss)):1;
     var n=st.n?Math.max(1,st.n):nMax;
     function value(Sx,Tleft,dv){ return L.reduce(function(a,l){ return a-l.sg*icBS(Sx,l.K,Tleft,l.iv+(dv||0),l.cp); },0); }  // cost to buy back
     var atmQ=null; ["P","C"].forEach(function(sd){ Object.keys(ch[sd]).forEach(function(k){ k=+k; if(!atmQ||Math.abs(k-ch.S)<Math.abs(atmQ.k-ch.S)) atmQ={k:k,iv:ch[sd][k].iv}; }); });
-    var atmIV=atmQ?atmQ.iv:(L[1].iv+L[2].iv)/2;
+    var atmIV=atmQ?atmQ.iv:shorts.reduce(function(a,l){ return a+l.iv/shorts.length; },0);
     var rv=IC_RV[st.tk]||0, exitDte=st.exitDte||((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.exit_dte)||18), exitDay=Math.max(0,dte-exitDte);
     function outcome(sig){ var h=exitDay/365, pw=0, pl=0, sw=0, sl=0, wsum=0;     // EV = P(win) x avg win - P(loss) x avg loss
       for(var i=-60;i<=60;i++){ var z=i/10, w=Math.exp(-z*z/2); var Sx=S*Math.exp(-0.5*sig*sig*h+sig*Math.sqrt(h)*z);
@@ -10663,16 +10714,17 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       pw/=wsum; pl/=wsum; sw/=wsum; sl/=wsum;
       var aw=pw?sw/pw:0, al=pl?-sl/pl:0; return {pop:pw,avgW:aw,avgL:al,ev:pw*aw-pl*al}; }
     function ev(sig){ return outcome(sig).ev; }
-    var beLo=st.sp-credit, beHi=st.sc+credit, hE=dte/365;
-    var pop=icN(Math.log(beHi/S)/(rv*Math.sqrt(hE))+0.5*rv*Math.sqrt(hE))-icN(Math.log(beLo/S)/(rv*Math.sqrt(hE))+0.5*rv*Math.sqrt(hE));
+    var beLo=icHas(st,"sp")?st.sp-credit:null, beHi=icHas(st,"sc")?st.sc+credit:null, hE=dte/365, sv=(rv||atmIV);
+    function pb(x){ return icN(Math.log(x/S)/(sv*Math.sqrt(hE))+0.5*sv*Math.sqrt(hE)); }      // P(stock below x at expiry)
+    var pop=(beHi!=null?pb(beHi):1)-(beLo!=null?pb(beLo):0);
     var vega=(value(S,dte/365,0)-value(S,dte/365,0.01))*100;
-    var comm=8*(((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.commission_leg)||0.65))*n;   // 4 legs in, 4 out
-    var feePer=8*(((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.commission_leg)||0.65));
+    var comm=2*nLeg*cl*n;   // every leg in and out
+    var feePer=2*nLeg*cl;
     var oc=outcome(atmIV), och=rv>0?outcome(rv):null;          // market probabilities first, historical beside them
     return {S:S,L:L,dte:dte,exitDay:exitDay,credit:credit,creditMid:creditMid,spreads:spreads,width:width,maxLoss:maxLoss,n:n,nMax:nMax,risk:risk,comm:comm,
             ev:oc.ev*n-comm,evHV:och?och.ev*n-comm:null,popHV:och?och.pop:null,atmIV:atmIV,exitDte:exitDte,popX:oc.pop,avgW:oc.avgW-feePer,avgL:oc.avgL+feePer,
             netDelta:L.reduce(function(a,l){ var T=dte/365, s_=l.iv*Math.sqrt(T), d1=(Math.log(S/l.K)+0.5*s_*s_)/s_, dl=l.cp==="C"?icN(d1):icN(d1)-1; return a+l.sg*dl; },0)*100,beLo:beLo,beHi:beHi,pop:pop,vega:vega*n,rv:rv,value:value,
-            otm:(st.sp<S&&st.sc>S)};
+            otm:((!icHas(st,"sp")||st.sp<S)&&(!icHas(st,"sc")||st.sc>S)),kind:kind,shorts:shorts};
   }
   function icDraw(){
     var st=IC_LAB, host=document.getElementById("icLab"); if(!st||!host) return;
@@ -10680,7 +10732,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     function k(v){ return (+v).toLocaleString(undefined,{maximumFractionDigits:2}); }
     function m(v){ return (v<0?"\u2212$":"$")+Math.abs(Math.round(v)).toLocaleString(); }
     var exps=Object.keys((icChain(st.tk)||{exps:{}}).exps).sort().filter(function(e){ return e>new Date().toISOString().slice(0,10); });
-    var names=Object.keys((IC_CH&&IC_CH.names)||{}).sort();
+    var names=Object.keys((IC_UNI&&IC_UNI.names)||(IC_CH&&IC_CH.names)||{}).sort();
     var pickTk={}; ((IC_DATA&&IC_DATA.picks)||[]).forEach(function(p){ pickTk[p.ticker]=p; });
     var dd=function(e){ return new Date(e+"T12:00:00Z").toLocaleDateString(undefined,{day:"numeric",month:"short",year:"2-digit"}); };
     function stepper(key,label,cls){ return '<div class="icl-leg '+cls+'"><i>'+label+'</i><button data-mv="'+key+'" data-d="-1">\u25C0</button><b>'+k(st[key])+'</b><button data-mv="'+key+'" data-d="1">\u25B6</button></div>'; }
@@ -10688,6 +10740,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     host.innerHTML=
       '<div class="icl-ctl">'+
         '<select id="iclTk">'+names.map(function(t){ return '<option'+(t===st.tk?' selected':'')+' value="'+t+'">'+t+(pickTk[t]?' \u2605':'')+'</option>'; }).join("")+'</select>'+
+        '<select id="iclKind">'+["IC","PCS","CCS"].map(function(k){ return '<option'+(k===(st.kind||"IC")?' selected':'')+' value="'+k+'">'+icKindName(k)+'</option>'; }).join("")+'</select>'+
         '<select id="iclExp">'+exps.map(function(e){ var d=Math.round((new Date(e+"T12:00:00Z")-new Date())/864e5);
           return '<option'+(e===st.exp?' selected':'')+' value="'+e+'">'+dd(e)+' \u00b7 '+d+'d'+(icMonthly(e)?' \u00b7 monthly':'')+'</option>'; }).join("")+'</select>'+
         '<div class="icl-risk"><i>risk</i>'+risks.map(function(x){ return '<button data-risk="'+x+'"'+((r&&!r.err&&!st.n&&r.risk===x)?' class="on"':'')+'>$'+(x>=1000?(x/1000)+'k':x)+'</button>'; }).join("")+'</div>'+
@@ -10696,7 +10749,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         (pickTk[st.tk]?'<button class="icl-reset">Phoenix pick</button>':'')+
       '</div>'+
       '<details class="icl-fine"'+(st.fine?' open':'')+'><summary>Fine-tune strikes</summary><div class="icl-ctl in">'+
-        stepper("lp","buy put","p")+stepper("sp","sell put","p")+stepper("sc","sell call","c")+stepper("lc","buy call","c")+
+        (icHas(st,"lp")?stepper("lp","buy put","p")+stepper("sp","sell put","p"):"")+(icHas(st,"sc")?stepper("sc","sell call","c")+stepper("lc","buy call","c"):"")+
         '<div class="icl-leg all"><i>all strikes</i><button data-all="-1">\u25C0</button><button data-all="1">\u25B6</button></div></div></details>'+
       (r&&!r.err?
         '<div class="mm-strip icl-strip"><div><i>credit</i><b>$'+r.credit.toFixed(2)+'</b></div><div><i>max profit</i><b style="color:var(--green)">'+m(r.credit*100*r.n)+'</b></div>'+
@@ -10710,86 +10763,85 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '<div class="icl-day"><span>Through time</span><input type="range" id="iclDay" min="0" max="'+r.dte+'" value="'+(st.day!=null?Math.min(st.day,r.dte):r.exitDay)+'"><b id="iclDayLbl"></b></div>'+
         '<div class="gexh-key mme-key" id="iclKey"></div>'+
         '<div class="icl-sub">Breakevens through time <span>\u00b7 the profit zone from today to expiry \u2014 it widens as time passes and the options lose their value</span></div>'+
-        '<div id="iclCone" class="icl-cone"></div><div id="iclBoard"></div>'
+        '<div id="iclCone" class="icl-cone"></div>'+
+        '<div class="icl-sub">The chart <span>\u00b7 six months of daily closes, the swing support and resistance the direction comes from, and the short strikes</span></div>'+
+        '<div id="iclChart" class="icl-cone"></div>'
       :'<div class="ed-note">'+((r&&r.err)||"No chain on file for "+st.tk+".")+'</div>');
     document.getElementById("iclTk").onchange=function(){ icLoad(this.value); };
     document.getElementById("iclExp").onchange=function(){ var c=icChain(st.tk,this.value);
       function near(side,K){ var ks=Object.keys(c[side]).map(Number); return ks.length?ks.reduce(function(a,b){ return Math.abs(b-K)<Math.abs(a-K)?b:a; }):K; }
-      st.exp=this.value; st.lp=near("P",st.lp); st.sp=near("P",st.sp); st.sc=near("C",st.sc); st.lc=near("C",st.lc); st.day=null; icDraw(); };
+      st.exp=this.value; icKeys(st).forEach(function(k){ st[k]=near(k==="lp"||k==="sp"?"P":"C",st[k]); }); st.day=null; icDraw(); };
+    document.getElementById("iclKind").onchange=function(){ icSetKind(this.value); };
     var fine=host.querySelector(".icl-fine"); if(fine) fine.ontoggle=function(){ st.fine=this.open; };
     host.querySelectorAll("[data-mv]").forEach(function(b){ b.onclick=function(){ icMove(this.dataset.mv,+this.dataset.d); }; });
-    host.querySelectorAll("[data-all]").forEach(function(b){ b.onclick=function(){ var d=+this.dataset.all; ["lp","sp","sc","lc"].forEach(function(x){ icMove(x,d,true); }); icDraw(); }; });
+    host.querySelectorAll("[data-all]").forEach(function(b){ b.onclick=function(){ var d=+this.dataset.all; icKeys(st).forEach(function(x){ icMove(x,d,true); }); icDraw(); }; });
     host.querySelectorAll("[data-risk]").forEach(function(b){ b.onclick=function(){ st.risk=+this.dataset.risk; st.n=null; icDraw(); }; });
     host.querySelectorAll("[data-exit]").forEach(function(b){ b.onclick=function(){ st.exitDte=+this.dataset.exit; st.day=null; icDraw(); }; });
     host.querySelectorAll("[data-n]").forEach(function(b){ b.onclick=function(){ st.n=Math.max(1,(r.n||1)+(+this.dataset.n)); icDraw(); }; });
     var rs=host.querySelector(".icl-reset"); if(rs) rs.onclick=function(){ var keep={risk:st.risk}; icLoad(st.tk,true); IC_LAB.risk=keep.risk; icDraw(); };
     if(!r||r.err) return;
     icWhy(r, pickTk[st.tk]);
-    icBoard(pickTk[st.tk]);
     document.getElementById("iclDay").oninput=function(){ st.day=+this.value; icPlot(r); };
-    icPlot(r); icCone(r);
+    icPlot(r); icCone(r); icPriceChart(r);
   }
   // breakeven(s) of the position on a given day: where its P&L crosses zero
   function icBEs(r,day){
-    var st=IC_LAB, Tl=(r.dte-day)/365, lo=st.lp*0.9, hi=st.lc*1.1, N=400, prev=null, out=[];
+    var st=IC_LAB, Tl=(r.dte-day)/365, ks=r.L.map(function(l){ return l.K; }), lo=Math.min.apply(null,ks.concat([r.S]))*0.8, hi=Math.max.apply(null,ks.concat([r.S]))*1.2, N=480, prev=null, out=[];
     for(var i=0;i<=N;i++){ var x=lo+(hi-lo)*i/N, y=(r.credit-r.value(x,Tl))*100;
       if(prev && ((prev.y<0)!==(y<0))) out.push(prev.x+(x-prev.x)*(0-prev.y)/(y-prev.y));
       prev={x:x,y:y}; }
+    if(r.kind==="PCS") return out.length?[out[0],null]:null;            // a bull put loses only below
+    if(r.kind==="CCS") return out.length?[null,out[out.length-1]]:null;  // a bear call only above
     return out.length>=2?[out[0],out[out.length-1]]:null;
-  }
-  function icBoard(p){
-    var el=document.getElementById("iclBoard"); if(!el) return;
-    if(!p||!p.board||!p.board.length){ el.innerHTML=""; return; }
-    function m(v){ return v==null?"\u2014":(v<0?"\u2212$":"$")+Math.abs(Math.round(v)).toLocaleString(); }
-    function d(x){ return Math.round(Math.abs(x)*100); }
-    var ex=(IC_DATA.rules&&IC_DATA.rules.exits)||[25,18,10];
-    el.innerHTML='<div class="icl-sub">The tournament <span>\u00b7 the best '+p.board.length+' of every short at 25\u201345 delta and long at 5\u201320 delta, ranked on market EV per $ of risk \u00b7 tap one to load it</span></div>'+
-      '<div class="ic-tbl icb"><div class="hd"><span>#</span><span>Expiry</span><span>Structure \u00b7 deltas</span><span>Credit</span><span>Max loss</span>'+ex.map(function(x){ return '<span>Mkt '+x+'d</span>'; }).join("")+ex.map(function(x){ return '<span>Hist '+x+'d</span>'; }).join("")+'<span>Lean</span></div>'+
-      p.board.map(function(b,i){ var L=b.legs, D=b.deltas, E=b.ev||{};
-        return '<div class="r" data-bi="'+i+'"><span>'+(i+1)+'</span><span>'+new Date(b.expiry+"T12:00:00Z").toLocaleDateString(undefined,{day:"numeric",month:"short"})+' <i>'+b.dte+'d</i></span>'+
-          '<span><span class="pp">'+L.long_put+'/'+L.short_put+'P</span> <span class="cc">'+L.short_call+'/'+L.long_call+'C</span> <i>'+d(D.long_put)+'/'+d(D.short_put)+' \u00b7 '+d(D.short_call)+'/'+d(D.long_call)+'\u0394</i></span>'+
-          '<span>$'+(+b.credit).toFixed(2)+'</span><span>'+m(-b.max_loss_1)+'</span>'+
-          ex.map(function(x){ var v=((E.market||{})[x]||{}).ev_1; return '<span class="ev'+(v>0?'':' neg')+(x===b.best_exit_dte?' best':'')+'">'+m(v)+'</span>'; }).join("")+
-          ex.map(function(x){ var v=((E.historical||{})[x]||{}).ev_1; return '<span class="ev'+(v>0?'':' neg')+'">'+m(v)+'</span>'; }).join("")+
-          '<span>'+b.lean+'</span></div>'; }).join("")+'</div>';
-    el.querySelectorAll("[data-bi]").forEach(function(row){ row.onclick=function(){ var b=p.board[+this.dataset.bi];
-      IC_LAB.exp=b.expiry; IC_LAB.lp=b.legs.long_put; IC_LAB.sp=b.legs.short_put; IC_LAB.sc=b.legs.short_call; IC_LAB.lc=b.legs.long_call; IC_LAB.exitDte=b.best_exit_dte; IC_LAB.day=null; icDraw();
-      var t=document.getElementById("icLab"); if(t) t.scrollIntoView({behavior:"smooth",block:"start"}); }; });
   }
   function icWhy(r,pick){
     var st=IC_LAB, el=document.getElementById("iclWhy"); if(!el) return;
-    var isPick=pick&&pick.expiry===st.exp&&pick.legs.long_put===st.lp&&pick.legs.short_put===st.sp&&pick.legs.short_call===st.sc&&pick.legs.long_call===st.lc;
-    var em=r.S*((r.L[1].iv+r.L[2].iv)/2)*Math.sqrt(r.dte/365), mr=null, mm=(typeof MME_MAP!=="undefined"&&MME_MAP)?MME_MAP:null;
+    var isPick=pick&&pick.expiry===st.exp&&(pick.structure||"IC")===(st.kind||"IC")&&icKeys(st).every(function(k){
+      var m={lp:"long_put",sp:"short_put",sc:"short_call",lc:"long_call"}; return +pick.legs[m[k]]===+st[k]; });
+    var sIV=r.shorts.reduce(function(a,l){ return a+l.iv/r.shorts.length; },0);
+    var em=r.S*sIV*Math.sqrt(r.dte/365), mr=null, mm=(typeof MME_MAP!=="undefined"&&MME_MAP)?MME_MAP:null;
     if(mm){ ["green","amber","red"].forEach(function(g){ ((mm.groups||{})[g]||[]).forEach(function(x){ if(x.ticker===st.tk) mr=x; }); }); if(!mr&&mm.etf_rows) mr=mm.etf_rows[st.tk]; }
     function f(v){ return (+v).toLocaleString(undefined,{maximumFractionDigits:2}); }
     function m(v){ return (v<0?"\u2212$":"$")+Math.abs(Math.round(v)).toLocaleString(); }
-    var dP=((r.S-st.sp)/em).toFixed(1), dC=((st.sc-r.S)/em).toFixed(1);
-    var wallP=mr&&mr.support?(st.sp<=mr.support?' \u2014 below the put wall at '+f(mr.support)+', where dealers buy weakness':' \u2014 above the put wall at '+f(mr.support)+', so the wall is not protecting it'):'';
-    var wallC=mr&&mr.resist?(st.sc>=mr.resist?' \u2014 above the call wall at '+f(mr.resist)+', where dealers sell strength':' \u2014 below the call wall at '+f(mr.resist)+', so the wall is not protecting it'):'';
+    var V=((IC_DATA&&IC_DATA.vol)||{})[st.tk]||{};
+    var parts=[];
+    if(icHas(st,"sp")){ var wallP=mr&&mr.support?(st.sp<=mr.support?' \u2014 below the put wall at '+f(mr.support)+', where dealers buy weakness':' \u2014 above the put wall at '+f(mr.support)+', so the wall is not protecting it'):'';
+      parts.push('the short put at '+f(st.sp)+' sits '+((r.S-st.sp)/em).toFixed(1)+' expected moves below spot'+wallP); }
+    if(icHas(st,"sc")){ var wallC=mr&&mr.resist?(st.sc>=mr.resist?' \u2014 above the call wall at '+f(mr.resist)+', where dealers sell strength':' \u2014 below the call wall at '+f(mr.resist)+', so the wall is not protecting it'):'';
+      parts.push('the short call at '+f(st.sc)+' sits '+((st.sc-r.S)/em).toFixed(1)+' moves above'+wallC); }
     var exitD=new Date(Date.now()+r.exitDay*864e5).toLocaleDateString(undefined,{day:"numeric",month:"short"});
-    var vp=Math.round((((r.L[1].iv+r.L[2].iv)/2)-r.rv)*1000)/10;
-    el.innerHTML='<b>'+(isPick?'Why Phoenix chose this':'Your condor')+'</b> '+
+    var vp=Math.round((r.atmIV-r.rv)*1000)/10;
+    var chartTxt=V.chart_why?'The chart reads <b>'+(V.bias||"")+'</b> \u2014 '+optEsc(V.chart_why)+'. ':'';
+    var lvl=(r.kind==="PCS"&&V.support)?' The short put is '+(st.sp<=V.support?'below':'above')+' chart support at '+f(V.support)+'.':
+            (r.kind==="CCS"&&V.resistance)?' The short call is '+(st.sc>=V.resistance?'above':'below')+' chart resistance at '+f(V.resistance)+'.':'';
+    var kindTxt=chartTxt+(r.kind==="PCS"?'A bull put spread \u2014 it wins if the stock holds above the short put.'+lvl+' ':
+                r.kind==="CCS"?'A bear call spread \u2014 it wins if the stock stays below the short call.'+lvl+' ':
+                'An iron condor with '+(Math.abs((st.sp-st.lp)-(st.lc-st.sc))<1e-6?'equal $'+f(st.sp-st.lp)+' wings':'<b>uneven wings</b> ($'+f(st.sp-st.lp)+' put side, $'+f(st.lc-st.sc)+' call side \u2014 a directional tilt)')+' \u2014 it wins if the stock stays between the shorts. ');
+    var loseTxt=r.kind==="PCS"?'below '+f(st.lp):(r.kind==="CCS"?'above '+f(st.lc):'below '+f(st.lp)+' or above '+f(st.lc));
+    var beTxt=[r.beLo,r.beHi].filter(function(x){ return x!=null; }).map(f).join(' and ');
+    el.innerHTML='<b>'+(isPick?'Why Phoenix chose this':'Your trade')+'</b> '+kindTxt+
       'The '+new Date(st.exp+"T12:00:00Z").toLocaleDateString(undefined,{day:"numeric",month:"short"})+' expiry, '+r.dte+' days out, closed by '+exitD+'. '+
-      'The short put at '+f(st.sp)+' sits '+dP+' expected moves below spot'+wallP+'; the short call at '+f(st.sc)+' sits '+dC+' moves above'+wallC+'. '+
+      (parts.length?parts.join('; ').replace(/^./,function(c){ return c.toUpperCase(); })+'. ':'')+
       'It collects $'+r.credit.toFixed(2)+' a share, '+Math.round(r.credit/r.width*100)+'% of the $'+f(r.width)+' width. '+
-      '<b>EV '+m(r.ev)+'</b> on market probabilities = '+Math.round(r.popX*100)+'% \u00d7 '+m(r.avgW*r.n)+' average win \u2212 '+Math.round((1-r.popX)*100)+'% \u00d7 '+m(r.avgL*r.n)+' average loss, closed at '+r.exitDte+' DTE, after slippage and fees'+
-      (r.evHV!=null?'; on the stock\u2019s own 30-day vol it is <b>'+m(r.evHV)+'</b>':'')+'. '+
+      (r.evHV!=null?'<b>EV '+m(r.evHV)+'</b> on the stock\u2019s own vol ('+Math.round(r.rv*100)+'%, event days stripped) = '+Math.round(r.popHV*100)+'% chance of a profit at the exit; ':'')+
+      'on the market\u2019s own probabilities it is <b>'+m(r.ev)+'</b> ('+Math.round(r.popX*100)+'% \u00d7 '+m(r.avgW*r.n)+' average win \u2212 '+Math.round((1-r.popX)*100)+'% \u00d7 '+m(r.avgL*r.n)+' average loss), closed at '+r.exitDte+' DTE, after slippage and fees. '+
+      'The options are priced at '+Math.round(r.atmIV*100)+'% implied vol against '+(r.rv?Math.round(r.rv*100)+'% delivered':'no realised-vol figure')+' \u2014 '+
+      (r.rv?(vp>0?'a '+vp+'-point premium the seller collects. ':'no premium to collect, which is why the EV is weak. '):'')+
       'Net delta '+(r.netDelta>=0?'+':'')+r.netDelta.toFixed(0)+' shares a contract \u2014 '+(Math.abs(r.netDelta)<5?'a neutral, time-decay trade':(r.netDelta>0?'a bullish lean':'a bearish lean'))+'. '+
-      'The options are priced at '+Math.round((r.L[1].iv+r.L[2].iv)/2*100)+'% implied vol against '+Math.round(r.rv*100)+'% realised \u2014 '+
-      (vp>0?'a '+vp+'-point premium the seller collects; ':'no premium to collect, which is why EV is weak; ')+
-      'priced at implied vol the same trade is worth '+m(r.evIV)+'. '+
-      '<b>Risk '+m(r.maxLoss*r.n)+'</b> ('+r.n+' contract'+(r.n>1?'s':'')+') if the stock finishes below '+f(st.lp)+' or above '+f(st.lc)+'; '+
-      'held to expiry it profits between '+f(r.beLo)+' and '+f(r.beHi)+' ('+Math.round(r.pop*100)+'% at realised vol), but Phoenix closes it at the exit date, where the win rate is '+Math.round(r.popX*100)+'%.';
+      '<b>Risk '+m(r.maxLoss*r.n)+'</b> ('+r.n+' contract'+(r.n>1?'s':'')+') if the stock finishes '+loseTxt+'; '+
+      'held to expiry it profits '+(r.kind==="IC"?'between ':(r.kind==="PCS"?'above ':'below '))+beTxt+' ('+Math.round(r.pop*100)+'%), but Phoenix closes it at the exit date.';
   }
   function icPlot(r){
     var el=document.getElementById("iclPlot"); if(!el) return;
     var st=IC_LAB, day=(st.day!=null?Math.min(st.day,r.dte):r.exitDay), n=r.n;
-    var lo=Math.min(st.lp, r.S)*0.97, hi=Math.max(st.lc, r.S)*1.03, N=240, xs=[], yE=[], yD=[], y0=[];
+    var ks=r.L.map(function(l){ return l.K; }), span=Math.max.apply(null,ks.concat([r.S]))-Math.min.apply(null,ks.concat([r.S]));
+    var lo=Math.min.apply(null,ks.concat([r.S]))-Math.max(span*0.25,r.S*0.03), hi=Math.max.apply(null,ks.concat([r.S]))+Math.max(span*0.25,r.S*0.03), N=240, xs=[], yE=[], yD=[], y0=[];
     for(var i=0;i<=N;i++){ var x=lo+(hi-lo)*i/N; xs.push(x);
       yE.push((r.credit-r.value(x,0))*100*n); yD.push((r.credit-r.value(x,(r.dte-day)/365))*100*n); y0.push((r.credit-r.value(x,r.dte/365))*100*n); }
     var dDate=new Date(Date.now()+day*864e5).toLocaleDateString(undefined,{day:"numeric",month:"short"});
     var beD=icBEs(r,day);
-    document.getElementById("iclDayLbl").textContent=dDate+" \u00b7 "+(r.dte-day)+" days to expiry"+(day===r.exitDay?" \u00b7 Phoenix exit":"")+(beD?" \u00b7 breakevens "+beD[0].toFixed(2)+" / "+beD[1].toFixed(2):"");
+    function bes(b){ return b?b.filter(function(x){ return x!=null; }).map(function(x){ return x.toFixed(2); }).join(" / "):"\u2014"; }
+    document.getElementById("iclDayLbl").textContent=dDate+" \u00b7 "+(r.dte-day)+" days to expiry"+(day===r.exitDay?" \u00b7 Phoenix exit":"")+(beD?" \u00b7 breakeven "+bes(beD):"");
     var css=getComputedStyle(document.documentElement), ink=css.getPropertyValue("--inkFade").trim()||"#888", line=css.getPropertyValue("--line2").trim()||"#ddd";
     var pos=yE.map(function(v){ return v>0?v:0; }), neg=yE.map(function(v){ return v<0?v:0; });
     var traces=[
@@ -10801,8 +10853,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     function vl(x,c,w,d){ return {type:"line",x0:x,x1:x,yref:"paper",y0:0,y1:1,line:{color:c,width:w,dash:d}}; }
     var narrow=(el.clientWidth||600)<700;                     // a phone: only the lines that answer a question
     var shapes=[vl(r.S,ICC.blue,2.5,"solid"),{type:"line",xref:"paper",x0:0,x1:1,y0:0,y1:0,line:{color:ink,width:1}}];
-    if(!narrow){ [st.lp,st.sp].forEach(function(x){ shapes.push(vl(x,"#d08a1c",1,"dot")); }); [st.sc,st.lc].forEach(function(x){ shapes.push(vl(x,"#4a86d0",1,"dot")); }); }
-    if(beD){ shapes.push(vl(beD[0],ICC.gold,1.4,"dash")); shapes.push(vl(beD[1],ICC.gold,1.4,"dash")); }
+    if(!narrow){ r.L.forEach(function(l){ shapes.push(vl(l.K,l.cp==="P"?"#d08a1c":"#4a86d0",1,"dot")); }); }
+    if(beD){ beD.forEach(function(x){ if(x!=null) shapes.push(vl(x,ICC.gold,1.4,"dash")); }); }
     var mm=(typeof MME_MAP!=="undefined"&&MME_MAP)?MME_MAP:null, mr=null;
     if(mm){ ["green","amber","red"].forEach(function(g){ ((mm.groups||{})[g]||[]).forEach(function(x){ if(x.ticker===st.tk) mr=x; }); }); if(!mr&&mm.etf_rows) mr=mm.etf_rows[st.tk]; }
     if(mr&&!narrow){ if(mr.support) shapes.push(vl(mr.support,"#2D8A55",1,"dashdot")); if(mr.resist) shapes.push(vl(mr.resist,"#B03030",1,"dashdot")); }
@@ -10813,8 +10865,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     document.getElementById("iclKey").innerHTML=
       '<span class="lv">'+sw("var(--inkFade)")+'<em>At expiry</em></span><span class="lv">'+sw(ICC.gold)+'<em>On</em><b>'+dDate+'</b></span><span class="lv">'+sw(ICC.blue,1,2)+'<em>Today</em></span>'+
       '<span class="lv">'+sw(ICC.blue,0,3)+'<em>Spot</em><b>'+(+r.S).toFixed(2)+'</b></span>'+
-      '<span class="lv">'+sw(ICC.gold,1,2)+'<em>Breakevens '+dDate+'</em><b>'+(beD?beD[0].toFixed(2)+' / '+beD[1].toFixed(2):'\u2014')+'</b></span>'+
-      '<span class="lv">'+sw("var(--inkFade)",1,1)+'<em>at expiry</em><b>'+r.beLo.toFixed(2)+' / '+r.beHi.toFixed(2)+'</b></span>'+
+      '<span class="lv">'+sw(ICC.gold,1,2)+'<em>Breakeven '+dDate+'</em><b>'+bes(beD)+'</b></span>'+
+      '<span class="lv">'+sw("var(--inkFade)",1,1)+'<em>at expiry</em><b>'+bes([r.beLo,r.beHi])+'</b></span>'+
       (mr&&mr.support?'<span class="lv">'+sw("#2D8A55",1,1)+'<em>Put wall</em><b>'+mr.support+'</b></span>':'')+(mr&&mr.resist?'<span class="lv">'+sw("#B03030",1,1)+'<em>Call wall</em><b>'+mr.resist+'</b></span>':'');
     if(typeof Plotly==="undefined") return;
     var pr=el.data?Plotly.react(el,traces,layout,{displayModeBar:false,responsive:true}):Plotly.newPlot(el,traces,layout,{displayModeBar:false,responsive:true});
@@ -10826,7 +10878,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var st=IC_LAB, el=document.getElementById("iclPlot"), host=document.getElementById("iclTags"); if(!el||!host||!el._fullLayout) return;
     var xa=el._fullLayout.xaxis, ch=icChain(st.tk,st.exp); if(!xa||!ch) return;
     function px(v){ return xa._offset+xa.l2p(v); }
-    var legs=[["lp","BUY","P","#d08a1c","top"],["sp","SELL","P","#d08a1c","bot"],["sc","SELL","C","#4a86d0","bot"],["lc","BUY","C","#4a86d0","top"]];
+    var legs=[["lp","BUY","P","#d08a1c","top"],["sp","SELL","P","#d08a1c","bot"],["sc","SELL","C","#4a86d0","bot"],["lc","BUY","C","#4a86d0","top"]].filter(function(L){ return icHas(st,L[0]); });
     host.innerHTML=legs.map(function(L){ var q=ch[L[2]][st[L[0]]]||{}; var mid=q.bid!=null?((q.bid+q.ask)/2).toFixed(2):"";
       return '<div class="icl-tag '+L[4]+' '+(L[1]==="SELL"?'sell':'buy')+'" data-leg="'+L[0]+'" style="left:'+px(st[L[0]])+'px;--tc:'+L[3]+'"><b>'+L[1]+' '+(+st[L[0]]).toLocaleString(undefined,{maximumFractionDigits:2})+' '+(L[2]==="P"?'Put':'Call')+'</b><span>'+mid+'</span></div>'; }).join("");
     (function(){ var W=host.clientWidth;                         // never past the chart's edges
@@ -10854,21 +10906,46 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var st=IC_LAB, days=[], lo=[], hi=[], step=Math.max(1,Math.round(r.dte/45));
     for(var d=0; d<=r.dte; d+=step){ var be=icBEs(r,d); if(be){ days.push(new Date(Date.now()+d*864e5).toISOString().slice(0,10)); lo.push(be[0]); hi.push(be[1]); } }
     if(days[days.length-1]!==st.exp){ days.push(st.exp); lo.push(r.beLo); hi.push(r.beHi); }
+    var vert=r.kind!=="IC";                                   // one breakeven: a line, not a band
     if(typeof Plotly==="undefined"||!days.length) return;
     var css=getComputedStyle(document.documentElement), ink=css.getPropertyValue("--inkFade").trim()||"#888", line=css.getPropertyValue("--line2").trim()||"#ddd";
     var exitD=new Date(Date.now()+r.exitDay*864e5).toISOString().slice(0,10);
     var traces=[{x:days,y:lo,type:"scatter",mode:"lines",line:{color:ICC.gold,width:2},hovertemplate:"%{x|%d %b}: %{y:.2f}<extra>lower breakeven</extra>"},
-                {x:days,y:hi,type:"scatter",mode:"lines",line:{color:ICC.gold,width:2},fill:"tonexty",fillcolor:"rgba(45,138,85,.16)",hovertemplate:"%{x|%d %b}: %{y:.2f}<extra>upper breakeven</extra>"},
+                {x:days,y:hi,type:"scatter",mode:"lines",line:{color:ICC.gold,width:2},fill:vert?"none":"tonexty",fillcolor:"rgba(45,138,85,.16)",hovertemplate:"%{x|%d %b}: %{y:.2f}<extra>upper breakeven</extra>"},
                 {x:[days[0],st.exp],y:[r.S,r.S],type:"scatter",mode:"lines",line:{color:ICC.blue,width:2},hovertemplate:"spot %{y:.2f}<extra></extra>"}];
     var shapes=[{type:"line",xref:"x",yref:"paper",x0:exitD,x1:exitD,y0:0,y1:1,line:{color:ink,width:1.2,dash:"dash"}},
-      {type:"line",xref:"paper",yref:"y",x0:0,x1:1,y0:st.sp,y1:st.sp,line:{color:"#d08a1c",width:1,dash:"dot"}},{type:"line",xref:"paper",yref:"y",x0:0,x1:1,y0:st.sc,y1:st.sc,line:{color:"#4a86d0",width:1,dash:"dot"}}];
+      ].concat(icHas(st,"sp")?[{type:"line",xref:"paper",yref:"y",x0:0,x1:1,y0:st.sp,y1:st.sp,line:{color:"#d08a1c",width:1,dash:"dot"}}]:[])
+       .concat(icHas(st,"sc")?[{type:"line",xref:"paper",yref:"y",x0:0,x1:1,y0:st.sc,y1:st.sc,line:{color:"#4a86d0",width:1,dash:"dot"}}]:[]);
     var layout={height:220,margin:{l:58,r:14,t:10,b:34},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},
       xaxis:{gridcolor:line,tickformat:"%d %b",fixedrange:true},yaxis:{gridcolor:line,fixedrange:true},showlegend:false,shapes:shapes,
       annotations:[{x:exitD,yref:"paper",y:1,yanchor:"top",text:"exit",showarrow:false,font:{size:10,color:ink}}]};
     if(el.data) Plotly.react(el,traces,layout,{displayModeBar:false,responsive:true}); else Plotly.newPlot(el,traces,layout,{displayModeBar:false,responsive:true});
   }
+  // the price chart the direction is read from: daily closes, swing support/resistance, short strikes
+  function icPriceChart(r){
+    var el=document.getElementById("iclChart"); if(!el) return;
+    var st=IC_LAB, B=((IC_DATA&&IC_DATA.bars)||{})[st.tk], V=((IC_DATA&&IC_DATA.vol)||{})[st.tk]||{};
+    if(!B||!B.t||!B.t.length){ el.innerHTML='<div class="ed-note">No price history on file for '+st.tk+'.</div>'; return; }
+    if(typeof Plotly==="undefined") return;
+    var css=getComputedStyle(document.documentElement), ink=css.getPropertyValue("--inkFade").trim()||"#888", line=css.getPropertyValue("--line2").trim()||"#ddd";
+    var traces=[{x:B.t,y:B.h,type:"scatter",mode:"lines",line:{width:0},hoverinfo:"skip"},
+                {x:B.t,y:B.l,type:"scatter",mode:"lines",line:{width:0},fill:"tonexty",fillcolor:"rgba(120,120,120,.15)",hoverinfo:"skip"},
+                {x:B.t,y:B.c,type:"scatter",mode:"lines",line:{color:ICC.blue,width:2},hovertemplate:"%{x|%d %b}: %{y:.2f}<extra></extra>"}];
+    function hl(y,c,d,lab){ return {type:"line",xref:"paper",x0:0,x1:1,y0:y,y1:y,line:{color:c,width:1.3,dash:d},label:{text:lab,textposition:"start",font:{size:10,color:c}}}; }
+    var shapes=[];
+    if(V.support) shapes.push(hl(V.support,ICC.green,"dash","support "+V.support));
+    if(V.resistance) shapes.push(hl(V.resistance,ICC.red,"dash","resistance "+V.resistance));
+    if(icHas(st,"sp")) shapes.push(hl(st.sp,"#d08a1c","dot","short put "+st.sp));
+    if(icHas(st,"sc")) shapes.push(hl(st.sc,"#4a86d0","dot","short call "+st.sc));
+    var layout={height:240,margin:{l:52,r:12,t:10,b:30},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},showlegend:false,
+      xaxis:{gridcolor:line,tickformat:"%b",fixedrange:true},yaxis:{gridcolor:line,fixedrange:true},shapes:shapes};
+    if(el.data) Plotly.react(el,traces,layout,{displayModeBar:false,responsive:true}); else Plotly.newPlot(el,traces,layout,{displayModeBar:false,responsive:true});
+  }
   function icValid(t){
     var c=icChain(t.tk,t.exp), S=(typeof MME_LIVE!=="undefined"&&MME_LIVE[t.tk]&&MME_LIVE[t.tk].last)||(c&&c.S)||0;
+    var k=t.kind||"IC";
+    if(k==="PCS") return t.lp<t.sp && (!S || t.sp<S);
+    if(k==="CCS") return t.sc<t.lc && (!S || t.sc>S);
     return t.lp<t.sp && t.sp<t.sc && t.sc<t.lc && (!S || (t.sp<S && t.sc>S));
   }
   function icMove(key,d,quiet){
@@ -10880,64 +10957,258 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(icValid(t)){ st[key]=nv; }                                  // legs never cross, shorts never in the money
     if(!quiet) icDraw();
   }
-  function icLoad(tk,reset){
-    var p=((IC_DATA&&IC_DATA.picks)||[]).filter(function(x){ return x.ticker===tk; })[0];
-    if(p){ IC_LAB={tk:tk,exp:p.expiry,lp:p.legs.long_put,sp:p.legs.short_put,sc:p.legs.short_call,lc:p.legs.long_call,day:null,exitDte:p.best_exit_dte||null}; }
-    else {                                                     // no pick: a sensible starting condor at the nearest monthly
-      var c=icChain(tk), exps=Object.keys((c||{exps:{}}).exps).sort().filter(function(e){ var d=(new Date(e+"T12:00:00Z")-new Date())/864e5; return d>=35&&d<=90&&icMonthly(e); });
-      var e=exps[0]||Object.keys((c||{exps:{}}).exps).sort().pop(); var q=icChain(tk,e); if(!q){ IC_LAB={tk:tk}; icDraw(); return; }
-      var S=q.S, pk=Object.keys(q.P).map(Number).sort(function(a,b){return a-b;}), ck=Object.keys(q.C).map(Number).sort(function(a,b){return a-b;});
-      function nr(ks,t){ return ks.reduce(function(a,b){ return Math.abs(b-t)<Math.abs(a-t)?b:a; }); }
-      var sp=nr(pk.filter(function(k){return k<S;}),S*0.93), sc=nr(ck.filter(function(k){return k>S;}),S*1.07);
-      IC_LAB={tk:tk,exp:e,sp:sp,sc:sc,lp:nr(pk.filter(function(k){return k<sp;}),sp-S*0.03),lc:nr(ck.filter(function(k){return k>sc;}),sc+S*0.03),day:null};
+  // the chain for one name, loaded on demand from outputs/ic_chains/<TICKER>.json (the screen's window only)
+  function icEnsure(tk){
+    IC_CH=IC_CH||{names:{}}; IC_CH.names=IC_CH.names||{};
+    if(IC_CH.names[tk]) return Promise.resolve(IC_CH.names[tk]);
+    var f=((IC_UNI&&IC_UNI.names&&IC_UNI.names[tk])||{}).file||tk.replace(/[\/.]/g,"-");
+    return getJSON("ic_chains/"+f).then(function(c){ if(c&&c.rows) IC_CH.names[tk]=c; return c; }).catch(function(){ return null; });
+  }
+  function icFromRow(tk,p){
+    var L=p.legs||{};
+    return {tk:tk,kind:p.structure||"IC",exp:p.expiry,lp:L.long_put!=null?+L.long_put:null,sp:L.short_put!=null?+L.short_put:null,
+            sc:L.short_call!=null?+L.short_call:null,lc:L.long_call!=null?+L.long_call:null,day:null,exitDte:p.best_exit_dte||null};
+  }
+  // switch structure: keep the strikes the new structure shares, place the missing side sensibly
+  function icSetKind(k){
+    var st=IC_LAB; if(!st) return; st.kind=k; var q=icChain(st.tk,st.exp); if(!q){ icDraw(); return; }
+    var S=q.S, pk=Object.keys(q.P).map(Number).sort(function(a,b){return a-b;}), ck=Object.keys(q.C).map(Number).sort(function(a,b){return a-b;});
+    function nr(ks,t){ return ks.length?ks.reduce(function(a,b){ return Math.abs(b-t)<Math.abs(a-t)?b:a; }):t; }
+    if(icHas(st,"sp")&&(st.sp==null||st.lp==null)){ st.sp=nr(pk.filter(function(k){return k<S;}),S*0.93); st.lp=nr(pk.filter(function(k){return k<st.sp;}),st.sp-S*0.03); }
+    if(icHas(st,"sc")&&(st.sc==null||st.lc==null)){ st.sc=nr(ck.filter(function(k){return k>S;}),S*1.07); st.lc=nr(ck.filter(function(k){return k>st.sc;}),st.sc+S*0.03); }
+    st.day=null; icDraw();
+  }
+  function icLoad(tk,reset,row){
+    var host=document.getElementById("icLab"); if(host&&!(IC_CH&&IC_CH.names&&IC_CH.names[tk])) host.innerHTML='<div class="ed-note">Loading the '+tk+' chain\u2026</div>';
+    return icEnsure(tk).then(function(c){
+      if(!c){ IC_LAB={tk:tk}; if(host) host.innerHTML='<div class="ed-note">No chain on file for '+tk+' \u2014 it was not fetched in this morning\u2019s run.</div>'; return; }
+      var p=row||((IC_DATA&&IC_DATA.picks)||[]).filter(function(x){ return x.ticker===tk; })[0];
+      if(p){ IC_LAB=icFromRow(tk,p); }
+      else {                                                     // no pick: a sensible starting condor at the nearest monthly
+        var ch=icChain(tk), exps=Object.keys((ch||{exps:{}}).exps).sort().filter(function(e){ var d=(new Date(e+"T12:00:00Z")-new Date())/864e5; return d>=25&&d<=95&&icMonthly(e); });
+        var e=exps[0]||Object.keys((ch||{exps:{}}).exps).sort().pop(); IC_LAB={tk:tk,kind:"IC",exp:e,day:null}; icSetKind("IC"); return;
+      }
+      icDraw();
+      if(reset){ var t=document.getElementById("optSec1"); if(t) t.scrollIntoView({behavior:"smooth",block:"start"}); }
+    });
+  }
+  // ---- OPTIONS (Mission Control tab): 1 · today's proposals with the graph, 2 · the tournament and the testing ----
+  var IC_UNI=null, OPT_GRP="all", OPT_BT=null;
+  function optM(v){ return v==null?"\u2014":(v<0?"\u2212$":"$")+Math.abs(Math.round(v)).toLocaleString(); }
+  function optPct(v,d){ return v==null?"\u2014":(v*100).toFixed(d==null?0:d)+"%"; }
+  function optDate(e,yr){ return e?new Date(e+"T12:00:00Z").toLocaleDateString(undefined,yr?{day:"numeric",month:"short",year:"2-digit"}:{month:"short",day:"numeric"}):"\u2014"; }
+  function optEsc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+  function optBias(b){ return b==="bullish"?"\u2197 bullish":(b==="bearish"?"\u2198 bearish":(b==="neutral"?"\u2194 range":"\u2014")); }
+  function optGrpName(g){ return g==="etf"?"ETF":(g==="stock"?"Stock":"MME"); }
+  // IV column: the 1-year rank once enough history has been recorded, the 30-day implied vol until then
+  function optIV(p){
+    if(p.ivr!=null) return '<span class="opt-ivr">'+(p.ivr_wk!=null?p.ivr_wk+' \u2192 ':'')+'<b>'+p.ivr+'</b></span>';
+    var a=p.iv30_wk, b=p.iv30; if(b==null) return "\u2014";
+    return '<span class="opt-ivr">'+(a!=null?Math.round(a*100)+' \u2192 ':'')+'<b>'+Math.round(b*100)+'</b><i>%</i></span>';
+  }
+  function optFill(){
+    var host=document.getElementById("optPane"); if(!host) return;
+    host.innerHTML='<div class="ed-note">Loading the options screen\u2026</div>';
+    Promise.all([getJSON("ic_screen").catch(function(){return null;}), getJSON("ic_universe").catch(function(){return null;}),
+                 (typeof MME_MAP!=="undefined"&&MME_MAP)?Promise.resolve(MME_MAP):getJSON("mme_map").catch(function(){return null;}),
+                 getJSON("ic_backtest").catch(function(){return null;})]).then(function(res){
+      IC_DATA=res[0]||{picks:[],proposed:[]}; IC_UNI=res[1]||{names:{}}; if(res[2]&&typeof MME_MAP!=="undefined"&&!MME_MAP) MME_MAP=res[2]; OPT_BT=res[3];
+      IC_RV={}; var V=IC_DATA.vol||{}; Object.keys(V).forEach(function(t){ if(V[t].hv30s) IC_RV[t]=V[t].hv30s; });
+      var R=IC_DATA.rules||{}, C=IC_DATA.counts||{}, P=IC_DATA.proposed||[];
+      var asof=IC_DATA.asof?String(IC_DATA.asof).replace(" UTC",""):(IC_DATA.date||"");
+      // events before each proposed expiry, the way the trade will have to sit through them
+      var EV=IC_DATA.events||{};
+      var evHTML=Object.keys(EV).sort().map(function(e){ var xs=EV[e]||[]; if(!xs.length) return "";
+        return '<div class="opt-evr"><b>\ud83d\uddd3 '+optDate(e)+':</b> '+xs.map(function(x){ return '<span>'+optEsc(x.label)+' '+optDate(x.date)+'</span>'; }).join('<i>|</i>')+'</div>'; }).join("");
+      host.innerHTML=
+        '<div class="opt">'+
+        '<div class="opt-hero"><div class="opt-k">Options \u00b7 '+optEsc(IC_DATA.date||"")+'</div>'+
+          '<div class="opt-h">The richest option premium of the day</div>'+
+          '<div class="opt-sub">Implied volatility above what the stock delivers, earnings stripped. Ranked by EV.</div></div>'+
+        '<div class="opt-meta">Updated '+optEsc(asof)+' \u00b7 '+(C.screened||0)+' names screened \u00b7 '+(C.proposed||P.length)+' proposed</div>'+
+        (evHTML?'<div class="opt-evs">'+evHTML+'</div>':'')+
+        // SECTION 1
+        '<div class="opt-sec" id="optSec1"><div class="opt-sk"><b>1</b> Today\u2019s proposals</div>'+
+          '<div id="icLab" class="icl"></div>'+
+          '<div class="opt-grp" id="optGrp"></div>'+
+          '<div id="optList"></div>'+
+          '<div class="opt-legend"><b>Trade:</b> IC iron condor \u00b7 \u00b1 wings, the same width both sides \u00b7 % = credit / wings<br>'+
+            '\u2212340P +280P \u00b7 9.65: sell the 340 put, buy the 280, collect 9.65 a share (a bull put spread; \u2212C +C is a bear call spread)<br>'+
+            '<b>Direction:</b> the chart decides \u2014 a range gets an iron condor, a bullish chart a bull put spread, a bearish chart a bear call spread<br>'+
+            '<b>Win odds:</b> chance of a profit at the exit, on the stock\u2019s own vol<br>'+
+            '<b>IV:</b> a week ago \u2192 today \u2014 the 30-day implied vol for now; from three months of recorded history it becomes the IV rank over that history (a full 1-year rank from Oct 2027). We sell as fear fades.<br>'+
+            '<b>Exit:</b> the day to close the trade, win or lose<br>'+
+            '<b>EV:</b> expected return on the money at risk, to the exit, after slippage and fees</div>'+
+        '</div>'+
+        // SECTION 2
+        '<div class="opt-sec" id="optSec2"><div class="opt-sk"><b>2</b> Tournament &amp; testing</div>'+
+          '<div id="optKpi"></div>'+
+          '<div id="optFwd"></div>'+
+          '<div id="optWinners"></div>'+
+          '<div id="optBoard"></div>'+
+          '<div id="optVol"></div>'+
+          '<div id="optBt"></div>'+
+          '<div id="optSkip"></div>'+
+          '<div class="ed-note" style="margin-top:10px">'+optEsc(IC_DATA.method||"")+'</div>'+
+        '</div></div>';
+      optGroups(); optList(); optKpi(); optForward(); optWinners(); optBoardFill(null); optVol(); optBacktest(); optSkipped();
+      var first=P[0]||(IC_DATA.picks||[])[0];
+      var tk=IC_LAB&&IC_LAB.tk?IC_LAB.tk:(first?first.ticker:Object.keys(IC_UNI.names||{}).sort()[0]);
+      if(tk) icLoad(tk,false); else document.getElementById("icLab").innerHTML='<div class="ed-note">No chains on file yet \u2014 the lab fills after the next morning run.</div>';
+    }).catch(function(e){ host.innerHTML='<div class="ed-note">The options screen could not be loaded ('+optEsc(e&&e.message)+').</div>'; });
+  }
+  function optGroups(){
+    var el=document.getElementById("optGrp"); if(!el) return;
+    var P=IC_DATA.proposed||[], n={all:P.length,mme:0,etf:0,stock:0}; P.forEach(function(p){ n[p.group||"mme"]=(n[p.group||"mme"]||0)+1; });
+    el.innerHTML=[["all","All"],["mme","MME"],["etf","ETFs"],["stock","Stocks"]].map(function(g){
+      return '<button data-g="'+g[0]+'"'+(OPT_GRP===g[0]?' class="on"':'')+'>'+g[1]+' <i>'+(n[g[0]]||0)+'</i></button>'; }).join("");
+    el.querySelectorAll("[data-g]").forEach(function(b){ b.onclick=function(){ OPT_GRP=this.dataset.g; optGroups(); optList(); }; });
+  }
+  function optList(){
+    var el=document.getElementById("optList"); if(!el) return;
+    var P=(IC_DATA.proposed||[]).filter(function(p){ return OPT_GRP==="all"||(p.group||"mme")===OPT_GRP; });
+    if(!P.length){ el.innerHTML='<div class="ed-note">Nothing passes today'+(OPT_GRP!=="all"?' in this group':'')+': no name has implied vol above what it delivers with a positive EV after costs. '+
+      'Every name\u2019s best structure is still in the tournament below, and you can build any trade in the lab above.</div>'; return; }
+    el.innerHTML='<div class="opt-tbl"><div class="hd"><span>Ticker</span><span>Trade</span><span>Win Odds</span><span>IV</span><span>Exit</span><span>EV</span></div>'+
+      P.map(function(p){ var on=IC_LAB&&IC_LAB.tk===p.ticker;
+        return '<div class="r'+(on?' on':'')+'" data-tk="'+p.ticker+'"><span class="tk">'+p.ticker+'<i>'+optGrpName(p.group)+' \u00b7 '+optBias(p.bias)+'</i></span>'+
+          '<span class="tr">'+optEsc(p.label)+'</span><span>'+optPct(p.pop_hv)+'</span><span>'+optIV(p)+'</span>'+
+          '<span>'+optDate(p.exit_date)+'</span><span class="ev">'+optPct(p.ev_pct)+'</span></div>'; }).join("")+'</div>';
+    el.querySelectorAll("[data-tk]").forEach(function(r){ r.onclick=function(){ var tk=this.dataset.tk;
+      el.querySelectorAll("[data-tk]").forEach(function(x){ x.classList.toggle("on",x===r); }); icLoad(tk,true); }; });
+  }
+  function optKpi(){
+    var el=document.getElementById("optKpi"); if(!el) return;
+    var C=IC_DATA.counts||{}, W=C.winners_by_structure||{}, sk=IC_DATA.skipped||{}, why={};
+    Object.keys(sk).forEach(function(t){ var k=String(sk[t]).split(" \u2014 ")[0]; why[k]=(why[k]||0)+1; });
+    el.innerHTML='<div class="opt-sub2">Today\u2019s tournament <span>\u00b7 '+optEsc(IC_DATA.date||"")+'</span></div>'+
+      '<div class="mm-strip opt-kpi"><div><i>screened</i><b>'+(C.screened||0)+'</b></div><div><i>with a qualifying trade</i><b>'+(C.with_winner||0)+'</b></div>'+
+      '<div><i>proposed</i><b style="color:var(--green)">'+(C.proposed||0)+'</b></div>'+
+      '<div><i>winners</i><b>'+(W.IC||0)+' IC \u00b7 '+(W.PCS||0)+' bull put \u00b7 '+(W.CCS||0)+' bear call</b></div>'+
+      '<div><i>skipped</i><b>'+(C.skipped||0)+'</b><small>'+Object.keys(why).map(function(k){ return why[k]+' '+optEsc(k); }).join(' \u00b7 ')+'</small></div></div>';
+  }
+  // the forward test: every proposal and every other name's winner, opened on paper and marked each morning
+  function optForward(){
+    var el=document.getElementById("optFwd"); if(!el) return;
+    el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 loading\u2026</span></div>';
+    supaRows("/rest/v1/ic_forward?select=id,opened,ticker,expiry,legs,credit,max_loss_1,model,result,status,role,structure,grp,closed&order=opened.desc&limit=2000").then(function(rows){
+      rows=rows||[];
+      if(!rows.length){ el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 starts with the next morning run: each day\u2019s trades are opened on paper and marked every morning</span></div>'; return; }
+      var ex=[25,18,10];
+      function pred(r,x){ var E=(r.model||{}).ev||{}; var meas=(r.model||{}).rank_measure==="historical"?"historical":"market"; return (((E[meas]||{})[x])||{}).ev_1; }
+      function agg(list){ var a={}; list.forEach(function(r){ ex.forEach(function(x){ var v=(r.result||{})[x]; if(v==null) return;
+        var g=a[x]=a[x]||{n:0,sum:0,win:0,pred:0,np:0,risk:0}; g.n++; g.sum+=+v; g.win+=(v>0?1:0); var p=pred(r,x); if(p!=null){ g.pred+=p; g.np++; } g.risk+=(+r.max_loss_1||0); }); }); return a; }
+      var roles=[["proposed","Proposed \u2014 the trades Phoenix put on the list"],["calibration","Calibration \u2014 every other name\u2019s best trade"]];
+      var open=rows.filter(function(r){ return r.status==="open"; }), closed=rows.filter(function(r){ return r.status!=="open"; });
+      var tbl=function(list,title){ var a=agg(list);
+        return '<div class="opt-sub3">'+title+' <span>\u00b7 '+list.length+' opened</span></div><div class="opt-tbl fw"><div class="hd"><span>Exit</span><span>Closed</span><span>Win rate</span><span>Avg realised</span><span>Avg predicted</span><span>Return on risk</span><span>Total</span></div>'+
+        ex.map(function(x){ var g=a[x]; if(!g) return '<div class="r"><span>'+x+' DTE</span><span>0</span><span>\u2014</span><span>\u2014</span><span>\u2014</span><span>\u2014</span><span>\u2014</span></div>';
+          return '<div class="r"><span>'+x+' DTE</span><span>'+g.n+'</span><span>'+Math.round(g.win/g.n*100)+'%</span><span class="ev'+(g.sum>0?'':' neg')+'">'+optM(g.sum/g.n)+'</span>'+
+            '<span>'+(g.np?optM(g.pred/g.np):'\u2014')+'</span><span class="ev'+(g.sum>0?'':' neg')+'">'+optPct(g.sum/Math.max(g.risk,1),1)+'</span><span class="ev'+(g.sum>0?'':' neg')+'">'+optM(g.sum)+'</span></div>'; }).join("")+'</div>'; };
+      // running P&L of what is open, from each trade's latest mark
+      var openPnl=open.reduce(function(a,r){ var l=(r.result||{}).last; return a+(l&&l.pnl_1!=null?+l.pnl_1:0); },0);
+      var openRisk=open.reduce(function(a,r){ return a+(+r.max_loss_1||0); },0);
+      var names={}; rows.forEach(function(r){ names[r.ticker+"|"+r.expiry]=1; });
+      var first=rows[rows.length-1].opened;
+      el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 since '+optDate(first,1)+' \u00b7 '+rows.length+' trades on '+Object.keys(names).length+' name-expiries \u00b7 realised per contract after slippage and fees</span></div>'+
+        '<div class="mm-strip opt-kpi"><div><i>open</i><b>'+open.length+'</b></div><div><i>open P&amp;L (latest marks)</i><b style="color:'+(openPnl>=0?'var(--green)':'var(--red)')+'">'+optM(openPnl)+'</b></div>'+
+          '<div><i>capital at risk</i><b>'+optM(openRisk)+'</b></div><div><i>closed</i><b>'+closed.length+'</b></div></div>'+
+        roles.map(function(r_){ var L=rows.filter(function(r){ return (r.role||"calibration")===r_[0]||(r_[0]==="calibration"&&r.role==="winner"); }); return L.length?tbl(L,r_[1]):""; }).join("")+
+        tbl(rows.filter(function(r){ return (r.structure||"IC")==="IC"; }),"Iron condors")+
+        (rows.some(function(r){ return r.structure&&r.structure!=="IC"; })?tbl(rows.filter(function(r){ return r.structure&&r.structure!=="IC"; }),"Credit spreads"):"")+
+        '<div class="opt-sub3">Open trades <span>\u00b7 latest mark \u00b7 tap one to load it in the lab</span></div>'+
+        '<div class="opt-tbl op"><div class="hd"><span>Ticker</span><span>Trade</span><span>Opened</span><span>DTE</span><span>Mark</span><span>Predicted</span><span>Role</span></div>'+
+        open.slice(0,60).map(function(r,i){ var l=(r.result||{}).last, lab=(r.model||{}).label||(r.ticker+" "+r.expiry), xb=(r.model||{}).best_exit_dte;
+          return '<div class="r" data-fo="'+i+'"><span class="tk">'+r.ticker+'</span><span class="tr">'+optEsc(lab)+'</span><span>'+optDate(r.opened)+'</span>'+
+            '<span>'+(l?l.dte:'\u2014')+'</span><span class="ev'+(l&&l.pnl_1>0?'':' neg')+'">'+(l?optM(l.pnl_1):'\u2014')+'</span><span>'+optM(pred(r,xb))+'</span><span>'+(r.role==="proposed"?'\u2605 proposed':'calib.')+'</span></div>'; }).join("")+
+        (open.length>60?'<div class="r"><span></span><span>+'+(open.length-60)+' more</span></div>':'')+'</div>';
+      el.querySelectorAll("[data-fo]").forEach(function(rw){ rw.onclick=function(){ var r=open[+this.dataset.fo];
+        icLoad(r.ticker,true,{legs:r.legs,expiry:String(r.expiry).slice(0,10),structure:r.structure||"IC",best_exit_dte:(r.model||{}).best_exit_dte}); }; });
+    }).catch(function(){ el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 could not be read</span></div>'; });
+  }
+  // every name's winner, proposed or not, with both EVs side by side
+  function optWinners(){
+    var el=document.getElementById("optWinners"); if(!el) return;
+    var P=(IC_DATA.picks||[]).slice();
+    if(!P.length){ el.innerHTML=""; return; }
+    el.innerHTML='<div class="opt-sub2">Every name\u2019s winner <span>\u00b7 '+P.length+' names \u00b7 ranked on EV per $ at risk \u00b7 tap a name to see its whole board</span></div>'+
+      '<div class="opt-tbl wn"><div class="hd"><span>Ticker</span><span>Trade</span><span>Win</span><span>EV hist</span><span>EV mkt</span><span>IV / HV</span><span>Max loss</span><span>Exit</span></div>'+
+      P.map(function(p){ var prop=(IC_DATA.proposed||[]).some(function(x){ return x.ticker===p.ticker; });
+        return '<div class="r'+(prop?' prop':'')+'" data-wb="'+p.ticker+'"><span class="tk">'+(prop?'\u2605 ':'')+p.ticker+'<i>'+optGrpName(p.group)+'</i></span><span class="tr">'+optEsc(p.label)+'</span>'+
+          '<span>'+optPct(p.pop_hv!=null?p.pop_hv:p.pop_exit)+'</span><span class="ev'+(p.ev_hv_1>0?'':' neg')+'">'+optM(p.ev_hv_1)+'</span><span class="ev'+(p.ev_1>0?'':' neg')+'">'+optM(p.ev_1)+'</span>'+
+          '<span>'+(p.iv_atm!=null?Math.round(p.iv_atm):'\u2014')+' / '+(p.hv30s?Math.round(p.hv30s*100):'\u2014')+'</span><span>'+optM(-p.max_loss_1)+'</span><span>'+optDate(p.exit_date)+'</span></div>'; }).join("")+'</div>';
+    el.querySelectorAll("[data-wb]").forEach(function(r){ r.onclick=function(){ optBoardFill(this.dataset.wb); var b=document.getElementById("optBoard"); if(b) b.scrollIntoView({behavior:"smooth",block:"start"}); }; });
+  }
+  // one name's board: the best of each structure across expiries
+  function optBoardFill(tk){
+    var el=document.getElementById("optBoard"); if(!el) return;
+    var P=IC_DATA.picks||[]; if(!P.length){ el.innerHTML=""; return; }
+    tk=tk||(IC_LAB&&IC_LAB.tk&&P.some(function(p){ return p.ticker===IC_LAB.tk; })?IC_LAB.tk:P[0].ticker);
+    var p=P.filter(function(x){ return x.ticker===tk; })[0]; if(!p){ el.innerHTML=""; return; }
+    var ex=(IC_DATA.rules&&IC_DATA.rules.exits)||[25,18,10];
+    function d(x){ return Math.round(Math.abs(x)*100); }
+    el.innerHTML='<div class="opt-sub2">The board <select id="optBoardTk">'+P.map(function(x){ return '<option'+(x.ticker===tk?' selected':'')+'>'+x.ticker+'</option>'; }).join("")+'</select>'+
+      '<span>\u00b7 the best of each structure, every expiry and wing width that passed \u00b7 EV per contract at each exit \u00b7 tap one to load it</span></div>'+
+      '<div class="opt-tbl bd"><div class="hd"><span>#</span><span>Trade</span><span>Deltas</span><span>Credit</span><span>Max loss</span>'+ex.map(function(x){ return '<span>Hist '+x+'d</span>'; }).join("")+ex.map(function(x){ return '<span>Mkt '+x+'d</span>'; }).join("")+'</div>'+
+      (p.board||[]).map(function(b,i){ var D=b.deltas||{}, E=b.ev||{};
+        var dl=[D.long_put,D.short_put,D.short_call,D.long_call].filter(function(x){ return x!=null; }).map(d).join("/");
+        return '<div class="r" data-bi="'+i+'"><span>'+(i+1)+'</span><span class="tr">'+optEsc(b.label||"")+'</span><span><i>'+dl+'\u0394</i></span><span>$'+(+b.credit).toFixed(2)+'</span><span>'+optM(-b.max_loss_1)+'</span>'+
+          ex.map(function(x){ var v=((E.historical||{})[x]||{}).ev_1; return '<span class="ev'+(v>0?'':' neg')+(x===b.best_exit_dte?' best':'')+'">'+optM(v)+'</span>'; }).join("")+
+          ex.map(function(x){ var v=((E.market||{})[x]||{}).ev_1; return '<span class="ev'+(v>0?'':' neg')+'">'+optM(v)+'</span>'; }).join("")+'</div>'; }).join("")+'</div>';
+    document.getElementById("optBoardTk").onchange=function(){ optBoardFill(this.value); };
+    el.querySelectorAll("[data-bi]").forEach(function(r){ r.onclick=function(){ icLoad(tk,true,p.board[+this.dataset.bi]); }; });
+  }
+  // where the premium is: implied against delivered vol for every name screened
+  function optVol(){
+    var el=document.getElementById("optVol"); if(!el) return;
+    var V=IC_DATA.vol||{}, ts=Object.keys(V).filter(function(t){ return V[t].iv30&&V[t].hv30s; });
+    if(!ts.length){ el.innerHTML=""; return; }
+    ts.sort(function(a,b){ return (V[b].iv30/V[b].hv30s)-(V[a].iv30/V[a].hv30s); });
+    el.innerHTML='<details class="opt-det"><summary>Implied vs delivered vol <span>\u00b7 '+ts.length+' names \u00b7 30-day implied against 30-day realised with event days stripped</span></summary>'+
+      '<div class="opt-tbl vl"><div class="hd"><span>Ticker</span><span>IV 30d</span><span>HV stripped</span><span>HV raw</span><span>IV / HV</span><span>Chart</span><span>Earnings</span></div>'+
+      ts.map(function(t){ var v=V[t], r=v.iv30/v.hv30s;
+        return '<div class="r"><span class="tk">'+t+'<i>'+optGrpName(v.group)+'</i></span><span>'+Math.round(v.iv30*100)+'%</span><span>'+Math.round(v.hv30s*100)+'%</span><span>'+(v.hv30?Math.round(v.hv30*100)+'%':'\u2014')+'</span>'+
+          '<span class="ev'+(r>=1?'':' neg')+'">'+r.toFixed(2)+'\u00d7</span><span title="'+optEsc(v.chart_why||"")+'">'+optBias(v.bias)+'</span><span>'+(v.earnings?optDate(v.earnings)+(String(v.earnings_src||"").indexOf("estimated")===0?' <i>est</i>':''):(v.group==="etf"?'fund':'\u2014'))+'</span></div>'; }).join("")+'</div></details>';
+  }
+  function optBacktest(){
+    var el=document.getElementById("optBt"); if(!el) return;
+    var B=OPT_BT;
+    if(!B||!B.by_rank||!Object.keys(B.by_rank).length){
+      el.innerHTML='<details class="opt-det"><summary>Backtest <span>\u00b7 replays the archived chains once there are a few weeks of them \u2014 run it by hand with --step ic_backtest</span></summary></details>'; return; }
+    var ex=[25,18,10];
+    el.innerHTML='<details class="opt-det" open><summary>Backtest <span>\u00b7 '+(B.days||[]).length+' archived days \u00b7 '+B.n_trades+' structures replayed \u00b7 '+optEsc(B.asof||"")+'</span></summary>'+
+      '<div class="opt-tbl bt"><div class="hd"><span>Board rank</span>'+ex.map(function(x){ return '<span>'+x+'d n</span><span>Win</span><span>Realised</span><span>Predicted</span>'; }).join("")+'</div>'+
+      Object.keys(B.by_rank).slice(0,12).map(function(rk){ var g=B.by_rank[rk];
+        return '<div class="r"><span>'+(rk==="1"?'1 \u2605 winner':rk)+'</span>'+ex.map(function(x){ var v=g[x]||g[String(x)]; if(!v) return '<span>\u2014</span><span></span><span></span><span></span>';
+          return '<span>'+v.n+'</span><span>'+Math.round(v.win_rate*100)+'%</span><span class="ev'+(v.avg_realised>0?'':' neg')+'">'+optM(v.avg_realised)+'</span><span>'+optM(v.avg_predicted)+'</span>'; }).join("")+'</div>'; }).join("")+'</div></details>';
+  }
+  function optSkipped(){
+    var el=document.getElementById("optSkip"); if(!el) return;
+    var S=IC_DATA.skipped||{}, ks=Object.keys(S).sort();
+    el.innerHTML=ks.length?'<details class="opt-det"><summary>Skipped <span>\u00b7 '+ks.length+' names and why</span></summary><div class="opt-skip">'+
+      ks.map(function(t){ return '<div><b>'+t+'</b> '+optEsc(S[t])+'</div>'; }).join("")+'</div></details>':"";
+  }
+  // Mission Control's tabs: the Daily Brief, MME (the dealer map) and Options (iron condors and credit spreads,
+  // its own section since 28 Oct 2026). The last one opened is remembered.
+  function mcPanes(host, briefHtml, mmeHtml){
+    host.innerHTML='<div class="mc-top"><button class="mc-tab" data-pane="brief">Daily Brief</button><button class="mc-tab" data-pane="mme">MME</button>'+
+                   '<button class="mc-tab" data-pane="options">Options</button></div>'+
+                   '<div id="mcPaneBrief">'+briefHtml+'</div><div id="mcPaneMme" style="display:none">'+mmeHtml+'</div>'+
+                   '<div id="mcPaneOpt" style="display:none"><div id="optPane"></div></div>';
+    var optDone=false;
+    function show(p){
+      if(["brief","mme","options"].indexOf(p)<0) p="brief";
+      document.getElementById("mcPaneBrief").style.display=p==="brief"?"":"none";
+      document.getElementById("mcPaneMme").style.display=p==="mme"?"":"none";
+      document.getElementById("mcPaneOpt").style.display=p==="options"?"":"none";
+      host.querySelectorAll(".mc-tab").forEach(function(b){ b.classList.toggle("on", b.dataset.pane===p); });
+      try{ localStorage.setItem("phoenix.mc.pane", p); }catch(e){}
+      if(p==="mme") mcbNamesFill();
+      if(p==="options"&&!optDone){ optDone=true; optFill(); }
     }
-    icDraw();
-    if(reset!==false){ var t=document.getElementById("icLab"); if(t&&reset) t.scrollIntoView({behavior:"smooth",block:"start"}); }
-  }
-  // the forward test: every tournament winner, marked each morning, realised P&L at 25 / 18 / 10 DTE
-  function icForwardFill(){
-    var el=document.getElementById("icFwd"); if(!el) return;
-    supaRows("/rest/v1/ic_forward?select=opened,ticker,expiry,legs,credit,max_loss_1,model,result,status,marks&order=opened.desc&limit=500").then(function(rows){
-      rows=rows||[]; function m(v){ return v==null?"\u2014":(v<0?"\u2212$":"$")+Math.abs(Math.round(v)).toLocaleString(); }
-      if(!rows.length){ el.innerHTML='<div class="icl-sub" style="padding-left:0">Forward test <span>\u00b7 starts with the next morning run: each day\u2019s winners are opened on paper and marked every morning</span></div>'; return; }
-      var ex=[25,18,10], agg={};
-      rows.forEach(function(r){ ex.forEach(function(x){ var v=(r.result||{})[x]; if(v==null) return; var p=((((r.model||{}).ev||{}).market||{})[x]||{}).ev_1;
-        var a=agg[x]=agg[x]||{n:0,sum:0,win:0,pred:0}; a.n++; a.sum+=+v; a.win+=(v>0?1:0); a.pred+=(p||0); }); });
-      var open=rows.filter(function(r){ return r.status==="open"; }).length;
-      el.innerHTML='<div class="icl-sub" style="padding-left:0">Forward test <span>\u00b7 '+rows.length+' condors opened since '+rows[rows.length-1].opened+' \u00b7 '+open+' open \u00b7 realised per contract after slippage and fees</span></div>'+
-        '<div class="ic-tbl ic-fw"><div class="hd"><span>Exit</span><span>Closed</span><span>Win rate</span><span>Avg realised</span><span>Avg predicted</span><span>Total</span></div>'+
-        ex.map(function(x){ var a=agg[x]; if(!a) return '<div class="r"><span>'+x+' DTE</span><span>0</span><span>\u2014</span><span>\u2014</span><span>\u2014</span><span>\u2014</span></div>';
-          return '<div class="r"><span>'+x+' DTE</span><span>'+a.n+'</span><span>'+Math.round(a.win/a.n*100)+'%</span><span class="ev'+(a.sum>0?'':' neg')+'">'+m(a.sum/a.n)+'</span><span>'+m(a.pred/a.n)+'</span><span class="ev'+(a.sum>0?'':' neg')+'">'+m(a.sum)+'</span></div>'; }).join("")+'</div>';
-    }).catch(function(){ el.innerHTML=""; });
-  }
-  function mmeICFill(){
-    var host=document.getElementById("mmeIC"); if(!host) return;
-    Promise.all([getJSON("ic_screen").catch(function(){return null;}), MME_CHAINS?Promise.resolve(MME_CHAINS):getJSON("mme_chains").catch(function(){return null;}),
-                 getJSON("iv_em").catch(function(){return null;})]).then(function(res){
-      IC_DATA=res[0]||{picks:[]}; IC_CH=res[1]; if(res[1]) MME_CHAINS=res[1];
-      IC_RV={}; var iv=(res[2]&&res[2].tickers)||{}; Object.keys(iv).forEach(function(t){ if(iv[t].rv30_pct) IC_RV[t]=iv[t].rv30_pct/100; });
-      var P=IC_DATA.picks||[], R=IC_DATA.rules||{};
-      function m(v){ return v==null?"\u2014":(v<0?"\u2212$":"$")+Math.abs(Math.round(v)).toLocaleString(); }
-      function k(v){ return (+v).toLocaleString(undefined,{maximumFractionDigits:2}); }
-      host.innerHTML='<div class="ic-wrap"><div class="ic-hd"><span class="mme-sk">Iron condors <span>\u00b7 '+(IC_DATA.date||"")+'</span></span>'+
-        '<span class="ic-rules">monthlies '+(R.dte_min||35)+'\u2013'+(R.dte_max||90)+'d \u00b7 exit at '+(R.exit_dte||19)+' DTE \u00b7 shorts out of the money \u00b7 up to $'+(IC_DATA.risk_per_trade||2000).toLocaleString()+' max loss per trade</span></div>'+
-        '<div id="icLab" class="icl"></div>'+
-        (P.length?'<div class="ic-tbl ic-sm"><div class="hd"><span>Name</span><span>Expiry</span><span>Structure</span><span>Credit</span><span>Max loss</span><span>Win</span><span>EV mkt</span><span>EV hist</span><span>Exit</span></div>'+
-          P.map(function(p,i){ return '<div class="r'+(p.ev_total>0?'':' neg')+(IC_LAB&&IC_LAB.tk===p.ticker?' on':'')+'" data-ic="'+p.ticker+'"><span class="tk">'+(i===0&&p.ev_total>0?'\u2605 ':'')+p.ticker+'</span>'+
-            '<span>'+new Date(p.expiry+"T12:00:00Z").toLocaleDateString(undefined,{day:"numeric",month:"short"})+' <i>'+p.dte+'d</i></span>'+
-            '<span><span class="pp">'+k(p.legs.long_put)+'/'+k(p.legs.short_put)+'P</span> <span class="cc">'+k(p.legs.short_call)+'/'+k(p.legs.long_call)+'C</span></span>'+
-            '<span>$'+(+p.credit).toFixed(2)+'</span><span>'+m(-p.max_loss_1)+'</span>'+
-            '<span>'+(p.pop_exit!=null?Math.round(p.pop_exit*100)+'%':'\u2014')+'</span><span class="ev'+(p.ev_1>0?'':' neg')+'">'+m(p.ev_1)+'</span>'+
-            '<span class="ev'+(p.ev_hv_1>0?'':' neg')+'">'+(p.ev_hv_1==null?'\u2014':m(p.ev_hv_1))+'</span><span>'+(p.best_exit_dte||'')+'d</span></div>'; }).join("")+'</div>':
-          '<div class="ed-note">No condor passed the screen today'+(IC_DATA.skipped?' \u2014 '+Object.keys(IC_DATA.skipped).length+' names did not qualify':'')+'. You can still build one in the lab above.</div>')+
-        '<div id="icFwd"></div>'+
-        '<div class="ed-note" style="margin-top:8px">Credit is filled at mid less a quarter of the four spreads. EV assumes the stock moves at its 30-day realised vol until the exit date and the condor is closed there; EV at IV is the same at implied vol \u2014 the gap is the volatility premium the trade depends on. Spreads are what the four legs cost to cross, as a share of the credit; EV is after IBKR fees ($0.65 per contract per leg, in and out). Tap a row to load it above; drag a strike tag on the chart to move it.</div></div>';
-      icForwardFill();
-      host.querySelectorAll("[data-ic]").forEach(function(el){ el.onclick=function(){ icLoad(el.dataset.ic,true);
-        host.querySelectorAll("[data-ic]").forEach(function(x){ x.classList.toggle("on",x===el); }); }; });
-      if(!IC_CH){ document.getElementById("icLab").innerHTML='<div class="ed-note">The chain file is not on hand yet \u2014 the lab needs mme_chains.json.</div>'; return; }
-      icLoad(IC_LAB&&IC_LAB.tk?IC_LAB.tk:(P[0]?P[0].ticker:Object.keys(IC_CH.names||{})[0]),false);
-    }).catch(function(e){ host.innerHTML=""; });
+    host.querySelectorAll(".mc-tab").forEach(function(b){ b.onclick=function(){ show(this.dataset.pane); }; });
+    var want="brief"; try{ want=localStorage.getItem("phoenix.mc.pane")||"brief"; }catch(e){}
+    show(want);
   }
   function mcbNamesFill(){
     var body=document.getElementById("mcNamesBody"), note=document.getElementById("mcNamesNote"); if(!body) return;
@@ -11003,8 +11274,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '<div class="mme-maphd"><span class="mme-sk">The map <span id="mmeLiveNote"></span></span>'+
           '<input id="mmeQ" class="mme-q" placeholder="Search ticker\u2026" autocomplete="off" autocapitalize="characters" value="'+esc(MME_Q)+'"></div>'+
         '<div class="mme-map" id="mmeMap"></div>'+
-        '<div class="ed-note" style="margin-top:10px">Levels: '+esc(d.source||"\u2014")+' \u00b7 '+esc(d.date||"")+'. Spot refreshes every 5 minutes; walls and the flip come from the morning chain and change once a day.</div>'+
-        '<div id="mmeIC"></div>';
+        '<div class="ed-note" style="margin-top:10px">Levels: '+esc(d.source||"\u2014")+' \u00b7 '+esc(d.date||"")+'. Spot refreshes every 5 minutes; walls and the flip come from the morning chain and change once a day. Iron condors and credit spreads are on the Options tab.</div>';
       note.textContent=(d.date||"")+" \u00b7 "+base.length+" names";
       function rows(){ return base.map(mmeRelive).sort(function(a,b){ return b.dist_flip_em-a.dist_flip_em; }); }
       function paintMap(){
@@ -11143,7 +11413,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       wireCal();
       var q=document.getElementById("mmeQ");
       if(q) q.oninput=function(){ MME_Q=this.value; paintMap(); };
-      paintMap(); paintTable(); paintGraph(); mmeICFill();
+      paintMap(); paintTable(); paintGraph();
       function tick(){ return mmeLive(base.map(function(r){ return r.ticker; })).then(function(){ paintMap(); paintGraph(); }); }
       tick();
       if(MME_TIMER) clearInterval(MME_TIMER);
@@ -11312,20 +11582,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       // the dealer map of every name against its walls and flip, with Cowork's read of it.
       MME_WIRE=d.map||null;      // Cowork's paragraph per name rides in the morning wire
       var mmeHtml='<div id="mcNamesRead"></div>'+mcbPlateNames();
-      host.innerHTML='<div class="mc-top"><button class="mc-tab" data-pane="brief">Daily Brief</button>'+
-                     '<button class="mc-tab" data-pane="mme">MME</button></div>'+
-                     '<div id="mcPaneBrief">'+html+'</div><div id="mcPaneMme" style="display:none">'+mmeHtml+'</div>';
-      function showPane(p){
-        var isB=(p!=="mme");
-        document.getElementById("mcPaneBrief").style.display=isB?"":"none";
-        document.getElementById("mcPaneMme").style.display=isB?"none":"";
-        host.querySelectorAll(".mc-tab").forEach(function(b){ b.classList.toggle("on", b.dataset.pane===(isB?"brief":"mme")); });
-        try{ localStorage.setItem("phoenix.mc.pane", isB?"brief":"mme"); }catch(e){}
-        if(!isB) mcbNamesFill();
-      }
-      host.querySelectorAll(".mc-tab").forEach(function(b){ b.onclick=function(){ showPane(this.dataset.pane); }; });
-      var want="brief"; try{ want=localStorage.getItem("phoenix.mc.pane")||"brief"; }catch(e){}
-      showPane(want);
+      mcPanes(host, html, mmeHtml);
       bind();
       host.querySelectorAll("[data-go]").forEach(function(a){ a.style.cursor="pointer";
         a.onclick=function(){ location.hash="#"+this.dataset.go; }; });
@@ -11390,12 +11647,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       host.className="";
       var _mme='<div id="mcNamesRead"></div>'+mcbPlateNames();
       var _body = P.length?P.join("") : '<span class="mcna">Brief unavailable. Waiting on <code>macro.json</code> and <code>gex.json</code>.</span>';
-      host.innerHTML='<div class="mc-top"><button class="mc-tab on" data-pane="brief">Daily Brief</button><button class="mc-tab" data-pane="mme">MME</button></div>'+
-                     '<div id="mcPaneBrief">'+_body+'</div><div id="mcPaneMme" style="display:none">'+_mme+'</div>';
-      host.querySelectorAll(".mc-tab").forEach(function(b){ b.onclick=function(){
-        var isB=this.dataset.pane!=="mme";
-        document.getElementById("mcPaneBrief").style.display=isB?"":"none"; document.getElementById("mcPaneMme").style.display=isB?"none":"";
-        host.querySelectorAll(".mc-tab").forEach(function(x){ x.classList.toggle("on", x===b); }); if(!isB) mcbNamesFill(); }; });
+      mcPanes(host, _body, _mme);
     }).catch(function(){
       host.className="mcna";
       host.innerHTML='Brief unavailable. Waiting on <code>macro.json</code> and <code>gex.json</code>.';
