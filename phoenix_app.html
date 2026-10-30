@@ -1131,8 +1131,8 @@
   .ic-tbl .pp{color:#d08a1c} .ic-tbl .cc{color:#4a86d0}
   /* ---- Options tab (Mission Control) ---- */
   .opt{margin-top:6px}
-  .opt-hero{background:var(--ink);color:var(--bg);border-radius:12px;padding:18px 22px;margin-bottom:12px}
-  .opt-hero .opt-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
+  .opt-hero{background:var(--card2);color:var(--ink);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;padding:18px 22px;margin-bottom:12px}
+  .opt-hero .opt-k{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
   .opt-hero .opt-h{font-size:22px;font-weight:700;margin-top:4px;line-height:1.25} .opt-hero .opt-sub{font-size:15px;opacity:.85;margin-top:4px}
   .opt-meta{font-family:var(--mono);font-size:12px;color:var(--inkFade);margin:4px 2px 8px}
   .opt-evs{font-size:13px;font-style:italic;color:var(--ink);margin:0 2px 14px;line-height:1.7}
@@ -1142,10 +1142,10 @@
   .opt-sk b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--gold);color:var(--bg);font-size:12px}
   .opt-grp{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 8px}
   .opt-grp button{font-family:var(--mono);font-size:11.5px;padding:6px 12px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--inkFade);cursor:pointer}
-  .opt-grp button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)} .opt-grp button i{font-style:normal;opacity:.7;margin-left:3px}
-  .opt-tbl{overflow-x:auto;font-size:13.5px;border-top:2px solid var(--ink);background:transparent}
+  .opt-grp button.on{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700} .opt-grp button i{font-style:normal;opacity:.7;margin-left:3px}
+  .opt-tbl{overflow-x:auto;font-size:13.5px;border-top:2px solid var(--line2);background:transparent}
   .opt-tbl .hd,.opt-tbl .r{display:grid;gap:10px;padding:10px 8px;align-items:center}
-  .opt-tbl .hd{font-weight:700;font-size:13px;border-bottom:1.5px solid var(--ink)}
+  .opt-tbl .hd{font-weight:700;font-size:13px;color:var(--ink);border-bottom:1.5px solid var(--line2)}
   .opt-tbl .r{border-bottom:1px solid var(--line2);cursor:pointer;font-family:var(--mono);font-size:13px} .opt-tbl .r:nth-child(even){background:var(--card2)}
   .opt-tbl .r:hover,.opt-tbl .r.on{background:var(--card);box-shadow:inset 3px 0 0 var(--gold)}
   .opt-tbl .tk{font-weight:800;font-family:var(--sans,inherit)} .opt-tbl .tk i{display:block;font-style:normal;font-weight:400;font-size:10px;color:var(--inkFade);letter-spacing:.05em;text-transform:uppercase}
@@ -10962,7 +10962,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     IC_CH=IC_CH||{names:{}}; IC_CH.names=IC_CH.names||{};
     if(IC_CH.names[tk]) return Promise.resolve(IC_CH.names[tk]);
     var f=((IC_UNI&&IC_UNI.names&&IC_UNI.names[tk])||{}).file||tk.replace(/[\/.]/g,"-");
-    return getJSON("ic_chains/"+f).then(function(c){ if(c&&c.rows) IC_CH.names[tk]=c; return c; }).catch(function(){ return null; });
+    return getJSON("ic_chains/"+f).then(function(c){ if(c&&c.rows){ IC_CH.names[tk]=c; return c; } throw new Error("empty"); })
+      .catch(function(){                                       // the MME names are also in mme_chains.json
+        return (MME_CHAINS?Promise.resolve(MME_CHAINS):getJSON("mme_chains")).then(function(m){ MME_CHAINS=m||MME_CHAINS;
+          var c=m&&m.names&&m.names[tk]; if(c&&c.rows){ IC_CH.names[tk]=c; return c; } return null; }).catch(function(){ return null; }); });
   }
   function icFromRow(tk,p){
     var L=p.legs||{};
@@ -10981,7 +10984,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function icLoad(tk,reset,row){
     var host=document.getElementById("icLab"); if(host&&!(IC_CH&&IC_CH.names&&IC_CH.names[tk])) host.innerHTML='<div class="ed-note">Loading the '+tk+' chain\u2026</div>';
     return icEnsure(tk).then(function(c){
-      if(!c){ IC_LAB={tk:tk}; if(host) host.innerHTML='<div class="ed-note">No chain on file for '+tk+' \u2014 it was not fetched in this morning\u2019s run.</div>'; return; }
+      if(!c){ IC_LAB={tk:tk}; if(host){ host.innerHTML='<div class="ed-note">The '+tk+' option chain could not be loaded. Right after a run the new files take a few minutes to go live \u2014 '+
+        '<a href="#" id="iclRetry">try again</a>.</div>'; var a=document.getElementById("iclRetry"); if(a) a.onclick=function(e){ e.preventDefault(); delete PX_INFLIGHT["ic_chains/"+tk]; icLoad(tk,false,row); }; } return; }
       var p=row||((IC_DATA&&IC_DATA.picks)||[]).filter(function(x){ return x.ticker===tk; })[0];
       if(p){ IC_LAB=icFromRow(tk,p); }
       else {                                                     // no pick: a sensible starting condor at the nearest monthly
@@ -11014,7 +11018,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
                  getJSON("ic_backtest").catch(function(){return null;})]).then(function(res){
       IC_DATA=res[0]||{picks:[],proposed:[]}; IC_UNI=res[1]||{names:{}}; if(res[2]&&typeof MME_MAP!=="undefined"&&!MME_MAP) MME_MAP=res[2]; OPT_BT=res[3];
       IC_RV={}; var V=IC_DATA.vol||{}; Object.keys(V).forEach(function(t){ if(V[t].hv30s) IC_RV[t]=V[t].hv30s; });
-      var R=IC_DATA.rules||{}, C=IC_DATA.counts||{}, P=IC_DATA.proposed||[];
+      var R=IC_DATA.rules||{}, P=IC_DATA.proposed||[];
+      var C=IC_DATA.counts||{screened:Object.keys(IC_DATA.universe||IC_DATA.vol||{}).length||(IC_DATA.picks||[]).length+Object.keys(IC_DATA.skipped||{}).length,
+                             with_winner:(IC_DATA.picks||[]).length,proposed:P.length,skipped:Object.keys(IC_DATA.skipped||{}).length};
+      IC_DATA.counts=C;
       var asof=IC_DATA.asof?String(IC_DATA.asof).replace(" UTC",""):(IC_DATA.date||"");
       // events before each proposed expiry, the way the trade will have to sit through them
       var EV=IC_DATA.events||{};
@@ -11174,7 +11181,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var el=document.getElementById("optBt"); if(!el) return;
     var B=OPT_BT;
     if(!B||!B.by_rank||!Object.keys(B.by_rank).length){
-      el.innerHTML='<details class="opt-det"><summary>Backtest <span>\u00b7 replays the archived chains once there are a few weeks of them \u2014 run it by hand with --step ic_backtest</span></summary></details>'; return; }
+      el.innerHTML='<details class="opt-det"><summary>Backtest <span>\u00b7 replays the archived chains every Friday once there are ten days of them \u2014 nothing to run by hand</span></summary></details>'; return; }
     var ex=[25,18,10];
     el.innerHTML='<details class="opt-det" open><summary>Backtest <span>\u00b7 '+(B.days||[]).length+' archived days \u00b7 '+B.n_trades+' structures replayed \u00b7 '+optEsc(B.asof||"")+'</span></summary>'+
       '<div class="opt-tbl bt"><div class="hd"><span>Board rank</span>'+ex.map(function(x){ return '<span>'+x+'d n</span><span>Win</span><span>Realised</span><span>Predicted</span>'; }).join("")+'</div>'+

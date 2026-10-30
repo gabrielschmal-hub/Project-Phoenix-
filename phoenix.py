@@ -11965,7 +11965,7 @@ def run_ic_record():
     sb_heartbeat("ic_record", not any("failed" in n for n in notes), f"opened {opened} · marked {marked} · closed {closed} · broken {broken} · {', '.join(notes)}")
 
 
-def run_ic_backtest(start=None, end=None):
+def run_ic_backtest(start=None, end=None, min_days=2):
     """
     Replay the archive. For every archived morning, every structure on every name's board (the top 20 of
     the tournament, winner included) is marked forward with the archived chains of the following days,
@@ -11983,8 +11983,8 @@ def run_ic_backtest(start=None, end=None):
                       json={"prefix": "chains", "limit": 1000}, timeout=60)
     days = sorted(x["name"][:10] for x in (r.json() if r.status_code == 200 else []) if x.get("name", "").endswith(".json.gz"))
     days = [x for x in days if (not start or x >= start) and (not end or x <= end)]
-    if len(days) < 2:
-        print(f"[icbt] {len(days)} archived day(s) — nothing to replay yet"); return
+    if len(days) < min_days:
+        print(f"[icbt] {len(days)} archived day(s) — the replay starts at {min_days}"); return
     chains = {}
     def chain(dd):
         if dd not in chains:
@@ -14931,6 +14931,10 @@ def run_full():
     step("mme_map",        run_mme_map,       optional=True)   # the dealer map: every name vs its walls and flip
     step("ic_screen",      run_ic_screen,     optional=True)   # iron condor tournament
     step("ic_record",      run_ic_record,     optional=True)   # archive chains + vol, forward-test the winners, mark open ones
+    # the backtest replays the archive; it runs itself on Fridays (it returns early until ten days are archived)
+    from datetime import datetime as _dt, timezone as _tz
+    if _dt.now(_tz.utc).weekday() == 4:
+        step("ic_backtest", lambda: run_ic_backtest(min_days=10), optional=True)
     step("financials_all", run_financials_all)
     step("detail_bundle",  run_detail_bundle)
 
