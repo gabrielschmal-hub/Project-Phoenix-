@@ -1190,6 +1190,24 @@
   .opt-tbl.pf-op .hd,.opt-tbl.pf-op .r{grid-template-columns:64px minmax(240px,1.6fr) 84px 70px 76px 54px 64px 110px;min-width:800px}
   .pf-act{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px} .pf-act button{font-family:var(--mono);font-size:12.5px;font-weight:700;padding:9px 14px;border-radius:8px;border:1px solid var(--gold);background:var(--gold);color:var(--bg);cursor:pointer}
   .pf-act span{font-size:12px;color:var(--inkFade)}
+  .pf-act button.ghost{background:transparent;color:var(--gold)}
+  .opt-tbl .tr.wrap{white-space:normal} .opt-tbl .tr.wrap i{font-size:11.5px}
+  .opt-tbl.pf-oc .hd,.opt-tbl.pf-oc .r{grid-template-columns:70px minmax(200px,1.6fr) 80px 70px 70px 110px;min-width:640px}
+  .pf-close{font-family:var(--mono);font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--line2);background:transparent;color:var(--ink);cursor:pointer}
+  .pf-dial{display:flex;gap:14px;align-items:center;margin:0 0 12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+  .pf-dial-s{min-width:74px;text-align:center;border:2px solid;border-radius:12px;padding:6px 4px} .pf-dial-s b{display:block;font-size:24px;font-family:var(--mono)} .pf-dial-s i{font-style:normal;font-family:var(--mono);font-size:11px;text-transform:uppercase}
+  .pf-dial-p{font-size:12.5px;line-height:1.6} .pf-dial-p span{white-space:nowrap} .pf-dial-p span.neg{color:var(--red)}
+  .pf-book{margin:4px 0 18px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card)} .pf-book.none{font-size:13px;line-height:1.5}
+  .pf-book .due{color:var(--red)} .pf-exc div{padding:6px 10px;margin:4px 0;border-radius:8px;font-size:13px;background:var(--card2)}
+  .pf-exc b{font-family:var(--mono);font-size:11px;margin-right:6px} .pf-exc .stop b,.pf-exc .risky b{color:var(--red)} .pf-exc .profit b{color:var(--green)}
+  .pf-notes{font-size:12.5px;color:var(--inkFade);margin:6px 2px;line-height:1.55}
+  .pf-review{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line2);font-size:13px} .pf-review div{padding:2px 0}
+  .pf-review b{font-family:var(--mono);font-size:11px;margin-right:6px} .pf-review .keep b{color:var(--green)} .pf-review .drop b{color:var(--red)} .pf-review .add b{color:var(--gold)} .pf-review .reb b{color:var(--inkFade)}
+  .opt-tbl.pf-bt .hd,.opt-tbl.pf-bt .r{grid-template-columns:80px 60px 76px 76px 76px 80px 54px 80px;min-width:620px}
+  .opt-tbl.pf-bc .hd,.opt-tbl.pf-bc .r{grid-template-columns:80px 90px 90px 80px 80px;min-width:440px}
+  .mindb{display:inline-block;margin-left:4px;font-style:normal;font-family:var(--mono);font-size:9.5px;padding:1px 5px;border-radius:999px;border:1px solid var(--line2);color:var(--inkFade)}
+  .mindb.ok{color:var(--green);border-color:var(--green)} .mindb.no{color:var(--red);border-color:var(--red)}
+  .opt-tbl.mind-tbl .hd,.opt-tbl.mind-tbl .r{grid-template-columns:80px 100px minmax(140px,1.2fr) 110px 100px 100px 140px;min-width:780px}
   .mc-health{margin:8px 0 2px} .mch{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--card);font-size:12.5px}
   .mch summary{cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700} .mch summary span{font-weight:400;color:var(--inkFade)}
   .mch.pass summary{color:var(--green)} .mch.warn summary{color:var(--gold)} .mch.fail summary{color:var(--red)}
@@ -9691,6 +9709,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
 
   function renderScreener(){
     if(GS==null&&!GS_MISS){ gsLoad(function(){ if(GS&&GS.industries) renderScreener(); }); }
+    if(window.pxMindLoad&&window.PX_MIND&&!window.PX_MIND.tried) window.pxMindLoad(function(){ renderScreener(); });
     if(!scrData) return;
     sfRenderBlock();
     if(scrView==="gexu"){ renderGexUniverse(); return; }
@@ -9751,6 +9770,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(fresh===false) txt+=' \u00B7 STALE: no fresh bars last run';
       else if(cov!=null) txt+=' \u00B7 '+cov+'% refreshed'+(bar?' \u00B7 '+bar:'');
       if(PX_ROT.asof) txt+=' \u00B7 sectors '+new Date(PX_ROT.asof).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+      if(window.PX_MIND&&window.PX_MIND.pf&&window.PX_MIND.pf.dial) txt+=' \u00B7 market dial '+window.PX_MIND.pf.dial.score+' '+window.PX_MIND.pf.dial.state;
       cEl.textContent=txt;
       cEl.style.color = (fresh===false) ? "var(--red)" : (cov!=null&&cov<90) ? "var(--amber)" : "var(--inkFade)";
     }
@@ -9823,7 +9843,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           '<i class="cmpb'+(cmpHas(s.ticker)?" on":"")+'" data-cmp="'+s.ticker+'" title="compare">'+(cmpHas(s.ticker)?"\u2611":"\u229E")+'</i></span>'+
           '<span class="co">'+(nm||"")+'</span></span>'+
         '<span class="patcell" data-pat="'+s.ticker+'"></span>'+
-        '<span><span class="scr-setup '+setCls+'">'+setup+'</span>'+grpChip+'</span>'+
+        '<span><span class="scr-setup '+setCls+'">'+setup+'</span>'+grpChip+(window.pxMindChip?window.pxMindChip(s.ticker):"")+'</span>'+
         '<span class="scorecell"><b>'+(sc==null?"\u2014":sc)+'</b>'+
           '<i class="sbar"><u style="width:'+(sc||0)+'%"></u></i>'+
           '<em>trade '+(s.trade_score!=null?s.trade_score:"\u2014")+
@@ -10863,7 +10883,31 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       (r.rv?(vp>0?'a '+vp+'-point premium the seller collects. ':'no premium to collect, which is why the EV is weak. '):'')+
       'Net delta '+(r.netDelta>=0?'+':'')+r.netDelta.toFixed(0)+' shares a contract \u2014 '+(Math.abs(r.netDelta)<5?'a neutral, time-decay trade':(r.netDelta>0?'a bullish lean':'a bearish lean'))+'. '+
       '<b>Risk '+m(r.maxLoss*r.n)+'</b> ('+r.n+' contract'+(r.n>1?'s':'')+') if the stock finishes '+loseTxt+'; '+
-      'held to expiry it profits '+(r.kind==="IC"?'between ':(r.kind==="PCS"?'above ':'below '))+beTxt+' ('+Math.round(r.pop*100)+'%), but Phoenix closes it at the exit date.';
+      'held to expiry it profits '+(r.kind==="IC"?'between ':(r.kind==="PCS"?'above ':'below '))+beTxt+' ('+Math.round(r.pop*100)+'%), but Phoenix closes it at the exit date.'+
+      '<div class="pf-act"><button id="iclRecord" class="ghost">I placed this trade \u2192 record it</button><span>Goes into your option book (same PIN as the trade book). The Portfolios tab then counts it against the risky budget, and the morning run marks it and tells you when its exit day comes.</span></div><div id="iclRecMsg" class="ed-note"></div>';
+    var rb=document.getElementById("iclRecord"); if(rb) rb.onclick=function(){ optRecord(r); };
+  }
+  // record a real option trade: the legs as built in the lab, your fill and contracts
+  function optRecord(r){
+    var st=IC_LAB, msg=document.getElementById("iclRecMsg");
+    var n=parseInt(window.prompt("How many contracts did you open?", String(r.n||1)),10); if(!(n>0)) return;
+    var fill=parseFloat(window.prompt("Credit received per share (your fill)?", r.credit.toFixed(2))); if(!(fill>0)) return;
+    var pin=sessionStorage.getItem("pxPin")||window.prompt("Phoenix PIN (same as the trade book)"); if(!pin) return;
+    var m={lp:"long_put",sp:"short_put",sc:"short_call",lc:"long_call"}, legs={}; icKeys(st).forEach(function(k){ legs[m[k]]=st[k]; });
+    var fees=2*r.L.length*(((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.commission_leg)||0.65));
+    var ml=(r.width-fill)*100+fees, d=new Date().toISOString().slice(0,10);
+    var lab=(st.kind==="IC"?"IC ":"")+optDate(st.exp)+" "+icKeys(st).map(function(k){ return (k[0]==="s"?"\u2212":"+")+st[k]+(k==="lp"||k==="sp"?"P":"C"); }).join(" ")+" \u00b7 "+fill.toFixed(2);
+    var id="opt-"+st.tk+"-"+Date.now();
+    var body={type:"option",account:"G",status:"open",ticker:st.tk,structure:st.kind||"IC",legs:legs,expiry:st.exp,credit:fill,contracts:n,
+      max_loss_usd:+ml.toFixed(2),fees_1:+fees.toFixed(2),planned_exit_dte:r.exitDte,opened:d,label:lab,
+      model:{ev_hist:r.evHV,ev_mkt:r.ev,win:r.popHV!=null?r.popHV:r.popX,credit_model:+r.credit.toFixed(2)}};
+    if(!confirm("Record "+n+" \u00d7 "+lab+" (max loss $"+Math.round(ml*n)+")?")) return;
+    msg.textContent="Saving\u2026";
+    fetch(SUPA.url+"/rest/v1/rpc/save_option_trade",{method:"POST",headers:pxAuthHeaders(),body:JSON.stringify({pin:pin,p_id:id,p_body:body,p_by:"app"})})
+      .then(function(x){ return x.json(); }).then(function(j){
+        if(!j||j.ok===false){ if(j&&/wrong PIN/.test(j.error||"")) sessionStorage.removeItem("pxPin"); msg.textContent="Not saved: "+((j&&j.error)||"error"); return; }
+        sessionStorage.setItem("pxPin",pin); msg.textContent="Recorded. It shows in the Portfolios tab from the next morning run."; })
+      .catch(function(e){ msg.textContent="Not saved: "+e.message; });
   }
   function icPlot(r){
     var el=document.getElementById("iclPlot"); if(!el) return;
@@ -11368,139 +11412,275 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     el.innerHTML=ks.length?'<details class="opt-det"><summary>Skipped <span>\u00b7 '+ks.length+' names and why</span></summary><div class="opt-skip">'+
       ks.map(function(t){ return '<div><b>'+t+'</b> '+optEsc(S[t])+'</div>'; }).join("")+'</div></details>':"";
   }
-  // ---- PORTFOLIOS (Mission Control tab): Phoenix's proposed portfolios from every book, for €5k / €10k / €15k ----
-  var PF_DATA=null, PF_ST={acct:10000, mode:"auto", view:"mix", manual:null};
-  try{ var _pfs=JSON.parse(localStorage.getItem("phoenix.pf")||"null"); if(_pfs) PF_ST=Object.assign(PF_ST,_pfs); }catch(e){}
+  // ---- PORTFOLIOS (Mission Control tab): a HELD book. Phoenix proposes; you lock it; it is reviewed every ~3 months
+  // (tactical) and ~6 months (core); between reviews only exceptions act (a stop hit, a profit flag, a risk cap). ----
+  var PF_DATA=null, PF_BOOK=null, PF_ST={acct:10000, mode:"auto", manual:null};
+  try{ var _pfs=JSON.parse(localStorage.getItem("phoenix.pf")||"null"); if(_pfs){ PF_ST.acct=_pfs.acct||10000; PF_ST.mode=_pfs.mode||"auto"; PF_ST.manual=_pfs.manual||null; } }catch(e){}
   function pfSave(){ try{ localStorage.setItem("phoenix.pf",JSON.stringify(PF_ST)); }catch(e){} }
   function pfE(v){ return v==null||isNaN(v)?"\u2014":(v<0?"\u2212\u20ac":"\u20ac")+Math.abs(Math.round(v)).toLocaleString(); }
   function pfP(v,d){ return v==null||isNaN(v)?"\u2014":(v*100).toFixed(d==null?0:d)+"%"; }
-  // the split in force: one book only, Phoenix's split for today, or yours
   function pfSplit(){
-    var D=PF_DATA||{};
-    if(PF_ST.view==="lt") return {lt:1,swing:0,options:0,cash:0};
-    if(PF_ST.view==="swing") return {lt:0,swing:1,options:0,cash:0};
-    if(PF_ST.view==="options") return {lt:0,swing:0,options:0.30,cash:0.70};
     if(PF_ST.mode==="manual"&&PF_ST.manual) return PF_ST.manual;
-    return D.split_auto||{lt:0.5,swing:0.15,options:0.10,cash:0.25};
+    return (PF_DATA||{}).split_auto||{core:0.6,tactical:0.2,risky:0.1,cash:0.1};
   }
-  // THE ALLOCATION — one place, every rule from the engine's ALLOC block, every exclusion with its reason
+  // THE ALLOCATION — one place, the engine's ALLOC rules, every exclusion with its reason
   function pfAllocate(acct, sp){
-    var D=PF_DATA||{}, R=D.rules||{}, fx=((D.conditions||{}).eurusd)||1.08, out={lt:[],swing:[],options:[],excluded:[],checks:[]};
-    // long-term: the core weights, plus the invest book's top names as a satellite
-    var ltCap=acct*(sp.lt||0), satShare=(D.lt&&D.lt.satellite&&D.lt.satellite.length)?(R.lt_satellite||0.2):0;
-    ((D.lt||{}).core||[]).forEach(function(l){ out.lt.push({t:l.t, w:l.w*(1-satShare), eur:ltCap*l.w*(1-satShare), note:l.note||"core"}); });
-    var sat=((D.lt||{}).satellite||[]).slice(0,5);
-    sat.forEach(function(s){ out.lt.push({t:s.t, w:satShare/sat.length, eur:ltCap*satShare/sat.length, note:"satellite \u00b7 invest score "+(s.score!=null?s.score:"\u2014")}); });
-    // swing: 1% of the account at risk per trade, a stop 2 ATR under the entry, heat and position caps
-    var S=R.swing||{risk_per_trade:0.01,max_heat:3,max_position:0.35,max_positions:5}, swCap=acct*(sp.swing||0), used=0, heat=0;
-    (D.swing||[]).forEach(function(c){
-      if(swCap<=0) return;
-      if(out.swing.length>=S.max_positions){ out.excluded.push({book:"swing",t:c.t,why:"already "+S.max_positions+" swing positions"}); return; }
-      if(heat+S.risk_per_trade>S.max_heat*S.risk_per_trade+1e-9){ out.excluded.push({book:"swing",t:c.t,why:"portfolio heat at its "+S.max_heat+"R cap"}); return; }
-      var riskEur=acct*S.risk_per_trade, perShareUsd=c.entry-c.stop; if(!(perShareUsd>0)){ out.excluded.push({book:"swing",t:c.t,why:"no valid stop"}); return; }
-      var qty=Math.floor(riskEur*fx/perShareUsd), cap=Math.min(acct*S.max_position, swCap-used);
-      var val=qty*c.entry/fx; if(val>cap){ qty=Math.floor(cap*fx/c.entry); val=qty*c.entry/fx; }
-      if(qty<1){ out.excluded.push({book:"swing",t:c.t,why:"one share ("+pfE(c.entry/fx)+") does not fit the "+pfE(cap)+" left in the sleeve"}); return; }
-      var r=qty*perShareUsd/fx; used+=val; heat+=r/acct;
-      out.swing.push({t:c.t, qty:qty, entry:c.entry, stop:c.stop, eur:val, risk:r, c:c});
+    var D=PF_DATA||{}, R=D.rules||{}, fx=((D.conditions||{}).eurusd)||1.08, out={core:[],tactical:[],options:[],excluded:[],checks:[]};
+    var crypto=R.crypto||["BTCE"];
+    // core (reviewed ~6 months): the saved builder portfolio + the invest book's best names as a satellite
+    var coreCap=acct*(sp.core||0), sat=((D.lt||{}).satellite||[]).slice(0,5), satShare=sat.length?(R.core_satellite||0.2):0;
+    ((D.lt||{}).core||[]).forEach(function(l){ out.core.push({t:l.t, w_book:l.w*(1-satShare)*(sp.core||0), eur:coreCap*l.w*(1-satShare), role:(crypto.indexOf(l.t)>=0?"core \u00b7 crypto (counts as risky)":(l.note||"core"))}); });
+    sat.forEach(function(s){ out.core.push({t:s.t, w_book:satShare/sat.length*(sp.core||0), eur:coreCap*satShare/sat.length, role:"satellite \u00b7 invest score "+(s.score!=null?s.score:"\u2014")}); });
+    // tactical (reviewed ~3 months): trade-book passers, 1% at risk each, stop 3 ATR under the entry
+    var T=R.tactical||{risk_per_trade:0.01,max_heat:3,max_position:0.35,max_positions:5}, tCap=acct*(sp.tactical||0), used=0;
+    var L=D.ledger||{stocks:[],options:[]}, SR=D.sector_rules||{max_names_per_sector:2,max_sector_pct:0.15};
+    // what you already hold counts first: its risk against the heat cap, its sectors against the sector caps
+    var heldRiskEur=(L.stocks||[]).reduce(function(a,x){ return a+((x.risk_usd||0)/fx); },0), heat=heldRiskEur/acct;
+    var held={}; (L.stocks||[]).forEach(function(x){ held[x.t]=1; });
+    var secN={}, secE={}; (L.stocks||[]).forEach(function(x){ var k=x.sector||"?"; secN[k]=(secN[k]||0)+1; secE[k]=(secE[k]||0)+((x.value_usd||0)/fx); });
+    sat.forEach(function(s){ var k=s.sector||"?"; secE[k]=(secE[k]||0)+coreCap*satShare/sat.length; });
+    var cool=(L.cooloff||{}).active;
+    (D.tactical||[]).slice().sort(function(a,b){ return (b.rank_score||b.score||0)-(a.rank_score||a.score||0); }).forEach(function(c){
+      if(tCap<=0) return;
+      if(held[c.t]) return out.excluded.push({book:"tactical",t:c.t,why:"already held in the trade book"});
+      if(cool) return out.excluded.push({book:"tactical",t:c.t,why:"cool-off: "+(L.cooloff.why||"no new tactical names")});
+      if((c.gates||[]).length) return out.excluded.push({book:"tactical",t:c.t,why:c.gates.join("; ")});
+      if(out.tactical.length>=T.max_positions) return out.excluded.push({book:"tactical",t:c.t,why:"already "+T.max_positions+" tactical names"});
+      var k=c.sector||"?";
+      if((secN[k]||0)>=SR.max_names_per_sector) return out.excluded.push({book:"tactical",t:c.t,why:"already "+SR.max_names_per_sector+" names in "+k});
+      if(heat+T.risk_per_trade*(c.size_mult||1)>T.max_heat*T.risk_per_trade+1e-9) return out.excluded.push({book:"tactical",t:c.t,why:"heat at its "+T.max_heat+"R cap ("+(heat/T.risk_per_trade).toFixed(1)+"R already, including your open trades)"});
+      var per=c.entry-c.stop; if(!(per>0)) return out.excluded.push({book:"tactical",t:c.t,why:"no valid stop"});
+      var qty=Math.floor(acct*T.risk_per_trade*(c.size_mult||1)*fx/per), cap=Math.min(acct*T.max_position, tCap-used, acct*SR.max_sector_pct-(secE[k]||0)), val=qty*c.entry/fx;
+      if(val>cap){ qty=Math.floor(Math.max(cap,0)*fx/c.entry); val=qty*c.entry/fx; }
+      if(qty<1) return out.excluded.push({book:"tactical",t:c.t,why:cap<=0?("sector "+k+" is at its "+pfP(SR.max_sector_pct)+" cap"):("one share ("+pfE(c.entry/fx)+") does not fit the "+pfE(cap)+" left")});
+      var r=qty*per/fx; used+=val; heat+=r/acct; secN[k]=(secN[k]||0)+1; secE[k]=(secE[k]||0)+val;
+      out.tactical.push({t:c.t, qty:qty, entry:c.entry, stop:c.stop, eur:val, risk:r, c:c});
     });
-    // options: a budget of max loss; ≤6 trades, ≤5% of the account each, ≤2 per cluster, positive at the conservative vol
-    var O=R.options||{max_trades:6,per_trade_max_loss:0.05,per_cluster:2,require_conservative_ev:true}, budget=acct*(sp.options||0), spent=0, per={};
-    var cands=(D.options||[]).slice().sort(function(a,b){ return (b.ev_cons_pct||-9)-(a.ev_cons_pct||-9)||(b.ev_pct||0)-(a.ev_pct||0); });
-    cands.forEach(function(o0){
+    // risky: the options budget (max loss; the trades roll inside the quarter) — positive at the conservative vol only
+    var O=R.options||{max_trades:6,per_trade_max_loss:0.05,per_cluster:2,require_conservative_ev:true};
+    var cryptoEur=out.core.filter(function(l){ return crypto.indexOf(l.t)>=0; }).reduce(function(a,l){ return a+l.eur; },0);
+    var openOpt=(L.options||[]), openMl=openOpt.reduce(function(a,o){ return a+(o.max_loss_usd||0)/fx; },0);
+    var budget=Math.max(0, acct*(sp.risky||0)-cryptoEur), spent=openMl, per2={}, nOpen=openOpt.length, heldOpt={};
+    var CL=D.clusters||{}; openOpt.forEach(function(o){ heldOpt[o.t]=1; var c=(CL[o.t]||("other: "+o.t)); per2[c]=(per2[c]||0)+1; });
+    (D.options||[]).slice().sort(function(a,b){ return (b.ev_cons_pct||-9)-(a.ev_cons_pct||-9); }).forEach(function(o0){
       if(budget<=0) return;
-      // the winner, or the best smaller version of the same view from its board when the winner is too big for the account
-      var o=o0, ml=(o.max_loss_usd||0)/fx, alt=null;
+      var o=o0, ml=(o.max_loss_usd||0)/fx;
       if(ml>acct*O.per_trade_max_loss){
         var pool=[]; Object.keys(o0.sized||{}).forEach(function(k){ pool.push(o0.sized[k]); }); pool=pool.concat(o0.alts||[]);
-        alt=pool.filter(function(a){ return (a.max_loss_usd||9e9)/fx<=acct*O.per_trade_max_loss&&(!O.require_conservative_ev||a.ev_cons_pct>0); })
-               .sort(function(a,b){ return (b.ev_cons_pct||0)-(a.ev_cons_pct||0); })[0];
+        var alt=pool.filter(function(a){ return (a.max_loss_usd||9e9)/fx<=acct*O.per_trade_max_loss&&(!O.require_conservative_ev||a.ev_cons_pct>0); }).sort(function(a,b){ return (b.ev_cons_pct||0)-(a.ev_cons_pct||0); })[0];
         if(alt){ o=Object.assign({},o0,alt,{alt_of:o0.label}); ml=(o.max_loss_usd||0)/fx; }
       }
-      if(O.require_conservative_ev&&!(o.ev_cons_pct>0)) return out.excluded.push({book:"options",t:o.t,why:"negative EV at the conservative (60-day) vol"});
-      if(out.options.length>=O.max_trades) return out.excluded.push({book:"options",t:o.t,why:"already "+O.max_trades+" option trades"});
-      if(ml>acct*O.per_trade_max_loss) return out.excluded.push({book:"options",t:o.t,why:"max loss "+pfE(ml)+" is over "+pfP(O.per_trade_max_loss)+" of the account ("+pfE(acct*O.per_trade_max_loss)+")"});
-      if((per[o.cluster]||0)>=O.per_cluster) return out.excluded.push({book:"options",t:o.t,why:"already "+O.per_cluster+" in "+o.cluster});
-      if(spent+ml>budget) return out.excluded.push({book:"options",t:o.t,why:"max-loss budget "+pfE(budget)+" would be exceeded"});
-      spent+=ml; per[o.cluster]=(per[o.cluster]||0)+1;
+      if(O.require_conservative_ev&&!(o.ev_cons_pct>0)) return out.excluded.push({book:"risky",t:o.t,why:"negative EV at the conservative (60-day) vol"});
+      if(heldOpt[o.t]) return out.excluded.push({book:"risky",t:o.t,why:"an option trade on it is already open"});
+      if(out.options.length+nOpen>=O.max_trades) return out.excluded.push({book:"risky",t:o.t,why:"already "+O.max_trades+" option trades"+(nOpen?" ("+nOpen+" open)":"")});
+      if(ml>acct*O.per_trade_max_loss) return out.excluded.push({book:"risky",t:o.t,why:"max loss "+pfE(ml)+" is over "+pfP(O.per_trade_max_loss)+" of the account, and no smaller version passes"});
+      if((per2[o.cluster]||0)>=O.per_cluster) return out.excluded.push({book:"risky",t:o.t,why:"already "+O.per_cluster+" in "+o.cluster});
+      if(spent+ml>budget) return out.excluded.push({book:"risky",t:o.t,why:"the options budget "+pfE(budget)+" would be exceeded"});
+      spent+=ml; per2[o.cluster]=(per2[o.cluster]||0)+1;
       out.options.push({t:o.t, o:o, maxLoss:ml, ev:(o.ev_usd||0)/fx, evc:(o.ev_cons_usd||0)/fx, dDollar:(o.net_delta||0)*(o.spot||0)/fx});
     });
-    // the whole book
-    var ltE=out.lt.reduce(function(a,x){return a+x.eur;},0), swE=used, swR=out.swing.reduce(function(a,x){return a+x.risk;},0);
-    out.totals={lt:ltE, swing:swE, swingRisk:swR, optMaxLoss:spent, cash:Math.max(0,acct-ltE-swE-spent), atRisk:swR+spent,
-                evOpt:out.options.reduce(function(a,x){return a+x.ev;},0), evOptCons:out.options.reduce(function(a,x){return a+x.evc;},0),
-                optDelta:out.options.reduce(function(a,x){return a+x.dDollar;},0)};
-    var T=out.totals, chk=function(ok,warn,txt){ out.checks.push({s:ok?"pass":(warn?"warn":"fail"),t:txt}); };
-    chk(ltE+swE+spent<=acct+1, false, "deployed "+pfE(ltE+swE+spent)+" of "+pfE(acct)+" (options counted at max loss, the margin they tie up)");
-    chk(T.atRisk<=acct*0.20, T.atRisk<=acct*0.30, "money that can be lost on the trading books: "+pfE(T.atRisk)+" = "+pfP(T.atRisk/acct,1)+" of the account (swing to its stops + options max loss)");
-    chk(out.options.length<=((R.options||{}).max_trades||6), false, out.options.length+" option trades (cap "+((R.options||{}).max_trades||6)+")");
+    var coreE=out.core.reduce(function(a,x){return a+x.eur;},0), tR=out.tactical.reduce(function(a,x){return a+x.risk;},0);
+    out.totals={core:coreE, tactical:used, tacticalRisk:tR, optBudget:budget, optUsed:spent, optOpen:openMl, crypto:cryptoEur, risky:cryptoEur+budget,
+                heldRisk:heldRiskEur, heatR:heat/T.risk_per_trade,
+                cash:Math.max(0,acct-coreE-used-budget), atRisk:tR+spent+heldRiskEur, optDelta:out.options.reduce(function(a,x){return a+x.dDollar;},0)};
+    var X=out.totals, chk=function(ok,warn,txt){ out.checks.push({s:ok?"pass":(warn?"warn":"fail"),t:txt}); };
+    chk(coreE+used+budget<=acct+1,false,"allocated "+pfE(coreE+used+budget)+" of "+pfE(acct)+" (the options budget is margin held for max loss)");
+    chk(X.risky<=acct*(R.risky_cap||0.15),false,"risky part "+pfE(X.risky)+" = "+pfP(X.risky/acct,1)+" of the account (options budget "+pfE(budget)+" + crypto "+pfE(cryptoEur)+"), cap "+pfP(R.risky_cap||0.15));
+    chk(X.atRisk<=acct*0.2,X.atRisk<=acct*0.3,"can be lost on the trading parts: "+pfE(X.atRisk)+" (new tactical to its stops "+pfE(tR)+" + your open stock trades "+pfE(heldRiskEur)+" + options max loss "+pfE(spent)+")");
+    if(openMl>0) chk(openMl<=budget+1,false,"your open option trades tie up "+pfE(openMl)+" of max loss against a risky budget of "+pfE(budget)+(openMl>budget?" \u2014 over budget: no new option trades until one closes":""));
+    chk(X.heatR<=T.max_heat+1e-9,false,"stock heat "+X.heatR.toFixed(1)+"R of "+T.max_heat+"R (Phoenix\u2019s one definition: risk to the stops over 1% of the account, open trades included)");
+    if((L.cooloff||{}).active) chk(false,true,"cool-off active: "+L.cooloff.why);
     var cl={}; out.options.forEach(function(x){ cl[x.o.cluster]=(cl[x.o.cluster]||0)+1; }); var top=Object.keys(cl).sort(function(a,b){return cl[b]-cl[a];})[0];
-    if(top) chk(cl[top]<=((R.options||{}).per_cluster||2), false, "most option trades in one cluster: "+cl[top]+" ("+top+")");
-    chk(Math.abs(T.optDelta)<=acct*0.5, true, "options net delta \u2248 "+pfE(T.optDelta)+" of stock exposure ("+(T.optDelta>=0?"long":"short")+")");
-    var ev={}; out.options.forEach(function(x){ (x.o.events||[]).forEach(function(e){ ev[e]=(ev[e]||0)+1; }); });
-    var evMax=Object.keys(ev).sort(function(a,b){return ev[b]-ev[a];})[0];
-    if(evMax) chk(ev[evMax]<=4, true, ev[evMax]+" of "+out.options.length+" option trades sit through "+evMax);
+    if(top) chk(cl[top]<=(O.per_cluster||2),false,"most option trades in one cluster: "+cl[top]+" ("+top+")");
     return out;
+  }
+  // the one market dial every engine reads, with what moved it
+  function pfDialHTML(D){
+    var d=D.dial; if(!d) return '';
+    var col=d.state==="risk-on"?"var(--green)":(d.state==="caution"?"var(--gold)":"var(--red)");
+    return '<div class="pf-dial"><div class="pf-dial-s" style="border-color:'+col+';color:'+col+'"><b>'+d.score+'</b><i>'+optEsc(d.state)+'</i></div><div class="pf-dial-p"><b>Market dial</b> \u2014 the same reading every engine uses. '+
+      (d.parts||[]).map(function(p){ return '<span class="'+(p.pts?'neg':'')+'">'+optEsc(p.k)+': '+optEsc(p.why)+(p.pts?' ('+p.pts+')':'')+'</span>'; }).join(' \u00b7 ')+'</div></div>';
+  }
+  // what you actually hold: the trade book's stocks and your recorded option trades
+  function pfLedgerHTML(D){
+    var L=D.ledger; if(!L) return '';
+    var fx=((D.conditions||{}).eurusd)||1.08;
+    var h='<div class="opt-sub3">What you hold <span>\u00b7 the trade book and your recorded option trades \u00b7 stock heat '+(L.heat_R!=null?L.heat_R:'\u2014')+'R of '+(L.heat_cap_R||3)+'R'+((L.cooloff||{}).active?' \u00b7 <b style="color:var(--red)">cool-off until '+L.cooloff.until+'</b>':'')+'</span></div>';
+    if(!(L.stocks||[]).length&&!(L.options||[]).length) return h+'<div class="ed-note">No open positions in the trade book and no recorded option trades.</div>';
+    if((L.stocks||[]).length) h+='<div class="opt-tbl pf-bc"><div class="hd"><span>Stock</span><span>Shares</span><span>Entry</span><span>Stop</span><span>Sector</span></div>'+
+      L.stocks.map(function(x){ return '<div class="r"><span class="tk">'+x.t+'</span><span>'+(x.qty||'\u2014')+'</span><span>'+(x.entry||'\u2014')+'</span><span>'+(x.stop||'\u2014')+'</span><span>'+optEsc(x.sector||'\u2014')+'</span></div>'; }).join("")+'</div>';
+    if((L.options||[]).length) h+='<div class="opt-tbl pf-oc"><div class="hd"><span>Option</span><span>Trade</span><span>Max loss</span><span>Opened</span><span>Exit at</span><span></span></div>'+
+      L.options.map(function(o,i){ return '<div class="r"><span class="tk">'+o.t+'</span><span class="tr">'+optEsc(o.label||o.structure)+'</span><span>'+pfE((o.max_loss_usd||0)/fx)+'</span><span>'+optDate(o.opened)+'</span><span>'+(o.planned_exit_dte||'\u2014')+' DTE</span>'+
+        '<span><button class="pf-close" data-oc="'+i+'">Record close</button></span></div>'; }).join("")+'</div><div id="pfCloseMsg" class="ed-note"></div>';
+    return h;
+  }
+  function pfBookHTML(){
+    var b=PF_BOOK;
+    if(!b) return '';
+    if(!b.active) return '<div class="pf-book none"><b>No locked book yet.</b> Choose the account and split below and press <i>Lock this as my book</i>. Phoenix then tracks it every morning and drafts the review when it is due.</div>';
+    var due=function(d){ return d<=0?'<b class="due">due now</b>':'in '+d+' days'; };
+    var h='<div class="pf-book"><div class="opt-sub2">Your book <span>\u00b7 locked '+optDate(String(b.locked_on).slice(0,10),1)+' \u00b7 '+pfE(b.account_eur)+' \u00b7 tactical review '+due(b.days_to_tactical)+' ('+optDate(b.next_tactical_review,1)+') \u00b7 core review '+due(b.days_to_core)+' ('+optDate(b.next_core_review,1)+')</span></div>';
+    if((b.exceptions||[]).length) h+='<div class="pf-exc">'+b.exceptions.map(function(e){ return '<div class="'+e.kind+'"><b>'+({stop:"EXIT",profit:"PROFIT",risky:"RISK"})[e.kind]+'</b> '+optEsc(e.text)+'</div>'; }).join("")+'</div>';
+    else h+='<div class="pf-checks"><div class="pass"><b>\u2714</b> No exceptions \u2014 nothing to do until the review.</div></div>';
+    if((b.notes||[]).length) h+='<div class="pf-notes">'+b.notes.map(function(n){ return '<div>\u2022 '+optEsc(n)+'</div>'; }).join("")+'</div>';
+    if(b.tactical&&b.tactical.length) h+='<div class="opt-tbl pf-bt"><div class="hd"><span>Tactical</span><span>Shares</span><span>Entry</span><span>Stop</span><span>Last</span><span>P&amp;L</span><span>R</span><span>State</span></div>'+
+      b.tactical.map(function(x){ return '<div class="r"><span class="tk">'+x.t+'</span><span>'+x.qty+'</span><span>$'+x.entry+'</span><span>$'+x.stop+'</span><span>'+(x.last!=null?'$'+x.last.toFixed(2):'\u2014')+'</span>'+
+        '<span class="ev'+(x.pnl_eur>0?'':' neg')+'">'+pfE(x.pnl_eur)+'</span><span>'+(x.R!=null?x.R.toFixed(1)+'R':'\u2014')+'</span><span>'+optEsc(x.state)+'</span></div>'; }).join("")+'</div>';
+    if(b.core&&b.core.length) h+='<div class="opt-tbl pf-bc"><div class="hd"><span>Core</span><span>Value</span><span>Weight now</span><span>Target</span><span>Drift</span></div>'+
+      b.core.map(function(l){ var d=(l.w_now!=null&&l.w_target!=null)?l.w_now-l.w_target:null;
+        return '<div class="r"><span class="tk">'+l.t+'</span><span>'+pfE(l.value_eur)+'</span><span>'+pfP(l.w_now,1)+'</span><span>'+pfP(l.w_target,1)+'</span><span class="'+(d!=null&&Math.abs(d)>0.05?'ev neg':'')+'">'+(d==null?'\u2014':(d>=0?'+':'')+(d*100).toFixed(1)+' pt')+'</span></div>'; }).join("")+'</div>';
+    h+='<div class="pf-notes"><div>Risky part: options budget '+pfE((b.risky||{}).options_budget_eur)+' + crypto '+pfE((b.risky||{}).crypto_eur)+' = '+pfE((b.risky||{}).total_eur)+'. Option trades roll inside the budget as they expire \u2014 today\u2019s are on the Options tab.</div>'+
+      ((b.unpriced||[]).length?'<div>No price this morning for '+optEsc(b.unpriced.join(", "))+'.</div>':'')+'</div>';
+    var R=b.review;
+    if(R){ h+='<div class="pf-review"><div class="opt-sub3">'+(R.tactical_due&&R.core_due?'Tactical and core review':(R.core_due?'Core review':'Tactical review'))+' \u2014 Phoenix\u2019s draft</div>'+
+      (R.keep||[]).map(function(k){ return '<div class="keep"><b>KEEP</b> '+k.t+' \u2014 '+optEsc(k.why)+'</div>'; }).join("")+
+      (R.drop||[]).map(function(k){ return '<div class="drop"><b>DROP</b> '+k.t+' \u2014 '+optEsc(k.why)+'</div>'; }).join("")+
+      (R.replace_with||[]).map(function(k){ return '<div class="add"><b>ADD</b> '+k.t+' \u2014 score '+(k.score!=null?k.score:'\u2014')+', entry $'+k.entry+', stop $'+k.stop+'</div>'; }).join("")+
+      (R.core_rebalance||[]).map(function(k){ return '<div class="reb"><b>REBALANCE</b> '+k.t+' '+pfP(k.now,1)+' \u2192 '+pfP(k.target,1)+'</div>'; }).join("")+
+      '<div class="ed-note">'+optEsc(R.how||"")+'</div></div>'; }
+    return h+'</div>';
   }
   function pfFill(){
     var host=document.getElementById("pfPane"); if(!host) return;
-    if(!PF_DATA){ host.innerHTML='<div class="ed-note">Loading Phoenix\u2019s proposals\u2026</div>';
-      getJSON("phoenix_portfolios").then(function(d){ PF_DATA=d||{}; pfFill(); }).catch(function(){ host.innerHTML='<div class="ed-note">No proposals on file yet \u2014 outputs/phoenix_portfolios.json is written by the morning run (step portfolios).</div>'; }); return; }
-    var D=PF_DATA, C=D.conditions||{}, sp=pfSplit(), A=pfAllocate(PF_ST.acct, sp), T=A.totals, acct=PF_ST.acct;
-    if(!PF_ST.manual) PF_ST.manual=Object.assign({}, D.split_auto||{lt:0.5,swing:0.15,options:0.1,cash:0.25});
+    if(!PF_DATA){ host.innerHTML='<div class="ed-note">Loading Phoenix\u2019s proposal\u2026</div>';
+      Promise.all([getJSON("phoenix_portfolios").catch(function(){return null;}), getJSON("pf_book").catch(function(){return null;})]).then(function(r){
+        PF_DATA=r[0]||{}; PF_BOOK=r[1]; if(!r[0]) { host.innerHTML='<div class="ed-note">No proposal on file yet \u2014 outputs/phoenix_portfolios.json is written by the morning run (step portfolios).</div>'; return; } pfFill(); }); return; }
+    if(!PF_ST.manual||PF_ST.manual.core==null) PF_ST.manual=Object.assign({}, PF_DATA.split_auto||{core:0.6,tactical:0.2,risky:0.1,cash:0.1});   // older saved splits used other sleeve names
+    var D=PF_DATA, C=D.conditions||{}, R=D.rules||{}, acct=PF_ST.acct, sp=pfSplit(), A=pfAllocate(acct,sp), X=A.totals;
     var chips=function(name,vals,cur){ return '<div class="pf-chips">'+vals.map(function(v){ return '<button data-'+name+'="'+v[0]+'"'+(String(v[0])===String(cur)?' class="on"':'')+'>'+v[1]+'</button>'; }).join("")+'</div>'; };
-    var man=PF_ST.manual, msum=(man.lt||0)+(man.swing||0)+(man.options||0)+(man.cash||0);
-    var h='<div class="opt-hero"><div class="opt-k">Portfolios \u00b7 '+optEsc(D.date||"")+'</div><div class="opt-h">Phoenix\u2019s proposed portfolios</div>'+
-      '<div class="opt-sub">Every book in one place \u2014 long-term, swing and options \u2014 sized to the account, with the risk added up across all of them.</div></div>'+
-      '<div class="pf-ctl"><div><i>Account</i>'+chips("acct",(D.rules&&D.rules.accounts_eur||[5000,10000,15000]).map(function(a){ return [a,"\u20ac"+(a/1000)+"k"]; }),PF_ST.acct)+'</div>'+
-      '<div><i>Portfolio</i>'+chips("view",[["mix","Phoenix mix"],["lt","Long-term"],["swing","Swing"],["options","Options"]],PF_ST.view)+'</div>'+
-      (PF_ST.view==="mix"?'<div><i>Split</i>'+chips("mode",[["auto","Phoenix decides"],["manual","I decide"]],PF_ST.mode)+'</div>':'')+'</div>';
-    if(PF_ST.view==="mix"&&PF_ST.mode==="manual"){
-      h+='<div class="pf-man">'+[["lt","Long-term"],["swing","Swing"],["options","Options (max loss)"],["cash","Cash"]].map(function(k){
+    var man=PF_ST.manual, msum=(man.core||0)+(man.tactical||0)+(man.risky||0)+(man.cash||0);
+    var rv=R.review_days||{tactical:91,core:182};
+    var h='<div class="opt-hero"><div class="opt-k">Portfolios \u00b7 '+optEsc(D.date||"")+'</div><div class="opt-h">One book, reviewed on a calendar</div>'+
+      '<div class="opt-sub">Core reviewed every ~'+Math.round(rv.core/30)+' months, tactical every ~'+Math.round(rv.tactical/30)+', a small risky part for options. Between reviews only exceptions act.</div></div>';
+    h+=pfDialHTML(D)+pfLedgerHTML(D)+pfBookHTML();
+    h+='<div class="opt-sub2">Phoenix\u2019s proposal today <span>\u00b7 what you would lock now; at a review it is what Phoenix would change to</span></div>';
+    h+='<div class="pf-ctl"><div><i>Account</i>'+chips("acct",(R.accounts_eur||[5000,10000,15000]).map(function(a){ return [a,"\u20ac"+(a/1000)+"k"]; }),acct)+'</div>'+
+      '<div><i>Split</i>'+chips("mode",[["auto","Phoenix decides"],["manual","I decide"]],PF_ST.mode)+'</div></div>';
+    if(PF_ST.mode==="manual") h+='<div class="pf-man">'+[["core","Core (6 m)"],["tactical","Tactical (3 m)"],["risky","Risky (options + crypto)"],["cash","Cash"]].map(function(k){
         return '<label>'+k[1]+'<input type="number" min="0" max="100" step="5" data-man="'+k[0]+'" value="'+Math.round((man[k[0]]||0)*100)+'">%</label>'; }).join("")+
         '<span class="'+(Math.abs(msum-1)<0.001?'ok':'bad')+'">'+Math.round(msum*100)+'%'+(Math.abs(msum-1)<0.001?'':' \u2014 must add to 100')+'</span></div>';
-    } else if(PF_ST.view==="mix"){
-      h+='<div class="pf-why"><b>Phoenix\u2019s split today:</b> long-term '+pfP(sp.lt)+' \u00b7 swing '+pfP(sp.swing)+' \u00b7 options '+pfP(sp.options)+' (max loss) \u00b7 cash '+pfP(sp.cash)+'<br>'+
-        (D.split_reasons||[]).map(optEsc).join(" ")+' <i>Day score '+(C.dayscore!=null?C.dayscore:'\u2014')+' \u00b7 regime '+optEsc(C.regime||'\u2014')+' \u00b7 EURUSD '+(C.eurusd||'\u2014')+'</i></div>';
-    }
-    // summary strip
-    h+='<div class="mm-strip opt-kpi pf-kpi"><div><i>long-term</i><b>'+pfE(T.lt)+'</b></div><div><i>swing</i><b>'+pfE(T.swing)+'</b><small>risk '+pfE(T.swingRisk)+'</small></div>'+
-      '<div><i>options max loss</i><b>'+pfE(T.optMaxLoss)+'</b><small>'+A.options.length+' trades</small></div><div><i>cash</i><b>'+pfE(T.cash)+'</b></div>'+
-      '<div><i>can be lost (trading)</i><b style="color:'+(T.atRisk<=acct*0.2?'var(--green)':'var(--red)')+'">'+pfE(T.atRisk)+'</b><small>'+pfP(T.atRisk/acct,1)+' of '+pfE(acct)+'</small></div></div>';
-    // checks
+    else h+='<div class="pf-why"><b>Phoenix\u2019s split:</b> core '+pfP(sp.core)+' \u00b7 tactical '+pfP(sp.tactical)+' \u00b7 risky '+pfP(sp.risky)+' \u00b7 cash '+pfP(sp.cash)+'<br>'+(D.split_reasons||[]).map(optEsc).join(" ")+
+      ' <i>Regime '+optEsc(C.regime||'\u2014')+' \u00b7 EURUSD '+(C.eurusd||'\u2014')+'</i></div>';
+    h+='<div class="mm-strip opt-kpi pf-kpi"><div><i>core \u00b7 6 m</i><b>'+pfE(X.core)+'</b></div><div><i>tactical \u00b7 3 m</i><b>'+pfE(X.tactical)+'</b><small>at risk '+pfE(X.tacticalRisk)+'</small></div>'+
+      '<div><i>risky</i><b>'+pfE(X.risky)+'</b><small>options '+pfE(X.optBudget)+' \u00b7 crypto '+pfE(X.crypto)+'</small></div><div><i>cash</i><b>'+pfE(X.cash)+'</b></div>'+
+      '<div><i>can be lost now</i><b style="color:'+(X.atRisk<=acct*0.2?'var(--green)':'var(--red)')+'">'+pfE(X.atRisk)+'</b><small>'+pfP(X.atRisk/acct,1)+'</small></div></div>';
     h+='<div class="pf-checks">'+A.checks.map(function(c){ return '<div class="'+c.s+'"><b>'+(c.s==="pass"?"\u2714":(c.s==="warn"?"\u26a0":"\u2716"))+'</b> '+optEsc(c.t)+'</div>'; }).join("")+'</div>';
-    // sleeves
-    if(A.lt.length&&(sp.lt||0)>0) h+='<div class="opt-sub2">Long-term <span>\u00b7 '+optEsc((D.lt||{}).core_src||"")+(((D.lt||{}).satellite||[]).length?' + the invest book\u2019s top names ('+pfP((D.rules||{}).lt_satellite||0.2)+' of the sleeve)':'')+'</span></div>'+
-      '<div class="opt-tbl pf-lt"><div class="hd"><span>Ticker</span><span>Weight</span><span>Amount</span><span>Role</span></div>'+
-      A.lt.map(function(l){ return '<div class="r"><span class="tk">'+l.t+'</span><span>'+pfP(l.w*(sp.lt||0),1)+'</span><span>'+pfE(l.eur)+'</span><span>'+optEsc(l.note)+'</span></div>'; }).join("")+'</div>';
-    if((sp.swing||0)>0) h+='<div class="opt-sub2">Swing <span>\u00b7 the stock trade book\u2019s passers \u00b7 '+pfP(((D.rules||{}).swing||{}).risk_per_trade||0.01)+' of the account at risk each, stop 2 ATR under the entry, heat cap '+(((D.rules||{}).swing||{}).max_heat||3)+'R</span></div>'+
-      (A.swing.length?'<div class="opt-tbl pf-sw"><div class="hd"><span>Ticker</span><span>Shares</span><span>Entry</span><span>Stop</span><span>Position</span><span>At risk</span><span>Why</span></div>'+
-      A.swing.map(function(x){ var c=x.c; return '<div class="r"><span class="tk">'+x.t+'<i>'+optEsc(c.industry||"")+'</i></span><span>'+x.qty+'</span><span>$'+c.entry+'</span><span>$'+c.stop+'</span><span>'+pfE(x.eur)+'</span><span class="ev neg">'+pfE(x.risk)+'</span>'+
-        '<span class="tr">score '+(c.score!=null?c.score:'\u2014')+(c.breakout?' \u00b7 breakout':'')+(c.chart?' \u00b7 chart '+c.chart:'')+(c.patterns&&c.patterns.length?' \u00b7 '+optEsc(c.patterns.join(", ")):'')+'</span></div>'; }).join("")+'</div>':'<div class="ed-note">No swing position fits today.</div>');
-    if((sp.options||0)>0) h+='<div class="opt-sub2">Options <span>\u00b7 from today\u2019s proposed list \u00b7 budget '+pfE(PF_ST.acct*(sp.options||0))+' of max loss \u00b7 \u2264'+(((D.rules||{}).options||{}).max_trades||6)+' trades, \u2264'+pfP((((D.rules||{}).options||{}).per_trade_max_loss)||0.05)+' of the account each, \u2264'+(((D.rules||{}).options||{}).per_cluster||2)+' per cluster, positive at the conservative vol</span></div>'+
+    if(A.core.length&&(sp.core||0)>0) h+='<div class="opt-sub3">Core <span>\u00b7 reviewed every ~6 months \u00b7 '+optEsc((D.lt||{}).core_src||"")+'</span></div><div class="opt-tbl pf-lt"><div class="hd"><span>Ticker</span><span>Weight</span><span>Amount</span><span>Role</span></div>'+
+      A.core.map(function(l){ return '<div class="r"><span class="tk">'+l.t+'</span><span>'+pfP(l.w_book,1)+'</span><span>'+pfE(l.eur)+'</span><span>'+optEsc(l.role)+'</span></div>'; }).join("")+'</div>';
+    if((sp.tactical||0)>0) h+='<div class="opt-sub3">Tactical <span>\u00b7 held for the quarter \u00b7 '+pfP((R.tactical||{}).risk_per_trade||0.01)+' at risk each \u00b7 stop '+((R.tactical||{}).atr_stop_mult||3)+' ATR under the entry \u00b7 exits early only on the stop</span></div>'+
+      (A.tactical.length?'<div class="opt-tbl pf-sw"><div class="hd"><span>Ticker</span><span>Shares</span><span>Entry</span><span>Stop</span><span>Position</span><span>At risk</span><span>Why</span></div>'+
+      A.tactical.map(function(x){ var c=x.c; return '<div class="r"><span class="tk">'+x.t+'<i>'+optEsc(c.industry||"")+'</i></span><span>'+x.qty+'</span><span>$'+c.entry+'</span><span>$'+c.stop+'</span><span>'+pfE(x.eur)+'</span><span class="ev neg">'+pfE(x.risk)+'</span>'+
+        '<span class="tr wrap">score '+(c.score!=null?c.score:'\u2014')+(c.rank_score!=null&&c.rank_score!==c.score?' \u2192 '+c.rank_score:'')+(c.sector?' \u00b7 '+optEsc(c.sector):'')+(c.breakout?' \u00b7 breakout':'')+(c.chart?' \u00b7 chart '+c.chart:'')+(c.patterns&&c.patterns.length?' \u00b7 '+optEsc(c.patterns.join(", ")):'')+
+        ((c.notes||[]).length?'<br><i>'+optEsc(c.notes.join(" \u00b7 "))+'</i>':'')+'</span></div>'; }).join("")+'</div>':'<div class="ed-note">No tactical name fits today.</div>');
+    if((sp.risky||0)>0) h+='<div class="opt-sub3">Risky \u00b7 options <span>\u00b7 a budget of '+pfE(X.optBudget)+' max loss for the quarter (the risky share less crypto); these are today\u2019s trades inside it \u2014 they expire and roll, the budget stays</span></div>'+
       (A.options.length?'<div class="opt-tbl pf-op"><div class="hd"><span>Ticker</span><span>Trade</span><span>Max loss</span><span>EV</span><span>EV cons.</span><span>Win</span><span>Exit</span><span>Cluster</span></div>'+
-      A.options.map(function(x){ var o=x.o; return '<div class="r" data-pfo="'+x.t+'"><span class="tk">'+x.t+'</span><span class="tr" title="'+(o.alt_of?'a smaller version of '+optEsc(o.alt_of):'')+'">'+optEsc(o.label)+'<i class="xt '+(o.expiry_type||"")+'">'+(o.expiry_type||"")+'</i>'+(o.alt_of?'<i class="xt">sized down</i>':'')+'</span><span class="ev neg">'+pfE(x.maxLoss)+'</span>'+
+      A.options.map(function(x){ var o=x.o; return '<div class="r" data-pfo="'+x.t+'"><span class="tk">'+x.t+'</span><span class="tr">'+optEsc(o.label)+'<i class="xt '+(o.expiry_type||"")+'">'+(o.expiry_type||"")+'</i>'+(o.alt_of?'<i class="xt">sized down</i>':'')+'</span><span class="ev neg">'+pfE(x.maxLoss)+'</span>'+
         '<span class="ev">'+pfE(x.ev)+'</span><span class="ev'+(x.evc>0?'':' neg')+'">'+pfE(x.evc)+'</span><span>'+pfP(o.win)+'</span><span>'+optDate(o.exit_date)+'</span><span>'+optEsc(o.cluster)+'</span></div>'; }).join("")+'</div>':
-      '<div class="ed-note">No option trade fits this account today \u2014 see why below.</div>');
-    if(A.excluded.length) h+='<details class="opt-det"><summary>Left out <span>\u00b7 '+A.excluded.length+' candidates and why</span></summary><div class="opt-skip">'+
-      A.excluded.map(function(x){ return '<div><b>'+x.t+'</b> <i>'+x.book+'</i> '+optEsc(x.why)+'</div>'; }).join("")+'</div></details>';
-    h+='<div class="pf-act"><button id="pfToBuilder">Open in Portfolio Builder \u2192</button><span>Sends the long-term and swing lines as weights (cash as XEON). Options stay here: they are positions with a max loss, not weights.</span></div>';
-    h+='<div class="ed-note" style="margin-top:10px">Swing and options are ranked by their own engines; this page only sizes them to the account and adds the risk up. Prices are in USD and converted at EURUSD '+(C.eurusd||'\u2014')+' ('+optEsc(C.fx_src||"")+').</div>';
+      '<div class="ed-note">No option trade fits the budget today \u2014 see why below. The budget simply waits.</div>');
+    if(A.excluded.length) h+='<details class="opt-det"><summary>Left out <span>\u00b7 '+A.excluded.length+' candidates and why</span></summary><div class="opt-skip">'+A.excluded.map(function(x){ return '<div><b>'+x.t+'</b> <i>'+x.book+'</i> '+optEsc(x.why)+'</div>'; }).join("")+'</div></details>';
+    var carry=PF_BOOK&&PF_BOOK.active&&PF_BOOK.days_to_core>0;
+    h+='<div class="pf-act"><button id="pfLock">'+(PF_BOOK&&PF_BOOK.active?'Lock as my new book':'Lock this as my book')+'</button><button id="pfToBuilder" class="ghost">Open in Portfolio Builder \u2192</button>'+
+      '<span>'+(carry?'Your core and its review date ('+optDate(PF_BOOK.next_core_review,1)+') carry over \u2014 only the tactical and risky parts change. ':'')+'Locking sets the next reviews ~3 and ~6 months out. Phoenix tracks the book every morning from tomorrow.</span></div><div id="pfMsg" class="ed-note"></div>';
     host.innerHTML=h;
     host.querySelectorAll("[data-acct]").forEach(function(b){ b.onclick=function(){ PF_ST.acct=+this.dataset.acct; pfSave(); pfFill(); }; });
-    host.querySelectorAll("[data-view]").forEach(function(b){ b.onclick=function(){ PF_ST.view=this.dataset.view; pfSave(); pfFill(); }; });
     host.querySelectorAll("[data-mode]").forEach(function(b){ b.onclick=function(){ PF_ST.mode=this.dataset.mode; pfSave(); pfFill(); }; });
     host.querySelectorAll("[data-man]").forEach(function(inp){ inp.onchange=function(){ PF_ST.manual[this.dataset.man]=Math.max(0,Math.min(100,+this.value||0))/100; pfSave(); pfFill(); }; });
+    host.querySelectorAll("[data-pfo]").forEach(function(r){ r.onclick=function(){ var tk=this.dataset.pfo; OPT_FOCUS=tk; var b=document.querySelector('.mc-tab[data-pane="options"]'); if(b) b.click(); if(IC_DATA&&document.getElementById("icLab")) icLoad(tk,true); }; });
+    var lk=document.getElementById("pfLock"); if(lk) lk.onclick=function(){ pfLock(A,sp,acct,carry); };
+    host.querySelectorAll("[data-oc]").forEach(function(b){ b.onclick=function(){ pfCloseOption(((D.ledger||{}).options||[])[+this.dataset.oc]); }; });
     var tb=document.getElementById("pfToBuilder"); if(tb) tb.onclick=function(){
       var lines=[], tot=0;
-      A.lt.forEach(function(l){ var w=l.eur/acct; if(w>0){ lines.push({t:l.t,w:+w.toFixed(4)}); tot+=w; } });
-      A.swing.forEach(function(x){ var w=x.eur/acct; lines.push({t:x.t,w:+w.toFixed(4)}); tot+=w; });
-      if(tot<0.9999){ var cash=lines.filter(function(l){return l.t==="XEON";})[0]; if(cash) cash.w=+(cash.w+1-tot).toFixed(4); else lines.push({t:"XEON",w:+(1-tot).toFixed(4)}); }
-      try{ localStorage.setItem("phoenix.builder.import",JSON.stringify({name:"Phoenix "+({mix:"mix",lt:"long-term",swing:"swing",options:"options"})[PF_ST.view]+" \u00b7 \u20ac"+(acct/1000)+"k \u00b7 "+(D.date||""),capital:acct,monthly:0,target:0,target_years:5,lines:lines})); }catch(e){}
+      A.core.forEach(function(l){ var w=l.eur/acct; if(w>0){ lines.push({t:l.t,w:+w.toFixed(4)}); tot+=w; } });
+      A.tactical.forEach(function(x){ var w=x.eur/acct; lines.push({t:x.t,w:+w.toFixed(4)}); tot+=w; });
+      if(tot<0.9999){ var c0=lines.filter(function(l){return l.t==="XEON";})[0]; if(c0) c0.w=+(c0.w+1-tot).toFixed(4); else lines.push({t:"XEON",w:+(1-tot).toFixed(4)}); }
+      try{ localStorage.setItem("phoenix.builder.import",JSON.stringify({name:"Phoenix book \u00b7 \u20ac"+(acct/1000)+"k \u00b7 "+(D.date||""),capital:acct,monthly:0,target:0,target_years:5,lines:lines})); }catch(e){}
       location.href="portfolio_builder.html?profile=G&import=1"; };
-    host.querySelectorAll("[data-pfo]").forEach(function(r){ r.onclick=function(){ var tk=this.dataset.pfo; OPT_FOCUS=tk; var b=document.querySelector('.mc-tab[data-pane="options"]'); if(b) b.click();
-      if(IC_DATA&&document.getElementById("icLab")) icLoad(tk,true); }; });
   }
+  // close a recorded option trade: the debit paid to close, P&L kept on the record
+  function pfCloseOption(o){
+    if(!o) return; var msg=document.getElementById("pfCloseMsg");
+    var debit=parseFloat(window.prompt("Debit paid per share to close "+o.t+" ("+(o.label||"")+")?","0")); if(isNaN(debit)||debit<0) return;
+    var pin=sessionStorage.getItem("pxPin")||window.prompt("Phoenix PIN (same as the trade book)"); if(!pin) return;
+    var n=o.contracts||1, pnl=((o.credit||0)-debit)*100*n-(o.fees_1||0)*n;
+    var body={type:"option",account:"G",status:"closed",ticker:o.t,structure:o.structure,legs:o.legs,expiry:o.expiry,credit:o.credit,contracts:n,
+      max_loss_usd:+((o.max_loss_usd||0)/n).toFixed(2),fees_1:o.fees_1,planned_exit_dte:o.planned_exit_dte,opened:o.opened,label:o.label,
+      exit:{date:new Date().toISOString().slice(0,10),debit:debit,pnl_usd:+pnl.toFixed(2)}};
+    if(!confirm("Close "+o.t+" at "+debit.toFixed(2)+" \u2014 P&L $"+Math.round(pnl)+"?")) return;
+    fetch(SUPA.url+"/rest/v1/rpc/save_option_trade",{method:"POST",headers:pxAuthHeaders(),body:JSON.stringify({pin:pin,p_id:o.id,p_body:body,p_by:"app"})})
+      .then(function(x){ return x.json(); }).then(function(j){ if(!j||j.ok===false){ if(j&&/wrong PIN/.test(j.error||"")) sessionStorage.removeItem("pxPin"); if(msg) msg.textContent="Not saved: "+((j&&j.error)||"error"); return; }
+        sessionStorage.setItem("pxPin",pin); if(msg) msg.textContent="Closed: P&L $"+Math.round(pnl)+". The ledger updates in the next morning run."; })
+      .catch(function(e){ if(msg) msg.textContent="Not saved: "+e.message; });
+  }
+  // lock: one RPC (pf_lock_book) that closes the previous book and stores this one; checks before it is sent
+  function pfLock(A,sp,acct,carry){
+    var msg=document.getElementById("pfMsg"), D=PF_DATA||{}, R=D.rules||{}, rv=R.review_days||{tactical:91,core:182};
+    var sum=(sp.core||0)+(sp.tactical||0)+(sp.risky||0)+(sp.cash||0);
+    if(Math.abs(sum-1)>0.001){ msg.textContent="The split adds to "+Math.round(sum*100)+"% \u2014 it must be 100% before locking."; return; }
+    if(A.checks.some(function(c){ return c.s==="fail"; })){ msg.textContent="A check failed above \u2014 fix it before locking."; return; }
+    var add=function(d){ var t=new Date(); t.setUTCDate(t.getUTCDate()+d); return t.toISOString().slice(0,10); };
+    var core=A.core.map(function(l){ return {t:l.t, w_book:+l.w_book.toFixed(4), eur:+l.eur.toFixed(2), role:l.role}; });
+    if(carry&&PF_BOOK&&PF_BOOK.core) core=PF_BOOK.core.map(function(l){ var o={}; ["t","w_book","eur","role","qty","entry","entry_date","symbol"].forEach(function(k){ if(l[k]!=null) o[k]=l[k]; }); return o; });
+    var book={account_eur:acct, split:sp,
+      positions:{core:core, tactical:A.tactical.map(function(x){ return {t:x.t, qty:x.qty, entry:x.entry, stop:x.stop, eur:+x.eur.toFixed(2), risk_eur:+x.risk.toFixed(2)}; }),
+                 risky:{options_budget_eur:+A.totals.optBudget.toFixed(2), crypto_eur:+A.totals.crypto.toFixed(2), cap:R.risky_cap||0.15}},
+      next_tactical_review:add(rv.tactical), next_core_review:carry?PF_BOOK.next_core_review:add(rv.core),
+      replace_note:carry?"replaced at a tactical review":"replaced by a new book",
+      source:{proposal_date:D.date, conditions:D.conditions||{}, split_mode:PF_ST.mode}};
+    if(!confirm("Lock this book for "+pfE(acct)+"? Next tactical review "+book.next_tactical_review+", core review "+book.next_core_review+".")) return;
+    msg.textContent="Locking\u2026";
+    fetch(SUPA.url+"/rest/v1/rpc/pf_lock_book",{method:"POST",headers:pxAuthHeaders(),body:JSON.stringify({p_book:book})})
+      .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,j:j}; }); })
+      .then(function(x){ if(!x.ok||!x.j||x.j.ok===false){ msg.textContent="Not locked: "+((x.j&&(x.j.error||x.j.message))||"the database refused it (are you signed in?)"); return; }
+        msg.textContent="Locked as book #"+x.j.id+". Phoenix starts tracking it in tomorrow\u2019s morning run.";
+        PF_BOOK={active:true, locked_on:new Date().toISOString().slice(0,10), account_eur:acct, next_tactical_review:book.next_tactical_review, next_core_review:book.next_core_review,
+                 days_to_tactical:rv.tactical, days_to_core:carry?PF_BOOK.days_to_core:rv.core, exceptions:[], notes:["Tracking starts with tomorrow\u2019s run."], core:[], tactical:[], risky:book.positions.risky};
+        setTimeout(pfFill,1500); })
+      .catch(function(e){ msg.textContent="Not locked: "+e.message; });
+  }
+  // ---- ONE MIND in the older pages: the dossier (chart read, patterns, dealer levels per name), the market dial
+  // and the locked book's exceptions, loaded once and read by the Portfolio tab and the screener ----
+  var PX_MIND=window.PX_MIND={dos:null,pf:null,book:null,tried:false};
+  function pxMindLoad(cb){
+    if(PX_MIND.tried){ if(cb&&PX_MIND.dos) cb(); return; }
+    PX_MIND.tried=true;
+    Promise.all([getJSON("dossier").catch(function(){return null;}),getJSON("phoenix_portfolios").catch(function(){return null;}),getJSON("pf_book").catch(function(){return null;})])
+      .then(function(r){ PX_MIND.dos=r[0]; PX_MIND.pf=r[1]; PX_MIND.book=r[2]; if(cb) cb(); });
+  }
+  // a small badge: chart read, below the gamma flip, call wall within one expected move
+  function pxMindChip(tk){
+    var d=PX_MIND.dos&&PX_MIND.dos.names&&PX_MIND.dos.names[tk]; if(!d) return "";
+    var c=(d.chart||{}).bias, dl=d.dealer||{}, px=(d.price||{}).close, out=[];
+    if(c) out.push('<i class="mindb '+(c==="bullish"?"ok":(c==="bearish"?"no":""))+'" title="'+String((d.chart||{}).why||"").replace(/"/g,"&quot;")+'">'+(c==="bullish"?"\u2197":(c==="bearish"?"\u2198":"\u2194"))+'</i>');
+    if(dl.flip!=null&&px!=null&&px<dl.flip) out.push('<i class="mindb no" title="below its gamma flip '+dl.flip+': dealers amplify moves">\u2193flip</i>');
+    if(dl.call_wall!=null&&px!=null&&d.vol&&d.vol.iv30){ var em=px*d.vol.iv30*Math.sqrt(30/365); if(dl.call_wall>=px&&dl.call_wall-px<=em) out.push('<i class="mindb" title="call wall '+dl.call_wall+' within one expected move: capped upside">wall</i>'); }
+    var pt=(d.patterns||[]).filter(function(p){ return p.kind==="chart"; })[0]; if(pt) out.push('<i class="mindb" title="'+String(pt.note||pt.label).replace(/"/g,"&quot;")+'">'+String(pt.label).split(" ").map(function(w){return w[0];}).join("").toUpperCase()+(pt.confirmed?"\u2713":"")+'</i>');
+    return out.join("");
+  }
+  function pxMindPortfolio(s){
+    var body=document.getElementById("pfMindBody"); if(!body) return;
+    if(!PX_MIND.tried){ body.innerHTML='<div class="loading">\u2026</div>'; pxMindLoad(function(){ pxMindPortfolio(s); }); return; }
+    var P=PX_MIND.pf||{}, D=(PX_MIND.dos||{}).names||{}, B=PX_MIND.book||{}, dial=P.dial;
+    var h=dial?pfDialHTML(P):'<div class="ed-note">No market dial on file yet \u2014 written by the morning run (step portfolios).</div>';
+    var exc=(B.exceptions||[]);
+    if(exc.length) h+='<div class="pf-exc">'+exc.map(function(e){ return '<div class="'+e.kind+'"><b>'+({stop:"EXIT",profit:"PROFIT",risky:"RISK",market:"MARKET",option:"OPTION"})[e.kind]+'</b> '+optEsc(e.text)+'</div>'; }).join("")+'</div>';
+    var open=(s&&s.open)||[], led={}; ((P.ledger||{}).stocks||[]).forEach(function(x){ led[x.t]=x; });
+    if(!open.length) h+='<div class="ed-note">No open positions on this account.</div>';
+    else h+='<div class="opt-tbl mind-tbl"><div class="hd"><span>Position</span><span>Chart</span><span>Patterns</span><span>Gamma flip</span><span>Put wall</span><span>Call wall</span><span>Sector</span></div>'+
+      open.map(function(r){ var d=D[r.ticker]||{}, dl=d.dealer||{}, px=r.last||((d.price||{}).close), c=d.chart||{}, L=led[r.ticker]||{};
+        var gi=(L.industry_ok===true||L.industry_ok===false)?{ok:L.industry_ok}:null;
+        function dist(x){ return x==null||!px?'\u2014':x+' <i>'+((x/px-1)*100>=0?'+':'')+((x/px-1)*100).toFixed(1)+'%</i>'; }
+        var below=dl.flip!=null&&px!=null&&px<dl.flip;
+        return '<div class="r"><span class="tk">'+r.ticker+(r.managed?'<i>mandate</i>':'')+'</span>'+
+          '<span title="'+optEsc(c.why||"")+'">'+(c.bias?optBias(c.bias):'\u2014')+'</span>'+
+          '<span>'+((d.patterns||[]).slice(0,2).map(function(p){ return optEsc(p.label)+(p.confirmed?' \u2713':''); }).join(", ")||'\u2014')+'</span>'+
+          '<span class="'+(below?'ev neg':'')+'">'+dist(dl.flip)+(below?' <i>below</i>':'')+'</span><span>'+dist(dl.put_wall)+'</span><span>'+dist(dl.call_wall)+'</span>'+
+          '<span>'+optEsc(L.sector||'\u2014')+(gi?' <i class="'+(gi.ok?'ev':'ev neg')+'">'+(gi.ok?'leading':'lagging')+'</i>':'')+'</span></div>'; }).join("")+'</div>';
+    h+='<div class="ed-note" style="margin-top:8px">Read from the morning run: the dossier (chart read, Bulkowski patterns, dealer levels), the market dial and the locked book. '+
+       'A name with no dealer levels has no option chain on file. Proposals, the split and the review live in Mission Control \u2192 Portfolios.</div>';
+    body.innerHTML=h;
+    var note=document.getElementById("pfMindNote"); if(note) note.textContent=dial?("dial "+dial.score+" \u00b7 "+dial.state+(exc.length?" \u00b7 "+exc.length+" exception"+(exc.length>1?"s":""):"")):"";
+  }
+  window.pxMindLoad=pxMindLoad; window.pxMindChip=pxMindChip; window.pxMindPortfolio=pxMindPortfolio;
   // Mission Control's tabs: the Daily Brief, MME (the dealer map) and Options (iron condors and credit spreads,
   // its own section since 28 Oct 2026). The last one opened is remembered.
   function mcPanes(host, briefHtml, mmeHtml){
@@ -13396,6 +13576,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '<div class="w-card-b" id="pfCommBody"></div></div>'+
       '<div class="w-card"><div class="pf-strip sm-stats" id="pfStrip">'+
         '<div class="loading" style="grid-column:1/-1;padding:14px">\u2026</div></div></div>'+
+      // ONE MIND (31 Oct 2026): the market dial, and what the dealer map, the chart read and the sector layer
+      // say about each open position, from the same files every engine reads
+      '<div class="w-card" id="pfMindCard"><div class="w-card-h pf-tog" data-sec="mind"><span class="w-card-t">Market &amp; your positions <span class="sub">\u00b7 dial \u00b7 dealer levels \u00b7 chart \u00b7 sector</span></span>'+
+        '<span><span class="w-card-n" id="pfMindNote"></span> <span class="sec-car">\u25be</span></span></div>'+
+        '<div class="w-card-b" data-sec-body="mind" id="pfMindBody"><div class="loading">\u2026</div></div></div>'+
       // PORTFOLIO BUILDER — separate page (portfolio_builder.html); profile passed in the URL
       '<div class="w-card" style="border-top:3px solid var(--ember,#E0511B);cursor:pointer" onclick="PX_OPEN_BUILDER()">'+
         '<div class="w-card-h"><span class="w-card-t">Portfolio Builder <span class="sub">\u00b7 construct \u00b7 test \u00b7 confirm</span></span>'+
@@ -13701,6 +13886,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     document.getElementById("pfCouncilBody").innerHTML=pfCouncilTile(s);
     document.getElementById("pfChairBody").innerHTML=pfChairTile(s);
     pfCorrRender();
+    try{ if(window.pxMindPortfolio) window.pxMindPortfolio(s); }catch(e){ console.warn("[pf] one mind", e); }
     try{ pfProjRender(); }catch(e){ console.warn("[pf] projection", e); }
     try{ pfGoalRender(); }catch(e){ console.warn("[pf] goal", e); }
     try{ pfExitFollow(); }catch(e){ console.warn("[pf] exit follow", e); }

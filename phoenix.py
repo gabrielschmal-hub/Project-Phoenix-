@@ -10964,6 +10964,24 @@ def run_mme_chains(max_dte=180, band=0.35):
     mme_set = set(names)
     uni = _ic_universe()                                               # + the options screen's ETFs and stocks
     names += [t for t in uni if t not in mme_set]
+    # + dealer levels for what the portfolio may buy or already holds: the trade book's top passers, the invest
+    # book's top names, open stock positions and open option trades (31 Oct 2026: MME on every candidate)
+    try:
+        _st = json.load(open(os.path.join(OUTPUTS_DIR, "stocks.json")))
+        extra = [c["ticker"] for c in (_st.get("trade_ranked") or []) if c.get("passer")][:15] + [c["ticker"] for c in (_st.get("invest_ranked") or [])[:5]]
+    except Exception:
+        extra = []
+    try:
+        extra += [t.get("ticker") for t in _open_trades() if t.get("ticker")]
+    except Exception:
+        pass
+    try:
+        extra += [r["ticker"] for r in _sb_option_trades("open")]
+    except Exception:
+        pass
+    for t in extra:
+        if t and "." not in t and t not in names:
+            names.append(t); uni.setdefault(t, "stock")
     today = datetime.now(timezone.utc).date()
     out, fails = {}, []
     t0 = time.time()
@@ -12415,17 +12433,38 @@ def run_health():
     pf = rd("phoenix_portfolios") or {}
     if pf:
         cnt = pf.get("counts") or {}
-        add("portfolios.inputs", "portfolios", "pass" if cnt.get("core") and (cnt.get("swing") or cnt.get("options")) else "warn",
-            f"core {cnt.get('core', 0)} ({(pf.get('lt') or {}).get('core_src')}), satellite {cnt.get('satellite', 0)}, swing {cnt.get('swing', 0)}, options {cnt.get('options', 0)}",
+        add("portfolios.inputs", "portfolios", "pass" if cnt.get("core") and (cnt.get("tactical") or cnt.get("options")) else "warn",
+            f"core {cnt.get('core', 0)} ({(pf.get('lt') or {}).get('core_src')}), satellite {cnt.get('satellite', 0)}, tactical {cnt.get('tactical', 0)}, options {cnt.get('options', 0)}",
             "run_portfolios (stocks.json trade/invest books, ic_screen proposed, Supabase portfolios)")
         sp = pf.get("split_auto") or {}
         add("portfolios.split", "portfolios", "pass" if abs(sum(sp.values()) - 1) < 1e-6 else "fail", f"Phoenix split {sp} sums to {sum(sp.values()):.3f}", "ALLOC split_by_verdict")
         add("portfolios.fx", "portfolios", "pass" if "static" not in str((pf.get("conditions") or {}).get("fx_src")) else "warn",
             f"EURUSD {(pf.get('conditions') or {}).get('eurusd')} from {(pf.get('conditions') or {}).get('fx_src')}", "_fx_usd_rates (Yahoo)")
-        bad_sw = [s_["t"] for s_ in pf.get("swing") or [] if not (0 < s_["stop"] < s_["entry"])]
-        add("portfolios.swing_stops", "portfolios", "pass" if not bad_sw else "fail", "every swing stop sits below its entry" if not bad_sw else f"bad stops: {', '.join(bad_sw)}", "run_portfolios swing")
+        bad_sw = [s_["t"] for s_ in pf.get("tactical") or [] if not (0 < s_["stop"] < s_["entry"])]
+        add("portfolios.tactical_stops", "portfolios", "pass" if not bad_sw else "fail", "every tactical stop sits below its entry" if not bad_sw else f"bad stops: {', '.join(bad_sw)}", "run_portfolios tactical")
     else:
         add("portfolios.inputs", "portfolios", "warn", "outputs/phoenix_portfolios.json missing", "step portfolios")
+    bk = rd("pf_book") or {}
+    if bk.get("active"):
+        add("book.priced", "portfolios", "pass" if not bk.get("unpriced") else "warn",
+            f"{len(bk.get('priced') or [])} positions priced" + (f"; no price for {', '.join(bk['unpriced'])}" if bk.get("unpriced") else ""), "run_pf_track (_pf_prices, Yahoo; symbols in outputs/pf_symbols.json)")
+        add("book.exceptions", "portfolios", "pass" if not bk.get("exceptions") else "warn",
+            f"{len(bk.get('exceptions') or [])} exceptions: " + "; ".join(e["text"] for e in (bk.get("exceptions") or [])[:3]) if bk.get("exceptions") else "no stop, profit or risk exception on the locked book", "run_pf_track")
+    else:
+        add("book.active", "portfolios", "warn", "no locked book yet — lock one on the Portfolios tab", "pf_books table")
+    led = (bk.get("ledger") or {})
+    if led:
+        add("ledger.heat", "ledger", "pass" if (led.get("heat_R") or 0) <= (led.get("heat_cap_R") or 3) else "fail",
+            f"stock heat {led.get('heat_R')}R of {led.get('heat_cap_R')}R over {len(led.get('stocks') or [])} open positions", "_ledger (trades.json)")
+        unm = [o_["t"] for o_ in led.get("options") or [] if o_.get("mark_1") is None]
+        add("ledger.options_marked", "ledger", "pass" if not unm else "warn",
+            f"{len(led.get('options') or [])} open option trades" + (f"; no mark for {', '.join(unm)} (no chain on file?)" if unm else ", all marked"), "_pf_ledger_marked (option_trades + chains)")
+        if (led.get("cooloff") or {}).get("active"):
+            add("ledger.cooloff", "ledger", "warn", led["cooloff"]["why"], "_ledger cool-off rule")
+    dl = (pf.get("dial") if pf else None) or {}
+    add("dial", "market", "pass" if dl.get("parts") and sum(1 for p_ in dl["parts"] if p_.get("value") is None) <= 1 else "warn",
+        f"market dial {dl.get('score')}/100 {dl.get('state')}" + (f"; inputs missing: {', '.join(p_['k'] for p_ in dl.get('parts') or [] if p_.get('value') is None)}" if dl.get("parts") else " — not computed"),
+        "_market_dial (macro, gex, vix_term, spx_daily)")
     # 6. calendar runway
     cal = rd("calendar") or {}
     lastev = max([e.get("date", "") for e in cal.get("events") or [] if e.get("type") != "OPEX"] or [""])
@@ -12455,19 +12494,24 @@ def run_health():
 # ============================================================
 ALLOC = {
     "accounts_eur": [5000, 10000, 15000], "default_eur": 10000,
-    # Phoenix's split by the day score (CLEAR / TRADE CAREFULLY / STAND DOWN): share of the account per sleeve.
-    # Long-term is a fixed half: it is invested for years and does not trade the day's conditions. The options
-    # share is a budget of MAX LOSS (what a defined-risk trade can lose, and what the broker holds as margin).
-    "split_by_verdict": {
-        "CLEAR":           {"lt": 0.50, "swing": 0.25, "options": 0.15, "cash": 0.10},
-        "TRADE CAREFULLY": {"lt": 0.50, "swing": 0.15, "options": 0.10, "cash": 0.25},
-        "STAND DOWN":      {"lt": 0.50, "swing": 0.00, "options": 0.05, "cash": 0.45},
-    },
-    "stress_regimes": ["CRISIS_PEAK", "ENERGY_SPIKE"],      # halve swing and options into cash
-    "lt_satellite": 0.20,                                    # share of the long-term sleeve in the stock invest book's top names
-    "swing": {"risk_per_trade": RISK["risk_conservative"], "max_heat": RISK["max_heat_R"], "max_position": RISK["max_position_pct"],
-              "atr_stop_mult": RISK["atr_stop_mult"], "max_positions": 5},
+    # A HELD BOOK, NOT A DAILY ONE (31 Oct 2026, Gabriel): the portfolio is locked and reviewed on a calendar —
+    # the tactical sleeve every ~3 months (better alternatives, profit taking), the core every ~6 months. Between
+    # reviews only exceptions act: a stop hit, a risk cap breached. So the split follows the macro REGIME (which
+    # moves over weeks), not the day score (which moves daily).
+    "review_days": {"tactical": 91, "core": 182},
+    "split_default": {"core": 0.60, "tactical": 0.20, "risky": 0.10, "cash": 0.10},
+    "split_stress":  {"core": 0.60, "tactical": 0.10, "risky": 0.05, "cash": 0.25},
+    "stress_regimes": ["CRISIS_PEAK", "ENERGY_SPIKE", "POLICY_TIGHTENING"],
+    "core_satellite": 0.20,                                  # share of the core in the stock invest book's top names
+    # tactical: the trade book's passers, held for the quarter. A stop 3 ATR under the entry (2 ATR is a swing
+    # stop; a three-month hold needs room), 1% of the account at risk per name, the existing heat and size caps.
+    "tactical": {"risk_per_trade": RISK["risk_conservative"], "max_heat": RISK["max_heat_R"], "max_position": RISK["max_position_pct"],
+                 "atr_stop_mult": 3.0, "max_positions": 5, "profit_flag_R": 4.0, "profit_review_R": 2.0},
+    # risky: the small, known-risky part — the options budget (in max loss; trades roll as they expire inside the
+    # quarter) plus any crypto line in the core. Sized like bitcoin: small, and capped as a whole.
+    "risky_cap": 0.15, "crypto": ["BTCE", "IBIT", "BTC", "ETHE"],
     "options": {"max_trades": 6, "per_trade_max_loss": 0.05, "per_cluster": 2, "require_conservative_ev": True},
+    "drift_band": 0.05,                                      # the builder's band: a line 5 points off target is flagged at review
 }
 # names that move together, so the options sleeve does not stack one bet six ways
 OPT_CLUSTER = {
@@ -12482,6 +12526,194 @@ OPT_CLUSTER = {
     "industrials": ["XLI", "BA", "CAT", "DE", "GE", "XLB"],
     "international": ["EEM", "EFA", "FXI"],
 }
+
+
+# ============================================================
+# LINKING THE BOOKS (31 Oct 2026): one market dial, one position ledger (stocks + options), one sector layer,
+# dealer levels on every candidate and holding. The allocator, the tracker and the health checks read these;
+# nothing recomputes its own version.
+# ============================================================
+DIAL = {
+    # points off 100; >= 70 risk-on, 45-69 caution, < 45 stress
+    "regime_stress": 35, "gex_negative": 20, "vix": [(30, 30), (25, 20), (20, 10)], "vix_backwardation": 15,
+    "spx_below_200": 20, "spx_below_50": 5, "risk_on": 70, "caution": 45,
+}
+ALLOC_SPLIT_CAUTION = {"core": 0.60, "tactical": 0.15, "risky": 0.075, "cash": 0.175}
+SECTOR = {"max_names_per_sector": 2, "max_sector_pct": 0.15,       # hard caps across tactical + held stocks + satellite
+          "lead_bonus": 5, "sector_bonus": 3, "lag_penalty": 5}
+DEALER = {"below_flip_size": 0.5, "wall_em": 1.0, "wall_penalty": 10, "putwall_stop_buffer": 0.01}
+
+
+def _market_dial():
+    """ONE MARKET DIAL for every engine: macro regime, SPX dealer gamma, VIX level and curve, SPX trend.
+    Returns {score, state, parts:[{k, value, pts, why}]}; a missing input is named with 0 points, never guessed."""
+    import os, json
+    def rd(n):
+        try:
+            return json.load(open(os.path.join(OUTPUTS_DIR, n + ".json")))
+        except Exception:
+            return {}
+    ctx = _context_now()
+    vt = rd("vix_term"); gex = rd("gex")
+    parts, score = [], 100
+    def part(k, value, pts, why):
+        nonlocal score
+        score -= pts; parts.append({"k": k, "value": value, "pts": -pts, "why": why})
+    reg = ctx.get("regime")
+    part("macro regime", reg, DIAL["regime_stress"] if reg in ALLOC["stress_regimes"] else 0,
+         "a stress regime" if reg in ALLOC["stress_regimes"] else ("no regime on file" if not reg else "not a stress regime"))
+    conf = ((gex.get("confidence") or {}).get("regime_sign") or "")
+    gr = str(ctx.get("gex_regime") or "")
+    neg = "neg" in gr.lower()
+    part("SPX dealer gamma", gr or None, DIAL["gex_negative"] if (neg and conf != "INVALID") else 0,
+         ("negative: dealers amplify moves" if neg else ("positive: dealers dampen moves" if gr else "no reading")) + (" (reading marked invalid, ignored)" if conf == "INVALID" else ""))
+    vix = vt.get("spot") or ctx.get("vix")
+    vp = next((p for lvl, p in DIAL["vix"] if vix and vix > lvl), 0)
+    part("VIX", vix, vp, (f"{vix} \u2014 elevated" if vp else f"{vix} \u2014 calm") if vix else "no VIX on file")
+    fut = vt.get("futures") or []
+    back = len(fut) >= 2 and fut[0].get("value") and fut[-1].get("value") and fut[0]["value"] > fut[-1]["value"]
+    part("VIX curve", "backwardation" if back else ("contango" if len(fut) >= 2 else None), DIAL["vix_backwardation"] if back else 0,
+         "near-term fear above long-term: stress" if back else ("normal upward curve" if len(fut) >= 2 else "no curve on file"))
+    s200, s50 = ctx.get("spx_vs_200d_pct"), ctx.get("spx_vs_50d_pct")
+    part("SPX vs 200-day", s200, DIAL["spx_below_200"] if (s200 is not None and s200 < 0) else 0, "below its 200-day: a downtrend" if (s200 is not None and s200 < 0) else ("above its 200-day" if s200 is not None else "no SPX history"))
+    part("SPX vs 50-day", s50, DIAL["spx_below_50"] if (s50 is not None and s50 < 0) else 0, "below its 50-day" if (s50 is not None and s50 < 0) else ("above its 50-day" if s50 is not None else "no SPX history"))
+    score = max(0, min(100, score))
+    state = "risk-on" if score >= DIAL["risk_on"] else ("caution" if score >= DIAL["caution"] else "stress")
+    return {"score": score, "state": state, "parts": parts, "context": ctx}
+
+
+def _sb_option_trades(status="open"):
+    try:
+        return _sb_get("option_trades", {"select": "*", "status": f"eq.{status}"}, limit=500) or []
+    except Exception as e:
+        print(f"[ledger] option_trades unreadable ({e})")
+        return []
+
+
+def _ledger():
+    """ONE POSITION LEDGER: what you actually hold. Stocks from the trade book (trades.json, mirrored from Supabase
+    trade_book), options from option_trades. Heat is Phoenix's one definition (risk to the stops over 1% of the
+    account, cap 3R) for stocks; options count as max loss against the risky budget, kept apart because a max loss
+    is a worst case, not a stop. Cool-off: the last RISK['cooloff_losses'] closed trades all losers and the last one
+    under RISK['cooloff_days'] days ago."""
+    from datetime import datetime, timedelta
+    rows = _load_trades()
+    try:
+        uni = load_universe_from_csv() or {}
+    except Exception:
+        uni = {}
+    # the account the heat is measured against: the trade's own account_size, else the book's balance (as _pk_portfolio)
+    bal = None
+    try:
+        import os, json
+        tj = json.load(open(os.path.join(OUTPUTS_DIR, "trades.json")))
+        if isinstance(tj, dict):
+            bal = tj.get("balance") or tj.get("account_size")
+            if not bal:
+                accts = tj.get("accounts")
+                if isinstance(accts, dict):
+                    bal = next((float(a.get("startingBalance") or a.get("starting_balance") or 0) for a in accts.values() if isinstance(a, dict) and (a.get("startingBalance") or a.get("starting_balance"))), None)
+    except Exception:
+        pass
+    try:
+        import os, json
+        _gs = json.load(open(os.path.join(OUTPUTS_DIR, "group_strength.json"))).get("industries") or {}
+    except Exception:
+        _gs = {}
+    stocks, heat, acct_seen = [], 0.0, None
+    for t in _open_trades(rows):
+        if str(t.get("type") or "").lower() == "option":
+            continue
+        try:
+            entry = float(t.get("entry") or 0); stop = float(t.get("stop") or t.get("current_stop") or t.get("initial_stop") or 0); qty = float(t.get("qty") or 0)
+        except Exception:
+            continue
+        acct = float(t.get("account_size") or 0) or (float(bal) if bal else None)
+        acct_seen = acct_seen or acct
+        risk = abs(entry - stop) * qty if (entry and stop and qty) else None
+        # mandate ("managed") positions carry no trading stop: the app keeps them out of heat, and so does the ledger
+        if risk and acct and not t.get("managed"):
+            heat += risk / (acct * 0.01)
+        u = uni.get(t.get("ticker")) or {}
+        stocks.append({"t": t.get("ticker"), "qty": qty, "entry": entry or None, "stop": stop or None, "managed": bool(t.get("managed")),
+                       "risk_usd": round(risk, 2) if (risk and not t.get("managed")) else None,
+                       "value_usd": round(entry * qty, 2) if entry and qty else None, "sector": t.get("sector") or u.get("sector"),
+                       "industry": t.get("industry") or u.get("industry"), "account": t.get("account"), "id": t.get("id"),
+                       "industry_ok": (_gs.get(t.get("industry") or u.get("industry") or "") or {}).get("ok")})
+    closed = [t for t in rows if str(t.get("status", "")).lower() in ("closed", "exited", "stopped") or t.get("exit_date")]
+    closed.sort(key=lambda t: str(t.get("exit_date") or ""))
+    def pnl(t):
+        if t.get("pnl") is not None:
+            return float(t["pnl"])
+        try:
+            return (float(t.get("exit_price") or t.get("exit")) - float(t.get("entry"))) * float(t.get("qty") or 1)
+        except Exception:
+            return None
+    trail = 0
+    for t in reversed(closed):
+        p = pnl(t)
+        if p is None:
+            break
+        if p < 0:
+            trail += 1
+        else:
+            break
+    last_exit = closed[-1].get("exit_date") if closed else None
+    cool = None
+    if trail >= RISK["cooloff_losses"] and last_exit:
+        until = datetime.strptime(str(last_exit)[:10], "%Y-%m-%d").date() + timedelta(days=RISK["cooloff_days"])
+        if datetime.utcnow().date() < until:
+            cool = {"active": True, "until": str(until), "why": f"{trail} losing trades in a row; no new tactical names until {until}"}
+    opts = []
+    for r in _sb_option_trades("open"):
+        b = r.get("body") or {}
+        n = float(b.get("contracts") or 1)
+        opts.append({"id": r["id"], "t": r["ticker"], "label": b.get("label"), "structure": b.get("structure"), "legs": b.get("legs"),
+                     "expiry": b.get("expiry"), "credit": b.get("credit"), "contracts": n, "max_loss_usd": round(float(b.get("max_loss_usd") or 0) * n, 2),
+                     "opened": b.get("opened"), "planned_exit_dte": b.get("planned_exit_dte"), "fees_1": b.get("fees_1")})
+    return {"stocks": stocks, "heat_R": round(heat, 2), "heat_cap_R": RISK["max_heat_R"], "account_size_usd": acct_seen,
+            "cooloff": cool or {"active": False, "trailing_losses": trail}, "options": opts,
+            "options_max_loss_usd": round(sum(o["max_loss_usd"] for o in opts), 2)}
+
+
+def _tactical_flags(c, dial, gs, mmrows, uni):
+    """Per-candidate gates and adjustments for the tactical sleeve (Gabriel, 31 Oct: clear-cut cases are HARD
+    gates, the rest ADJUST size and rank). Portfolio-level gates (heat, sectors, cool-off) are applied by the
+    allocator as it fills the sleeve, because they depend on what has been picked so far."""
+    u = uni.get(c["t"]) or {}
+    sec = u.get("sector") or c.get("sector"); ind = c.get("industry") or u.get("industry")
+    gi = ((gs.get("industries") or {}).get(ind or "") or {}); gsec = ((gs.get("sectors") or {}).get(sec or "") or {})
+    mr = mmrows.get(c["t"]) or {}
+    gates, notes, rank, size = [], [], float(c.get("score") or 0), 1.0
+    stop = c["stop"]
+    # sector and industry leadership: adjustments
+    if gi.get("ok"):
+        rank += SECTOR["lead_bonus"]; notes.append(f"industry leading (rank {gi.get('rank_m3')}/{gi.get('of')}, {gi.get('vs_spx_m1'):+.1f}% vs SPX over a month)" if gi.get("vs_spx_m1") is not None else "industry leading")
+    elif gi:
+        rank -= SECTOR["lag_penalty"]; notes.append(f"industry not leading (rank {gi.get('rank_m3')}/{gi.get('of')})")
+    if gsec.get("ok"):
+        rank += SECTOR["sector_bonus"]; notes.append(f"sector {sec} leading")
+    # dealer levels
+    if mr:
+        flip, em, spot = mr.get("flip"), mr.get("em"), mr.get("spot") or c["entry"]
+        below = flip is not None and spot is not None and spot < flip
+        if below and dial["state"] == "stress":
+            gates.append(f"below its gamma flip ({flip}) while the market dial is in stress")
+        elif below:
+            size *= DEALER["below_flip_size"]; notes.append(f"below its gamma flip ({flip}): half size \u2014 dealers amplify moves there")
+        cw = mr.get("resist")
+        if cw and em and spot and 0 <= (cw - spot) <= DEALER["wall_em"] * em:
+            rank -= DEALER["wall_penalty"]; notes.append(f"call wall {cw} within one expected move above: capped upside")
+        pw = mr.get("support")
+        if pw and spot and stop < pw < spot:
+            new_stop = round(pw * (1 - DEALER["putwall_stop_buffer"]), 2)
+            if new_stop > stop:
+                notes.append(f"stop raised to {new_stop}, just under the put wall {pw} (was {stop})"); stop = new_stop
+    else:
+        notes.append("no dealer levels (no option chain on file)")
+    return {"sector": sec, "industry": ind, "industry_ok": gi.get("ok"), "sector_ok": gsec.get("ok"), "gates": gates, "notes": notes,
+            "rank_score": round(rank, 1), "size_mult": size, "stop": stop,
+            "dealer": ({"flip": mr.get("flip"), "call_wall": mr.get("resist"), "put_wall": mr.get("support"), "em": mr.get("em"), "regime": mr.get("regime")} if mr else None)}
 
 
 def run_portfolios():
@@ -12503,17 +12735,17 @@ def run_portfolios():
         except Exception:
             return {}
     ds, macro, stocks, scr, dos, cal = rd("dayscore"), rd("macro"), rd("stocks"), rd("ic_screen"), rd("dossier"), rd("calendar")
-    verdict = ds.get("verdict") or "TRADE CAREFULLY"
+    verdict = ds.get("verdict")
     regime = macro.get("regime")
-    split = dict(ALLOC["split_by_verdict"].get(verdict) or ALLOC["split_by_verdict"]["TRADE CAREFULLY"])
-    sc_ = ds.get("score") if ds.get("score") is not None else "n/a"
-    reasons = [f"Day score {sc_} ({verdict}) sets the trading sleeves: swing {split['swing']*100:.0f}%, options max-loss budget {split['options']*100:.0f}%."
-               if ds else "No day score on file \u2014 using the TRADE CAREFULLY split."]
-    if regime in ALLOC["stress_regimes"]:
-        cut = split["swing"] / 2 + split["options"] / 2
-        split["swing"] /= 2; split["options"] /= 2; split["cash"] += cut
-        reasons.append(f"Regime {regime}: swing and options halved into cash.")
-    reasons.append("Long-term stays at half the account: it is invested for years and does not trade the day's conditions.")
+    held = ((macro.get("explain") or {}).get("held_weeks") if isinstance(macro.get("explain"), dict) else None)
+    dial = _market_dial()
+    stress = dial["state"] == "stress"
+    split = dict(ALLOC["split_stress"] if stress else (ALLOC_SPLIT_CAUTION if dial["state"] == "caution" else ALLOC["split_default"]))
+    off = [p_ for p_ in dial["parts"] if p_["pts"]]
+    reasons = [f"Market dial {dial['score']}/100 — {dial['state']}" + (": " + "; ".join(f"{p_['k']} {p_['why']} ({p_['pts']})" for p_ in off) if off else ": nothing on the dial is flashing") + ".",
+               {"risk-on": "Full split: core 60%, tactical 20%, risky 10%, cash 10%.", "caution": "Caution split: tactical 15%, risky 7.5%, cash raised to 17.5%.",
+                "stress": "Stress split: tactical 10%, risky 5%, cash 25%; names below their gamma flip are excluded."}[dial["state"]],
+               "The split is set when the book is locked or reviewed; between reviews a move into stress is an exception that asks you to cut the trading parts."]
     # FX: USD per EUR
     try:
         fx, fx_src = _fx_usd_rates(); eurusd = float(fx.get("EUR") or 1.08)
@@ -12538,10 +12770,22 @@ def run_portfolios():
         core = [{"t": l["t"], "w": round(l["w"] / tw, 4)} for l in core]
     elif tw < 0.9999:                                        # the unallocated part of the saved portfolio stays as cash (XEON)
         core = [{"t": l["t"], "w": round(l["w"], 4)} for l in core] + [{"t": "XEON", "w": round(1 - tw, 4), "note": "unallocated in the saved portfolio, held as cash"}]
+    try:
+        _u = load_universe_from_csv() or {}
+    except Exception:
+        _u = {}
     sat = [{"t": c["ticker"], "name": c.get("name"), "score": c.get("invest_score"), "industry": c.get("industry"),
-            "price": (c.get("levels") or {}).get("last")} for c in (stocks.get("invest_ranked") or [])[:5]]
-    # swing: trade-book passers
+            "sector": (_u.get(c["ticker"]) or {}).get("sector"), "price": (c.get("levels") or {}).get("last")} for c in (stocks.get("invest_ranked") or [])[:5]]
+    # tactical: trade-book passers, with the sector layer and dealer levels (gates + adjustments) and what you already hold
     D = dos.get("names") or {}
+    gs = rd("group_strength"); mm = rd("mme_map")
+    mmrows = {r["ticker"]: r for g in (mm.get("groups") or {}).values() for r in g}
+    mmrows.update(mm.get("etf_rows") or {})
+    try:
+        uni = load_universe_from_csv() or {}
+    except Exception:
+        uni = {}
+    ledger = _ledger()
     swing = []
     for c in (stocks.get("trade_ranked") or []):
         if not c.get("passer"):
@@ -12549,13 +12793,16 @@ def run_portfolios():
         lv = c.get("levels") or {}; last = lv.get("last"); atr = c.get("atr14_pct") or lv.get("atr_pct")
         if not last or not atr:
             continue
-        stop = round(last * (1 - ALLOC["swing"]["atr_stop_mult"] * atr / 100), 2)
+        stop = round(last * (1 - ALLOC["tactical"]["atr_stop_mult"] * atr / 100), 2)
         dd = D.get(c["ticker"]) or {}
-        swing.append({"t": c["ticker"], "name": c.get("name"), "industry": c.get("industry"), "score": c.get("trade_score"),
-                      "breakout": c.get("breakout"), "entry": last, "stop": stop, "atr_pct": atr, "resistance": lv.get("resistance"),
-                      "chart": (dd.get("chart") or {}).get("bias"), "patterns": [p.get("label") for p in dd.get("patterns") or []][:3]})
-        if len(swing) >= 12:
+        row = {"t": c["ticker"], "name": c.get("name"), "industry": c.get("industry"), "score": c.get("trade_score"),
+               "breakout": c.get("breakout"), "entry": last, "stop": stop, "stop_atr": stop, "atr_pct": atr, "resistance": lv.get("resistance"),
+               "chart": (dd.get("chart") or {}).get("bias"), "patterns": [p.get("label") for p in dd.get("patterns") or []][:3]}
+        row.update(_tactical_flags(row, dial, gs, mmrows, uni))
+        swing.append(row)
+        if len(swing) >= 15:
             break
+    swing.sort(key=lambda r: -r["rank_score"])
     # options: the proposed list
     cl = {t: k for k, v in OPT_CLUSTER.items() for t in v}
     evs = [e for e in (cal.get("events") or []) if e.get("type") in ("FOMC", "CPI", "NFP")]
@@ -12581,13 +12828,257 @@ def run_portfolios():
                                                and (b.get("ev_cons_pct") or -1) > 0 and b.get("label") != p.get("label")],
                                               key=lambda b: -(b.get("ev_cons_pct") or 0))[:4]]})
     out = {"asof": _now(), "date": scr.get("date") or str(datetime.utcnow().date()), "rules": ALLOC,
-           "conditions": {"dayscore": ds.get("score"), "verdict": verdict, "regime": regime, "eurusd": round(eurusd, 4), "fx_src": fx_src},
+           "dial": dial, "ledger": ledger, "sector_rules": SECTOR, "dealer_rules": DEALER, "clusters": cl,
+           "conditions": {"dayscore": ds.get("score"), "verdict": verdict, "regime": regime, "regime_held_weeks": held, "stress": stress, "dial_state": dial["state"], "dial_score": dial["score"],
+                          "eurusd": round(eurusd, 4), "fx_src": fx_src},
            "split_auto": split, "split_reasons": reasons,
-           "lt": {"core": core, "core_src": core_src, "satellite": sat}, "swing": swing, "options": opts,
-           "counts": {"core": len(core), "satellite": len(sat), "swing": len(swing), "options": len(opts)}}
+           "lt": {"core": core, "core_src": core_src, "satellite": sat}, "tactical": swing, "options": opts,
+           "counts": {"core": len(core), "satellite": len(sat), "tactical": len(swing), "options": len(opts)}}
     write_json("phoenix_portfolios", out)
-    print(f"[portfolios] {verdict} · split {split} · core {len(core)} ({core_src}) · satellite {len(sat)} · swing {len(swing)} · options {len(opts)} · EURUSD {eurusd:.4f} ({fx_src})")
-    sb_heartbeat("portfolios", bool(core), f"{verdict} · swing {len(swing)} · options {len(opts)} · core {len(core)}")
+    print(f"[portfolios] regime {regime} · split {split} · core {len(core)} ({core_src}) · satellite {len(sat)} · tactical {len(swing)} · options {len(opts)} · EURUSD {eurusd:.4f} ({fx_src})")
+    sb_heartbeat("portfolios", bool(core), f"regime {regime} · tactical {len(swing)} · options {len(opts)} · core {len(core)}")
+    return out
+
+
+def _pf_prices(tickers):
+    """{ticker: (last close, yahoo symbol)} for US stocks and the builder's European ETFs. The builder's tickers carry
+    no exchange, so each is tried as listed, then on Xetra (.DE), Milan (.MI), Amsterdam (.AS) and London (.L); the
+    symbol that answers is remembered in outputs/pf_symbols.json so tomorrow asks once."""
+    import os, json
+    fp = os.path.join(OUTPUTS_DIR, "pf_symbols.json")
+    try:
+        known = json.load(open(fp))
+    except Exception:
+        known = {}
+    out, todo = {}, []
+    try:
+        import yfinance as yf
+    except Exception as e:
+        print(f"[pf] yfinance unavailable ({e})"); return out
+    def batch(syms):
+        if not syms:
+            return {}
+        res = {}
+        try:
+            df = yf.download(list(syms), period="10d", interval="1d", auto_adjust=False, progress=False, group_by="column", threads=True)
+            cl = df["Close"]
+            for sy in syms:
+                try:
+                    col = cl[sy] if hasattr(cl, "columns") else cl
+                    v = col.dropna()
+                    if len(v):
+                        res[sy] = float(v.values[-1])
+                except Exception:
+                    pass
+        except Exception as e:
+            print(f"[pf] price batch failed ({e})")
+        return res
+    first = {t: known.get(t, t) for t in tickers}
+    got = batch(sorted(set(first.values())))
+    for t, sy in first.items():
+        if sy in got:
+            out[t] = (got[sy], sy)
+        else:
+            todo.append(t)
+    for suf in (".DE", ".MI", ".AS", ".L"):
+        if not todo:
+            break
+        got = batch([t + suf for t in todo])
+        rest = []
+        for t in todo:
+            if t + suf in got:
+                out[t] = (got[t + suf], t + suf); known[t] = t + suf
+            else:
+                rest.append(t)
+        todo = rest
+    for t, (_, sy) in out.items():
+        known[t] = sy
+    try:
+        json.dump(known, open(fp, "w"), indent=1, sort_keys=True)
+    except Exception:
+        pass
+    return out
+
+
+def _pf_ledger_marked(today):
+    """The ledger with every open option trade marked on this morning's chains, and the option exceptions:
+    the planned exit reached (close it), expiry passed, and the stop study's levels breached (noted, not acted on)."""
+    led = _ledger(); led["exceptions"] = []
+    ch = _ic_load_chains() or {}
+    for o in led["options"]:
+        try:
+            from datetime import datetime as _d
+            dte = (_d.strptime(str(o["expiry"])[:10], "%Y-%m-%d").date() - today).days
+        except Exception:
+            dte = None
+        o["dte"] = dte
+        c = (ch.get("names") or {}).get(o["t"]) or {}
+        q = _ic_quotes(c.get("rows"), str(o.get("expiry"))[:10]) if c else {}
+        try:
+            L = {k: float(v) for k, v in (o.get("legs") or {}).items() if v is not None}
+            m = _ic_mark(L, float(o.get("credit") or 0), float(o.get("fees_1") or 0), q, c.get("spot"), dte) if (q and dte is not None) else None
+        except Exception:
+            m = None
+        o["mark_1"] = m; o["pnl_usd"] = round(m * o["contracts"], 2) if m is not None else None
+        if dte is not None and dte <= 0:
+            led["exceptions"].append({"kind": "option", "t": o["t"], "text": f"{o['t']} {o.get('label') or ''}: expiry reached — record the close"})
+        elif dte is not None and o.get("planned_exit_dte") and dte <= int(o["planned_exit_dte"]):
+            led["exceptions"].append({"kind": "option", "t": o["t"], "text": f"{o['t']} {o.get('label') or ''}: the planned exit ({o['planned_exit_dte']} days to expiry) is reached — close it, win or lose"
+                                      + (f" (P&L about ${o['pnl_usd']:,.0f})" if o["pnl_usd"] is not None else "")})
+        elif m is not None and o.get("max_loss_usd") and m * o["contracts"] <= -0.5 * o["max_loss_usd"]:
+            led["exceptions"].append({"kind": "option", "t": o["t"], "text": f"{o['t']}: down half its max loss (the stop study's level) — your call; the test holds to the exit"})
+    return led
+
+
+def run_pf_track():
+    """
+    THE LOCKED BOOK, tracked every morning (31 Oct 2026). The book is what you locked on the Portfolios tab; it is
+    reviewed on a calendar — tactical every ~3 months, core every ~6 — and between reviews only EXCEPTIONS act:
+      stop      a tactical name closed below its stop: exit, do not wait for the review
+      profit    a tactical name is up 4R or more: take some now; 2R or more is noted for the review
+      risky     options budget plus crypto lines above the cap
+      drift     a core line more than the band off its target (acted on at the core review, flagged before)
+    On a review date it drafts the review: which tactical names to keep, which to replace and with what (the trade
+    book's best names not held), where to take profit, and the core's rebalance back to target.
+    Writes outputs/pf_book.json. No active book -> says so and does nothing else.
+    """
+    import os, json
+    from datetime import datetime, date
+    def rd(n):
+        try:
+            return json.load(open(os.path.join(OUTPUTS_DIR, n + ".json")))
+        except Exception:
+            return {}
+    try:
+        rows = _sb_get("pf_books", {"select": "*", "status": "eq.active", "order": "id.desc"}, limit=1) or []
+    except Exception as e:
+        print(f"[pf] cannot read pf_books ({e})"); sb_heartbeat("pf_track", False, f"pf_books unreadable: {e}"); return None
+    pfp = rd("phoenix_portfolios"); stocks = rd("stocks")
+    today = datetime.utcnow().date()
+    led = _pf_ledger_marked(today)
+    if not rows:
+        write_json("pf_book", {"asof": _now(), "date": str(today), "active": False, "ledger": led,
+                               "exceptions": led["exceptions"],
+                               "note": "No locked book. Lock a proposal on the Portfolios tab to start tracking it."})
+        print(f"[pf] no active book · ledger: {len(led['stocks'])} stocks, {len(led['options'])} option trades, heat {led['heat_R']}R")
+        sb_heartbeat("pf_track", True, f"no active book · {len(led['options'])} option trades"); return None
+    B = rows[0]; P = B.get("positions") or {}
+    fx = ((pfp.get("conditions") or {}).get("eurusd")) or 1.08
+    core, tac, risky = P.get("core") or [], P.get("tactical") or [], P.get("risky") or {}
+    px = _pf_prices([l["t"] for l in core if l.get("t") and l["t"] != "XEON"] + [x["t"] for x in tac])
+    acct = float(B["account_eur"])
+    exceptions, notes = [], []
+    # the first morning after a lock fixes each core line's quantity at that close (the app knows amounts, not prices)
+    filled = False
+    for l in core:
+        if l.get("t") and l["t"] != "XEON" and not l.get("qty") and l["t"] in px and l.get("eur"):
+            last, sy = px[l["t"]]
+            eu = sy.endswith((".DE", ".MI", ".AS", ".L"))
+            l["qty"] = round(l["eur"] * (1.0 if eu else fx) / last, 4); l["entry"] = round(last, 4); l["entry_date"] = str(today); l["symbol"] = sy
+            filled = True
+    if filled:
+        try:
+            P["core"] = core
+            _sb_write("PATCH", "pf_books", {"positions": P}, params={"id": f"eq.{B['id']}"})
+            notes.append("core quantities fixed at this morning's closes (first run after the lock)")
+        except Exception as e:
+            notes.append(f"could not save core quantities: {e}")
+    # tactical: P&L in R, stops, profit flags
+    T = ALLOC["tactical"]
+    tac_out = []
+    for x in tac:
+        last = (px.get(x["t"]) or (None, None))[0]
+        r_usd = (x["entry"] - x["stop"]) * x["qty"]
+        pnl_usd = (last - x["entry"]) * x["qty"] if last else None
+        R = pnl_usd / r_usd if (pnl_usd is not None and r_usd > 0) else None
+        st = "open"
+        if last is not None and last < x["stop"]:
+            st = "stop hit"; exceptions.append({"kind": "stop", "t": x["t"], "text": f"{x['t']} closed {last:.2f}, below its stop {x['stop']:.2f}: exit now, do not wait for the review"})
+        elif R is not None and R >= T["profit_flag_R"]:
+            exceptions.append({"kind": "profit", "t": x["t"], "text": f"{x['t']} is up {R:.1f}R: take part of it now and raise the stop"})
+        elif R is not None and R >= T["profit_review_R"]:
+            notes.append(f"{x['t']} is up {R:.1f}R \u2014 a profit-taking candidate at the review")
+        tac_out.append(dict(x, last=last, pnl_eur=round(pnl_usd / fx, 2) if pnl_usd is not None else None, R=round(R, 2) if R is not None else None, state=st,
+                            value_eur=round(last * x["qty"] / fx, 2) if last else None))
+    # core: value and drift against target weights (EUR-listed ETFs priced in EUR; US satellite names in USD)
+    core_out, core_val = [], 0.0
+    for l in core:
+        q = l.get("qty"); last = (px.get(l["t"]) or (None, None))[0]
+        if l["t"] == "XEON" and not last:
+            val = l.get("eur")
+        elif q and last:
+            ccy_usd = not (px.get(l["t"]) or (None, ""))[1].endswith((".DE", ".MI", ".AS", ".L"))
+            val = q * last / (fx if ccy_usd else 1.0)
+        else:
+            val = l.get("eur")
+        core_val += val or 0
+        core_out.append(dict(l, last=last, value_eur=round(val, 2) if val is not None else None))
+    tgt_core = sum(l.get("w_book", 0) for l in core) or 1
+    for l in core_out:
+        w_now = (l["value_eur"] or 0) / core_val if core_val else None
+        w_tgt = (l.get("w_book") or 0) / tgt_core
+        l["w_now"], l["w_target"] = (round(w_now, 4) if w_now is not None else None), round(w_tgt, 4)
+        if w_now is not None and abs(w_now - w_tgt) > ALLOC["drift_band"]:
+            notes.append(f"{l['t']} is {w_now*100:.0f}% of the core against {w_tgt*100:.0f}% \u2014 rebalance at the core review")
+    # risky: options budget plus crypto
+    crypto_eur = sum((l.get("value_eur") or 0) for l in core_out if l["t"] in ALLOC["crypto"])
+    risky_eur = (risky.get("options_budget_eur") or 0) + crypto_eur
+    if risky_eur > acct * ALLOC["risky_cap"]:
+        exceptions.append({"kind": "risky", "t": "", "text": f"risky exposure {risky_eur:,.0f} \u20ac (options budget + crypto) is over {ALLOC['risky_cap']*100:.0f}% of the account"})
+    # the market dial moved into stress since the lock: the one market exception
+    dial_then = ((B.get("source") or {}).get("conditions") or {}).get("dial_state")
+    dial_now = (pfp.get("dial") or {}).get("state")
+    if dial_now == "stress" and dial_then and dial_then != "stress":
+        exceptions.append({"kind": "market", "t": "", "text": f"the market dial moved into stress ({(pfp.get('dial') or {}).get('score')}/100) since the book was locked in {dial_then}: cut the tactical and risky parts to the stress split now"})
+    # sector leadership and dealer levels on what you hold
+    gs = rd("group_strength"); mm = rd("mme_map")
+    mmrows = {r["ticker"]: r for g in (mm.get("groups") or {}).values() for r in g}; mmrows.update(mm.get("etf_rows") or {})
+    try:
+        uni = load_universe_from_csv() or {}
+    except Exception:
+        uni = {}
+    for x in tac_out:
+        u = uni.get(x["t"]) or {}; ind = u.get("industry"); gi = ((gs.get("industries") or {}).get(ind or "") or {})
+        x["industry"], x["sector"], x["industry_ok"] = ind, u.get("sector"), gi.get("ok")
+        mr = mmrows.get(x["t"]) or {}
+        if mr:
+            x["dealer"] = {"flip": mr.get("flip"), "call_wall": mr.get("resist"), "put_wall": mr.get("support"), "em": mr.get("em")}
+        if gi and not gi.get("ok"):
+            notes.append(f"{x['t']}: its industry ({ind}) is no longer leading — a replacement candidate at the review")
+    exceptions += led["exceptions"]
+    # reviews
+    ntr = datetime.strptime(str(B["next_tactical_review"])[:10], "%Y-%m-%d").date()
+    ncr = datetime.strptime(str(B["next_core_review"])[:10], "%Y-%m-%d").date()
+    review = None
+    if today >= ntr or today >= ncr:
+        held = {x["t"] for x in tac}
+        cands = [c for c in (pfp.get("tactical") or []) if c["t"] not in held]
+        tr = {c["ticker"]: c for c in (stocks.get("trade_ranked") or [])}
+        keep, drop = [], []
+        for x in tac_out:
+            c = tr.get(x["t"])
+            if x["state"] == "stop hit":
+                drop.append({"t": x["t"], "why": "stopped out"})
+            elif x.get("industry_ok") is False:
+                drop.append({"t": x["t"], "why": f"its industry ({x.get('industry')}) stopped leading"})
+            elif not c or not c.get("passer"):
+                drop.append({"t": x["t"], "why": "no longer passes the trade book's gates" + (f" (missing {c.get('missing_gate')})" if c else "")})
+            else:
+                keep.append({"t": x["t"], "why": f"still a passer (score {c.get('trade_score')})" + (f"; up {x['R']}R \u2014 consider taking half" if (x.get("R") or 0) >= T["profit_review_R"] else "")})
+        review = {"tactical_due": today >= ntr, "core_due": today >= ncr, "keep": keep, "drop": drop,
+                  "replace_with": [{"t": c["t"], "score": c.get("score"), "entry": c.get("entry"), "stop": c.get("stop")} for c in cands[:max(0, len(drop) + (T["max_positions"] - len(tac)))]],
+                  "core_rebalance": [{"t": l["t"], "now": l["w_now"], "target": l["w_target"]} for l in core_out if l["w_now"] is not None and abs(l["w_now"] - l["w_target"]) > 0.005] if today >= ncr else [],
+                  "how": "Lock a new book from today's proposal to act on this review; the core and its review date carry over unless the core review is due."}
+    out = {"asof": _now(), "date": str(today), "active": True, "id": B["id"], "locked_on": B["locked_on"], "account_eur": acct, "split": B["split"],
+           "next_tactical_review": str(ntr), "next_core_review": str(ncr), "days_to_tactical": (ntr - today).days, "days_to_core": (ncr - today).days,
+           "core": core_out, "core_value_eur": round(core_val, 2), "tactical": tac_out,
+           "risky": dict(risky, crypto_eur=round(crypto_eur, 2), total_eur=round(risky_eur, 2)),
+           "exceptions": exceptions, "notes": notes, "review": review, "ledger": led, "dial": pfp.get("dial"),
+           "priced": sorted(px), "unpriced": sorted(({l["t"] for l in core if l["t"] != "XEON"} | {x["t"] for x in tac}) - set(px))}
+    write_json("pf_book", out)
+    print(f"[pf] book #{B['id']} \u00b7 {len(exceptions)} exceptions \u00b7 tactical review in {(ntr - today).days}d \u00b7 core in {(ncr - today).days}d"
+          + (f" \u00b7 unpriced {', '.join(out['unpriced'])}" if out["unpriced"] else ""))
+    sb_heartbeat("pf_track", True, f"book {B['id']} \u00b7 exceptions {len(exceptions)} \u00b7 review in {(ntr - today).days}d")
     return out
 
 
@@ -15737,6 +16228,7 @@ def run_full():
     step("ic_record",      run_ic_record,     optional=True)   # archive chains + vol, forward-test the winners, mark open ones
     step("dossier",        run_dossier,       optional=True)   # one record per name: every engine's view, archived for the review
     step("portfolios",     run_portfolios,    optional=True)   # every book's candidates + Phoenix's split, for the proposed portfolios
+    step("pf_track",       run_pf_track,      optional=True)   # the locked book: exceptions daily, the review drafted when it is due
     # the backtest replays the archive; it runs itself on Fridays (it returns early until ten days are archived)
     from datetime import datetime as _dt, timezone as _tz
     if _dt.now(_tz.utc).weekday() == 4:
@@ -15811,6 +16303,8 @@ def run_engine(name):
         run_dossier()
     elif name == "portfolios":
         run_portfolios()
+    elif name == "pf_track":
+        run_pf_track()
     elif name == "health":
         run_health()
     elif name == "dayscore":
