@@ -1,9 +1,9 @@
 {
- "asof": "2026-10-31 15:42 UTC",
+ "asof": "2026-10-31 20:40 UTC",
  "date": "2026-10-31",
  "summary": {
-  "pass": 26,
-  "warn": 1,
+  "pass": 29,
+  "warn": 2,
   "fail": 0
  },
  "checks": [
@@ -81,14 +81,14 @@
    "id": "chains.coverage",
    "area": "data",
    "status": "pass",
-   "detail": "103 of 103 names have an option chain on file",
+   "detail": "111 of 103 names have an option chain on file",
    "where": "step mme_chains (CBOE)"
   },
   {
    "id": "bars.coverage",
    "area": "data",
    "status": "pass",
-   "detail": "103 of 103 names have Yahoo bars (chart read, patterns, realised vol)",
+   "detail": "111 of 111 names have Yahoo bars (chart read, patterns, realised vol)",
    "where": "step ic_screen (_ic_hist, Yahoo)"
   },
   {
@@ -102,14 +102,14 @@
    "id": "screen.rules",
    "area": "options",
    "status": "pass",
-   "detail": "36 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
+   "detail": "37 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
    "where": "run_ic_screen (outputs/ic_screen.json)"
   },
   {
    "id": "screen.proposed",
    "area": "options",
    "status": "pass",
-   "detail": "20 proposed of 36 winners",
+   "detail": "20 proposed of 37 winners",
    "where": "run_ic_screen"
   },
   {
@@ -123,7 +123,7 @@
    "id": "dossier.sections",
    "area": "dossier",
    "status": "pass",
-   "detail": "missing: earnings 1",
+   "detail": "missing: dealer 1, earnings 1",
    "where": "run_dossier (names in outputs/dossier.json 'missing_names')"
   },
   {
@@ -158,14 +158,14 @@
    "id": "portfolios.inputs",
    "area": "portfolios",
    "status": "pass",
-   "detail": "core 4 (the builder's Long Term template (no saved portfolio found)), satellite 5, swing 12, options 20",
+   "detail": "core 4 (the builder's Long Term template (no saved portfolio found)), satellite 5, tactical 15, options 20",
    "where": "run_portfolios (stocks.json trade/invest books, ic_screen proposed, Supabase portfolios)"
   },
   {
    "id": "portfolios.split",
    "area": "portfolios",
    "status": "pass",
-   "detail": "Phoenix split {'lt': 0.5, 'swing': 0.15, 'options': 0.1, 'cash': 0.25} sums to 1.000",
+   "detail": "Phoenix split {'core': 0.6, 'tactical': 0.2, 'risky': 0.1, 'cash': 0.1} sums to 1.000",
    "where": "ALLOC split_by_verdict"
   },
   {
@@ -176,11 +176,39 @@
    "where": "_fx_usd_rates (Yahoo)"
   },
   {
-   "id": "portfolios.swing_stops",
+   "id": "portfolios.tactical_stops",
    "area": "portfolios",
    "status": "pass",
-   "detail": "every swing stop sits below its entry",
-   "where": "run_portfolios swing"
+   "detail": "every tactical stop sits below its entry",
+   "where": "run_portfolios tactical"
+  },
+  {
+   "id": "book.active",
+   "area": "portfolios",
+   "status": "warn",
+   "detail": "no locked book yet \u2014 lock one on the Portfolios tab",
+   "where": "pf_books table"
+  },
+  {
+   "id": "ledger.heat",
+   "area": "ledger",
+   "status": "pass",
+   "detail": "stock heat 0.0R of 3R over 1 open positions",
+   "where": "_ledger (trades.json)"
+  },
+  {
+   "id": "ledger.options_marked",
+   "area": "ledger",
+   "status": "pass",
+   "detail": "0 open option trades, all marked",
+   "where": "_pf_ledger_marked (option_trades + chains)"
+  },
+  {
+   "id": "dial",
+   "area": "market",
+   "status": "pass",
+   "detail": "market dial 75/100 risk-on; inputs missing: ",
+   "where": "_market_dial (macro, gex, vix_term, spx_daily)"
   },
   {
    "id": "calendar.runway",
@@ -193,7 +221,7 @@
    "id": "heartbeats",
    "area": "pipeline",
    "status": "warn",
-   "detail": "18 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | senate_efd: agreement HTTP 403 | house_ptr: 11 unseen filings \u00b7 0 PDFs parsed \u00b7 11 fetch/parse failures {'pdftotext empty': 11} \u00b7 0 rows | signal_mark: marked 0 \u00b7 skipped 31 (no bars yet) \u00b7 failed 0 \u00b7 31 due \u00b7 3/9 tickers fetched",
+   "detail": "20 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | senate_efd: agreement HTTP 403 | house_ptr: 11 unseen filings \u00b7 0 PDFs parsed \u00b7 11 fetch/parse failures {'pdftotext empty': 11} \u00b7 0 rows | signal_mark: marked 0 \u00b7 skipped 31 (no bars yet) \u00b7 failed 0 \u00b7 31 due \u00b7 3/9 tickers fetched",
    "where": "heartbeats table"
   }
  ]

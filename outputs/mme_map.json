@@ -1,5 +1,5 @@
 {
- "asof": "2026-10-31 15:33 UTC",
+ "asof": "2026-10-31 20:34 UTC",
  "date": "2026-10-31",
  "source": "Phoenix, computed on the 2026-10-31 chain: CBOE delayed, all expiries to 180d, strikes within \u00b115%, business-day T/262, sticky-strike BS gamma, dealers long calls / short puts, 120-pt 0.8-1.2x flip sweep, walls = closest round strike at >=25% of side max (vendor gamma), EM from ATM IV of nearest expiry >=3bd",
  "source_file": null,
@@ -18777,6 +18777,222 @@
    "rolloff_opex_B": 0.008,
    "contracts": 642,
    "read": "TXN closed $302.00, 0.2 expected moves above its 300 wall, where dealers buy into weakness, so it tends to support. Its flip sits $272.83, 3.4 moves below."
+  },
+  "TTE": {
+   "ticker": "TTE",
+   "spot": 95.85,
+   "support": 95.0,
+   "flip": 80.72,
+   "resist": 100.0,
+   "em": 1.47,
+   "em_src": "atm_iv",
+   "dist_flip_em": 10.3,
+   "regime": "green",
+   "status": "NEARING WALL",
+   "level": 95.0,
+   "net_gex_B": 0.0,
+   "asof": "2026-10-31",
+   "stale_days": 0,
+   "pct_to_resist": 4.3,
+   "pct_to_support": -0.9,
+   "src": "phoenix",
+   "support_tiered": [
+    85.0,
+    90.0,
+    95.0
+   ],
+   "resist_tiered": [
+    100.0,
+    105.0,
+    110.0
+   ],
+   "rolloff_friday_B": 0.003,
+   "rolloff_opex_B": 0.003,
+   "contracts": 132,
+   "read": "TTE closed $95.85, 0.6 expected moves above its 95 wall, where dealers buy into weakness, so it tends to support. Its flip sits $80.72, 10.3 moves below."
+  },
+  "BLCO": {
+   "ticker": "BLCO",
+   "spot": 20.0,
+   "support": 19.0,
+   "flip": null,
+   "resist": 21.0,
+   "em": 0.53,
+   "dist_flip_em": 99.0,
+   "regime": "green",
+   "status": "",
+   "level": null,
+   "stale_days": 0,
+   "src": "phoenix",
+   "em_src": "atm_iv",
+   "net_gex_B": 0.0,
+   "support_tiered": [
+    18.0,
+    19.0,
+    17.0
+   ],
+   "resist_tiered": [
+    21.0,
+    22.0,
+    23.0
+   ],
+   "rolloff_friday_B": 0.0,
+   "rolloff_opex_B": 0.0,
+   "contracts": 55,
+   "read": "BLCO closed $20.00. No flip inside \u00b120% \u2014 the chain is one-sided, so the hedging has a single lean across the whole range."
+  },
+  "BKH": {
+   "ticker": "BKH",
+   "spot": 82.01,
+   "support": 80.0,
+   "flip": 59.15,
+   "resist": 85.0,
+   "em": 1.66,
+   "em_src": "atm_iv",
+   "dist_flip_em": 13.8,
+   "regime": "green",
+   "status": "",
+   "level": null,
+   "net_gex_B": 0.0,
+   "asof": "2026-10-31",
+   "stale_days": 0,
+   "pct_to_resist": 3.6,
+   "pct_to_support": -2.5,
+   "src": "phoenix",
+   "support_tiered": [
+    80.0,
+    75.0,
+    70.0
+   ],
+   "resist_tiered": [
+    85.0,
+    90.0
+   ],
+   "rolloff_friday_B": 0.0,
+   "rolloff_opex_B": 0.0,
+   "contracts": 41,
+   "read": "BKH closed $82.01. It sits 13.8 expected moves above its flip at $59.15. In positive gamma, dealers sell into strength and buy into weakness, so a tighter, more orderly range is the base case. Support at the 80 wall, resistance at the 85 wall."
+  },
+  "MDT": {
+   "ticker": "MDT",
+   "spot": 96.6,
+   "support": 95.0,
+   "flip": 84.79,
+   "resist": 100.0,
+   "em": 1.71,
+   "em_src": "atm_iv",
+   "dist_flip_em": 6.9,
+   "regime": "green",
+   "status": "NEARING WALL",
+   "level": 95.0,
+   "net_gex_B": 0.02,
+   "asof": "2026-10-31",
+   "stale_days": 0,
+   "pct_to_resist": 3.5,
+   "pct_to_support": -1.7,
+   "src": "phoenix",
+   "support_tiered": [
+    90.0,
+    95.0,
+    85.0
+   ],
+   "resist_tiered": [
+    100.0,
+    105.0,
+    110.0
+   ],
+   "rolloff_friday_B": -0.001,
+   "rolloff_opex_B": 0.008,
+   "contracts": 340,
+   "read": "MDT closed $96.60, 0.9 expected moves above its 95 wall, where dealers buy into weakness, so it tends to support. Its flip sits $84.79, 6.9 moves below."
+  },
+  "HAE": {
+   "ticker": "HAE",
+   "spot": 119.65,
+   "support": 115.0,
+   "flip": 107.1,
+   "resist": 120.0,
+   "em": 4.11,
+   "em_src": "atm_iv",
+   "dist_flip_em": 3.1,
+   "regime": "green",
+   "status": "AT WALL",
+   "level": 120.0,
+   "net_gex_B": 0.0,
+   "asof": "2026-10-31",
+   "stale_days": 0,
+   "pct_to_resist": 0.3,
+   "pct_to_support": -3.9,
+   "src": "phoenix",
+   "support_tiered": [
+    105.0,
+    115.0,
+    110.0
+   ],
+   "resist_tiered": [
+    130.0,
+    120.0,
+    125.0
+   ],
+   "rolloff_friday_B": 0.0,
+   "rolloff_opex_B": 0.0,
+   "contracts": 97,
+   "read": "HAE closed $119.65, pressing its 120 wall from just below, where gamma concentrates and dealers sell into strength. On a hold above 120, the same dealers buy pullbacks back toward it, so the wall should firm up as support from above. Its flip sits $12.55 lower at $107.10, so this is a wall test, not a flip story."
+  },
+  "TALO": {
+   "ticker": "TALO",
+   "spot": 18.23,
+   "support": 17.5,
+   "flip": null,
+   "resist": 20.0,
+   "em": 0.56,
+   "dist_flip_em": 99.0,
+   "regime": "green",
+   "status": "",
+   "level": null,
+   "stale_days": 0,
+   "src": "phoenix",
+   "em_src": "atm_iv",
+   "net_gex_B": 0.0,
+   "support_tiered": [
+    17.5
+   ],
+   "resist_tiered": [
+    20.0
+   ],
+   "rolloff_friday_B": 0.0,
+   "rolloff_opex_B": 0.0,
+   "contracts": 29,
+   "read": "TALO closed $18.23. No flip inside \u00b120% \u2014 the chain is one-sided, so the hedging has a single lean across the whole range."
+  },
+  "ZYME": {
+   "ticker": "ZYME",
+   "spot": 28.98,
+   "support": 25.0,
+   "flip": 18.02,
+   "resist": 30.0,
+   "em": 1.17,
+   "em_src": "atm_iv",
+   "dist_flip_em": 9.4,
+   "regime": "green",
+   "status": "NEARING WALL",
+   "level": 30.0,
+   "net_gex_B": -0.0,
+   "asof": "2026-10-31",
+   "stale_days": 0,
+   "pct_to_resist": 3.5,
+   "pct_to_support": -13.7,
+   "src": "phoenix",
+   "support_tiered": [
+    25.0
+   ],
+   "resist_tiered": [
+    30.0
+   ],
+   "rolloff_friday_B": 0.0,
+   "rolloff_opex_B": 0.0,
+   "contracts": 30,
+   "read": "ZYME closed $28.98, within a normal session\u2019s move of its 30 wall, about 0.9 expected moves below it (3.5% higher), where gamma concentrates and dealers sell into strength. It is not being pressed yet. Its flip sits $10.96 lower at $18.02, so the wall is the level in play."
   }
  }
 }

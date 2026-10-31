@@ -1,5 +1,5 @@
 {
- "asof": "2026-10-31 15:34 UTC",
+ "asof": "2026-10-31 20:34 UTC",
  "date": "2026-10-31",
  "rules": {
   "accounts_eur": [
@@ -8,61 +8,264 @@
    15000
   ],
   "default_eur": 10000,
-  "split_by_verdict": {
-   "CLEAR": {
-    "lt": 0.5,
-    "swing": 0.25,
-    "options": 0.15,
-    "cash": 0.1
-   },
-   "TRADE CAREFULLY": {
-    "lt": 0.5,
-    "swing": 0.15,
-    "options": 0.1,
-    "cash": 0.25
-   },
-   "STAND DOWN": {
-    "lt": 0.5,
-    "swing": 0.0,
-    "options": 0.05,
-    "cash": 0.45
-   }
+  "review_days": {
+   "tactical": 91,
+   "core": 182
+  },
+  "split_default": {
+   "core": 0.6,
+   "tactical": 0.2,
+   "risky": 0.1,
+   "cash": 0.1
+  },
+  "split_stress": {
+   "core": 0.6,
+   "tactical": 0.1,
+   "risky": 0.05,
+   "cash": 0.25
   },
   "stress_regimes": [
    "CRISIS_PEAK",
-   "ENERGY_SPIKE"
+   "ENERGY_SPIKE",
+   "POLICY_TIGHTENING"
   ],
-  "lt_satellite": 0.2,
-  "swing": {
+  "core_satellite": 0.2,
+  "tactical": {
    "risk_per_trade": 0.01,
    "max_heat": 3,
    "max_position": 0.35,
-   "atr_stop_mult": 2.0,
-   "max_positions": 5
+   "atr_stop_mult": 3.0,
+   "max_positions": 5,
+   "profit_flag_R": 4.0,
+   "profit_review_R": 2.0
   },
+  "risky_cap": 0.15,
+  "crypto": [
+   "BTCE",
+   "IBIT",
+   "BTC",
+   "ETHE"
+  ],
   "options": {
    "max_trades": 6,
    "per_trade_max_loss": 0.05,
    "per_cluster": 2,
    "require_conservative_ev": true
+  },
+  "drift_band": 0.05
+ },
+ "dial": {
+  "score": 75,
+  "state": "risk-on",
+  "parts": [
+   {
+    "k": "macro regime",
+    "value": "ENERGY_GRIND",
+    "pts": 0,
+    "why": "not a stress regime"
+   },
+   {
+    "k": "SPX dealer gamma",
+    "value": "negative",
+    "pts": -20,
+    "why": "negative: dealers amplify moves"
+   },
+   {
+    "k": "VIX",
+    "value": 19.42,
+    "pts": 0,
+    "why": "19.42 \u2014 calm"
+   },
+   {
+    "k": "VIX curve",
+    "value": "contango",
+    "pts": 0,
+    "why": "normal upward curve"
+   },
+   {
+    "k": "SPX vs 200-day",
+    "value": 3.7,
+    "pts": 0,
+    "why": "above its 200-day"
+   },
+   {
+    "k": "SPX vs 50-day",
+    "value": -1.52,
+    "pts": -5,
+    "why": "below its 50-day"
+   }
+  ],
+  "context": {
+   "regime": "ENERGY_GRIND",
+   "regime_held_weeks": 4,
+   "gex_regime": "negative",
+   "gex_net_B": -75.66,
+   "gex_flip": 7718.2,
+   "gex_dist_to_flip_pct": 1.82,
+   "spx_close": 7580.07,
+   "spx_vs_50d_pct": -1.52,
+   "spx_vs_200d_pct": 3.7,
+   "vix": 19.42,
+   "dayscore": 65.9,
+   "dayscore_verdict": "TRADE CAREFULLY"
   }
+ },
+ "ledger": {
+  "stocks": [
+   {
+    "t": "GOOG",
+    "qty": 1.0,
+    "entry": 325.86,
+    "stop": 305.67,
+    "managed": true,
+    "risk_usd": null,
+    "value_usd": 325.86,
+    "sector": "Technology services",
+    "industry": "Internet software/Services",
+    "account": "gabriel",
+    "id": "tr_1785772777546_711",
+    "industry_ok": false
+   }
+  ],
+  "heat_R": 0.0,
+  "heat_cap_R": 3,
+  "account_size_usd": 2000.0,
+  "cooloff": {
+   "active": false,
+   "trailing_losses": 1
+  },
+  "options": [],
+  "options_max_loss_usd": 0
+ },
+ "sector_rules": {
+  "max_names_per_sector": 2,
+  "max_sector_pct": 0.15,
+  "lead_bonus": 5,
+  "sector_bonus": 3,
+  "lag_penalty": 5
+ },
+ "dealer_rules": {
+  "below_flip_size": 0.5,
+  "wall_em": 1.0,
+  "wall_penalty": 10,
+  "putwall_stop_buffer": 0.01
+ },
+ "clusters": {
+  "JPM": "financials",
+  "BAC": "financials",
+  "WFC": "financials",
+  "C": "financials",
+  "GS": "financials",
+  "MS": "financials",
+  "AXP": "financials",
+  "V": "financials",
+  "MA": "financials",
+  "PYPL": "financials",
+  "COIN": "financials",
+  "XLF": "financials",
+  "KRE": "financials",
+  "SOFI": "financials",
+  "SPY": "us index",
+  "QQQ": "us index",
+  "IWM": "us index",
+  "DIA": "us index",
+  "SMH": "semis & tech",
+  "SOXX": "semis & tech",
+  "XLK": "semis & tech",
+  "NVDA": "semis & tech",
+  "AMD": "semis & tech",
+  "MU": "semis & tech",
+  "MRVL": "semis & tech",
+  "TER": "semis & tech",
+  "TXN": "semis & tech",
+  "AVGO": "semis & tech",
+  "TSM": "semis & tech",
+  "CSCO": "semis & tech",
+  "AAPL": "semis & tech",
+  "MSFT": "semis & tech",
+  "GOOGL": "semis & tech",
+  "GOOG": "semis & tech",
+  "META": "semis & tech",
+  "AMZN": "semis & tech",
+  "CRM": "semis & tech",
+  "ADBE": "semis & tech",
+  "NOW": "semis & tech",
+  "PLTR": "semis & tech",
+  "SNOW": "semis & tech",
+  "IBM": "semis & tech",
+  "DELL": "semis & tech",
+  "ARKK": "semis & tech",
+  "XLE": "energy",
+  "USO": "energy",
+  "XOM": "energy",
+  "CVX": "energy",
+  "OXY": "energy",
+  "VLO": "energy",
+  "MPC": "energy",
+  "TLT": "rates & credit",
+  "IEF": "rates & credit",
+  "LQD": "rates & credit",
+  "HYG": "rates & credit",
+  "GLD": "metals",
+  "SLV": "metals",
+  "GDX": "metals",
+  "XLV": "health",
+  "XBI": "health",
+  "UNH": "health",
+  "LLY": "health",
+  "JNJ": "health",
+  "PFE": "health",
+  "MRK": "health",
+  "ABBV": "health",
+  "XLY": "consumer",
+  "XLP": "consumer",
+  "WMT": "consumer",
+  "COST": "consumer",
+  "TGT": "consumer",
+  "HD": "consumer",
+  "LOW": "consumer",
+  "MCD": "consumer",
+  "SBUX": "consumer",
+  "NKE": "consumer",
+  "DIS": "consumer",
+  "NFLX": "consumer",
+  "KO": "consumer",
+  "PEP": "consumer",
+  "TSLA": "consumer",
+  "UBER": "consumer",
+  "ABNB": "consumer",
+  "SHOP": "consumer",
+  "XLI": "industrials",
+  "BA": "industrials",
+  "CAT": "industrials",
+  "DE": "industrials",
+  "GE": "industrials",
+  "XLB": "industrials",
+  "EEM": "international",
+  "EFA": "international",
+  "FXI": "international"
  },
  "conditions": {
   "dayscore": 65.9,
   "verdict": "TRADE CAREFULLY",
   "regime": "ENERGY_GRIND",
+  "regime_held_weeks": 4,
+  "stress": false,
+  "dial_state": "risk-on",
+  "dial_score": 75,
   "eurusd": 1.1183,
   "fx_src": "yahoo"
  },
  "split_auto": {
-  "lt": 0.5,
-  "swing": 0.15,
-  "options": 0.1,
-  "cash": 0.25
+  "core": 0.6,
+  "tactical": 0.2,
+  "risky": 0.1,
+  "cash": 0.1
  },
  "split_reasons": [
-  "Day score 65.9 (TRADE CAREFULLY) sets the trading sleeves: swing 15%, options max-loss budget 10%.",
-  "Long-term stays at half the account: it is invested for years and does not trade the day's conditions."
+  "Market dial 75/100 \u2014 risk-on: SPX dealer gamma negative: dealers amplify moves (-20); SPX vs 50-day below its 50-day (-5).",
+  "Full split: core 60%, tactical 20%, risky 10%, cash 10%.",
+  "The split is set when the book is locked or reviewed; between reviews a move into stress is an exception that asks you to cut the trading parts."
  ],
  "lt": {
   "core": [
@@ -91,6 +294,7 @@
     "name": "Okeanis Eco Tankers Corp.",
     "score": 85,
     "industry": "Marine shipping",
+    "sector": "Transportation",
     "price": 101.33
    },
    {
@@ -98,6 +302,7 @@
     "name": "Valero Energy Corporation",
     "score": 83,
     "industry": "Oil refining/Marketing",
+    "sector": "Energy minerals",
     "price": 399.66
    },
    {
@@ -105,6 +310,7 @@
     "name": "Micron Technology, Inc.",
     "score": 81,
     "industry": "Semiconductors",
+    "sector": "Electronic technology",
     "price": 884.74
    },
    {
@@ -112,6 +318,7 @@
     "name": "Frontline Plc",
     "score": 77,
     "industry": "Marine shipping",
+    "sector": "Transportation",
     "price": 56.9
    },
    {
@@ -119,11 +326,12 @@
     "name": "Marathon Petroleum Corporation",
     "score": 74,
     "industry": "Oil refining/Marketing",
+    "sector": "Energy minerals",
     "price": 444.73
    }
   ]
  },
- "swing": [
+ "tactical": [
   {
    "t": "TTE",
    "name": "TotalEnergies SE",
@@ -131,11 +339,31 @@
    "score": 69,
    "breakout": true,
    "entry": 95.33,
-   "stop": 91.86,
+   "stop": 94.05,
+   "stop_atr": 90.12,
    "atr_pct": 1.82,
    "resistance": 92.78,
-   "chart": null,
-   "patterns": []
+   "chart": "bullish",
+   "patterns": [
+    "rising window"
+   ],
+   "sector": "Energy minerals",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 6/121, +13.1% vs SPX over a month)",
+    "stop raised to 94.05, just under the put wall 95.0 (was 90.12)"
+   ],
+   "rank_score": 74.0,
+   "size_mult": 1.0,
+   "dealer": {
+    "flip": 80.72,
+    "call_wall": 100.0,
+    "put_wall": 95.0,
+    "em": 1.47,
+    "regime": "green"
+   }
   },
   {
    "t": "BLCO",
@@ -144,11 +372,32 @@
    "score": 67,
    "breakout": false,
    "entry": 20.0,
-   "stop": 18.49,
+   "stop": 18.81,
+   "stop_atr": 17.73,
    "atr_pct": 3.78,
    "resistance": 18.04,
-   "chart": null,
-   "patterns": []
+   "chart": "bullish",
+   "patterns": [
+    "rising window",
+    "bearish belt hold"
+   ],
+   "sector": "Health technology",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 17/121, +8.0% vs SPX over a month)",
+    "stop raised to 18.81, just under the put wall 19.0 (was 17.73)"
+   ],
+   "rank_score": 72.0,
+   "size_mult": 1.0,
+   "dealer": {
+    "flip": null,
+    "call_wall": 21.0,
+    "put_wall": 19.0,
+    "em": 0.53,
+    "regime": "green"
+   }
   },
   {
    "t": "BKH",
@@ -157,11 +406,29 @@
    "score": 66,
    "breakout": false,
    "entry": 82.01,
-   "stop": 78.93,
+   "stop": 79.2,
+   "stop_atr": 77.38,
    "atr_pct": 1.88,
    "resistance": 79.41,
-   "chart": null,
-   "patterns": []
+   "chart": "bullish",
+   "patterns": [],
+   "sector": "Utilities",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 45/121, +10.9% vs SPX over a month)",
+    "stop raised to 79.2, just under the put wall 80.0 (was 77.38)"
+   ],
+   "rank_score": 71.0,
+   "size_mult": 1.0,
+   "dealer": {
+    "flip": 59.15,
+    "call_wall": 85.0,
+    "put_wall": 80.0,
+    "em": 1.66,
+    "regime": "green"
+   }
   },
   {
    "t": "MDT",
@@ -170,24 +437,29 @@
    "score": 66,
    "breakout": false,
    "entry": 96.54,
-   "stop": 92.06,
+   "stop": 94.05,
+   "stop_atr": 89.82,
    "atr_pct": 2.32,
    "resistance": 95.41,
-   "chart": null,
-   "patterns": []
-  },
-  {
-   "t": "HAE",
-   "name": "Haemonetics Corporation",
-   "industry": "Medical specialties",
-   "score": 65,
-   "breakout": false,
-   "entry": 119.65,
-   "stop": 113.64,
-   "atr_pct": 2.51,
-   "resistance": 118.69,
-   "chart": null,
-   "patterns": []
+   "chart": "bullish",
+   "patterns": [],
+   "sector": "Health technology",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 17/121, +8.0% vs SPX over a month)",
+    "stop raised to 94.05, just under the put wall 95.0 (was 89.82)"
+   ],
+   "rank_score": 71.0,
+   "size_mult": 1.0,
+   "dealer": {
+    "flip": 84.79,
+    "call_wall": 100.0,
+    "put_wall": 95.0,
+    "em": 1.71,
+    "regime": "green"
+   }
   },
   {
    "t": "TALO",
@@ -196,24 +468,29 @@
    "score": 65,
    "breakout": true,
    "entry": 18.23,
-   "stop": 16.9,
+   "stop": 17.32,
+   "stop_atr": 16.24,
    "atr_pct": 3.64,
    "resistance": 18.39,
-   "chart": null,
-   "patterns": []
-  },
-  {
-   "t": "ZYME",
-   "name": "Zymeworks Inc.",
-   "industry": "Pharmaceuticals: major",
-   "score": 65,
-   "breakout": false,
-   "entry": 28.61,
-   "stop": 26.5,
-   "atr_pct": 3.68,
-   "resistance": 29.19,
-   "chart": null,
-   "patterns": []
+   "chart": "bullish",
+   "patterns": [],
+   "sector": "Energy minerals",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 4/121, +18.9% vs SPX over a month)",
+    "stop raised to 17.32, just under the put wall 17.5 (was 16.24)"
+   ],
+   "rank_score": 70.0,
+   "size_mult": 1.0,
+   "dealer": {
+    "flip": null,
+    "call_wall": 20.0,
+    "put_wall": 17.5,
+    "em": 0.56,
+    "regime": "green"
+   }
   },
   {
    "t": "BTE",
@@ -222,11 +499,23 @@
    "score": 63,
    "breakout": false,
    "entry": 5.38,
-   "stop": 5.0,
+   "stop": 4.81,
+   "stop_atr": 4.81,
    "atr_pct": 3.56,
    "resistance": 5.5,
-   "chart": null,
-   "patterns": []
+   "chart": "bullish",
+   "patterns": [],
+   "sector": "Energy minerals",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 6/121, +13.1% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 68.0,
+   "size_mult": 1.0,
+   "dealer": null
   },
   {
    "t": "RPRX",
@@ -235,11 +524,23 @@
    "score": 63,
    "breakout": false,
    "entry": 67.18,
-   "stop": 64.09,
+   "stop": 62.54,
+   "stop_atr": 62.54,
    "atr_pct": 2.3,
    "resistance": 63.96,
    "chart": null,
-   "patterns": []
+   "patterns": [],
+   "sector": "Health technology",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 15/121, +12.5% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 68.0,
+   "size_mult": 1.0,
+   "dealer": null
   },
   {
    "t": "KDP",
@@ -248,11 +549,23 @@
    "score": 62,
    "breakout": false,
    "entry": 35.84,
-   "stop": 34.38,
+   "stop": 33.65,
+   "stop_atr": 33.65,
    "atr_pct": 2.04,
    "resistance": 34.68,
    "chart": null,
-   "patterns": []
+   "patterns": [],
+   "sector": "Consumer non-durables",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 24/121, +11.7% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 67.0,
+   "size_mult": 1.0,
+   "dealer": null
   },
   {
    "t": "PG",
@@ -261,11 +574,23 @@
    "score": 62,
    "breakout": false,
    "entry": 161.57,
-   "stop": 154.91,
+   "stop": 151.58,
+   "stop_atr": 151.58,
    "atr_pct": 2.06,
    "resistance": 161.02,
    "chart": null,
-   "patterns": []
+   "patterns": [],
+   "sector": "Consumer non-durables",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 12/121, +13.3% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 67.0,
+   "size_mult": 1.0,
+   "dealer": null
   },
   {
    "t": "BIIB",
@@ -274,11 +599,161 @@
    "score": 61,
    "breakout": false,
    "entry": 253.62,
-   "stop": 237.79,
+   "stop": 229.88,
+   "stop_atr": 229.88,
    "atr_pct": 3.12,
    "resistance": 250.69,
    "chart": null,
-   "patterns": []
+   "patterns": [],
+   "sector": "Health technology",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 15/121, +12.5% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 66.0,
+   "size_mult": 1.0,
+   "dealer": null
+  },
+  {
+   "t": "CON",
+   "name": "Concentra Group Holdings Parent, Inc.",
+   "industry": "Medical/Nursing services",
+   "score": 61,
+   "breakout": false,
+   "entry": 40.38,
+   "stop": 37.47,
+   "stop_atr": 37.47,
+   "atr_pct": 2.4,
+   "resistance": 39.25,
+   "chart": null,
+   "patterns": [],
+   "sector": "Health services",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 39/121, +8.5% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 66.0,
+   "size_mult": 1.0,
+   "dealer": null
+  },
+  {
+   "t": "ECO",
+   "name": "Okeanis Eco Tankers Corp.",
+   "industry": "Marine shipping",
+   "score": 61,
+   "breakout": false,
+   "entry": 101.33,
+   "stop": 86.31,
+   "stop_atr": 86.31,
+   "atr_pct": 4.94,
+   "resistance": 94.73,
+   "chart": null,
+   "patterns": [],
+   "sector": "Transportation",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 2/121, +1.6% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 66.0,
+   "size_mult": 1.0,
+   "dealer": null
+  },
+  {
+   "t": "KMI",
+   "name": "Kinder Morgan, Inc.",
+   "industry": "Oil & gas pipelines",
+   "score": 61,
+   "breakout": false,
+   "entry": 33.87,
+   "stop": 31.21,
+   "stop_atr": 31.21,
+   "atr_pct": 2.62,
+   "resistance": 34.43,
+   "chart": null,
+   "patterns": [],
+   "sector": "Industrial services",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 40/121, +9.2% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 66.0,
+   "size_mult": 1.0,
+   "dealer": null
+  },
+  {
+   "t": "HAE",
+   "name": "Haemonetics Corporation",
+   "industry": "Medical specialties",
+   "score": 65,
+   "breakout": false,
+   "entry": 119.65,
+   "stop": 113.85,
+   "stop_atr": 110.64,
+   "atr_pct": 2.51,
+   "resistance": 118.69,
+   "chart": "bullish",
+   "patterns": [],
+   "sector": "Health technology",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 17/121, +8.0% vs SPX over a month)",
+    "call wall 120.0 within one expected move above: capped upside",
+    "stop raised to 113.85, just under the put wall 115.0 (was 110.64)"
+   ],
+   "rank_score": 60.0,
+   "size_mult": 1.0,
+   "dealer": {
+    "flip": 107.1,
+    "call_wall": 120.0,
+    "put_wall": 115.0,
+    "em": 4.11,
+    "regime": "green"
+   }
+  },
+  {
+   "t": "ZYME",
+   "name": "Zymeworks Inc.",
+   "industry": "Pharmaceuticals: major",
+   "score": 65,
+   "breakout": false,
+   "entry": 28.61,
+   "stop": 25.45,
+   "stop_atr": 25.45,
+   "atr_pct": 3.68,
+   "resistance": 29.19,
+   "chart": "neutral",
+   "patterns": [],
+   "sector": "Health technology",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 15/121, +12.5% vs SPX over a month)",
+    "call wall 30.0 within one expected move above: capped upside"
+   ],
+   "rank_score": 60.0,
+   "size_mult": 1.0,
+   "dealer": {
+    "flip": 18.02,
+    "call_wall": 30.0,
+    "put_wall": 25.0,
+    "em": 1.17,
+    "regime": "green"
+   }
   }
  ],
  "options": [
@@ -1537,7 +2012,7 @@
  "counts": {
   "core": 4,
   "satellite": 5,
-  "swing": 12,
+  "tactical": 15,
   "options": 20
  }
 }
