@@ -1,0 +1,611 @@
+{
+ "schema": "phoenix-fact-pack/1",
+ "date": "2026-10-31",
+ "asof": "2026-10-31 15:42 UTC",
+ "market": {
+  "regime": "ENERGY_GRIND",
+  "regime_held_weeks": 4,
+  "spx": {
+   "last": 7580.07,
+   "chg_1d_pct": -1.82,
+   "vs_50d_pct": -1.52,
+   "vs_200d_pct": 3.7
+  },
+  "vix": 19.42,
+  "dxy": null,
+  "us10y": null,
+  "gold": null,
+  "wti": null,
+  "gex": {
+   "net_B": -75.66,
+   "regime": "negative",
+   "flip": null,
+   "dist_to_flip_pct": 1.52,
+   "call_wall": null,
+   "put_wall": null,
+   "spot": 7580.07
+  }
+ },
+ "macro": {
+  "spx": {
+   "last": 7580.07,
+   "d1_pct": -1.82,
+   "w1_pct": -0.57,
+   "m1_pct": -1.13
+  },
+  "ndx": {
+   "last": 25437.0,
+   "d1_pct": -2.86,
+   "w1_pct": -2.0,
+   "m1_pct": -5.34
+  },
+  "dow": {
+   "last": 51770.31,
+   "d1_pct": -1.09,
+   "w1_pct": -0.85,
+   "m1_pct": 1.66
+  },
+  "rut": {
+   "last": 2811.84,
+   "d1_pct": -1.66,
+   "w1_pct": 1.29,
+   "m1_pct": 0.19
+  },
+  "gold": {
+   "last": 3898.9,
+   "d1_pct": -3.29,
+   "w1_pct": -2.72,
+   "m1_pct": -7.22
+  },
+  "wti": {
+   "last": 104.12,
+   "d1_pct": 2.08,
+   "w1_pct": 0.82,
+   "m1_pct": 12.11
+  },
+  "btc": {
+   "last": 77198.0,
+   "d1_pct": -0.74,
+   "w1_pct": -4.78,
+   "m1_pct": -9.02
+  },
+  "dxy": {
+   "last": 101.88,
+   "d1_pct": -0.16,
+   "w1_pct": 0.07,
+   "m1_pct": -0.22
+  },
+  "vix": {
+   "last": 19.42,
+   "d1_pct": 12.91,
+   "w1_pct": -0.15,
+   "m1_pct": 18.49
+  },
+  "usdjpy": {
+   "last": 157.8,
+   "d1_pct": -0.02,
+   "w1_pct": 0.84,
+   "m1_pct": 0.16
+  },
+  "tnx": {
+   "last": 4.93,
+   "d1_bp": -6,
+   "w1_bp": -6,
+   "m1_bp": -31
+  },
+  "us02": {
+   "last": 4.61,
+   "d1_bp": 0,
+   "w1_bp": -8,
+   "m1_bp": -17
+  },
+  "real10": {
+   "last": 2.63,
+   "d1_bp": 0,
+   "w1_bp": -3,
+   "m1_bp": -25
+  },
+  "hy": {
+   "last": 3.26,
+   "d1_bp": 0,
+   "w1_bp": 0,
+   "m1_bp": 0
+  },
+  "cpi_yoy": {
+   "last": 3.72,
+   "prev_print": 3.35
+  },
+  "curve_2s10s_bp": 32,
+  "curve_2s10s_chg_1m_bp": -14,
+  "absent": [],
+  "rows": 251
+ },
+ "regime_gates": {
+  "regime": "ENERGY_GRIND",
+  "held_weeks": 4,
+  "since": "2026-10-05",
+  "drivers": [
+   {
+    "key": "cpi_chg_3m",
+    "label": "CPI 3m change",
+    "value": 0.42,
+    "op": ">",
+    "threshold": 0.3,
+    "clear_by": 0.12,
+    "ok": true
+   },
+   {
+    "key": "wti_vs_2yr",
+    "label": "WTI vs 2yr",
+    "value": 41.07,
+    "op": ">",
+    "threshold": 0,
+    "clear_by": 41.07,
+    "ok": true
+   },
+   {
+    "key": "wti_12m",
+    "label": "WTI 12m",
+    "value": 70.74,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 45.74,
+    "ok": true
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI 3m change falls below 0.3",
+    "now": 0.42,
+    "threshold": 0.3,
+    "distance": 0.12,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI vs 2yr falls below 0",
+    "now": 41.07,
+    "threshold": 0,
+    "distance": 41.07,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI 12m falls below 25",
+    "now": 70.74,
+    "threshold": 25,
+    "distance": 45.74,
+    "then": "ENERGY_GRIND no longer qualifies"
+   }
+  ],
+  "runner_up": {
+   "regime": "POLICY_TIGHTENING",
+   "score": 41.1,
+   "behind_by": 31.8
+  }
+ },
+ "screener": {
+  "n_candidates": 410,
+  "top": [
+   {
+    "ticker": "TTE",
+    "industry": "Integrated oil",
+    "trade_score": 69,
+    "atr14_pct": 1.82,
+    "mcap_B": 179.62,
+    "breakout": true,
+    "days_on_list": 67,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 85,
+    "dollar_vol_M": 209.2,
+    "stop_pct_2_5atr": 4.55
+   },
+   {
+    "ticker": "BLCO",
+    "industry": "Medical specialties",
+    "trade_score": 67,
+    "atr14_pct": 3.78,
+    "mcap_B": 5.32,
+    "breakout": false,
+    "days_on_list": 3,
+    "profitability": "marginal",
+    "pos_vs_high": -0.3,
+    "surge": 58,
+    "dollar_vol_M": 17.8,
+    "stop_pct_2_5atr": 9.45
+   },
+   {
+    "ticker": "BKH",
+    "industry": "Gas distributors",
+    "trade_score": 66,
+    "atr14_pct": 1.88,
+    "mcap_B": 5.55,
+    "breakout": false,
+    "days_on_list": 78,
+    "profitability": "investing",
+    "pos_vs_high": 0.0,
+    "surge": 69,
+    "dollar_vol_M": 110.3,
+    "stop_pct_2_5atr": 4.7
+   },
+   {
+    "ticker": "MDT",
+    "industry": "Medical specialties",
+    "trade_score": 66,
+    "atr14_pct": 2.32,
+    "mcap_B": 101.47,
+    "breakout": false,
+    "days_on_list": 16,
+    "profitability": "profitable",
+    "pos_vs_high": -5.3,
+    "surge": 262,
+    "dollar_vol_M": 2696.3,
+    "stop_pct_2_5atr": 5.8
+   },
+   {
+    "ticker": "HAE",
+    "industry": "Medical specialties",
+    "trade_score": 65,
+    "atr14_pct": 2.51,
+    "mcap_B": 3.3,
+    "breakout": false,
+    "days_on_list": 83,
+    "profitability": "marginal",
+    "pos_vs_high": 0.0,
+    "surge": 16,
+    "dollar_vol_M": 89.5,
+    "stop_pct_2_5atr": 6.27
+   },
+   {
+    "ticker": "TALO",
+    "industry": "Oil & gas production",
+    "trade_score": 65,
+    "atr14_pct": 3.64,
+    "mcap_B": 2.35,
+    "breakout": true,
+    "days_on_list": 66,
+    "profitability": "marginal",
+    "pos_vs_high": -0.9,
+    "surge": 106,
+    "dollar_vol_M": 69.8,
+    "stop_pct_2_5atr": 9.1
+   },
+   {
+    "ticker": "ZYME",
+    "industry": "Pharmaceuticals: major",
+    "trade_score": 65,
+    "atr14_pct": 3.68,
+    "mcap_B": 1.71,
+    "breakout": false,
+    "days_on_list": 73,
+    "profitability": "unknown",
+    "pos_vs_high": -2.0,
+    "surge": 102,
+    "dollar_vol_M": 37.4,
+    "stop_pct_2_5atr": 9.2
+   },
+   {
+    "ticker": "BTE",
+    "industry": "Integrated oil",
+    "trade_score": 63,
+    "atr14_pct": 3.56,
+    "mcap_B": 2.98,
+    "breakout": false,
+    "days_on_list": 61,
+    "profitability": "marginal",
+    "pos_vs_high": -2.2,
+    "surge": 31,
+    "dollar_vol_M": 104.8,
+    "stop_pct_2_5atr": 8.9
+   }
+  ],
+  "leaning": [],
+  "counts": {}
+ },
+ "smart_money": {
+  "quarter": "2026-06-30",
+  "accumulating": [],
+  "distributing": [],
+  "notable": [
+   {
+    "ticker": "GOOGL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 37764088383,
+    "sector": null
+   },
+   {
+    "ticker": "GE",
+    "manager": "TCI Fund (Hohn)",
+    "action": "TRIM",
+    "value_usd": 17725353519,
+    "sector": null
+   },
+   {
+    "ticker": "V",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 10462232091,
+    "sector": null
+   },
+   {
+    "ticker": "DVA",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "TRIM",
+    "value_usd": 6425268898,
+    "sector": null
+   },
+   {
+    "ticker": "SPGI",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 5735017808,
+    "sector": null
+   },
+   {
+    "ticker": "DAL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 5368591200,
+    "sector": null
+   },
+   {
+    "ticker": "IEP",
+    "manager": "Icahn Capital",
+    "action": "ADD",
+    "value_usd": 4458616003,
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 4389741007,
+    "sector": null
+   }
+  ],
+  "congress_recent": [
+   {
+    "ticker": "V",
+    "member": "David J. Taylor",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-29",
+    "sector": null
+   },
+   {
+    "ticker": "LRCX",
+    "member": "David J. Taylor",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-29",
+    "sector": null
+   },
+   {
+    "ticker": "MPC",
+    "member": "David J. Taylor",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-29",
+    "sector": null
+   },
+   {
+    "ticker": "PLD",
+    "member": "David J. Taylor",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-29",
+    "sector": null
+   },
+   {
+    "ticker": "T",
+    "member": "David J. Taylor",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-29",
+    "sector": null
+   },
+   {
+    "ticker": "RPM",
+    "member": "David J. Taylor",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-29",
+    "sector": null
+   },
+   {
+    "ticker": "TXN",
+    "member": "Kevin Hern",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-10-28",
+    "sector": null
+   },
+   {
+    "ticker": "STX",
+    "member": "Kevin Hern",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-10-28",
+    "sector": null
+   },
+   {
+    "ticker": "ASML",
+    "member": "Kevin Hern",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-10-28",
+    "sector": null
+   },
+   {
+    "ticker": "PG",
+    "member": "Pete Sessions",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-27",
+    "sector": null
+   }
+  ],
+  "note": null,
+  "congress_status": {
+   "written": "2026-10-31",
+   "dropped_impossible_dates": 0,
+   "sources": {
+    "House Clerk PTR": {
+     "rows": 9804,
+     "last_30d": 53,
+     "newest_tx": "2026-10-27",
+     "newest_filed": "2026-10-29"
+    },
+    "OGE 278-T via Open Cabinet": {
+     "rows": 7828,
+     "last_30d": 0,
+     "newest_tx": "2026-08-31",
+     "newest_filed": "2026-08-12"
+    },
+    "Senate eFD": {
+     "rows": 1016,
+     "last_30d": 0,
+     "newest_tx": "2026-09-25",
+     "newest_filed": "2026-10-22"
+    }
+   },
+   "quiet": [
+    "OGE 278-T via Open Cabinet",
+    "Senate eFD"
+   ]
+  }
+ },
+ "portfolio": {
+  "open": [
+   {
+    "ticker": "GOOG",
+    "entry": 325.86,
+    "stop": 305.67,
+    "last": null,
+    "R": null,
+    "managed": true,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   }
+  ],
+  "heat_R": 1.01,
+  "cap_R": 3.0,
+  "unsized": 0,
+  "note": null,
+  "over_cap": false
+ },
+ "news": {
+  "date": "2026-10-30",
+  "asof": "2026-10-31 14:56 UTC",
+  "headline": "October ends with the Nasdaq down 2.9% and Intel down 29% \u2014 and this book was flat through it",
+  "standfirst": "The Nasdaq fell 2.86% and the S&P 1.82% as Intel lost 28.58% on its guide and the semiconductor index fell 7.20%; the Nasdaq finished October about 5.3% lower. Gold fell 3.62% as Fed officials pushed for more hikes, while WTI rose 2.08% to $104.12 after a limpet-mine attack on a tanker. The VIX rose 12.91% to 19.42. The book is flat after GOOG's exit at Thursday's open; Q4 is -7.54 realised, heat 0R.",
+  "themes": [
+   {
+    "kicker": "What's next",
+    "right": "Monday: Palantir \u00b7 Tuesday: the midterms",
+    "title": "Two big events in the first two sessions of November",
+    "items": [
+     {
+      "tone": "c-cb",
+      "tag": "EARNINGS",
+      "html": "<b>Palantir Q3</b> \u2014 revenue guided to $2.160-2.164bn, after a 7.2% fall in chip stocks",
+      "when": "Mon \u00b7 2026-11-02",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-fomc",
+      "tag": "VOTE",
+      "html": "<b>US midterms</b> \u2014 Trump has said no strike on Iran before the vote",
+      "when": "Tue \u00b7 2026-11-03",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-fomc",
+      "tag": "FOMC",
+      "html": "<b>December Fed meeting</b> \u2014 a hike priced at about 76%",
+      "when": "Tue\u2013Wed \u00b7 2026-12-08",
+      "kind": "calendar"
+     }
+    ],
+    "note": "<b>Monday brings Palantir's Q3</b>, the first AI software result after a week in which the market marked down Alphabet, Intel and the chip sector. <b>Tuesday is the midterm vote</b>, the date that reported US strike plans on Iran have been tied to. The Fed meets on <b>8-9 December</b>."
+   }
+  ],
+  "ondeck": "<b>Monday brings Palantir's Q3</b>, the first AI software result after a week in which the market marked down Alphabet, Intel and the chip sector. <b>Tuesday is the midterm vote</b>, the date that reported US strike plans on Iran have been tied to. The Fed meets on <b>8-9 December</b>.",
+  "note": null
+ },
+ "provenance": {
+  "macro": {
+   "asof": "2026-10-31 14:56 UTC",
+   "age_min": null
+  },
+  "gex": {
+   "asof": "2026-10-31 14:56 UTC",
+   "age_min": null
+  },
+  "stocks": {
+   "asof": "2026-10-31 15:06 UTC",
+   "age_min": null
+  },
+  "institutional_holdings": {
+   "asof": "2026-10-31 15:19 UTC",
+   "quarter": "2026-06-30"
+  },
+  "congress_trades": {
+   "asof": "2026-10-31 15:18 UTC",
+   "status": {
+    "written": "2026-10-31",
+    "dropped_impossible_dates": 0,
+    "sources": {
+     "House Clerk PTR": {
+      "rows": 9804,
+      "last_30d": 53,
+      "newest_tx": "2026-10-27",
+      "newest_filed": "2026-10-29"
+     },
+     "OGE 278-T via Open Cabinet": {
+      "rows": 7828,
+      "last_30d": 0,
+      "newest_tx": "2026-08-31",
+      "newest_filed": "2026-08-12"
+     },
+     "Senate eFD": {
+      "rows": 1016,
+      "last_30d": 0,
+      "newest_tx": "2026-09-25",
+      "newest_filed": "2026-10-22"
+     }
+    },
+    "quiet": [
+     "OGE 278-T via Open Cabinet",
+     "Senate eFD"
+    ]
+   }
+  },
+  "wire": {
+   "asof": "2026-10-31 14:56 UTC"
+  }
+ },
+ "missing": [],
+ "changed": {
+  "first_pack": false,
+  "prev_date": "2026-10-30",
+  "changes": [
+   {
+    "kind": "market",
+    "what": "vix",
+    "was": 22.65,
+    "now": 19.42,
+    "why": "volatility repriced"
+   },
+   {
+    "kind": "screener",
+    "what": "new in the top setups",
+    "was": null,
+    "now": "TALO",
+    "why": "names the engine ranked highest that were not there yesterday"
+   }
+  ]
+ }
+}

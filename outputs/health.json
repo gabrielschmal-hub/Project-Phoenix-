@@ -1,0 +1,200 @@
+{
+ "asof": "2026-10-31 15:42 UTC",
+ "date": "2026-10-31",
+ "summary": {
+  "pass": 26,
+  "warn": 1,
+  "fail": 0
+ },
+ "checks": [
+  {
+   "id": "file.ic_screen",
+   "area": "files",
+   "status": "pass",
+   "detail": "outputs/ic_screen.json as of 2026-10-31",
+   "where": "step ic_screen"
+  },
+  {
+   "id": "file.ic_universe",
+   "area": "files",
+   "status": "pass",
+   "detail": "outputs/ic_universe.json as of 2026-10-31",
+   "where": "step mme_chains"
+  },
+  {
+   "id": "file.ic_hist",
+   "area": "files",
+   "status": "pass",
+   "detail": "outputs/ic_hist.json as of 2026-10-31",
+   "where": "step ic_screen (_ic_hist)"
+  },
+  {
+   "id": "file.dossier",
+   "area": "files",
+   "status": "pass",
+   "detail": "outputs/dossier.json as of 2026-10-31",
+   "where": "step dossier"
+  },
+  {
+   "id": "file.calendar",
+   "area": "files",
+   "status": "pass",
+   "detail": "outputs/calendar.json as of 2026-10-31",
+   "where": "step calendar"
+  },
+  {
+   "id": "file.mme_map",
+   "area": "files",
+   "status": "pass",
+   "detail": "outputs/mme_map.json as of 2026-10-31",
+   "where": "step mme_map"
+  },
+  {
+   "id": "file.iv_em",
+   "area": "files",
+   "status": "pass",
+   "detail": "outputs/iv_em.json as of 2026-10-31",
+   "where": "step iv_em"
+  },
+  {
+   "id": "file.macro",
+   "area": "files",
+   "status": "pass",
+   "detail": "outputs/macro.json as of 2026-10-31",
+   "where": "step macro"
+  },
+  {
+   "id": "file.gex",
+   "area": "files",
+   "status": "pass",
+   "detail": "outputs/gex.json as of 2026-10-31",
+   "where": "step gex"
+  },
+  {
+   "id": "file.dayscore",
+   "area": "files",
+   "status": "pass",
+   "detail": "outputs/dayscore.json as of 2026-10-31",
+   "where": "step dayscore"
+  },
+  {
+   "id": "chains.coverage",
+   "area": "data",
+   "status": "pass",
+   "detail": "103 of 103 names have an option chain on file",
+   "where": "step mme_chains (CBOE)"
+  },
+  {
+   "id": "bars.coverage",
+   "area": "data",
+   "status": "pass",
+   "detail": "103 of 103 names have Yahoo bars (chart read, patterns, realised vol)",
+   "where": "step ic_screen (_ic_hist, Yahoo)"
+  },
+  {
+   "id": "chart.read",
+   "area": "data",
+   "status": "pass",
+   "detail": "0 names without a chart read",
+   "where": "_ic_chart_read in ic_screen"
+  },
+  {
+   "id": "screen.rules",
+   "area": "options",
+   "status": "pass",
+   "detail": "36 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
+   "where": "run_ic_screen (outputs/ic_screen.json)"
+  },
+  {
+   "id": "screen.proposed",
+   "area": "options",
+   "status": "pass",
+   "detail": "20 proposed of 36 winners",
+   "where": "run_ic_screen"
+  },
+  {
+   "id": "dossier.consistency",
+   "area": "dossier",
+   "status": "pass",
+   "detail": "chart reads in the dossier match the screen",
+   "where": "run_dossier vs run_ic_screen"
+  },
+  {
+   "id": "dossier.sections",
+   "area": "dossier",
+   "status": "pass",
+   "detail": "missing: earnings 1",
+   "where": "run_dossier (names in outputs/dossier.json 'missing_names')"
+  },
+  {
+   "id": "forward.marked",
+   "area": "forward test",
+   "status": "pass",
+   "detail": "98 of 98 open trades marked for 2026-10-31 (0 opened today)",
+   "where": "run_ic_record step 3a"
+  },
+  {
+   "id": "forward.wings",
+   "area": "forward test",
+   "status": "pass",
+   "detail": "0 current-rule condors with uneven wings",
+   "where": "run_ic_record step 3b"
+  },
+  {
+   "id": "forward.size",
+   "area": "forward test",
+   "status": "pass",
+   "detail": "highest trade id 99 (the app pages 1,000 at a time up to 20,000)",
+   "where": "app optRowsAll"
+  },
+  {
+   "id": "decisions.logged",
+   "area": "learning",
+   "status": "pass",
+   "detail": "0 options decisions logged for 2026-10-31",
+   "where": "run_ic_record (decisions table)"
+  },
+  {
+   "id": "portfolios.inputs",
+   "area": "portfolios",
+   "status": "pass",
+   "detail": "core 4 (the builder's Long Term template (no saved portfolio found)), satellite 5, swing 12, options 20",
+   "where": "run_portfolios (stocks.json trade/invest books, ic_screen proposed, Supabase portfolios)"
+  },
+  {
+   "id": "portfolios.split",
+   "area": "portfolios",
+   "status": "pass",
+   "detail": "Phoenix split {'lt': 0.5, 'swing': 0.15, 'options': 0.1, 'cash': 0.25} sums to 1.000",
+   "where": "ALLOC split_by_verdict"
+  },
+  {
+   "id": "portfolios.fx",
+   "area": "portfolios",
+   "status": "pass",
+   "detail": "EURUSD 1.1183 from yahoo",
+   "where": "_fx_usd_rates (Yahoo)"
+  },
+  {
+   "id": "portfolios.swing_stops",
+   "area": "portfolios",
+   "status": "pass",
+   "detail": "every swing stop sits below its entry",
+   "where": "run_portfolios swing"
+  },
+  {
+   "id": "calendar.runway",
+   "area": "data",
+   "status": "pass",
+   "detail": "macro events on file until 2026-12-30",
+   "where": "phoenix.py: FOMC_2026, CPI_2026, NFP_2026, ..."
+  },
+  {
+   "id": "heartbeats",
+   "area": "pipeline",
+   "status": "warn",
+   "detail": "18 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | senate_efd: agreement HTTP 403 | house_ptr: 11 unseen filings \u00b7 0 PDFs parsed \u00b7 11 fetch/parse failures {'pdftotext empty': 11} \u00b7 0 rows | signal_mark: marked 0 \u00b7 skipped 31 (no bars yet) \u00b7 failed 0 \u00b7 31 due \u00b7 3/9 tickers fetched",
+   "where": "heartbeats table"
+  }
+ ]
+}
