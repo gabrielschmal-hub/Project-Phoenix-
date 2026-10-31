@@ -237,6 +237,10 @@ function render(){ensureSeries(S.lines.map(l=>l.t));const b=blended(),t=total(),
   document.getElementById('main').innerHTML=h;
   if(qv||qf){const nq=document.getElementById('q');if(nq){nq.value=qv;if(qf){nq.focus();nq.setSelectionRange(qv.length,qv.length);}if(qv)sugg();}}}
 document.getElementById('tabs').innerHTML=`<div class="tab on">Builder</div><div class="tab" style="color:var(--mut)">Profile ${PROFILE} · ${NAME[PROFILE]}</div>`;
-loadPortfolios();
+// A proposed Phoenix portfolio sent from Mission Control (Portfolios tab): the long-term and swing lines as weights,
+// loaded after the saved portfolios so it is what you see; Confirm saves it like any other build.
+function phoenixImport(){if(!/[?&]import=1/.test(location.search))return;try{const o=JSON.parse(localStorage.getItem('phoenix.builder.import')||'null');
+  if(o&&o.lines&&o.lines.length){load(Object.assign({name:'Phoenix proposal',capital:10000,monthly:0,target:0,target_years:5},o));}}catch(e){console.warn('Phoenix import failed',e);}}
+loadPortfolios().then(phoenixImport);
 
 </script></body></html>

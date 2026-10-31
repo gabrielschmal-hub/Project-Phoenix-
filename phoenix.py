@@ -11266,41 +11266,324 @@ def _ic_chart_read(H, L, C, D=None, k=4, lookback=130):
     return dict(out, bias="neutral", why="range: no clean trend in the swings" + rng)
 
 
+# ============================================================
+# PATTERN READS (31 Oct 2026) — Bulkowski's tested candlestick and chart-pattern statistics, from Gabriel's
+# "Bulkowski Pattern Notes" doc (claude.ai artifact Gg1srSuMoxEQz97cqzVmeL, tab "Recap & spotting guide").
+# Percentages are Bulkowski's bull-market test results. The rules that matter more than any candle, from the
+# same notes: trade with the primary trend, decide only on the breakout (a CLOSE beyond the pattern), and a
+# candle's TESTED direction wins over the textbook one. Nothing here trades; it is evidence in the dossier.
+# ============================================================
+BULKOWSKI = {
+    # candles: (tested direction, rate, kind, note)
+    "three_line_strike_bear": ("bullish", 0.84, "reversal", "bearish three-line strike: tests say it REVERSES UP 84%; performance rank 1 of 103"),
+    "three_white_soldiers":   ("bullish", 0.82, "reversal", "82% reversal, rank 32 — the last close already sits near the pattern edge, so watch for a counter-move"),
+    "bearish_engulfing":      ("bearish", 0.79, "reversal", "79% reversal but rank 91: the move is short-lived"),
+    "three_black_crows":      ("bearish", 0.78, "reversal", "78% reversal, rank 3"),
+    "morning_star":           ("bullish", 0.78, "reversal", "78% reversal, rank 12"),
+    "morning_doji_star":      ("bullish", 0.76, "reversal", "76% reversal, rank 25"),
+    "three_outside_up":       ("bullish", 0.75, "reversal", "75% reversal, rank 34"),
+    "evening_star":           ("bearish", 0.72, "reversal", "72% reversal, rank 4"),
+    "evening_doji_star":      ("bearish", 0.71, "reversal", "71% reversal, rank 30"),
+    "bullish_belt_hold":      ("bullish", 0.71, "reversal", "71% reversal, rank 62"),
+    "three_outside_down":     ("bearish", 0.69, "reversal", "69% reversal, rank 39"),
+    "bearish_belt_hold":      ("bearish", 0.68, "reversal", "68% reversal, weak follow-through"),
+    "takuri":                 ("bullish", 0.66, "reversal", "66% reversal, rank 47 (a hammer with a lower shadow over 3x the body)"),
+    "three_inside_up":        ("bullish", 0.65, "reversal", "65% reversal, rank 20"),
+    "rising_window":          ("bullish", 0.75, "continuation", "gap up: continues 75%"),
+    "falling_window":         ("bearish", 0.67, "continuation", "gap down: continues 67%, rank 7"),
+    "three_line_strike_bull": ("bearish", 0.65, "reversal", "bullish three-line strike: tests say it REVERSES DOWN 65%"),
+    "inverted_hammer":        ("bearish", 0.65, "continuation", "textbook bullish, tests: the downtrend CONTINUES 65%"),
+    "hanging_man":            ("bullish", 0.59, "continuation", "textbook bearish, tests: the uptrend CONTINUES 59% — not a sell signal"),
+    "advance_block":          ("bullish", 0.64, "continuation", "continues up 64% but warns the rise is tiring"),
+}
+# chart patterns: direction -> (rank, of, fails, avg move, target met) for the breakout direction, and the odds of each breakout
+BULK_CHART = {
+    "double_bottom":   {"odds_up": None, "up": {"note": "Eve & Eve rank 5/39: fails 12%, avg rise 50%, target met 65%", "target_met": 0.65},
+                        "unconfirmed": "48% of unconfirmed twin bottoms keep falling"},
+    "double_top":      {"down": {"note": "Adam & Eve rank 10/36: fails 21%, avg decline 16%, target met 54%", "target_met": 0.54},
+                        "unconfirmed": "unconfirmed double tops fail 60% of the time"},
+    "hs_top":          {"down": {"note": "rank 9/36: fails 19%, avg decline 16%, target met ~51%", "target_met": 0.51}},
+    "hs_bottom":       {"up": {"note": "rank 13/39: fails 11%, avg rise 45% (target-met rate not in the notes)", "target_met": None}},
+    "ascending_triangle": {"odds_up": 0.63, "down": {"note": "down breakouts fail 38% (rank 30); a busted down breakout is the best trade, avg +36%"},
+                           "up": {"note": "up breakouts 63% of the time"}},
+    "descending_triangle": {"odds_up": 0.53, "down": {"note": "down breakout rank 15/36: fails 23%, avg decline 15%, target met 50%", "target_met": 0.50},
+                            "up": {"note": "up breakouts rank 33 of 39 — poor"}},
+    "rectangle_top":   {"odds_up": 0.63, "up": {"note": "up breakout rank 4/39: fails 15%, avg rise 51%, target met 78%", "target_met": 0.78},
+                        "down": {"note": "down breakouts rank 32 of 36 — poor"}},
+    "rectangle_bottom": {"odds_up": 0.59, "up": {"note": "up breakout rank 8/39: fails 15%, avg rise 48%, target met 79%", "target_met": 0.79},
+                         "down": {"note": "down breakout rank 14/36: fails 24%, avg decline 16%, target met 55%", "target_met": 0.55}},
+}
+
+
+def _pat_trend(C, end, n=10, thr=0.02):
+    """Trend into a candle (the notes: look at the closes of the preceding one to two weeks)."""
+    if end - n < 0:
+        return None
+    a, b = C[end - n], C[end]
+    if b > a * (1 + thr):
+        return "up"
+    if b < a * (1 - thr):
+        return "down"
+    return "flat"
+
+
+def _pat_candles(O, H, L, C, D, look=3):
+    """Candlestick patterns completing in the last `look` sessions, named by the notes' rules (bodies unless the
+    rule says shadows; "tall" = body at least 1.3x the average body of the prior 15 sessions; trend from the
+    10 closes before the pattern). Each gets its TESTED direction and rate, and whether a close has since broken
+    the pattern's high or low (the only entry the notes allow)."""
+    n = len(C); out = []
+    if n < 30:
+        return out
+    body = [abs(C[i] - O[i]) for i in range(n)]
+    white = [C[i] > O[i] for i in range(n)]; black = [C[i] < O[i] for i in range(n)]
+    for e in range(n - look, n):                      # e = the pattern's last candle
+        avgb = sum(body[e - 17:e - 2]) / 15 or 1e-9
+        tall = lambda i: body[i] >= 1.3 * avgb
+        small = lambda i: body[i] <= 0.6 * avgb
+        doji = lambda i: body[i] <= max(0.1 * (H[i] - L[i]), 0.02 * avgb)
+        hits = []
+        t1 = _pat_trend(C, e - 1); t2 = _pat_trend(C, e - 2); t3 = _pat_trend(C, e - 3); t4 = _pat_trend(C, e - 4)
+        # two-candle
+        if t2 == "up" and white[e - 1] and black[e] and O[e] >= C[e - 1] and C[e] <= O[e - 1] and body[e] > body[e - 1]:
+            hits.append(("bearish_engulfing", 2))
+        if t1 == "up" and L[e] > H[e - 1]:
+            hits.append(("rising_window", 1))
+        if t1 == "down" and H[e] < L[e - 1]:
+            hits.append(("falling_window", 1))
+        # one-candle
+        lo_sh = min(O[e], C[e]) - L[e]; up_sh = H[e] - max(O[e], C[e]); rng = H[e] - L[e] or 1e-9
+        if t1 == "down" and white[e] and abs(O[e] - L[e]) <= 0.02 * rng and tall(e):
+            hits.append(("bullish_belt_hold", 1))
+        if t1 == "up" and black[e] and abs(H[e] - O[e]) <= 0.02 * rng and tall(e):
+            hits.append(("bearish_belt_hold", 1))
+        if t1 == "down" and body[e] > 0 and lo_sh >= 3 * body[e] and up_sh <= 0.25 * body[e] + 0.05 * rng:
+            hits.append(("takuri", 1))
+        elif t1 == "up" and body[e] > 0 and 2 * body[e] <= lo_sh and up_sh <= 0.25 * body[e] + 0.05 * rng:
+            hits.append(("hanging_man", 1))
+        if t2 == "down" and black[e - 1] and small(e) and up_sh >= 2 * body[e] and lo_sh <= 0.25 * body[e] + 0.05 * rng and max(O[e], C[e]) <= C[e - 1]:
+            hits.append(("inverted_hammer", 2))
+        # three-candle
+        a, b, c = e - 2, e - 1, e
+        if t3 == "down" and black[a] and tall(a) and max(O[b], C[b]) < C[a] and (small(b) or doji(b)) and white[c] and C[c] > (O[a] + C[a]) / 2 and min(O[c], C[c]) > max(O[b], C[b]):
+            hits.append(("morning_doji_star" if doji(b) else "morning_star", 3))
+        if t3 == "up" and white[a] and tall(a) and min(O[b], C[b]) > C[a] and (small(b) or doji(b)) and black[c] and C[c] < (O[a] + C[a]) / 2 and max(O[c], C[c]) < min(O[b], C[b]):
+            hits.append(("evening_doji_star" if doji(b) else "evening_star", 3))
+        if t3 == "down" and black[a] and white[b] and O[b] <= C[a] and C[b] >= O[a] and body[b] > body[a] and C[c] > C[b]:
+            hits.append(("three_outside_up", 3))
+        if t3 == "up" and white[a] and black[b] and O[b] >= C[a] and C[b] <= O[a] and body[b] > body[a] and C[c] < C[b]:
+            hits.append(("three_outside_down", 3))
+        if t3 == "down" and black[a] and tall(a) and white[b] and O[b] >= C[a] and C[b] <= O[a] and C[c] > C[b] and C[c] > O[a]:
+            hits.append(("three_inside_up", 3))
+        if all(white[i] for i in (a, b, c)) and O[b] > O[a] and O[b] < C[a] and O[c] > O[b] and O[c] < C[b] and C[c] > C[b] > C[a]:
+            ups = [H[i] - C[i] for i in (a, b, c)]
+            if ups[2] > ups[1] > ups[0] and body[c] < body[b]:
+                hits.append(("advance_block", 3))
+            elif all(H[i] - C[i] <= 0.25 * (H[i] - L[i] or 1e-9) for i in (a, b, c)):
+                hits.append(("three_white_soldiers", 3))
+        if all(black[i] for i in (a, b, c)) and O[b] < O[a] and O[b] > C[a] and O[c] < O[b] and O[c] > C[b] and C[c] < C[b] < C[a] \
+                and all(C[i] - L[i] <= 0.25 * (H[i] - L[i] or 1e-9) for i in (a, b, c)):
+            hits.append(("three_black_crows", 3))
+        # four-candle
+        f = e - 3
+        if f >= 0 and t4 == "down" and all(black[i] for i in (f, a, b)) and C[a] < C[f] and C[b] < C[a] and white[c] and O[c] <= C[b] and C[c] >= O[f]:
+            hits.append(("three_line_strike_bear", 4))
+        if f >= 0 and t4 == "up" and all(white[i] for i in (f, a, b)) and C[a] > C[f] and C[b] > C[a] and black[c] and O[c] >= C[b] and C[c] <= O[f]:
+            hits.append(("three_line_strike_bull", 4))
+        for name, k in hits:
+            d_, rate, kind, note = BULKOWSKI[name]
+            s0 = e - k + 1
+            hi, lo = max(H[s0:e + 1]), min(L[s0:e + 1])
+            after = C[e + 1:]
+            brk = "up" if any(x > hi for x in after) else ("down" if any(x < lo for x in after) else None)
+            out.append({"kind": "candle", "name": name, "label": name.replace("_", " "), "date": D[e], "bars": k,
+                        "tested_direction": d_, "rate": rate, "type": kind, "note": note, "trend_in": _pat_trend(C, s0 - 1),
+                        "pattern_high": round(hi, 2), "pattern_low": round(lo, 2), "breakout": brk,
+                        "confirmed": brk == d_, "rule": f"enter only on a close {'above' if d_ == 'bullish' else 'below'} {hi if d_ == 'bullish' else lo:.2f}"})
+    return out
+
+
+def _pat_swings(H, L, k=4, start=0):
+    sh, sl = [], []
+    for i in range(max(k, start), len(H) - k):
+        if H[i] > max(H[i - k:i]) and H[i] >= max(H[i + 1:i + k + 1]):
+            sh.append(i)
+        if L[i] < min(L[i - k:i]) and L[i] <= min(L[i + 1:i + k + 1]):
+            sl.append(i)
+    return sh, sl
+
+
+def _pat_charts(H, L, C, D, look=120):
+    """Chart patterns in the last `look` sessions, from swing highs and lows (4 bars either side), by the notes'
+    spotting rules (a pattern whose last swing is more than 40 sessions old is history, not a setup): doubles within 5% and 10-35 sessions apart with a 10% move between; head-and-shoulders with
+    the head 3% beyond both shoulders and the shoulders within 6% of each other; triangles and rectangles need
+    at least five touches with flat lines within 1.5%. Each reports the confirmation line, whether a close has
+    crossed it, the measure-rule target, the stop, and where price sits in its yearly range."""
+    n = len(C); out = []
+    if n < 80:
+        return out
+    s0 = max(0, n - look)
+    sh, sl = _pat_swings(H, L, 4, s0)
+    last = C[-1]
+    y_lo, y_hi = min(L[-252:]), max(H[-252:])
+    yr_pos = (last - y_lo) / (y_hi - y_lo) if y_hi > y_lo else None
+    def ctx(direction):
+        notes = []
+        if yr_pos is not None:
+            if direction == "up" and yr_pos <= 1 / 3:
+                notes.append("in the lowest third of its yearly range \u2014 where breakouts do best")
+            if direction == "up" and yr_pos >= 0.9:
+                notes.append("near its yearly high \u2014 breakouts there usually do not outperform")
+        return notes
+    def add(name, direction_bias, line, confirmed, height, start_i, end_i, extra):
+        st = BULK_CHART.get(name, {}); dd = st.get("up" if direction_bias == "up" else "down") or {}
+        tm = dd.get("target_met")
+        target = (line + height * (tm if tm else 1.0)) if direction_bias == "up" else (line - height * (tm if tm else 1.0))
+        out.append(dict({"kind": "chart", "name": name, "label": name.replace("_", " "), "start": D[start_i], "end": D[end_i],
+                         "direction": direction_bias, "confirm_line": round(line, 2), "confirmed": confirmed,
+                         "height": round(height, 2), "target": round(target, 2), "target_rule": f"height x {int(tm*100)}% (target-met rate)" if tm else "full height (no target-met rate in the notes)",
+                         "note": dd.get("note"), "unconfirmed_note": st.get("unconfirmed"), "odds_up": st.get("odds_up"),
+                         "yearly_position": round(yr_pos, 2) if yr_pos is not None else None, "context": ctx(direction_bias)}, **extra))
+    # doubles: the last two swing lows / highs
+    if len(sl) >= 2:
+        i, j = sl[-2], sl[-1]
+        a, b = L[i], L[j]
+        mid = max(H[i:j + 1]) if j > i else None
+        if mid and j >= n - 40 and 10 <= j - i <= 35 and abs(a - b) / min(a, b) <= 0.05 and (mid - min(a, b)) / min(a, b) >= 0.10 \
+                and i >= 20 and C[i - 20] > a * 1.08:
+            conf = any(x > mid for x in C[j:])
+            stop = min(a, b) * 0.995
+            add("double_bottom", "up", mid, conf, mid - min(a, b), i, j,
+                {"stop": round(stop, 2), "stop_pct": round((mid - stop) / mid * 100, 1),
+                 "stop_rule": "pass if the stop is more than ~10% below the entry" if (mid - stop) / mid > 0.10 else "stop a few cents under the lower bottom"})
+    if len(sh) >= 2:
+        i, j = sh[-2], sh[-1]
+        a, b = H[i], H[j]
+        mid = min(L[i:j + 1]) if j > i else None
+        if mid and j >= n - 40 and 10 <= j - i <= 35 and abs(a - b) / max(a, b) <= 0.05 and (max(a, b) - mid) / max(a, b) >= 0.10 \
+                and i >= 20 and C[i - 20] < a * 0.92:
+            conf = any(x < mid for x in C[j:])
+            add("double_top", "down", mid, conf, max(a, b) - mid, i, j, {"stop": round(max(a, b) * 1.005, 2)})
+    # head and shoulders: the last three swing highs (top) / lows (bottom)
+    if len(sh) >= 3:
+        l_, h_, r_ = sh[-3], sh[-2], sh[-1]
+        if r_ >= n - 40 and H[h_] >= 1.03 * max(H[l_], H[r_]) and abs(H[l_] - H[r_]) / max(H[l_], H[r_]) <= 0.06:
+            v1, v2 = min(L[l_:h_ + 1]), min(L[h_:r_ + 1])
+            neck = min(v1, v2)                       # the lower valley: a close below it confirms
+            conf = any(x < neck for x in C[r_:])
+            add("hs_top", "down", neck, conf, H[h_] - neck, l_, r_, {"stop": round(H[r_] * 1.005, 2)})
+    if len(sl) >= 3:
+        l_, h_, r_ = sl[-3], sl[-2], sl[-1]
+        if r_ >= n - 40 and L[h_] <= 0.97 * min(L[l_], L[r_]) and abs(L[l_] - L[r_]) / min(L[l_], L[r_]) <= 0.06:
+            p1, p2 = max(H[l_:h_ + 1]), max(H[h_:r_ + 1])
+            neck = max(p1, p2)
+            conf = any(x > neck for x in C[r_:])
+            add("hs_bottom", "up", neck, conf, neck - L[h_], l_, r_, {"stop": round(L[r_] * 0.995, 2)})
+    # triangles and rectangles from the last ~60 sessions of swings
+    rh = [i for i in sh if i >= n - 60]; rl = [i for i in sl if i >= n - 60]
+    if len(rh) >= 2 and len(rl) >= 2 and len(rh) + len(rl) >= 5:
+        hs = [H[i] for i in rh]; ls = [L[i] for i in rl]
+        flat_top = (max(hs) - min(hs)) / max(hs) <= 0.015
+        flat_bot = (max(ls) - min(ls)) / max(ls) <= 0.015
+        rising_lows = all(ls[x + 1] > ls[x] for x in range(len(ls) - 1))
+        falling_highs = all(hs[x + 1] < hs[x] for x in range(len(hs) - 1))
+        top, bot = max(hs), min(ls); st_i = min(rh[0], rl[0]); en_i = max(rh[-1], rl[-1])
+        after = C[en_i:]
+        up_b = any(x > top for x in after); dn_b = any(x < bot for x in after) if not rising_lows else any(x < ls[-1] for x in after)
+        if flat_top and rising_lows:
+            d_ = "up" if up_b else ("down" if dn_b else None)
+            add("ascending_triangle", d_ or "up", top if d_ != "down" else ls[-1], bool(d_), top - ls[0], st_i, en_i,
+                {"breakout": d_, "touches": len(rh) + len(rl), "busted_watch": "if it breaks down then closes back above %.2f, the busted breakout is the best trade in the pattern" % top})
+        elif flat_bot and falling_highs:
+            d_ = "down" if any(x < bot for x in after) else ("up" if any(x > hs[-1] for x in after) else None)
+            add("descending_triangle", d_ or "down", bot if d_ != "up" else hs[-1], bool(d_), hs[0] - bot, st_i, en_i,
+                {"breakout": d_, "touches": len(rh) + len(rl)})
+        elif flat_top and flat_bot and (top - bot) / bot >= 0.03:
+            entered_from_below = C[max(0, st_i - 15)] < bot
+            nm = "rectangle_top" if entered_from_below else "rectangle_bottom"
+            d_ = "up" if up_b else ("down" if any(x < bot for x in after) else None)
+            add(nm, d_ or "up", top if d_ != "down" else bot, bool(d_), top - bot, st_i, en_i,
+                {"breakout": d_, "touches": len(rh) + len(rl)})
+    return out
+
+
+def _pat_summary(chart, pats):
+    """One line: do the patterns agree with the chart read?"""
+    bias = (chart or {}).get("bias")
+    agree, conflict = [], []
+    for p in pats:
+        d_ = p.get("tested_direction") or ({"up": "bullish", "down": "bearish"}.get(p.get("direction")))
+        if not d_ or bias not in ("bullish", "bearish"):
+            continue
+        (agree if d_ == bias else conflict).append(p["label"] + (" (confirmed)" if p.get("confirmed") else ""))
+    return {"agree": agree, "conflict": conflict}
+
+
+
 def _ic_hist(tickers, today):
-    """{ticker: {hv30s, hv30, hv60s, close, chart, closes}} from Yahoo daily bars, one batch request.
-    hv30s is the event-stripped 30-day vol the screen compares implied vol against; chart is the price-structure
-    read that picks the direction (_ic_chart_read). Cached per day in outputs/ic_hist.json."""
+    """{ticker: {hv30s, hv60s, hv_cons, hv30, close, chart, patterns, bars}} from Yahoo daily OHLC bars, one batch request.
+      hv30s    30-day realised vol with event days stripped: what the screen compares implied vol against
+      hv_cons  the conservative figure, the higher of the 30- and 60-day stripped vols (a calm month can flatter a stock)
+      chart    the price-structure read that picks the direction (_ic_chart_read)
+      patterns Bulkowski candle and chart patterns (_pat_candles, _pat_charts) with their tested odds
+      bars     130 sessions of high/low/close for the app's price chart
+    Cached for the day: the summary in outputs/ic_hist.json (committed, no bars), the full bars in _work/ (this run only).
+    A cache without bars is refetched, so the app's chart never goes missing on a re-run."""
     import os, json, math
-    fp = os.path.join(OUTPUTS_DIR, "ic_hist.json")
+    fp = os.path.join(OUTPUTS_DIR, "ic_hist.json"); wp = os.path.join("_work", "ic_bars.json")
     try:
-        cache = json.load(open(fp))
-        if cache.get("date") == str(today) and set(tickers) <= set(cache.get("names") or {}):
-            return cache["names"]
+        cache = json.load(open(fp)); bars = json.load(open(wp))
+        if cache.get("date") == str(today) and set(tickers) <= set(cache.get("names") or {}) and bars.get("date") == str(today):
+            out = cache["names"]
+            for t, v in out.items():
+                v["bars"] = (bars.get("names") or {}).get(t)
+            return out
     except Exception:
-        cache = {}
-    out = {}
+        pass
+    out, full = {}, {}
     try:
         import yfinance as yf
         df = yf.download(list(tickers), period="1y", interval="1d", auto_adjust=True, progress=False, group_by="column", threads=True)
         for tk in tickers:
             try:
-                sub = {f: (df[f][tk] if hasattr(df[f], "columns") else df[f]) for f in ("High", "Low", "Close")}
-                frame = sub["Close"].to_frame("C").join(sub["High"].rename("H")).join(sub["Low"].rename("L")).dropna()
-                C = [float(v) for v in frame["C"].values]; H = [float(v) for v in frame["H"].values]; L = [float(v) for v in frame["L"].values]
-                D = [str(x)[:10] for x in frame.index]
+                col = lambda f: (df[f][tk] if hasattr(df[f], "columns") else df[f])
+                frame = col("Close").to_frame("C").join(col("High").rename("H")).join(col("Low").rename("L")).join(col("Open").rename("O"))
+                try:
+                    frame = frame.join(col("Volume").rename("V"))
+                except Exception:
+                    frame["V"] = 0
+                frame = frame.dropna(subset=["C", "H", "L", "O"])
+                C = [float(v) for v in frame["C"].values]; H = [float(v) for v in frame["H"].values]
+                L = [float(v) for v in frame["L"].values]; O = [float(v) for v in frame["O"].values]
+                V = [float(v or 0) for v in frame["V"].fillna(0).values]; D = [str(x)[:10] for x in frame.index]
             except Exception:
                 continue
             if len(C) < 60:
                 continue
             rets = [math.log(C[i] / C[i - 1]) for i in range(1, len(C)) if C[i - 1] > 0]
             raw30 = _realised_vol(C, 30)
-            out[tk] = {"hv30s": round(_ic_strip_vol(rets[-30:]) or 0, 4) or None, "hv60s": round(_ic_strip_vol(rets[-60:]) or 0, 4) or None,
-                       "hv30": round(raw30 / 100, 4) if raw30 else None, "close": round(C[-1], 2),
-                       "chart": _ic_chart_read(H, L, C, D),
-                       "bars": {"t": D[-130:], "h": [round(x, 2) for x in H[-130:]], "l": [round(x, 2) for x in L[-130:]], "c": [round(x, 2) for x in C[-130:]]}}
+            h30, h60 = _ic_strip_vol(rets[-30:]), _ic_strip_vol(rets[-60:])
+            chart = _ic_chart_read(H, L, C, D)
+            try:
+                pats = _pat_candles(O, H, L, C, D) + _pat_charts(H, L, C, D)
+            except Exception as e:
+                pats = []; print(f"[ic] {tk}: pattern scan failed ({e})")
+            out[tk] = {"hv30s": round(h30, 4) if h30 else None, "hv60s": round(h60, 4) if h60 else None,
+                       "hv_cons": round(max(x for x in (h30, h60) if x), 4) if (h30 or h60) else None,
+                       "hv30": round(raw30 / 100, 4) if raw30 else None, "close": round(C[-1], 2), "last_bar": D[-1],
+                       "chart": chart, "patterns": pats, "pattern_view": _pat_summary(chart, pats)}
+            full[tk] = {"t": D[-130:], "o": [round(x, 2) for x in O[-130:]], "h": [round(x, 2) for x in H[-130:]],
+                        "l": [round(x, 2) for x in L[-130:]], "c": [round(x, 2) for x in C[-130:]]}
     except Exception as e:
-        print(f"[ic] Yahoo bars unavailable ({e}) — no chart read, so no directional trades today")
+        print(f"[ic] Yahoo bars unavailable ({e}) \u2014 no chart read, so no directional trades today")
     write_json("ic_hist", {"asof": _now(), "date": str(today), "names": out})
+    try:
+        os.makedirs("_work", exist_ok=True)
+        json.dump({"date": str(today), "names": full}, open(wp, "w"), separators=(",", ":"))
+    except Exception as e:
+        print(f"[ic] bar cache not written: {e}")
+    for t, v in out.items():
+        v["bars"] = full.get(t)
     return out
 
 
@@ -11417,6 +11700,12 @@ def _ic_label(row):
     return f"{e} \u2212{f(L['short_call'])}C +{f(L['long_call'])}C \u00b7 {row['credit']:.2f}"
 
 
+def _ic_size_caps():
+    """Max loss per trade in USD for each account size (5% of €5k / €10k / €15k at the static EURUSD)."""
+    fx = (FX_STATIC_FALLBACK.get("EUR") if "FX_STATIC_FALLBACK" in globals() else None) or 1.10
+    return [a * ALLOC["options"]["per_trade_max_loss"] * fx for a in ALLOC["accounts_eur"]]
+
+
 def run_ic_screen():
     """
     OPTIONS TOURNAMENT (coach call 26 Oct 2026; structures and universe 28 Oct 2026).
@@ -11518,6 +11807,7 @@ def run_ic_screen():
         h = hist.get(tk) or {}
         iv_row = ivem.get(tk) or {}
         hv = h.get("hv30s") or ((iv_row.get("rv30_pct") or 0) / 100.0) or None
+        hv_cons = h.get("hv_cons") or hv                    # the higher of the 30- and 60-day stripped vols, shown beside, not ranked on
         chart = h.get("chart") or {}
         bias = chart.get("bias")
         iv30 = _ic_iv30(c.get("rows"), S, today)
@@ -11533,7 +11823,10 @@ def run_ic_screen():
         e_info = earn_all.get(tk) if grp != "etf" else None
         earn = (e_info or {}).get("date")
         vol[tk] = {"group": grp, "spot": S, "iv30": iv30, "iv30_wk": iv30_wk, "ivr": ivr, "ivr_wk": ivr_wk, "ivr_days": len(allv),
-                   "hv30s": hv, "hv30": h.get("hv30"), "bias": bias, "chart_why": chart.get("why"),
+                   "hv30s": hv, "hv60s": h.get("hv60s"), "hv_cons": hv_cons, "hv30": h.get("hv30"), "bias": bias, "chart_why": chart.get("why"),
+                   "patterns": [{k: p_.get(k) for k in ("kind", "name", "label", "date", "end", "tested_direction", "direction", "rate", "confirmed", "confirm_line", "target", "note")}
+                                for p_ in (h.get("patterns") or [])][:6],
+                   "pattern_view": h.get("pattern_view"),
                    "support": chart.get("support"), "resistance": chart.get("resistance"),
                    "regime": mr.get("regime"), "flip": mr.get("flip"), "earnings": earn, "earnings_src": (e_info or {}).get("src")}
         red = bool(mr) and (mr.get("regime") == "red" or (mr.get("dist_flip_em") or 0) < 0)
@@ -11646,7 +11939,7 @@ def run_ic_screen():
             pos_p = {a: i + 1 for i, a in enumerate(upP)}; pos_c = {b: i + 1 for i, b in enumerate(upC)}
             ip = np.array([pos_p.get(a, 0) if a else 0 for _, a, _ in cands]); icx = np.array([pos_c.get(b, 0) if b else 0 for _, _, b in cands])
             res = {}
-            for meas, sig in (("market", atm), ("historical", hv)):
+            for meas, sig in (("market", atm), ("historical", hv), ("conservative", hv_cons)):
                 if not sig:
                     continue
                 for x in exits:
@@ -11678,6 +11971,12 @@ def run_ic_screen():
                 k_ = cands[i][0]
                 if per_s.get(k_, 0) < IC["board_size"] // 2 and np.isfinite(best[i]):
                     order.append(i); per_s[k_] = per_s.get(k_, 0) + 1
+            # account-sized versions: the best trade whose max loss fits 5% of a €5k / €10k / €15k account, so the
+            # proposed portfolios can size a name down instead of dropping it (narrower wings, usually)
+            for cap in _ic_size_caps():
+                fit = [i for i in np.argsort(-best) if max_loss[i] <= cap and np.isfinite(best[i])]
+                if fit and fit[0] not in order:
+                    order.append(fit[0])
             for i in order:
                 stc, a, b = cands[i]; xb = int(bx[i])
                 legs, dl = {}, {}
@@ -11687,6 +11986,7 @@ def run_ic_screen():
                     legs.update({"short_call": b[0], "long_call": b[1]}); dl.update({"short_call": round(dC[b[0]], 3), "long_call": round(dC[b[1]], 3)})
                 nd = round(((-dP[a[0]] + dP[a[1]]) if a else 0) * 100 + ((-dC[b[0]] + dC[b[1]]) if b else 0) * 100, 1)
                 row = {"ticker": tk, "group": grp, "structure": stc, "expiry": str(e), "dte": dte, "tier": tier,
+                       "expiry_type": "monthly" if _ic_monthly(e) else "weekly",
                        "legs": legs, "deltas": dl,
                        "credit": round(float(credit[i]), 2), "credit_mid": round(float(cm[i]), 2), "width": round(float(wd[i]), 2),
                        "put_width": round(a[0] - a[1], 2) if a else None, "call_width": round(b[1] - b[0], 2) if b else None,
@@ -11701,8 +12001,11 @@ def run_ic_screen():
                     row["ev"].setdefault(meas, {})[str(x)] = {"ev_1": round(float(ev[i]), 2), "pop": round(float(pw[i]), 3),
                                                               "avg_win_1": round(float(aw[i]), 2), "avg_loss_1": round(float(al[i]), 2)}
                 m_ = row["ev"]["market"][str(xb)]; h_ = (row["ev"].get("historical") or {}).get(str(xb)) or {}
+                c_ = (row["ev"].get("conservative") or {}).get(str(xb)) or {}
                 row.update({"ev_1": m_["ev_1"], "pop_exit": m_["pop"], "avg_win_1": m_["avg_win_1"], "avg_loss_1": m_["avg_loss_1"],
                             "ev_hv_1": h_.get("ev_1"), "pop_hv": h_.get("pop"),
+                            "ev_cons_1": c_.get("ev_1"), "pop_cons": c_.get("pop"),
+                            "ev_cons_pct": round(c_["ev_1"] / max(row["max_loss_1"], 1), 4) if c_.get("ev_1") is not None else None,
                             "ev_pct": round((h_.get("ev_1") if h_ else m_["ev_1"]) / max(row["max_loss_1"], 1), 4),
                             "ev_per_risk": round(float(best[i]), 4)})
                 row["label"] = _ic_label(row)
@@ -11719,6 +12022,12 @@ def run_ic_screen():
                 per[r["structure"]].append(r)
         top = sorted([r for v in per.values() for r in v], key=lambda r: -r["ev_per_risk"])[:IC["board_size"]]
         win_ = dict(board[0])
+        win_["sized"] = {}
+        for acct, cap in zip(ALLOC["accounts_eur"], _ic_size_caps()):
+            fit = next((r for r in board if r["max_loss_1"] <= cap and r["structure"] == board[0]["structure"]), None)
+            if fit and fit is not board[0]:
+                win_["sized"][str(acct)] = {k: fit.get(k) for k in ("label", "structure", "expiry", "expiry_type", "exit_date", "max_loss_1", "credit",
+                                                                     "ev_hv_1", "ev_pct", "ev_cons_1", "ev_cons_pct", "ev_1", "pop_hv", "net_delta", "legs")}
         n = max(1, int(IC["risk_per_trade"] // max(win_["max_loss_1"], 1)))
         L = win_["legs"]
         win_.update({"contracts": n, "ev_total": round((win_["ev_hv_1"] if win_["ev_hv_1"] is not None else win_["ev_1"]) * n, 2),
@@ -11729,6 +12038,37 @@ def run_ic_screen():
                      "be_low": round(L["short_put"] - win_["credit"], 2) if "short_put" in L else None,
                      "be_high": round(L["short_call"] + win_["credit"], 2) if "short_call" in L else None,
                      "board": top, "by_structure": {s_: next((r for r in board if r["structure"] == s_), None) for s_ in IC["structures"]}})
+        # WHY THIS TRADE, in the order Phoenix decided it
+        nm = {"IC": "an iron condor", "PCS": "a bull put spread", "CCS": "a bear call spread"}[win_["structure"]]
+        exps_tried = sorted({r["expiry"] for r in board})
+        runner = next((r for r in board[1:] if r["expiry"] != win_["expiry"]), None)
+        alt = next((r for r in board[1:] if r["expiry"] == win_["expiry"]), None)
+        D = win_["deltas"]; hs = (win_.get("ev") or {}).get("historical") or {}
+        _m = lambda v: ("\u2212$" if v < 0 else "+$") + f"{abs(v):,.0f}"
+        why = [f"Chart {bias or '-'}: {chart.get('why') or 'no read'} → {nm}.",
+               f"Expiry {win_['expiry']} — a {win_['expiry_type']} expiry, {win_['dte']} days out ({win_['tier']} tier); the best of "
+               f"{len(exps_tried)} expiries that had a qualifying trade" + (f"; next best expiry {runner['label']} at EV {runner['ev_pct']*100:.1f}%" if runner else "") + ".",
+               f"Strikes: short{'s' if win_['structure']=='IC' else ''} at " + " and ".join(f"{abs(D[k])*100:.0f} delta" for k in ("short_put", "short_call") if k in D) +
+               f", wing{'s' if win_['structure']=='IC' else ''} ${win_['width']:g} wide, credit ${win_['credit']:.2f} = {win_['credit_to_width']*100:.0f}% of the width" +
+               (f"; the next best strikes on the same expiry ({alt['label']}) made EV {alt['ev_pct']*100:.1f}%" if alt else "") + ".",
+               (f"Vol: options priced at {win_['iv_atm']:.0f}% against {hv*100:.0f}% delivered (30-day, event days stripped) — "
+                + (f"a {win_['iv_atm']-hv*100:.1f}-point premium to sell." if win_['iv_atm'] > hv * 100 else "no premium, so it is not on the proposed list.")) if hv else "Vol: no realised-vol figure, ranked on market odds only.",
+               f"EV {_m(win_['ev_hv_1'] if win_['ev_hv_1'] is not None else win_['ev_1'])} per contract on the stock's own vol = {win_['ev_pct']*100:.1f}% of the ${win_['max_loss_1']:,.0f} at risk; "
+               f"{_m(win_['ev_1'])} at the market's own odds; win odds {((win_.get('pop_hv') or win_['pop_exit'])*100):.0f}% at the {win_['best_exit_dte']}-day exit "
+               f"({win_['exit_date']}), the exit with the best EV" + (" of " + "/".join(str(x) for x in sorted(hs, key=int, reverse=True)) if hs else "") + ".",
+               ("Earnings: a fund, none." if grp == "etf" else f"Earnings {earn} ({(e_info or {}).get('src', '')}) — after the exit.")]
+        pv = h.get("pattern_view") or {}
+        pts = h.get("patterns") or []
+        if pts:
+            why.insert(1, "Patterns (Bulkowski, tested odds): " + "; ".join(
+                f"{p_['label']}" + (f" {p_.get('tested_direction')} {int(p_['rate']*100)}%" if p_.get("rate") else (f" {p_.get('direction')}" if p_.get("direction") else ""))
+                + (" — confirmed" if p_.get("confirmed") else " — not confirmed") for p_ in pts[:4])
+                + (f". Agrees with the chart read: {', '.join(pv.get('agree'))}" if pv.get("agree") else "")
+                + (f". Conflicts with it: {', '.join(pv.get('conflict'))} — treat the read with care" if pv.get("conflict") else "") + ".")
+        if win_.get("ev_cons_1") is not None and hv_cons and hv and hv_cons > hv + 1e-6:
+            why.append(f"Conservative check: at the higher 60-day vol ({hv_cons*100:.0f}%) the EV is {_m(win_['ev_cons_1'])} ({win_['ev_cons_pct']*100:.1f}% of risk).")
+        win_.update({"why": why, "runner_up": ({"label": runner["label"], "ev_pct": runner["ev_pct"], "expiry": runner["expiry"],
+                                                "expiry_type": runner["expiry_type"]} if runner else None)})
         n_struct[win_["structure"]] += 1
         picks.append(win_)
     picks.sort(key=lambda p: -p["ev_per_risk"])
@@ -11849,6 +12189,436 @@ def _ic_mark(legs, credit, fees_1, quotes, spot, dte):
     return round((credit - cost) * 100 - fees_1, 2)
 
 
+# ============================================================
+# ONE MIND, PHASE 1 (31 Oct 2026): the context every decision is stamped with, the decision log, the ticker
+# dossier every engine reads and writes, and the health checks that say what broke and where.
+# ============================================================
+def _context_now():
+    """Today's market context from this run's own outputs — the same keys backfill_signal_context stamps on stock
+    signals, plus the day score, so a stock signal and an options decision can be compared on one footing."""
+    import os, json
+    def rd(n):
+        try:
+            return json.load(open(os.path.join(OUTPUTS_DIR, n + ".json")))
+        except Exception:
+            return {}
+    macro, gex, spx, ds = rd("macro"), rd("gex"), rd("spx_daily"), rd("dayscore")
+    bars = spx.get("bars") or []
+    closes = [float(b.get("c", b.get("close"))) for b in bars if b.get("c", b.get("close")) is not None]
+    c = closes[-1] if closes else None
+    ma50 = sum(closes[-50:]) / 50 if len(closes) >= 50 else None
+    ma200 = sum(closes[-200:]) / 200 if len(closes) >= 200 else None
+    ov = gex.get("overview") or {}
+    ex = macro.get("explain") if isinstance(macro.get("explain"), dict) else {}
+    inp = macro.get("inputs") if isinstance(macro.get("inputs"), dict) else {}
+    return {"regime": macro.get("regime"), "regime_held_weeks": ex.get("held_weeks"),
+            "gex_regime": ov.get("regime"), "gex_net_B": ov.get("net_gex_B"), "gex_flip": ov.get("gamma_flip"),
+            "gex_dist_to_flip_pct": ov.get("dist_to_flip_pct"), "spx_close": c,
+            "spx_vs_50d_pct": round((c / ma50 - 1) * 100, 2) if c and ma50 else None,
+            "spx_vs_200d_pct": round((c / ma200 - 1) * 100, 2) if c and ma200 else None,
+            "vix": inp.get("vix"), "dayscore": ds.get("score"), "dayscore_verdict": ds.get("verdict")}
+
+
+def _log_decisions(engine, d, rows):
+    """Upsert one row per (day, engine, ticker, action) into the decisions table. rows: dicts with ticker, action,
+    detail, context, ref. The table is the learning loop's memory: every engine's yes AND no, with the context."""
+    if not rows:
+        return 0
+    for r in rows:
+        r.update({"d": d, "engine": engine})
+    for i in range(0, len(rows), 200):
+        _sb_write("POST", "decisions", rows[i:i + 200], extra_headers={"Prefer": "resolution=merge-duplicates,return=minimal"})
+    return len(rows)
+
+
+def run_dossier():
+    """
+    THE TICKER DOSSIER: one record per name with every engine's view of it, so the pieces read the same facts.
+    Written to outputs/dossier.json for the app and archived per day in Supabase (ticker_dossier) for the review.
+    Each section carries its source and how old it is; a missing section is named, never silently blank.
+      price     last close and bar date                          (Yahoo, via the options history step)
+      chart     swing-structure bias, support, resistance         (_ic_chart_read)
+      patterns  Bulkowski candles and chart patterns, tested odds  (_pat_candles, _pat_charts)
+      vol       implied 30-day, realised stripped 30/60-day, conservative, raw  (CBOE chains + Yahoo)
+      dealer    flip, walls, regime                               (mme_map)
+      earnings  next date and where it came from                  (earnings state / iv_em / Yahoo)
+      events    macro events in the next 45 days                  (calendar)
+      options   today's pick, EVs, proposed or skipped and why    (ic_screen)
+      stock     the stock screener's fields, when the name is in it (stocks.json)
+    """
+    import os, json
+    from datetime import datetime, timedelta, date as _date
+    def rd(n, default=None):
+        try:
+            return json.load(open(os.path.join(OUTPUTS_DIR, n + ".json")))
+        except Exception:
+            return default if default is not None else {}
+    scr, hist, mm, cal, stocks = rd("ic_screen"), rd("ic_hist"), rd("mme_map"), rd("calendar"), rd("stocks")
+    d = str(scr.get("date") or datetime.utcnow().date())
+    today = datetime.strptime(d[:10], "%Y-%m-%d").date()
+    mmrows = {r["ticker"]: r for g in (mm.get("groups") or {}).values() for r in g}
+    mmrows.update(mm.get("etf_rows") or {})
+    picks = {p["ticker"]: p for p in scr.get("picks") or []}
+    prop = {p["ticker"] for p in scr.get("proposed") or []}
+    vol = scr.get("vol") or {}
+    H = hist.get("names") or {}
+    st_rows = {}
+    for key in ("stocks", "rows", "names", "data"):
+        v = stocks.get(key) if isinstance(stocks, dict) else None
+        if isinstance(v, list):
+            for r in v:
+                if isinstance(r, dict) and (r.get("ticker") or r.get("t")):
+                    st_rows[str(r.get("ticker") or r.get("t")).upper()] = r
+            break
+        if isinstance(v, dict):
+            st_rows.update({k.upper(): x for k, x in v.items() if isinstance(x, dict)})
+            break
+    ev45 = [e for e in (cal.get("events") or []) if str(today) <= e.get("date", "") <= str(today + timedelta(days=45))]
+    names = sorted(set(scr.get("universe") or {}) | set(H) | set(vol))
+    ctx = _context_now()
+    out, missing = {}, {}
+    for tk in names:
+        h, v, p, mr = H.get(tk) or {}, vol.get(tk) or {}, picks.get(tk), mmrows.get(tk)
+        rec = {"group": v.get("group") or (scr.get("universe") or {}).get(tk),
+               "price": {"close": h.get("close") or v.get("spot"), "bar": h.get("last_bar"), "src": "yahoo daily"},
+               "chart": dict((h.get("chart") or {}), src="_ic_chart_read") if h.get("chart") else None,
+               "patterns": h.get("patterns") or [], "pattern_view": h.get("pattern_view"),
+               "vol": {"iv30": v.get("iv30"), "iv30_wk": v.get("iv30_wk"), "ivr": v.get("ivr"), "hv30s": h.get("hv30s") or v.get("hv30s"),
+                       "hv60s": h.get("hv60s"), "hv_cons": h.get("hv_cons"), "hv30_raw": h.get("hv30"), "src": "CBOE chain / Yahoo bars"},
+               "dealer": ({"regime": mr.get("regime"), "flip": mr.get("flip"), "put_wall": mr.get("support"), "call_wall": mr.get("resist"),
+                           "dist_flip_em": mr.get("dist_flip_em"), "src": "mme_map " + str(mm.get("date") or "")} if mr else None),
+               "earnings": ({"date": v.get("earnings"), "src": v.get("earnings_src")} if v.get("earnings") else ({"date": None, "src": "fund"} if v.get("group") == "etf" else None)),
+               "events": [{"date": e["date"], "label": e.get("short") or e.get("type")} for e in ev45],
+               "options": ({"label": p.get("label"), "structure": p.get("structure"), "expiry": p.get("expiry"), "expiry_type": p.get("expiry_type"),
+                            "ev_pct": p.get("ev_pct"), "ev_cons_pct": p.get("ev_cons_pct"), "ev_mkt": p.get("ev_1"), "win": p.get("pop_hv"),
+                            "proposed": tk in prop, "why": p.get("why")} if p else
+                           ({"skipped": (scr.get("skipped") or {}).get(tk)} if tk in (scr.get("skipped") or {}) else None)),
+               "stock": ({k: st_rows[tk].get(k) for k in ("score", "rating", "stage", "stage2", "setup", "rs", "signal", "gates") if k in st_rows[tk]} or None) if tk in st_rows else None}
+        for sec in ("chart", "vol", "dealer", "earnings", "options"):
+            if rec.get(sec) is None or (sec == "vol" and rec["vol"].get("iv30") is None):
+                missing.setdefault(sec, []).append(tk)
+        out[tk] = rec
+    doc = {"asof": _now(), "date": d, "context": ctx, "count": len(out), "missing": {k: len(v_) for k, v_ in missing.items()},
+           "missing_names": {k: v_[:20] for k, v_ in missing.items()}, "names": out,
+           "note": "One record per name with every engine's view. A section that is null is named in 'missing' with the names."}
+    write_json("dossier", doc)
+    n_ok = 0
+    try:
+        rows = [{"d": d, "ticker": tk, "data": r} for tk, r in out.items()]
+        for i in range(0, len(rows), 100):
+            _sb_write("POST", "ticker_dossier", rows[i:i + 100], extra_headers={"Prefer": "resolution=merge-duplicates,return=minimal"})
+        n_ok = len(rows)
+    except Exception as e:
+        print(f"[dossier] archive failed: {e}")
+    print(f"[dossier] {len(out)} names · missing " + (", ".join(f"{k} {len(v_)}" for k, v_ in missing.items()) or "nothing") + f" · archived {n_ok}")
+    sb_heartbeat("dossier", bool(out), f"{len(out)} names · archived {n_ok} · missing " + (", ".join(f"{k} {len(v_)}" for k, v_ in missing.items()) or "nothing"))
+    return doc
+
+
+def run_health():
+    """
+    HEALTH CHECKS — the last step of the run. Each check says what it tested, what it found and WHERE to look
+    (the step and the file). pass / warn / fail. outputs/health.json feeds the app's health strip; the run log
+    and the heartbeat carry the summary. A check that cannot run is itself a warn, never silently skipped.
+    """
+    import os, json, math
+    from datetime import datetime, timedelta
+    checks = []
+    def add(cid, area, status, detail, where):
+        checks.append({"id": cid, "area": area, "status": status, "detail": detail, "where": where})
+    def rd(n):
+        try:
+            return json.load(open(os.path.join(OUTPUTS_DIR, n + ".json")))
+        except Exception:
+            return None
+    today = datetime.utcnow().date()
+    # 1. freshness of the files the options and dossier work reads
+    for n, step, crit in (("ic_screen", "ic_screen", True), ("ic_universe", "mme_chains", True), ("ic_hist", "ic_screen (_ic_hist)", True),
+                          ("dossier", "dossier", True), ("calendar", "calendar", True), ("mme_map", "mme_map", False),
+                          ("iv_em", "iv_em", False), ("macro", "macro", False), ("gex", "gex", False), ("dayscore", "dayscore", False)):
+        j = rd(n)
+        if j is None:
+            add(f"file.{n}", "files", "fail" if crit else "warn", f"outputs/{n}.json missing or unreadable", f"step {step}")
+            continue
+        a = str(j.get("asof") or j.get("date") or "")[:10]
+        age = (today - datetime.strptime(a, "%Y-%m-%d").date()).days if a[:4].isdigit() else None
+        st = "pass" if age is not None and age <= 1 else ("warn" if age is not None and age <= 3 else "fail")
+        add(f"file.{n}", "files", st if (crit or st == "pass") else "warn", f"outputs/{n}.json as of {a or 'unknown'}" + (f" ({age} days old)" if age else ""), f"step {step}")
+    scr, uni, hist, dos = rd("ic_screen") or {}, rd("ic_universe") or {}, rd("ic_hist") or {}, rd("dossier") or {}
+    U = set((uni.get("names") or {}))
+    # 2. coverage
+    n_u = len(U); n_h = len(hist.get("names") or {})
+    want = len(_ic_universe())
+    add("chains.coverage", "data", "pass" if n_u >= 0.9 * want else ("warn" if n_u >= 0.6 * want else "fail"),
+        f"{n_u} of {want} names have an option chain on file", "step mme_chains (CBOE)")
+    add("bars.coverage", "data", "pass" if n_h >= 0.9 * max(n_u, 1) else ("warn" if n_h >= 0.6 * max(n_u, 1) else "fail"),
+        f"{n_h} of {n_u} names have Yahoo bars (chart read, patterns, realised vol)", "step ic_screen (_ic_hist, Yahoo)")
+    no_read = [t for t, v in (hist.get("names") or {}).items() if not (v.get("chart") or {}).get("bias")]
+    add("chart.read", "data", "pass" if len(no_read) <= 3 else "warn", f"{len(no_read)} names without a chart read" + (f": {', '.join(no_read[:8])}" if no_read else ""), "_ic_chart_read in ic_screen")
+    # 3. the screen's own rules, re-checked on its output
+    picks = scr.get("picks") or []; prop = scr.get("proposed") or []
+    R = scr.get("rules") or IC
+    bad = []
+    for p in picks:
+        L, D = p.get("legs") or {}, p.get("deltas") or {}
+        s_ = p.get("structure", "IC")
+        if s_ == "IC" and abs((p.get("put_width") or 0) - (p.get("call_width") or 0)) > 1e-6:
+            bad.append(f"{p['ticker']} uneven wings")
+        band = R.get("short_delta_ic" if s_ == "IC" else "short_delta_vert") or (0.25, 0.45)
+        for k in ("short_put", "short_call"):
+            if k in D and not (band[0] - 0.005 <= abs(D[k]) <= band[1] + 0.005):
+                bad.append(f"{p['ticker']} {k} delta {abs(D[k]):.2f} outside {band}")
+        if not (0 < p.get("credit", 0) < p.get("width", 0)):
+            bad.append(f"{p['ticker']} credit {p.get('credit')} vs width {p.get('width')}")
+        for f in ("ev_1", "ev_pct", "max_loss_1"):
+            x = p.get(f)
+            if x is None or (isinstance(x, float) and math.isnan(x)):
+                bad.append(f"{p['ticker']} {f} missing")
+        want_s = {"neutral": "IC", "bullish": "PCS", "bearish": "CCS"}.get(p.get("bias"))
+        if want_s and want_s != s_:
+            bad.append(f"{p['ticker']} chart {p.get('bias')} but structure {s_}")
+        e = p.get("next_earnings")
+        if p.get("group") != "etf" and e and str(scr.get("date")) <= e <= str(p.get("exit_date")):
+            bad.append(f"{p['ticker']} earnings {e} before the exit")
+    add("screen.rules", "options", "pass" if not bad and picks else ("warn" if not picks else "fail"),
+        (f"{len(picks)} picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate" if not bad else "; ".join(bad[:10])),
+        "run_ic_screen (outputs/ic_screen.json)")
+    add("screen.proposed", "options", "pass" if len(prop) <= len(picks) else "fail", f"{len(prop)} proposed of {len(picks)} winners", "run_ic_screen")
+    # 4. the dossier agrees with the screen
+    dn = dos.get("names") or {}
+    vol = scr.get("vol") or {}
+    dis = [t for t, r in dn.items() if (r.get("chart") or {}).get("bias") != (vol.get(t) or {}).get("bias") and t in vol]
+    add("dossier.consistency", "dossier", "pass" if not dis else "fail", "chart reads in the dossier match the screen" if not dis else f"chart read differs for {', '.join(dis[:8])}", "run_dossier vs run_ic_screen")
+    miss = dos.get("missing") or {}
+    add("dossier.sections", "dossier", "pass" if not any(v for k, v in miss.items() if k in ("chart", "vol")) else "warn",
+        "missing: " + (", ".join(f"{k} {v}" for k, v in miss.items()) or "nothing"), "run_dossier (names in outputs/dossier.json 'missing_names')")
+    # 5. the forward test and the decision log, from the database
+    try:
+        rows = _sb_get("ic_forward", {"select": "id,opened,status,role,structure,legs,marks", "status": "eq.open"}, limit=5000) or []
+        d_ = str(scr.get("date") or today)
+        older = [r for r in rows if str(r.get("opened") or "")[:10] != d_]          # trades opened today get their first mark tomorrow
+        unmarked = [r.get("id") for r in older if not any((m or {}).get("date") == d_ for m in (r.get("marks") or []))]
+        sched = os.environ.get("GITHUB_EVENT_NAME") in (None, "schedule")
+        add("forward.marked", "forward test", "pass" if not unmarked else ("warn" if not sched else "fail"),
+            f"{len(older) - len(unmarked)} of {len(older)} open trades marked for {d_} ({len(rows) - len(older)} opened today)", "run_ic_record step 3a")
+        broken = [r.get("id") for r in rows if r.get("role") in ("proposed", "calibration") and (r.get("structure") or "IC") == "IC"
+                  and all(k in (r.get("legs") or {}) for k in ("long_put", "short_put", "short_call", "long_call")) and abs((r["legs"]["short_put"] - r["legs"]["long_put"]) - (r["legs"]["long_call"] - r["legs"]["short_call"])) > 1e-6]
+        add("forward.wings", "forward test", "pass" if not broken else "fail", f"{len(broken)} current-rule condors with uneven wings", "run_ic_record step 3b")
+        tot = _sb_get("ic_forward", {"select": "id", "order": "id.desc"}, limit=1) or []
+        top = (tot[0].get("id") or 0) if tot else 0
+        add("forward.size", "forward test", "pass" if top < 15000 else "warn", f"highest trade id {top} (the app pages 1,000 at a time up to 20,000)", "app optRowsAll")
+        dec = _sb_get("decisions", {"select": "id", "d": f"eq.{d_}", "engine": "eq.options"}, limit=5000) or []
+        add("decisions.logged", "learning", "pass" if dec or not sched else "warn", f"{len(dec)} options decisions logged for {d_}", "run_ic_record (decisions table)")
+    except Exception as e:
+        add("forward.db", "forward test", "warn", f"could not read the database: {e}", "Supabase")
+    # 5b. the proposed portfolios' inputs
+    pf = rd("phoenix_portfolios") or {}
+    if pf:
+        cnt = pf.get("counts") or {}
+        add("portfolios.inputs", "portfolios", "pass" if cnt.get("core") and (cnt.get("swing") or cnt.get("options")) else "warn",
+            f"core {cnt.get('core', 0)} ({(pf.get('lt') or {}).get('core_src')}), satellite {cnt.get('satellite', 0)}, swing {cnt.get('swing', 0)}, options {cnt.get('options', 0)}",
+            "run_portfolios (stocks.json trade/invest books, ic_screen proposed, Supabase portfolios)")
+        sp = pf.get("split_auto") or {}
+        add("portfolios.split", "portfolios", "pass" if abs(sum(sp.values()) - 1) < 1e-6 else "fail", f"Phoenix split {sp} sums to {sum(sp.values()):.3f}", "ALLOC split_by_verdict")
+        add("portfolios.fx", "portfolios", "pass" if "static" not in str((pf.get("conditions") or {}).get("fx_src")) else "warn",
+            f"EURUSD {(pf.get('conditions') or {}).get('eurusd')} from {(pf.get('conditions') or {}).get('fx_src')}", "_fx_usd_rates (Yahoo)")
+        bad_sw = [s_["t"] for s_ in pf.get("swing") or [] if not (0 < s_["stop"] < s_["entry"])]
+        add("portfolios.swing_stops", "portfolios", "pass" if not bad_sw else "fail", "every swing stop sits below its entry" if not bad_sw else f"bad stops: {', '.join(bad_sw)}", "run_portfolios swing")
+    else:
+        add("portfolios.inputs", "portfolios", "warn", "outputs/phoenix_portfolios.json missing", "step portfolios")
+    # 6. calendar runway
+    cal = rd("calendar") or {}
+    lastev = max([e.get("date", "") for e in cal.get("events") or [] if e.get("type") != "OPEX"] or [""])
+    add("calendar.runway", "data", "pass" if lastev and lastev >= str(today + timedelta(days=60)) else "warn",
+        f"macro events on file until {lastev or 'none'}" + ("" if lastev >= str(today + timedelta(days=60)) else " \u2014 add next year's FOMC/CPI/NFP/ECB/BoJ dates"), "phoenix.py: FOMC_2026, CPI_2026, NFP_2026, ...")
+    # 7. today's heartbeats
+    try:
+        hb = _sb_get("heartbeats", {"select": "lane,ok,note,ts", "ts": f"gte.{today}T00:00:00", "order": "ts.desc"}, limit=500) or []
+        seen = {}
+        for h in hb:
+            seen.setdefault(h["lane"], h)
+        failed = [f"{k}: {v.get('note') or ''}"[:120] for k, v in seen.items() if not v.get("ok")]
+        add("heartbeats", "pipeline", "pass" if not failed else "warn", f"{len(seen)} steps reported today" + (f"; not ok: " + " | ".join(failed[:6]) if failed else ", all ok"), "heartbeats table")
+    except Exception as e:
+        add("heartbeats", "pipeline", "warn", f"could not read heartbeats: {e}", "Supabase")
+    n = {s_: sum(1 for c in checks if c["status"] == s_) for s_ in ("pass", "warn", "fail")}
+    write_json("health", {"asof": _now(), "date": str(today), "summary": n, "checks": checks})
+    print(f"[health] {n['pass']} pass · {n['warn']} warn · {n['fail']} fail" + "".join(f"\n  {c['status'].upper()} {c['id']}: {c['detail']} ({c['where']})" for c in checks if c["status"] != "pass"))
+    sb_heartbeat("health", n["fail"] == 0, f"{n['pass']} pass · {n['warn']} warn · {n['fail']} fail")
+    return checks
+
+
+# ============================================================
+# PROPOSED PHOENIX PORTFOLIOS (Phase 2, 31 Oct 2026). The engine gathers every book's candidates and the day's
+# conditions; the app does the allocation for the account size and split you choose (€5k / €10k / €15k, Phoenix's
+# split or your own), so the numbers move as you change them. One rulebook, written here and shown in the app.
+# ============================================================
+ALLOC = {
+    "accounts_eur": [5000, 10000, 15000], "default_eur": 10000,
+    # Phoenix's split by the day score (CLEAR / TRADE CAREFULLY / STAND DOWN): share of the account per sleeve.
+    # Long-term is a fixed half: it is invested for years and does not trade the day's conditions. The options
+    # share is a budget of MAX LOSS (what a defined-risk trade can lose, and what the broker holds as margin).
+    "split_by_verdict": {
+        "CLEAR":           {"lt": 0.50, "swing": 0.25, "options": 0.15, "cash": 0.10},
+        "TRADE CAREFULLY": {"lt": 0.50, "swing": 0.15, "options": 0.10, "cash": 0.25},
+        "STAND DOWN":      {"lt": 0.50, "swing": 0.00, "options": 0.05, "cash": 0.45},
+    },
+    "stress_regimes": ["CRISIS_PEAK", "ENERGY_SPIKE"],      # halve swing and options into cash
+    "lt_satellite": 0.20,                                    # share of the long-term sleeve in the stock invest book's top names
+    "swing": {"risk_per_trade": RISK["risk_conservative"], "max_heat": RISK["max_heat_R"], "max_position": RISK["max_position_pct"],
+              "atr_stop_mult": RISK["atr_stop_mult"], "max_positions": 5},
+    "options": {"max_trades": 6, "per_trade_max_loss": 0.05, "per_cluster": 2, "require_conservative_ev": True},
+}
+# names that move together, so the options sleeve does not stack one bet six ways
+OPT_CLUSTER = {
+    "financials": ["JPM", "BAC", "WFC", "C", "GS", "MS", "AXP", "V", "MA", "PYPL", "COIN", "XLF", "KRE", "SOFI"],
+    "us index": ["SPY", "QQQ", "IWM", "DIA"],
+    "semis & tech": ["SMH", "SOXX", "XLK", "NVDA", "AMD", "MU", "MRVL", "TER", "TXN", "AVGO", "TSM", "CSCO", "AAPL", "MSFT", "GOOGL", "GOOG", "META", "AMZN", "CRM", "ADBE", "NOW", "PLTR", "SNOW", "IBM", "DELL", "ARKK"],
+    "energy": ["XLE", "USO", "XOM", "CVX", "OXY", "VLO", "MPC"],
+    "rates & credit": ["TLT", "IEF", "LQD", "HYG"],
+    "metals": ["GLD", "SLV", "GDX"],
+    "health": ["XLV", "XBI", "UNH", "LLY", "JNJ", "PFE", "MRK", "ABBV"],
+    "consumer": ["XLY", "XLP", "WMT", "COST", "TGT", "HD", "LOW", "MCD", "SBUX", "NKE", "DIS", "NFLX", "KO", "PEP", "TSLA", "UBER", "ABNB", "SHOP"],
+    "industrials": ["XLI", "BA", "CAT", "DE", "GE", "XLB"],
+    "international": ["EEM", "EFA", "FXI"],
+}
+
+
+def run_portfolios():
+    """
+    Gather the candidates for the proposed portfolios from every book, with the day's conditions:
+      long-term   your confirmed Portfolio Builder portfolio (Supabase portfolios, owner G) as the core, else the
+                  builder's Long Term template; plus the stock invest book's top names as a satellite
+      swing       the stock trade book's passers (all six gates), with an entry at the last close and a stop
+                  2 ATR below, sized later to 1% of the account at risk
+      options     today's proposed list, with each trade's max loss, both EVs, cluster and the events it sits through
+      split       Phoenix's split for today from the day score and the regime, with the reasons
+    Writes outputs/phoenix_portfolios.json. The app allocates for €5k / €10k / €15k and your split.
+    """
+    import os, json
+    from datetime import datetime
+    def rd(n):
+        try:
+            return json.load(open(os.path.join(OUTPUTS_DIR, n + ".json")))
+        except Exception:
+            return {}
+    ds, macro, stocks, scr, dos, cal = rd("dayscore"), rd("macro"), rd("stocks"), rd("ic_screen"), rd("dossier"), rd("calendar")
+    verdict = ds.get("verdict") or "TRADE CAREFULLY"
+    regime = macro.get("regime")
+    split = dict(ALLOC["split_by_verdict"].get(verdict) or ALLOC["split_by_verdict"]["TRADE CAREFULLY"])
+    sc_ = ds.get("score") if ds.get("score") is not None else "n/a"
+    reasons = [f"Day score {sc_} ({verdict}) sets the trading sleeves: swing {split['swing']*100:.0f}%, options max-loss budget {split['options']*100:.0f}%."
+               if ds else "No day score on file \u2014 using the TRADE CAREFULLY split."]
+    if regime in ALLOC["stress_regimes"]:
+        cut = split["swing"] / 2 + split["options"] / 2
+        split["swing"] /= 2; split["options"] /= 2; split["cash"] += cut
+        reasons.append(f"Regime {regime}: swing and options halved into cash.")
+    reasons.append("Long-term stays at half the account: it is invested for years and does not trade the day's conditions.")
+    # FX: USD per EUR
+    try:
+        fx, fx_src = _fx_usd_rates(); eurusd = float(fx.get("EUR") or 1.08)
+    except Exception as e:
+        eurusd, fx_src = FX_STATIC_FALLBACK.get("EUR", 1.08) if "FX_STATIC_FALLBACK" in globals() else 1.08, f"static ({e})"
+    # long-term core: the confirmed builder portfolio
+    core, core_src = [], None
+    try:
+        rows = _sb_get("portfolios", {"select": "name,confirmed,lines,updated_at", "owner": "eq.G", "order": "updated_at.desc"}, limit=20) or []
+        pick = next((r for r in rows if r.get("confirmed") and r.get("lines")), None) or next((r for r in rows if r.get("lines")), None)
+        if pick:
+            core = [{"t": l.get("t") or l.get("ticker"), "w": float(l.get("w") if l.get("w") is not None else l.get("weight") or 0)} for l in pick["lines"]]
+            core_src = f"Portfolio Builder: {pick.get('name')}" + (" (confirmed)" if pick.get("confirmed") else " (latest, not confirmed)")
+    except Exception as e:
+        print(f"[portfolios] builder portfolios unreadable ({e})")
+    if not core:
+        core = [{"t": "VWCE", "w": 0.60}, {"t": "SGLD", "w": 0.08}, {"t": "BTCE", "w": 0.07}]
+        core_src = "the builder's Long Term template (no saved portfolio found)"
+    core = [l for l in core if l["t"] and l["w"] > 0]
+    tw = sum(l["w"] for l in core) or 1
+    if tw > 1.0001:                                          # over-allocated: scale down
+        core = [{"t": l["t"], "w": round(l["w"] / tw, 4)} for l in core]
+    elif tw < 0.9999:                                        # the unallocated part of the saved portfolio stays as cash (XEON)
+        core = [{"t": l["t"], "w": round(l["w"], 4)} for l in core] + [{"t": "XEON", "w": round(1 - tw, 4), "note": "unallocated in the saved portfolio, held as cash"}]
+    sat = [{"t": c["ticker"], "name": c.get("name"), "score": c.get("invest_score"), "industry": c.get("industry"),
+            "price": (c.get("levels") or {}).get("last")} for c in (stocks.get("invest_ranked") or [])[:5]]
+    # swing: trade-book passers
+    D = dos.get("names") or {}
+    swing = []
+    for c in (stocks.get("trade_ranked") or []):
+        if not c.get("passer"):
+            continue
+        lv = c.get("levels") or {}; last = lv.get("last"); atr = c.get("atr14_pct") or lv.get("atr_pct")
+        if not last or not atr:
+            continue
+        stop = round(last * (1 - ALLOC["swing"]["atr_stop_mult"] * atr / 100), 2)
+        dd = D.get(c["ticker"]) or {}
+        swing.append({"t": c["ticker"], "name": c.get("name"), "industry": c.get("industry"), "score": c.get("trade_score"),
+                      "breakout": c.get("breakout"), "entry": last, "stop": stop, "atr_pct": atr, "resistance": lv.get("resistance"),
+                      "chart": (dd.get("chart") or {}).get("bias"), "patterns": [p.get("label") for p in dd.get("patterns") or []][:3]})
+        if len(swing) >= 12:
+            break
+    # options: the proposed list
+    cl = {t: k for k, v in OPT_CLUSTER.items() for t in v}
+    evs = [e for e in (cal.get("events") or []) if e.get("type") in ("FOMC", "CPI", "NFP")]
+    opts = []
+    for p in scr.get("proposed") or []:
+        through = [f"{e['type']} {e['date'][5:]}" for e in evs if str(scr.get("date")) <= e["date"] <= str(p.get("exit_date"))]
+        opts.append({"t": p["ticker"], "label": p.get("label"), "structure": p.get("structure"), "expiry": p.get("expiry"),
+                     "expiry_type": p.get("expiry_type"), "exit_date": p.get("exit_date"), "max_loss_usd": p.get("max_loss_1"),
+                     "credit": p.get("credit"), "ev_usd": p.get("ev_hv_1"), "ev_pct": p.get("ev_pct"), "ev_cons_usd": p.get("ev_cons_1"),
+                     "ev_cons_pct": p.get("ev_cons_pct"), "ev_mkt_usd": p.get("ev_1"), "win": p.get("pop_hv"), "net_delta": p.get("net_delta"),
+                     "spot": p.get("spot"), "bias": p.get("bias"), "cluster": cl.get(p["ticker"], "other: " + p["ticker"]), "events": through,
+                     # smaller versions of the same view from the name's board (narrower wings, a different expiry), for
+                     # accounts where the winner's max loss is too big: the allocator tries these before giving up on the name
+                     "sized": {a: {"label": v.get("label"), "structure": v.get("structure"), "expiry": v.get("expiry"), "expiry_type": v.get("expiry_type"),
+                                   "exit_date": v.get("exit_date"), "max_loss_usd": v.get("max_loss_1"), "credit": v.get("credit"), "ev_usd": v.get("ev_hv_1"),
+                                   "ev_pct": v.get("ev_pct"), "ev_cons_usd": v.get("ev_cons_1"), "ev_cons_pct": v.get("ev_cons_pct"), "ev_mkt_usd": v.get("ev_1"),
+                                   "win": v.get("pop_hv"), "net_delta": v.get("net_delta")} for a, v in (p.get("sized") or {}).items()},
+                     "alts": [{"label": b.get("label"), "structure": b.get("structure"), "expiry": b.get("expiry"), "expiry_type": b.get("expiry_type"),
+                               "exit_date": b.get("exit_date"), "max_loss_usd": b.get("max_loss_1"), "credit": b.get("credit"),
+                               "ev_usd": b.get("ev_hv_1"), "ev_pct": b.get("ev_pct"), "ev_cons_usd": b.get("ev_cons_1"), "ev_cons_pct": b.get("ev_cons_pct"),
+                               "ev_mkt_usd": b.get("ev_1"), "win": b.get("pop_hv"), "net_delta": b.get("net_delta")}
+                              for b in sorted([b for b in (p.get("board") or []) if (b.get("max_loss_1") or 9e9) < (p.get("max_loss_1") or 0)
+                                               and (b.get("ev_cons_pct") or -1) > 0 and b.get("label") != p.get("label")],
+                                              key=lambda b: -(b.get("ev_cons_pct") or 0))[:4]]})
+    out = {"asof": _now(), "date": scr.get("date") or str(datetime.utcnow().date()), "rules": ALLOC,
+           "conditions": {"dayscore": ds.get("score"), "verdict": verdict, "regime": regime, "eurusd": round(eurusd, 4), "fx_src": fx_src},
+           "split_auto": split, "split_reasons": reasons,
+           "lt": {"core": core, "core_src": core_src, "satellite": sat}, "swing": swing, "options": opts,
+           "counts": {"core": len(core), "satellite": len(sat), "swing": len(swing), "options": len(opts)}}
+    write_json("phoenix_portfolios", out)
+    print(f"[portfolios] {verdict} · split {split} · core {len(core)} ({core_src}) · satellite {len(sat)} · swing {len(swing)} · options {len(opts)} · EURUSD {eurusd:.4f} ({fx_src})")
+    sb_heartbeat("portfolios", bool(core), f"{verdict} · swing {len(swing)} · options {len(opts)} · core {len(core)}")
+    return out
+
+
+IC_STOPS = {"sl50": ("half the max loss", lambda r: -0.5 * float(r["max_loss_1"])),
+            "slcr": ("a loss equal to the credit", lambda r: -100.0 * float(r["credit"]))}
+
+
+def _ic_stop_results(row, marks, res):
+    """THE STOP-LOSS VARIANTS, side by side (31 Oct 2026, Gabriel). The trade itself runs to its planned exits;
+    these answer "what if we had stopped out". Read from the same daily marks: the first mark at or below the
+    stop level closes the variant at that mark's P&L (a daily check, so a gap past the level is taken in full,
+    as a real stop would be). At each exit the variant shows the stop P&L if it fired first, else the held result.
+      sl50   stop at -50% of the max loss
+      slcr   stop at a loss equal to the credit received"""
+    out = {}
+    exit_at = {}
+    for i, m in enumerate(marks):
+        for x in IC["exits"]:
+            if str(x) not in exit_at and m.get("pnl_1") is not None and m.get("dte") is not None and m["dte"] <= x:
+                exit_at[str(x)] = i
+    for key, (_, lvl) in IC_STOPS.items():
+        thr = lvl(row)
+        hit = next(((i, m) for i, m in enumerate(marks) if m.get("pnl_1") is not None and m["pnl_1"] <= thr), None)
+        v = {"level": round(thr, 2), "stopped": ({"date": hit[1]["date"], "dte": hit[1]["dte"], "pnl_1": hit[1]["pnl_1"]} if hit else None)}
+        for x in IC["exits"]:
+            if str(x) in res and str(x) in exit_at:
+                v[str(x)] = hit[1]["pnl_1"] if (hit and hit[0] <= exit_at[str(x)]) else res[str(x)]
+        out[key] = v
+    return out
+
+
 def run_ic_record():
     import os, json, gzip
     from datetime import datetime, date
@@ -11879,7 +12649,12 @@ def run_ic_record():
         notes.append("archived")
     except Exception as e:
         notes.append(f"archive failed: {e}")
-    # 2. vol history
+    # 2. vol history, with each name's pick of the day so the app can show how it changes
+    prop_tk = {p["ticker"] for p in scr.get("proposed") or []}
+    picks_by = {p["ticker"]: {"label": p.get("label"), "structure": p.get("structure"), "expiry": p.get("expiry"),
+                              "expiry_type": p.get("expiry_type"), "ev_pct": p.get("ev_pct"), "ev_mkt": p.get("ev_1"),
+                              "pop": p.get("pop_hv") or p.get("pop_exit"), "bias": p.get("bias"), "proposed": p["ticker"] in prop_tk}
+                for p in scr.get("picks") or []}
     try:
         rows = []
         for tk, c in (ch.get("names") or {}).items():
@@ -11892,7 +12667,8 @@ def run_ic_record():
             rows.append({"d": d, "ticker": tk, "spot": S, "hv30": (ivem.get(tk) or {}).get("rv30_pct"),
                          "iv_atm": {e: round(v[1] * 100, 2) for e, v in sorted(atm.items())},
                          "iv30": round(iv30, 4) if iv30 else None, "hv30s": vv.get("hv30s"),
-                         "grp": vv.get("group") or (ch.get("groups") or {}).get(tk)})
+                         "grp": vv.get("group") or (ch.get("groups") or {}).get(tk),
+                         "pick": picks_by.get(tk)})
         if rows:
             _sb_write("POST", "ic_vol_history", rows, extra_headers={"Prefer": "resolution=merge-duplicates,return=minimal"})
         notes.append(f"vol {len(rows)}")
@@ -11926,6 +12702,7 @@ def run_ic_record():
                         res[str(x)] = pnl                        # first mark at or inside each exit
                 if all(str(x) in res for x in IC["exits"] if x < (row.get("model") or {}).get("dte_entry", 999) - 2) or dte <= 0:
                     patch.update({"status": "closed", "closed": d}); closed += 1
+            res.update(_ic_stop_results(row, marks, res))
             patch.update({"marks": marks, "result": res})
             _sb_write("PATCH", "ic_forward", patch, params={"id": f"eq.{row['id']}"})
             marked += 1
@@ -11935,6 +12712,31 @@ def run_ic_record():
     # so the model is tested where it says no as well). One open trade per name and expiry: a winner that
     # repeats on the same expiry is the same trade and is not counted twice.
     opened = 0
+    ev_name = os.environ.get("GITHUB_EVENT_NAME")
+    if ev_name and ev_name != "schedule" and not os.environ.get("PHOENIX_FORWARD"):
+        # a manual run mid-day would open trades at intraday quotes and a second batch on the same date
+        notes.append(f"no opens ({ev_name} run — the forward test opens in the scheduled morning run only)")
+        print(f"[icrec] {d}: {', '.join(notes)} · marked {marked} · closed {closed} · broken {broken}")
+        sb_heartbeat("ic_record", not any("failed" in n for n in notes), f"marked {marked} · {', '.join(notes)}")
+        return
+    # the decision log: every name's outcome today (proposed, calibration, skipped) with the market context, so the
+    # weekly review can ask which contexts the options engine gets right — the same footing as the stock signals
+    ctx = _context_now()
+    try:
+        prop_set = {p["ticker"] for p in scr.get("proposed") or []}
+        dec = []
+        for p in scr.get("picks") or []:
+            dec.append({"ticker": p["ticker"], "action": "proposed" if p["ticker"] in prop_set else "calibration",
+                        "detail": {"label": p.get("label"), "structure": p.get("structure"), "expiry": p.get("expiry"), "expiry_type": p.get("expiry_type"),
+                                   "ev_pct": p.get("ev_pct"), "ev_cons_pct": p.get("ev_cons_pct"), "ev_mkt": p.get("ev_1"), "win": p.get("pop_hv"),
+                                   "bias": p.get("bias"), "iv": p.get("iv_atm"), "hv": p.get("hv30s"), "group": p.get("group"),
+                                   "patterns": [x.get("label") for x in ((scr.get("vol") or {}).get(p["ticker"]) or {}).get("patterns") or []][:4]},
+                        "context": ctx, "ref": f"{p['ticker']}|{p.get('expiry')}"})
+        for tk, why in (scr.get("skipped") or {}).items():
+            dec.append({"ticker": tk, "action": "skipped", "detail": {"reason": why, "bias": ((scr.get("vol") or {}).get(tk) or {}).get("bias")}, "context": ctx, "ref": None})
+        notes.append(f"decisions {_log_decisions('options', d, dec)}")
+    except Exception as e:
+        notes.append(f"decisions failed: {e}")
     try:
         held = {(r["ticker"], str(r["expiry"])[:10]) for r in (_sb_get("ic_forward", {"status": "eq.open", "select": "ticker,expiry"}) or [])}
         prop = {(p["ticker"], p["expiry"]) for p in scr.get("proposed") or []}
@@ -11955,7 +12757,8 @@ def run_ic_record():
                                   "net_delta": p.get("net_delta"), "deltas": p.get("deltas"), "label": p.get("label"),
                                   "ev_pct": p.get("ev_pct"), "rank_measure": p.get("rank_measure"), "dte_entry": p.get("dte"),
                                   "structure": p.get("structure", "IC"), "group": p.get("group"), "bias": p.get("bias"), "chart_why": p.get("chart_why"),
-                                  "iv30": p.get("iv30"), "hv30s": p.get("hv30s")},
+                                  "iv30": p.get("iv30"), "hv30s": p.get("hv30s"), "ev_cons_pct": p.get("ev_cons_pct"),
+                                  "expiry_type": p.get("expiry_type"), "context": ctx},
                         "iv_atm": p.get("iv_atm"), "hv": p.get("hv")})
         if new:
             _sb_write("POST", "ic_forward", new, extra_headers={"Prefer": "resolution=ignore-duplicates,return=minimal"})
@@ -14932,6 +15735,8 @@ def run_full():
     step("mme_map",        run_mme_map,       optional=True)   # the dealer map: every name vs its walls and flip
     step("ic_screen",      run_ic_screen,     optional=True)   # iron condor tournament
     step("ic_record",      run_ic_record,     optional=True)   # archive chains + vol, forward-test the winners, mark open ones
+    step("dossier",        run_dossier,       optional=True)   # one record per name: every engine's view, archived for the review
+    step("portfolios",     run_portfolios,    optional=True)   # every book's candidates + Phoenix's split, for the proposed portfolios
     # the backtest replays the archive; it runs itself on Fridays (it returns early until ten days are archived)
     from datetime import datetime as _dt, timezone as _tz
     if _dt.now(_tz.utc).weekday() == 4:
@@ -14951,6 +15756,7 @@ def run_full():
     # The pack reads every module above, so it must be the LAST step. Placed earlier it would
     # have summarised yesterday's 13F and today's everything else, and nothing would have said so.
     step("fact_pack",      run_fact_pack,     optional=True)
+    step("health",         run_health,        optional=True)   # LAST: re-checks the run's outputs and says what broke and where
 
     if PUBLISH_HOLDS:
         print("=== PUBLISH GATE HELD BACK %d FILE(S) ===" % len(PUBLISH_HOLDS))
@@ -15001,6 +15807,12 @@ def run_engine(name):
         run_ic_record()
     elif name == "ic_backtest":
         run_ic_backtest()
+    elif name == "dossier":
+        run_dossier()
+    elif name == "portfolios":
+        run_portfolios()
+    elif name == "health":
+        run_health()
     elif name == "dayscore":
         run_dayscore()
     elif name == "signals":

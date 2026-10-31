@@ -1153,7 +1153,7 @@
   .opt-tbl .tr{white-space:nowrap} .opt-tbl i{font-style:normal;color:var(--inkFade)}
   .opt-tbl .ev{color:var(--green);font-weight:700} .opt-tbl .ev.neg{color:var(--red)} .opt-tbl .ev.best{text-decoration:underline}
   .opt-tbl .r.prop{box-shadow:inset 3px 0 0 var(--green)}
-  #optList .opt-tbl .hd,#optList .opt-tbl .r{grid-template-columns:90px minmax(230px,2.2fr) 80px 92px 70px 60px;min-width:640px}
+  #optList .opt-tbl .hd,#optList .opt-tbl .r{grid-template-columns:96px minmax(260px,2.2fr) 86px 104px 76px 64px 80px;min-width:780px}
   #optList .opt-tbl .hd span:nth-child(n+3),#optList .opt-tbl .r span:nth-child(n+3){text-align:center} #optList .opt-tbl .ev{text-align:right}
   .opt-ivr b{font-weight:700} .opt-ivr i{font-size:10px}
   .opt-legend{font-size:12px;font-style:italic;color:var(--inkFade);line-height:1.6;margin:10px 4px 4px}
@@ -1165,10 +1165,43 @@
   .opt-kpi small{display:block;font-size:10px;color:var(--inkFade);font-family:var(--mono);margin-top:2px}
   .opt-tbl.fw .hd,.opt-tbl.fw .r{grid-template-columns:70px 64px 74px 100px 100px 100px 90px;min-width:640px}
   .opt-tbl.op .hd,.opt-tbl.op .r{grid-template-columns:70px minmax(220px,2fr) 70px 50px 80px 80px 90px;min-width:700px}
-  .opt-tbl.wn .hd,.opt-tbl.wn .r{grid-template-columns:90px minmax(220px,2fr) 54px 80px 80px 80px 84px 66px;min-width:800px}
+  .opt-tbl.wn .hd,.opt-tbl.wn .r{grid-template-columns:96px minmax(220px,2fr) 76px 60px 84px 84px 84px 80px 84px 70px;min-width:990px}
   .opt-tbl.bd .hd,.opt-tbl.bd .r{grid-template-columns:28px minmax(210px,2fr) 110px 66px 76px repeat(6,70px);min-width:1000px}
-  .opt-tbl.vl .hd,.opt-tbl.vl .r{grid-template-columns:90px 70px 90px 70px 70px 100px 90px;min-width:640px}
+  .opt-tbl.vl .hd,.opt-tbl.vl .r{grid-template-columns:90px 70px 96px 76px 76px repeat(var(--wk,0),78px) 84px 100px 90px;min-width:900px}
   .opt-tbl.bt .hd,.opt-tbl.bt .r{grid-template-columns:110px repeat(12,64px);min-width:900px}
+  .opt-tbl .hd .sk{cursor:pointer;user-select:none;-webkit-user-select:none} .opt-tbl .hd .sk em{font-style:normal;font-size:10px;margin-left:4px;color:var(--inkFade)}
+  .opt-tbl .hd .sk.on{color:var(--gold)} .opt-tbl .hd .sk.on em{color:var(--gold)}
+  .opt-tbl .xt{display:inline-block;margin-left:8px;font-size:9.5px;padding:1px 6px;border-radius:999px;border:1px solid var(--line2);text-transform:uppercase;letter-spacing:.05em}
+  .opt-tbl .xt.monthly{color:var(--gold);border-color:var(--gold)} .opt-tbl .xt.weekly{color:var(--inkFade)}
+  .opt-why{padding:10px 14px 14px;background:var(--card);border-bottom:1px solid var(--line2);font-size:13px;line-height:1.55;min-width:640px}
+  .opt-why ol{margin:0 0 8px 18px;padding:0} .opt-why li{margin:3px 0}
+  .opt-wk{display:flex;flex-wrap:wrap;gap:6px 14px;font-family:var(--mono);font-size:12px;margin:6px 0} .opt-wk span{white-space:nowrap}
+  #mcPanePf{max-width:100%;overflow-x:hidden}
+  .pf-ctl{display:flex;flex-wrap:wrap;gap:10px 22px;margin:4px 2px 12px} .pf-ctl>div{display:flex;align-items:center;gap:8px} .pf-ctl i{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--inkFade);text-transform:uppercase;letter-spacing:.06em}
+  .pf-chips{display:flex;gap:6px;flex-wrap:wrap} .pf-chips button{font-family:var(--mono);font-size:12px;padding:6px 12px;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--inkFade);cursor:pointer}
+  .pf-chips button.on{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:700}
+  .pf-man{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:0 2px 12px;font-family:var(--mono);font-size:12px}
+  .pf-man input{width:56px;margin:0 4px;padding:4px;border-radius:6px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:var(--mono)}
+  .pf-man .ok{color:var(--green)} .pf-man .bad{color:var(--red);font-weight:700}
+  .pf-why{font-size:13px;line-height:1.55;margin:0 2px 12px;padding:10px 12px;border-left:3px solid var(--gold);background:var(--card)} .pf-why i{color:var(--inkFade);font-style:normal;font-family:var(--mono);font-size:11.5px}
+  .pf-checks{margin:10px 2px;font-size:12.5px} .pf-checks div{padding:3px 0} .pf-checks .pass b{color:var(--green)} .pf-checks .warn b{color:var(--gold)} .pf-checks .fail b{color:var(--red)}
+  .opt-tbl.pf-lt .hd,.opt-tbl.pf-lt .r{grid-template-columns:90px 80px 100px minmax(200px,1fr);min-width:520px}
+  .opt-tbl.pf-sw .hd,.opt-tbl.pf-sw .r{grid-template-columns:100px 60px 76px 76px 90px 80px minmax(220px,1fr);min-width:760px}
+  .opt-tbl.pf-op .hd,.opt-tbl.pf-op .r{grid-template-columns:64px minmax(240px,1.6fr) 84px 70px 76px 54px 64px 110px;min-width:800px}
+  .pf-act{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px} .pf-act button{font-family:var(--mono);font-size:12.5px;font-weight:700;padding:9px 14px;border-radius:8px;border:1px solid var(--gold);background:var(--gold);color:var(--bg);cursor:pointer}
+  .pf-act span{font-size:12px;color:var(--inkFade)}
+  .mc-health{margin:8px 0 2px} .mch{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--card);font-size:12.5px}
+  .mch summary{cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700} .mch summary span{font-weight:400;color:var(--inkFade)}
+  .mch.pass summary{color:var(--green)} .mch.warn summary{color:var(--gold)} .mch.fail summary{color:var(--red)}
+  .mch-l{margin-top:6px;overflow-x:auto} .mch-l div{display:grid;grid-template-columns:44px 150px minmax(240px,1fr) 220px;gap:8px;padding:4px 0;border-top:1px solid var(--line2);min-width:680px;font-size:12px}
+  .mch-l b{font-family:var(--mono);font-size:10.5px} .mch-l .fail b{color:var(--red)} .mch-l .warn b{color:var(--gold)} .mch-l .pass b{color:var(--green)}
+  .mch-l span:nth-child(2){font-family:var(--mono)} .mch-l i{color:var(--inkFade);font-style:normal;font-family:var(--mono);font-size:11px}
+  /* implied vol: falling = fear fading = good for a seller (green), rising = red */
+  .ivup,.opt-tbl .ivup,.opt-wk .ivup{color:var(--red)} .ivdn,.opt-tbl .ivdn,.opt-wk .ivdn{color:var(--green)}
+  .opt-ph{margin-top:6px;font-size:12.5px} .opt-phl div{display:grid;grid-template-columns:70px minmax(200px,1fr) 80px 90px 100px;gap:8px;font-family:var(--mono);font-size:12px;padding:2px 0}
+  .opt-phl div.ch{color:var(--gold)} .opt-go{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;color:var(--gold)}
+  .opt-tbl.sl .hd,.opt-tbl.sl .r{grid-template-columns:64px 190px 40px 70px 84px 100px 84px 90px;min-width:760px} .opt-tbl.sl .r.first{border-top:1.5px solid var(--line2)}
+  .opt-tbl.pt .hd,.opt-tbl.pt .r{grid-template-columns:70px minmax(170px,1.6fr) 60px 70px 56px 84px 130px 84px 64px;min-width:860px}
   .opt-det{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--card)}
   .opt-det summary{cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
   .opt-det summary span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--inkFade)}
@@ -10856,6 +10889,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var shapes=[vl(r.S,ICC.blue,2.5,"solid"),{type:"line",xref:"paper",x0:0,x1:1,y0:0,y1:0,line:{color:ink,width:1}}];
     if(!narrow){ r.L.forEach(function(l){ shapes.push(vl(l.K,l.cp==="P"?"#d08a1c":"#4a86d0",1,"dot")); }); }
     if(beD){ beD.forEach(function(x){ if(x!=null) shapes.push(vl(x,ICC.gold,1.4,"dash")); }); }
+    // the two stop-loss levels being tested, per the position size shown
+    [[-0.5*r.maxLoss*r.n,"stop \u221250% max loss"],[-r.credit*100*r.n,"stop = credit"]].forEach(function(h){
+      shapes.push({type:"line",xref:"paper",x0:0,x1:1,y0:h[0],y1:h[0],line:{color:ICC.red,width:1,dash:"dot"},label:{text:h[1]+" "+optM(h[0]),textposition:"end",font:{size:9,color:ICC.red}}}); });
     var mm=(typeof MME_MAP!=="undefined"&&MME_MAP)?MME_MAP:null, mr=null;
     if(mm){ ["green","amber","red"].forEach(function(g){ ((mm.groups||{})[g]||[]).forEach(function(x){ if(x.ticker===st.tk) mr=x; }); }); if(!mr&&mm.etf_rows) mr=mm.etf_rows[st.tk]; }
     if(mr&&!narrow){ if(mr.support) shapes.push(vl(mr.support,"#2D8A55",1,"dashdot")); if(mr.resist) shapes.push(vl(mr.resist,"#B03030",1,"dashdot")); }
@@ -10936,6 +10972,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var shapes=[];
     if(V.support) shapes.push(hl(V.support,ICC.green,"dash","support "+V.support));
     if(V.resistance) shapes.push(hl(V.resistance,ICC.red,"dash","resistance "+V.resistance));
+    (V.patterns||[]).filter(function(p){ return p.kind==="chart"&&p.confirm_line!=null; }).slice(0,2).forEach(function(p){
+      shapes.push(hl(p.confirm_line,"#8a5cc2","dashdot",p.label+(p.confirmed?" \u2713 ":" line ")+p.confirm_line));
+      if(p.target!=null) shapes.push(hl(p.target,"#8a5cc2","dot",p.label+" target "+p.target)); });
     if(icHas(st,"sp")) shapes.push(hl(st.sp,"#d08a1c","dot","short put "+st.sp));
     if(icHas(st,"sc")) shapes.push(hl(st.sc,"#4a86d0","dot","short call "+st.sc));
     var layout={height:240,margin:{l:52,r:12,t:10,b:30},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},showlegend:false,
@@ -10980,6 +11019,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     function nr(ks,t){ return ks.length?ks.reduce(function(a,b){ return Math.abs(b-t)<Math.abs(a-t)?b:a; }):t; }
     if(icHas(st,"sp")&&(st.sp==null||st.lp==null)){ st.sp=nr(pk.filter(function(k){return k<S;}),S*0.93); st.lp=nr(pk.filter(function(k){return k<st.sp;}),st.sp-S*0.03); }
     if(icHas(st,"sc")&&(st.sc==null||st.lc==null)){ st.sc=nr(ck.filter(function(k){return k>S;}),S*1.07); st.lc=nr(ck.filter(function(k){return k>st.sc;}),st.sc+S*0.03); }
+    if(k==="IC"&&st.lp!=null&&st.lc!=null){                   // a condor gets equal wings: the call wing matches the put wing
+      var w=st.sp-st.lp, c2=ck.filter(function(x){ return Math.abs(x-st.sc-w)<1e-6; });
+      if(c2.length) st.lc=c2[0]; else { var p2=pk.filter(function(x){ return Math.abs(st.sp-x-(st.lc-st.sc))<1e-6; }); if(p2.length) st.lp=p2[0]; }
+    }
     st.day=null; icDraw();
   }
   function icLoad(tk,reset,row){
@@ -10998,19 +11041,13 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     });
   }
   // ---- OPTIONS (Mission Control tab): 1 · today's proposals with the graph, 2 · the tournament and the testing ----
-  var IC_UNI=null, OPT_GRP="all", OPT_BT=null;
+  var IC_UNI=null, OPT_GRP="all", OPT_BT=null, OPT_FOCUS=null;
   function optM(v){ return v==null?"\u2014":(v<0?"\u2212$":"$")+Math.abs(Math.round(v)).toLocaleString(); }
-  function optPct(v,d){ return v==null?"\u2014":(v*100).toFixed(d==null?0:d)+"%"; }
+  function optPct(v,d){ if(v==null) return "\u2014"; var x=(v*100).toFixed(d==null?0:d); return (+x===0?(0).toFixed(d==null?0:d):x)+"%"; }
   function optDate(e,yr){ return e?new Date(e+"T12:00:00Z").toLocaleDateString(undefined,yr?{day:"numeric",month:"short",year:"2-digit"}:{month:"short",day:"numeric"}):"\u2014"; }
   function optEsc(x){ return String(x==null?"":x).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
   function optBias(b){ return b==="bullish"?"\u2197 bullish":(b==="bearish"?"\u2198 bearish":(b==="neutral"?"\u2194 range":"\u2014")); }
   function optGrpName(g){ return g==="etf"?"ETF":(g==="stock"?"Stock":"MME"); }
-  // IV column: the 1-year rank once enough history has been recorded, the 30-day implied vol until then
-  function optIV(p){
-    if(p.ivr!=null) return '<span class="opt-ivr">'+(p.ivr_wk!=null?p.ivr_wk+' \u2192 ':'')+'<b>'+p.ivr+'</b></span>';
-    var a=p.iv30_wk, b=p.iv30; if(b==null) return "\u2014";
-    return '<span class="opt-ivr">'+(a!=null?Math.round(a*100)+' \u2192 ':'')+'<b>'+Math.round(b*100)+'</b><i>%</i></span>';
-  }
   function optFill(){
     var host=document.getElementById("optPane"); if(!host) return;
     host.innerHTML='<div class="ed-note">Loading the options screen\u2026</div>';
@@ -11048,7 +11085,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
             '<b>Win odds:</b> chance of a profit at the exit, on the stock\u2019s own vol<br>'+
             '<b>IV:</b> a week ago \u2192 today \u2014 the 30-day implied vol for now; from three months of recorded history it becomes the IV rank over that history (a full 1-year rank from Oct 2027). We sell as fear fades.<br>'+
             '<b>Exit:</b> the day to close the trade, win or lose<br>'+
-            '<b>EV:</b> expected return on the money at risk, to the exit, after slippage and fees</div>'+
+            '<b>EV:</b> expected return on the money at risk, to the exit, after slippage and fees, on the stock\u2019s 30-day vol \u00b7 <b>EV cons.:</b> the same at the higher of its 30- and 60-day vol, the conservative check<br>'+
+            '<b>Patterns:</b> Bulkowski\u2019s tested candle and chart patterns (from your pattern notes) \u2014 tap a row to see them with their odds</div>'+
         '</div>'+
         // SECTION 2
         '<div class="opt-sec" id="optSec2"><div class="opt-sk"><b>2</b> Tournament &amp; testing</div>'+
@@ -11057,13 +11095,16 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           '<div id="optWinners"></div>'+
           '<div id="optBoard"></div>'+
           '<div id="optVol"></div>'+
+          '<div id="optPat"></div>'+
           '<div id="optBt"></div>'+
           '<div id="optSkip"></div>'+
           '<div class="ed-note" style="margin-top:10px">'+optEsc(IC_DATA.method||"")+'</div>'+
         '</div></div>';
       optGroups(); optList(); optKpi(); optForward(); optWinners(); optBoardFill(null); optVol(); optBacktest(); optSkipped();
+      optLoadIVW().then(function(){ optList(); optVol(); });
+      optPatterns();
       var first=P[0]||(IC_DATA.picks||[])[0];
-      var tk=IC_LAB&&IC_LAB.tk?IC_LAB.tk:(first?first.ticker:Object.keys(IC_UNI.names||{}).sort()[0]);
+      var tk=OPT_FOCUS||(IC_LAB&&IC_LAB.tk?IC_LAB.tk:(first?first.ticker:Object.keys(IC_UNI.names||{}).sort()[0])); OPT_FOCUS=null;
       if(tk) icLoad(tk,false); else document.getElementById("icLab").innerHTML='<div class="ed-note">No chains on file yet \u2014 the lab fills after the next morning run.</div>';
     }).catch(function(e){ host.innerHTML='<div class="ed-note">The options screen could not be loaded ('+optEsc(e&&e.message)+').</div>'; });
   }
@@ -11074,18 +11115,125 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       return '<button data-g="'+g[0]+'"'+(OPT_GRP===g[0]?' class="on"':'')+'>'+g[1]+' <i>'+(n[g[0]]||0)+'</i></button>'; }).join("");
     el.querySelectorAll("[data-g]").forEach(function(b){ b.onclick=function(){ OPT_GRP=this.dataset.g; optGroups(); optList(); }; });
   }
+  // ---- sortable tables: tap a header for largest first, tap again for smallest first ----
+  var OPT_SORT={}, OPT_OPEN={}, OPT_IVW=null, OPT_WEEKS=[], OPT_HIST={};
+  function optSortRows(tbl, rows, get){
+    var s=OPT_SORT[tbl]; if(!s||!get[s.k]) return rows; var g=get[s.k];
+    return rows.slice().sort(function(a,b){ var x=g(a), y=g(b); if(x==null&&y==null) return 0; if(x==null) return 1; if(y==null) return -1;
+      return (x<y?-1:(x>y?1:0))*s.d; });
+  }
+  function optHead(tbl, cols){
+    var s=OPT_SORT[tbl]||{};
+    return '<div class="hd">'+cols.map(function(c){ if(!c[0]) return '<span>'+c[1]+'</span>';
+      var on=s.k===c[0]; return '<span class="sk'+(on?' on':'')+'" data-sk="'+c[0]+'">'+c[1]+'<em>'+(on?(s.d<0?'\u25bc':'\u25b2'):'\u21c5')+'</em></span>'; }).join("")+'</div>';
+  }
+  function optBindSort(el, tbl, redraw){
+    el.querySelectorAll("[data-sk]").forEach(function(h){ h.onclick=function(e){ e.stopPropagation(); var k=this.dataset.sk, s=OPT_SORT[tbl];
+      OPT_SORT[tbl]=(s&&s.k===k)?{k:k,d:-s.d}:{k:k,d:(k==="tk"||k==="trade"?1:-1)}; redraw(); }; });
+  }
+  // the stop-loss variants against holding to the planned exit, on the same trades (the trades themselves are never closed early)
+  function optStopsHTML(rows){
+    var ex=[25,18,10], V=[["hold","Hold to the exit",null],["sl50","Stop at \u221250% of max loss","sl50"],["slcr","Stop at a loss = credit","slcr"]];
+    function val(r,v,x){ var R=r.result||{}; if(!v[2]) return R[x]!=null?+R[x]:null; var s=R[v[2]]; return s&&s[x]!=null?+s[x]:null; }
+    var anyClosed=rows.some(function(r){ return ex.some(function(x){ return (r.result||{})[x]!=null; }); });
+    var stopped={sl50:0,slcr:0}; rows.forEach(function(r){ ["sl50","slcr"].forEach(function(k){ if(((r.result||{})[k]||{}).stopped) stopped[k]++; }); });
+    var html='<div class="opt-sub3">Stop-loss test <span>\u00b7 the same trades three ways \u00b7 a stop fires on the first daily mark at or past its level and takes that mark\u2019s P&amp;L \u00b7 stopped so far: '+
+      stopped.sl50+' at \u221250% of max loss, '+stopped.slcr+' at a loss = credit</span></div>';
+    if(!anyClosed) return html+'<div class="ed-note">No trade has reached its first exit yet \u2014 the comparison fills from 2 November.</div>';
+    html+='<div class="opt-tbl sl"><div class="hd"><span>Exit</span><span>Rule</span><span>n</span><span>Win rate</span><span>Avg</span><span>Return on risk</span><span>Worst</span><span>Total</span></div>';
+    ex.forEach(function(x){ V.forEach(function(v,i){ var n=0,sum=0,win=0,risk=0,worst=null;
+      rows.forEach(function(r){ var a=val(r,v,x); if(a==null) return; n++; sum+=a; win+=(a>0?1:0); risk+=(+r.max_loss_1||0); worst=worst==null?a:Math.min(worst,a); });
+      html+='<div class="r'+(i===0?' first':'')+'"><span>'+(i===0?x+' DTE':'')+'</span><span>'+v[1]+'</span><span>'+n+'</span><span>'+(n?Math.round(win/n*100)+'%':'\u2014')+'</span>'+
+        '<span class="ev'+(sum>0?'':' neg')+'">'+(n?optM(sum/n):'\u2014')+'</span><span class="ev'+(sum>0?'':' neg')+'">'+(n?optPct(sum/Math.max(risk,1),1):'\u2014')+'</span>'+
+        '<span class="ev neg">'+(worst!=null?optM(worst):'\u2014')+'</span><span class="ev'+(sum>0?'':' neg')+'">'+(n?optM(sum):'\u2014')+'</span></div>'; }); });
+    return html+'</div>';
+  }
+  // every row of a Supabase table, a thousand at a time (the API returns at most 1,000 per request)
+  function optRowsAll(path){
+    var out=[];
+    function page(o){ return supaRows(path+"&limit=1000&offset="+o).then(function(r){ r=r||[]; out=out.concat(r); return r.length===1000&&o<20000?page(o+1000):out; }); }
+    return page(0);
+  }
+  // weekly implied vol: the last reading of each week (Friday, or the last trading day before it)
+  function optFriday(d){ var t=new Date(d+"T12:00:00Z"), w=t.getUTCDay(); t.setUTCDate(t.getUTCDate()+(w===6?-1:(w===0?-2:5-w))); return t.toISOString().slice(0,10); }
+  function optLoadIVW(){
+    if(OPT_IVW) return Promise.resolve(OPT_IVW);
+    var since=new Date(Date.now()-70*864e5).toISOString().slice(0,10);
+    return optRowsAll("/rest/v1/ic_vol_history?select=d,ticker,iv30&iv30=not.is.null&d=gte."+since+"&order=d.asc").then(function(rows){
+      var by={}, wk={};
+      rows.forEach(function(r){ var f=optFriday(String(r.d).slice(0,10)); wk[f]=1; (by[r.ticker]=by[r.ticker]||{})[f]=+r.iv30; });
+      OPT_IVW=by; OPT_WEEKS=Object.keys(wk).sort(); return by;
+    }).catch(function(){ OPT_IVW={}; OPT_WEEKS=[]; return OPT_IVW; });
+  }
+  function optIVpair(tk,p){                     // [last week, this week], from the recorded history; the screen's own fields until then
+    var w=(OPT_IVW||{})[tk], ws=OPT_WEEKS;
+    if(w&&ws.length>=2){ var cur=w[ws[ws.length-1]], prev=w[ws[ws.length-2]]; if(cur!=null) return [prev,cur]; }
+    return [p&&p.iv30_wk, p&&(p.iv30!=null?p.iv30:(p.iv_atm!=null?p.iv_atm/100:null))];
+  }
+  function optIV(p){
+    if(p.ivr!=null) return '<span class="opt-ivr">'+(p.ivr_wk!=null?p.ivr_wk+' \u2192 ':'')+'<b>'+p.ivr+'</b></span>';
+    var pr=optIVpair(p.ticker,p), a=pr[0], b=pr[1]; if(b==null) return "\u2014";
+    var arr=a!=null?(b<a-0.005?' <i class="ivdn">\u2193</i>':(b>a+0.005?' <i class="ivup">\u2191</i>':'')):'';
+    return '<span class="opt-ivr">'+(a!=null?Math.round(a*100)+' \u2192 ':'')+'<b>'+Math.round(b*100)+'</b><i>%</i>'+arr+'</span>';
+  }
   function optList(){
     var el=document.getElementById("optList"); if(!el) return;
     var P=(IC_DATA.proposed||[]).filter(function(p){ return OPT_GRP==="all"||(p.group||"mme")===OPT_GRP; });
     if(!P.length){ el.innerHTML='<div class="ed-note">Nothing passes today'+(OPT_GRP!=="all"?' in this group':'')+': no name has implied vol above what it delivers with a positive EV after costs. '+
       'Every name\u2019s best structure is still in the tournament below, and you can build any trade in the lab above.</div>'; return; }
-    el.innerHTML='<div class="opt-tbl"><div class="hd"><span>Ticker</span><span>Trade</span><span>Win Odds</span><span>IV</span><span>Exit</span><span>EV</span></div>'+
-      P.map(function(p){ var on=IC_LAB&&IC_LAB.tk===p.ticker;
+    P=optSortRows("list",P,{tk:function(p){return p.ticker;}, trade:function(p){return p.label;}, win:function(p){return p.pop_hv!=null?p.pop_hv:p.pop_exit;},
+      iv:function(p){ return optIVpair(p.ticker,p)[1]; }, exit:function(p){return p.exit_date;}, ev:function(p){return p.ev_pct;}, evc:function(p){return p.ev_cons_pct;}});
+    el.innerHTML='<div class="opt-tbl">'+optHead("list",[["tk","Ticker"],["trade","Trade"],["win","Win Odds"],["iv","IV"],["exit","Exit"],["ev","EV"],["evc","EV cons."]])+
+      P.map(function(p){ var on=IC_LAB&&IC_LAB.tk===p.ticker, op=OPT_OPEN[p.ticker];
         return '<div class="r'+(on?' on':'')+'" data-tk="'+p.ticker+'"><span class="tk">'+p.ticker+'<i>'+optGrpName(p.group)+' \u00b7 '+optBias(p.bias)+'</i></span>'+
-          '<span class="tr">'+optEsc(p.label)+'</span><span>'+optPct(p.pop_hv)+'</span><span>'+optIV(p)+'</span>'+
-          '<span>'+optDate(p.exit_date)+'</span><span class="ev">'+optPct(p.ev_pct)+'</span></div>'; }).join("")+'</div>';
-    el.querySelectorAll("[data-tk]").forEach(function(r){ r.onclick=function(){ var tk=this.dataset.tk;
-      el.querySelectorAll("[data-tk]").forEach(function(x){ x.classList.toggle("on",x===r); }); icLoad(tk,true); }; });
+          '<span class="tr">'+optEsc(p.label)+'<i class="xt '+(p.expiry_type||"")+'">'+(p.expiry_type||"")+'</i></span><span>'+optPct(p.pop_hv)+'</span><span>'+optIV(p)+'</span>'+
+          '<span>'+optDate(p.exit_date)+'</span><span class="ev">'+optPct(p.ev_pct)+'</span><span class="ev'+(p.ev_cons_pct>0?'':' neg')+'">'+(p.ev_cons_pct!=null?optPct(p.ev_cons_pct):'\u2014')+'</span></div>'+
+          (op?'<div class="opt-why" id="optWhy_'+p.ticker+'">'+optWhyHTML(p)+'</div>':''); }).join("")+'</div>';
+    optBindSort(el,"list",optList);
+    el.querySelectorAll(".r[data-tk]").forEach(function(r){ r.onclick=function(){ var tk=this.dataset.tk;
+      OPT_OPEN[tk]=!OPT_OPEN[tk]; if(IC_LAB&&IC_LAB.tk!==tk||!IC_LAB) icLoad(tk,false); optList(); if(OPT_OPEN[tk]) optPickHist(tk); }; });
+  }
+  // why Phoenix chose it, in the order it decided, plus how the pick and the IV have moved
+  function optWhyHTML(p){
+    var w=(OPT_IVW||{})[p.ticker]||{}, ws=OPT_WEEKS.slice(-6);
+    var ivs=ws.length?'<div class="opt-wk"><b>IV by week</b> '+ws.map(function(k,i){ var v=w[k], pv=i?w[ws[i-1]]:null;
+      return '<span>'+optDate(k)+' <b>'+(v!=null?Math.round(v*100)+'%':'\u2014')+'</b>'+(v!=null&&pv!=null?' <i class="'+(v<pv?'ivdn':'ivup')+'">'+(v<pv?'\u2193':'\u2191')+Math.abs(Math.round((v-pv)*100))+'</i>':'')+'</span>'; }).join("")+'</div>':'';
+    return '<ol>'+(p.why||[]).map(function(x){ return '<li>'+optEsc(x)+'</li>'; }).join("")+'</ol>'+ivs+
+      '<div class="opt-ph" id="optPH_'+p.ticker+'">'+(OPT_HIST[p.ticker]?optPickHistHTML(p.ticker):'<i>Loading how the pick has changed\u2026</i>')+'</div>'+
+      '<a href="#" class="opt-go" data-go="'+p.ticker+'">Show it in the graph \u2191</a>';
+  }
+  function optPickHist(tk){
+    var bind=function(){ var a=document.querySelector('[data-go="'+tk+'"]'); if(a) a.onclick=function(e){ e.preventDefault(); e.stopPropagation(); icLoad(tk,true); }; };
+    bind();
+    if(OPT_HIST[tk]){ return; }
+    supaRows("/rest/v1/ic_vol_history?select=d,pick&ticker=eq."+encodeURIComponent(tk)+"&pick=not.is.null&order=d.desc&limit=30").then(function(r){
+      OPT_HIST[tk]=r||[]; var el=document.getElementById("optPH_"+tk); if(el) el.innerHTML=optPickHistHTML(tk); bind(); }).catch(function(){ OPT_HIST[tk]=[]; });
+  }
+  function optPickHistHTML(tk){
+    var H=(OPT_HIST[tk]||[]).slice().reverse();
+    if(!H.length) return '<i>The pick history starts with the next morning run.</i>';
+    var prev=null;
+    return '<b>How the pick has changed</b><div class="opt-phl">'+H.map(function(h){ var p=h.pick||{}, ch=prev&&(prev.expiry!==p.expiry||prev.structure!==p.structure||prev.label!==p.label);
+      var row='<div'+(ch?' class="ch"':'')+'><span>'+optDate(String(h.d).slice(0,10))+'</span><span>'+optEsc(p.label||"\u2014")+' <i>'+(p.expiry_type||"")+'</i></span>'+
+        '<span>EV '+optPct(p.ev_pct,1)+'</span><span>'+optBias(p.bias)+'</span><span>'+(p.proposed?'\u2605 proposed':'not proposed')+'</span></div>';
+      prev=p; return row; }).join("")+'</div>';
+  }
+  // every name's winner, proposed or not, with both EVs side by side
+  function optWinners(){
+    var el=document.getElementById("optWinners"); if(!el) return;
+    var P=(IC_DATA.picks||[]).slice(); if(!P.length){ el.innerHTML=""; return; }
+    var prop={}; (IC_DATA.proposed||[]).forEach(function(x){ prop[x.ticker]=1; });
+    P=optSortRows("win",P,{tk:function(p){return p.ticker;}, trade:function(p){return p.label;}, win:function(p){return p.pop_hv!=null?p.pop_hv:p.pop_exit;},
+      evh:function(p){return p.ev_hv_1;}, evc:function(p){return p.ev_cons_1;}, evm:function(p){return p.ev_1;}, ivhv:function(p){ return p.iv_atm&&p.hv30s?p.iv_atm/100/p.hv30s:null; },
+      ml:function(p){return p.max_loss_1;}, exit:function(p){return p.exit_date;}, typ:function(p){return p.expiry_type;}});
+    el.innerHTML='<div class="opt-sub2">Every name\u2019s winner <span>\u00b7 '+P.length+' names \u00b7 \u2605 = on the proposed list \u00b7 tap a name to see its whole board</span></div>'+
+      '<div class="opt-tbl wn">'+optHead("win",[["tk","Ticker"],["trade","Trade"],["typ","Expiry"],["win","Win"],["evh","EV hist"],["evc","EV cons."],["evm","EV mkt"],["ivhv","IV / HV"],["ml","Max loss"],["exit","Exit"]])+
+      P.map(function(p){ var pr=prop[p.ticker];
+        return '<div class="r'+(pr?' prop':'')+'" data-wb="'+p.ticker+'"><span class="tk">'+(pr?'\u2605 ':'')+p.ticker+'<i>'+optGrpName(p.group)+' \u00b7 '+optBias(p.bias)+'</i></span><span class="tr">'+optEsc(p.label)+'</span>'+
+          '<span>'+(p.expiry_type||"\u2014")+'</span><span>'+optPct(p.pop_hv!=null?p.pop_hv:p.pop_exit)+'</span><span class="ev'+(p.ev_hv_1>0?'':' neg')+'">'+optM(p.ev_hv_1)+'</span><span class="ev'+(p.ev_cons_1>0?'':' neg')+'">'+optM(p.ev_cons_1)+'</span><span class="ev'+(p.ev_1>0?'':' neg')+'">'+optM(p.ev_1)+'</span>'+
+          '<span>'+(p.iv_atm!=null?Math.round(p.iv_atm):'\u2014')+' / '+(p.hv30s?Math.round(p.hv30s*100):'\u2014')+'</span><span>'+optM(-p.max_loss_1)+'</span><span>'+optDate(p.exit_date)+'</span></div>'; }).join("")+'</div>';
+    optBindSort(el,"win",optWinners);
+    el.querySelectorAll("[data-wb]").forEach(function(r){ r.onclick=function(){ optBoardFill(this.dataset.wb); var b=document.getElementById("optBoard"); if(b) b.scrollIntoView({behavior:"smooth",block:"start"}); }; });
   }
   function optKpi(){
     var el=document.getElementById("optKpi"); if(!el) return;
@@ -11101,14 +11249,16 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function optForward(){
     var el=document.getElementById("optFwd"); if(!el) return;
     el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 loading\u2026</span></div>';
-    supaRows("/rest/v1/ic_forward?select=id,opened,ticker,expiry,legs,credit,max_loss_1,model,result,status,role,structure,grp,closed&order=opened.desc&limit=2000").then(function(rows){
+    optRowsAll("/rest/v1/ic_forward?select=id,opened,ticker,expiry,legs,credit,max_loss_1,model,result,status,role,structure,grp,closed&order=opened.desc,id.desc").then(function(rows){
       rows=rows||[];
       if(!rows.length){ el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 starts with the next morning run: each day\u2019s trades are opened on paper and marked every morning</span></div>'; return; }
       var ex=[25,18,10];
       function pred(r,x){ var E=(r.model||{}).ev||{}; var meas=(r.model||{}).rank_measure==="historical"?"historical":"market"; return (((E[meas]||{})[x])||{}).ev_1; }
       function agg(list){ var a={}; list.forEach(function(r){ ex.forEach(function(x){ var v=(r.result||{})[x]; if(v==null) return;
         var g=a[x]=a[x]||{n:0,sum:0,win:0,pred:0,np:0,risk:0}; g.n++; g.sum+=+v; g.win+=(v>0?1:0); var p=pred(r,x); if(p!=null){ g.pred+=p; g.np++; } g.risk+=(+r.max_loss_1||0); }); }); return a; }
-      var roles=[["proposed","Proposed \u2014 the trades Phoenix put on the list"],["calibration","Calibration \u2014 every other name\u2019s best trade"]];
+      var roles=[["proposed","Proposed \u2014 the trades Phoenix put on the list"],["calibration","Calibration \u2014 every other name\u2019s best trade"],
+                 ["winner","Old rules \u2014 opened 27\u201330 Oct before equal wings, the chart read and the new universe; kept apart, not in the totals"]];
+      var cur=rows.filter(function(r){ return r.role!=="winner"; });
       var open=rows.filter(function(r){ return r.status==="open"; }), closed=rows.filter(function(r){ return r.status!=="open"; });
       var tbl=function(list,title){ var a=agg(list);
         return '<div class="opt-sub3">'+title+' <span>\u00b7 '+list.length+' opened</span></div><div class="opt-tbl fw"><div class="hd"><span>Exit</span><span>Closed</span><span>Win rate</span><span>Avg realised</span><span>Avg predicted</span><span>Return on risk</span><span>Total</span></div>'+
@@ -11116,38 +11266,27 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           return '<div class="r"><span>'+x+' DTE</span><span>'+g.n+'</span><span>'+Math.round(g.win/g.n*100)+'%</span><span class="ev'+(g.sum>0?'':' neg')+'">'+optM(g.sum/g.n)+'</span>'+
             '<span>'+(g.np?optM(g.pred/g.np):'\u2014')+'</span><span class="ev'+(g.sum>0?'':' neg')+'">'+optPct(g.sum/Math.max(g.risk,1),1)+'</span><span class="ev'+(g.sum>0?'':' neg')+'">'+optM(g.sum)+'</span></div>'; }).join("")+'</div>'; };
       // running P&L of what is open, from each trade's latest mark
-      var openPnl=open.reduce(function(a,r){ var l=(r.result||{}).last; return a+(l&&l.pnl_1!=null?+l.pnl_1:0); },0);
-      var openRisk=open.reduce(function(a,r){ return a+(+r.max_loss_1||0); },0);
+      var openCur=open.filter(function(r){ return r.role!=="winner"; });
+      var openPnl=openCur.reduce(function(a,r){ var l=(r.result||{}).last; return a+(l&&l.pnl_1!=null?+l.pnl_1:0); },0);
+      var openRisk=openCur.reduce(function(a,r){ return a+(+r.max_loss_1||0); },0);
       var names={}; rows.forEach(function(r){ names[r.ticker+"|"+r.expiry]=1; });
       var first=rows[rows.length-1].opened;
       el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 since '+optDate(first,1)+' \u00b7 '+rows.length+' trades on '+Object.keys(names).length+' name-expiries \u00b7 realised per contract after slippage and fees</span></div>'+
         '<div class="mm-strip opt-kpi"><div><i>open</i><b>'+open.length+'</b></div><div><i>open P&amp;L (latest marks)</i><b style="color:'+(openPnl>=0?'var(--green)':'var(--red)')+'">'+optM(openPnl)+'</b></div>'+
           '<div><i>capital at risk</i><b>'+optM(openRisk)+'</b></div><div><i>closed</i><b>'+closed.length+'</b></div></div>'+
-        roles.map(function(r_){ var L=rows.filter(function(r){ return (r.role||"calibration")===r_[0]||(r_[0]==="calibration"&&r.role==="winner"); }); return L.length?tbl(L,r_[1]):""; }).join("")+
-        tbl(rows.filter(function(r){ return (r.structure||"IC")==="IC"; }),"Iron condors")+
-        (rows.some(function(r){ return r.structure&&r.structure!=="IC"; })?tbl(rows.filter(function(r){ return r.structure&&r.structure!=="IC"; }),"Credit spreads"):"")+
+        roles.map(function(r_){ var L=rows.filter(function(r){ return (r.role||"winner")===r_[0]; }); return L.length?tbl(L,r_[1]):""; }).join("")+
+        tbl(cur.filter(function(r){ return (r.structure||"IC")==="IC"; }),"Iron condors (current rules)")+
+        (cur.some(function(r){ return r.structure&&r.structure!=="IC"; })?tbl(cur.filter(function(r){ return r.structure&&r.structure!=="IC"; }),"Credit spreads"):"")+
+        optStopsHTML(cur)+
         '<div class="opt-sub3">Open trades <span>\u00b7 latest mark \u00b7 tap one to load it in the lab</span></div>'+
         '<div class="opt-tbl op"><div class="hd"><span>Ticker</span><span>Trade</span><span>Opened</span><span>DTE</span><span>Mark</span><span>Predicted</span><span>Role</span></div>'+
         open.slice(0,60).map(function(r,i){ var l=(r.result||{}).last, lab=(r.model||{}).label||(r.ticker+" "+r.expiry), xb=(r.model||{}).best_exit_dte;
           return '<div class="r" data-fo="'+i+'"><span class="tk">'+r.ticker+'</span><span class="tr">'+optEsc(lab)+'</span><span>'+optDate(r.opened)+'</span>'+
-            '<span>'+(l?l.dte:'\u2014')+'</span><span class="ev'+(l&&l.pnl_1>0?'':' neg')+'">'+(l?optM(l.pnl_1):'\u2014')+'</span><span>'+optM(pred(r,xb))+'</span><span>'+(r.role==="proposed"?'\u2605 proposed':'calib.')+'</span></div>'; }).join("")+
+            '<span>'+(l?l.dte:'\u2014')+'</span><span class="ev'+(l&&l.pnl_1>0?'':' neg')+'">'+(l?optM(l.pnl_1):'\u2014')+'</span><span>'+optM(pred(r,xb))+'</span><span>'+(r.role==="proposed"?'\u2605 proposed':(r.role==="winner"?'old rules':'calib.'))+'</span></div>'; }).join("")+
         (open.length>60?'<div class="r"><span></span><span>+'+(open.length-60)+' more</span></div>':'')+'</div>';
       el.querySelectorAll("[data-fo]").forEach(function(rw){ rw.onclick=function(){ var r=open[+this.dataset.fo];
         icLoad(r.ticker,true,{legs:r.legs,expiry:String(r.expiry).slice(0,10),structure:r.structure||"IC",best_exit_dte:(r.model||{}).best_exit_dte}); }; });
     }).catch(function(){ el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 could not be read</span></div>'; });
-  }
-  // every name's winner, proposed or not, with both EVs side by side
-  function optWinners(){
-    var el=document.getElementById("optWinners"); if(!el) return;
-    var P=(IC_DATA.picks||[]).slice();
-    if(!P.length){ el.innerHTML=""; return; }
-    el.innerHTML='<div class="opt-sub2">Every name\u2019s winner <span>\u00b7 '+P.length+' names \u00b7 ranked on EV per $ at risk \u00b7 tap a name to see its whole board</span></div>'+
-      '<div class="opt-tbl wn"><div class="hd"><span>Ticker</span><span>Trade</span><span>Win</span><span>EV hist</span><span>EV mkt</span><span>IV / HV</span><span>Max loss</span><span>Exit</span></div>'+
-      P.map(function(p){ var prop=(IC_DATA.proposed||[]).some(function(x){ return x.ticker===p.ticker; });
-        return '<div class="r'+(prop?' prop':'')+'" data-wb="'+p.ticker+'"><span class="tk">'+(prop?'\u2605 ':'')+p.ticker+'<i>'+optGrpName(p.group)+'</i></span><span class="tr">'+optEsc(p.label)+'</span>'+
-          '<span>'+optPct(p.pop_hv!=null?p.pop_hv:p.pop_exit)+'</span><span class="ev'+(p.ev_hv_1>0?'':' neg')+'">'+optM(p.ev_hv_1)+'</span><span class="ev'+(p.ev_1>0?'':' neg')+'">'+optM(p.ev_1)+'</span>'+
-          '<span>'+(p.iv_atm!=null?Math.round(p.iv_atm):'\u2014')+' / '+(p.hv30s?Math.round(p.hv30s*100):'\u2014')+'</span><span>'+optM(-p.max_loss_1)+'</span><span>'+optDate(p.exit_date)+'</span></div>'; }).join("")+'</div>';
-    el.querySelectorAll("[data-wb]").forEach(function(r){ r.onclick=function(){ optBoardFill(this.dataset.wb); var b=document.getElementById("optBoard"); if(b) b.scrollIntoView({behavior:"smooth",block:"start"}); }; });
   }
   // one name's board: the best of each structure across expiries
   function optBoardFill(tk){
@@ -11168,17 +11307,48 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     document.getElementById("optBoardTk").onchange=function(){ optBoardFill(this.value); };
     el.querySelectorAll("[data-bi]").forEach(function(r){ r.onclick=function(){ icLoad(tk,true,p.board[+this.dataset.bi]); }; });
   }
-  // where the premium is: implied against delivered vol for every name screened
+  // where the premium is: implied against delivered vol for every name, and how the implied vol moved week to week
   function optVol(){
     var el=document.getElementById("optVol"); if(!el) return;
-    var V=IC_DATA.vol||{}, ts=Object.keys(V).filter(function(t){ return V[t].iv30&&V[t].hv30s; });
+    var V=IC_DATA.vol||{}, ts=Object.keys(V).filter(function(t){ return V[t].iv30||V[t].hv30s; });
     if(!ts.length){ el.innerHTML=""; return; }
-    ts.sort(function(a,b){ return (V[b].iv30/V[b].hv30s)-(V[a].iv30/V[a].hv30s); });
-    el.innerHTML='<details class="opt-det"><summary>Implied vs delivered vol <span>\u00b7 '+ts.length+' names \u00b7 30-day implied against 30-day realised with event days stripped</span></summary>'+
-      '<div class="opt-tbl vl"><div class="hd"><span>Ticker</span><span>IV 30d</span><span>HV stripped</span><span>HV raw</span><span>IV / HV</span><span>Chart</span><span>Earnings</span></div>'+
-      ts.map(function(t){ var v=V[t], r=v.iv30/v.hv30s;
-        return '<div class="r"><span class="tk">'+t+'<i>'+optGrpName(v.group)+'</i></span><span>'+Math.round(v.iv30*100)+'%</span><span>'+Math.round(v.hv30s*100)+'%</span><span>'+(v.hv30?Math.round(v.hv30*100)+'%':'\u2014')+'</span>'+
-          '<span class="ev'+(r>=1?'':' neg')+'">'+r.toFixed(2)+'\u00d7</span><span title="'+optEsc(v.chart_why||"")+'">'+optBias(v.bias)+'</span><span>'+(v.earnings?optDate(v.earnings)+(String(v.earnings_src||"").indexOf("estimated")===0?' <i>est</i>':''):(v.group==="etf"?'fund':'\u2014'))+'</span></div>'; }).join("")+'</div></details>';
+    var ws=OPT_WEEKS.slice(-6), W=OPT_IVW||{};
+    var get={tk:function(t){return t;}, iv:function(t){return V[t].iv30;}, hv:function(t){return V[t].hv30s;}, raw:function(t){return V[t].hv30;},
+      ratio:function(t){ return V[t].iv30&&V[t].hv30s?V[t].iv30/V[t].hv30s:null; }, chg:function(t){ var w=W[t]||{}; return ws.length>=2&&w[ws[ws.length-1]]!=null&&w[ws[ws.length-2]]!=null?w[ws[ws.length-1]]-w[ws[ws.length-2]]:null; },
+      bias:function(t){return V[t].bias;}, earn:function(t){return V[t].earnings;}};
+    ws.forEach(function(k){ get["w"+k]=function(t){ return (W[t]||{})[k]; }; });
+    if(!OPT_SORT.vol) OPT_SORT.vol={k:"ratio",d:-1};
+    ts=optSortRows("vol",ts,get);
+    var cols=[["tk","Ticker"],["iv","IV 30d"],["hv","HV stripped"],["raw","HV raw"],["ratio","IV / HV"]].concat(ws.map(function(k){ return ["w"+k,"IV "+optDate(k)]; }))
+      .concat([["chg","Week \u0394"],["bias","Chart"],["earn","Earnings"]]);
+    el.innerHTML='<details class="opt-det" open><summary>Implied vs delivered vol <span>\u00b7 '+ts.length+' names \u00b7 30-day implied against 30-day realised with event days stripped \u00b7 IV at each week\u2019s last reading'+(ws.length<2?' (the week-on-week columns fill as the weeks are recorded)':'')+'</span></summary>'+
+      '<div class="opt-tbl vl" style="--wk:'+ws.length+'">'+optHead("vol",cols)+
+      ts.map(function(t){ var v=V[t], r=v.iv30&&v.hv30s?v.iv30/v.hv30s:null, c=get.chg(t);
+        return '<div class="r"><span class="tk">'+t+'<i>'+optGrpName(v.group)+'</i></span><span>'+(v.iv30?Math.round(v.iv30*100)+'%':'\u2014')+'</span><span>'+(v.hv30s?Math.round(v.hv30s*100)+'%':'\u2014')+'</span><span>'+(v.hv30?Math.round(v.hv30*100)+'%':'\u2014')+'</span>'+
+          '<span class="ev'+(r>=1?'':' neg')+'">'+(r?r.toFixed(2)+'\u00d7':'\u2014')+'</span>'+
+          ws.map(function(k){ var x=(W[t]||{})[k]; return '<span>'+(x!=null?Math.round(x*100)+'%':'\u2014')+'</span>'; }).join("")+
+          '<span class="'+(c==null?'':(c<0?'ivdn':'ivup'))+'">'+(c==null?'\u2014':(c>0?'+':'\u2212')+Math.abs(Math.round(c*1000)/10)+' pt')+'</span>'+
+          '<span title="'+optEsc(v.chart_why||"")+'">'+optBias(v.bias)+'</span><span>'+(v.earnings?optDate(v.earnings)+(String(v.earnings_src||"").indexOf("estimated")===0?' <i>est</i>':''):(v.group==="etf"?'fund':'\u2014'))+'</span></div>'; }).join("")+'</div></details>';
+    optBindSort(el,"vol",optVol);
+  }
+  // Bulkowski patterns across every name (the pattern notes' tested odds), with whether they agree with the chart read
+  function optPatterns(){
+    var el=document.getElementById("optPat"); if(!el) return;
+    var V=IC_DATA.vol||{}, rows=[];
+    Object.keys(V).forEach(function(t){ (V[t].patterns||[]).forEach(function(p){ rows.push({t:t,v:V[t],p:p}); }); });
+    if(!rows.length){ el.innerHTML='<details class="opt-det"><summary>Patterns <span>\u00b7 none found today, or the screen predates the pattern scan</span></summary></details>'; return; }
+    function dir(p){ return p.tested_direction||({up:"bullish",down:"bearish"})[p.direction]||""; }
+    rows=optSortRows("pat",rows,{tk:function(r){return r.t;}, nm:function(r){return r.p.label;}, k:function(r){return r.p.kind;}, d:function(r){return dir(r.p);},
+      rate:function(r){return r.p.rate;}, c:function(r){return r.p.confirmed?1:0;}, ag:function(r){ var b=r.v.bias; return dir(r.p)===b?1:(b==="neutral"?0:-1); }, dt:function(r){return r.p.date||r.p.end;}});
+    el.innerHTML='<details class="opt-det" open><summary>Patterns <span>\u00b7 '+rows.length+' across '+Object.keys(V).filter(function(t){return (V[t].patterns||[]).length;}).length+' names \u00b7 Bulkowski\u2019s tested direction and odds, not the textbook\u2019s \u00b7 trade only a close beyond the pattern</span></summary>'+
+      '<div class="opt-tbl pt">'+optHead("pat",[["tk","Ticker"],["nm","Pattern"],["k","Kind"],["d","Tested"],["rate","Odds"],["c","Confirmed"],[null,"Line / target"],["ag","Chart read"],["dt","Date"]])+
+      rows.map(function(r){ var p=r.p, d=dir(p), b=r.v.bias, ag=b==="neutral"?"range":(d===b?"agrees":"conflicts");
+        return '<div class="r" data-pt="'+r.t+'"><span class="tk">'+r.t+'</span><span class="tr" title="'+optEsc(p.note||"")+'">'+optEsc(p.label)+'</span><span>'+p.kind+'</span>'+
+          '<span class="'+(d==="bullish"?'ev':(d==="bearish"?'ev neg':''))+'">'+(d||'\u2014')+'</span><span>'+(p.rate?Math.round(p.rate*100)+'%':(r.p.direction?'\u2014':''))+'</span>'+
+          '<span>'+(p.confirmed?'\u2713 yes':'not yet')+'</span><span>'+(p.confirm_line!=null?p.confirm_line+(p.target!=null?' \u2192 '+p.target:''):'\u2014')+'</span>'+
+          '<span class="'+(ag==="conflicts"?'ev neg':(ag==="agrees"?'ev':''))+'">'+ag+'</span><span>'+optDate(p.date||p.end)+'</span></div>'; }).join("")+'</div></details>';
+    optBindSort(el,"pat",optPatterns);
+    el.querySelectorAll("[data-pt]").forEach(function(r){ r.onclick=function(){ icLoad(this.dataset.pt,true); }; });
   }
   function optBacktest(){
     var el=document.getElementById("optBt"); if(!el) return;
@@ -11198,27 +11368,179 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     el.innerHTML=ks.length?'<details class="opt-det"><summary>Skipped <span>\u00b7 '+ks.length+' names and why</span></summary><div class="opt-skip">'+
       ks.map(function(t){ return '<div><b>'+t+'</b> '+optEsc(S[t])+'</div>'; }).join("")+'</div></details>':"";
   }
+  // ---- PORTFOLIOS (Mission Control tab): Phoenix's proposed portfolios from every book, for €5k / €10k / €15k ----
+  var PF_DATA=null, PF_ST={acct:10000, mode:"auto", view:"mix", manual:null};
+  try{ var _pfs=JSON.parse(localStorage.getItem("phoenix.pf")||"null"); if(_pfs) PF_ST=Object.assign(PF_ST,_pfs); }catch(e){}
+  function pfSave(){ try{ localStorage.setItem("phoenix.pf",JSON.stringify(PF_ST)); }catch(e){} }
+  function pfE(v){ return v==null||isNaN(v)?"\u2014":(v<0?"\u2212\u20ac":"\u20ac")+Math.abs(Math.round(v)).toLocaleString(); }
+  function pfP(v,d){ return v==null||isNaN(v)?"\u2014":(v*100).toFixed(d==null?0:d)+"%"; }
+  // the split in force: one book only, Phoenix's split for today, or yours
+  function pfSplit(){
+    var D=PF_DATA||{};
+    if(PF_ST.view==="lt") return {lt:1,swing:0,options:0,cash:0};
+    if(PF_ST.view==="swing") return {lt:0,swing:1,options:0,cash:0};
+    if(PF_ST.view==="options") return {lt:0,swing:0,options:0.30,cash:0.70};
+    if(PF_ST.mode==="manual"&&PF_ST.manual) return PF_ST.manual;
+    return D.split_auto||{lt:0.5,swing:0.15,options:0.10,cash:0.25};
+  }
+  // THE ALLOCATION — one place, every rule from the engine's ALLOC block, every exclusion with its reason
+  function pfAllocate(acct, sp){
+    var D=PF_DATA||{}, R=D.rules||{}, fx=((D.conditions||{}).eurusd)||1.08, out={lt:[],swing:[],options:[],excluded:[],checks:[]};
+    // long-term: the core weights, plus the invest book's top names as a satellite
+    var ltCap=acct*(sp.lt||0), satShare=(D.lt&&D.lt.satellite&&D.lt.satellite.length)?(R.lt_satellite||0.2):0;
+    ((D.lt||{}).core||[]).forEach(function(l){ out.lt.push({t:l.t, w:l.w*(1-satShare), eur:ltCap*l.w*(1-satShare), note:l.note||"core"}); });
+    var sat=((D.lt||{}).satellite||[]).slice(0,5);
+    sat.forEach(function(s){ out.lt.push({t:s.t, w:satShare/sat.length, eur:ltCap*satShare/sat.length, note:"satellite \u00b7 invest score "+(s.score!=null?s.score:"\u2014")}); });
+    // swing: 1% of the account at risk per trade, a stop 2 ATR under the entry, heat and position caps
+    var S=R.swing||{risk_per_trade:0.01,max_heat:3,max_position:0.35,max_positions:5}, swCap=acct*(sp.swing||0), used=0, heat=0;
+    (D.swing||[]).forEach(function(c){
+      if(swCap<=0) return;
+      if(out.swing.length>=S.max_positions){ out.excluded.push({book:"swing",t:c.t,why:"already "+S.max_positions+" swing positions"}); return; }
+      if(heat+S.risk_per_trade>S.max_heat*S.risk_per_trade+1e-9){ out.excluded.push({book:"swing",t:c.t,why:"portfolio heat at its "+S.max_heat+"R cap"}); return; }
+      var riskEur=acct*S.risk_per_trade, perShareUsd=c.entry-c.stop; if(!(perShareUsd>0)){ out.excluded.push({book:"swing",t:c.t,why:"no valid stop"}); return; }
+      var qty=Math.floor(riskEur*fx/perShareUsd), cap=Math.min(acct*S.max_position, swCap-used);
+      var val=qty*c.entry/fx; if(val>cap){ qty=Math.floor(cap*fx/c.entry); val=qty*c.entry/fx; }
+      if(qty<1){ out.excluded.push({book:"swing",t:c.t,why:"one share ("+pfE(c.entry/fx)+") does not fit the "+pfE(cap)+" left in the sleeve"}); return; }
+      var r=qty*perShareUsd/fx; used+=val; heat+=r/acct;
+      out.swing.push({t:c.t, qty:qty, entry:c.entry, stop:c.stop, eur:val, risk:r, c:c});
+    });
+    // options: a budget of max loss; ≤6 trades, ≤5% of the account each, ≤2 per cluster, positive at the conservative vol
+    var O=R.options||{max_trades:6,per_trade_max_loss:0.05,per_cluster:2,require_conservative_ev:true}, budget=acct*(sp.options||0), spent=0, per={};
+    var cands=(D.options||[]).slice().sort(function(a,b){ return (b.ev_cons_pct||-9)-(a.ev_cons_pct||-9)||(b.ev_pct||0)-(a.ev_pct||0); });
+    cands.forEach(function(o0){
+      if(budget<=0) return;
+      // the winner, or the best smaller version of the same view from its board when the winner is too big for the account
+      var o=o0, ml=(o.max_loss_usd||0)/fx, alt=null;
+      if(ml>acct*O.per_trade_max_loss){
+        var pool=[]; Object.keys(o0.sized||{}).forEach(function(k){ pool.push(o0.sized[k]); }); pool=pool.concat(o0.alts||[]);
+        alt=pool.filter(function(a){ return (a.max_loss_usd||9e9)/fx<=acct*O.per_trade_max_loss&&(!O.require_conservative_ev||a.ev_cons_pct>0); })
+               .sort(function(a,b){ return (b.ev_cons_pct||0)-(a.ev_cons_pct||0); })[0];
+        if(alt){ o=Object.assign({},o0,alt,{alt_of:o0.label}); ml=(o.max_loss_usd||0)/fx; }
+      }
+      if(O.require_conservative_ev&&!(o.ev_cons_pct>0)) return out.excluded.push({book:"options",t:o.t,why:"negative EV at the conservative (60-day) vol"});
+      if(out.options.length>=O.max_trades) return out.excluded.push({book:"options",t:o.t,why:"already "+O.max_trades+" option trades"});
+      if(ml>acct*O.per_trade_max_loss) return out.excluded.push({book:"options",t:o.t,why:"max loss "+pfE(ml)+" is over "+pfP(O.per_trade_max_loss)+" of the account ("+pfE(acct*O.per_trade_max_loss)+")"});
+      if((per[o.cluster]||0)>=O.per_cluster) return out.excluded.push({book:"options",t:o.t,why:"already "+O.per_cluster+" in "+o.cluster});
+      if(spent+ml>budget) return out.excluded.push({book:"options",t:o.t,why:"max-loss budget "+pfE(budget)+" would be exceeded"});
+      spent+=ml; per[o.cluster]=(per[o.cluster]||0)+1;
+      out.options.push({t:o.t, o:o, maxLoss:ml, ev:(o.ev_usd||0)/fx, evc:(o.ev_cons_usd||0)/fx, dDollar:(o.net_delta||0)*(o.spot||0)/fx});
+    });
+    // the whole book
+    var ltE=out.lt.reduce(function(a,x){return a+x.eur;},0), swE=used, swR=out.swing.reduce(function(a,x){return a+x.risk;},0);
+    out.totals={lt:ltE, swing:swE, swingRisk:swR, optMaxLoss:spent, cash:Math.max(0,acct-ltE-swE-spent), atRisk:swR+spent,
+                evOpt:out.options.reduce(function(a,x){return a+x.ev;},0), evOptCons:out.options.reduce(function(a,x){return a+x.evc;},0),
+                optDelta:out.options.reduce(function(a,x){return a+x.dDollar;},0)};
+    var T=out.totals, chk=function(ok,warn,txt){ out.checks.push({s:ok?"pass":(warn?"warn":"fail"),t:txt}); };
+    chk(ltE+swE+spent<=acct+1, false, "deployed "+pfE(ltE+swE+spent)+" of "+pfE(acct)+" (options counted at max loss, the margin they tie up)");
+    chk(T.atRisk<=acct*0.20, T.atRisk<=acct*0.30, "money that can be lost on the trading books: "+pfE(T.atRisk)+" = "+pfP(T.atRisk/acct,1)+" of the account (swing to its stops + options max loss)");
+    chk(out.options.length<=((R.options||{}).max_trades||6), false, out.options.length+" option trades (cap "+((R.options||{}).max_trades||6)+")");
+    var cl={}; out.options.forEach(function(x){ cl[x.o.cluster]=(cl[x.o.cluster]||0)+1; }); var top=Object.keys(cl).sort(function(a,b){return cl[b]-cl[a];})[0];
+    if(top) chk(cl[top]<=((R.options||{}).per_cluster||2), false, "most option trades in one cluster: "+cl[top]+" ("+top+")");
+    chk(Math.abs(T.optDelta)<=acct*0.5, true, "options net delta \u2248 "+pfE(T.optDelta)+" of stock exposure ("+(T.optDelta>=0?"long":"short")+")");
+    var ev={}; out.options.forEach(function(x){ (x.o.events||[]).forEach(function(e){ ev[e]=(ev[e]||0)+1; }); });
+    var evMax=Object.keys(ev).sort(function(a,b){return ev[b]-ev[a];})[0];
+    if(evMax) chk(ev[evMax]<=4, true, ev[evMax]+" of "+out.options.length+" option trades sit through "+evMax);
+    return out;
+  }
+  function pfFill(){
+    var host=document.getElementById("pfPane"); if(!host) return;
+    if(!PF_DATA){ host.innerHTML='<div class="ed-note">Loading Phoenix\u2019s proposals\u2026</div>';
+      getJSON("phoenix_portfolios").then(function(d){ PF_DATA=d||{}; pfFill(); }).catch(function(){ host.innerHTML='<div class="ed-note">No proposals on file yet \u2014 outputs/phoenix_portfolios.json is written by the morning run (step portfolios).</div>'; }); return; }
+    var D=PF_DATA, C=D.conditions||{}, sp=pfSplit(), A=pfAllocate(PF_ST.acct, sp), T=A.totals, acct=PF_ST.acct;
+    if(!PF_ST.manual) PF_ST.manual=Object.assign({}, D.split_auto||{lt:0.5,swing:0.15,options:0.1,cash:0.25});
+    var chips=function(name,vals,cur){ return '<div class="pf-chips">'+vals.map(function(v){ return '<button data-'+name+'="'+v[0]+'"'+(String(v[0])===String(cur)?' class="on"':'')+'>'+v[1]+'</button>'; }).join("")+'</div>'; };
+    var man=PF_ST.manual, msum=(man.lt||0)+(man.swing||0)+(man.options||0)+(man.cash||0);
+    var h='<div class="opt-hero"><div class="opt-k">Portfolios \u00b7 '+optEsc(D.date||"")+'</div><div class="opt-h">Phoenix\u2019s proposed portfolios</div>'+
+      '<div class="opt-sub">Every book in one place \u2014 long-term, swing and options \u2014 sized to the account, with the risk added up across all of them.</div></div>'+
+      '<div class="pf-ctl"><div><i>Account</i>'+chips("acct",(D.rules&&D.rules.accounts_eur||[5000,10000,15000]).map(function(a){ return [a,"\u20ac"+(a/1000)+"k"]; }),PF_ST.acct)+'</div>'+
+      '<div><i>Portfolio</i>'+chips("view",[["mix","Phoenix mix"],["lt","Long-term"],["swing","Swing"],["options","Options"]],PF_ST.view)+'</div>'+
+      (PF_ST.view==="mix"?'<div><i>Split</i>'+chips("mode",[["auto","Phoenix decides"],["manual","I decide"]],PF_ST.mode)+'</div>':'')+'</div>';
+    if(PF_ST.view==="mix"&&PF_ST.mode==="manual"){
+      h+='<div class="pf-man">'+[["lt","Long-term"],["swing","Swing"],["options","Options (max loss)"],["cash","Cash"]].map(function(k){
+        return '<label>'+k[1]+'<input type="number" min="0" max="100" step="5" data-man="'+k[0]+'" value="'+Math.round((man[k[0]]||0)*100)+'">%</label>'; }).join("")+
+        '<span class="'+(Math.abs(msum-1)<0.001?'ok':'bad')+'">'+Math.round(msum*100)+'%'+(Math.abs(msum-1)<0.001?'':' \u2014 must add to 100')+'</span></div>';
+    } else if(PF_ST.view==="mix"){
+      h+='<div class="pf-why"><b>Phoenix\u2019s split today:</b> long-term '+pfP(sp.lt)+' \u00b7 swing '+pfP(sp.swing)+' \u00b7 options '+pfP(sp.options)+' (max loss) \u00b7 cash '+pfP(sp.cash)+'<br>'+
+        (D.split_reasons||[]).map(optEsc).join(" ")+' <i>Day score '+(C.dayscore!=null?C.dayscore:'\u2014')+' \u00b7 regime '+optEsc(C.regime||'\u2014')+' \u00b7 EURUSD '+(C.eurusd||'\u2014')+'</i></div>';
+    }
+    // summary strip
+    h+='<div class="mm-strip opt-kpi pf-kpi"><div><i>long-term</i><b>'+pfE(T.lt)+'</b></div><div><i>swing</i><b>'+pfE(T.swing)+'</b><small>risk '+pfE(T.swingRisk)+'</small></div>'+
+      '<div><i>options max loss</i><b>'+pfE(T.optMaxLoss)+'</b><small>'+A.options.length+' trades</small></div><div><i>cash</i><b>'+pfE(T.cash)+'</b></div>'+
+      '<div><i>can be lost (trading)</i><b style="color:'+(T.atRisk<=acct*0.2?'var(--green)':'var(--red)')+'">'+pfE(T.atRisk)+'</b><small>'+pfP(T.atRisk/acct,1)+' of '+pfE(acct)+'</small></div></div>';
+    // checks
+    h+='<div class="pf-checks">'+A.checks.map(function(c){ return '<div class="'+c.s+'"><b>'+(c.s==="pass"?"\u2714":(c.s==="warn"?"\u26a0":"\u2716"))+'</b> '+optEsc(c.t)+'</div>'; }).join("")+'</div>';
+    // sleeves
+    if(A.lt.length&&(sp.lt||0)>0) h+='<div class="opt-sub2">Long-term <span>\u00b7 '+optEsc((D.lt||{}).core_src||"")+(((D.lt||{}).satellite||[]).length?' + the invest book\u2019s top names ('+pfP((D.rules||{}).lt_satellite||0.2)+' of the sleeve)':'')+'</span></div>'+
+      '<div class="opt-tbl pf-lt"><div class="hd"><span>Ticker</span><span>Weight</span><span>Amount</span><span>Role</span></div>'+
+      A.lt.map(function(l){ return '<div class="r"><span class="tk">'+l.t+'</span><span>'+pfP(l.w*(sp.lt||0),1)+'</span><span>'+pfE(l.eur)+'</span><span>'+optEsc(l.note)+'</span></div>'; }).join("")+'</div>';
+    if((sp.swing||0)>0) h+='<div class="opt-sub2">Swing <span>\u00b7 the stock trade book\u2019s passers \u00b7 '+pfP(((D.rules||{}).swing||{}).risk_per_trade||0.01)+' of the account at risk each, stop 2 ATR under the entry, heat cap '+(((D.rules||{}).swing||{}).max_heat||3)+'R</span></div>'+
+      (A.swing.length?'<div class="opt-tbl pf-sw"><div class="hd"><span>Ticker</span><span>Shares</span><span>Entry</span><span>Stop</span><span>Position</span><span>At risk</span><span>Why</span></div>'+
+      A.swing.map(function(x){ var c=x.c; return '<div class="r"><span class="tk">'+x.t+'<i>'+optEsc(c.industry||"")+'</i></span><span>'+x.qty+'</span><span>$'+c.entry+'</span><span>$'+c.stop+'</span><span>'+pfE(x.eur)+'</span><span class="ev neg">'+pfE(x.risk)+'</span>'+
+        '<span class="tr">score '+(c.score!=null?c.score:'\u2014')+(c.breakout?' \u00b7 breakout':'')+(c.chart?' \u00b7 chart '+c.chart:'')+(c.patterns&&c.patterns.length?' \u00b7 '+optEsc(c.patterns.join(", ")):'')+'</span></div>'; }).join("")+'</div>':'<div class="ed-note">No swing position fits today.</div>');
+    if((sp.options||0)>0) h+='<div class="opt-sub2">Options <span>\u00b7 from today\u2019s proposed list \u00b7 budget '+pfE(PF_ST.acct*(sp.options||0))+' of max loss \u00b7 \u2264'+(((D.rules||{}).options||{}).max_trades||6)+' trades, \u2264'+pfP((((D.rules||{}).options||{}).per_trade_max_loss)||0.05)+' of the account each, \u2264'+(((D.rules||{}).options||{}).per_cluster||2)+' per cluster, positive at the conservative vol</span></div>'+
+      (A.options.length?'<div class="opt-tbl pf-op"><div class="hd"><span>Ticker</span><span>Trade</span><span>Max loss</span><span>EV</span><span>EV cons.</span><span>Win</span><span>Exit</span><span>Cluster</span></div>'+
+      A.options.map(function(x){ var o=x.o; return '<div class="r" data-pfo="'+x.t+'"><span class="tk">'+x.t+'</span><span class="tr" title="'+(o.alt_of?'a smaller version of '+optEsc(o.alt_of):'')+'">'+optEsc(o.label)+'<i class="xt '+(o.expiry_type||"")+'">'+(o.expiry_type||"")+'</i>'+(o.alt_of?'<i class="xt">sized down</i>':'')+'</span><span class="ev neg">'+pfE(x.maxLoss)+'</span>'+
+        '<span class="ev">'+pfE(x.ev)+'</span><span class="ev'+(x.evc>0?'':' neg')+'">'+pfE(x.evc)+'</span><span>'+pfP(o.win)+'</span><span>'+optDate(o.exit_date)+'</span><span>'+optEsc(o.cluster)+'</span></div>'; }).join("")+'</div>':
+      '<div class="ed-note">No option trade fits this account today \u2014 see why below.</div>');
+    if(A.excluded.length) h+='<details class="opt-det"><summary>Left out <span>\u00b7 '+A.excluded.length+' candidates and why</span></summary><div class="opt-skip">'+
+      A.excluded.map(function(x){ return '<div><b>'+x.t+'</b> <i>'+x.book+'</i> '+optEsc(x.why)+'</div>'; }).join("")+'</div></details>';
+    h+='<div class="pf-act"><button id="pfToBuilder">Open in Portfolio Builder \u2192</button><span>Sends the long-term and swing lines as weights (cash as XEON). Options stay here: they are positions with a max loss, not weights.</span></div>';
+    h+='<div class="ed-note" style="margin-top:10px">Swing and options are ranked by their own engines; this page only sizes them to the account and adds the risk up. Prices are in USD and converted at EURUSD '+(C.eurusd||'\u2014')+' ('+optEsc(C.fx_src||"")+').</div>';
+    host.innerHTML=h;
+    host.querySelectorAll("[data-acct]").forEach(function(b){ b.onclick=function(){ PF_ST.acct=+this.dataset.acct; pfSave(); pfFill(); }; });
+    host.querySelectorAll("[data-view]").forEach(function(b){ b.onclick=function(){ PF_ST.view=this.dataset.view; pfSave(); pfFill(); }; });
+    host.querySelectorAll("[data-mode]").forEach(function(b){ b.onclick=function(){ PF_ST.mode=this.dataset.mode; pfSave(); pfFill(); }; });
+    host.querySelectorAll("[data-man]").forEach(function(inp){ inp.onchange=function(){ PF_ST.manual[this.dataset.man]=Math.max(0,Math.min(100,+this.value||0))/100; pfSave(); pfFill(); }; });
+    var tb=document.getElementById("pfToBuilder"); if(tb) tb.onclick=function(){
+      var lines=[], tot=0;
+      A.lt.forEach(function(l){ var w=l.eur/acct; if(w>0){ lines.push({t:l.t,w:+w.toFixed(4)}); tot+=w; } });
+      A.swing.forEach(function(x){ var w=x.eur/acct; lines.push({t:x.t,w:+w.toFixed(4)}); tot+=w; });
+      if(tot<0.9999){ var cash=lines.filter(function(l){return l.t==="XEON";})[0]; if(cash) cash.w=+(cash.w+1-tot).toFixed(4); else lines.push({t:"XEON",w:+(1-tot).toFixed(4)}); }
+      try{ localStorage.setItem("phoenix.builder.import",JSON.stringify({name:"Phoenix "+({mix:"mix",lt:"long-term",swing:"swing",options:"options"})[PF_ST.view]+" \u00b7 \u20ac"+(acct/1000)+"k \u00b7 "+(D.date||""),capital:acct,monthly:0,target:0,target_years:5,lines:lines})); }catch(e){}
+      location.href="portfolio_builder.html?profile=G&import=1"; };
+    host.querySelectorAll("[data-pfo]").forEach(function(r){ r.onclick=function(){ var tk=this.dataset.pfo; OPT_FOCUS=tk; var b=document.querySelector('.mc-tab[data-pane="options"]'); if(b) b.click();
+      if(IC_DATA&&document.getElementById("icLab")) icLoad(tk,true); }; });
+  }
   // Mission Control's tabs: the Daily Brief, MME (the dealer map) and Options (iron condors and credit spreads,
   // its own section since 28 Oct 2026). The last one opened is remembered.
   function mcPanes(host, briefHtml, mmeHtml){
     host.innerHTML='<div class="mc-top"><button class="mc-tab" data-pane="brief">Daily Brief</button><button class="mc-tab" data-pane="mme">MME</button>'+
-                   '<button class="mc-tab" data-pane="options">Options</button></div>'+
+                   '<button class="mc-tab" data-pane="options">Options</button><button class="mc-tab" data-pane="portfolios">Portfolios</button></div>'+
+                   '<div id="mcHealth" class="mc-health"></div>'+
                    '<div id="mcPaneBrief">'+briefHtml+'</div><div id="mcPaneMme" style="display:none">'+mmeHtml+'</div>'+
-                   '<div id="mcPaneOpt" style="display:none"><div id="optPane"></div></div>';
+                   '<div id="mcPaneOpt" style="display:none"><div id="optPane"></div></div>'+
+                   '<div id="mcPanePf" style="display:none"><div id="pfPane"></div></div>';
     var optDone=false;
     function show(p){
-      if(["brief","mme","options"].indexOf(p)<0) p="brief";
+      if(["brief","mme","options","portfolios"].indexOf(p)<0) p="brief";
       document.getElementById("mcPaneBrief").style.display=p==="brief"?"":"none";
       document.getElementById("mcPaneMme").style.display=p==="mme"?"":"none";
       document.getElementById("mcPaneOpt").style.display=p==="options"?"":"none";
+      document.getElementById("mcPanePf").style.display=p==="portfolios"?"":"none";
       host.querySelectorAll(".mc-tab").forEach(function(b){ b.classList.toggle("on", b.dataset.pane===p); });
       try{ localStorage.setItem("phoenix.mc.pane", p); }catch(e){}
       if(p==="mme") mcbNamesFill();
       if(p==="options"&&!optDone){ optDone=true; optFill(); }
+      if(p==="portfolios") pfFill();
     }
     host.querySelectorAll(".mc-tab").forEach(function(b){ b.onclick=function(){ show(this.dataset.pane); }; });
     var want="brief"; try{ want=localStorage.getItem("phoenix.mc.pane")||"brief"; }catch(e){}
     show(want);
+    mcHealthFill();
+  }
+  // the run's own health checks: what was tested, what broke and where to look (outputs/health.json, written last)
+  function mcHealthFill(){
+    var el=document.getElementById("mcHealth"); if(!el) return;
+    getJSON("health").then(function(h){
+      if(!h||!h.checks){ el.innerHTML=""; return; }
+      var n=h.summary||{}, bad=h.checks.filter(function(c){ return c.status!=="pass"; });
+      var cls=n.fail?"fail":(n.warn?"warn":"pass");
+      el.innerHTML='<details class="mch '+cls+'"><summary>'+(n.fail?'\u2716 ':(n.warn?'\u26a0 ':'\u2714 '))+'System checks \u00b7 '+(n.pass||0)+' pass'+(n.warn?' \u00b7 '+n.warn+' warn':'')+(n.fail?' \u00b7 '+n.fail+' fail':'')+
+        ' <span>\u00b7 run of '+String(h.asof||"").replace(" UTC","")+'</span></summary>'+
+        '<div class="mch-l">'+(bad.length?bad:h.checks).map(function(c){ return '<div class="'+c.status+'"><b>'+c.status.toUpperCase()+'</b><span>'+c.id+'</span><span>'+
+          String(c.detail||"").replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</span><i>'+String(c.where||"").replace(/</g,"&lt;")+'</i></div>'; }).join("")+
+        (bad.length?'<div class="pass"><b>PASS</b><span>'+(n.pass||0)+' other checks</span><span>'+h.checks.filter(function(c){ return c.status==="pass"; }).map(function(c){ return c.id; }).join(", ")+'</span><i></i></div>':'')+'</div></details>';
+    }).catch(function(){ el.innerHTML=""; });
   }
   function mcbNamesFill(){
     var body=document.getElementById("mcNamesBody"), note=document.getElementById("mcNamesNote"); if(!body) return;
