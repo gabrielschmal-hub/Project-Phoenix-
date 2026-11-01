@@ -12272,6 +12272,7 @@ def run_dossier():
         except Exception:
             return default if default is not None else {}
     scr, hist, mm, cal, stocks = rd("ic_screen"), rd("ic_hist"), rd("mme_map"), rd("calendar"), rd("stocks")
+    NEWS_N = (rd("news") or {}).get("names") or {}
     d = str(scr.get("date") or datetime.utcnow().date())
     today = datetime.strptime(d[:10], "%Y-%m-%d").date()
     mmrows = {r["ticker"]: r for g in (mm.get("groups") or {}).values() for r in g}
@@ -12311,6 +12312,7 @@ def run_dossier():
                             "ev_pct": p.get("ev_pct"), "ev_cons_pct": p.get("ev_cons_pct"), "ev_mkt": p.get("ev_1"), "win": p.get("pop_hv"),
                             "proposed": tk in prop, "why": p.get("why")} if p else
                            ({"skipped": (scr.get("skipped") or {}).get(tk)} if tk in (scr.get("skipped") or {}) else None)),
+               "news": [{"h": a["h"], "src": a.get("src"), "t": a.get("t"), "tags": a.get("tags"), "url": a.get("url")} for a in (NEWS_N.get(tk) or [])[:3]],
                "stock": ({k: st_rows[tk].get(k) for k in ("score", "rating", "stage", "stage2", "setup", "rs", "signal", "gates") if k in st_rows[tk]} or None) if tk in st_rows else None}
         for sec in ("chart", "vol", "dealer", "earnings", "options"):
             if rec.get(sec) is None or (sec == "vol" and rec["vol"].get("iv30") is None):
@@ -12432,6 +12434,12 @@ def run_health():
     rc = rd("ic_recap") or {}
     add("forward.recap", "forward test", "pass" if rc.get("date") == str(today) else "warn",
         f"recap of {rc.get('trades', 0)} trades, {rc.get('closed_planned', 0)} closed at their planned exit" if rc else "outputs/ic_recap.json missing", "run_ic_recap")
+    nw = rd("news") or {}
+    add("news", "data", "pass" if nw.get("date") == str(today) and nw.get("names_with_news") else ("warn" if nw else "warn"),
+        (f"{nw.get('calls')} Finnhub calls, {nw.get('names_with_news')}/{nw.get('names_asked')} names with news, {len(nw.get('failed') or [])} failed" if nw else "outputs/news.json missing (FINNHUB_API_KEY passed to the run?)"),
+        "run_news (Finnhub)")
+    ab = rd("auto_brief") or {}
+    add("auto_brief", "brief", "pass" if ab.get("date") == str(today) else "warn", f"auto brief for {ab.get('date') or 'no date'}", "run_auto_brief")
     # 5b. the proposed portfolios' inputs
     pf = rd("phoenix_portfolios") or {}
     if pf:
@@ -13271,6 +13279,345 @@ def run_ic_recap():
     print(f"[icrecap] {len(rows)} trades \u00b7 {out['open']} open \u00b7 {closed_n} closed at the planned exit \u00b7 week MTM {tw['mtm_change']:+.0f}$ \u00b7 realised {tw['realised']:+.0f}$")
     sb_heartbeat("ic_recap", True, f"{len(rows)} trades · week {tw['mtm_change']:+.0f}$ · month {periods['this_month']['mtm_change']:+.0f}$")
     return out
+
+
+# ============================================================
+# NEWS (1 Nov 2026): Finnhub company news for every single stock Phoenix follows, plus general market news.
+# Headlines, source, link and time only — never article text. Tags are plain keyword rules you can read below.
+# ============================================================
+NEWS_TAGS = [
+    ("earnings", ["earnings", "results", "eps", "quarterly", "q1 ", "q2 ", "q3 ", "q4 ", "beats", "misses", "revenue"]),
+    ("guidance", ["guidance", "outlook", "forecast", "raises", "lowers", "cuts outlook", "reaffirm"]),
+    ("upgrade", ["upgrade", "upgraded", "raised to buy", "outperform", "overweight", "price target raised", "raises price target"]),
+    ("downgrade", ["downgrade", "downgraded", "cut to sell", "underperform", "underweight", "price target cut", "lowers price target"]),
+    ("M&A", ["acquire", "acquisition", "merger", "takeover", "buyout", "to buy ", "deal to"]),
+    ("legal", ["lawsuit", "sues", "probe", "investigation", "sec ", "doj", "antitrust", "fine", "settlement", "recall", "fda"]),
+    ("insider", ["insider", "ceo sells", "ceo buys", "director buys", "stake"]),
+    ("capital", ["buyback", "repurchase", "dividend", "offering", "secondary", "convertible"]),
+]
+NEWS_WEIGHT = {"downgrade": 3, "upgrade": 2, "guidance": 3, "earnings": 2, "M&A": 3, "legal": 3, "insider": 1, "capital": 1}
+
+
+def _news_tags(h):
+    hl = " " + (h or "").lower() + " "
+    return [t for t, kws in NEWS_TAGS if any(k in hl for k in kws)]
+
+
+# ---- turning articles into facts (1 Nov 2026): no headlines or links in the brief, only what happened ----
+import re as _re_news
+_FIRM = _re_news.compile(r"\b(?:at|by|from)\s+([A-Z][A-Za-z&]+(?: [A-Z][A-Za-z&]+){0,2})|([A-Z][A-Za-z&]+(?: [A-Z][A-Za-z&]+){0,2})\s+(?:upgrades|downgrades|raises|cuts|lowers|initiates|reiterates|boosts)\b")
+_PT = _re_news.compile(r"(?:price target|PT|target)[^$\d]{0,30}\$?\s?(\d{1,5}(?:\.\d{1,2})?)", _re_news.I)
+_BN = _re_news.compile(r"\$\s?(\d+(?:\.\d+)?)\s?(billion|bn|million|mn)", _re_news.I)
+_FIRM_STOP = {"The", "A", "An", "Shares", "Stock", "Q1", "Q2", "Q3", "Q4", "Inc", "Corp", "Wall", "Street"}
+MARKET_THEMES = [
+    ("Fed & rates", ["fed ", "fomc", "powell", "rate hike", "rate cut", "interest rate", "treasury yield", "yields", "bond market"]),
+    ("Inflation", ["inflation", "cpi", "pce", "prices rose", "price index"]),
+    ("Jobs & growth", ["jobs", "payroll", "unemployment", "gdp", "recession", "jobless", "economy"]),
+    ("Earnings season", ["earnings", "quarterly results", "guidance", "beats", "misses"]),
+    ("Oil & energy", ["oil", "crude", "opec", "brent", "natural gas", "energy"]),
+    ("War & geopolitics", ["war", "attack", "missile", "sanction", "tanker", "ceasefire", "military", "iran", "russia", "ukraine", "israel"]),
+    ("China & trade", ["china", "tariff", "trade war", "beijing", "export control"]),
+    ("Tech & AI", ["ai ", "artificial intelligence", "chip", "semiconductor", "nvidia", "data center"]),
+    ("Crypto", ["bitcoin", "crypto", "ether", "stablecoin"]),
+]
+
+
+def _news_facts(text):
+    """Facts from one article's headline + summary: analyst firm and direction, price targets, beat/miss,
+    guidance raised/cut, deal size. Regex rules; anything it cannot read is simply not a fact."""
+    t = text or ""; tl = t.lower()
+    f = {}
+    if any(k in tl for k in ("downgrade", "cut to sell", "to underperform", "to underweight")):
+        f["analyst"] = "down"
+    elif any(k in tl for k in ("upgrade", "to outperform", "to overweight", "to buy from")):
+        f["analyst"] = "up"
+    elif "initiat" in tl:
+        f["analyst"] = "init"
+    if f.get("analyst"):
+        for m in _FIRM.finditer(t):
+            name = (m.group(1) or m.group(2) or "").strip(" .")
+            if name and name.split()[0] not in _FIRM_STOP and len(name) > 2:
+                f["firm"] = name; break
+    pts = [float(x) for x in _PT.findall(t) if 0 < float(x) < 100000]
+    if pts:
+        f["pt"] = pts[0]
+        if any(k in tl for k in ("raises price target", "price target raised", "boosts price target", "lifts price target")):
+            f["pt_dir"] = "up"
+        elif any(k in tl for k in ("cuts price target", "lowers price target", "price target cut", "price target lowered")):
+            f["pt_dir"] = "down"
+    if any(k in tl for k in ("beats", "beat estimates", "tops estimates", "above estimates", "better-than-expected")):
+        f["earnings"] = "beat"
+    elif any(k in tl for k in ("misses", "missed estimates", "below estimates", "worse-than-expected", "falls short")):
+        f["earnings"] = "miss"
+    if any(k in tl for k in ("raises guidance", "raises outlook", "raises forecast", "lifts outlook", "boosts guidance", "raised its forecast")):
+        f["guidance"] = "raised"
+    elif any(k in tl for k in ("cuts guidance", "lowers guidance", "cuts outlook", "lowers outlook", "cuts forecast", "weak guidance", "disappointing guidance", "soft guidance")):
+        f["guidance"] = "cut"
+    if any(k in tl for k in ("acquire", "acquisition", "merger", "takeover", "buyout")):
+        m = _BN.search(t)
+        f["deal"] = (f"${m.group(1)} {m.group(2).lower().replace('bn', 'billion').replace('mn', 'million')}" if m else "a deal")
+    if any(k in tl for k in ("lawsuit", "sues", "probe", "investigation", "antitrust", "recall", "fda rejects", "subpoena")):
+        f["legal"] = True
+    return f
+
+
+def _news_condense(facts):
+    """All of a name's article facts -> one short sentence of what happened, no headlines."""
+    if not facts:
+        return None
+    parts = []
+    g = [f["guidance"] for f in facts if f.get("guidance")]
+    if g:
+        parts.append("guidance " + ("raised" if g.count("raised") >= g.count("cut") else "cut"))
+    e = [f["earnings"] for f in facts if f.get("earnings")]
+    if e:
+        parts.append("results " + ("beat estimates" if e.count("beat") >= e.count("miss") else "missed estimates"))
+    for d_, word in (("down", "downgrade"), ("up", "upgrade"), ("init", "initiation")):
+        a = [f for f in facts if f.get("analyst") == d_]
+        if a:
+            firms = list(dict.fromkeys(f["firm"] for f in a if f.get("firm")))[:3]
+            parts.append(f"{len(a)} {word}{'s' if len(a) > 1 else ''}" + (f" ({', '.join(firms)})" if firms else ""))
+    pts = [f for f in facts if f.get("pt") and f.get("pt_dir")]
+    if pts:
+        dirs = [f["pt_dir"] for f in pts]; vals = sorted(f["pt"] for f in pts)
+        rng = f"${vals[0]:g}" if len(vals) == 1 or vals[0] == vals[-1] else f"${vals[0]:g}\u2013{vals[-1]:g}"
+        parts.append(f"price targets {'raised' if dirs.count('up') >= dirs.count('down') else 'cut'} to {rng}")
+    deals = [f["deal"] for f in facts if f.get("deal")]
+    if deals:
+        parts.append("M&A: " + next((d_ for d_ in deals if d_ != "a deal"), "a deal") + " reported")
+    if any(f.get("legal") for f in facts):
+        parts.append("a legal or regulatory matter in the news")
+    return "; ".join(parts) if parts else None
+
+
+def run_news():
+    """
+    One Finnhub call per single stock (company news, last 3 days) and one for general market news.
+    Names: the options universe's stocks (ETFs have no company news), open stock trades, recorded option
+    trades and the trade book's top passers. Free tier: 60 calls a minute, so calls are spaced ~1.1 s and a
+    429 waits a minute once. Writes outputs/news.json; the dossier and the auto brief read it.
+    """
+    import os, json, time
+    from datetime import datetime, timedelta
+    key = os.environ.get("FINNHUB_API_KEY") or os.environ.get("FINNHUB_KEY") or os.environ.get("FINNHUB_TOKEN")
+    if not key:
+        print("[news] FINNHUB_API_KEY not set \u2014 no news today"); sb_heartbeat("news", False, "FINNHUB_API_KEY missing"); return None
+    import requests
+    today = datetime.utcnow().date(); frm = today - timedelta(days=3)
+    names = set()
+    try:
+        u = json.load(open(os.path.join(OUTPUTS_DIR, "ic_universe.json"))).get("names") or {}
+        names |= {t for t, v in u.items() if (v or {}).get("group") != "etf"}
+    except Exception:
+        pass
+    try:
+        names |= {t.get("ticker") for t in _open_trades() if t.get("ticker")}
+    except Exception:
+        pass
+    try:
+        names |= {r["ticker"] for r in _sb_option_trades("open")}
+    except Exception:
+        pass
+    try:
+        st = json.load(open(os.path.join(OUTPUTS_DIR, "stocks.json")))
+        names |= {c["ticker"] for c in (st.get("trade_ranked") or []) if c.get("passer")}
+    except Exception:
+        pass
+    names = sorted(t for t in names if t and "." not in t and t not in IC_UNIVERSE_DEFAULT.get("etf", []))
+    calls, fails, out = 0, [], {}
+    def get(path, params):
+        nonlocal calls
+        for attempt in (1, 2):
+            calls += 1
+            r = requests.get("https://finnhub.io/api/v1/" + path, params=dict(params, token=key), timeout=20)
+            if r.status_code == 429 and attempt == 1:
+                print("[news] rate limit hit \u2014 waiting 60 s"); time.sleep(61); continue
+            r.raise_for_status()
+            return r.json()
+        return []
+    def clean(items, n):
+        seen, rows = set(), []
+        for a in sorted(items or [], key=lambda a: -(a.get("datetime") or 0)):
+            h = (a.get("headline") or "").strip()
+            if not h or h.lower() in seen:
+                continue
+            seen.add(h.lower())
+            tags = _news_tags(h)
+            rows.append({"h": h[:220], "src": a.get("source"), "url": a.get("url"), "facts": _news_facts(h + ". " + (a.get("summary") or "")[:600]),
+                         "t": datetime.utcfromtimestamp(a["datetime"]).strftime("%Y-%m-%d %H:%M") if a.get("datetime") else None,
+                         "tags": tags, "w": sum(NEWS_WEIGHT.get(t, 0) for t in tags)})
+            if len(rows) >= n:
+                break
+        return rows
+    def themes(items):
+        cnt = {}
+        for a in items or []:
+            tl = " " + ((a.get("headline") or "") + " " + (a.get("summary") or "")[:300]).lower() + " "
+            for th, kws in MARKET_THEMES:
+                if any(k in tl for k in kws):
+                    cnt[th] = cnt.get(th, 0) + 1
+        return sorted(cnt.items(), key=lambda x: -x[1])
+    for tk in names:
+        try:
+            out[tk] = clean(get("company-news", {"symbol": tk, "from": str(frm), "to": str(today)}), 6)
+        except Exception as e:
+            fails.append(f"{tk}: {str(e)[:60]}")
+        time.sleep(1.1)
+    try:
+        raw_m = get("news", {"category": "general"})
+        market = clean(raw_m, 25); market_themes = themes(raw_m)
+    except Exception as e:
+        market = []; market_themes = []; fails.append(f"market: {str(e)[:60]}")
+    condensed = {tk: _news_condense([a.get("facts") or {} for a in v]) for tk, v in out.items()}
+    with_news = sum(1 for v in out.values() if v)
+    doc = {"asof": _now(), "date": str(today), "source": "Finnhub (free tier)", "window_days": 3, "calls": calls,
+           "names_asked": len(names), "names_with_news": with_news, "failed": fails[:30], "market": market, "names": out,
+           "condensed": {k: v for k, v in condensed.items() if v}, "market_themes": market_themes,
+           "tag_rules": {t: k for t, k in NEWS_TAGS}}
+    write_json("news", doc)
+    print(f"[news] {calls} calls \u00b7 {len(names)} names \u00b7 {with_news} with news in 3 days \u00b7 {len(market)} market headlines \u00b7 {len(fails)} failed")
+    sb_heartbeat("news", not (len(fails) > len(names) / 2), f"{calls} calls \u00b7 {with_news}/{len(names)} names with news \u00b7 {len(fails)} failed")
+    return doc
+
+
+def run_auto_brief():
+    """
+    THE AUTO BRIEF (1 Nov 2026) — Phoenix's own daily brief, in the SAME shape as the 4am Claude brief
+    (wire.json's parsed daily: recap "In five minutes", headline, standfirst, stance, market, macro, screener,
+    positions, world, what changed, what would change this, on deck), so the two render identically and can be
+    compared. No language model: moves come from Phoenix's prices, news is condensed to facts by rules
+    (_news_facts / _news_condense) — what happened, never headlines or links.
+    """
+    import os, json
+    from datetime import datetime, timedelta
+    def rd(n):
+        try:
+            return json.load(open(os.path.join(OUTPUTS_DIR, n + ".json")))
+        except Exception:
+            return {}
+    prev = rd("auto_brief")
+    pf, book, dos, news, cal, scr, rc, hl, ds = (rd("phoenix_portfolios"), rd("pf_book"), rd("dossier"), rd("news"), rd("calendar"),
+                                               rd("ic_screen"), rd("ic_recap"), rd("health"), rd("dayscore"))
+    try:
+        bars = (json.load(open(os.path.join("_work", "ic_bars.json"))).get("names")) or {}
+    except Exception:
+        bars = {}
+    today = datetime.utcnow().date()
+    D = dos.get("names") or {}; C = news.get("condensed") or {}
+    dial = pf.get("dial") or {}; ctx = dial.get("context") or {}
+    usd = lambda v: ("\u2212$" if (v or 0) < 0 else "+$") + f"{abs(v or 0):,.0f}"
+    def chg(t):
+        c = (bars.get(t) or {}).get("c") or []
+        return (c[-1] / c[-2] - 1) * 100 if len(c) >= 2 and c[-2] else None
+    def pc(v):
+        return "\u2014" if v is None else f"{v:+.2f}%"
+    def b(x):
+        return f"<b>{x}</b>"
+    # ---- the tape
+    idx = [("S&P 500", "SPY"), ("Nasdaq 100", "QQQ"), ("Russell 2000", "IWM"), ("Dow", "DIA")]
+    idx_m = [(n_, t, chg(t)) for n_, t in idx if chg(t) is not None]
+    sectors = {"XLK": "technology", "XLF": "financials", "XLE": "energy", "XLV": "health care", "XLI": "industrials", "XLY": "consumer discretionary",
+               "XLP": "staples", "XLU": "utilities", "XLB": "materials", "SMH": "semiconductors", "KRE": "regional banks", "XBI": "biotech"}
+    sec_m = sorted([(sectors[t], t, chg(t)) for t in sectors if chg(t) is not None], key=lambda x: x[2])
+    cross = [("Long Treasuries (TLT)", "TLT"), ("Gold (GLD)", "GLD"), ("Oil (USO)", "USO"), ("Bitcoin fund (IBIT)", "IBIT")]
+    cross_m = [(n_, t, chg(t)) for n_, t in cross if chg(t) is not None]
+    movers = sorted([(t, chg(t)) for t in bars if chg(t) is not None and t not in dict(idx).values() and t not in sectors],
+                    key=lambda x: -abs(x[1]))[:6]
+    vix = ctx.get("vix")
+    # ---- recap: in five minutes
+    items = []
+    if idx_m:
+        lead = max(idx_m, key=lambda x: abs(x[2]))
+        txt = b(f"{lead[0]} {pc(lead[2])}.") + " " + ", ".join(f"{n_} {b(pc(v))}" for n_, t, v in idx_m if n_ != lead[0]) + "."
+        if sec_m:
+            txt += f" Strongest group {sec_m[-1][0]} {b(pc(sec_m[-1][2]))}, weakest {sec_m[0][0]} {b(pc(sec_m[0][2]))}."
+        if vix:
+            txt += f" VIX {b(vix)}."
+        items.append({"tag": "1", "html": txt, "tone": "", "when": ""})
+    if movers:
+        lines = []
+        for t, v in movers[:4]:
+            why = C.get(t)
+            lines.append(f"{b(t)} {pc(v)}" + (f" \u2014 {why}" if why else ""))
+        items.append({"tag": str(len(items) + 1), "html": b("Biggest moves Phoenix follows:") + " " + "; ".join(lines) + ".", "tone": "", "when": ""})
+    if cross_m:
+        items.append({"tag": str(len(items) + 1), "html": b("Across assets:") + " " + ", ".join(f"{n_} {b(pc(v))}" for n_, t, v in cross_m) + ".", "tone": "", "when": ""})
+    th = news.get("market_themes") or []
+    if th:
+        items.append({"tag": str(len(items) + 1), "html": b("What the market news was about:") + " " + ", ".join(f"{k} ({n_} stor{'ies' if n_ > 1 else 'y'})" for k, n_ in th[:4]) + ".", "tone": "", "when": ""})
+    led = pf.get("ledger") or {}; exc = book.get("exceptions") or []
+    _ns, _no = len(led.get("stocks") or []), len(led.get("options") or [])
+    note = (f"{b(str(_ns) + ' stock position' + ('s' if _ns != 1 else ''))} and {b(str(_no) + ' option trade' + ('s' if _no != 1 else ''))} open; stock heat {b(str(led.get('heat_R', 0)) + 'R')} of {led.get('heat_cap_R', 3)}R. "
+            + (f"{b(str(len(exc)) + ' thing' + ('s' if len(exc) != 1 else '') + ' to act on')}." if exc else "Nothing to act on."))
+    # ---- headline and standfirst
+    if idx_m:
+        lead = max(idx_m, key=lambda x: abs(x[2]))
+        headline = f"{lead[0]} {pc(lead[2])}" + (f": {sec_m[0][0]} weakest at {pc(sec_m[0][2])}" if sec_m and lead[2] < 0 else (f": {sec_m[-1][0]} strongest at {pc(sec_m[-1][2])}" if sec_m else ""))
+    else:
+        headline = f"Market dial {dial.get('score', 'n/a')}/100, {dial.get('state', 'unknown')}"
+    standfirst = (f"The market dial reads {dial.get('score', 'n/a')}/100 ({dial.get('state', 'unknown')})"
+                  + (": " + "; ".join(f"{p['k']} {p['why']}" for p in (dial.get("parts") or []) if p.get("pts")) if any(p.get("pts") for p in dial.get("parts") or []) else "")
+                  + ". " + (("Act first: " + exc[0]["text"] + ".") if exc else "No position needs action today."))
+    # ---- sections in the brief's order
+    sp = pf.get("split_auto") or {}
+    stance = {"kicker": "The stance", "title": {"risk-on": "Full risk budget", "caution": "Caution: smaller trading parts", "stress": "Stress: cut the trading parts"}.get(dial.get("state"), "Stance"),
+              "note": f"New money splits core {sp.get('core', 0)*100:.0f}%, tactical {sp.get('tactical', 0)*100:.0f}%, risky {sp.get('risky', 0)*100:.0f}%, cash {sp.get('cash', 0)*100:.0f}%."
+                      + (f" Day score {ds.get('score')} \u2014 {ds.get('verdict')}." if ds.get("score") is not None else "")}
+    markets = {"kicker": "The market", "items": [{"tag": t, "html": f"{n_} {b(pc(v))}", "tone": "up" if v > 0 else "dn", "when": ""} for n_, t, v in idx_m] +
+               [{"tag": t, "html": f"{n_} {b(pc(v))}", "tone": "up" if v > 0 else "dn", "when": ""} for n_, t, v in list(dict.fromkeys(sec_m[-2:][::-1] + sec_m[:2]))]}
+    macro = {"kicker": "The macro", "note": "; ".join(x for x in [f"Regime {ctx.get('regime')}" if ctx.get("regime") else None,
+                                                                 f"SPX {ctx.get('spx_vs_50d_pct'):+.1f}% vs its 50-day and {ctx.get('spx_vs_200d_pct'):+.1f}% vs its 200-day" if ctx.get("spx_vs_50d_pct") is not None and ctx.get("spx_vs_200d_pct") is not None else None,
+                                                                 f"SPX dealer gamma {ctx.get('gex_regime')}" if ctx.get("gex_regime") else None,
+                                                                 f"VIX {vix}" if vix else None] if x) + "."}
+    held = [s_["t"] for s_ in led.get("stocks") or []] + [o["t"] for o in led.get("options") or []]
+    pos_items = []
+    for t in dict.fromkeys(held):
+        d = D.get(t) or {}; dl = d.get("dealer") or {}; px = (d.get("price") or {}).get("close")
+        bits = [f"{pc(chg(t))} on the day" if chg(t) is not None else None,
+                f"chart {d['chart']['bias']}" if (d.get("chart") or {}).get("bias") else None,
+                f"below its gamma flip {dl['flip']}" if dl.get("flip") and px and px < dl["flip"] else None,
+                C.get(t)]
+        pos_items.append({"tag": t, "ticker": t, "html": "; ".join(x for x in bits if x) or "no change of note", "tone": "", "when": ""})
+    positions = {"kicker": "Your positions", "note": note + (" " + " ".join(e["text"] + "." for e in exc) if exc else ""), "items": pos_items}
+    prop = (scr.get("proposed") or [])[:3]; tac = [c for c in pf.get("tactical") or [] if not c.get("gates")][:3]
+    screener = {"kicker": "The screener", "items":
+                [{"tag": "OPT", "ticker": p["ticker"], "html": f"{b(p['ticker'])} {p.get('label')} \u2014 EV {p.get('ev_pct', 0)*100:.1f}%" + (f", {p['ev_cons_pct']*100:.1f}% at the conservative vol" if p.get("ev_cons_pct") is not None else "") + (f"; news: {C[p['ticker']]}" if C.get(p["ticker"]) else ""), "tone": "", "when": ""} for p in prop] +
+                [{"tag": "TAC", "ticker": c["t"], "html": f"{b(c['t'])} rank {c.get('rank_score')}" + (f" \u2014 {'; '.join((c.get('notes') or [])[:2])}" if c.get("notes") else "") + (f"; news: {C[c['t']]}" if C.get(c["t"]) else ""), "tone": "", "when": ""} for c in tac]}
+    world = {"kicker": "The world", "note": ("Most-covered themes in today's market news: " + ", ".join(f"{k} ({n_})" for k, n_ in th[:6]) + ".") if th else "No market news on file."}
+    # what changed since the last auto brief
+    ch_items = []
+    pd = (prev.get("_state") or {})
+    if pd.get("dial") is not None and dial.get("score") is not None and pd["dial"] != dial["score"]:
+        ch_items.append({"tag": "DIAL", "html": f"Market dial {pd['dial']} \u2192 {b(dial['score'])} ({dial.get('state')})", "tone": "", "when": ""})
+    newp = sorted({p["ticker"] for p in scr.get("proposed") or []} - set(pd.get("proposed") or []))
+    if newp:
+        ch_items.append({"tag": "NEW", "html": "New on the options list: " + ", ".join(newp[:8]), "tone": "", "when": ""})
+    gone = sorted(set(pd.get("proposed") or []) - {p["ticker"] for p in scr.get("proposed") or []})
+    if gone:
+        ch_items.append({"tag": "OFF", "html": "Off the options list: " + ", ".join(gone[:8]), "tone": "", "when": ""})
+    P = rc.get("periods") or {}
+    if rc:
+        ch_items.append({"tag": "TEST", "html": f"Options forward test: this week {b(usd(P.get('this_week', {}).get('mtm_change')))}, this month {b(usd(P.get('this_month', {}).get('mtm_change')))}; {rc.get('closed_planned', 0)} closed at plan.", "tone": "", "when": ""})
+    changed = {"kicker": "What changed", "items": ch_items} if ch_items else None
+    nxt = "caution" if dial.get("state") == "risk-on" else ("stress" if dial.get("state") == "caution" else "caution")
+    invalidation = {"kicker": "What would change this", "note": f"The dial moving into {nxt} (risk-on \u2265 70, caution 45\u201369, stress < 45). Inputs: macro regime, SPX dealer gamma, VIX level and curve, SPX against its 50- and 200-day."}
+    ev = [e for e in cal.get("events") or [] if str(today) <= e.get("date", "") <= str(today + timedelta(days=7)) and e.get("type") != "OPEX"]
+    watch = set(held) | {p["ticker"] for p in scr.get("proposed") or []}
+    earn = sorted([(((D.get(t) or {}).get("earnings") or {}).get("date"), t) for t in watch if ((D.get(t) or {}).get("earnings") or {}).get("date")
+                   and str(today) <= ((D.get(t) or {}).get("earnings") or {}).get("date") <= str(today + timedelta(days=14))])
+    ondeck = "; ".join([f"{datetime.strptime(e['date'], '%Y-%m-%d').strftime('%a %d %b')} {e.get('label')}" for e in ev] +
+                       [f"{t} earnings {datetime.strptime(d_, '%Y-%m-%d').strftime('%d %b')}" for d_, t in earn]) or "No macro events or earnings on your names in the next week."
+    doc = {"asof": _now(), "date": str(today), "parser": "phoenix-auto", "headline": headline, "standfirst": standfirst,
+           "recap": {"note": note, "items": items, "right": "auto"},
+           "stance": stance, "markets": markets, "macro": macro, "screener": screener, "positions": positions,
+           "world": world, "changed": changed, "invalidation": invalidation, "ondeck": ondeck,
+           "sources": {"prices": "Yahoo daily bars (Phoenix)", "news": f"{news.get('source', 'Finnhub')}, {news.get('names_with_news', 0)} names with news, condensed by rules",
+                       "data": "dossier, market dial, ledger, locked book, options screen, forward-test recap"},
+           "_state": {"dial": dial.get("score"), "proposed": sorted({p["ticker"] for p in scr.get("proposed") or []})}}
+    write_json("auto_brief", doc)
+    print(f"[autobrief] {headline}")
+    sb_heartbeat("auto_brief", True, headline[:120])
+    return doc
 
 
 IC_STOPS = {"sl50": ("half the max loss", lambda r: -0.5 * float(r["max_loss_1"])),
@@ -16451,10 +16798,12 @@ def run_full():
     step("mme_map",        run_mme_map,       optional=True)   # the dealer map: every name vs its walls and flip
     step("ic_screen",      run_ic_screen,     optional=True)   # iron condor tournament
     step("ic_record",      run_ic_record,     optional=True)   # archive chains + vol, forward-test the winners, mark open ones
+    step("news",           run_news,          optional=True)   # Finnhub company + market news (headlines only)
     step("ic_recap",       run_ic_recap,      optional=True)   # the forward test added up: daily book, week/month, edge by entry context
     step("dossier",        run_dossier,       optional=True)   # one record per name: every engine's view, archived for the review
     step("portfolios",     run_portfolios,    optional=True)   # every book's candidates + Phoenix's split, for the proposed portfolios
     step("pf_track",       run_pf_track,      optional=True)   # the locked book: exceptions daily, the review drafted when it is due
+    step("auto_brief",     run_auto_brief,    optional=True)   # the brief Phoenix writes itself, beside the 4am Claude brief
     # the backtest replays the archive; it runs itself on Fridays (it returns early until ten days are archived)
     from datetime import datetime as _dt, timezone as _tz
     if _dt.now(_tz.utc).weekday() == 4:
@@ -16529,6 +16878,10 @@ def run_engine(name):
         run_dossier()
     elif name == "ic_recap":
         run_ic_recap()
+    elif name == "news":
+        run_news()
+    elif name == "auto_brief":
+        run_auto_brief()
     elif name == "portfolios":
         run_portfolios()
     elif name == "pf_track":

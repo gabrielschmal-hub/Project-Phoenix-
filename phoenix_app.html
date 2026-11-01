@@ -1209,6 +1209,12 @@
   .mindb{display:inline-block;margin-left:4px;font-style:normal;font-family:var(--mono);font-size:9.5px;padding:1px 5px;border-radius:999px;border:1px solid var(--line2);color:var(--inkFade)}
   .mindb.ok{color:var(--green);border-color:var(--green)} .mindb.no{color:var(--red);border-color:var(--red)}
   .opt-tbl.mind-tbl .hd,.opt-tbl.mind-tbl .r{grid-template-columns:80px 100px minmax(140px,1.2fr) 110px 100px 100px 140px;min-width:780px}
+  .ab-sec{margin:10px 2px;font-size:14px;line-height:1.55} .ab-sec>b{font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;margin-right:6px;color:var(--gold)}
+  .ab-facts{font-family:var(--mono);font-size:12px;color:var(--inkFade);margin-top:2px} .ab-rows div{padding:4px 0;border-bottom:1px solid var(--line2);font-size:13px}
+  .ab-rows .tk{font-family:var(--mono);font-weight:700;margin-right:6px} .ab-src{font-style:normal;color:var(--inkFade);font-size:11px}
+  .ab-tag{display:inline-block;font-style:normal;font-family:var(--mono);font-size:9.5px;padding:1px 6px;margin-right:5px;border-radius:999px;border:1px solid var(--line2);color:var(--inkFade);text-transform:uppercase}
+  .ab-tag.downgrade,.ab-tag.legal{color:var(--red);border-color:var(--red)} .ab-tag.upgrade{color:var(--green);border-color:var(--green)} .ab-tag.earnings,.ab-tag.guidance,.ab-tag.MA{color:var(--gold);border-color:var(--gold)}
+  .ab-n a,.ab-rows a{color:var(--ink)}
   .mc-health{margin:8px 0 2px} .mch{border:1px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--card);font-size:12.5px}
   .mch summary{cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700} .mch summary span{font-weight:400;color:var(--inkFade)}
   .mch.pass summary{color:var(--green)} .mch.warn summary{color:var(--gold)} .mch.fail summary{color:var(--red)}
@@ -10666,6 +10672,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   var MCB_ORDER=[["recap","In five minutes"],["stance","The stance"],["markets","The market"],["macro","The macro"],
                  ["smart_money","Smart money"],["screener","The screener"],["positions","Your positions"],
                  ["world","The world"],["changed","What changed"],["invalidation","What would change this"]];
+  window.mcbSecW=function(s,k){ return mcbSec(s,k); };       // the auto brief renders with the same section markup
   function mcbSec(s,fallbackKicker){
     if(!s) return "";
     var items=(s.items||[]).map(function(it){
@@ -11011,6 +11018,17 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       annotations:[{x:exitD,yref:"paper",y:1,yanchor:"top",text:"exit",showarrow:false,font:{size:10,color:ink}}]};
     if(el.data) Plotly.react(el,traces,layout,{displayModeBar:false,responsive:true}); else Plotly.newPlot(el,traces,layout,{displayModeBar:false,responsive:true});
   }
+  // TradingView-style candles for a name, from the screen's daily bars (o/h/l/c); a close line if the bars carry no opens
+  function icCandles(B,name){
+    if(B.o&&B.o.length===B.c.length) return {x:B.t,open:B.o,high:B.h,low:B.l,close:B.c,type:"candlestick",name:name||"price",
+      increasing:{line:{color:"#26a69a",width:1},fillcolor:"#26a69a"},decreasing:{line:{color:"#ef5350",width:1},fillcolor:"#ef5350"},hoverinfo:"x+y"};
+    return {x:B.t,y:B.c,type:"scatter",mode:"lines",name:name||"price",line:{color:ICC.blue,width:2}};
+  }
+  function icTvLayout(h,ink,line,shapes){
+    return {height:h,margin:{l:10,r:56,t:8,b:28},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},showlegend:false,dragmode:"pan",
+      xaxis:{type:"date",rangeslider:{visible:false},rangebreaks:[{bounds:["sat","mon"]}],gridcolor:line,tickformat:"%d %b",fixedrange:false},
+      yaxis:{side:"right",gridcolor:line,fixedrange:false},shapes:shapes||[]};
+  }
   // the price chart the direction is read from: daily closes, swing support/resistance, short strikes
   function icPriceChart(r){
     var el=document.getElementById("iclChart"); if(!el) return;
@@ -11018,9 +11036,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(!B||!B.t||!B.t.length){ el.innerHTML='<div class="ed-note">No price history on file for '+st.tk+'.</div>'; return; }
     if(typeof Plotly==="undefined") return;
     var css=getComputedStyle(document.documentElement), ink=css.getPropertyValue("--inkFade").trim()||"#888", line=css.getPropertyValue("--line2").trim()||"#ddd";
-    var traces=[{x:B.t,y:B.h,type:"scatter",mode:"lines",line:{width:0},hoverinfo:"skip"},
-                {x:B.t,y:B.l,type:"scatter",mode:"lines",line:{width:0},fill:"tonexty",fillcolor:"rgba(120,120,120,.15)",hoverinfo:"skip"},
-                {x:B.t,y:B.c,type:"scatter",mode:"lines",line:{color:ICC.blue,width:2},hovertemplate:"%{x|%d %b}: %{y:.2f}<extra></extra>"}];
+    var traces=[icCandles(B,st.tk)];
     function hl(y,c,d,lab){ return {type:"line",xref:"paper",x0:0,x1:1,y0:y,y1:y,line:{color:c,width:1.3,dash:d},label:{text:lab,textposition:"start",font:{size:10,color:c}}}; }
     var shapes=[];
     if(V.support) shapes.push(hl(V.support,ICC.green,"dash","support "+V.support));
@@ -11030,8 +11046,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(p.target!=null) shapes.push(hl(p.target,"#8a5cc2","dot",p.label+" target "+p.target)); });
     if(icHas(st,"sp")) shapes.push(hl(st.sp,"#d08a1c","dot","short put "+st.sp));
     if(icHas(st,"sc")) shapes.push(hl(st.sc,"#4a86d0","dot","short call "+st.sc));
-    var layout={height:240,margin:{l:52,r:12,t:10,b:30},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},showlegend:false,
-      xaxis:{gridcolor:line,tickformat:"%b",fixedrange:true},yaxis:{gridcolor:line,fixedrange:true},shapes:shapes};
+    var layout=icTvLayout(300,ink,line,shapes);
     if(el.data) Plotly.react(el,traces,layout,{displayModeBar:false,responsive:true}); else Plotly.newPlot(el,traces,layout,{displayModeBar:false,responsive:true});
   }
   function icValid(t){
@@ -11208,7 +11223,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   }
   // one trade, day by day: the marks the morning run stores (P&L, greeks, breakevens, IV, dealer levels)
   function optTradeDetail(id){
-    supaRows("/rest/v1/ic_forward?select=id,ticker,expiry,legs,credit,max_loss_1,marks,result,model,structure,status&id=eq."+id).then(function(rr){
+    supaRows("/rest/v1/ic_forward?select=id,opened,ticker,expiry,legs,credit,max_loss_1,marks,result,model,structure,status&id=eq."+id).then(function(rr){
       var r=(rr||[])[0], el=document.getElementById("optTrDet"); if(!r||!el) return;
       var M=(r.marks||[]).filter(function(m){ return m.pnl_1!=null; }), L=r.legs||{};
       if(!M.length){ el.innerHTML='<i>No marks yet \u2014 the first comes with the next morning run.</i>'; return; }
@@ -11220,7 +11235,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           ex.map(function(x){ return '<span><i>exit '+x+'d</i><b class="'+(res[x]>=0?'ev':'ev neg')+'">'+optM(res[x])+'</b></span>'; }).join("")+
           (res.expiry!=null?'<span><i>held to expiry</i><b class="'+(res.expiry>=0?'ev':'ev neg')+'">'+optM(res.expiry)+'</b></span>':'')+
           ['sl50','slcr'].map(function(k){ var v=res[k]; return v&&v.stopped?'<span><i>'+(k==="sl50"?'stop \u221250%':'stop = credit')+'</i><b class="ev neg">hit '+optDate(v.stopped.date)+'</b></span>':''; }).join("")+'</div>'+
-        '<div id="optTrC1" class="icl-cone"></div><div id="optTrC2" class="icl-cone"></div>'+
+        '<div class="opt-sub3">'+optEsc(r.ticker)+' <span>\u00b7 daily candles with the trade drawn on: strikes, today\u2019s breakevens and dealer walls, the day it opened</span></div><div id="optTrC1" class="icl-cone"></div>'+
+        '<div class="opt-sub3">P&amp;L <span>\u00b7 one point per morning mark, per contract</span></div><div id="optTrC2" class="icl-cone"></div>'+
         '<div class="opt-tbl dd"><div class="hd"><span>Date</span><span>DTE</span><span>Spot</span><span>P&amp;L</span><span>\u0394 sh</span><span>\u0393</span><span>\u0398 $/day</span><span>Vega $</span><span>BE low</span><span>BE high</span><span>IV short</span><span>Flip</span><span>Put wall</span><span>Call wall</span></div>'+
         M.slice().reverse().map(function(m){ var dl=m.dealer||{};
           return '<div class="r'+(m.post_exit?' post':'')+'"><span>'+optDate(m.date)+(m.post_exit?' <i>after exit</i>':'')+'</span><span>'+m.dte+'</span><span>'+(m.spot!=null?(+m.spot).toFixed(2):'\u2014')+'</span>'+
@@ -11235,21 +11251,32 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var X=M.map(function(m){ return m.date; });
       var lay=function(h,extra){ return Object.assign({height:h,margin:{l:52,r:46,t:10,b:30},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},
         legend:{orientation:"h",y:-0.2,font:{size:10}},xaxis:{gridcolor:line,fixedrange:true},yaxis:{gridcolor:line,fixedrange:true}},extra||{}); };
-      // 1. price against the breakevens, the short strikes and the dealer walls, day by day
-      var col=function(k){ return M.map(function(m){ return m[k]!=null?m[k]:null; }); }, dk=function(k){ return M.map(function(m){ return (m.dealer||{})[k]!=null?m.dealer[k]:null; }); };
-      var t1=[{x:X,y:col("be_lo"),name:"breakeven low",mode:"lines",line:{color:ICC.gold,width:1.5,dash:"dash"}},
-              {x:X,y:col("be_hi"),name:"breakeven high",mode:"lines",line:{color:ICC.gold,width:1.5,dash:"dash"},fill:(L.short_put!=null&&L.short_call!=null)?"tonexty":"none",fillcolor:"rgba(45,138,85,.12)"},
-              {x:X,y:col("spot"),name:"price",mode:"lines+markers",line:{color:ICC.blue,width:2},marker:{size:4}},
-              {x:X,y:dk("flip"),name:"gamma flip",mode:"lines",line:{color:"#8a5cc2",width:1,dash:"dot"}},
-              {x:X,y:dk("put_wall"),name:"put wall",mode:"lines",line:{color:ICC.green,width:1,dash:"dot"}},
-              {x:X,y:dk("call_wall"),name:"call wall",mode:"lines",line:{color:ICC.red,width:1,dash:"dot"}}];
-      var sh=[]; ["short_put","short_call"].forEach(function(k){ if(L[k]!=null) sh.push({type:"line",xref:"paper",x0:0,x1:1,y0:L[k],y1:L[k],line:{color:k==="short_put"?"#d08a1c":"#4a86d0",width:1}}); });
-      Plotly.newPlot("optTrC1",t1,lay(260,{shapes:sh}),{displayModeBar:false,responsive:true});
-      // 2. P&L with theta and delta beside it
-      var t2=[{x:X,y:col("pnl_1"),name:"P&L $",type:"bar",marker:{color:M.map(function(m){ return m.pnl_1>=0?"rgba(45,138,85,.7)":"rgba(196,72,72,.7)"; })}},
-              {x:X,y:M.map(function(m){ return g(m,"theta"); }),name:"\u0398 $/day",mode:"lines",yaxis:"y2",line:{color:ICC.gold,width:1.5}},
-              {x:X,y:M.map(function(m){ return g(m,"delta"); }),name:"\u0394 shares",mode:"lines",yaxis:"y2",line:{color:ICC.blue,width:1.5}}];
-      Plotly.newPlot("optTrC2",t2,lay(220,{yaxis2:{overlaying:"y",side:"right",gridcolor:"rgba(0,0,0,0)",fixedrange:true}}),{displayModeBar:false,responsive:true});
+      // 1. the ticker as candles, with the trade drawn on it: short strikes, long strikes, today's breakevens,
+      //    today's dealer walls and flip, and the day it was opened
+      var B=((IC_DATA&&IC_DATA.bars)||{})[r.ticker], last=M[M.length-1], dl=last.dealer||{};
+      var hl=function(y,c,w,d,lab){ return {type:"line",xref:"paper",x0:0,x1:1,y0:y,y1:y,line:{color:c,width:w,dash:d},label:{text:lab,textposition:"end",font:{size:9,color:c}}}; };
+      var sh=[];
+      if(L.short_put!=null) sh.push(hl(L.short_put,"#d08a1c",1.5,"solid","short put "+L.short_put));
+      if(L.long_put!=null) sh.push(hl(L.long_put,"#d08a1c",1,"dot","long put "+L.long_put));
+      if(L.short_call!=null) sh.push(hl(L.short_call,"#4a86d0",1.5,"solid","short call "+L.short_call));
+      if(L.long_call!=null) sh.push(hl(L.long_call,"#4a86d0",1,"dot","long call "+L.long_call));
+      if(last.be_lo!=null) sh.push(hl(last.be_lo,ICC.gold,1.2,"dash","breakeven "+last.be_lo));
+      if(last.be_hi!=null) sh.push(hl(last.be_hi,ICC.gold,1.2,"dash","breakeven "+last.be_hi));
+      if(dl.flip!=null) sh.push(hl(dl.flip,"#8a5cc2",1,"dot","flip "+dl.flip));
+      if(dl.put_wall!=null) sh.push(hl(dl.put_wall,ICC.green,1,"dot","put wall "+dl.put_wall));
+      if(dl.call_wall!=null) sh.push(hl(dl.call_wall,ICC.red,1,"dot","call wall "+dl.call_wall));
+      var op=String((r.opened||M[0].date)).slice(0,10);
+      sh.push({type:"line",xref:"x",yref:"paper",x0:op,x1:op,y0:0,y1:1,line:{color:ICC.gold,width:1,dash:"dot"},label:{text:"opened",textposition:"start",font:{size:9,color:ICC.gold}}});
+      var c1=document.getElementById("optTrC1");
+      if(B&&B.t&&B.t.length){ var k=Math.max(0,B.t.length-90), Bs={t:B.t.slice(k),o:B.o&&B.o.slice(k),h:B.h.slice(k),l:B.l.slice(k),c:B.c.slice(k)};
+        Plotly.newPlot(c1,[icCandles(Bs,r.ticker)],icTvLayout(300,ink,line,sh),{displayModeBar:false,responsive:true,scrollZoom:true}); }
+      else c1.innerHTML='<div class="ed-note">No price history on file for '+r.ticker+'.</div>';
+      // 2. the trade's P&L, one point per morning mark: a line, the zero line, and the day's figure on hover
+      var X2=M.map(function(m){ return m.date; }), Y2=M.map(function(m){ return m.pnl_1; });
+      Plotly.newPlot("optTrC2",[{x:X2,y:Y2,type:"scatter",mode:"lines+markers",name:"P&L",line:{color:Y2[Y2.length-1]>=0?ICC.green:ICC.red,width:2},marker:{size:5},
+        fill:"tozeroy",fillcolor:Y2[Y2.length-1]>=0?"rgba(38,166,154,.10)":"rgba(239,83,80,.10)",hovertemplate:"%{x}: $%{y:.0f}<extra></extra>"}],
+        {height:170,margin:{l:10,r:56,t:8,b:28},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},showlegend:false,
+         xaxis:{type:"category",gridcolor:line,fixedrange:true},yaxis:{side:"right",gridcolor:line,zeroline:true,zerolinecolor:ink,tickprefix:"$",fixedrange:true}},{displayModeBar:false,responsive:true});
     }).catch(function(){ var el=document.getElementById("optTrDet"); if(el) el.innerHTML='<i>Could not read this trade.</i>'; });
   }
   // week / month recap, the book's daily P&L, and the edge by what was known at entry
@@ -11812,27 +11839,54 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var note=document.getElementById("pfMindNote"); if(note) note.textContent=dial?("dial "+dial.score+" \u00b7 "+dial.state+(exc.length?" \u00b7 "+exc.length+" exception"+(exc.length>1?"s":""):"")):"";
   }
   window.pxMindLoad=pxMindLoad; window.pxMindChip=pxMindChip; window.pxMindPortfolio=pxMindPortfolio;
+  // ---- AUTO BRIEF: the brief Phoenix writes itself from its own files and Finnhub news, shown beside the
+  // 4am Claude brief (Daily Brief tab) so the two can be compared. Key lines open, the rest one tap away. ----
+  function abFill(){
+    var host=document.getElementById("abPane"); if(!host) return;
+    host.innerHTML='<div class="ed-note">Loading the auto brief\u2026</div>';
+    getJSON("auto_brief").then(function(d){
+      if(!d||!d.headline){ host.innerHTML='<div class="ed-note">No auto brief yet \u2014 written by the morning run (step auto_brief).</div>'; return; }
+      var sec=window.mcbSecW||function(x,k){ if(!x) return ""; return '<div class="ed-sec"><div class="ed-k"><span>'+(x.kicker||k||"")+'</span></div>'+(x.title?'<h2 class="ed-hl">'+x.title+'</h2>':"")+
+        (x.items||[]).map(function(it){ return '<div class="ed-w"><span class="w-tag">'+(it.tag||"")+'</span><span>'+(it.html||"")+'</span></div>'; }).join("")+(x.note?'<p class="ed-body">'+x.note+'</p>':"")+'</div>'; };
+      var r=d.recap||{};
+      var order=[["stance","The stance"],["markets","The market"],["macro","The macro"],["screener","The screener"],["positions","Your positions"],["world","The world"],["changed","What changed"],["invalidation","What would change this"]];
+      host.innerHTML=
+        '<div class="mcb-top">'+
+          '<div class="mcb-recap"><div class="mcb-rk">In five minutes \u00b7 auto</div>'+(r.note?'<div class="mcb-rb">'+r.note+'</div>':"")+
+            ((r.items||[]).length?'<div class="mcb-rl">'+r.items.map(function(it){ return '<div class="mcb-ri">'+(it.html||"")+'</div>'; }).join("")+'</div>':"")+'</div>'+
+          '<div class="ed-call">'+d.headline+'</div>'+(d.standfirst?'<div class="ed-vwhy">'+d.standfirst+'</div>':"")+
+        '</div>'+
+        order.map(function(x){ return sec(d[x[0]],x[1]); }).join("")+
+        (d.ondeck?'<p class="ed-body"><b>On deck.</b> '+d.ondeck+'</p>':"")+
+        '<div class="mcb-src">Written by Phoenix '+String(d.asof||d.date||"").replace(" UTC","")+' \u00b7 prices: '+optEsc((d.sources||{}).prices||"")+' \u00b7 news: '+optEsc((d.sources||{}).news||"")+
+        ' \u00b7 no language model: every line comes from Phoenix\u2019s files. Compare with the Daily Brief tab (the 4am Claude brief).</div>';
+      host.querySelectorAll("[data-tk]").forEach(function(n){ n.style.cursor="pointer"; n.onclick=function(){ if(typeof trOpenTicker==="function") trOpenTicker(this.dataset.tk); }; });
+    }).catch(function(){ host.innerHTML='<div class="ed-note">The auto brief could not be loaded.</div>'; });
+  }
   // Mission Control's tabs: the Daily Brief, MME (the dealer map) and Options (iron condors and credit spreads,
   // its own section since 28 Oct 2026). The last one opened is remembered.
   function mcPanes(host, briefHtml, mmeHtml){
     host.innerHTML='<div class="mc-top"><button class="mc-tab" data-pane="brief">Daily Brief</button><button class="mc-tab" data-pane="mme">MME</button>'+
-                   '<button class="mc-tab" data-pane="options">Options</button><button class="mc-tab" data-pane="portfolios">Portfolios</button></div>'+
+                   '<button class="mc-tab" data-pane="options">Options</button><button class="mc-tab" data-pane="portfolios">Portfolios</button><button class="mc-tab" data-pane="auto">Auto brief</button></div>'+
                    '<div id="mcHealth" class="mc-health"></div>'+
                    '<div id="mcPaneBrief">'+briefHtml+'</div><div id="mcPaneMme" style="display:none">'+mmeHtml+'</div>'+
                    '<div id="mcPaneOpt" style="display:none"><div id="optPane"></div></div>'+
-                   '<div id="mcPanePf" style="display:none"><div id="pfPane"></div></div>';
+                   '<div id="mcPanePf" style="display:none"><div id="pfPane"></div></div>'+
+                   '<div id="mcPaneAuto" style="display:none"><div id="abPane"></div></div>';
     var optDone=false;
     function show(p){
-      if(["brief","mme","options","portfolios"].indexOf(p)<0) p="brief";
+      if(["brief","mme","options","portfolios","auto"].indexOf(p)<0) p="brief";
       document.getElementById("mcPaneBrief").style.display=p==="brief"?"":"none";
       document.getElementById("mcPaneMme").style.display=p==="mme"?"":"none";
       document.getElementById("mcPaneOpt").style.display=p==="options"?"":"none";
       document.getElementById("mcPanePf").style.display=p==="portfolios"?"":"none";
+      document.getElementById("mcPaneAuto").style.display=p==="auto"?"":"none";
       host.querySelectorAll(".mc-tab").forEach(function(b){ b.classList.toggle("on", b.dataset.pane===p); });
       try{ localStorage.setItem("phoenix.mc.pane", p); }catch(e){}
       if(p==="mme") mcbNamesFill();
       if(p==="options"&&!optDone){ optDone=true; optFill(); }
       if(p==="portfolios") pfFill();
+      if(p==="auto") abFill();
     }
     host.querySelectorAll(".mc-tab").forEach(function(b){ b.onclick=function(){ show(this.dataset.pane); }; });
     var want="brief"; try{ want=localStorage.getItem("phoenix.mc.pane")||"brief"; }catch(e){}
