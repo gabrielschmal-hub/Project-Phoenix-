@@ -1191,6 +1191,7 @@
   .pf-act{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px} .pf-act button{font-family:var(--mono);font-size:12.5px;font-weight:700;padding:9px 14px;border-radius:8px;border:1px solid var(--gold);background:var(--gold);color:var(--bg);cursor:pointer}
   .pf-act span{font-size:12px;color:var(--inkFade)}
   .pf-act button.ghost{background:transparent;color:var(--gold)}
+  .pf-mini{margin-top:4px} .pf-mini summary{cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--inkFade)} .pf-mini div{font-size:12px;padding:1px 0}
   .opt-tbl .tr.wrap{white-space:normal} .opt-tbl .tr.wrap i{font-size:11.5px}
   .opt-tbl.pf-oc .hd,.opt-tbl.pf-oc .r{grid-template-columns:70px minmax(200px,1.6fr) 80px 70px 70px 110px;min-width:640px}
   .pf-close{font-family:var(--mono);font-size:11px;padding:4px 8px;border-radius:6px;border:1px solid var(--line2);background:transparent;color:var(--ink);cursor:pointer}
@@ -1218,8 +1219,18 @@
   .ivup,.opt-tbl .ivup,.opt-wk .ivup{color:var(--red)} .ivdn,.opt-tbl .ivdn,.opt-wk .ivdn{color:var(--green)}
   .opt-ph{margin-top:6px;font-size:12.5px} .opt-phl div{display:grid;grid-template-columns:70px minmax(200px,1fr) 80px 90px 100px;gap:8px;font-family:var(--mono);font-size:12px;padding:2px 0}
   .opt-phl div.ch{color:var(--gold)} .opt-go{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:12px;color:var(--gold)}
+  .opt-rcs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0 8px} .opt-rc{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--card)}
+  .opt-rc i{display:block;font-style:normal;font-family:var(--mono);font-size:11px;color:var(--inkFade);text-transform:uppercase} .opt-rc i small{text-transform:none}
+  .opt-rc b{display:block;font-size:20px;font-family:var(--mono);margin:2px 0} .opt-rc small{font-size:11px;color:var(--inkFade);line-height:1.4}
+  .opt-tbl.eg .hd,.opt-tbl.eg .r{grid-template-columns:120px 64px 74px 84px 100px 84px 84px;min-width:640px}
+  .opt-tbl.dd .hd,.opt-tbl.dd .r{grid-template-columns:96px 40px 64px 70px 52px 52px 62px 62px 64px 64px 62px 60px 66px 66px;min-width:980px;font-size:12px}
+  .opt-tbl.dd .r.post{opacity:.7} .opt-trd-k{display:flex;flex-wrap:wrap;gap:8px 18px;margin:2px 0 8px} .opt-trd-k i{display:block;font-style:normal;font-size:10.5px;color:var(--inkFade);font-family:var(--mono)} .opt-trd-k b{font-family:var(--mono)}
+  @media(max-width:700px){.opt-rcs{grid-template-columns:repeat(2,1fr)}}
   .opt-tbl.sl .hd,.opt-tbl.sl .r{grid-template-columns:64px 190px 40px 70px 84px 100px 84px 90px;min-width:760px} .opt-tbl.sl .r.first{border-top:1.5px solid var(--line2)}
   .opt-tbl.pt .hd,.opt-tbl.pt .r{grid-template-columns:70px minmax(170px,1.6fr) 60px 70px 56px 84px 130px 84px 64px;min-width:860px}
+  .opt-det.slim{padding:6px 12px;margin-top:8px} .opt-det.icl-det{margin:8px 12px;background:transparent}
+  .opt-glance{grid-template-columns:repeat(6,1fr)} .opt-glance small{display:block;font-size:10px;color:var(--inkFade);font-family:var(--mono);margin-top:2px}
+  @media(max-width:700px){.opt-glance{grid-template-columns:repeat(3,1fr)}}
   .opt-det{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--card)}
   .opt-det summary{cursor:pointer;font-family:var(--mono);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
   .opt-det summary span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--inkFade)}
@@ -10816,10 +10827,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '<div class="icl-pw"><div id="iclPlot" class="icl-plot"></div><div class="icl-tags" id="iclTags"></div></div>'+
         '<div class="icl-day"><span>Through time</span><input type="range" id="iclDay" min="0" max="'+r.dte+'" value="'+(st.day!=null?Math.min(st.day,r.dte):r.exitDay)+'"><b id="iclDayLbl"></b></div>'+
         '<div class="gexh-key mme-key" id="iclKey"></div>'+
-        '<div class="icl-sub">Breakevens through time <span>\u00b7 the profit zone from today to expiry \u2014 it widens as time passes and the options lose their value</span></div>'+
-        '<div id="iclCone" class="icl-cone"></div>'+
-        '<div class="icl-sub">The chart <span>\u00b7 six months of daily closes, the swing support and resistance the direction comes from, and the short strikes</span></div>'+
-        '<div id="iclChart" class="icl-cone"></div>'
+        '<details class="opt-det icl-det"><summary>Breakevens through time <span>\u00b7 the profit zone from today to expiry</span></summary><div id="iclCone" class="icl-cone"></div></details>'+
+        '<details class="opt-det icl-det"><summary>The price chart <span>\u00b7 six months, support/resistance, pattern lines, short strikes</span></summary><div id="iclChart" class="icl-cone"></div></details>'
       :'<div class="ed-note">'+((r&&r.err)||"No chain on file for "+st.tk+".")+'</div>');
     document.getElementById("iclTk").onchange=function(){ icLoad(this.value); };
     document.getElementById("iclExp").onchange=function(){ var c=icChain(st.tk,this.value);
@@ -11117,32 +11126,30 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           '<div class="opt-h">The richest option premium of the day</div>'+
           '<div class="opt-sub">Implied volatility above what the stock delivers, earnings stripped. Ranked by EV.</div></div>'+
         '<div class="opt-meta">Updated '+optEsc(asof)+' \u00b7 '+(C.screened||0)+' names screened \u00b7 '+(C.proposed||P.length)+' proposed</div>'+
-        (evHTML?'<div class="opt-evs">'+evHTML+'</div>':'')+
+        (evHTML?'<details class="opt-det slim"><summary>Macro events before the expiries <span>\u00b7 '+Object.keys(EV).reduce(function(a,e){ return a+(EV[e]||[]).length; },0)+' on the calendar \u2014 FOMC, CPI, payrolls, ECB, BoJ</span></summary><div class="opt-evs">'+evHTML+'</div></details>':'')+
         // SECTION 1
         '<div class="opt-sec" id="optSec1"><div class="opt-sk"><b>1</b> Today\u2019s proposals</div>'+
           '<div id="icLab" class="icl"></div>'+
           '<div class="opt-grp" id="optGrp"></div>'+
           '<div id="optList"></div>'+
-          '<div class="opt-legend"><b>Trade:</b> IC iron condor \u00b7 \u00b1 wings, the same width both sides \u00b7 % = credit / wings<br>'+
+          '<details class="opt-det slim"><summary>How to read the table</summary><div class="opt-legend"><b>Trade:</b> IC iron condor \u00b7 \u00b1 wings, the same width both sides \u00b7 % = credit / wings<br>'+
             '\u2212340P +280P \u00b7 9.65: sell the 340 put, buy the 280, collect 9.65 a share (a bull put spread; \u2212C +C is a bear call spread)<br>'+
             '<b>Direction:</b> the chart decides \u2014 a range gets an iron condor, a bullish chart a bull put spread, a bearish chart a bear call spread<br>'+
             '<b>Win odds:</b> chance of a profit at the exit, on the stock\u2019s own vol<br>'+
             '<b>IV:</b> a week ago \u2192 today \u2014 the 30-day implied vol for now; from three months of recorded history it becomes the IV rank over that history (a full 1-year rank from Oct 2027). We sell as fear fades.<br>'+
             '<b>Exit:</b> the day to close the trade, win or lose<br>'+
             '<b>EV:</b> expected return on the money at risk, to the exit, after slippage and fees, on the stock\u2019s 30-day vol \u00b7 <b>EV cons.:</b> the same at the higher of its 30- and 60-day vol, the conservative check<br>'+
-            '<b>Patterns:</b> Bulkowski\u2019s tested candle and chart patterns (from your pattern notes) \u2014 tap a row to see them with their odds</div>'+
+            '<b>Patterns:</b> Bulkowski\u2019s tested candle and chart patterns (from your pattern notes) \u2014 tap a row to see them with their odds</div></details>'+
         '</div>'+
         // SECTION 2
         '<div class="opt-sec" id="optSec2"><div class="opt-sk"><b>2</b> Tournament &amp; testing</div>'+
-          '<div id="optKpi"></div>'+
           '<div id="optFwd"></div>'+
-          '<div id="optWinners"></div>'+
-          '<div id="optBoard"></div>'+
+          '<details class="opt-det"><summary>Today\u2019s tournament <span id="optTourSum">\u00b7 every name\u2019s best trade, the boards, the skipped</span></summary>'+
+            '<div id="optKpi"></div><div id="optWinners"></div><div id="optBoard"></div><div id="optSkip"></div></details>'+
           '<div id="optVol"></div>'+
           '<div id="optPat"></div>'+
           '<div id="optBt"></div>'+
-          '<div id="optSkip"></div>'+
-          '<div class="ed-note" style="margin-top:10px">'+optEsc(IC_DATA.method||"")+'</div>'+
+          '<details class="opt-det"><summary>How the tournament works</summary><div class="ed-note">'+optEsc(IC_DATA.method||"")+'</div></details>'+
         '</div></div>';
       optGroups(); optList(); optKpi(); optForward(); optWinners(); optBoardFill(null); optVol(); optBacktest(); optSkipped();
       optLoadIVW().then(function(){ optList(); optVol(); });
@@ -11174,6 +11181,115 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function optBindSort(el, tbl, redraw){
     el.querySelectorAll("[data-sk]").forEach(function(h){ h.onclick=function(e){ e.stopPropagation(); var k=this.dataset.sk, s=OPT_SORT[tbl];
       OPT_SORT[tbl]=(s&&s.k===k)?{k:k,d:-s.d}:{k:k,d:(k==="tk"||k==="trade"?1:-1)}; redraw(); }; });
+  }
+  // a chart drawn inside a closed <details> has no width: redraw it at its real size when the panel opens
+  document.addEventListener("toggle",function(e){ var d=e.target; if(!d||!d.open||typeof Plotly==="undefined"||!d.querySelectorAll) return;
+    d.querySelectorAll(".js-plotly-plot").forEach(function(g){ try{ Plotly.Plots.resize(g); }catch(_){} }); },true);
+  // ---- the forward test, day by day ----
+  var OPT_TR_ROWS=[], OPT_TR_SEL="open", OPT_TR_OPEN=null, OPT_RECAP=null, OPT_EDGE_DIM="IV / HV", OPT_TR_ALL=false;
+  function optTradesList(){
+    var el=document.getElementById("optTrList"), sel=document.getElementById("optTrSel"); if(!el) return;
+    var rows=OPT_TR_ROWS.filter(function(r){ return OPT_TR_SEL==="all"||(OPT_TR_SEL==="open"?r.status==="open":r.status!=="open"); });
+    var n={open:0,closed:0,all:OPT_TR_ROWS.length}; OPT_TR_ROWS.forEach(function(r){ n[r.status==="open"?"open":"closed"]++; });
+    sel.innerHTML=[["open","Open"],["closed","Closed"],["all","All"]].map(function(g){ return '<button data-ts="'+g[0]+'"'+(OPT_TR_SEL===g[0]?' class="on"':'')+'>'+g[1]+' <i>'+n[g[0]]+'</i></button>'; }).join("");
+    sel.querySelectorAll("[data-ts]").forEach(function(b){ b.onclick=function(){ OPT_TR_SEL=this.dataset.ts; optTradesList(); }; });
+    rows=optSortRows("tr",rows,{tk:function(r){return r.ticker;},op:function(r){return r.opened;},dte:function(r){ return ((r.result||{}).last||{}).dte; },
+      mk:function(r){ return ((r.result||{}).last||{}).pnl_1; },pct:function(r){ var l=(r.result||{}).last; return l&&r.max_loss_1?l.pnl_1/r.max_loss_1:null; }});
+    el.innerHTML='<div class="opt-tbl op">'+optHead("tr",[["tk","Ticker"],[null,"Trade"],["op","Opened"],["dte","DTE"],["mk","Mark"],["pct","% of risk"],[null,"Role"]])+
+      rows.slice(0,OPT_TR_ALL?200:10).map(function(r){ var l=(r.result||{}).last, lab=(r.model||{}).label||(r.ticker+" "+r.expiry), on=OPT_TR_OPEN===r.id;
+        return '<div class="r'+(on?' on':'')+'" data-fo="'+r.id+'"><span class="tk">'+r.ticker+'</span><span class="tr">'+optEsc(lab)+'</span><span>'+optDate(r.opened)+'</span>'+
+          '<span>'+(l?l.dte:'\u2014')+'</span><span class="ev'+(l&&l.pnl_1>0?'':' neg')+'">'+(l?optM(l.pnl_1):'\u2014')+'</span><span>'+(l&&r.max_loss_1?optPct(l.pnl_1/r.max_loss_1,1):'\u2014')+'</span>'+
+          '<span>'+(r.role==="proposed"?'\u2605 proposed':(r.role==="winner"?'old rules':'calib.'))+(r.status!=="open"?' \u00b7 '+r.status:'')+'</span></div>'+
+          (on?'<div class="opt-why" id="optTrDet"><i>Loading the day-by-day\u2026</i></div>':''); }).join("")+
+      '</div>'+(rows.length>10?'<a href="#" class="opt-go" id="optTrMore">'+(OPT_TR_ALL?'Show the first 10':'Show all '+rows.length)+'</a>':'');
+    optBindSort(el,"tr",optTradesList);
+    var mo=document.getElementById("optTrMore"); if(mo) mo.onclick=function(e){ e.preventDefault(); OPT_TR_ALL=!OPT_TR_ALL; optTradesList(); };
+    el.querySelectorAll("[data-fo]").forEach(function(rw){ rw.onclick=function(){ var id=+this.dataset.fo; OPT_TR_OPEN=(OPT_TR_OPEN===id?null:id); optTradesList(); if(OPT_TR_OPEN) optTradeDetail(id); }; });
+  }
+  // one trade, day by day: the marks the morning run stores (P&L, greeks, breakevens, IV, dealer levels)
+  function optTradeDetail(id){
+    supaRows("/rest/v1/ic_forward?select=id,ticker,expiry,legs,credit,max_loss_1,marks,result,model,structure,status&id=eq."+id).then(function(rr){
+      var r=(rr||[])[0], el=document.getElementById("optTrDet"); if(!r||!el) return;
+      var M=(r.marks||[]).filter(function(m){ return m.pnl_1!=null; }), L=r.legs||{};
+      if(!M.length){ el.innerHTML='<i>No marks yet \u2014 the first comes with the next morning run.</i>'; return; }
+      var res=r.result||{}, ex=[25,18,10].filter(function(x){ return res[x]!=null; });
+      var g=function(m,k){ return m.greeks&&m.greeks[k]!=null?m.greeks[k]:null; };
+      el.innerHTML='<div class="opt-trd-k">'+
+          '<span><i>credit</i><b>$'+(+r.credit).toFixed(2)+'</b></span><span><i>max loss</i><b>'+optM(-r.max_loss_1)+'</b></span>'+
+          '<span><i>latest</i><b class="'+(M[M.length-1].pnl_1>=0?'ev':'ev neg')+'">'+optM(M[M.length-1].pnl_1)+'</b></span>'+
+          ex.map(function(x){ return '<span><i>exit '+x+'d</i><b class="'+(res[x]>=0?'ev':'ev neg')+'">'+optM(res[x])+'</b></span>'; }).join("")+
+          (res.expiry!=null?'<span><i>held to expiry</i><b class="'+(res.expiry>=0?'ev':'ev neg')+'">'+optM(res.expiry)+'</b></span>':'')+
+          ['sl50','slcr'].map(function(k){ var v=res[k]; return v&&v.stopped?'<span><i>'+(k==="sl50"?'stop \u221250%':'stop = credit')+'</i><b class="ev neg">hit '+optDate(v.stopped.date)+'</b></span>':''; }).join("")+'</div>'+
+        '<div id="optTrC1" class="icl-cone"></div><div id="optTrC2" class="icl-cone"></div>'+
+        '<div class="opt-tbl dd"><div class="hd"><span>Date</span><span>DTE</span><span>Spot</span><span>P&amp;L</span><span>\u0394 sh</span><span>\u0393</span><span>\u0398 $/day</span><span>Vega $</span><span>BE low</span><span>BE high</span><span>IV short</span><span>Flip</span><span>Put wall</span><span>Call wall</span></div>'+
+        M.slice().reverse().map(function(m){ var dl=m.dealer||{};
+          return '<div class="r'+(m.post_exit?' post':'')+'"><span>'+optDate(m.date)+(m.post_exit?' <i>after exit</i>':'')+'</span><span>'+m.dte+'</span><span>'+(m.spot!=null?(+m.spot).toFixed(2):'\u2014')+'</span>'+
+            '<span class="'+(m.pnl_1>=0?'ev':'ev neg')+'">'+optM(m.pnl_1)+'</span><span>'+(g(m,"delta")!=null?g(m,"delta").toFixed(1):'\u2014')+'</span><span>'+(g(m,"gamma")!=null?g(m,"gamma").toFixed(2):'\u2014')+'</span>'+
+            '<span>'+(g(m,"theta")!=null?g(m,"theta").toFixed(1):'\u2014')+'</span><span>'+(g(m,"vega")!=null?g(m,"vega").toFixed(1):'\u2014')+'</span>'+
+            '<span>'+(m.be_lo!=null?m.be_lo:'\u2014')+'</span><span>'+(m.be_hi!=null?m.be_hi:'\u2014')+'</span><span>'+(m.iv_short!=null?Math.round(m.iv_short*1000)/10+'%':'\u2014')+'</span>'+
+            '<span>'+(dl.flip!=null?dl.flip:'\u2014')+'</span><span>'+(dl.put_wall!=null?dl.put_wall:'\u2014')+'</span><span>'+(dl.call_wall!=null?dl.call_wall:'\u2014')+'</span></div>'; }).join("")+'</div>'+
+        '<a href="#" class="opt-go" id="optTrLab">Rebuild it in the graph \u2191</a>';
+      var a=document.getElementById("optTrLab"); if(a) a.onclick=function(e){ e.preventDefault(); icLoad(r.ticker,true,{legs:L,expiry:String(r.expiry).slice(0,10),structure:r.structure||"IC",best_exit_dte:(r.model||{}).best_exit_dte}); };
+      if(typeof Plotly==="undefined") return;
+      var css=getComputedStyle(document.documentElement), ink=css.getPropertyValue("--inkFade").trim()||"#888", line=css.getPropertyValue("--line2").trim()||"#ddd";
+      var X=M.map(function(m){ return m.date; });
+      var lay=function(h,extra){ return Object.assign({height:h,margin:{l:52,r:46,t:10,b:30},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},
+        legend:{orientation:"h",y:-0.2,font:{size:10}},xaxis:{gridcolor:line,fixedrange:true},yaxis:{gridcolor:line,fixedrange:true}},extra||{}); };
+      // 1. price against the breakevens, the short strikes and the dealer walls, day by day
+      var col=function(k){ return M.map(function(m){ return m[k]!=null?m[k]:null; }); }, dk=function(k){ return M.map(function(m){ return (m.dealer||{})[k]!=null?m.dealer[k]:null; }); };
+      var t1=[{x:X,y:col("be_lo"),name:"breakeven low",mode:"lines",line:{color:ICC.gold,width:1.5,dash:"dash"}},
+              {x:X,y:col("be_hi"),name:"breakeven high",mode:"lines",line:{color:ICC.gold,width:1.5,dash:"dash"},fill:(L.short_put!=null&&L.short_call!=null)?"tonexty":"none",fillcolor:"rgba(45,138,85,.12)"},
+              {x:X,y:col("spot"),name:"price",mode:"lines+markers",line:{color:ICC.blue,width:2},marker:{size:4}},
+              {x:X,y:dk("flip"),name:"gamma flip",mode:"lines",line:{color:"#8a5cc2",width:1,dash:"dot"}},
+              {x:X,y:dk("put_wall"),name:"put wall",mode:"lines",line:{color:ICC.green,width:1,dash:"dot"}},
+              {x:X,y:dk("call_wall"),name:"call wall",mode:"lines",line:{color:ICC.red,width:1,dash:"dot"}}];
+      var sh=[]; ["short_put","short_call"].forEach(function(k){ if(L[k]!=null) sh.push({type:"line",xref:"paper",x0:0,x1:1,y0:L[k],y1:L[k],line:{color:k==="short_put"?"#d08a1c":"#4a86d0",width:1}}); });
+      Plotly.newPlot("optTrC1",t1,lay(260,{shapes:sh}),{displayModeBar:false,responsive:true});
+      // 2. P&L with theta and delta beside it
+      var t2=[{x:X,y:col("pnl_1"),name:"P&L $",type:"bar",marker:{color:M.map(function(m){ return m.pnl_1>=0?"rgba(45,138,85,.7)":"rgba(196,72,72,.7)"; })}},
+              {x:X,y:M.map(function(m){ return g(m,"theta"); }),name:"\u0398 $/day",mode:"lines",yaxis:"y2",line:{color:ICC.gold,width:1.5}},
+              {x:X,y:M.map(function(m){ return g(m,"delta"); }),name:"\u0394 shares",mode:"lines",yaxis:"y2",line:{color:ICC.blue,width:1.5}}];
+      Plotly.newPlot("optTrC2",t2,lay(220,{yaxis2:{overlaying:"y",side:"right",gridcolor:"rgba(0,0,0,0)",fixedrange:true}}),{displayModeBar:false,responsive:true});
+    }).catch(function(){ var el=document.getElementById("optTrDet"); if(el) el.innerHTML='<i>Could not read this trade.</i>'; });
+  }
+  // week / month recap, the book's daily P&L, and the edge by what was known at entry
+  function optRecap(){
+    var el=document.getElementById("optRecap"); if(!el) return;
+    (OPT_RECAP?Promise.resolve(OPT_RECAP):getJSON("ic_recap")).then(function(R){ OPT_RECAP=R; if(!R){ el.innerHTML=""; return; }
+      var P=R.periods||{};
+      var card=function(p){ if(!p) return ''; var w=p.exits?Math.round(p.wins/p.exits*100)+'%':'\u2014';
+        return '<div class="opt-rc"><i>'+optEsc(p.label)+' <small>'+optDate(p.from)+'\u2013'+optDate(p.to)+'</small></i><b class="'+(p.mtm_change>=0?'ev':'ev neg')+'">'+optM(p.mtm_change)+'</b>'+
+          '<small>book P&amp;L change \u00b7 '+p.exits+' exits, '+w+' won, realised '+optM(p.realised)+(p.best?' \u00b7 best '+p.best.t+' '+optM(p.best.pnl):'')+(p.worst?' \u00b7 worst '+p.worst.t+' '+optM(p.worst.pnl):'')+'</small></div>'; };
+      var dims=Object.keys(R.edge||{}); if(dims.indexOf(OPT_EDGE_DIM)<0) OPT_EDGE_DIM=dims[0];
+      var E=(R.edge||{})[OPT_EDGE_DIM]||{};
+      var gw=document.getElementById("optGlWk"), gm=document.getElementById("optGlMo");
+      if(gw&&P.this_week){ gw.textContent=optM(P.this_week.mtm_change); gw.className=P.this_week.mtm_change>=0?"ev":"ev neg"; }
+      if(gm&&P.this_month){ gm.textContent=optM(P.this_month.mtm_change); gm.className=P.this_month.mtm_change>=0?"ev":"ev neg"; }
+      el.innerHTML='<details class="opt-det slim"><summary>Week and month recap <span>\u00b7 last week '+optM((P.last_week||{}).mtm_change)+' \u00b7 last month '+optM((P.last_month||{}).mtm_change)+' \u00b7 daily chart</span></summary>'+
+        '<div class="opt-rcs">'+card(P.this_week)+card(P.last_week)+card(P.this_month)+card(P.last_month)+'</div>'+
+        '<div id="optRecapC" class="icl-cone"></div></details>';
+      var eg=document.getElementById("optEdge"); if(!eg) return;
+      var best=null, worst=null; Object.keys(R.edge||{}).forEach(function(d){ Object.keys(R.edge[d]).forEach(function(k){ var g=R.edge[d][k]; if(g.n<15) return;
+        if(!best||g.ror>best.ror) best={d:d,k:k,ror:g.ror,n:g.n}; if(!worst||g.ror<worst.ror) worst={d:d,k:k,ror:g.ror,n:g.n}; }); });
+      var es=document.getElementById("optEdgeSum"); if(es) es.textContent=best?"\u00b7 best: "+best.d+" "+best.k+" "+optPct(best.ror,1)+" (n "+best.n+") \u00b7 worst: "+worst.d+" "+worst.k+" "+optPct(worst.ror,1)+" (n "+worst.n+")":"\u00b7 "+(R.closed_planned||0)+" trades closed at plan \u2014 groups need 15+ to show";
+      eg.innerHTML='<div class="opt-sub3">Where the edge is <span>\u00b7 '+(R.closed_planned||0)+' trades closed at their planned exit, grouped by what was known when they opened \u00b7 '+optEsc(R.note||"")+'</span></div>'+
+        '<div class="opt-grp" id="optEdgeDim">'+dims.map(function(d){ return '<button data-ed="'+optEsc(d)+'"'+(d===OPT_EDGE_DIM?' class="on"':'')+'>'+optEsc(d)+'</button>'; }).join("")+'</div>'+
+        (Object.keys(E).length?'<div class="opt-tbl eg"><div class="hd"><span>'+optEsc(OPT_EDGE_DIM)+'</span><span>Trades</span><span>Win rate</span><span>Avg P&amp;L</span><span>Return on risk</span><span>Model said</span><span>Confidence</span></div>'+
+          Object.keys(E).sort(function(a,b){ return (E[b].ror||0)-(E[a].ror||0); }).map(function(k){ var g=E[k];
+            return '<div class="r"><span class="tk">'+optEsc(k)+'</span><span>'+g.n+'</span><span>'+optPct(g.win_rate)+'</span><span class="'+(g.avg>=0?'ev':'ev neg')+'">'+optM(g.avg)+'</span>'+
+              '<span class="'+(g.ror>=0?'ev':'ev neg')+'">'+(g.ror!=null?optPct(g.ror,1):'\u2014')+'</span><span>'+optM(g.avg_pred)+'</span><span class="'+(g.confidence==="too few"?'':'ev')+'">'+g.confidence+'</span></div>'; }).join("")+'</div>':
+          '<div class="ed-note">No trade has reached its planned exit yet \u2014 this fills from early November.</div>')+
+        (Object.keys(R.exits||{}).length?'<div class="opt-sub3">Which exit pays <span>\u00b7 the same trades closed at each exit</span></div><div class="opt-tbl eg"><div class="hd"><span>Exit</span><span>Trades</span><span>Win rate</span><span>Avg P&amp;L</span><span></span><span></span><span></span></div>'+
+          Object.keys(R.exits).map(function(x){ var e=R.exits[x]; return '<div class="r"><span class="tk">'+x+' DTE</span><span>'+e.n+'</span><span>'+optPct(e.win_rate)+'</span><span class="'+(e.avg>=0?'ev':'ev neg')+'">'+optM(e.avg)+'</span><span></span><span></span><span></span></div>'; }).join("")+'</div>':'');
+      eg.querySelectorAll("[data-ed]").forEach(function(b){ b.onclick=function(){ OPT_EDGE_DIM=this.dataset.ed; optRecap(); }; });
+      var D=R.daily||[]; if(D.length&&typeof Plotly!=="undefined"){
+        var css=getComputedStyle(document.documentElement), ink=css.getPropertyValue("--inkFade").trim()||"#888", line=css.getPropertyValue("--line2").trim()||"#ddd";
+        Plotly.newPlot("optRecapC",[{x:D.map(function(d){return d.date;}),y:D.map(function(d){return d.chg;}),type:"bar",name:"day\u2019s change $",marker:{color:D.map(function(d){ return d.chg>=0?"rgba(45,138,85,.6)":"rgba(196,72,72,.6)"; })}},
+          {x:D.map(function(d){return d.date;}),y:D.map(function(d){return d.cum;}),mode:"lines",name:"cumulative $",yaxis:"y2",line:{color:ICC.gold,width:2}}],
+          {height:220,margin:{l:52,r:52,t:10,b:30},paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:ink,size:11},legend:{orientation:"h",y:-0.25,font:{size:10}},
+           xaxis:{gridcolor:line,fixedrange:true},yaxis:{gridcolor:line,fixedrange:true,title:{text:"per day",font:{size:10}}},yaxis2:{overlaying:"y",side:"right",fixedrange:true,title:{text:"cumulative",font:{size:10}}}},{displayModeBar:false,responsive:true});
+      }
+    }).catch(function(){ el.innerHTML=""; });
   }
   // the stop-loss variants against holding to the planned exit, on the same trades (the trades themselves are never closed early)
   function optStopsHTML(rows){
@@ -11282,6 +11398,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function optKpi(){
     var el=document.getElementById("optKpi"); if(!el) return;
     var C=IC_DATA.counts||{}, W=C.winners_by_structure||{}, sk=IC_DATA.skipped||{}, why={};
+    var ts=document.getElementById("optTourSum"); if(ts) ts.textContent="\u00b7 "+(C.screened||0)+" screened \u00b7 "+(C.with_winner||0)+" with a trade ("+(W.IC||0)+" IC, "+(W.PCS||0)+" bull put, "+(W.CCS||0)+" bear call) \u00b7 "+(C.proposed||0)+" proposed \u00b7 "+(C.skipped||0)+" skipped";
     Object.keys(sk).forEach(function(t){ var k=String(sk[t]).split(" \u2014 ")[0]; why[k]=(why[k]||0)+1; });
     el.innerHTML='<div class="opt-sub2">Today\u2019s tournament <span>\u00b7 '+optEsc(IC_DATA.date||"")+'</span></div>'+
       '<div class="mm-strip opt-kpi"><div><i>screened</i><b>'+(C.screened||0)+'</b></div><div><i>with a qualifying trade</i><b>'+(C.with_winner||0)+'</b></div>'+
@@ -11315,21 +11432,27 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var openRisk=openCur.reduce(function(a,r){ return a+(+r.max_loss_1||0); },0);
       var names={}; rows.forEach(function(r){ names[r.ticker+"|"+r.expiry]=1; });
       var first=rows[rows.length-1].opened;
-      el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 since '+optDate(first,1)+' \u00b7 '+rows.length+' trades on '+Object.keys(names).length+' name-expiries \u00b7 realised per contract after slippage and fees</span></div>'+
-        '<div class="mm-strip opt-kpi"><div><i>open</i><b>'+open.length+'</b></div><div><i>open P&amp;L (latest marks)</i><b style="color:'+(openPnl>=0?'var(--green)':'var(--red)')+'">'+optM(openPnl)+'</b></div>'+
-          '<div><i>capital at risk</i><b>'+optM(openRisk)+'</b></div><div><i>closed</i><b>'+closed.length+'</b></div></div>'+
-        roles.map(function(r_){ var L=rows.filter(function(r){ return (r.role||"winner")===r_[0]; }); return L.length?tbl(L,r_[1]):""; }).join("")+
-        tbl(cur.filter(function(r){ return (r.structure||"IC")==="IC"; }),"Iron condors (current rules)")+
-        (cur.some(function(r){ return r.structure&&r.structure!=="IC"; })?tbl(cur.filter(function(r){ return r.structure&&r.structure!=="IC"; }),"Credit spreads"):"")+
-        optStopsHTML(cur)+
-        '<div class="opt-sub3">Open trades <span>\u00b7 latest mark \u00b7 tap one to load it in the lab</span></div>'+
-        '<div class="opt-tbl op"><div class="hd"><span>Ticker</span><span>Trade</span><span>Opened</span><span>DTE</span><span>Mark</span><span>Predicted</span><span>Role</span></div>'+
-        open.slice(0,60).map(function(r,i){ var l=(r.result||{}).last, lab=(r.model||{}).label||(r.ticker+" "+r.expiry), xb=(r.model||{}).best_exit_dte;
-          return '<div class="r" data-fo="'+i+'"><span class="tk">'+r.ticker+'</span><span class="tr">'+optEsc(lab)+'</span><span>'+optDate(r.opened)+'</span>'+
-            '<span>'+(l?l.dte:'\u2014')+'</span><span class="ev'+(l&&l.pnl_1>0?'':' neg')+'">'+(l?optM(l.pnl_1):'\u2014')+'</span><span>'+optM(pred(r,xb))+'</span><span>'+(r.role==="proposed"?'\u2605 proposed':(r.role==="winner"?'old rules':'calib.'))+'</span></div>'; }).join("")+
-        (open.length>60?'<div class="r"><span></span><span>+'+(open.length-60)+' more</span></div>':'')+'</div>';
-      el.querySelectorAll("[data-fo]").forEach(function(rw){ rw.onclick=function(){ var r=open[+this.dataset.fo];
-        icLoad(r.ticker,true,{legs:r.legs,expiry:String(r.expiry).slice(0,10),structure:r.structure||"IC",best_exit_dte:(r.model||{}).best_exit_dte}); }; });
+      // at a glance: the planned-exit results on current rules (each trade once, at the exit it was opened for)
+      var pl=cur.map(function(r){ var x=String((r.model||{}).best_exit_dte||10), v=(r.result||{})[x]; return v==null?null:{v:+v,risk:+r.max_loss_1||0}; }).filter(Boolean);
+      var plW=pl.filter(function(x){ return x.v>0; }).length, plSum=pl.reduce(function(a,x){ return a+x.v; },0), plRisk=pl.reduce(function(a,x){ return a+x.risk; },0);
+      var gl=function(lbl,val,cls,sub){ return '<div><i>'+lbl+'</i><b'+(cls?' class="'+cls+'"':'')+'>'+val+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>'; };
+      el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 since '+optDate(first,1)+' \u00b7 per contract, after slippage and fees</span></div>'+
+        '<div class="mm-strip opt-kpi opt-glance">'+
+          gl("open trades",openCur.length,"",optM(openRisk)+" at risk")+
+          gl("open P&amp;L",optM(openPnl),openPnl>=0?"ev":"ev neg","latest marks")+
+          gl("this week",'<span id="optGlWk">\u2026</span>',"","book P&amp;L change")+
+          gl("this month",'<span id="optGlMo">\u2026</span>',"","book P&amp;L change")+
+          gl("closed at plan",pl.length,"",pl.length?Math.round(plW/pl.length*100)+"% won":"first exits from 2 Nov")+
+          gl("return on risk",pl.length?optPct(plSum/Math.max(plRisk,1),1):"\u2014",pl.length?(plSum>=0?"ev":"ev neg"):"",pl.length?optM(plSum)+" total":"")+'</div>'+
+        '<div id="optRecap"></div>'+
+        '<div class="opt-sub3">Trades <span>\u00b7 tap one for its day-by-day: P&amp;L, greeks, breakevens and dealer walls</span></div><div class="opt-grp" id="optTrSel"></div><div id="optTrList"></div>'+
+        '<details class="opt-det"><summary>Where the edge is <span id="optEdgeSum">\u00b7 results grouped by what was known at entry</span></summary><div id="optEdge"></div></details>'+
+        '<details class="opt-det"><summary>Results by role and structure <span>\u00b7 proposed vs calibration vs old rules, condors vs spreads, at each exit</span></summary>'+
+          roles.map(function(r_){ var L=rows.filter(function(r){ return (r.role||"winner")===r_[0]; }); return L.length?tbl(L,r_[1]):""; }).join("")+
+          tbl(cur.filter(function(r){ return (r.structure||"IC")==="IC"; }),"Iron condors (current rules)")+
+          (cur.some(function(r){ return r.structure&&r.structure!=="IC"; })?tbl(cur.filter(function(r){ return r.structure&&r.structure!=="IC"; }),"Credit spreads"):"")+'</details>'+
+        '<details class="opt-det"><summary>Stop-loss study <span>\u00b7 hold vs stop at \u221250% of max loss vs stop at a loss = credit, same trades</span></summary>'+optStopsHTML(cur)+'</details>';
+      OPT_TR_ROWS=rows; optTradesList(); optRecap();
     }).catch(function(){ el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 could not be read</span></div>'; });
   }
   // one name's board: the best of each structure across expiries
@@ -11365,7 +11488,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     ts=optSortRows("vol",ts,get);
     var cols=[["tk","Ticker"],["iv","IV 30d"],["hv","HV stripped"],["raw","HV raw"],["ratio","IV / HV"]].concat(ws.map(function(k){ return ["w"+k,"IV "+optDate(k)]; }))
       .concat([["chg","Week \u0394"],["bias","Chart"],["earn","Earnings"]]);
-    el.innerHTML='<details class="opt-det" open><summary>Implied vs delivered vol <span>\u00b7 '+ts.length+' names \u00b7 30-day implied against 30-day realised with event days stripped \u00b7 IV at each week\u2019s last reading'+(ws.length<2?' (the week-on-week columns fill as the weeks are recorded)':'')+'</span></summary>'+
+    el.innerHTML='<details class="opt-det"><summary>Implied vs delivered vol <span>\u00b7 '+ts.length+' names \u00b7 30-day implied against 30-day realised with event days stripped \u00b7 IV at each week\u2019s last reading'+(ws.length<2?' (the week-on-week columns fill as the weeks are recorded)':'')+'</span></summary>'+
       '<div class="opt-tbl vl" style="--wk:'+ws.length+'">'+optHead("vol",cols)+
       ts.map(function(t){ var v=V[t], r=v.iv30&&v.hv30s?v.iv30/v.hv30s:null, c=get.chg(t);
         return '<div class="r"><span class="tk">'+t+'<i>'+optGrpName(v.group)+'</i></span><span>'+(v.iv30?Math.round(v.iv30*100)+'%':'\u2014')+'</span><span>'+(v.hv30s?Math.round(v.hv30s*100)+'%':'\u2014')+'</span><span>'+(v.hv30?Math.round(v.hv30*100)+'%':'\u2014')+'</span>'+
@@ -11384,7 +11507,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     function dir(p){ return p.tested_direction||({up:"bullish",down:"bearish"})[p.direction]||""; }
     rows=optSortRows("pat",rows,{tk:function(r){return r.t;}, nm:function(r){return r.p.label;}, k:function(r){return r.p.kind;}, d:function(r){return dir(r.p);},
       rate:function(r){return r.p.rate;}, c:function(r){return r.p.confirmed?1:0;}, ag:function(r){ var b=r.v.bias; return dir(r.p)===b?1:(b==="neutral"?0:-1); }, dt:function(r){return r.p.date||r.p.end;}});
-    el.innerHTML='<details class="opt-det" open><summary>Patterns <span>\u00b7 '+rows.length+' across '+Object.keys(V).filter(function(t){return (V[t].patterns||[]).length;}).length+' names \u00b7 Bulkowski\u2019s tested direction and odds, not the textbook\u2019s \u00b7 trade only a close beyond the pattern</span></summary>'+
+    el.innerHTML='<details class="opt-det"><summary>Patterns <span>\u00b7 '+rows.length+' across '+Object.keys(V).filter(function(t){return (V[t].patterns||[]).length;}).length+' names \u00b7 Bulkowski\u2019s tested direction and odds, not the textbook\u2019s \u00b7 trade only a close beyond the pattern</span></summary>'+
       '<div class="opt-tbl pt">'+optHead("pat",[["tk","Ticker"],["nm","Pattern"],["k","Kind"],["d","Tested"],["rate","Odds"],["c","Confirmed"],[null,"Line / target"],["ag","Chart read"],["dt","Date"]])+
       rows.map(function(r){ var p=r.p, d=dir(p), b=r.v.bias, ag=b==="neutral"?"range":(d===b?"agrees":"conflicts");
         return '<div class="r" data-pt="'+r.t+'"><span class="tk">'+r.t+'</span><span class="tr" title="'+optEsc(p.note||"")+'">'+optEsc(p.label)+'</span><span>'+p.kind+'</span>'+
@@ -11400,7 +11523,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(!B||!B.by_rank||!Object.keys(B.by_rank).length){
       el.innerHTML='<details class="opt-det"><summary>Backtest <span>\u00b7 replays the archived chains every Friday once there are ten days of them \u2014 nothing to run by hand</span></summary></details>'; return; }
     var ex=[25,18,10];
-    el.innerHTML='<details class="opt-det" open><summary>Backtest <span>\u00b7 '+(B.days||[]).length+' archived days \u00b7 '+B.n_trades+' structures replayed \u00b7 '+optEsc(B.asof||"")+'</span></summary>'+
+    el.innerHTML='<details class="opt-det"><summary>Backtest <span>\u00b7 '+(B.days||[]).length+' archived days \u00b7 '+B.n_trades+' structures replayed \u00b7 '+optEsc(B.asof||"")+'</span></summary>'+
       '<div class="opt-tbl bt"><div class="hd"><span>Board rank</span>'+ex.map(function(x){ return '<span>'+x+'d n</span><span>Win</span><span>Realised</span><span>Predicted</span>'; }).join("")+'</div>'+
       Object.keys(B.by_rank).slice(0,12).map(function(rk){ var g=B.by_rank[rk];
         return '<div class="r"><span>'+(rk==="1"?'1 \u2605 winner':rk)+'</span>'+ex.map(function(x){ var v=g[x]||g[String(x)]; if(!v) return '<span>\u2014</span><span></span><span></span><span></span>';
@@ -11498,21 +11621,25 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function pfDialHTML(D){
     var d=D.dial; if(!d) return '';
     var col=d.state==="risk-on"?"var(--green)":(d.state==="caution"?"var(--gold)":"var(--red)");
-    return '<div class="pf-dial"><div class="pf-dial-s" style="border-color:'+col+';color:'+col+'"><b>'+d.score+'</b><i>'+optEsc(d.state)+'</i></div><div class="pf-dial-p"><b>Market dial</b> \u2014 the same reading every engine uses. '+
-      (d.parts||[]).map(function(p){ return '<span class="'+(p.pts?'neg':'')+'">'+optEsc(p.k)+': '+optEsc(p.why)+(p.pts?' ('+p.pts+')':'')+'</span>'; }).join(' \u00b7 ')+'</div></div>';
+    var hit=(d.parts||[]).filter(function(p){ return p.pts; });
+    return '<div class="pf-dial"><div class="pf-dial-s" style="border-color:'+col+';color:'+col+'"><b>'+d.score+'</b><i>'+optEsc(d.state)+'</i></div><div class="pf-dial-p"><b>Market dial</b> \u2014 '+
+      (hit.length?hit.map(function(p){ return '<span class="neg">'+optEsc(p.k)+' '+p.pts+'</span>'; }).join(' \u00b7 '):'nothing is flashing')+
+      '<details class="pf-mini"><summary>all inputs</summary>'+(d.parts||[]).map(function(p){ return '<div>'+optEsc(p.k)+': '+optEsc(p.why)+(p.pts?' ('+p.pts+')':'')+'</div>'; }).join("")+'</details></div></div>';
   }
   // what you actually hold: the trade book's stocks and your recorded option trades
   function pfLedgerHTML(D){
     var L=D.ledger; if(!L) return '';
     var fx=((D.conditions||{}).eurusd)||1.08;
-    var h='<div class="opt-sub3">What you hold <span>\u00b7 the trade book and your recorded option trades \u00b7 stock heat '+(L.heat_R!=null?L.heat_R:'\u2014')+'R of '+(L.heat_cap_R||3)+'R'+((L.cooloff||{}).active?' \u00b7 <b style="color:var(--red)">cool-off until '+L.cooloff.until+'</b>':'')+'</span></div>';
-    if(!(L.stocks||[]).length&&!(L.options||[]).length) return h+'<div class="ed-note">No open positions in the trade book and no recorded option trades.</div>';
+    var ns=(L.stocks||[]).length, no=(L.options||[]).length;
+    var h='<details class="opt-det slim"><summary>What you hold <span>\u00b7 '+ns+' stock'+(ns===1?'':'s')+' \u00b7 heat '+(L.heat_R!=null?L.heat_R:'\u2014')+'R of '+(L.heat_cap_R||3)+'R \u00b7 '+no+' option trade'+(no===1?'':'s')+
+      ((L.cooloff||{}).active?' \u00b7 <b style="color:var(--red)">cool-off until '+L.cooloff.until+'</b>':'')+'</span></summary>';
+    if(!ns&&!no) return h+'<div class="ed-note">No open positions in the trade book and no recorded option trades.</div></details>';
     if((L.stocks||[]).length) h+='<div class="opt-tbl pf-bc"><div class="hd"><span>Stock</span><span>Shares</span><span>Entry</span><span>Stop</span><span>Sector</span></div>'+
       L.stocks.map(function(x){ return '<div class="r"><span class="tk">'+x.t+'</span><span>'+(x.qty||'\u2014')+'</span><span>'+(x.entry||'\u2014')+'</span><span>'+(x.stop||'\u2014')+'</span><span>'+optEsc(x.sector||'\u2014')+'</span></div>'; }).join("")+'</div>';
     if((L.options||[]).length) h+='<div class="opt-tbl pf-oc"><div class="hd"><span>Option</span><span>Trade</span><span>Max loss</span><span>Opened</span><span>Exit at</span><span></span></div>'+
       L.options.map(function(o,i){ return '<div class="r"><span class="tk">'+o.t+'</span><span class="tr">'+optEsc(o.label||o.structure)+'</span><span>'+pfE((o.max_loss_usd||0)/fx)+'</span><span>'+optDate(o.opened)+'</span><span>'+(o.planned_exit_dte||'\u2014')+' DTE</span>'+
         '<span><button class="pf-close" data-oc="'+i+'">Record close</button></span></div>'; }).join("")+'</div><div id="pfCloseMsg" class="ed-note"></div>';
-    return h;
+    return h+'</details>';
   }
   function pfBookHTML(){
     var b=PF_BOOK;
@@ -11523,12 +11650,14 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if((b.exceptions||[]).length) h+='<div class="pf-exc">'+b.exceptions.map(function(e){ return '<div class="'+e.kind+'"><b>'+({stop:"EXIT",profit:"PROFIT",risky:"RISK"})[e.kind]+'</b> '+optEsc(e.text)+'</div>'; }).join("")+'</div>';
     else h+='<div class="pf-checks"><div class="pass"><b>\u2714</b> No exceptions \u2014 nothing to do until the review.</div></div>';
     if((b.notes||[]).length) h+='<div class="pf-notes">'+b.notes.map(function(n){ return '<div>\u2022 '+optEsc(n)+'</div>'; }).join("")+'</div>';
+    h+='<details class="opt-det slim"><summary>Positions in the book <span>\u00b7 '+((b.tactical||[]).length)+' tactical \u00b7 '+((b.core||[]).length)+' core lines \u00b7 core '+pfE(b.core_value_eur)+'</span></summary>';
     if(b.tactical&&b.tactical.length) h+='<div class="opt-tbl pf-bt"><div class="hd"><span>Tactical</span><span>Shares</span><span>Entry</span><span>Stop</span><span>Last</span><span>P&amp;L</span><span>R</span><span>State</span></div>'+
       b.tactical.map(function(x){ return '<div class="r"><span class="tk">'+x.t+'</span><span>'+x.qty+'</span><span>$'+x.entry+'</span><span>$'+x.stop+'</span><span>'+(x.last!=null?'$'+x.last.toFixed(2):'\u2014')+'</span>'+
         '<span class="ev'+(x.pnl_eur>0?'':' neg')+'">'+pfE(x.pnl_eur)+'</span><span>'+(x.R!=null?x.R.toFixed(1)+'R':'\u2014')+'</span><span>'+optEsc(x.state)+'</span></div>'; }).join("")+'</div>';
     if(b.core&&b.core.length) h+='<div class="opt-tbl pf-bc"><div class="hd"><span>Core</span><span>Value</span><span>Weight now</span><span>Target</span><span>Drift</span></div>'+
       b.core.map(function(l){ var d=(l.w_now!=null&&l.w_target!=null)?l.w_now-l.w_target:null;
         return '<div class="r"><span class="tk">'+l.t+'</span><span>'+pfE(l.value_eur)+'</span><span>'+pfP(l.w_now,1)+'</span><span>'+pfP(l.w_target,1)+'</span><span class="'+(d!=null&&Math.abs(d)>0.05?'ev neg':'')+'">'+(d==null?'\u2014':(d>=0?'+':'')+(d*100).toFixed(1)+' pt')+'</span></div>'; }).join("")+'</div>';
+    h+='</details>';
     h+='<div class="pf-notes"><div>Risky part: options budget '+pfE((b.risky||{}).options_budget_eur)+' + crypto '+pfE((b.risky||{}).crypto_eur)+' = '+pfE((b.risky||{}).total_eur)+'. Option trades roll inside the budget as they expire \u2014 today\u2019s are on the Options tab.</div>'+
       ((b.unpriced||[]).length?'<div>No price this morning for '+optEsc(b.unpriced.join(", "))+'.</div>':'')+'</div>';
     var R=b.review;
@@ -11564,19 +11693,21 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     h+='<div class="mm-strip opt-kpi pf-kpi"><div><i>core \u00b7 6 m</i><b>'+pfE(X.core)+'</b></div><div><i>tactical \u00b7 3 m</i><b>'+pfE(X.tactical)+'</b><small>at risk '+pfE(X.tacticalRisk)+'</small></div>'+
       '<div><i>risky</i><b>'+pfE(X.risky)+'</b><small>options '+pfE(X.optBudget)+' \u00b7 crypto '+pfE(X.crypto)+'</small></div><div><i>cash</i><b>'+pfE(X.cash)+'</b></div>'+
       '<div><i>can be lost now</i><b style="color:'+(X.atRisk<=acct*0.2?'var(--green)':'var(--red)')+'">'+pfE(X.atRisk)+'</b><small>'+pfP(X.atRisk/acct,1)+'</small></div></div>';
-    h+='<div class="pf-checks">'+A.checks.map(function(c){ return '<div class="'+c.s+'"><b>'+(c.s==="pass"?"\u2714":(c.s==="warn"?"\u26a0":"\u2716"))+'</b> '+optEsc(c.t)+'</div>'; }).join("")+'</div>';
-    if(A.core.length&&(sp.core||0)>0) h+='<div class="opt-sub3">Core <span>\u00b7 reviewed every ~6 months \u00b7 '+optEsc((D.lt||{}).core_src||"")+'</span></div><div class="opt-tbl pf-lt"><div class="hd"><span>Ticker</span><span>Weight</span><span>Amount</span><span>Role</span></div>'+
-      A.core.map(function(l){ return '<div class="r"><span class="tk">'+l.t+'</span><span>'+pfP(l.w_book,1)+'</span><span>'+pfE(l.eur)+'</span><span>'+optEsc(l.role)+'</span></div>'; }).join("")+'</div>';
-    if((sp.tactical||0)>0) h+='<div class="opt-sub3">Tactical <span>\u00b7 held for the quarter \u00b7 '+pfP((R.tactical||{}).risk_per_trade||0.01)+' at risk each \u00b7 stop '+((R.tactical||{}).atr_stop_mult||3)+' ATR under the entry \u00b7 exits early only on the stop</span></div>'+
+    var bad=A.checks.filter(function(c){ return c.s!=="pass"; }), ok=A.checks.filter(function(c){ return c.s==="pass"; });
+    var line=function(c){ return '<div class="'+c.s+'"><b>'+(c.s==="pass"?"\u2714":(c.s==="warn"?"\u26a0":"\u2716"))+'</b> '+optEsc(c.t)+'</div>'; };
+    h+='<div class="pf-checks">'+bad.map(line).join("")+(ok.length?'<details class="pf-mini"><summary>'+(bad.length?'':'\u2714 ')+ok.length+' check'+(ok.length>1?'s':'')+' pass</summary>'+ok.map(line).join("")+'</details>':'')+'</div>';
+    if(A.core.length&&(sp.core||0)>0) h+='<details class="opt-det slim"><summary>Core <span>\u00b7 '+pfE(X.core)+' \u00b7 '+A.core.length+' lines \u00b7 reviewed every ~6 months</span></summary><div class="ed-note">'+optEsc((D.lt||{}).core_src||"")+'</div><div class="opt-tbl pf-lt"><div class="hd"><span>Ticker</span><span>Weight</span><span>Amount</span><span>Role</span></div>'+
+      A.core.map(function(l){ return '<div class="r"><span class="tk">'+l.t+'</span><span>'+pfP(l.w_book,1)+'</span><span>'+pfE(l.eur)+'</span><span>'+optEsc(l.role)+'</span></div>'; }).join("")+'</div></details>';
+    if((sp.tactical||0)>0) h+='<details class="opt-det slim" open><summary>Tactical <span>\u00b7 '+A.tactical.length+' name'+(A.tactical.length===1?'':'s')+' \u00b7 '+pfE(X.tactical)+' \u00b7 '+pfE(X.tacticalRisk)+' at risk</span></summary><div class="opt-sub3"><span>held for the quarter \u00b7 '+pfP((R.tactical||{}).risk_per_trade||0.01)+' at risk each \u00b7 stop '+((R.tactical||{}).atr_stop_mult||3)+' ATR under the entry \u00b7 exits early only on the stop</span></div>'+
       (A.tactical.length?'<div class="opt-tbl pf-sw"><div class="hd"><span>Ticker</span><span>Shares</span><span>Entry</span><span>Stop</span><span>Position</span><span>At risk</span><span>Why</span></div>'+
       A.tactical.map(function(x){ var c=x.c; return '<div class="r"><span class="tk">'+x.t+'<i>'+optEsc(c.industry||"")+'</i></span><span>'+x.qty+'</span><span>$'+c.entry+'</span><span>$'+c.stop+'</span><span>'+pfE(x.eur)+'</span><span class="ev neg">'+pfE(x.risk)+'</span>'+
         '<span class="tr wrap">score '+(c.score!=null?c.score:'\u2014')+(c.rank_score!=null&&c.rank_score!==c.score?' \u2192 '+c.rank_score:'')+(c.sector?' \u00b7 '+optEsc(c.sector):'')+(c.breakout?' \u00b7 breakout':'')+(c.chart?' \u00b7 chart '+c.chart:'')+(c.patterns&&c.patterns.length?' \u00b7 '+optEsc(c.patterns.join(", ")):'')+
-        ((c.notes||[]).length?'<br><i>'+optEsc(c.notes.join(" \u00b7 "))+'</i>':'')+'</span></div>'; }).join("")+'</div>':'<div class="ed-note">No tactical name fits today.</div>');
-    if((sp.risky||0)>0) h+='<div class="opt-sub3">Risky \u00b7 options <span>\u00b7 a budget of '+pfE(X.optBudget)+' max loss for the quarter (the risky share less crypto); these are today\u2019s trades inside it \u2014 they expire and roll, the budget stays</span></div>'+
+        ((c.notes||[]).length?'<br><i>'+optEsc(c.notes.join(" \u00b7 "))+'</i>':'')+'</span></div>'; }).join("")+'</div>':'<div class="ed-note">No tactical name fits today.</div>')+'</details>';
+    if((sp.risky||0)>0) h+='<details class="opt-det slim" open><summary>Risky \u00b7 options <span>\u00b7 '+A.options.length+' trade'+(A.options.length===1?'':'s')+' \u00b7 budget '+pfE(X.optBudget)+'</span></summary><div class="opt-sub3"><span>\u00b7 a budget of '+pfE(X.optBudget)+' max loss for the quarter (the risky share less crypto); these are today\u2019s trades inside it \u2014 they expire and roll, the budget stays</span></div>'+
       (A.options.length?'<div class="opt-tbl pf-op"><div class="hd"><span>Ticker</span><span>Trade</span><span>Max loss</span><span>EV</span><span>EV cons.</span><span>Win</span><span>Exit</span><span>Cluster</span></div>'+
       A.options.map(function(x){ var o=x.o; return '<div class="r" data-pfo="'+x.t+'"><span class="tk">'+x.t+'</span><span class="tr">'+optEsc(o.label)+'<i class="xt '+(o.expiry_type||"")+'">'+(o.expiry_type||"")+'</i>'+(o.alt_of?'<i class="xt">sized down</i>':'')+'</span><span class="ev neg">'+pfE(x.maxLoss)+'</span>'+
         '<span class="ev">'+pfE(x.ev)+'</span><span class="ev'+(x.evc>0?'':' neg')+'">'+pfE(x.evc)+'</span><span>'+pfP(o.win)+'</span><span>'+optDate(o.exit_date)+'</span><span>'+optEsc(o.cluster)+'</span></div>'; }).join("")+'</div>':
-      '<div class="ed-note">No option trade fits the budget today \u2014 see why below. The budget simply waits.</div>');
+      '<div class="ed-note">No option trade fits the budget today \u2014 see why below. The budget simply waits.</div>')+'</details>';
     if(A.excluded.length) h+='<details class="opt-det"><summary>Left out <span>\u00b7 '+A.excluded.length+' candidates and why</span></summary><div class="opt-skip">'+A.excluded.map(function(x){ return '<div><b>'+x.t+'</b> <i>'+x.book+'</i> '+optEsc(x.why)+'</div>'; }).join("")+'</div></details>';
     var carry=PF_BOOK&&PF_BOOK.active&&PF_BOOK.days_to_core>0;
     h+='<div class="pf-act"><button id="pfLock">'+(PF_BOOK&&PF_BOOK.active?'Lock as my new book':'Lock this as my book')+'</button><button id="pfToBuilder" class="ghost">Open in Portfolio Builder \u2192</button>'+

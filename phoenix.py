@@ -12429,6 +12429,9 @@ def run_health():
         add("decisions.logged", "learning", "pass" if dec or not sched else "warn", f"{len(dec)} options decisions logged for {d_}", "run_ic_record (decisions table)")
     except Exception as e:
         add("forward.db", "forward test", "warn", f"could not read the database: {e}", "Supabase")
+    rc = rd("ic_recap") or {}
+    add("forward.recap", "forward test", "pass" if rc.get("date") == str(today) else "warn",
+        f"recap of {rc.get('trades', 0)} trades, {rc.get('closed_planned', 0)} closed at their planned exit" if rc else "outputs/ic_recap.json missing", "run_ic_recap")
     # 5b. the proposed portfolios' inputs
     pf = rd("phoenix_portfolios") or {}
     if pf:
@@ -13082,6 +13085,194 @@ def run_pf_track():
     return out
 
 
+def _ic_bs_greeks(S, K, T, iv, cp):
+    """Black-Scholes value and greeks per share (zero rate): delta, gamma, theta per calendar day, vega per vol point."""
+    from math import log, sqrt, exp, pi, erf
+    if not (S and K and iv) or T <= 0:
+        intr = max(S - K, 0) if cp == "C" else max(K - S, 0)
+        return intr, ((1.0 if S > K else 0.0) if cp == "C" else (-1.0 if S < K else 0.0)), 0.0, 0.0, 0.0
+    st = iv * sqrt(T); d1 = (log(S / K) + 0.5 * st * st) / st; d2 = d1 - st
+    N = lambda x: 0.5 * (1 + erf(x / sqrt(2))); n = lambda x: exp(-0.5 * x * x) / sqrt(2 * pi)
+    val = S * N(d1) - K * N(d2) if cp == "C" else K * N(-d2) - S * N(-d1)
+    delta = N(d1) if cp == "C" else N(d1) - 1
+    gamma = n(d1) / (S * st)
+    theta = -S * n(d1) * iv / (2 * sqrt(T)) / 365.0
+    vega = S * n(d1) * sqrt(T) / 100.0
+    return val, delta, gamma, theta, vega
+
+
+def _ic_position_read(legs, credit, fees_1, quotes, spot, dte):
+    """Everything a daily mark records beyond the P&L, per contract (100 shares), from each leg's own IV:
+      greeks   delta (shares), gamma (shares per $1), theta ($ per day the position earns), vega ($ per vol point)
+      be       today's breakevens: where closing now would make zero, on a price grid +-40% with the IVs held
+      iv       the average IV of the short legs
+    A leg with no quote this morning -> None (the mark itself is then missing too)."""
+    spec = (("long_put", "P", +1), ("short_put", "P", -1), ("short_call", "C", -1), ("long_call", "C", +1))
+    L = [(cp, float(legs[k]), sg) for k, cp, sg in spec if legs.get(k) is not None]
+    T = max(dte, 0) / 365.0
+    q = {}
+    for cp, K, sg in L:
+        x = quotes.get((cp, K))
+        if not x or not x[2]:
+            return None
+        q[(cp, K)] = x
+    g = {"delta": 0.0, "gamma": 0.0, "theta": 0.0, "vega": 0.0}
+    for cp, K, sg in L:
+        _, dl, gm, th, vg = _ic_bs_greeks(spot, K, T, q[(cp, K)][2], cp)
+        # the position holds +1 long, -1 short; greeks of the held position, per contract
+        g["delta"] += sg * dl * 100; g["gamma"] += sg * gm * 100; g["theta"] += sg * th * 100; g["vega"] += sg * vg * 100
+    def pnl_at(S):
+        close = sum(-sg * _ic_bs_greeks(S, K, T, q[(cp, K)][2], cp)[0] for cp, K, sg in L)   # cost to buy back the shorts, sell the longs
+        return (credit - close) * 100 - fees_1
+    lo_, hi_ = spot * 0.6, spot * 1.4
+    xs = [lo_ + (hi_ - lo_) * i / 400 for i in range(401)]
+    ys = [pnl_at(x) for x in xs]
+    cross = [xs[i] + (xs[i + 1] - xs[i]) * (0 - ys[i]) / (ys[i + 1] - ys[i]) for i in range(400) if (ys[i] < 0) != (ys[i + 1] < 0)]
+    has_p = any(cp == "P" for cp, _, _ in L); has_c = any(cp == "C" for cp, _, _ in L)
+    near = min(cross, key=lambda c: abs(c - spot)) if cross else None
+    if has_p and not has_c:            # bull put: one breakeven, the line it must stay above (today it can sit above spot)
+        lo_b, hi_b = near, None
+    elif has_c and not has_p:          # bear call: the line it must stay below
+        lo_b, hi_b = None, near
+    else:
+        below = [c for c in cross if c <= spot]; above = [c for c in cross if c > spot]
+        lo_b = max(below) if below else None; hi_b = min(above) if above else None
+    shorts = [q[(cp, K)][2] for cp, K, sg in L if sg < 0]
+    return {"greeks": {k: round(v, 3) for k, v in g.items()},
+            "be_lo": round(lo_b, 2) if lo_b else None, "be_hi": round(hi_b, 2) if hi_b else None,
+            "iv_short": round(sum(shorts) / len(shorts), 4) if shorts else None}
+
+
+def run_ic_recap():
+    """
+    THE FORWARD TEST, ADDED UP (31 Oct 2026). Every morning, from every trade's daily marks:
+      daily     the book's mark-to-market each day and its change (what the open trades made or lost that day)
+      periods   this week, last week, this month, last month: P&L change, exits realised, wins, best and worst
+      edge      realised results grouped by what was known at entry (structure, chart read, IV/HV, dial, deltas,
+                days to expiry, weekly/monthly, exit) with n, win rate, average, return on risk and the model's
+                prediction beside it: where the edge is positive, where it is not, and how sure (n)
+    Old-rule trades (role "winner") are left out. Writes outputs/ic_recap.json and one row per finished week and
+    month to ic_recaps, which the weekly brief will read.
+    """
+    import os, json
+    from datetime import datetime, timedelta, date
+    try:
+        rows = _sb_get("ic_forward", {"select": "id,opened,ticker,expiry,credit,max_loss_1,model,result,marks,status,role,structure,grp,iv_atm,hv"}, limit=20000) or []
+    except Exception as e:
+        print(f"[icrecap] cannot read ic_forward ({e})"); sb_heartbeat("ic_recap", False, str(e)); return None
+    rows = [r for r in rows if r.get("role") in ("proposed", "calibration")]
+    today = datetime.utcnow().date()
+    # 1. daily book: sum of each trade's latest mark per day, and the day-on-day change from the trades marked on both days
+    by_day = {}
+    for r in rows:
+        prev = None
+        for m in r.get("marks") or []:
+            if m.get("pnl_1") is None or m.get("post_exit"):
+                continue
+            dd = by_day.setdefault(m["date"], {"mtm": 0.0, "chg": 0.0, "n": 0, "risk": 0.0})
+            dd["mtm"] += m["pnl_1"]; dd["n"] += 1; dd["risk"] += float(r.get("max_loss_1") or 0)
+            dd["chg"] += m["pnl_1"] - (prev if prev is not None else 0.0)    # day one: the whole mark (the entry cost)
+            prev = m["pnl_1"]
+    daily = [{"date": k, **{kk: round(vv, 2) for kk, vv in v.items()}} for k, v in sorted(by_day.items())]
+    cum = 0.0
+    for x in daily:
+        cum += x["chg"]; x["cum"] = round(cum, 2)
+    # 2. realised exits by the date they were reached
+    real = []
+    for r in rows:
+        res = r.get("result") or {}; marks = r.get("marks") or []
+        best = str((r.get("model") or {}).get("best_exit_dte") or 10)
+        for x in IC["exits"]:
+            v = res.get(str(x))
+            if v is None:
+                continue
+            m = next((m for m in marks if m.get("pnl_1") is not None and m.get("dte") is not None and m["dte"] <= x), None)
+            real.append({"id": r["id"], "t": r["ticker"], "exit": x, "planned": str(x) == best, "pnl": float(v), "date": (m or {}).get("date"),
+                         "risk": float(r.get("max_loss_1") or 0), "role": r.get("role"), "structure": r.get("structure") or "IC",
+                         "pred": ((((r.get("model") or {}).get("ev") or {}).get((r.get("model") or {}).get("rank_measure") or "market") or {}).get(str(x)) or {}).get("ev_1")})
+    def period(a, b, label):
+        ds = [x for x in daily if a <= x["date"] <= b]
+        rr = [x for x in real if x["planned"] and x["date"] and a <= x["date"] <= b]
+        w = [x for x in rr if x["pnl"] > 0]
+        out = {"label": label, "from": a, "to": b, "mtm_change": round(sum(x["chg"] for x in ds), 2), "days": len(ds),
+               "exits": len(rr), "wins": len(w), "realised": round(sum(x["pnl"] for x in rr), 2),
+               "risk_closed": round(sum(x["risk"] for x in rr), 2),
+               "best": max(rr, key=lambda x: x["pnl"]) if rr else None, "worst": min(rr, key=lambda x: x["pnl"]) if rr else None,
+               "by_role": {k: round(sum(x["pnl"] for x in rr if x["role"] == k), 2) for k in ("proposed", "calibration")},
+               "by_structure": {k: round(sum(x["pnl"] for x in rr if x["structure"] == k), 2) for k in ("IC", "PCS", "CCS")},
+               "open_at_end": next((x["n"] for x in reversed(daily) if x["date"] <= b), 0),
+               "mtm_at_end": next((x["mtm"] for x in reversed(daily) if x["date"] <= b), 0)}
+        for k in ("best", "worst"):
+            if out[k]:
+                out[k] = {"t": out[k]["t"], "pnl": out[k]["pnl"], "exit": out[k]["exit"]}
+        return out
+    mon = today - timedelta(days=today.weekday())
+    m1 = today.replace(day=1); pm_end = m1 - timedelta(days=1); pm1 = pm_end.replace(day=1)
+    periods = {"this_week": period(str(mon), str(today), "this week"),
+               "last_week": period(str(mon - timedelta(days=7)), str(mon - timedelta(days=1)), "last week"),
+               "this_month": period(str(m1), str(today), today.strftime("%B")),
+               "last_month": period(str(pm1), str(pm_end), pm_end.strftime("%B"))}
+    # 3. the edge, by what was known at entry (planned exit only; each trade once)
+    def feat(r):
+        M = r.get("model") or {}; D = M.get("deltas") or {}
+        sd = [abs(D[k]) for k in ("short_put", "short_call") if D.get(k) is not None]
+        ivhv = (float(r["iv_atm"]) / 100 / float(M["hv30s"])) if (r.get("iv_atm") and M.get("hv30s")) else None
+        dte = M.get("dte_entry")
+        ctx = M.get("context") or {}
+        return {"structure": r.get("structure") or "IC", "role": r.get("role"), "chart read": M.get("bias") or "\u2014",
+                "expiry": M.get("expiry_type") or "\u2014",
+                "IV / HV": ("< 1.0" if ivhv < 1 else ("1.0\u20131.2" if ivhv < 1.2 else ("1.2\u20131.5" if ivhv < 1.5 else "\u2265 1.5"))) if ivhv else "\u2014",
+                "short delta": ("25\u201330" if max(sd) < 0.30 else ("30\u201338" if max(sd) < 0.38 else "38\u201345")) if sd else "\u2014",
+                "days at entry": ("\u2264 35" if dte <= 35 else ("36\u201360" if dte <= 60 else "> 60")) if dte else "\u2014",
+                "market dial": ctx.get("dial_state") or "\u2014", "SPX dealer gamma": ctx.get("gex_regime") or "\u2014",
+                "IV week-on-week": ("falling" if (M.get("iv30_wk") and M.get("iv30") and M["iv30"] < M["iv30_wk"]) else
+                                    ("rising" if (M.get("iv30_wk") and M.get("iv30")) else "\u2014"))}
+    planned = {}
+    for x in real:
+        if x["planned"]:
+            planned[x["id"]] = x
+    byid = {r["id"]: r for r in rows}
+    edge = {}
+    for tid, x in planned.items():
+        for k, v in feat(byid[tid]).items():
+            g = edge.setdefault(k, {}).setdefault(v, {"n": 0, "wins": 0, "pnl": 0.0, "risk": 0.0, "pred": 0.0, "np": 0})
+            g["n"] += 1; g["wins"] += x["pnl"] > 0; g["pnl"] += x["pnl"]; g["risk"] += x["risk"]
+            if x["pred"] is not None:
+                g["pred"] += x["pred"]; g["np"] += 1
+    for k, groups in edge.items():
+        for v, g in groups.items():
+            g.update({"win_rate": round(g["wins"] / g["n"], 3), "avg": round(g["pnl"] / g["n"], 2), "ror": round(g["pnl"] / g["risk"], 4) if g["risk"] else None,
+                      "avg_pred": round(g["pred"] / g["np"], 2) if g["np"] else None,
+                      "confidence": "too few" if g["n"] < 15 else ("some" if g["n"] < 40 else "solid")})
+            g["pnl"] = round(g["pnl"], 2); g["risk"] = round(g["risk"], 2)
+    # exits compared on the same trades: which exit pays
+    exits_cmp = {}
+    for x in real:
+        e = exits_cmp.setdefault(str(x["exit"]), {"n": 0, "pnl": 0.0, "wins": 0})
+        e["n"] += 1; e["pnl"] += x["pnl"]; e["wins"] += x["pnl"] > 0
+    for e in exits_cmp.values():
+        e["avg"] = round(e["pnl"] / e["n"], 2); e["win_rate"] = round(e["wins"] / e["n"], 3); e["pnl"] = round(e["pnl"], 2)
+    closed_n = len(planned)
+    out = {"asof": _now(), "date": str(today), "trades": len(rows), "open": sum(1 for r in rows if r.get("status") == "open"),
+           "closed_planned": closed_n, "daily": daily[-120:], "periods": periods, "edge": edge, "exits": exits_cmp,
+           "note": ("Edge groups need about 15 closed trades each before they mean anything, 40 to lean on."
+                    if closed_n < 40 else "Groups marked 'solid' have 40+ closed trades.")}
+    write_json("ic_recap", out)
+    # one row per finished period for the brief: last week and last month are final once they are over
+    try:
+        rec = [{"period": "week", "start": periods["last_week"]["from"], "data": periods["last_week"]},
+               {"period": "month", "start": periods["last_month"]["from"], "data": periods["last_month"]},
+               {"period": "week_to_date", "start": periods["this_week"]["from"], "data": periods["this_week"]},
+               {"period": "month_to_date", "start": periods["this_month"]["from"], "data": periods["this_month"]}]
+        _sb_write("POST", "ic_recaps", rec, extra_headers={"Prefer": "resolution=merge-duplicates,return=minimal"})
+    except Exception as e:
+        print(f"[icrecap] recap rows not stored ({e})")
+    tw = periods["this_week"]
+    print(f"[icrecap] {len(rows)} trades \u00b7 {out['open']} open \u00b7 {closed_n} closed at the planned exit \u00b7 week MTM {tw['mtm_change']:+.0f}$ \u00b7 realised {tw['realised']:+.0f}$")
+    sb_heartbeat("ic_recap", True, f"{len(rows)} trades · week {tw['mtm_change']:+.0f}$ · month {periods['this_month']['mtm_change']:+.0f}$")
+    return out
+
+
 IC_STOPS = {"sl50": ("half the max loss", lambda r: -0.5 * float(r["max_loss_1"])),
             "slcr": ("a loss equal to the credit", lambda r: -100.0 * float(r["credit"]))}
 
@@ -13165,28 +13356,58 @@ def run_ic_record():
         notes.append(f"vol {len(rows)}")
     except Exception as e:
         notes.append(f"vol failed: {e}")
-    # 3a. mark everything still open
+    # 3a. mark everything still open — and keep marking closed trades until their expiry ("post_exit" marks),
+    # so the test can ask afterwards whether the planned exit beat holding (31 Oct 2026). Each mark records the
+    # P&L, the position's greeks, today's breakevens, the short legs' IV and the name's dealer levels that day.
     marked = closed = broken = 0
     try:
-        for row in _sb_get("ic_forward", {"status": "eq.open", "select": "*"}) or []:
+        mm = json.load(open(os.path.join(OUTPUTS_DIR, "mme_map.json")))
+        mmrows = {r_["ticker"]: r_ for g in (mm.get("groups") or {}).values() for r_ in g}; mmrows.update(mm.get("etf_rows") or {})
+    except Exception:
+        mmrows = {}
+    try:
+        live = (_sb_get("ic_forward", {"status": "eq.open", "select": "*"}, limit=5000) or []) + \
+               (_sb_get("ic_forward", {"status": "eq.closed", "expiry": f"gte.{d}", "select": "*"}, limit=5000) or [])
+        for row in live:
             c = (ch.get("names") or {}).get(row["ticker"])
             if not c:
                 continue
             exp = str(row["expiry"])[:10]
             dte = (datetime.strptime(exp, "%Y-%m-%d").date() - today).days
-            pnl = _ic_mark(row["legs"], float(row["credit"]), float(row["fees_1"] or 0), _ic_quotes(c.get("rows"), exp), c.get("spot"), dte)
+            q_ = _ic_quotes(c.get("rows"), exp)
+            pnl = _ic_mark(row["legs"], float(row["credit"]), float(row["fees_1"] or 0), q_, c.get("spot"), dte)
             marks = row.get("marks") or []
             if any(m.get("date") == d for m in marks):
                 continue                                         # already marked today
+            post = row.get("status") == "closed"
             res = dict(row.get("result") or {})
             patch = {}
+            mr = mmrows.get(row["ticker"]) or {}
+            extra = {"post_exit": True} if post else {}
+            try:
+                pr = _ic_position_read(row["legs"], float(row["credit"]), float(row["fees_1"] or 0), q_, c.get("spot"), dte) if pnl is not None else None
+            except Exception:
+                pr = None
+            if pr:
+                extra.update(pr)
+            if mr:
+                extra["dealer"] = {"flip": mr.get("flip"), "call_wall": mr.get("resist"), "put_wall": mr.get("support"), "em": mr.get("em")}
+            if pnl is not None and row.get("max_loss_1"):
+                extra["pnl_pct_risk"] = round(pnl / float(row["max_loss_1"]), 4)
+            if post:
+                marks.append(dict({"date": d, "dte": dte, "spot": c.get("spot"), "pnl_1": pnl}, **extra))
+                if dte <= 0 and pnl is not None:
+                    res["expiry"] = pnl                           # what holding to expiry would have made
+                _sb_write("PATCH", "ic_forward", {"marks": marks, "result": res}, params={"id": f"eq.{row['id']}"})
+                marked += 1
+                continue
             if pnl is None:
                 misses = sum(1 for m in marks[-3:] if m.get("pnl_1") is None) + 1
                 marks.append({"date": d, "dte": dte, "spot": c.get("spot"), "pnl_1": None})
                 if misses >= 3:
                     patch.update({"status": "broken", "closed": d}); broken += 1
             else:
-                marks.append({"date": d, "dte": dte, "spot": c.get("spot"), "pnl_1": pnl})
+                marks.append(dict({"date": d, "dte": dte, "spot": c.get("spot"), "pnl_1": pnl}, **extra))
                 res["last"] = {"date": d, "dte": dte, "spot": c.get("spot"), "pnl_1": pnl}   # the app lists from this
                 for x in IC["exits"]:
                     if str(x) not in res and dte <= x:
@@ -13213,6 +13434,10 @@ def run_ic_record():
     # the decision log: every name's outcome today (proposed, calibration, skipped) with the market context, so the
     # weekly review can ask which contexts the options engine gets right — the same footing as the stock signals
     ctx = _context_now()
+    try:
+        ctx["dial_state"] = _market_dial().get("state")
+    except Exception:
+        ctx["dial_state"] = None
     try:
         prop_set = {p["ticker"] for p in scr.get("proposed") or []}
         dec = []
@@ -13249,7 +13474,7 @@ def run_ic_record():
                                   "ev_pct": p.get("ev_pct"), "rank_measure": p.get("rank_measure"), "dte_entry": p.get("dte"),
                                   "structure": p.get("structure", "IC"), "group": p.get("group"), "bias": p.get("bias"), "chart_why": p.get("chart_why"),
                                   "iv30": p.get("iv30"), "hv30s": p.get("hv30s"), "ev_cons_pct": p.get("ev_cons_pct"),
-                                  "expiry_type": p.get("expiry_type"), "context": ctx},
+                                  "expiry_type": p.get("expiry_type"), "context": ctx, "iv30_wk": p.get("iv30_wk")},
                         "iv_atm": p.get("iv_atm"), "hv": p.get("hv")})
         if new:
             _sb_write("POST", "ic_forward", new, extra_headers={"Prefer": "resolution=ignore-duplicates,return=minimal"})
@@ -16226,6 +16451,7 @@ def run_full():
     step("mme_map",        run_mme_map,       optional=True)   # the dealer map: every name vs its walls and flip
     step("ic_screen",      run_ic_screen,     optional=True)   # iron condor tournament
     step("ic_record",      run_ic_record,     optional=True)   # archive chains + vol, forward-test the winners, mark open ones
+    step("ic_recap",       run_ic_recap,      optional=True)   # the forward test added up: daily book, week/month, edge by entry context
     step("dossier",        run_dossier,       optional=True)   # one record per name: every engine's view, archived for the review
     step("portfolios",     run_portfolios,    optional=True)   # every book's candidates + Phoenix's split, for the proposed portfolios
     step("pf_track",       run_pf_track,      optional=True)   # the locked book: exceptions daily, the review drafted when it is due
@@ -16301,6 +16527,8 @@ def run_engine(name):
         run_ic_backtest()
     elif name == "dossier":
         run_dossier()
+    elif name == "ic_recap":
+        run_ic_recap()
     elif name == "portfolios":
         run_portfolios()
     elif name == "pf_track":
