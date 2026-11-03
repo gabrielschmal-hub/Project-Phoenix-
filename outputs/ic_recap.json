@@ -1,8 +1,8 @@
 {
- "asof": "2026-11-01 20:00 UTC",
- "date": "2026-11-01",
- "trades": 65,
- "open": 65,
+ "asof": "2026-11-03 21:26 UTC",
+ "date": "2026-11-03",
+ "trades": 92,
+ "open": 92,
  "closed_planned": 0,
  "daily": [
   {
@@ -28,11 +28,51 @@
    "n": 65,
    "risk": 68419.0,
    "cum": -4281.65
+  },
+  {
+   "date": "2026-11-02",
+   "mtm": -4750.45,
+   "chg": -709.75,
+   "n": 53,
+   "risk": 55390.0,
+   "cum": -4991.4
+  },
+  {
+   "date": "2026-11-03",
+   "mtm": -9119.15,
+   "chg": -4127.75,
+   "n": 90,
+   "risk": 98941.0,
+   "cum": -9119.15
   }
  ],
  "periods": {
   "this_week": {
    "label": "this week",
+   "from": "2026-11-02",
+   "to": "2026-11-03",
+   "mtm_change": -4837.5,
+   "days": 2,
+   "exits": 0,
+   "wins": 0,
+   "realised": 0,
+   "risk_closed": 0,
+   "best": null,
+   "worst": null,
+   "by_role": {
+    "proposed": 0,
+    "calibration": 0
+   },
+   "by_structure": {
+    "IC": 0,
+    "PCS": 0,
+    "CCS": 0
+   },
+   "open_at_end": 90,
+   "mtm_at_end": -9119.15
+  },
+  "last_week": {
+   "label": "last week",
    "from": "2026-10-26",
    "to": "2026-11-01",
    "mtm_change": -4281.65,
@@ -55,36 +95,12 @@
    "open_at_end": 65,
    "mtm_at_end": -4281.65
   },
-  "last_week": {
-   "label": "last week",
-   "from": "2026-10-19",
-   "to": "2026-10-25",
-   "mtm_change": 0,
-   "days": 0,
-   "exits": 0,
-   "wins": 0,
-   "realised": 0,
-   "risk_closed": 0,
-   "best": null,
-   "worst": null,
-   "by_role": {
-    "proposed": 0,
-    "calibration": 0
-   },
-   "by_structure": {
-    "IC": 0,
-    "PCS": 0,
-    "CCS": 0
-   },
-   "open_at_end": 0,
-   "mtm_at_end": 0
-  },
   "this_month": {
    "label": "November",
    "from": "2026-11-01",
-   "to": "2026-11-01",
-   "mtm_change": 0.0,
-   "days": 1,
+   "to": "2026-11-03",
+   "mtm_change": -4837.5,
+   "days": 3,
    "exits": 0,
    "wins": 0,
    "realised": 0,
@@ -100,8 +116,8 @@
     "PCS": 0,
     "CCS": 0
    },
-   "open_at_end": 65,
-   "mtm_at_end": -4281.65
+   "open_at_end": 90,
+   "mtm_at_end": -9119.15
   },
   "last_month": {
    "label": "October",
@@ -130,5 +146,46 @@
  },
  "edge": {},
  "exits": {},
+ "compare": {
+  "calibration": {
+   "trades": 37,
+   "open": 37,
+   "closed": 0,
+   "wins": 0,
+   "pnl": 0.0,
+   "risk": 0.0,
+   "mtm": -3204.7,
+   "risk_open": 39774.0,
+   "win_rate": null,
+   "ror": null,
+   "mtm_pct": -0.0806
+  },
+  "proposed": {
+   "trades": 55,
+   "open": 55,
+   "closed": 0,
+   "wins": 0,
+   "pnl": 0.0,
+   "risk": 0.0,
+   "mtm": -5914.45,
+   "risk_open": 60037.0,
+   "win_rate": null,
+   "ror": null,
+   "mtm_pct": -0.0985
+  },
+  "coach": {
+   "trades": 1,
+   "open": 1,
+   "closed": 0,
+   "wins": 0,
+   "pnl": 0.0,
+   "risk": 0.0,
+   "mtm": -25.95,
+   "risk_open": 590.2,
+   "win_rate": null,
+   "ror": null,
+   "mtm_pct": -0.044
+  }
+ },
  "note": "Edge groups need about 15 closed trades each before they mean anything, 40 to lean on."
 }
