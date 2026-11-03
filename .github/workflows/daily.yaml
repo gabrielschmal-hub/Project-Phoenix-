@@ -64,6 +64,11 @@ jobs:
           git add -A outputs/ macroflow.db || true
           if git diff --cached --quiet; then echo "No changes to commit"; exit 0; fi
           git commit -m "Phoenix run $(date -u +%Y-%m-%dT%H:%M) (${{ github.event_name }})"
+          # 3 Nov 2026 (second fix): the run also leaves changed files OUTSIDE outputs/ (caches, work files) that
+          # were never committed. They blocked the rebase ("You have unstaged changes"). List them for the log,
+          # then set them aside so only this run's commit is rebased and pushed.
+          echo "Left out of the commit (not published, as before):"; git status --short | head -40
+          git stash push --include-untracked -m "run leftovers" || true
           for i in 1 2 3 4 5; do
             if git pull --rebase -X theirs origin main && git push origin HEAD:main; then
               echo "Pushed on attempt $i"; exit 0
