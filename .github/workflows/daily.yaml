@@ -18,7 +18,10 @@ concurrency:
 jobs:
   run-pipeline:
     runs-on: ubuntu-24.04      # pinned: ubuntu-latest moves to Ubuntu 26 from 19 Oct 2026
-    timeout-minutes: 75        # a hung run cannot eat the month's minutes
+    # 3 Nov 2026: 75 minutes cut the 2 Nov run off before its commit, so a full day's outputs were lost.
+    # The repo is public (Actions minutes are free), the run now takes ~65 min, so the job gets room and
+    # the run step its own cap; the commit step runs whatever happened above it.
+    timeout-minutes: 150
     permissions:
       contents: write
     steps:
@@ -35,6 +38,8 @@ jobs:
           pip install -r requirements.txt
           sudo apt-get install -y -qq poppler-utils >/dev/null 2>&1 || true   # pdftotext for House PTR PDFs
       - name: Run Phoenix
+        timeout-minutes: 120
+        continue-on-error: true    # a crash or a cap still publishes what was finished
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
@@ -48,6 +53,7 @@ jobs:
             python phoenix.py --full
           fi
       - name: Commit outputs
+        if: always()
         run: |
           git config user.name  "phoenix-bot"
           git config user.email "phoenix-bot@users.noreply.github.com"
