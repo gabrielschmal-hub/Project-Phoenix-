@@ -57,7 +57,18 @@ jobs:
         run: |
           git config user.name  "phoenix-bot"
           git config user.email "phoenix-bot@users.noreply.github.com"
-          git pull --rebase origin main || true
-          git add outputs/ macroflow.db || true
-          git commit -m "Phoenix run $(date -u +%Y-%m-%dT%H:%M) (${{ github.event_name }})" || echo "No changes"
-          git push || echo "Nothing to push"
+          # 3 Nov 2026: the old order (pull, then add/commit) failed silently whenever anything else was committed
+          # during the run (an upload, the signal-log or smart-money workflows): git refuses to rebase over
+          # uncommitted changes, the "|| true" hid it, and the push was rejected. Commit first, then rebase onto
+          # whatever landed meanwhile (this run's outputs win a conflict), retry, and fail loudly if it never lands.
+          git add -A outputs/ macroflow.db || true
+          if git diff --cached --quiet; then echo "No changes to commit"; exit 0; fi
+          git commit -m "Phoenix run $(date -u +%Y-%m-%dT%H:%M) (${{ github.event_name }})"
+          for i in 1 2 3 4 5; do
+            if git pull --rebase -X theirs origin main && git push origin HEAD:main; then
+              echo "Pushed on attempt $i"; exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "Push attempt $i failed; retrying"; sleep $((i * 10))
+          done
+          echo "::error::Outputs were not pushed after 5 attempts"; exit 1
