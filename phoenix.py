@@ -11083,6 +11083,11 @@ def run_mme_chains(max_dte=180, band=0.35):
 # ============================================================
 IC = {"dte_min": 25, "dte_max": 95, "exit_dte": 18, "sleeve": 2000, "risk_per_trade": 2000,
       "tiers": [(25, 45, "1 month"), (46, 95, "2-3 months")], "exits": [25, 18, 10],
+      # MINIMUM HOLD (3 Nov 2026): an exit counts only if it comes at least this many days after entry. A trade
+      # opened 28 days out reached its "25 DTE" exit after three sessions, which measures the entry cost, not
+      # the strategy. Applied to the screen, the record, the recap and the backtest; earlier short-hold
+      # results stay on the rows but are left out of every count.
+      "min_hold_days": 7,
       "short_delta": (0.25, 0.45), "long_delta": (0.05, 0.20), "board_size": 12,
       # spreads decide whether an edge survives the fill: a leg wider than this share of its own mid is
       # untradeable, and a condor whose four spreads eat more than this share of the credit is skipped
@@ -11883,7 +11888,7 @@ def run_ic_screen():
             dte = (e - today).days
             tier = next((lab for lo, hi, lab in IC["tiers"] if lo <= dte <= hi), None)
             P, Cc = sides.get("P") or {}, sides.get("C") or {}
-            exits = [x for x in IC["exits"] if x < dte - 2]
+            exits = _ic_valid_exits(dte)
             if not tier or not exits:
                 why["no_quotes"] += 1; continue
             if earn and str(today) <= str(earn) <= str(e - timedelta(days=min(exits))):
@@ -12354,7 +12359,7 @@ def run_health():
     today = datetime.utcnow().date()
     # 1. freshness of the files the options and dossier work reads
     for n, step, crit in (("ic_screen", "ic_screen", True), ("ic_universe", "mme_chains", True), ("ic_hist", "ic_screen (_ic_hist)", True),
-                          ("dossier", "dossier", True), ("calendar", "calendar", True), ("mme_map", "mme_map", False),
+                          ("dossier", "dossier", True), ("calendar", "calendar", True), ("mme_map", "mme_map", True),
                           ("iv_em", "iv_em", False), ("macro", "macro", False), ("gex", "gex", False), ("dayscore", "dayscore", False)):
         j = rd(n)
         if j is None:
@@ -12364,6 +12369,16 @@ def run_health():
         age = (today - datetime.strptime(a, "%Y-%m-%d").date()).days if a[:4].isdigit() else None
         st = "pass" if age is not None and age <= 1 else ("warn" if age is not None and age <= 3 else "fail")
         add(f"file.{n}", "files", st if (crit or st == "pass") else "warn", f"outputs/{n}.json as of {a or 'unknown'}" + (f" ({age} days old)" if age else ""), f"step {step}")
+    # the dealer map is rebuilt in every wire upload from the chain file on disk, so its "asof" can be fresh while its
+    # chains are days old (3 Nov 2026): check the chain date it was computed on, not when it was written
+    mmj = rd("mme_map") or {}
+    try:
+        cd_ = str(mmj.get("date") or "")[:10]
+        age_ = (today - datetime.strptime(cd_, "%Y-%m-%d").date()).days
+        add("mme_map.chains", "data", "pass" if age_ <= 1 else ("warn" if age_ <= 3 else "fail"),
+            f"dealer map computed on the {cd_} option chains ({age_} day{'s' if age_ != 1 else ''} old)", "steps mme_chains \u2192 mme_map (a run that never committed leaves the map on old chains)")
+    except Exception:
+        add("mme_map.chains", "data", "warn", "dealer map has no chain date", "step mme_map")
     scr, uni, hist, dos = rd("ic_screen") or {}, rd("ic_universe") or {}, rd("ic_hist") or {}, rd("dossier") or {}
     U = set((uni.get("names") or {}))
     # 2. coverage
@@ -13189,8 +13204,8 @@ def run_ic_recap():
     real = []
     for r in rows:
         res = r.get("result") or {}; marks = r.get("marks") or []
-        best = str((r.get("model") or {}).get("best_exit_dte") or 10)
-        for x in IC["exits"]:
+        pe = _ic_planned_exit(r); best = str(pe) if pe is not None else None
+        for x in _ic_valid_exits(_ic_dte_entry(r)):
             v = res.get(str(x))
             if v is None:
                 continue
@@ -13622,6 +13637,37 @@ def run_auto_brief():
 
 IC_STOPS = {"sl50": ("half the max loss", lambda r: -0.5 * float(r["max_loss_1"])),
             "slcr": ("a loss equal to the credit", lambda r: -100.0 * float(r["credit"]))}
+# take-profit variants (3 Nov 2026): close at the first mark at or above the level
+IC_TAKES = {"tp50": ("half the max profit", lambda r: 0.5 * (100.0 * float(r["credit"]) - float(r.get("fees_1") or 0)))}
+
+
+def _ic_valid_exits(dte_entry):
+    """The exits a trade opened dte_entry days from expiry can use: at least IC['min_hold_days'] after entry."""
+    if dte_entry is None:
+        return list(IC["exits"])
+    return [x for x in IC["exits"] if x <= dte_entry - IC.get("min_hold_days", 7)]
+
+
+def _ic_dte_entry(row):
+    """Days to expiry when the trade was opened: from the model, else from the opened and expiry dates."""
+    from datetime import datetime
+    m = (row.get("model") or {}).get("dte_entry")
+    if m is not None:
+        return int(m)
+    try:
+        return (datetime.strptime(str(row["expiry"])[:10], "%Y-%m-%d") - datetime.strptime(str(row["opened"])[:10], "%Y-%m-%d")).days
+    except Exception:
+        return None
+
+
+def _ic_planned_exit(row):
+    """The exit a trade is judged at: the model's best exit if it respects the minimum hold, else the earliest
+    valid one (the longest hold-to-date still allowed); None when no exit is valid."""
+    v = _ic_valid_exits(_ic_dte_entry(row))
+    b = (row.get("model") or {}).get("best_exit_dte")
+    if b is not None and int(b) in v:
+        return int(b)
+    return max(v) if v else None
 
 
 def _ic_stop_results(row, marks, res):
@@ -13630,18 +13676,27 @@ def _ic_stop_results(row, marks, res):
     stop level closes the variant at that mark's P&L (a daily check, so a gap past the level is taken in full,
     as a real stop would be). At each exit the variant shows the stop P&L if it fired first, else the held result.
       sl50   stop at -50% of the max loss
-      slcr   stop at a loss equal to the credit received"""
+      slcr   stop at a loss equal to the credit received
+      tp50   take profit at +50% of the max profit (credit less fees), the first mark at or above it
+    Only exits that respect the minimum hold count."""
     out = {}
     exit_at = {}
+    vx = _ic_valid_exits(_ic_dte_entry(row))
     for i, m in enumerate(marks):
-        for x in IC["exits"]:
+        if m.get("post_exit"):
+            continue
+        for x in vx:
             if str(x) not in exit_at and m.get("pnl_1") is not None and m.get("dte") is not None and m["dte"] <= x:
                 exit_at[str(x)] = i
-    for key, (_, lvl) in IC_STOPS.items():
-        thr = lvl(row)
-        hit = next(((i, m) for i, m in enumerate(marks) if m.get("pnl_1") is not None and m["pnl_1"] <= thr), None)
-        v = {"level": round(thr, 2), "stopped": ({"date": hit[1]["date"], "dte": hit[1]["dte"], "pnl_1": hit[1]["pnl_1"]} if hit else None)}
-        for x in IC["exits"]:
+    live = [(i, m) for i, m in enumerate(marks) if m.get("pnl_1") is not None and not m.get("post_exit")]
+    for key, (_, lvl), side in [(k, v, "stop") for k, v in IC_STOPS.items()] + [(k, v, "take") for k, v in IC_TAKES.items()]:
+        try:
+            thr = lvl(row)
+        except Exception:
+            continue
+        hit = next(((i, m) for i, m in live if (m["pnl_1"] <= thr if side == "stop" else m["pnl_1"] >= thr)), None)
+        v = {"level": round(thr, 2), "kind": side, "stopped": ({"date": hit[1]["date"], "dte": hit[1]["dte"], "pnl_1": hit[1]["pnl_1"]} if hit else None)}
+        for x in vx:
             if str(x) in res and str(x) in exit_at:
                 v[str(x)] = hit[1]["pnl_1"] if (hit and hit[0] <= exit_at[str(x)]) else res[str(x)]
         out[key] = v
@@ -13756,10 +13811,11 @@ def run_ic_record():
             else:
                 marks.append(dict({"date": d, "dte": dte, "spot": c.get("spot"), "pnl_1": pnl}, **extra))
                 res["last"] = {"date": d, "dte": dte, "spot": c.get("spot"), "pnl_1": pnl}   # the app lists from this
-                for x in IC["exits"]:
+                _vx = _ic_valid_exits(_ic_dte_entry(row))
+                for x in _vx:
                     if str(x) not in res and dte <= x:
                         res[str(x)] = pnl                        # first mark at or inside each exit
-                if all(str(x) in res for x in IC["exits"] if x < (row.get("model") or {}).get("dte_entry", 999) - 2) or dte <= 0:
+                if all(str(x) in res for x in _vx) or dte <= 0:
                     patch.update({"status": "closed", "closed": d}); closed += 1
             res.update(_ic_stop_results(row, marks, res))
             patch.update({"marks": marks, "result": res})
@@ -13871,10 +13927,11 @@ def run_ic_backtest(start=None, end=None, min_days=2):
                     pnl = _ic_mark(b["legs"], b["credit"], b.get("fees_1", 8 * IC["commission_leg"]), _ic_quotes(c.get("rows"), exp), c.get("spot"), dte)
                     if pnl is None:
                         continue
-                    for x in IC["exits"]:
+                    _vx = _ic_valid_exits((datetime.strptime(exp, "%Y-%m-%d").date() - datetime.strptime(d0, "%Y-%m-%d").date()).days)
+                    for x in _vx:
                         if str(x) not in res and dte <= x:
                             res[str(x)] = pnl
-                    if len(res) == len(IC["exits"]) or dte <= 0:
+                    if len(res) >= len(_vx) or dte <= 0:
                         break
                 trades.append({"opened": d0, "ticker": b["ticker"], "rank": rank, "expiry": exp, "legs": b["legs"],
                                "predicted": {x: ((b.get("ev") or {}).get("market") or {}).get(str(x), {}).get("ev_1") for x in IC["exits"]},
@@ -16725,6 +16782,11 @@ def run_full():
     t0 = _t.time()
     budget = float(os.environ.get("PHOENIX_BUDGET_MIN", "300")) * 60.0
 
+    try:
+        sb_heartbeat("run_full", True, f"started ({os.environ.get('GITHUB_EVENT_NAME') or 'local'})")
+    except Exception:
+        pass
+
     def step(label, fn, optional=False):
         elapsed = _t.time() - t0
         if optional and elapsed > budget:
@@ -16743,6 +16805,11 @@ def run_full():
             progress.append({"step": label, "status": "failed",
                              "seconds": round(_t.time() - st, 1), "error": str(e)[:300]})
             print(f"[{label}] FAILED (non-fatal): {e}")
+            # a failure is reported to the database at once, so it is visible even if the run never commits
+            try:
+                sb_heartbeat("step:" + label, False, f"failed after {round(_t.time() - st, 1)}s: {str(e)[:200]}")
+            except Exception:
+                pass
         # rewrite meta after EVERY step: a killed run still leaves a trail
         try:
             write_meta(source_flags=flags, warnings=warnings, progress=progress)
@@ -16824,6 +16891,11 @@ def run_full():
     # have summarised yesterday's 13F and today's everything else, and nothing would have said so.
     step("fact_pack",      run_fact_pack,     optional=True)
     step("health",         run_health,        optional=True)   # LAST: re-checks the run's outputs and says what broke and where
+    try:
+        failed = [p_["step"] for p_ in progress if p_.get("status") == "failed"]
+        sb_heartbeat("run_full", not failed, f"finished in {(_t.time() - t0)/60:.1f} min" + (f"; failed: {', '.join(failed)}" if failed else "; every step ok"))
+    except Exception:
+        pass
 
     if PUBLISH_HOLDS:
         print("=== PUBLISH GATE HELD BACK %d FILE(S) ===" % len(PUBLISH_HOLDS))

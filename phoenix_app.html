@@ -11227,14 +11227,14 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var r=(rr||[])[0], el=document.getElementById("optTrDet"); if(!r||!el) return;
       var M=(r.marks||[]).filter(function(m){ return m.pnl_1!=null; }), L=r.legs||{};
       if(!M.length){ el.innerHTML='<i>No marks yet \u2014 the first comes with the next morning run.</i>'; return; }
-      var res=r.result||{}, ex=[25,18,10].filter(function(x){ return res[x]!=null; });
+      var res=r.result||{}, ex=[25,18,10].filter(function(x){ return res[x]!=null&&optValid(r,x); });
       var g=function(m,k){ return m.greeks&&m.greeks[k]!=null?m.greeks[k]:null; };
       el.innerHTML='<div class="opt-trd-k">'+
           '<span><i>credit</i><b>$'+(+r.credit).toFixed(2)+'</b></span><span><i>max loss</i><b>'+optM(-r.max_loss_1)+'</b></span>'+
           '<span><i>latest</i><b class="'+(M[M.length-1].pnl_1>=0?'ev':'ev neg')+'">'+optM(M[M.length-1].pnl_1)+'</b></span>'+
           ex.map(function(x){ return '<span><i>exit '+x+'d</i><b class="'+(res[x]>=0?'ev':'ev neg')+'">'+optM(res[x])+'</b></span>'; }).join("")+
           (res.expiry!=null?'<span><i>held to expiry</i><b class="'+(res.expiry>=0?'ev':'ev neg')+'">'+optM(res.expiry)+'</b></span>':'')+
-          ['sl50','slcr'].map(function(k){ var v=res[k]; return v&&v.stopped?'<span><i>'+(k==="sl50"?'stop \u221250%':'stop = credit')+'</i><b class="ev neg">hit '+optDate(v.stopped.date)+'</b></span>':''; }).join("")+'</div>'+
+          ['sl50','slcr','tp50'].map(function(k){ var v=res[k]; return v&&v.stopped?'<span><i>'+({sl50:'stop \u221250%',slcr:'stop = credit',tp50:'take profit +50%'})[k]+'</i><b class="'+(k==="tp50"?'ev':'ev neg')+'">hit '+optDate(v.stopped.date)+'</b></span>':''; }).join("")+'</div>'+
         '<div class="opt-sub3">'+optEsc(r.ticker)+' <span>\u00b7 daily candles with the trade drawn on: strikes, today\u2019s breakevens and dealer walls, the day it opened</span></div><div id="optTrC1" class="icl-cone"></div>'+
         '<div class="opt-sub3">P&amp;L <span>\u00b7 one point per morning mark, per contract</span></div><div id="optTrC2" class="icl-cone"></div>'+
         '<div class="opt-tbl dd"><div class="hd"><span>Date</span><span>DTE</span><span>Spot</span><span>P&amp;L</span><span>\u0394 sh</span><span>\u0393</span><span>\u0398 $/day</span><span>Vega $</span><span>BE low</span><span>BE high</span><span>IV short</span><span>Flip</span><span>Put wall</span><span>Call wall</span></div>'+
@@ -11318,14 +11318,19 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       }
     }).catch(function(){ el.innerHTML=""; });
   }
+  // the minimum hold (7 days): an exit counts only if it comes at least that long after entry, as in the engine
+  function optDteEntry(r){ var m=(r.model||{}).dte_entry; if(m!=null) return +m; try{ return Math.round((new Date(String(r.expiry).slice(0,10)+"T12:00:00Z")-new Date(String(r.opened).slice(0,10)+"T12:00:00Z"))/864e5); }catch(e){ return null; } }
+  function optValid(r,x){ var d=optDteEntry(r), h=((IC_DATA&&IC_DATA.rules&&IC_DATA.rules.min_hold_days)||7); return d==null||x<=d-h; }
+  function optPlanned(r){ var v=[25,18,10].filter(function(x){ return optValid(r,x); }), b=(r.model||{}).best_exit_dte;
+    if(b!=null&&v.indexOf(+b)>=0) return +b; return v.length?Math.max.apply(null,v):null; }
   // the stop-loss variants against holding to the planned exit, on the same trades (the trades themselves are never closed early)
   function optStopsHTML(rows){
-    var ex=[25,18,10], V=[["hold","Hold to the exit",null],["sl50","Stop at \u221250% of max loss","sl50"],["slcr","Stop at a loss = credit","slcr"]];
-    function val(r,v,x){ var R=r.result||{}; if(!v[2]) return R[x]!=null?+R[x]:null; var s=R[v[2]]; return s&&s[x]!=null?+s[x]:null; }
-    var anyClosed=rows.some(function(r){ return ex.some(function(x){ return (r.result||{})[x]!=null; }); });
-    var stopped={sl50:0,slcr:0}; rows.forEach(function(r){ ["sl50","slcr"].forEach(function(k){ if(((r.result||{})[k]||{}).stopped) stopped[k]++; }); });
-    var html='<div class="opt-sub3">Stop-loss test <span>\u00b7 the same trades three ways \u00b7 a stop fires on the first daily mark at or past its level and takes that mark\u2019s P&amp;L \u00b7 stopped so far: '+
-      stopped.sl50+' at \u221250% of max loss, '+stopped.slcr+' at a loss = credit</span></div>';
+    var ex=[25,18,10], V=[["hold","Hold to the exit",null],["sl50","Stop at \u221250% of max loss","sl50"],["slcr","Stop at a loss = credit","slcr"],["tp50","Take profit at +50% of max profit","tp50"]];
+    function val(r,v,x){ if(!optValid(r,x)) return null; var R=r.result||{}; if(!v[2]) return R[x]!=null?+R[x]:null; var s=R[v[2]]; return s&&s[x]!=null?+s[x]:null; }
+    var anyClosed=rows.some(function(r){ return ex.some(function(x){ return optValid(r,x)&&(r.result||{})[x]!=null; }); });
+    var stopped={sl50:0,slcr:0,tp50:0}; rows.forEach(function(r){ ["sl50","slcr","tp50"].forEach(function(k){ if(((r.result||{})[k]||{}).stopped) stopped[k]++; }); });
+    var html='<div class="opt-sub3">Exit rules test <span>\u00b7 the same trades three ways \u00b7 a stop fires on the first daily mark at or past its level and takes that mark\u2019s P&amp;L \u00b7 stopped so far: '+
+      stopped.sl50+' at \u221250% of max loss, '+stopped.slcr+' at a loss = credit \u00b7 profit taken: '+stopped.tp50+' at +50% \u00b7 exits under 7 days after entry are not counted</span></div>';
     if(!anyClosed) return html+'<div class="ed-note">No trade has reached its first exit yet \u2014 the comparison fills from 2 November.</div>';
     html+='<div class="opt-tbl sl"><div class="hd"><span>Exit</span><span>Rule</span><span>n</span><span>Win rate</span><span>Avg</span><span>Return on risk</span><span>Worst</span><span>Total</span></div>';
     ex.forEach(function(x){ V.forEach(function(v,i){ var n=0,sum=0,win=0,risk=0,worst=null;
@@ -11442,7 +11447,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(!rows.length){ el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 starts with the next morning run: each day\u2019s trades are opened on paper and marked every morning</span></div>'; return; }
       var ex=[25,18,10];
       function pred(r,x){ var E=(r.model||{}).ev||{}; var meas=(r.model||{}).rank_measure==="historical"?"historical":"market"; return (((E[meas]||{})[x])||{}).ev_1; }
-      function agg(list){ var a={}; list.forEach(function(r){ ex.forEach(function(x){ var v=(r.result||{})[x]; if(v==null) return;
+      function agg(list){ var a={}; list.forEach(function(r){ ex.forEach(function(x){ var v=(r.result||{})[x]; if(v==null||!optValid(r,x)) return;
         var g=a[x]=a[x]||{n:0,sum:0,win:0,pred:0,np:0,risk:0}; g.n++; g.sum+=+v; g.win+=(v>0?1:0); var p=pred(r,x); if(p!=null){ g.pred+=p; g.np++; } g.risk+=(+r.max_loss_1||0); }); }); return a; }
       var roles=[["proposed","Proposed \u2014 the trades Phoenix put on the list"],["calibration","Calibration \u2014 every other name\u2019s best trade"],
                  ["winner","Old rules \u2014 opened 27\u201330 Oct before equal wings, the chart read and the new universe; kept apart, not in the totals"]];
@@ -11460,7 +11465,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var names={}; rows.forEach(function(r){ names[r.ticker+"|"+r.expiry]=1; });
       var first=rows[rows.length-1].opened;
       // at a glance: the planned-exit results on current rules (each trade once, at the exit it was opened for)
-      var pl=cur.map(function(r){ var x=String((r.model||{}).best_exit_dte||10), v=(r.result||{})[x]; return v==null?null:{v:+v,risk:+r.max_loss_1||0}; }).filter(Boolean);
+      var pl=cur.map(function(r){ var x=optPlanned(r), v=x==null?null:(r.result||{})[x]; return v==null?null:{v:+v,risk:+r.max_loss_1||0}; }).filter(Boolean);
       var plW=pl.filter(function(x){ return x.v>0; }).length, plSum=pl.reduce(function(a,x){ return a+x.v; },0), plRisk=pl.reduce(function(a,x){ return a+x.risk; },0);
       var gl=function(lbl,val,cls,sub){ return '<div><i>'+lbl+'</i><b'+(cls?' class="'+cls+'"':'')+'>'+val+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>'; };
       el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 since '+optDate(first,1)+' \u00b7 per contract, after slippage and fees</span></div>'+
@@ -11478,7 +11483,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           roles.map(function(r_){ var L=rows.filter(function(r){ return (r.role||"winner")===r_[0]; }); return L.length?tbl(L,r_[1]):""; }).join("")+
           tbl(cur.filter(function(r){ return (r.structure||"IC")==="IC"; }),"Iron condors (current rules)")+
           (cur.some(function(r){ return r.structure&&r.structure!=="IC"; })?tbl(cur.filter(function(r){ return r.structure&&r.structure!=="IC"; }),"Credit spreads"):"")+'</details>'+
-        '<details class="opt-det"><summary>Stop-loss study <span>\u00b7 hold vs stop at \u221250% of max loss vs stop at a loss = credit, same trades</span></summary>'+optStopsHTML(cur)+'</details>';
+        '<details class="opt-det"><summary>Exit rules study <span>\u00b7 hold vs two stops vs take profit at +50%, same trades</span></summary>'+optStopsHTML(cur)+'</details>';
       OPT_TR_ROWS=rows; optTradesList(); optRecap();
     }).catch(function(){ el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 could not be read</span></div>'; });
   }
