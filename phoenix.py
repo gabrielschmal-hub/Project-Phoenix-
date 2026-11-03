@@ -11729,7 +11729,19 @@ def _ic_size_caps():
     return [a * ALLOC["options"]["per_trade_max_loss"] * fx for a in ALLOC["accounts_eur"]]
 
 
-def run_ic_screen():
+# RULE SET B (3 Nov 2026), run SIDE BY SIDE with the live rules (A) through November, so the forward test can say
+# which is better on the same days. Only these keys differ; everything else is the IC block.
+#   leaning condors   the two shorts chosen independently (8-45 delta each), no balance rule: a condor can lean
+#                     (the coach's DIA trade: short put ~10 delta, short call ~34)
+#   softer flip gate  a condor is blocked only when price is more than half an expected move below its gamma
+#                     flip, not any amount below it (DIA was 0.5% under its flip on 1 Nov)
+IC_RULESETS = {
+    "B": {"short_delta_ic": (0.08, 0.45), "ic_max_delta_gap": 1.0, "flip_gate_em": 0.5,
+          "label": "Rules B: leaning condors + softer flip gate"},
+}
+
+
+def run_ic_screen(variant=None):
     """
     OPTIONS TOURNAMENT (coach call 26 Oct 2026; structures and universe 28 Oct 2026).
 
@@ -11759,6 +11771,9 @@ def run_ic_screen():
     import os, json, math
     import numpy as np
     from datetime import datetime, timedelta
+    # the rules in force: the live IC block, or the live block with a test rule set's differences on top
+    IC = dict(globals()["IC"], **(IC_RULESETS.get(variant) or {}))
+    out_name = "ic_screen" + ("_" + variant.lower() if variant else "")
     ch = _ic_load_chains()
     if not ch:
         print("[ic] no chain file — skipped"); return None
@@ -11852,7 +11867,11 @@ def run_ic_screen():
                    "pattern_view": h.get("pattern_view"),
                    "support": chart.get("support"), "resistance": chart.get("resistance"),
                    "regime": mr.get("regime"), "flip": mr.get("flip"), "earnings": earn, "earnings_src": (e_info or {}).get("src")}
-        red = bool(mr) and (mr.get("regime") == "red" or (mr.get("dist_flip_em") or 0) < 0)
+        if IC.get("flip_gate_em"):
+            # softer gate: blocked only beyond flip_gate_em expected moves below the flip
+            red = bool(mr) and (mr.get("dist_flip_em") is not None and mr["dist_flip_em"] < -IC["flip_gate_em"])
+        else:
+            red = bool(mr) and (mr.get("regime") == "red" or (mr.get("dist_flip_em") or 0) < 0)
         # the chart picks the structure: a range -> iron condor, a bullish chart -> bull put spread, a bearish
         # one -> bear call spread. The gamma flip gates only the condor (it needs a tape dealers pin).
         want = {"neutral": "IC", "bullish": "PCS", "bearish": "CCS"}.get(bias)
@@ -12103,7 +12122,7 @@ def run_ic_screen():
     for e in sorted({p["expiry"] for p in proposed}):
         evx[e] = [{"date": v["date"], "label": v.get("short") or v.get("type"), "type": v.get("type")} for v in cal
                   if v.get("type") in IC["event_types"] and str(today) <= v["date"] <= e]
-    write_json("ic_screen", {
+    write_json(out_name, {"variant": variant, "variant_label": (IC_RULESETS.get(variant) or {}).get("label"),
         "asof": _now(), "date": str(today), "rules": IC, "sleeve": IC["sleeve"], "risk_per_trade": IC["risk_per_trade"],
         "sources": {"chain": "CBOE delayed quotes (cdn.cboe.com), morning run: bid, ask, OI, IV per contract",
                     "implied_vol": "each contract's own IV from the CBOE feed; market measure uses the at-the-money IV of the expiry; IV 30 interpolated between the expiries either side of 30 days",
@@ -12121,7 +12140,7 @@ def run_ic_screen():
         "positive": sum(1 for p in picks if (p.get("ev_hv_1") or -1) > 0), "skipped": skipped})
     print(f"[ic] tournament: {len(names)} names · {len(picks)} with a qualifying structure ({n_struct}) · {len(proposed)} proposed · "
           f"{len(skipped)} skipped" + (f" · best {proposed[0]['ticker']} {proposed[0]['label']} EV {proposed[0]['ev_pct']*100:.1f}%" if proposed else ""))
-    sb_heartbeat("ic_screen", bool(picks), f"{len(names)} names · {len(picks)} winners · {len(proposed)} proposed · {len(skipped)} skipped")
+    sb_heartbeat(out_name, bool(picks), f"{len(names)} names · {len(picks)} winners · {len(proposed)} proposed · {len(skipped)} skipped")
     return picks
 
 
@@ -12359,7 +12378,7 @@ def run_health():
     today = datetime.utcnow().date()
     # 1. freshness of the files the options and dossier work reads
     for n, step, crit in (("ic_screen", "ic_screen", True), ("ic_universe", "mme_chains", True), ("ic_hist", "ic_screen (_ic_hist)", True),
-                          ("dossier", "dossier", True), ("calendar", "calendar", True), ("mme_map", "mme_map", True),
+                          ("dossier", "dossier", True), ("calendar", "calendar", True), ("mme_map", "mme_map", True), ("ic_screen_b", "ic_screen_b", False),
                           ("iv_em", "iv_em", False), ("macro", "macro", False), ("gex", "gex", False), ("dayscore", "dayscore", False)):
         j = rd(n)
         if j is None:
@@ -13183,7 +13202,8 @@ def run_ic_recap():
         rows = _sb_get("ic_forward", {"select": "id,opened,ticker,expiry,credit,max_loss_1,model,result,marks,status,role,structure,grp,iv_atm,hv"}, limit=20000) or []
     except Exception as e:
         print(f"[icrecap] cannot read ic_forward ({e})"); sb_heartbeat("ic_recap", False, str(e)); return None
-    rows = [r for r in rows if r.get("role") in ("proposed", "calibration")]
+    all_rows = [r for r in rows if r.get("role") in ("proposed", "calibration", "rules_b", "coach")]
+    rows = [r for r in all_rows if r.get("role") in ("proposed", "calibration")]
     today = datetime.utcnow().date()
     # 1. daily book: sum of each trade's latest mark per day, and the day-on-day change from the trades marked on both days
     by_day = {}
@@ -13205,7 +13225,7 @@ def run_ic_recap():
     for r in rows:
         res = r.get("result") or {}; marks = r.get("marks") or []
         pe = _ic_planned_exit(r); best = str(pe) if pe is not None else None
-        for x in _ic_valid_exits(_ic_dte_entry(r)):
+        for x in _ic_row_exits(r):
             v = res.get(str(x))
             if v is None:
                 continue
@@ -13276,8 +13296,22 @@ def run_ic_recap():
     for e in exits_cmp.values():
         e["avg"] = round(e["pnl"] / e["n"], 2); e["win_rate"] = round(e["wins"] / e["n"], 3); e["pnl"] = round(e["pnl"], 2)
     closed_n = len(planned)
+    # rule sets and the coach side by side: each trade once, at its planned exit, open marks shown too
+    compare = {}
+    for r in all_rows:
+        g = compare.setdefault(r.get("role"), {"trades": 0, "open": 0, "closed": 0, "wins": 0, "pnl": 0.0, "risk": 0.0, "mtm": 0.0, "risk_open": 0.0})
+        g["trades"] += 1
+        pe = _ic_planned_exit(r); v = (r.get("result") or {}).get(str(pe)) if pe is not None else None
+        if v is not None:
+            g["closed"] += 1; g["wins"] += float(v) > 0; g["pnl"] += float(v); g["risk"] += float(r.get("max_loss_1") or 0)
+        elif r.get("status") == "open":
+            last = ((r.get("result") or {}).get("last") or {}).get("pnl_1")
+            g["open"] += 1; g["mtm"] += float(last or 0); g["risk_open"] += float(r.get("max_loss_1") or 0)
+    for g in compare.values():
+        g.update({"win_rate": round(g["wins"] / g["closed"], 3) if g["closed"] else None, "ror": round(g["pnl"] / g["risk"], 4) if g["risk"] else None,
+                  "mtm_pct": round(g["mtm"] / g["risk_open"], 4) if g["risk_open"] else None, "pnl": round(g["pnl"], 2), "mtm": round(g["mtm"], 2)})
     out = {"asof": _now(), "date": str(today), "trades": len(rows), "open": sum(1 for r in rows if r.get("status") == "open"),
-           "closed_planned": closed_n, "daily": daily[-120:], "periods": periods, "edge": edge, "exits": exits_cmp,
+           "closed_planned": closed_n, "daily": daily[-120:], "periods": periods, "edge": edge, "exits": exits_cmp, "compare": compare,
            "note": ("Edge groups need about 15 closed trades each before they mean anything, 40 to lean on."
                     if closed_n < 40 else "Groups marked 'solid' have 40+ closed trades.")}
     write_json("ic_recap", out)
@@ -13660,10 +13694,19 @@ def _ic_dte_entry(row):
         return None
 
 
+def _ic_row_exits(row):
+    """A row's exits: its own list when it has one (a coach trade exits on the coach's day), else the live exits
+    that respect the minimum hold."""
+    own = (row.get("model") or {}).get("exits")
+    if own:
+        return [int(x) for x in own]
+    return _ic_valid_exits(_ic_dte_entry(row))
+
+
 def _ic_planned_exit(row):
     """The exit a trade is judged at: the model's best exit if it respects the minimum hold, else the earliest
     valid one (the longest hold-to-date still allowed); None when no exit is valid."""
-    v = _ic_valid_exits(_ic_dte_entry(row))
+    v = _ic_row_exits(row)
     b = (row.get("model") or {}).get("best_exit_dte")
     if b is not None and int(b) in v:
         return int(b)
@@ -13681,7 +13724,7 @@ def _ic_stop_results(row, marks, res):
     Only exits that respect the minimum hold count."""
     out = {}
     exit_at = {}
-    vx = _ic_valid_exits(_ic_dte_entry(row))
+    vx = _ic_row_exits(row)
     for i, m in enumerate(marks):
         if m.get("post_exit"):
             continue
@@ -13811,7 +13854,7 @@ def run_ic_record():
             else:
                 marks.append(dict({"date": d, "dte": dte, "spot": c.get("spot"), "pnl_1": pnl}, **extra))
                 res["last"] = {"date": d, "dte": dte, "spot": c.get("spot"), "pnl_1": pnl}   # the app lists from this
-                _vx = _ic_valid_exits(_ic_dte_entry(row))
+                _vx = _ic_row_exits(row)
                 for x in _vx:
                     if str(x) not in res and dte <= x:
                         res[str(x)] = pnl                        # first mark at or inside each exit
@@ -13857,18 +13900,29 @@ def run_ic_record():
     except Exception as e:
         notes.append(f"decisions failed: {e}")
     try:
-        held = {(r["ticker"], str(r["expiry"])[:10]) for r in (_sb_get("ic_forward", {"status": "eq.open", "select": "ticker,expiry"}) or [])}
+        held_rows = _sb_get("ic_forward", {"status": "eq.open", "select": "ticker,expiry,role"}, limit=5000) or []
+        held = {(r["ticker"], str(r["expiry"])[:10]) for r in held_rows if r.get("role") in ("proposed", "calibration")}
+        held_b = {(r["ticker"], str(r["expiry"])[:10]) for r in held_rows if r.get("role") == "rules_b"}
         prop = {(p["ticker"], p["expiry"]) for p in scr.get("proposed") or []}
         new = []
-        for rank, p in enumerate(scr.get("picks") or [], 1):
-            if IC.get("forward_one_per_expiry") and (p["ticker"], p["expiry"]) in held:
+        # rule set B, side by side (its proposed list only): same days, same chains, its own role
+        try:
+            scr_b = json.load(open(os.path.join(OUTPUTS_DIR, "ic_screen_b.json")))
+            if str(scr_b.get("date")) != str(scr.get("date")):
+                scr_b = {}
+        except Exception:
+            scr_b = {}
+        cand = [(rank, p, "proposed" if (p["ticker"], p["expiry"]) in prop else "calibration") for rank, p in enumerate(scr.get("picks") or [], 1)]
+        cand += [(rank, p, "rules_b") for rank, p in enumerate(scr_b.get("proposed") or [], 1)]
+        for rank, p, role_ in cand:
+            if IC.get("forward_one_per_expiry") and (p["ticker"], p["expiry"]) in (held_b if role_ == "rules_b" else held):
                 continue
             c = (ch.get("names") or {}).get(p["ticker"]) or {}
             q = _ic_quotes(c.get("rows"), p["expiry"])
             L = p["legs"]
             eq = {k: dict(zip(("bid", "ask", "iv"), q.get(("P" if "put" in k else "C", float(L[k])), (None, None, None)))) for k in L}
             new.append({"opened": d, "ticker": p["ticker"], "expiry": p["expiry"], "rank_on_day": rank,
-                        "role": "proposed" if (p["ticker"], p["expiry"]) in prop else "calibration",
+                        "role": role_,
                         "structure": p.get("structure", "IC"), "grp": p.get("group"),
                         "legs": L, "entry_quotes": eq, "spot_entry": p.get("spot"), "credit": p["credit"],
                         "max_loss_1": p["max_loss_1"], "fees_1": p.get("fees_1", 8 * IC["commission_leg"]),
@@ -13877,7 +13931,8 @@ def run_ic_record():
                                   "ev_pct": p.get("ev_pct"), "rank_measure": p.get("rank_measure"), "dte_entry": p.get("dte"),
                                   "structure": p.get("structure", "IC"), "group": p.get("group"), "bias": p.get("bias"), "chart_why": p.get("chart_why"),
                                   "iv30": p.get("iv30"), "hv30s": p.get("hv30s"), "ev_cons_pct": p.get("ev_cons_pct"),
-                                  "expiry_type": p.get("expiry_type"), "context": ctx, "iv30_wk": p.get("iv30_wk")},
+                                  "expiry_type": p.get("expiry_type"), "context": ctx, "iv30_wk": p.get("iv30_wk"),
+                                  "ruleset": "B" if role_ == "rules_b" else "A"},
                         "iv_atm": p.get("iv_atm"), "hv": p.get("hv")})
         if new:
             _sb_write("POST", "ic_forward", new, extra_headers={"Prefer": "resolution=ignore-duplicates,return=minimal"})
@@ -16864,6 +16919,7 @@ def run_full():
     step("mme_chains",     run_mme_chains,    optional=True)   # raw CBOE chains for the universe, one file, for the MME task
     step("mme_map",        run_mme_map,       optional=True)   # the dealer map: every name vs its walls and flip
     step("ic_screen",      run_ic_screen,     optional=True)   # iron condor tournament
+    step("ic_screen_b",    lambda: run_ic_screen("B"), optional=True)   # rule set B side by side (November test)
     step("ic_record",      run_ic_record,     optional=True)   # archive chains + vol, forward-test the winners, mark open ones
     step("news",           run_news,          optional=True)   # Finnhub company + market news (headlines only)
     step("ic_recap",       run_ic_recap,      optional=True)   # the forward test added up: daily book, week/month, edge by entry context
@@ -16950,6 +17006,8 @@ def run_engine(name):
         run_dossier()
     elif name == "ic_recap":
         run_ic_recap()
+    elif name == "ic_screen_b":
+        run_ic_screen("B")
     elif name == "news":
         run_news()
     elif name == "auto_brief":
