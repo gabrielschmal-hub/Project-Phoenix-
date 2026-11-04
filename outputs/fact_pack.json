@@ -1,7 +1,7 @@
 {
  "schema": "phoenix-fact-pack/1",
  "date": "2026-11-04",
- "asof": "2026-11-04 08:12 UTC",
+ "asof": "2026-11-04 13:33 UTC",
  "market": {
   "regime": "ENERGY_GRIND",
   "regime_held_weeks": 5,
@@ -11,16 +11,16 @@
    "vs_50d_pct": -1.61,
    "vs_200d_pct": 3.46
   },
-  "vix": 20.83,
+  "vix": 18.27,
   "dxy": null,
   "us10y": null,
   "gold": null,
   "wti": null,
   "gex": {
-   "net_B": -50.68,
+   "net_B": -60.09,
    "regime": "negative",
    "flip": null,
-   "dist_to_flip_pct": 1.06,
+   "dist_to_flip_pct": 1.41,
    "call_wall": null,
    "put_wall": null,
    "spot": 7568.92
@@ -137,19 +137,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 29.89,
+    "value": 27.87,
     "op": ">",
     "threshold": 0,
-    "clear_by": 29.89,
+    "clear_by": 27.87,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 60.99,
+    "value": 58.44,
     "op": ">",
     "threshold": 25,
-    "clear_by": 35.99,
+    "clear_by": 33.44,
     "ok": true
    }
   ],
@@ -163,16 +163,16 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 29.89,
+    "now": 27.87,
     "threshold": 0,
-    "distance": 29.89,
+    "distance": 27.87,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 60.99,
+    "now": 58.44,
     "threshold": 25,
-    "distance": 35.99,
+    "distance": 33.44,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
@@ -184,7 +184,7 @@
     {
      "label": "WTI 3m",
      "need": "> 25",
-     "now": 23.03658488862674
+     "now": 21.092348170121245
     }
    ]
   }
@@ -372,83 +372,83 @@
   ],
   "congress_recent": [
    {
-    "ticker": "V",
-    "member": "David J. Taylor",
+    "ticker": "AVGO",
+    "member": "John J Mr McGuire",
     "side": "sell",
     "amount": "$1,001 - $15,000",
-    "filed": "2026-10-29",
+    "filed": "2026-11-01",
     "sector": null
    },
    {
-    "ticker": "LRCX",
-    "member": "David J. Taylor",
+    "ticker": "MU",
+    "member": "John J Mr McGuire",
     "side": "buy",
     "amount": "$1,001 - $15,000",
-    "filed": "2026-10-29",
+    "filed": "2026-11-01",
     "sector": null
    },
    {
-    "ticker": "MPC",
-    "member": "David J. Taylor",
-    "side": "sell",
-    "amount": "$1,001 - $15,000",
-    "filed": "2026-10-29",
-    "sector": null
-   },
-   {
-    "ticker": "PLD",
-    "member": "David J. Taylor",
+    "ticker": "MU",
+    "member": "John J Mr McGuire",
     "side": "buy",
     "amount": "$1,001 - $15,000",
-    "filed": "2026-10-29",
+    "filed": "2026-11-01",
     "sector": null
    },
    {
-    "ticker": "T",
-    "member": "David J. Taylor",
+    "ticker": "MU",
+    "member": "John J Mr McGuire",
     "side": "buy",
     "amount": "$1,001 - $15,000",
-    "filed": "2026-10-29",
-    "sector": null
-   },
-   {
-    "ticker": "RPM",
-    "member": "David J. Taylor",
-    "side": "buy",
-    "amount": "$1,001 - $15,000",
-    "filed": "2026-10-29",
+    "filed": "2026-11-01",
     "sector": null
    },
    {
     "ticker": "TXN",
-    "member": "Kevin Hern",
-    "side": "sell",
-    "amount": "$15,001 - $50,000",
-    "filed": "2026-10-28",
+    "member": "Thomas H. Kean",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-30",
     "sector": null
    },
    {
-    "ticker": "STX",
-    "member": "Kevin Hern",
-    "side": "sell",
-    "amount": "$15,001 - $50,000",
-    "filed": "2026-10-28",
-    "sector": null
-   },
-   {
-    "ticker": "ASML",
-    "member": "Kevin Hern",
-    "side": "sell",
-    "amount": "$15,001 - $50,000",
-    "filed": "2026-10-28",
-    "sector": null
-   },
-   {
-    "ticker": "PG",
-    "member": "Pete Sessions",
+    "ticker": "JNJ",
+    "member": "Thomas H. Kean",
     "side": "sell",
     "amount": "$1,001 - $15,000",
-    "filed": "2026-10-27",
+    "filed": "2026-10-30",
+    "sector": null
+   },
+   {
+    "ticker": "MDLZ",
+    "member": "Thomas H. Kean",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-30",
+    "sector": null
+   },
+   {
+    "ticker": "SYK",
+    "member": "Thomas H. Kean",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-30",
+    "sector": null
+   },
+   {
+    "ticker": "ABT",
+    "member": "Thomas H. Kean",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-30",
+    "sector": null
+   },
+   {
+    "ticker": "ESAB",
+    "member": "Thomas H. Kean",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-30",
     "sector": null
    }
   ],
@@ -458,10 +458,10 @@
    "dropped_impossible_dates": 0,
    "sources": {
     "House Clerk PTR": {
-     "rows": 9804,
+     "rows": 9815,
      "last_30d": 33,
      "newest_tx": "2026-10-27",
-     "newest_filed": "2026-10-29"
+     "newest_filed": "2026-11-01"
     },
     "OGE 278-T via Open Cabinet": {
      "rows": 7828,
@@ -505,7 +505,7 @@
  },
  "news": {
   "date": "2026-11-03",
-  "asof": "2026-11-04 07:27 UTC",
+  "asof": "2026-11-04 12:46 UTC",
   "headline": "Democrats flip North Carolina as chips bounce \u2014 and AMD beats after the close",
   "standfirst": "On election day the Nasdaq rose 0.83% and the S&P 0.36% as the chip index rebounded 2.63%, while the Dow fell 0.38% and most stocks fell. Job openings and factory orders beat, and a December hike is priced at about 78%. The US struck Iran's Qeshm Island and Vance spoke of a possible settlement; WTI eased to $96.09. After the close AMD beat and guided higher, and Democrats flipped North Carolina's Senate seat, with control of both chambers not yet projected. The book is flat; Q4 is +34.64 realised, heat 0R.",
   "themes": [
@@ -544,32 +544,32 @@
  },
  "provenance": {
   "macro": {
-   "asof": "2026-11-04 07:26 UTC",
+   "asof": "2026-11-04 12:46 UTC",
    "age_min": null
   },
   "gex": {
-   "asof": "2026-11-04 07:27 UTC",
+   "asof": "2026-11-04 12:46 UTC",
    "age_min": null
   },
   "stocks": {
-   "asof": "2026-11-04 07:33 UTC",
+   "asof": "2026-11-04 12:55 UTC",
    "age_min": null
   },
   "institutional_holdings": {
-   "asof": "2026-11-04 07:51 UTC",
+   "asof": "2026-11-04 13:15 UTC",
    "quarter": "2026-06-30"
   },
   "congress_trades": {
-   "asof": "2026-11-04 07:49 UTC",
+   "asof": "2026-11-04 13:13 UTC",
    "status": {
     "written": "2026-11-04",
     "dropped_impossible_dates": 0,
     "sources": {
      "House Clerk PTR": {
-      "rows": 9804,
+      "rows": 9815,
       "last_30d": 33,
       "newest_tx": "2026-10-27",
-      "newest_filed": "2026-10-29"
+      "newest_filed": "2026-11-01"
      },
      "OGE 278-T via Open Cabinet": {
       "rows": 7828,
@@ -591,13 +591,21 @@
    }
   },
   "wire": {
-   "asof": "2026-11-04 07:27 UTC"
+   "asof": "2026-11-04 12:46 UTC"
   }
  },
  "missing": [],
  "changed": {
   "first_pack": false,
   "prev_date": "2026-11-03",
-  "changes": []
+  "changes": [
+   {
+    "kind": "market",
+    "what": "vix",
+    "was": 20.96,
+    "now": 18.27,
+    "why": "volatility repriced"
+   }
+  ]
  }
 }

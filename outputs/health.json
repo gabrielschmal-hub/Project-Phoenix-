@@ -1,10 +1,10 @@
 {
- "asof": "2026-11-04 08:12 UTC",
+ "asof": "2026-11-04 13:33 UTC",
  "date": "2026-11-04",
  "summary": {
   "pass": 32,
-  "warn": 4,
-  "fail": 0
+  "warn": 3,
+  "fail": 1
  },
  "checks": [
   {
@@ -95,14 +95,14 @@
    "id": "chains.coverage",
    "area": "data",
    "status": "pass",
-   "detail": "98 of 103 names have an option chain on file",
+   "detail": "121 of 103 names have an option chain on file",
    "where": "step mme_chains (CBOE)"
   },
   {
    "id": "bars.coverage",
    "area": "data",
    "status": "pass",
-   "detail": "98 of 98 names have Yahoo bars (chart read, patterns, realised vol)",
+   "detail": "121 of 121 names have Yahoo bars (chart read, patterns, realised vol)",
    "where": "step ic_screen (_ic_hist, Yahoo)"
   },
   {
@@ -116,14 +116,14 @@
    "id": "screen.rules",
    "area": "options",
    "status": "pass",
-   "detail": "37 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
+   "detail": "31 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
    "where": "run_ic_screen (outputs/ic_screen.json)"
   },
   {
    "id": "screen.proposed",
    "area": "options",
    "status": "pass",
-   "detail": "27 proposed of 37 winners",
+   "detail": "20 proposed of 31 winners",
    "where": "run_ic_screen"
   },
   {
@@ -137,14 +137,14 @@
    "id": "dossier.sections",
    "area": "dossier",
    "status": "pass",
-   "detail": "missing: earnings 1",
+   "detail": "missing: dealer 2, earnings 1",
    "where": "run_dossier (names in outputs/dossier.json 'missing_names')"
   },
   {
    "id": "forward.marked",
    "area": "forward test",
-   "status": "warn",
-   "detail": "119 of 124 open trades marked for 2026-11-04 (0 opened today)",
+   "status": "fail",
+   "detail": "121 of 124 open trades marked for 2026-11-04 (32 opened today)",
    "where": "run_ic_record step 3a"
   },
   {
@@ -158,28 +158,28 @@
    "id": "forward.size",
    "area": "forward test",
    "status": "pass",
-   "detail": "highest trade id 128 (the app pages 1,000 at a time up to 20,000)",
+   "detail": "highest trade id 160 (the app pages 1,000 at a time up to 20,000)",
    "where": "app optRowsAll"
   },
   {
    "id": "decisions.logged",
    "area": "learning",
    "status": "pass",
-   "detail": "0 options decisions logged for 2026-11-04",
+   "detail": "121 options decisions logged for 2026-11-04",
    "where": "run_ic_record (decisions table)"
   },
   {
    "id": "forward.recap",
    "area": "forward test",
    "status": "pass",
-   "detail": "recap of 92 trades, 0 closed at their planned exit",
+   "detail": "recap of 102 trades, 0 closed at their planned exit",
    "where": "run_ic_recap"
   },
   {
    "id": "news",
    "area": "data",
    "status": "pass",
-   "detail": "180 Finnhub calls, 160/179 names with news, 0 failed",
+   "detail": "188 Finnhub calls, 173/187 names with news, 0 failed",
    "where": "run_news (Finnhub)"
   },
   {
@@ -193,7 +193,7 @@
    "id": "portfolios.inputs",
    "area": "portfolios",
    "status": "pass",
-   "detail": "core 4 (the builder's Long Term template (no saved portfolio found)), satellite 5, tactical 15, options 27",
+   "detail": "core 4 (the builder's Long Term template (no saved portfolio found)), satellite 5, tactical 15, options 20",
    "where": "run_portfolios (stocks.json trade/invest books, ic_screen proposed, Supabase portfolios)"
   },
   {
@@ -207,7 +207,7 @@
    "id": "portfolios.fx",
    "area": "portfolios",
    "status": "pass",
-   "detail": "EURUSD 1.1244 from yahoo",
+   "detail": "EURUSD 1.127 from yahoo",
    "where": "_fx_usd_rates (Yahoo)"
   },
   {
@@ -256,7 +256,7 @@
    "id": "heartbeats",
    "area": "pipeline",
    "status": "warn",
-   "detail": "22 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | senate_efd: agreement HTTP 403 | house_ptr: pdftotext missing on runner (apt-get install poppler-utils)",
+   "detail": "24 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | senate_efd: agreement HTTP 403 | signal_mark: marked 0 \u00b7 skipped 31 (no bars yet) \u00b7 failed 0 \u00b7 31 due \u00b7 3/9 tickers fetched",
    "where": "heartbeats table"
   }
  ]
