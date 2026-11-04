@@ -13202,7 +13202,7 @@ def run_ic_recap():
         rows = _sb_get("ic_forward", {"select": "id,opened,ticker,expiry,credit,max_loss_1,model,result,marks,status,role,structure,grp,iv_atm,hv"}, limit=20000) or []
     except Exception as e:
         print(f"[icrecap] cannot read ic_forward ({e})"); sb_heartbeat("ic_recap", False, str(e)); return None
-    all_rows = [r for r in rows if r.get("role") in ("proposed", "calibration", "rules_b", "coach")]
+    all_rows = [r for r in rows if r.get("role") in ("proposed", "calibration", "rules_b", "coach", "mine")]
     rows = [r for r in all_rows if r.get("role") in ("proposed", "calibration")]
     today = datetime.utcnow().date()
     # 1. daily book: sum of each trade's latest mark per day, and the day-on-day change from the trades marked on both days

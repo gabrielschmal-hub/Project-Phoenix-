@@ -1228,6 +1228,7 @@
   .opt-rcs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0 8px} .opt-rc{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--card)}
   .opt-rc i{display:block;font-style:normal;font-family:var(--mono);font-size:11px;color:var(--inkFade);text-transform:uppercase} .opt-rc i small{text-transform:none}
   .opt-rc b{display:block;font-size:20px;font-family:var(--mono);margin:2px 0} .opt-rc small{font-size:11px;color:var(--inkFade);line-height:1.4}
+  .icl-fill{width:84px;padding:4px 6px;border-radius:6px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:var(--mono)}
   .opt-tbl.cmp .hd,.opt-tbl.cmp .r{grid-template-columns:150px 60px 70px 120px 64px 74px 100px;min-width:660px}
   .opt-tbl.eg .hd,.opt-tbl.eg .r{grid-template-columns:120px 64px 74px 84px 100px 84px 84px;min-width:640px}
   .opt-tbl.dd .hd,.opt-tbl.dd .r{grid-template-columns:96px 40px 64px 70px 52px 52px 62px 62px 64px 64px 62px 60px 66px 66px;min-width:980px;font-size:12px}
@@ -10834,6 +10835,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         '<div class="icl-why" id="iclWhy"></div>'+
         '<div class="icl-pw"><div id="iclPlot" class="icl-plot"></div><div class="icl-tags" id="iclTags"></div></div>'+
         '<div class="icl-day"><span>Through time</span><input type="range" id="iclDay" min="0" max="'+r.dte+'" value="'+(st.day!=null?Math.min(st.day,r.dte):r.exitDay)+'"><b id="iclDayLbl"></b></div>'+
+        '<div class="icl-day"><span>Volatility</span><input type="range" id="iclVol" min="-15" max="15" step="1" value="'+(st.dv||0)+'"><b id="iclVolLbl"></b></div>'+
+        '<div class="icl-day"><span>Your fill</span><input type="number" id="iclFill" class="icl-fill" step="0.01" min="0" value="'+(st.fill!=null?st.fill:r.credit.toFixed(2))+'"><b id="iclFillLbl"></b></div>'+
         '<div class="gexh-key mme-key" id="iclKey"></div>'+
         '<details class="opt-det icl-det"><summary>Breakevens through time <span>\u00b7 the profit zone from today to expiry</span></summary><div id="iclCone" class="icl-cone"></div></details>'+
         '<details class="opt-det icl-det"><summary>The price chart <span>\u00b7 six months, support/resistance, pattern lines, short strikes</span></summary><div id="iclChart" class="icl-cone"></div></details>'
@@ -10853,12 +10856,18 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(!r||r.err) return;
     icWhy(r, pickTk[st.tk]);
     document.getElementById("iclDay").oninput=function(){ st.day=+this.value; icPlot(r); };
+    document.getElementById("iclVol").oninput=function(){ st.dv=+this.value; icPlot(r); };
+    document.getElementById("iclFill").oninput=function(){ var v=parseFloat(this.value); st.fill=(v>0?v:null); icPlot(r); };
     icPlot(r); icCone(r); icPriceChart(r);
   }
   // breakeven(s) of the position on a given day: where its P&L crosses zero
+  // the lab's what-ifs: a volatility shift (vol points, every leg) and your own fill instead of the model's credit
+  function icDv(){ var st=IC_LAB||{}; return (st.dv||0)/100; }
+  function icCr(r){ var st=IC_LAB||{}; return (st.fill!=null&&!isNaN(st.fill)&&st.fill>0)?st.fill:r.credit; }
   function icBEs(r,day){
     var st=IC_LAB, Tl=(r.dte-day)/365, ks=r.L.map(function(l){ return l.K; }), lo=Math.min.apply(null,ks.concat([r.S]))*0.8, hi=Math.max.apply(null,ks.concat([r.S]))*1.2, N=480, prev=null, out=[];
-    for(var i=0;i<=N;i++){ var x=lo+(hi-lo)*i/N, y=(r.credit-r.value(x,Tl))*100;
+    var cr=icCr(r), dv=day>=r.dte?0:icDv();
+    for(var i=0;i<=N;i++){ var x=lo+(hi-lo)*i/N, y=(cr-r.value(x,Tl,dv))*100;
       if(prev && ((prev.y<0)!==(y<0))) out.push(prev.x+(x-prev.x)*(0-prev.y)/(y-prev.y));
       prev={x:x,y:y}; }
     if(r.kind==="PCS") return out.length?[out[0],null]:null;            // a bull put loses only below
@@ -10931,8 +10940,12 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var st=IC_LAB, day=(st.day!=null?Math.min(st.day,r.dte):r.exitDay), n=r.n;
     var ks=r.L.map(function(l){ return l.K; }), span=Math.max.apply(null,ks.concat([r.S]))-Math.min.apply(null,ks.concat([r.S]));
     var lo=Math.min.apply(null,ks.concat([r.S]))-Math.max(span*0.25,r.S*0.03), hi=Math.max.apply(null,ks.concat([r.S]))+Math.max(span*0.25,r.S*0.03), N=240, xs=[], yE=[], yD=[], y0=[];
+    var cr=icCr(r), dv=icDv();
     for(var i=0;i<=N;i++){ var x=lo+(hi-lo)*i/N; xs.push(x);
-      yE.push((r.credit-r.value(x,0))*100*n); yD.push((r.credit-r.value(x,(r.dte-day)/365))*100*n); y0.push((r.credit-r.value(x,r.dte/365))*100*n); }
+      yE.push((cr-r.value(x,0))*100*n); yD.push((cr-r.value(x,(r.dte-day)/365,dv))*100*n); y0.push((cr-r.value(x,r.dte/365,dv))*100*n); }
+    var pnlD=(cr-r.value(r.S,(r.dte-day)/365,dv))*100*n, pnl0=(cr-r.value(r.S,r.dte/365,dv))*100*n;
+    var vl_=document.getElementById("iclVolLbl"); if(vl_) vl_.textContent=(st.dv>0?"+":"")+(st.dv||0)+" vol pts \u00b7 IV "+((r.atmIV+dv)*100).toFixed(1)+"%"+(st.dv?" (now "+(r.atmIV*100).toFixed(1)+"%)":" \u00b7 as quoted")+" \u00b7 at today\u2019s price: "+optM(pnl0)+" now, "+optM(pnlD)+" on the chosen day";
+    var fl_=document.getElementById("iclFillLbl"); if(fl_) fl_.textContent="credit $"+cr.toFixed(2)+" \u00b7 mid $"+r.creditMid.toFixed(2)+" \u00b7 "+(cr<r.creditMid?"gives away ":"gains ")+optM(Math.abs(cr-r.creditMid)*100*n).replace("$","$").replace("\u2212","")+" against the mid"+(n>1?" ("+n+" contracts)":"");
     var dDate=new Date(Date.now()+day*864e5).toLocaleDateString(undefined,{day:"numeric",month:"short"});
     var beD=icBEs(r,day);
     function bes(b){ return b?b.filter(function(x){ return x!=null; }).map(function(x){ return x.toFixed(2); }).join(" / "):"\u2014"; }
@@ -11215,7 +11228,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       rows.slice(0,OPT_TR_ALL?200:10).map(function(r){ var l=(r.result||{}).last, lab=(r.model||{}).label||(r.ticker+" "+r.expiry), on=OPT_TR_OPEN===r.id;
         return '<div class="r'+(on?' on':'')+'" data-fo="'+r.id+'"><span class="tk">'+r.ticker+'</span><span class="tr">'+optEsc(lab)+'</span><span>'+optDate(r.opened)+'</span>'+
           '<span>'+(l?l.dte:'\u2014')+'</span><span class="ev'+(l&&l.pnl_1>0?'':' neg')+'">'+(l?optM(l.pnl_1):'\u2014')+'</span><span>'+(l&&r.max_loss_1?optPct(l.pnl_1/r.max_loss_1,1):'\u2014')+'</span>'+
-          '<span>'+(r.role==="proposed"?'\u2605 proposed':(r.role==="winner"?'old rules':(r.role==="rules_b"?'rules B':(r.role==="coach"?'coach':'calib.'))))+(r.status!=="open"?' \u00b7 '+r.status:'')+'</span></div>'+
+          '<span>'+(r.role==="proposed"?'\u2605 proposed':(r.role==="winner"?'old rules':(r.role==="rules_b"?'rules B':(r.role==="coach"?'coach':(r.role==="mine"?'mine':'calib.')))))+(r.status!=="open"?' \u00b7 '+r.status:'')+'</span></div>'+
           (on?'<div class="opt-why" id="optTrDet"><i>Loading the day-by-day\u2026</i></div>':''); }).join("")+
       '</div>'+(rows.length>10?'<a href="#" class="opt-go" id="optTrMore">'+(OPT_TR_ALL?'Show the first 10':'Show all '+rows.length)+'</a>':'');
     optBindSort(el,"tr",optTradesList);
@@ -11291,10 +11304,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var dims=Object.keys(R.edge||{}); if(dims.indexOf(OPT_EDGE_DIM)<0) OPT_EDGE_DIM=dims[0];
       var E=(R.edge||{})[OPT_EDGE_DIM]||{};
       var cm=document.getElementById("optCmp"), CP=R.compare||{};
-      if(cm&&Object.keys(CP).length){ var lab={proposed:"Rules A \u00b7 proposed",calibration:"Rules A \u00b7 calibration",rules_b:"Rules B \u00b7 test",coach:"Coach"};
+      if(cm&&Object.keys(CP).length){ var lab={proposed:"Rules A \u00b7 proposed",calibration:"Rules A \u00b7 calibration",rules_b:"Rules B \u00b7 test",coach:"Coach",mine:"Mine (paper)"};
         cm.innerHTML='<div class="opt-sub3">Side by side <span>\u00b7 November: live rules (A) against the test rules (B) and the coach \u00b7 closed = at each trade\u2019s planned exit</span></div>'+
           '<div class="opt-tbl cmp"><div class="hd"><span>Book</span><span>Trades</span><span>Open now</span><span>Open P&amp;L</span><span>Closed</span><span>Win rate</span><span>Return on risk</span></div>'+
-          ["proposed","rules_b","coach","calibration"].filter(function(k){ return CP[k]; }).map(function(k){ var g=CP[k];
+          ["proposed","rules_b","coach","mine","calibration"].filter(function(k){ return CP[k]; }).map(function(k){ var g=CP[k];
             return '<div class="r"><span class="tk">'+lab[k]+'</span><span>'+g.trades+'</span><span>'+g.open+'</span><span class="'+(g.mtm>=0?'ev':'ev neg')+'">'+optM(g.mtm)+(g.mtm_pct!=null?' <i>'+optPct(g.mtm_pct,1)+'</i>':'')+'</span>'+
               '<span>'+g.closed+'</span><span>'+(g.win_rate!=null?optPct(g.win_rate):'\u2014')+'</span><span class="'+((g.ror||0)>=0?'ev':'ev neg')+'">'+(g.ror!=null?optPct(g.ror,1):'\u2014')+'</span></div>'; }).join("")+'</div>'; }
       var gw=document.getElementById("optGlWk"), gm=document.getElementById("optGlMo");
@@ -11460,6 +11473,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         var g=a[x]=a[x]||{n:0,sum:0,win:0,pred:0,np:0,risk:0}; g.n++; g.sum+=+v; g.win+=(v>0?1:0); var p=pred(r,x); if(p!=null){ g.pred+=p; g.np++; } g.risk+=(+r.max_loss_1||0); }); }); return a; }
       var roles=[["proposed","Proposed \u2014 the trades Phoenix put on the list"],["calibration","Calibration \u2014 every other name\u2019s best trade"],
                  ["rules_b","Rules B (November test) \u2014 leaning condors and a softer flip gate, its proposed list"],["coach","Coach \u2014 the trades from his emails, his strikes, credit and exit day"],
+                 ["mine","Mine \u2014 your own trades (paper), your fill and your exit day"],
                  ["winner","Old rules \u2014 opened 27\u201330 Oct before equal wings, the chart read and the new universe; kept apart, not in the totals"]];
       var cur=rows.filter(function(r){ return r.role==="proposed"||r.role==="calibration"; });   // the live rules (A); B and the coach are compared side by side
       var open=rows.filter(function(r){ return r.status==="open"; }), closed=rows.filter(function(r){ return r.status!=="open"; });
