@@ -11226,7 +11226,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       mk:function(r){ return ((r.result||{}).last||{}).pnl_1; },pct:function(r){ var l=(r.result||{}).last; return l&&r.max_loss_1?l.pnl_1/r.max_loss_1:null; }});
     el.innerHTML='<div class="opt-tbl op">'+optHead("tr",[["tk","Ticker"],[null,"Trade"],["op","Opened"],["dte","DTE"],["mk","Mark"],["pct","% of risk"],[null,"Role"]])+
       rows.slice(0,OPT_TR_ALL?200:10).map(function(r){ var l=(r.result||{}).last, lab=(r.model||{}).label||(r.ticker+" "+r.expiry), on=OPT_TR_OPEN===r.id;
-        return '<div class="r'+(on?' on':'')+'" data-fo="'+r.id+'"><span class="tk">'+r.ticker+'</span><span class="tr">'+optEsc(lab)+'</span><span>'+optDate(r.opened)+'</span>'+
+        return '<div class="r'+(on?' on':'')+'" data-fo="'+r.id+'"><span class="tk">'+r.ticker+'</span><span class="tr">'+optEsc(lab)+(function(){ var mp=(+r.credit||0)*100-(+r.fees_1||0); if(!l||!(mp>0)||l.pnl_1<0.5*mp) return '';
+            return ' <i class="xt" style="color:var(--green);border-color:var(--green)">'+Math.round(l.pnl_1/mp*100)+'% of max profit'+(l.pnl_1>=0.7*mp?' \u00b7 take-profit level':'')+'</i>'; })()+'</span><span>'+optDate(r.opened)+'</span>'+
           '<span>'+(l?l.dte:'\u2014')+'</span><span class="ev'+(l&&l.pnl_1>0?'':' neg')+'">'+(l?optM(l.pnl_1):'\u2014')+'</span><span>'+(l&&r.max_loss_1?optPct(l.pnl_1/r.max_loss_1,1):'\u2014')+'</span>'+
           '<span>'+(r.role==="proposed"?'\u2605 proposed':(r.role==="winner"?'old rules':(r.role==="rules_b"?'rules B':(r.role==="coach"?'coach':(r.role==="mine"?'mine':'calib.')))))+(r.status!=="open"?' \u00b7 '+r.status:'')+'</span></div>'+
           (on?'<div class="opt-why" id="optTrDet"><i>Loading the day-by-day\u2026</i></div>':''); }).join("")+
@@ -11248,7 +11249,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           '<span><i>latest</i><b class="'+(M[M.length-1].pnl_1>=0?'ev':'ev neg')+'">'+optM(M[M.length-1].pnl_1)+'</b></span>'+
           ex.map(function(x){ return '<span><i>exit '+x+'d</i><b class="'+(res[x]>=0?'ev':'ev neg')+'">'+optM(res[x])+'</b></span>'; }).join("")+
           (res.expiry!=null?'<span><i>held to expiry</i><b class="'+(res.expiry>=0?'ev':'ev neg')+'">'+optM(res.expiry)+'</b></span>':'')+
-          ['sl50','slcr','tp50'].map(function(k){ var v=res[k]; return v&&v.stopped?'<span><i>'+({sl50:'stop \u221250%',slcr:'stop = credit',tp50:'take profit +50%'})[k]+'</i><b class="'+(k==="tp50"?'ev':'ev neg')+'">hit '+optDate(v.stopped.date)+'</b></span>':''; }).join("")+'</div>'+
+          ['sl50','slcr','tp50','tp70'].map(function(k){ var v=res[k]; return v&&v.stopped?'<span><i>'+({sl50:'stop \u221250%',slcr:'stop = credit',tp50:'take profit +50%',tp70:'take profit +70%'})[k]+'</i><b class="'+(k.indexOf("tp")===0?'ev':'ev neg')+'">hit '+optDate(v.stopped.date)+'</b></span>':''; }).join("")+'</div>'+
         '<div class="opt-sub3">'+optEsc(r.ticker)+' <span>\u00b7 daily candles with the trade drawn on: strikes, today\u2019s breakevens and dealer walls, the day it opened</span></div><div id="optTrC1" class="icl-cone"></div>'+
         '<div class="opt-sub3">P&amp;L <span>\u00b7 one point per morning mark, per contract</span></div><div id="optTrC2" class="icl-cone"></div>'+
         '<div class="opt-tbl dd"><div class="hd"><span>Date</span><span>DTE</span><span>Spot</span><span>P&amp;L</span><span>\u0394 sh</span><span>\u0393</span><span>\u0398 $/day</span><span>Vega $</span><span>BE low</span><span>BE high</span><span>IV short</span><span>Flip</span><span>Put wall</span><span>Call wall</span></div>'+
@@ -11347,12 +11348,12 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     if(b!=null&&v.indexOf(+b)>=0) return +b; return v.length?Math.max.apply(null,v):null; }
   // the stop-loss variants against holding to the planned exit, on the same trades (the trades themselves are never closed early)
   function optStopsHTML(rows){
-    var ex=[25,18,16,10].filter(function(x){ return x!==16||rows.some(function(r){ return optValid(r,16)&&(r.result||{})[16]!=null; }); }), V=[["hold","Hold to the exit",null],["sl50","Stop at \u221250% of max loss","sl50"],["slcr","Stop at a loss = credit","slcr"],["tp50","Take profit at +50% of max profit","tp50"]];
+    var ex=[25,18,16,10].filter(function(x){ return x!==16||rows.some(function(r){ return optValid(r,16)&&(r.result||{})[16]!=null; }); }), V=[["hold","Hold to the exit",null],["sl50","Stop at \u221250% of max loss","sl50"],["slcr","Stop at a loss = credit","slcr"],["tp50","Take profit at +50% of max profit","tp50"],["tp70","Take profit at +70% of max profit","tp70"]];
     function val(r,v,x){ if(!optValid(r,x)) return null; var R=r.result||{}; if(!v[2]) return R[x]!=null?+R[x]:null; var s=R[v[2]]; return s&&s[x]!=null?+s[x]:null; }
     var anyClosed=rows.some(function(r){ return ex.some(function(x){ return optValid(r,x)&&(r.result||{})[x]!=null; }); });
-    var stopped={sl50:0,slcr:0,tp50:0}; rows.forEach(function(r){ ["sl50","slcr","tp50"].forEach(function(k){ if(((r.result||{})[k]||{}).stopped) stopped[k]++; }); });
+    var stopped={sl50:0,slcr:0,tp50:0,tp70:0}; rows.forEach(function(r){ ["sl50","slcr","tp50","tp70"].forEach(function(k){ if(((r.result||{})[k]||{}).stopped) stopped[k]++; }); });
     var html='<div class="opt-sub3">Exit rules test <span>\u00b7 the same trades three ways \u00b7 a stop fires on the first daily mark at or past its level and takes that mark\u2019s P&amp;L \u00b7 stopped so far: '+
-      stopped.sl50+' at \u221250% of max loss, '+stopped.slcr+' at a loss = credit \u00b7 profit taken: '+stopped.tp50+' at +50% \u00b7 exits under 7 days after entry are not counted</span></div>';
+      stopped.sl50+' at \u221250% of max loss, '+stopped.slcr+' at a loss = credit \u00b7 profit taken: '+stopped.tp50+' at +50%, '+stopped.tp70+' at +70% \u00b7 exits under 7 days after entry are not counted</span></div>';
     if(!anyClosed) return html+'<div class="ed-note">No trade has reached its first exit yet \u2014 the comparison fills from 2 November.</div>';
     html+='<div class="opt-tbl sl"><div class="hd"><span>Exit</span><span>Rule</span><span>n</span><span>Win rate</span><span>Avg</span><span>Return on risk</span><span>Worst</span><span>Total</span></div>';
     ex.forEach(function(x){ V.forEach(function(v,i){ var n=0,sum=0,win=0,risk=0,worst=null;
@@ -11464,7 +11465,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function optForward(){
     var el=document.getElementById("optFwd"); if(!el) return;
     el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 loading\u2026</span></div>';
-    optRowsAll("/rest/v1/ic_forward?select=id,opened,ticker,expiry,legs,credit,max_loss_1,model,result,status,role,structure,grp,closed&order=opened.desc,id.desc").then(function(rows){
+    optRowsAll("/rest/v1/ic_forward?select=id,opened,ticker,expiry,legs,credit,fees_1,max_loss_1,model,result,status,role,structure,grp,closed&order=opened.desc,id.desc").then(function(rows){
       rows=rows||[];
       if(!rows.length){ el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 starts with the next morning run: each day\u2019s trades are opened on paper and marked every morning</span></div>'; return; }
       var ex=[25,18,16,10];
@@ -11507,7 +11508,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           roles.map(function(r_){ var L=rows.filter(function(r){ return (r.role||"winner")===r_[0]; }); return L.length?tbl(L,r_[1]):""; }).join("")+
           tbl(cur.filter(function(r){ return (r.structure||"IC")==="IC"; }),"Iron condors (current rules)")+
           (cur.some(function(r){ return r.structure&&r.structure!=="IC"; })?tbl(cur.filter(function(r){ return r.structure&&r.structure!=="IC"; }),"Credit spreads"):"")+'</details>'+
-        '<details class="opt-det"><summary>Exit rules study <span>\u00b7 hold vs two stops vs take profit at +50%, same trades</span></summary>'+optStopsHTML(cur)+'</details>';
+        '<details class="opt-det"><summary>Exit rules study <span>\u00b7 hold vs two stops vs take profit at +50% and +70%, same trades</span></summary>'+optStopsHTML(cur)+'</details>';
       OPT_TR_ROWS=rows; optTradesList(); optRecap();
     }).catch(function(){ el.innerHTML='<div class="opt-sub2">Forward test <span>\u00b7 could not be read</span></div>'; });
   }

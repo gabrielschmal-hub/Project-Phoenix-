@@ -12970,6 +12970,12 @@ def _pf_ledger_marked(today):
         elif dte is not None and o.get("planned_exit_dte") and dte <= int(o["planned_exit_dte"]):
             led["exceptions"].append({"kind": "option", "t": o["t"], "text": f"{o['t']} {o.get('label') or ''}: the planned exit ({o['planned_exit_dte']} days to expiry) is reached — close it, win or lose"
                                       + (f" (P&L about ${o['pnl_usd']:,.0f})" if o["pnl_usd"] is not None else "")})
+        elif m is not None and o.get("credit") and m >= OPT_TAKE_PROFIT["act"] * (100.0 * float(o["credit"]) - float(o.get("fees_1") or 0)):
+            mp = 100.0 * float(o["credit"]) - float(o.get("fees_1") or 0)
+            led["exceptions"].append({"kind": "profit", "t": o["t"], "text": f"{o['t']} {o.get('label') or ''}: {m / mp * 100:.0f}% of its max profit is in (about ${m * o['contracts']:,.0f}) \u2014 take it: what is left is small and the risk is not"})
+        elif m is not None and o.get("credit") and m >= OPT_TAKE_PROFIT["note"] * (100.0 * float(o["credit"]) - float(o.get("fees_1") or 0)):
+            mp = 100.0 * float(o["credit"]) - float(o.get("fees_1") or 0)
+            led["exceptions"].append({"kind": "option", "t": o["t"], "text": f"{o['t']}: {m / mp * 100:.0f}% of its max profit is in \u2014 consider closing; 70% is the take-profit level"})
         elif m is not None and o.get("max_loss_usd") and m * o["contracts"] <= -0.5 * o["max_loss_usd"]:
             led["exceptions"].append({"kind": "option", "t": o["t"], "text": f"{o['t']}: down half its max loss (the stop study's level) — your call; the test holds to the exit"})
     return led
@@ -13672,7 +13678,12 @@ def run_auto_brief():
 IC_STOPS = {"sl50": ("half the max loss", lambda r: -0.5 * float(r["max_loss_1"])),
             "slcr": ("a loss equal to the credit", lambda r: -100.0 * float(r["credit"]))}
 # take-profit variants (3 Nov 2026): close at the first mark at or above the level
-IC_TAKES = {"tp50": ("half the max profit", lambda r: 0.5 * (100.0 * float(r["credit"]) - float(r.get("fees_1") or 0)))}
+# 5 Nov 2026: +70% added (Gabriel): the closer a credit trade is to max profit, the less is left to earn against the
+# full max loss still at risk, so many traders close early; the study says which level pays on our trades
+IC_TAKES = {"tp50": ("half the max profit", lambda r: 0.5 * (100.0 * float(r["credit"]) - float(r.get("fees_1") or 0))),
+            "tp70": ("70% of the max profit", lambda r: 0.7 * (100.0 * float(r["credit"]) - float(r.get("fees_1") or 0)))}
+# 5 Nov 2026: the share of max profit at which a REAL option trade (the option book) raises a take-profit exception
+OPT_TAKE_PROFIT = {"note": 0.5, "act": 0.7}
 
 
 def _ic_valid_exits(dte_entry):
@@ -13721,6 +13732,7 @@ def _ic_stop_results(row, marks, res):
       sl50   stop at -50% of the max loss
       slcr   stop at a loss equal to the credit received
       tp50   take profit at +50% of the max profit (credit less fees), the first mark at or above it
+      tp70   take profit at +70% of the max profit
     Only exits that respect the minimum hold count."""
     out = {}
     exit_at = {}
