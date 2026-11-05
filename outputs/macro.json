@@ -1,28 +1,28 @@
 {
- "asof": "2026-11-04 12:46 UTC",
+ "asof": "2026-11-05 05:53 UTC",
  "regime": "ENERGY_GRIND",
- "confidence": 62.3,
+ "confidence": 52.6,
  "confidence_note": "regime score, not a calibrated probability (A4)",
  "scores": {
-  "ENERGY_GRIND": 62.3
+  "ENERGY_GRIND": 52.6
  },
  "secondary_tag": null,
  "inputs": {
-  "wti_12m": 58.44,
-  "wti_3m": 21.09,
-  "wti_vs_2yr": 27.87,
+  "wti_12m": 46.28,
+  "wti_3m": 11.79,
+  "wti_vs_2yr": 18.16,
   "cpi_yoy": 3.72,
   "cpi_chg_3m": 0.37,
-  "spx_3m": -2.43,
-  "spx_1m": -3.11,
-  "dd": -3.11,
-  "trail_dd": -3.11,
-  "spx_off_low": 0.0,
+  "spx_3m": -0.89,
+  "spx_1m": -1.57,
+  "dd": -1.57,
+  "trail_dd": -1.57,
+  "spx_off_low": 1.43,
   "fresh_high": false,
   "us02_3m": 38.0,
   "real_3m": 21.0,
-  "vix": 18.27,
-  "vix_3m_chg": 22.62,
+  "vix": 16.61,
+  "vix_3m_chg": 11.48,
   "hy": 326.0
  },
  "explain": {
@@ -42,19 +42,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 27.87,
+    "value": 18.16,
     "op": ">",
     "threshold": 0,
-    "clear_by": 27.87,
+    "clear_by": 18.16,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 58.44,
+    "value": 46.28,
     "op": ">",
     "threshold": 25,
-    "clear_by": 33.44,
+    "clear_by": 21.28,
     "ok": true
    }
   ],
@@ -68,28 +68,33 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 27.87,
+    "now": 18.16,
     "threshold": 0,
-    "distance": 27.87,
+    "distance": 18.16,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 58.44,
+    "now": 46.28,
     "threshold": 25,
-    "distance": 33.44,
+    "distance": 21.28,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
   "runner_up": {
    "regime": "ENERGY_SPIKE",
    "score": null,
-   "gates_missing": 1,
+   "gates_missing": 2,
    "needs": [
     {
      "label": "WTI 3m",
      "need": "> 25",
-     "now": 21.092348170121245
+     "now": 11.793299033912552
+    },
+    {
+     "label": "VIX 3m change",
+     "need": "> 15",
+     "now": 11.476517017454535
     }
    ]
   }

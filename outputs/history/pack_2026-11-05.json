@@ -1,0 +1,623 @@
+{
+ "schema": "phoenix-fact-pack/1",
+ "date": "2026-11-05",
+ "asof": "2026-11-05 06:57 UTC",
+ "market": {
+  "regime": "ENERGY_GRIND",
+  "regime_held_weeks": 5,
+  "spx": {
+   "last": 7688.62,
+   "chg_1d_pct": 1.58,
+   "vs_50d_pct": -0.06,
+   "vs_200d_pct": 5.03
+  },
+  "vix": 16.61,
+  "dxy": null,
+  "us10y": null,
+  "gold": null,
+  "wti": null,
+  "gex": {
+   "net_B": 2.6,
+   "regime": "positive",
+   "flip": null,
+   "dist_to_flip_pct": -0.5,
+   "call_wall": null,
+   "put_wall": null,
+   "spot": 7688.62
+  }
+ },
+ "macro": {
+  "spx": {
+   "last": 7688.62,
+   "d1_pct": 1.58,
+   "w1_pct": -0.71,
+   "m1_pct": -1.67
+  },
+  "ndx": {
+   "last": 25736.51,
+   "d1_pct": 1.44,
+   "w1_pct": -3.06,
+   "m1_pct": -6.75
+  },
+  "dow": {
+   "last": 53356.12,
+   "d1_pct": 3.03,
+   "w1_pct": 1.68,
+   "m1_pct": 3.56
+  },
+  "rut": {
+   "last": 2856.95,
+   "d1_pct": 1.58,
+   "w1_pct": 0.93,
+   "m1_pct": 0.94
+  },
+  "gold": {
+   "last": 4073.0,
+   "d1_pct": 3.37,
+   "w1_pct": 0.53,
+   "m1_pct": -2.73
+  },
+  "wti": {
+   "last": 88.12,
+   "d1_pct": -8.29,
+   "w1_pct": -14.26,
+   "m1_pct": -1.48
+  },
+  "btc": {
+   "last": 77345.0,
+   "d1_pct": 0.87,
+   "w1_pct": -4.28,
+   "m1_pct": -9.84
+  },
+  "dxy": {
+   "last": 101.51,
+   "d1_pct": -0.35,
+   "w1_pct": -0.67,
+   "m1_pct": -0.31
+  },
+  "vix": {
+   "last": 16.61,
+   "d1_pct": -20.26,
+   "w1_pct": -1.77,
+   "m1_pct": 10.66
+  },
+  "usdjpy": {
+   "last": 158.47,
+   "d1_pct": 0.35,
+   "w1_pct": 0.3,
+   "m1_pct": 0.32
+  },
+  "tnx": {
+   "last": 4.89,
+   "d1_bp": -6,
+   "w1_bp": -15,
+   "m1_bp": -38
+  },
+  "us02": {
+   "last": 4.61,
+   "d1_bp": 0,
+   "w1_bp": -6,
+   "m1_bp": -18
+  },
+  "real10": {
+   "last": 2.65,
+   "d1_bp": 0,
+   "w1_bp": -2,
+   "m1_bp": -26
+  },
+  "hy": {
+   "last": 3.4,
+   "d1_bp": 0,
+   "w1_bp": 0,
+   "m1_bp": 0
+  },
+  "cpi_yoy": {
+   "last": 3.72,
+   "prev_print": 3.35
+  },
+  "curve_2s10s_bp": 28,
+  "curve_2s10s_chg_1m_bp": -20,
+  "absent": [],
+  "rows": 251
+ },
+ "regime_gates": {
+  "regime": "ENERGY_GRIND",
+  "held_weeks": 5,
+  "since": "2026-10-05",
+  "drivers": [
+   {
+    "key": "cpi_chg_3m",
+    "label": "CPI 3m change",
+    "value": 0.37,
+    "op": ">",
+    "threshold": 0.3,
+    "clear_by": 0.07,
+    "ok": true
+   },
+   {
+    "key": "wti_vs_2yr",
+    "label": "WTI vs 2yr",
+    "value": 18.16,
+    "op": ">",
+    "threshold": 0,
+    "clear_by": 18.16,
+    "ok": true
+   },
+   {
+    "key": "wti_12m",
+    "label": "WTI 12m",
+    "value": 46.28,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 21.28,
+    "ok": true
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI 3m change falls below 0.3",
+    "now": 0.37,
+    "threshold": 0.3,
+    "distance": 0.07,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI vs 2yr falls below 0",
+    "now": 18.16,
+    "threshold": 0,
+    "distance": 18.16,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI 12m falls below 25",
+    "now": 46.28,
+    "threshold": 25,
+    "distance": 21.28,
+    "then": "ENERGY_GRIND no longer qualifies"
+   }
+  ],
+  "runner_up": {
+   "regime": "ENERGY_SPIKE",
+   "score": null,
+   "gates_missing": 2,
+   "needs": [
+    {
+     "label": "WTI 3m",
+     "need": "> 25",
+     "now": 11.793299033912552
+    },
+    {
+     "label": "VIX 3m change",
+     "need": "> 15",
+     "now": 11.476517017454535
+    }
+   ]
+  }
+ },
+ "screener": {
+  "n_candidates": 521,
+  "top": [
+   {
+    "ticker": "FMX",
+    "industry": "Beverages: non-alcoholic",
+    "trade_score": 69,
+    "atr14_pct": 2.52,
+    "mcap_B": 25.21,
+    "breakout": true,
+    "days_on_list": 10,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 86,
+    "dollar_vol_M": 91.3,
+    "stop_pct_2_5atr": 6.3
+   },
+   {
+    "ticker": "ZYME",
+    "industry": "Pharmaceuticals: major",
+    "trade_score": 68,
+    "atr14_pct": 3.64,
+    "mcap_B": 1.71,
+    "breakout": true,
+    "days_on_list": 78,
+    "profitability": "unknown",
+    "pos_vs_high": 0.0,
+    "surge": 84,
+    "dollar_vol_M": 39.1,
+    "stop_pct_2_5atr": 9.1
+   },
+   {
+    "ticker": "RNR",
+    "industry": "Property/Casualty insurance",
+    "trade_score": 65,
+    "atr14_pct": 2.61,
+    "mcap_B": 12.83,
+    "breakout": true,
+    "days_on_list": 88,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 74,
+    "dollar_vol_M": 176.3,
+    "stop_pct_2_5atr": 6.52
+   },
+   {
+    "ticker": "WCN",
+    "industry": "Environmental services",
+    "trade_score": 65,
+    "atr14_pct": 2.68,
+    "mcap_B": 38.98,
+    "breakout": false,
+    "days_on_list": 10,
+    "profitability": "profitable",
+    "pos_vs_high": -2.3,
+    "surge": 93,
+    "dollar_vol_M": 407.8,
+    "stop_pct_2_5atr": 6.7
+   },
+   {
+    "ticker": "BLCO",
+    "industry": "Medical specialties",
+    "trade_score": 64,
+    "atr14_pct": 3.55,
+    "mcap_B": 5.32,
+    "breakout": true,
+    "days_on_list": 8,
+    "profitability": "marginal",
+    "pos_vs_high": 0.0,
+    "surge": 222,
+    "dollar_vol_M": 20.2,
+    "stop_pct_2_5atr": 8.88
+   },
+   {
+    "ticker": "KNSA",
+    "industry": "Pharmaceuticals: major",
+    "trade_score": 64,
+    "atr14_pct": 5.78,
+    "mcap_B": 4.4,
+    "breakout": true,
+    "days_on_list": 88,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 103,
+    "dollar_vol_M": 82.0,
+    "stop_pct_2_5atr": 14.45
+   },
+   {
+    "ticker": "EHC",
+    "industry": "Medical/Nursing services",
+    "trade_score": 62,
+    "atr14_pct": 3.35,
+    "mcap_B": 9.79,
+    "breakout": false,
+    "days_on_list": 88,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 30,
+    "dollar_vol_M": 151.8,
+    "stop_pct_2_5atr": 8.38
+   },
+   {
+    "ticker": "HCSG",
+    "industry": "Miscellaneous commercial services",
+    "trade_score": 62,
+    "atr14_pct": 4.07,
+    "mcap_B": 1.55,
+    "breakout": false,
+    "days_on_list": 86,
+    "profitability": "unknown",
+    "pos_vs_high": 0.0,
+    "surge": 21,
+    "dollar_vol_M": 18.9,
+    "stop_pct_2_5atr": 10.18
+   }
+  ],
+  "leaning": [],
+  "counts": {}
+ },
+ "smart_money": {
+  "quarter": "2026-06-30",
+  "accumulating": [],
+  "distributing": [],
+  "notable": [
+   {
+    "ticker": "GOOGL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 37764088383,
+    "sector": null
+   },
+   {
+    "ticker": "GE",
+    "manager": "TCI Fund (Hohn)",
+    "action": "TRIM",
+    "value_usd": 17725353519,
+    "sector": null
+   },
+   {
+    "ticker": "V",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 10462232091,
+    "sector": null
+   },
+   {
+    "ticker": "DVA",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "TRIM",
+    "value_usd": 6425268898,
+    "sector": null
+   },
+   {
+    "ticker": "SPGI",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 5735017808,
+    "sector": null
+   },
+   {
+    "ticker": "DAL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 5368591200,
+    "sector": null
+   },
+   {
+    "ticker": "IEP",
+    "manager": "Icahn Capital",
+    "action": "ADD",
+    "value_usd": 4458616003,
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 4389741007,
+    "sector": null
+   }
+  ],
+  "congress_recent": [
+   {
+    "ticker": "FMAO",
+    "member": "Robert E. Latta",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-03",
+    "sector": null
+   },
+   {
+    "ticker": "AVGO",
+    "member": "John J Mr McGuire",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-01",
+    "sector": null
+   },
+   {
+    "ticker": "MU",
+    "member": "John J Mr McGuire",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-01",
+    "sector": null
+   },
+   {
+    "ticker": "MU",
+    "member": "John J Mr McGuire",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-01",
+    "sector": null
+   },
+   {
+    "ticker": "MU",
+    "member": "John J Mr McGuire",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-01",
+    "sector": null
+   },
+   {
+    "ticker": "TXN",
+    "member": "Thomas H. Kean",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-30",
+    "sector": null
+   },
+   {
+    "ticker": "JNJ",
+    "member": "Thomas H. Kean",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-30",
+    "sector": null
+   },
+   {
+    "ticker": "MDLZ",
+    "member": "Thomas H. Kean",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-30",
+    "sector": null
+   },
+   {
+    "ticker": "SYK",
+    "member": "Thomas H. Kean",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-30",
+    "sector": null
+   },
+   {
+    "ticker": "ABT",
+    "member": "Thomas H. Kean",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-10-30",
+    "sector": null
+   }
+  ],
+  "note": null,
+  "congress_status": {
+   "written": "2026-11-05",
+   "dropped_impossible_dates": 0,
+   "sources": {
+    "House Clerk PTR": {
+     "rows": 9816,
+     "last_30d": 34,
+     "newest_tx": "2026-10-27",
+     "newest_filed": "2026-11-03"
+    },
+    "OGE 278-T via Open Cabinet": {
+     "rows": 7828,
+     "last_30d": 0,
+     "newest_tx": "2026-08-31",
+     "newest_filed": "2026-08-12"
+    },
+    "Senate eFD": {
+     "rows": 1016,
+     "last_30d": 0,
+     "newest_tx": "2026-09-25",
+     "newest_filed": "2026-10-22"
+    }
+   },
+   "quiet": [
+    "OGE 278-T via Open Cabinet",
+    "Senate eFD"
+   ]
+  }
+ },
+ "portfolio": {
+  "open": [
+   {
+    "ticker": "GOOG",
+    "entry": 325.86,
+    "stop": 305.67,
+    "last": null,
+    "R": null,
+    "managed": true,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   }
+  ],
+  "heat_R": 1.01,
+  "cap_R": 3.0,
+  "unsized": 0,
+  "note": null,
+  "over_cap": false
+ },
+ "news": {
+  "date": "2026-11-04",
+  "asof": "2026-11-05 05:53 UTC",
+  "headline": "Democrats take Congress and the Dow jumps 3% \u2014 as oil falls 8% on bets the war will end",
+  "standfirst": "Democrats won the House and the Senate, and the Dow rose 3.03%, its best day since April 2025, with the S&P up 1.58% and the Russell 1.58%. WTI fell 8.29% to $88.12 on bets that pressure to end the Iran war will grow, and gold rose 3.27%. Amazon, Microsoft and Apple rose more than 5% each while chip and data-centre stocks fell, and the VIX fell to 16.61. The book is flat; Q4 is +34.64 realised, heat 0R.",
+  "themes": [
+   {
+    "kicker": "What's next",
+    "right": "Thursday: claims and Iran feedback \u00b7 Friday: payrolls",
+    "title": "The election is done; jobs and Iran are next",
+    "items": [
+     {
+      "tone": "c-cb",
+      "tag": "DATA",
+      "html": "<b>Jobless claims, productivity and labour costs</b>",
+      "when": "Thu \u00b7 2026-11-05",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "JOBS",
+      "html": "<b>October payrolls</b> \u2014 consensus about +55,000",
+      "when": "Fri \u00b7 2026-11-06",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-fomc",
+      "tag": "FOMC",
+      "html": "<b>December Fed meeting</b> \u2014 a hike priced at about 77%",
+      "when": "Tue\u2013Wed \u00b7 2026-12-08",
+      "kind": "calendar"
+     }
+    ],
+    "note": "<b>Thursday brings jobless claims and productivity</b>, and Qatar's expected feedback on the Iran talks falls inside the next day and a half. <b>Friday is October payrolls</b>, with a consensus of about 55,000. The Fed meets on <b>8-9 December</b>."
+   }
+  ],
+  "ondeck": "<b>Thursday brings jobless claims and productivity</b>, and Qatar's expected feedback on the Iran talks falls inside the next day and a half. <b>Friday is October payrolls</b>, with a consensus of about 55,000. The Fed meets on <b>8-9 December</b>.",
+  "note": null
+ },
+ "provenance": {
+  "macro": {
+   "asof": "2026-11-05 05:53 UTC",
+   "age_min": null
+  },
+  "gex": {
+   "asof": "2026-11-05 05:53 UTC",
+   "age_min": null
+  },
+  "stocks": {
+   "asof": "2026-11-05 06:01 UTC",
+   "age_min": null
+  },
+  "institutional_holdings": {
+   "asof": "2026-11-05 06:32 UTC",
+   "quarter": "2026-06-30"
+  },
+  "congress_trades": {
+   "asof": "2026-11-05 06:29 UTC",
+   "status": {
+    "written": "2026-11-05",
+    "dropped_impossible_dates": 0,
+    "sources": {
+     "House Clerk PTR": {
+      "rows": 9816,
+      "last_30d": 34,
+      "newest_tx": "2026-10-27",
+      "newest_filed": "2026-11-03"
+     },
+     "OGE 278-T via Open Cabinet": {
+      "rows": 7828,
+      "last_30d": 0,
+      "newest_tx": "2026-08-31",
+      "newest_filed": "2026-08-12"
+     },
+     "Senate eFD": {
+      "rows": 1016,
+      "last_30d": 0,
+      "newest_tx": "2026-09-25",
+      "newest_filed": "2026-10-22"
+     }
+    },
+    "quiet": [
+     "OGE 278-T via Open Cabinet",
+     "Senate eFD"
+    ]
+   }
+  },
+  "wire": {
+   "asof": "2026-11-05 05:53 UTC"
+  }
+ },
+ "missing": [],
+ "changed": {
+  "first_pack": false,
+  "prev_date": "2026-11-04",
+  "changes": [
+   {
+    "kind": "gex",
+    "what": "index gamma",
+    "was": "negative",
+    "now": "positive",
+    "why": "dealers switch between dampening and amplifying moves"
+   },
+   {
+    "kind": "screener",
+    "what": "new in the top setups",
+    "was": null,
+    "now": "ZYME, RNR, KNSA, EHC",
+    "why": "names the engine ranked highest that were not there yesterday"
+   }
+  ]
+ }
+}

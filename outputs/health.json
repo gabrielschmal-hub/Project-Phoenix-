@@ -1,108 +1,108 @@
 {
- "asof": "2026-11-04 13:33 UTC",
- "date": "2026-11-04",
+ "asof": "2026-11-05 06:57 UTC",
+ "date": "2026-11-05",
  "summary": {
   "pass": 32,
-  "warn": 3,
-  "fail": 1
+  "warn": 4,
+  "fail": 0
  },
  "checks": [
   {
    "id": "file.ic_screen",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/ic_screen.json as of 2026-11-04",
+   "detail": "outputs/ic_screen.json as of 2026-11-05",
    "where": "step ic_screen"
   },
   {
    "id": "file.ic_universe",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/ic_universe.json as of 2026-11-04",
+   "detail": "outputs/ic_universe.json as of 2026-11-05",
    "where": "step mme_chains"
   },
   {
    "id": "file.ic_hist",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/ic_hist.json as of 2026-11-04",
+   "detail": "outputs/ic_hist.json as of 2026-11-05",
    "where": "step ic_screen (_ic_hist)"
   },
   {
    "id": "file.dossier",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/dossier.json as of 2026-11-04",
+   "detail": "outputs/dossier.json as of 2026-11-05",
    "where": "step dossier"
   },
   {
    "id": "file.calendar",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/calendar.json as of 2026-11-04",
+   "detail": "outputs/calendar.json as of 2026-11-05",
    "where": "step calendar"
   },
   {
    "id": "file.mme_map",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/mme_map.json as of 2026-11-04",
+   "detail": "outputs/mme_map.json as of 2026-11-05",
    "where": "step mme_map"
   },
   {
    "id": "file.ic_screen_b",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/ic_screen_b.json as of 2026-11-04",
+   "detail": "outputs/ic_screen_b.json as of 2026-11-05",
    "where": "step ic_screen_b"
   },
   {
    "id": "file.iv_em",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/iv_em.json as of 2026-11-04",
+   "detail": "outputs/iv_em.json as of 2026-11-05",
    "where": "step iv_em"
   },
   {
    "id": "file.macro",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/macro.json as of 2026-11-04",
+   "detail": "outputs/macro.json as of 2026-11-05",
    "where": "step macro"
   },
   {
    "id": "file.gex",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/gex.json as of 2026-11-04",
+   "detail": "outputs/gex.json as of 2026-11-05",
    "where": "step gex"
   },
   {
    "id": "file.dayscore",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/dayscore.json as of 2026-11-04",
+   "detail": "outputs/dayscore.json as of 2026-11-05",
    "where": "step dayscore"
   },
   {
    "id": "mme_map.chains",
    "area": "data",
    "status": "pass",
-   "detail": "dealer map computed on the 2026-11-04 option chains (0 days old)",
+   "detail": "dealer map computed on the 2026-11-05 option chains (0 days old)",
    "where": "steps mme_chains \u2192 mme_map (a run that never committed leaves the map on old chains)"
   },
   {
    "id": "chains.coverage",
    "area": "data",
    "status": "pass",
-   "detail": "121 of 103 names have an option chain on file",
+   "detail": "120 of 103 names have an option chain on file",
    "where": "step mme_chains (CBOE)"
   },
   {
    "id": "bars.coverage",
    "area": "data",
    "status": "pass",
-   "detail": "121 of 121 names have Yahoo bars (chart read, patterns, realised vol)",
+   "detail": "120 of 120 names have Yahoo bars (chart read, patterns, realised vol)",
    "where": "step ic_screen (_ic_hist, Yahoo)"
   },
   {
@@ -116,14 +116,14 @@
    "id": "screen.rules",
    "area": "options",
    "status": "pass",
-   "detail": "31 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
+   "detail": "44 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
    "where": "run_ic_screen (outputs/ic_screen.json)"
   },
   {
    "id": "screen.proposed",
    "area": "options",
    "status": "pass",
-   "detail": "20 proposed of 31 winners",
+   "detail": "20 proposed of 44 winners",
    "where": "run_ic_screen"
   },
   {
@@ -143,8 +143,8 @@
   {
    "id": "forward.marked",
    "area": "forward test",
-   "status": "fail",
-   "detail": "121 of 124 open trades marked for 2026-11-04 (32 opened today)",
+   "status": "warn",
+   "detail": "154 of 156 open trades marked for 2026-11-05 (0 opened today)",
    "where": "run_ic_record step 3a"
   },
   {
@@ -165,7 +165,7 @@
    "id": "decisions.logged",
    "area": "learning",
    "status": "pass",
-   "detail": "121 options decisions logged for 2026-11-04",
+   "detail": "0 options decisions logged for 2026-11-05",
    "where": "run_ic_record (decisions table)"
   },
   {
@@ -179,14 +179,14 @@
    "id": "news",
    "area": "data",
    "status": "pass",
-   "detail": "188 Finnhub calls, 173/187 names with news, 0 failed",
+   "detail": "253 Finnhub calls, 238/252 names with news, 0 failed",
    "where": "run_news (Finnhub)"
   },
   {
    "id": "auto_brief",
    "area": "brief",
    "status": "pass",
-   "detail": "auto brief for 2026-11-04",
+   "detail": "auto brief for 2026-11-05",
    "where": "run_auto_brief"
   },
   {
@@ -200,14 +200,14 @@
    "id": "portfolios.split",
    "area": "portfolios",
    "status": "pass",
-   "detail": "Phoenix split {'core': 0.6, 'tactical': 0.15, 'risky': 0.075, 'cash': 0.175} sums to 1.000",
+   "detail": "Phoenix split {'core': 0.6, 'tactical': 0.2, 'risky': 0.1, 'cash': 0.1} sums to 1.000",
    "where": "ALLOC split_by_verdict"
   },
   {
    "id": "portfolios.fx",
    "area": "portfolios",
    "status": "pass",
-   "detail": "EURUSD 1.127 from yahoo",
+   "detail": "EURUSD 1.1266 from yahoo",
    "where": "_fx_usd_rates (Yahoo)"
   },
   {
@@ -242,7 +242,7 @@
    "id": "dial",
    "area": "market",
    "status": "pass",
-   "detail": "market dial 65/100 caution; inputs missing: ",
+   "detail": "market dial 95/100 risk-on; inputs missing: ",
    "where": "_market_dial (macro, gex, vix_term, spx_daily)"
   },
   {
@@ -256,7 +256,7 @@
    "id": "heartbeats",
    "area": "pipeline",
    "status": "warn",
-   "detail": "24 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | senate_efd: agreement HTTP 403 | signal_mark: marked 0 \u00b7 skipped 31 (no bars yet) \u00b7 failed 0 \u00b7 31 due \u00b7 3/9 tickers fetched",
+   "detail": "22 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | senate_efd: agreement HTTP 403",
    "where": "heartbeats table"
   }
  ]
