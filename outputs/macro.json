@@ -1,28 +1,28 @@
 {
- "asof": "2026-11-05 12:55 UTC",
+ "asof": "2026-11-05 21:49 UTC",
  "regime": "ENERGY_GRIND",
- "confidence": 55.4,
+ "confidence": 57.5,
  "confidence_note": "regime score, not a calibrated probability (A4)",
  "scores": {
-  "ENERGY_GRIND": 55.4
+  "ENERGY_GRIND": 57.5
  },
  "secondary_tag": null,
  "inputs": {
-  "wti_12m": 49.86,
-  "wti_3m": 14.53,
-  "wti_vs_2yr": 21.02,
+  "wti_12m": 52.49,
+  "wti_3m": 16.54,
+  "wti_vs_2yr": 23.11,
   "cpi_yoy": 3.72,
   "cpi_chg_3m": 0.37,
-  "spx_3m": -0.89,
-  "spx_1m": -1.57,
-  "dd": -1.57,
-  "trail_dd": -1.57,
-  "spx_off_low": 1.43,
+  "spx_3m": -5.21,
+  "spx_1m": -5.86,
+  "dd": -5.86,
+  "trail_dd": -5.86,
+  "spx_off_low": 0.0,
   "fresh_high": false,
   "us02_3m": 38.0,
   "real_3m": 21.0,
-  "vix": 17.0,
-  "vix_3m_chg": 14.09,
+  "vix": 28.18,
+  "vix_3m_chg": 89.13,
   "hy": 326.0
  },
  "explain": {
@@ -42,19 +42,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 21.02,
+    "value": 23.11,
     "op": ">",
     "threshold": 0,
-    "clear_by": 21.02,
+    "clear_by": 23.11,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 49.86,
+    "value": 52.49,
     "op": ">",
     "threshold": 25,
-    "clear_by": 24.86,
+    "clear_by": 27.49,
     "ok": true
    }
   ],
@@ -68,33 +68,28 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 21.02,
+    "now": 23.11,
     "threshold": 0,
-    "distance": 21.02,
+    "distance": 23.11,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 49.86,
+    "now": 52.49,
     "threshold": 25,
-    "distance": 24.86,
+    "distance": 27.49,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
   "runner_up": {
    "regime": "ENERGY_SPIKE",
    "score": null,
-   "gates_missing": 2,
+   "gates_missing": 1,
    "needs": [
     {
      "label": "WTI 3m",
      "need": "> 25",
-     "now": 14.530571202363497
-    },
-    {
-     "label": "VIX 3m change",
-     "need": "> 15",
-     "now": 14.093962652576696
+     "now": 16.53875704106358
     }
    ]
   }
