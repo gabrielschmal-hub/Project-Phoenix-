@@ -1,7 +1,7 @@
 {
  "schema": "phoenix-fact-pack/1",
  "date": "2026-11-05",
- "asof": "2026-11-05 06:57 UTC",
+ "asof": "2026-11-05 13:48 UTC",
  "market": {
   "regime": "ENERGY_GRIND",
   "regime_held_weeks": 5,
@@ -11,16 +11,16 @@
    "vs_50d_pct": -0.06,
    "vs_200d_pct": 5.03
   },
-  "vix": 16.61,
+  "vix": 17.0,
   "dxy": null,
   "us10y": null,
   "gold": null,
   "wti": null,
   "gex": {
-   "net_B": 2.6,
-   "regime": "positive",
+   "net_B": -0.36,
+   "regime": "negative",
    "flip": null,
-   "dist_to_flip_pct": -0.5,
+   "dist_to_flip_pct": -0.05,
    "call_wall": null,
    "put_wall": null,
    "spot": 7688.62
@@ -64,10 +64,10 @@
    "m1_pct": -1.48
   },
   "btc": {
-   "last": 77345.0,
-   "d1_pct": 0.87,
-   "w1_pct": -4.28,
-   "m1_pct": -9.84
+   "last": 80405.0,
+   "d1_pct": 3.96,
+   "w1_pct": -1.06,
+   "m1_pct": -6.02
   },
   "dxy": {
    "last": 101.51,
@@ -137,19 +137,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 18.16,
+    "value": 21.02,
     "op": ">",
     "threshold": 0,
-    "clear_by": 18.16,
+    "clear_by": 21.02,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 46.28,
+    "value": 49.86,
     "op": ">",
     "threshold": 25,
-    "clear_by": 21.28,
+    "clear_by": 24.86,
     "ok": true
    }
   ],
@@ -163,16 +163,16 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 18.16,
+    "now": 21.02,
     "threshold": 0,
-    "distance": 18.16,
+    "distance": 21.02,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 46.28,
+    "now": 49.86,
     "threshold": 25,
-    "distance": 21.28,
+    "distance": 24.86,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
@@ -184,18 +184,18 @@
     {
      "label": "WTI 3m",
      "need": "> 25",
-     "now": 11.793299033912552
+     "now": 14.530571202363497
     },
     {
      "label": "VIX 3m change",
      "need": "> 15",
-     "now": 11.476517017454535
+     "now": 14.093962652576696
     }
    ]
   }
  },
  "screener": {
-  "n_candidates": 521,
+  "n_candidates": 522,
   "top": [
    {
     "ticker": "FMX",
@@ -510,7 +510,7 @@
  },
  "news": {
   "date": "2026-11-04",
-  "asof": "2026-11-05 05:53 UTC",
+  "asof": "2026-11-05 12:55 UTC",
   "headline": "Democrats take Congress and the Dow jumps 3% \u2014 as oil falls 8% on bets the war will end",
   "standfirst": "Democrats won the House and the Senate, and the Dow rose 3.03%, its best day since April 2025, with the S&P up 1.58% and the Russell 1.58%. WTI fell 8.29% to $88.12 on bets that pressure to end the Iran war will grow, and gold rose 3.27%. Amazon, Microsoft and Apple rose more than 5% each while chip and data-centre stocks fell, and the VIX fell to 16.61. The book is flat; Q4 is +34.64 realised, heat 0R.",
   "themes": [
@@ -549,23 +549,23 @@
  },
  "provenance": {
   "macro": {
-   "asof": "2026-11-05 05:53 UTC",
+   "asof": "2026-11-05 12:55 UTC",
    "age_min": null
   },
   "gex": {
-   "asof": "2026-11-05 05:53 UTC",
+   "asof": "2026-11-05 12:55 UTC",
    "age_min": null
   },
   "stocks": {
-   "asof": "2026-11-05 06:01 UTC",
+   "asof": "2026-11-05 13:05 UTC",
    "age_min": null
   },
   "institutional_holdings": {
-   "asof": "2026-11-05 06:32 UTC",
+   "asof": "2026-11-05 13:29 UTC",
    "quarter": "2026-06-30"
   },
   "congress_trades": {
-   "asof": "2026-11-05 06:29 UTC",
+   "asof": "2026-11-05 13:28 UTC",
    "status": {
     "written": "2026-11-05",
     "dropped_impossible_dates": 0,
@@ -596,7 +596,7 @@
    }
   },
   "wire": {
-   "asof": "2026-11-05 05:53 UTC"
+   "asof": "2026-11-05 12:55 UTC"
   }
  },
  "missing": [],
@@ -604,13 +604,6 @@
   "first_pack": false,
   "prev_date": "2026-11-04",
   "changes": [
-   {
-    "kind": "gex",
-    "what": "index gamma",
-    "was": "negative",
-    "now": "positive",
-    "why": "dealers switch between dampening and amplifying moves"
-   },
    {
     "kind": "screener",
     "what": "new in the top setups",
