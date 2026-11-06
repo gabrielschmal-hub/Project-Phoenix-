@@ -1,5 +1,5 @@
 {
- "asof": "2026-11-06 07:31 UTC",
+ "asof": "2026-11-06 13:24 UTC",
  "date": "2026-11-06",
  "names": {
   "AAPL": {
@@ -1337,6 +1337,97 @@
     "conflict": []
    }
   },
+  "CHD": {
+   "hv30s": 0.2277,
+   "hv60s": 0.2194,
+   "hv_cons": 0.2277,
+   "hv30": 0.2277,
+   "close": 111.33,
+   "last_bar": "2026-11-05",
+   "chart": {
+    "support": 103.81,
+    "resistance": null,
+    "swings_high": [
+     [
+      "2026-07-07",
+      100.18
+     ],
+     [
+      "2026-07-17",
+      100.62
+     ],
+     [
+      "2026-08-06",
+      103.99
+     ],
+     [
+      "2026-08-27",
+      103.23
+     ],
+     [
+      "2026-09-24",
+      97.04
+     ],
+     [
+      "2026-10-22",
+      108.93
+     ]
+    ],
+    "swings_low": [
+     [
+      "2026-07-23",
+      94.72
+     ],
+     [
+      "2026-07-31",
+      94.59
+     ],
+     [
+      "2026-08-21",
+      96.27
+     ],
+     [
+      "2026-09-11",
+      93.04
+     ],
+     [
+      "2026-10-01",
+      93.33
+     ],
+     [
+      "2026-10-28",
+      103.81
+     ]
+    ],
+    "bias": "bullish",
+    "why": "breakout: closed 111.33 above the highest swing high of the window (108.93)"
+   },
+   "patterns": [
+    {
+     "kind": "candle",
+     "name": "rising_window",
+     "label": "rising window",
+     "date": "2026-11-04",
+     "bars": 1,
+     "tested_direction": "bullish",
+     "rate": 0.75,
+     "type": "continuation",
+     "note": "gap up: continues 75%",
+     "trend_in": "up",
+     "pattern_high": 113.25,
+     "pattern_low": 110.8,
+     "breakout": null,
+     "confirmed": false,
+     "rule": "enter only on a close above 113.25"
+    }
+   ],
+   "pattern_view": {
+    "agree": [
+     "rising window"
+    ],
+    "conflict": []
+   }
+  },
   "COIN": {
    "hv30s": 0.6523,
    "hv60s": 0.7875,
@@ -2220,6 +2311,97 @@
     "conflict": []
    }
   },
+  "ECO": {
+   "hv30s": 0.6792,
+   "hv60s": 0.5742,
+   "hv_cons": 0.6792,
+   "hv30": 0.6792,
+   "close": 81.18,
+   "last_bar": "2026-11-05",
+   "chart": {
+    "support": 75.56,
+    "resistance": 87.31,
+    "swings_high": [
+     [
+      "2026-07-16",
+      53.09
+     ],
+     [
+      "2026-08-06",
+      58.89
+     ],
+     [
+      "2026-08-13",
+      65.87
+     ],
+     [
+      "2026-09-17",
+      87.31
+     ],
+     [
+      "2026-10-13",
+      100.68
+     ],
+     [
+      "2026-10-29",
+      102.56
+     ]
+    ],
+    "swings_low": [
+     [
+      "2026-07-09",
+      46.65
+     ],
+     [
+      "2026-07-17",
+      49.16
+     ],
+     [
+      "2026-08-11",
+      54.74
+     ],
+     [
+      "2026-08-26",
+      61.9
+     ],
+     [
+      "2026-09-22",
+      75.56
+     ],
+     [
+      "2026-10-20",
+      86.32
+     ]
+    ],
+    "bias": "neutral",
+    "why": "range: no clean trend in the swings between 75.56 and 87.31"
+   },
+   "patterns": [
+    {
+     "kind": "chart",
+     "name": "double_top",
+     "label": "double top",
+     "start": "2026-10-13",
+     "end": "2026-10-29",
+     "direction": "down",
+     "confirm_line": 86.32,
+     "confirmed": true,
+     "height": 16.24,
+     "target": 77.55,
+     "target_rule": "height x 54% (target-met rate)",
+     "note": "Adam & Eve rank 10/36: fails 21%, avg decline 16%, target met 54%",
+     "unconfirmed_note": "unconfirmed double tops fail 60% of the time",
+     "odds_up": null,
+     "yearly_position": 0.72,
+     "context": [],
+     "stop": 103.07
+    }
+   ],
+   "pattern_view": {
+    "agree": [],
+    "conflict": []
+   }
+  },
   "EEM": {
    "hv30s": 0.2556,
    "hv60s": 0.2064,
@@ -2653,6 +2835,97 @@
     "agree": [
      "hs bottom"
     ],
+    "conflict": []
+   }
+  },
+  "FRO": {
+   "hv30s": 0.573,
+   "hv60s": 0.449,
+   "hv_cons": 0.573,
+   "hv30": 0.6195,
+   "close": 44.7,
+   "last_bar": "2026-11-05",
+   "chart": {
+    "support": 38.56,
+    "resistance": 52.48,
+    "swings_high": [
+     [
+      "2026-07-14",
+      36.79
+     ],
+     [
+      "2026-07-24",
+      37.26
+     ],
+     [
+      "2026-08-19",
+      42.32
+     ],
+     [
+      "2026-09-21",
+      52.48
+     ],
+     [
+      "2026-10-13",
+      59.75
+     ],
+     [
+      "2026-10-28",
+      57.3
+     ]
+    ],
+    "swings_low": [
+     [
+      "2026-07-09",
+      33.45
+     ],
+     [
+      "2026-07-17",
+      33.46
+     ],
+     [
+      "2026-08-11",
+      34.94
+     ],
+     [
+      "2026-08-26",
+      38.56
+     ],
+     [
+      "2026-09-23",
+      46.68
+     ],
+     [
+      "2026-10-20",
+      49.03
+     ]
+    ],
+    "bias": "neutral",
+    "why": "range: no clean trend in the swings between 38.56 and 52.48"
+   },
+   "patterns": [
+    {
+     "kind": "chart",
+     "name": "double_top",
+     "label": "double top",
+     "start": "2026-10-13",
+     "end": "2026-10-28",
+     "direction": "down",
+     "confirm_line": 49.03,
+     "confirmed": true,
+     "height": 10.72,
+     "target": 43.24,
+     "target_rule": "height x 54% (target-met rate)",
+     "note": "Adam & Eve rank 10/36: fails 21%, avg decline 16%, target met 54%",
+     "unconfirmed_note": "unconfirmed double tops fail 60% of the time",
+     "odds_up": null,
+     "yearly_position": 0.64,
+     "context": [],
+     "stop": 60.05
+    }
+   ],
+   "pattern_view": {
+    "agree": [],
     "conflict": []
    }
   },
@@ -3295,6 +3568,77 @@
      "rule": "enter only on a close above 356.02"
     }
    ],
+   "pattern_view": {
+    "agree": [],
+    "conflict": []
+   }
+  },
+  "HNGE": {
+   "hv30s": 0.3965,
+   "hv60s": 0.4031,
+   "hv_cons": 0.4031,
+   "hv30": 0.3965,
+   "close": 115.98,
+   "last_bar": "2026-11-05",
+   "chart": {
+    "support": 97.44,
+    "resistance": null,
+    "swings_high": [
+     [
+      "2026-05-21",
+      56.0
+     ],
+     [
+      "2026-07-13",
+      91.5
+     ],
+     [
+      "2026-08-11",
+      93.13
+     ],
+     [
+      "2026-08-27",
+      95.57
+     ],
+     [
+      "2026-09-17",
+      96.66
+     ],
+     [
+      "2026-10-13",
+      107.0
+     ]
+    ],
+    "swings_low": [
+     [
+      "2026-07-28",
+      71.4
+     ],
+     [
+      "2026-08-21",
+      84.23
+     ],
+     [
+      "2026-08-31",
+      85.75
+     ],
+     [
+      "2026-09-11",
+      86.29
+     ],
+     [
+      "2026-09-23",
+      89.75
+     ],
+     [
+      "2026-10-16",
+      97.44
+     ]
+    ],
+    "bias": "bullish",
+    "why": "breakout: closed 115.98 above the highest swing high of the window (107.00)"
+   },
+   "patterns": [],
    "pattern_view": {
     "agree": [],
     "conflict": []
@@ -6553,6 +6897,115 @@
     "conflict": []
    }
   },
+  "QGEN": {
+   "hv30s": 0.2077,
+   "hv60s": 0.2791,
+   "hv_cons": 0.2791,
+   "hv30": 0.3004,
+   "close": 50.86,
+   "last_bar": "2026-11-05",
+   "chart": {
+    "support": 50.07,
+    "resistance": null,
+    "swings_high": [
+     [
+      "2026-08-03",
+      42.66
+     ],
+     [
+      "2026-08-10",
+      44.41
+     ],
+     [
+      "2026-08-20",
+      45.53
+     ],
+     [
+      "2026-09-02",
+      44.92
+     ],
+     [
+      "2026-10-06",
+      47.28
+     ],
+     [
+      "2026-10-20",
+      50.82
+     ]
+    ],
+    "swings_low": [
+     [
+      "2026-08-06",
+      40.87
+     ],
+     [
+      "2026-08-24",
+      41.42
+     ],
+     [
+      "2026-09-14",
+      41.74
+     ],
+     [
+      "2026-09-23",
+      42.56
+     ],
+     [
+      "2026-10-01",
+      41.94
+     ],
+     [
+      "2026-10-30",
+      50.07
+     ]
+    ],
+    "bias": "bullish",
+    "why": "breakout: closed 50.86 above the highest swing high of the window (50.82)"
+   },
+   "patterns": [
+    {
+     "kind": "candle",
+     "name": "hanging_man",
+     "label": "hanging man",
+     "date": "2026-11-03",
+     "bars": 1,
+     "tested_direction": "bullish",
+     "rate": 0.59,
+     "type": "continuation",
+     "note": "textbook bearish, tests: the uptrend CONTINUES 59% \u2014 not a sell signal",
+     "trend_in": "up",
+     "pattern_high": 50.42,
+     "pattern_low": 50.24,
+     "breakout": "up",
+     "confirmed": false,
+     "rule": "enter only on a close above 50.42"
+    },
+    {
+     "kind": "candle",
+     "name": "rising_window",
+     "label": "rising window",
+     "date": "2026-11-04",
+     "bars": 1,
+     "tested_direction": "bullish",
+     "rate": 0.75,
+     "type": "continuation",
+     "note": "gap up: continues 75%",
+     "trend_in": "up",
+     "pattern_high": 50.88,
+     "pattern_low": 50.65,
+     "breakout": null,
+     "confirmed": false,
+     "rule": "enter only on a close above 50.88"
+    }
+   ],
+   "pattern_view": {
+    "agree": [
+     "hanging man",
+     "rising window"
+    ],
+    "conflict": []
+   }
+  },
   "QQQ": {
    "hv30s": 0.2054,
    "hv60s": 0.1815,
@@ -6732,6 +7185,77 @@
     "agree": [
      "takuri"
     ],
+    "conflict": []
+   }
+  },
+  "RPRX": {
+   "hv30s": 0.2304,
+   "hv60s": 0.2457,
+   "hv_cons": 0.2457,
+   "hv30": 0.2304,
+   "close": 67.57,
+   "last_bar": "2026-11-05",
+   "chart": {
+    "support": 60.39,
+    "resistance": null,
+    "swings_high": [
+     [
+      "2026-06-08",
+      56.27
+     ],
+     [
+      "2026-07-09",
+      58.6
+     ],
+     [
+      "2026-07-17",
+      59.2
+     ],
+     [
+      "2026-07-29",
+      60.2
+     ],
+     [
+      "2026-08-25",
+      62.46
+     ],
+     [
+      "2026-09-04",
+      64.38
+     ]
+    ],
+    "swings_low": [
+     [
+      "2026-06-18",
+      50.94
+     ],
+     [
+      "2026-07-15",
+      54.73
+     ],
+     [
+      "2026-08-04",
+      56.13
+     ],
+     [
+      "2026-08-31",
+      60.39
+     ],
+     [
+      "2026-09-14",
+      57.75
+     ],
+     [
+      "2026-10-08",
+      55.13
+     ]
+    ],
+    "bias": "bullish",
+    "why": "breakout: closed 67.57 above the highest swing high of the window (64.38)"
+   },
+   "patterns": [],
+   "pattern_view": {
+    "agree": [],
     "conflict": []
    }
   },
@@ -6962,6 +7486,97 @@
    "pattern_view": {
     "agree": [],
     "conflict": []
+   }
+  },
+  "SIGI": {
+   "hv30s": 0.2331,
+   "hv60s": 0.2068,
+   "hv_cons": 0.2331,
+   "hv30": 0.2331,
+   "close": 101.77,
+   "last_bar": "2026-11-05",
+   "chart": {
+    "support": 92.64,
+    "resistance": null,
+    "swings_high": [
+     [
+      "2026-07-06",
+      99.94
+     ],
+     [
+      "2026-07-21",
+      98.78
+     ],
+     [
+      "2026-08-06",
+      97.44
+     ],
+     [
+      "2026-08-28",
+      93.52
+     ],
+     [
+      "2026-10-06",
+      86.04
+     ],
+     [
+      "2026-10-23",
+      101.25
+     ]
+    ],
+    "swings_low": [
+     [
+      "2026-07-16",
+      92.64
+     ],
+     [
+      "2026-07-28",
+      90.99
+     ],
+     [
+      "2026-08-20",
+      88.87
+     ],
+     [
+      "2026-08-27",
+      90.07
+     ],
+     [
+      "2026-09-18",
+      85.64
+     ],
+     [
+      "2026-10-01",
+      83.02
+     ]
+    ],
+    "bias": "bullish",
+    "why": "breakout: closed 101.77 above the highest swing high of the window (101.25)"
+   },
+   "patterns": [
+    {
+     "kind": "candle",
+     "name": "bearish_engulfing",
+     "label": "bearish engulfing",
+     "date": "2026-11-05",
+     "bars": 2,
+     "tested_direction": "bearish",
+     "rate": 0.79,
+     "type": "reversal",
+     "note": "79% reversal but rank 91: the move is short-lived",
+     "trend_in": "up",
+     "pattern_high": 105.65,
+     "pattern_low": 100.39,
+     "breakout": null,
+     "confirmed": false,
+     "rule": "enter only on a close below 100.39"
+    }
+   ],
+   "pattern_view": {
+    "agree": [],
+    "conflict": [
+     "bearish engulfing"
+    ]
    }
   },
   "SLV": {
@@ -8308,6 +8923,97 @@
     "conflict": [
      "double bottom"
     ]
+   }
+  },
+  "UL": {
+   "hv30s": 0.254,
+   "hv60s": 0.2192,
+   "hv_cons": 0.254,
+   "hv30": 0.254,
+   "close": 67.71,
+   "last_bar": "2026-11-05",
+   "chart": {
+    "support": 64.13,
+    "resistance": null,
+    "swings_high": [
+     [
+      "2026-07-07",
+      63.24
+     ],
+     [
+      "2026-07-17",
+      62.93
+     ],
+     [
+      "2026-07-28",
+      66.89
+     ],
+     [
+      "2026-08-26",
+      65.63
+     ],
+     [
+      "2026-09-22",
+      63.25
+     ],
+     [
+      "2026-10-23",
+      67.17
+     ]
+    ],
+    "swings_low": [
+     [
+      "2026-08-17",
+      60.98
+     ],
+     [
+      "2026-09-10",
+      61.52
+     ],
+     [
+      "2026-09-18",
+      61.54
+     ],
+     [
+      "2026-10-01",
+      59.22
+     ],
+     [
+      "2026-10-21",
+      64.13
+     ],
+     [
+      "2026-10-28",
+      63.4
+     ]
+    ],
+    "bias": "bullish",
+    "why": "breakout: closed 67.71 above the highest swing high of the window (67.17)"
+   },
+   "patterns": [
+    {
+     "kind": "candle",
+     "name": "rising_window",
+     "label": "rising window",
+     "date": "2026-11-05",
+     "bars": 1,
+     "tested_direction": "bullish",
+     "rate": 0.75,
+     "type": "continuation",
+     "note": "gap up: continues 75%",
+     "trend_in": "up",
+     "pattern_high": 69.1,
+     "pattern_low": 67.44,
+     "breakout": null,
+     "confirmed": false,
+     "rule": "enter only on a close above 69.10"
+    }
+   ],
+   "pattern_view": {
+    "agree": [
+     "rising window"
+    ],
+    "conflict": []
    }
   },
   "UNH": {

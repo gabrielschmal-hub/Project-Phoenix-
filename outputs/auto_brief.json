@@ -1,5 +1,5 @@
 {
- "asof": "2026-11-06 07:35 UTC",
+ "asof": "2026-11-06 13:28 UTC",
  "date": "2026-11-06",
  "parser": "phoenix-auto",
  "headline": "Nasdaq 100 -6.49%: semiconductors weakest at -11.21%",
@@ -9,7 +9,7 @@
   "items": [
    {
     "tag": "1",
-    "html": "<b>Nasdaq 100 -6.49%.</b> S&P 500 <b>-4.41%</b>, Russell 2000 <b>-4.59%</b>, Dow <b>-3.53%</b>. Strongest group utilities <b>-0.71%</b>, weakest semiconductors <b>-11.21%</b>. VIX <b>28.18</b>.",
+    "html": "<b>Nasdaq 100 -6.49%.</b> S&P 500 <b>-4.41%</b>, Russell 2000 <b>-4.59%</b>, Dow <b>-3.53%</b>. Strongest group utilities <b>-0.71%</b>, weakest semiconductors <b>-11.21%</b>. VIX <b>26.51</b>.",
     "tone": "",
     "when": ""
    },
@@ -27,7 +27,7 @@
    },
    {
     "tag": "4",
-    "html": "<b>What the market news was about:</b> War & geopolitics (32 stories), Oil & energy (14 stories), Tech & AI (7 stories), Fed & rates (1 story).",
+    "html": "<b>What the market news was about:</b> War & geopolitics (32 stories), Oil & energy (14 stories), Tech & AI (6 stories), Inflation (1 story).",
     "tone": "",
     "when": ""
    }
@@ -37,7 +37,7 @@
  "stance": {
   "kicker": "The stance",
   "title": "Stress: cut the trading parts",
-  "note": "New money splits core 60%, tactical 10%, risky 5%, cash 25%. Day score 46.8 \u2014 TRADE CAREFULLY."
+  "note": "New money splits core 60%, tactical 10%, risky 5%, cash 25%. Day score 46.5 \u2014 TRADE CAREFULLY."
  },
  "markets": {
   "kicker": "The market",
@@ -94,7 +94,7 @@
  },
  "macro": {
   "kicker": "The macro",
-  "note": "Regime ENERGY_GRIND; SPX -4.3% vs its 50-day and +0.4% vs its 200-day; SPX dealer gamma negative; VIX 28.18."
+  "note": "Regime ENERGY_GRIND; SPX -4.3% vs its 50-day and +0.4% vs its 200-day; SPX dealer gamma negative; VIX 26.51."
  },
  "screener": {
   "kicker": "The screener",
@@ -102,21 +102,21 @@
    {
     "tag": "OPT",
     "ticker": "ABNB",
-    "html": "<b>ABNB</b> Dec18 \u2212185P +155P \u00b7 13.41 \u2014 EV 32.6%, 31.4% at the conservative vol",
+    "html": "<b>ABNB</b> Dec18 \u2212185P +155P \u00b7 13.41 \u2014 EV 36.5%, 35.3% at the conservative vol",
     "tone": "",
     "when": ""
    },
    {
     "tag": "OPT",
     "ticker": "SPY",
-    "html": "<b>SPY</b> Dec18 \u2212741C +769C \u00b7 12.40 \u2014 EV 26.6%, 26.6% at the conservative vol",
+    "html": "<b>SPY</b> Jan15 \u2212750C +780C \u00b7 11.97 \u2014 EV 25.0%, 25.0% at the conservative vol",
     "tone": "",
     "when": ""
    },
    {
     "tag": "OPT",
-    "ticker": "IWM",
-    "html": "<b>IWM</b> Dec18 \u2212275C +289C \u00b7 4.98 \u2014 EV 13.9%, 13.9% at the conservative vol",
+    "ticker": "USO",
+    "html": "<b>USO</b> IC Jan15 145/160 \u00b135 \u00b7 45% \u2014 EV 18.7%, 1.6% at the conservative vol",
     "tone": "",
     "when": ""
    },
@@ -150,7 +150,7 @@
    {
     "tag": "GOOG",
     "ticker": "GOOG",
-    "html": "-1.94% on the day; chart bearish; below its gamma flip 295.13",
+    "html": "-1.94% on the day; chart bearish; below its gamma flip 292.6",
     "tone": "",
     "when": ""
    }
@@ -158,20 +158,20 @@
  },
  "world": {
   "kicker": "The world",
-  "note": "Most-covered themes in today's market news: War & geopolitics (32), Oil & energy (14), Tech & AI (7), Fed & rates (1), Jobs & growth (1), China & trade (1)."
+  "note": "Most-covered themes in today's market news: War & geopolitics (32), Oil & energy (14), Tech & AI (6), Inflation (1), Fed & rates (1), Jobs & growth (1)."
  },
  "changed": {
   "kicker": "What changed",
   "items": [
    {
     "tag": "NEW",
-    "html": "New on the options list: ABNB, CVX, EEM, GE, IEF, MCD, XOM",
+    "html": "New on the options list: USO",
     "tone": "",
     "when": ""
    },
    {
     "tag": "OFF",
-    "html": "Off the options list: COIN, USO",
+    "html": "Off the options list: C, CVX, EEM, HOOD, SOFI, UBER",
     "tone": "",
     "when": ""
    },
@@ -190,7 +190,7 @@
  "ondeck": "Fri 06 Nov Payrolls (NFP); Tue 10 Nov CPI release",
  "sources": {
   "prices": "Yahoo daily bars (Phoenix)",
-  "news": "Finnhub (free tier), 171 names with news, condensed by rules",
+  "news": "Finnhub (free tier), 175 names with news, condensed by rules",
   "data": "dossier, market dial, ledger, locked book, options screen, forward-test recap"
  },
  "_state": {
@@ -199,12 +199,8 @@
    "ABNB",
    "AXP",
    "BA",
-   "C",
-   "CVX",
-   "EEM",
    "GE",
    "GOOG",
-   "HOOD",
    "IBM",
    "IEF",
    "IWM",
@@ -213,11 +209,10 @@
    "NFLX",
    "NKE",
    "QQQ",
-   "SOFI",
    "SPY",
    "TLT",
-   "UBER",
    "UNH",
+   "USO",
    "XOM"
   ]
  }

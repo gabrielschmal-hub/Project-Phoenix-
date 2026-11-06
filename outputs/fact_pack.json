@@ -1,7 +1,7 @@
 {
  "schema": "phoenix-fact-pack/1",
  "date": "2026-11-06",
- "asof": "2026-11-06 07:41 UTC",
+ "asof": "2026-11-06 13:34 UTC",
  "market": {
   "regime": "ENERGY_GRIND",
   "regime_held_weeks": 5,
@@ -11,16 +11,16 @@
    "vs_50d_pct": -4.33,
    "vs_200d_pct": 0.42
   },
-  "vix": 28.18,
+  "vix": 26.51,
   "dxy": null,
   "us10y": null,
   "gold": null,
   "wti": null,
   "gex": {
-   "net_B": -92.66,
+   "net_B": -95.98,
    "regime": "negative",
    "flip": null,
-   "dist_to_flip_pct": 5.07,
+   "dist_to_flip_pct": 4.1,
    "call_wall": null,
    "put_wall": null,
    "spot": 7353.73
@@ -64,10 +64,10 @@
    "m1_pct": 2.54
   },
   "btc": {
-   "last": 80405.0,
-   "d1_pct": 3.96,
-   "w1_pct": -1.06,
-   "m1_pct": -6.02
+   "last": 75942.0,
+   "d1_pct": -5.55,
+   "w1_pct": -2.36,
+   "m1_pct": -8.81
   },
   "dxy": {
    "last": 101.55,
@@ -137,19 +137,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 24.01,
+    "value": 22.49,
     "op": ">",
     "threshold": 0,
-    "clear_by": 24.01,
+    "clear_by": 22.49,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 53.61,
+    "value": 51.7,
     "op": ">",
     "threshold": 25,
-    "clear_by": 28.61,
+    "clear_by": 26.7,
     "ok": true
    }
   ],
@@ -163,16 +163,16 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 24.01,
+    "now": 22.49,
     "threshold": 0,
-    "distance": 24.01,
+    "distance": 22.49,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 53.61,
+    "now": 51.7,
     "threshold": 25,
-    "distance": 28.61,
+    "distance": 26.7,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
@@ -184,7 +184,7 @@
     {
      "label": "WTI 3m",
      "need": "> 25",
-     "now": 17.39575136995839
+     "now": 15.937578710456668
     }
    ]
   }
@@ -505,7 +505,7 @@
  },
  "news": {
   "date": "2026-11-05",
-  "asof": "2026-11-06 06:49 UTC",
+  "asof": "2026-11-06 12:42 UTC",
   "headline": "The worst day since April 2025 \u2014 chips crash on data-centre fears, and the Nasdaq enters a correction",
   "standfirst": "The S&P fell 4.36%, the Nasdaq 5.52% and the Russell 4.45%, their worst day since April 2025, as investors priced slower data-centre growth under a Democratic Congress. Technology fell 8%, with AMD down 17.26% and Nvidia 9.26%, and the VIX jumped to 28.18. The two-year yield fell about 12bp on soft labour costs and December hike odds dropped to about two-thirds, while WTI rose 2.72% to $90.52. The book is flat; Q4 is +34.64 realised, heat 0R.",
   "themes": [
@@ -537,23 +537,23 @@
  },
  "provenance": {
   "macro": {
-   "asof": "2026-11-06 06:48 UTC",
+   "asof": "2026-11-06 12:42 UTC",
    "age_min": null
   },
   "gex": {
-   "asof": "2026-11-06 06:49 UTC",
+   "asof": "2026-11-06 12:42 UTC",
    "age_min": null
   },
   "stocks": {
-   "asof": "2026-11-06 06:59 UTC",
+   "asof": "2026-11-06 12:52 UTC",
    "age_min": null
   },
   "institutional_holdings": {
-   "asof": "2026-11-06 07:22 UTC",
+   "asof": "2026-11-06 13:15 UTC",
    "quarter": "2026-06-30"
   },
   "congress_trades": {
-   "asof": "2026-11-06 07:20 UTC",
+   "asof": "2026-11-06 13:14 UTC",
    "status": {
     "written": "2026-11-06",
     "dropped_impossible_dates": 0,
@@ -584,7 +584,7 @@
    }
   },
   "wire": {
-   "asof": "2026-11-06 06:49 UTC"
+   "asof": "2026-11-06 12:42 UTC"
   }
  },
  "missing": [],
