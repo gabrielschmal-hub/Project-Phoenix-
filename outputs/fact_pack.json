@@ -1,7 +1,7 @@
 {
  "schema": "phoenix-fact-pack/1",
- "date": "2026-11-05",
- "asof": "2026-11-05 22:31 UTC",
+ "date": "2026-11-06",
+ "asof": "2026-11-06 07:41 UTC",
  "market": {
   "regime": "ENERGY_GRIND",
   "regime_held_weeks": 5,
@@ -17,10 +17,10 @@
   "gold": null,
   "wti": null,
   "gex": {
-   "net_B": -100.89,
+   "net_B": -92.66,
    "regime": "negative",
    "flip": null,
-   "dist_to_flip_pct": 4.5,
+   "dist_to_flip_pct": 5.07,
    "call_wall": null,
    "put_wall": null,
    "spot": 7353.73
@@ -52,28 +52,28 @@
    "m1_pct": -2.27
   },
   "gold": {
-   "last": 4099.9,
-   "d1_pct": 0.66,
-   "w1_pct": 1.7,
-   "m1_pct": -0.99
+   "last": 4113.5,
+   "d1_pct": 0.99,
+   "w1_pct": 2.04,
+   "m1_pct": -0.66
   },
   "wti": {
-   "last": 91.11,
-   "d1_pct": 3.39,
-   "w1_pct": -10.68,
-   "m1_pct": 3.21
+   "last": 90.52,
+   "d1_pct": 2.72,
+   "w1_pct": -11.25,
+   "m1_pct": 2.54
   },
   "btc": {
-   "last": 75819.0,
-   "d1_pct": -5.7,
-   "w1_pct": -2.52,
-   "m1_pct": -8.95
+   "last": 80405.0,
+   "d1_pct": 3.96,
+   "w1_pct": -1.06,
+   "m1_pct": -6.02
   },
   "dxy": {
-   "last": 101.6,
-   "d1_pct": 0.09,
-   "w1_pct": -0.43,
-   "m1_pct": -0.63
+   "last": 101.55,
+   "d1_pct": 0.04,
+   "w1_pct": -0.48,
+   "m1_pct": -0.67
   },
   "vix": {
    "last": 28.18,
@@ -82,10 +82,10 @@
    "m1_pct": 86.87
   },
   "usdjpy": {
-   "last": 157.66,
-   "d1_pct": -0.51,
-   "w1_pct": -0.11,
-   "m1_pct": -0.4
+   "last": 158.36,
+   "d1_pct": -0.07,
+   "w1_pct": 0.33,
+   "m1_pct": 0.04
   },
   "tnx": {
    "last": 4.84,
@@ -137,19 +137,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 23.11,
+    "value": 24.01,
     "op": ">",
     "threshold": 0,
-    "clear_by": 23.11,
+    "clear_by": 24.01,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 52.49,
+    "value": 53.61,
     "op": ">",
     "threshold": 25,
-    "clear_by": 27.49,
+    "clear_by": 28.61,
     "ok": true
    }
   ],
@@ -163,16 +163,16 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 23.11,
+    "now": 24.01,
     "threshold": 0,
-    "distance": 23.11,
+    "distance": 24.01,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 52.49,
+    "now": 53.61,
     "threshold": 25,
-    "distance": 27.49,
+    "distance": 28.61,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
@@ -184,7 +184,7 @@
     {
      "label": "WTI 3m",
      "need": "> 25",
-     "now": 16.53875704106358
+     "now": 17.39575136995839
     }
    ]
   }
@@ -195,16 +195,30 @@
    {
     "ticker": "FMX",
     "industry": "Beverages: non-alcoholic",
-    "trade_score": 68,
+    "trade_score": 67,
     "atr14_pct": 2.37,
     "mcap_B": 25.21,
     "breakout": true,
-    "days_on_list": 10,
+    "days_on_list": 11,
     "profitability": "profitable",
     "pos_vs_high": -0.4,
     "surge": 86,
     "dollar_vol_M": 97.6,
     "stop_pct_2_5atr": 5.93
+   },
+   {
+    "ticker": "WCN",
+    "industry": "Environmental services",
+    "trade_score": 65,
+    "atr14_pct": 2.77,
+    "mcap_B": 38.98,
+    "breakout": false,
+    "days_on_list": 11,
+    "profitability": "profitable",
+    "pos_vs_high": -2.4,
+    "surge": 93,
+    "dollar_vol_M": 418.5,
+    "stop_pct_2_5atr": 6.92
    },
    {
     "ticker": "HCSG",
@@ -213,7 +227,7 @@
     "atr14_pct": 4.72,
     "mcap_B": 1.55,
     "breakout": false,
-    "days_on_list": 86,
+    "days_on_list": 87,
     "profitability": "unknown",
     "pos_vs_high": -0.8,
     "surge": 21,
@@ -227,7 +241,7 @@
     "atr14_pct": 2.69,
     "mcap_B": 12.83,
     "breakout": true,
-    "days_on_list": 88,
+    "days_on_list": 89,
     "profitability": "profitable",
     "pos_vs_high": 0.0,
     "surge": 74,
@@ -235,32 +249,18 @@
     "stop_pct_2_5atr": 6.72
    },
    {
-    "ticker": "WCN",
-    "industry": "Environmental services",
-    "trade_score": 64,
-    "atr14_pct": 2.77,
-    "mcap_B": 38.98,
-    "breakout": false,
-    "days_on_list": 10,
-    "profitability": "profitable",
-    "pos_vs_high": -2.4,
-    "surge": 93,
-    "dollar_vol_M": 417.4,
-    "stop_pct_2_5atr": 6.92
-   },
-   {
     "ticker": "BLCO",
     "industry": "Medical specialties",
     "trade_score": 63,
-    "atr14_pct": 3.78,
+    "atr14_pct": 3.79,
     "mcap_B": 5.32,
     "breakout": true,
-    "days_on_list": 8,
+    "days_on_list": 9,
     "profitability": "marginal",
     "pos_vs_high": -0.7,
     "surge": 222,
     "dollar_vol_M": 20.6,
-    "stop_pct_2_5atr": 9.45
+    "stop_pct_2_5atr": 9.47
    },
    {
     "ticker": "KDP",
@@ -269,26 +269,26 @@
     "atr14_pct": 2.82,
     "mcap_B": 42.0,
     "breakout": false,
-    "days_on_list": 24,
+    "days_on_list": 25,
     "profitability": "profitable",
     "pos_vs_high": 0.0,
     "surge": 42,
-    "dollar_vol_M": 624.8,
+    "dollar_vol_M": 625.6,
     "stop_pct_2_5atr": 7.05
    },
    {
     "ticker": "EHC",
     "industry": "Medical/Nursing services",
     "trade_score": 62,
-    "atr14_pct": 3.36,
+    "atr14_pct": 3.37,
     "mcap_B": 9.79,
     "breakout": false,
-    "days_on_list": 88,
+    "days_on_list": 89,
     "profitability": "profitable",
     "pos_vs_high": 0.0,
     "surge": 30,
     "dollar_vol_M": 157.3,
-    "stop_pct_2_5atr": 8.4
+    "stop_pct_2_5atr": 8.43
    },
    {
     "ticker": "EG",
@@ -297,7 +297,7 @@
     "atr14_pct": 2.71,
     "mcap_B": 13.43,
     "breakout": false,
-    "days_on_list": 88,
+    "days_on_list": 89,
     "profitability": "profitable",
     "pos_vs_high": 0.0,
     "surge": 23,
@@ -372,6 +372,38 @@
   ],
   "congress_recent": [
    {
+    "ticker": "PG",
+    "member": "Maria Elvira Salazar",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-05",
+    "sector": null
+   },
+   {
+    "ticker": "NVDA",
+    "member": "Maria Elvira Salazar",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-05",
+    "sector": null
+   },
+   {
+    "ticker": "NVDA",
+    "member": "Daniel Meuser",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-05",
+    "sector": null
+   },
+   {
+    "ticker": "CSCO",
+    "member": "Maria Elvira Salazar",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-05",
+    "sector": null
+   },
+   {
     "ticker": "FMAO",
     "member": "Robert E. Latta",
     "side": "buy",
@@ -418,50 +450,18 @@
     "amount": "$1,001 - $15,000",
     "filed": "2026-10-30",
     "sector": null
-   },
-   {
-    "ticker": "JNJ",
-    "member": "Thomas H. Kean",
-    "side": "sell",
-    "amount": "$1,001 - $15,000",
-    "filed": "2026-10-30",
-    "sector": null
-   },
-   {
-    "ticker": "MDLZ",
-    "member": "Thomas H. Kean",
-    "side": "sell",
-    "amount": "$1,001 - $15,000",
-    "filed": "2026-10-30",
-    "sector": null
-   },
-   {
-    "ticker": "SYK",
-    "member": "Thomas H. Kean",
-    "side": "sell",
-    "amount": "$1,001 - $15,000",
-    "filed": "2026-10-30",
-    "sector": null
-   },
-   {
-    "ticker": "ABT",
-    "member": "Thomas H. Kean",
-    "side": "sell",
-    "amount": "$1,001 - $15,000",
-    "filed": "2026-10-30",
-    "sector": null
    }
   ],
   "note": null,
   "congress_status": {
-   "written": "2026-11-05",
+   "written": "2026-11-06",
    "dropped_impossible_dates": 0,
    "sources": {
     "House Clerk PTR": {
-     "rows": 9816,
-     "last_30d": 34,
+     "rows": 9820,
+     "last_30d": 37,
      "newest_tx": "2026-10-27",
-     "newest_filed": "2026-11-03"
+     "newest_filed": "2026-11-05"
     },
     "OGE 278-T via Open Cabinet": {
      "rows": 7828,
@@ -504,72 +504,65 @@
   "over_cap": false
  },
  "news": {
-  "date": "2026-11-04",
-  "asof": "2026-11-05 21:49 UTC",
-  "headline": "Democrats take Congress and the Dow jumps 3% \u2014 as oil falls 8% on bets the war will end",
-  "standfirst": "Democrats won the House and the Senate, and the Dow rose 3.03%, its best day since April 2025, with the S&P up 1.58% and the Russell 1.58%. WTI fell 8.29% to $88.12 on bets that pressure to end the Iran war will grow, and gold rose 3.27%. Amazon, Microsoft and Apple rose more than 5% each while chip and data-centre stocks fell, and the VIX fell to 16.61. The book is flat; Q4 is +34.64 realised, heat 0R.",
+  "date": "2026-11-05",
+  "asof": "2026-11-06 06:49 UTC",
+  "headline": "The worst day since April 2025 \u2014 chips crash on data-centre fears, and the Nasdaq enters a correction",
+  "standfirst": "The S&P fell 4.36%, the Nasdaq 5.52% and the Russell 4.45%, their worst day since April 2025, as investors priced slower data-centre growth under a Democratic Congress. Technology fell 8%, with AMD down 17.26% and Nvidia 9.26%, and the VIX jumped to 28.18. The two-year yield fell about 12bp on soft labour costs and December hike odds dropped to about two-thirds, while WTI rose 2.72% to $90.52. The book is flat; Q4 is +34.64 realised, heat 0R.",
   "themes": [
    {
     "kicker": "What's next",
-    "right": "Thursday: claims and Iran feedback \u00b7 Friday: payrolls",
-    "title": "The election is done; jobs and Iran are next",
+    "right": "Friday: payrolls",
+    "title": "Payrolls on the morning after a crash",
     "items": [
      {
       "tone": "c-cb",
-      "tag": "DATA",
-      "html": "<b>Jobless claims, productivity and labour costs</b>",
-      "when": "Thu \u00b7 2026-11-05",
-      "kind": "calendar"
-     },
-     {
-      "tone": "c-cb",
       "tag": "JOBS",
-      "html": "<b>October payrolls</b> \u2014 consensus about +55,000",
+      "html": "<b>October payrolls</b> \u2014 consensus about +65,000, unemployment 4.2%",
       "when": "Fri \u00b7 2026-11-06",
       "kind": "calendar"
      },
      {
       "tone": "c-fomc",
       "tag": "FOMC",
-      "html": "<b>December Fed meeting</b> \u2014 a hike priced at about 77%",
+      "html": "<b>December Fed meeting</b> \u2014 a hike priced at about two-thirds",
       "when": "Tue\u2013Wed \u00b7 2026-12-08",
       "kind": "calendar"
      }
     ],
-    "note": "<b>Thursday brings jobless claims and productivity</b>, and Qatar's expected feedback on the Iran talks falls inside the next day and a half. <b>Friday is October payrolls</b>, with a consensus of about 55,000. The Fed meets on <b>8-9 December</b>."
+    "note": "<b>Friday brings October payrolls</b>, with a consensus of about 65,000 and unemployment at 4.2%. After the close <b>Cloudflare</b> and <b>Airbnb</b> rose on beats, while <b>DraftKings</b>, <b>Atlassian</b> and <b>Axon</b> fell more than 10%. The Fed meets on <b>8-9 December</b>."
    }
   ],
-  "ondeck": "<b>Thursday brings jobless claims and productivity</b>, and Qatar's expected feedback on the Iran talks falls inside the next day and a half. <b>Friday is October payrolls</b>, with a consensus of about 55,000. The Fed meets on <b>8-9 December</b>.",
+  "ondeck": "<b>Friday brings October payrolls</b>, with a consensus of about 65,000 and unemployment at 4.2%. After the close <b>Cloudflare</b> and <b>Airbnb</b> rose on beats, while <b>DraftKings</b>, <b>Atlassian</b> and <b>Axon</b> fell more than 10%. The Fed meets on <b>8-9 December</b>.",
   "note": null
  },
  "provenance": {
   "macro": {
-   "asof": "2026-11-05 21:49 UTC",
+   "asof": "2026-11-06 06:48 UTC",
    "age_min": null
   },
   "gex": {
-   "asof": "2026-11-05 21:49 UTC",
+   "asof": "2026-11-06 06:49 UTC",
    "age_min": null
   },
   "stocks": {
-   "asof": "2026-11-05 21:58 UTC",
+   "asof": "2026-11-06 06:59 UTC",
    "age_min": null
   },
   "institutional_holdings": {
-   "asof": "2026-11-05 22:13 UTC",
+   "asof": "2026-11-06 07:22 UTC",
    "quarter": "2026-06-30"
   },
   "congress_trades": {
-   "asof": "2026-11-05 22:11 UTC",
+   "asof": "2026-11-06 07:20 UTC",
    "status": {
-    "written": "2026-11-05",
+    "written": "2026-11-06",
     "dropped_impossible_dates": 0,
     "sources": {
      "House Clerk PTR": {
-      "rows": 9816,
-      "last_30d": 34,
+      "rows": 9820,
+      "last_30d": 37,
       "newest_tx": "2026-10-27",
-      "newest_filed": "2026-11-03"
+      "newest_filed": "2026-11-05"
      },
      "OGE 278-T via Open Cabinet": {
       "rows": 7828,
@@ -591,28 +584,13 @@
    }
   },
   "wire": {
-   "asof": "2026-11-05 21:49 UTC"
+   "asof": "2026-11-06 06:49 UTC"
   }
  },
  "missing": [],
  "changed": {
   "first_pack": false,
-  "prev_date": "2026-11-04",
-  "changes": [
-   {
-    "kind": "market",
-    "what": "vix",
-    "was": 18.27,
-    "now": 28.18,
-    "why": "volatility repriced"
-   },
-   {
-    "kind": "screener",
-    "what": "new in the top setups",
-    "was": null,
-    "now": "RNR, KDP, EHC",
-    "why": "names the engine ranked highest that were not there yesterday"
-   }
-  ]
+  "prev_date": "2026-11-05",
+  "changes": []
  }
 }
