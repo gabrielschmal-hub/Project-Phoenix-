@@ -1,10 +1,10 @@
 {
- "asof": "2026-11-09 10:53 UTC",
+ "asof": "2026-11-09 14:28 UTC",
  "date": "2026-11-09",
  "summary": {
-  "pass": 31,
-  "warn": 5,
-  "fail": 0
+  "pass": 32,
+  "warn": 3,
+  "fail": 1
  },
  "checks": [
   {
@@ -94,15 +94,15 @@
   {
    "id": "chains.coverage",
    "area": "data",
-   "status": "warn",
-   "detail": "85 of 103 names have an option chain on file",
+   "status": "pass",
+   "detail": "119 of 103 names have an option chain on file",
    "where": "step mme_chains (CBOE)"
   },
   {
    "id": "bars.coverage",
    "area": "data",
    "status": "pass",
-   "detail": "85 of 85 names have Yahoo bars (chart read, patterns, realised vol)",
+   "detail": "119 of 119 names have Yahoo bars (chart read, patterns, realised vol)",
    "where": "step ic_screen (_ic_hist, Yahoo)"
   },
   {
@@ -116,14 +116,14 @@
    "id": "screen.rules",
    "area": "options",
    "status": "pass",
-   "detail": "35 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
+   "detail": "31 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
    "where": "run_ic_screen (outputs/ic_screen.json)"
   },
   {
    "id": "screen.proposed",
    "area": "options",
    "status": "pass",
-   "detail": "16 proposed of 35 winners",
+   "detail": "13 proposed of 31 winners",
    "where": "run_ic_screen"
   },
   {
@@ -137,14 +137,14 @@
    "id": "dossier.sections",
    "area": "dossier",
    "status": "pass",
-   "detail": "missing: earnings 1",
+   "detail": "missing: dealer 2, earnings 1",
    "where": "run_dossier (names in outputs/dossier.json 'missing_names')"
   },
   {
    "id": "forward.marked",
    "area": "forward test",
-   "status": "warn",
-   "detail": "163 of 196 open trades marked for 2026-11-09 (0 opened today)",
+   "status": "fail",
+   "detail": "193 of 196 open trades marked for 2026-11-09 (9 opened today)",
    "where": "run_ic_record step 3a"
   },
   {
@@ -158,28 +158,28 @@
    "id": "forward.size",
    "area": "forward test",
    "status": "pass",
-   "detail": "highest trade id 208 (the app pages 1,000 at a time up to 20,000)",
+   "detail": "highest trade id 217 (the app pages 1,000 at a time up to 20,000)",
    "where": "app optRowsAll"
   },
   {
    "id": "decisions.logged",
    "area": "learning",
    "status": "pass",
-   "detail": "0 options decisions logged for 2026-11-09",
+   "detail": "119 options decisions logged for 2026-11-09",
    "where": "run_ic_record (decisions table)"
   },
   {
    "id": "forward.recap",
    "area": "forward test",
    "status": "pass",
-   "detail": "recap of 126 trades, 3 closed at their planned exit",
+   "detail": "recap of 133 trades, 4 closed at their planned exit",
    "where": "run_ic_recap"
   },
   {
    "id": "news",
    "area": "data",
    "status": "pass",
-   "detail": "180 Finnhub calls, 152/179 names with news, 0 failed",
+   "detail": "200 Finnhub calls, 172/199 names with news, 0 failed",
    "where": "run_news (Finnhub)"
   },
   {
@@ -193,7 +193,7 @@
    "id": "portfolios.inputs",
    "area": "portfolios",
    "status": "pass",
-   "detail": "core 4 (the builder's Long Term template (no saved portfolio found)), satellite 5, tactical 15, options 16",
+   "detail": "core 4 (the builder's Long Term template (no saved portfolio found)), satellite 5, tactical 15, options 13",
    "where": "run_portfolios (stocks.json trade/invest books, ic_screen proposed, Supabase portfolios)"
   },
   {
@@ -207,7 +207,7 @@
    "id": "portfolios.fx",
    "area": "portfolios",
    "status": "pass",
-   "detail": "EURUSD 1.1197 from yahoo",
+   "detail": "EURUSD 1.1203 from yahoo",
    "where": "_fx_usd_rates (Yahoo)"
   },
   {
@@ -256,7 +256,7 @@
    "id": "heartbeats",
    "area": "pipeline",
    "status": "warn",
-   "detail": "22 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | senate_efd: agreement HTTP 403 | house_ptr: 11 unseen filings \u00b7 0 PDFs parsed \u00b7 11 fetch/parse failures {'pdftotext empty': 11} \u00b7 0 rows",
+   "detail": "23 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | house_ptr: 11 unseen filings \u00b7 0 PDFs parsed \u00b7 11 fetch/parse failures {'pdftotext empty': 11} \u00b7 0 rows",
    "where": "heartbeats table"
   }
  ]
