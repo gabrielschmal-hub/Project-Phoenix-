@@ -398,11 +398,18 @@ function acceptSession(j){
   storeSession({ access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Math.floor(Date.now()/1000) + Number(j.expires_in || 3600), email: (j.user && j.user.email) || session?.email || "", uid: (j.user && j.user.id) || session?.uid || "" });
   return true;
 }
+let refreshing = null;   // one refresh at a time: refresh tokens are single-use
 async function freshToken(){
   if (!session) throw Object.assign(new Error("signed out"), { status: 401 });
   if (session.expires_at - 60 > Date.now()/1000) return session.access_token;
-  try { acceptSession(await supaAuth("token?grant_type=refresh_token", { refresh_token: session.refresh_token })); }
-  catch(e){ if (e.status >= 400 && e.status < 500){ storeSession(null); } throw e; }
+  if (!refreshing){
+    const rt = session.refresh_token;
+    refreshing = supaAuth("token?grant_type=refresh_token", { refresh_token: rt })
+      .then(j => { acceptSession(j); })
+      .catch(e => { if (e.status >= 400 && e.status < 500){ S.prevUid = session?.uid || S.prevUid; S.authEmail = session?.email || S.authEmail; storeSession(null); e.status = 401; } throw e; })
+      .finally(() => { refreshing = null; });
+  }
+  await refreshing;
   return session.access_token;
 }
 async function rest(method, q, body, extra = {}){
@@ -441,7 +448,12 @@ async function flush(){
     try { await writeDoc(id, id.startsWith("tx-") && !body.list.length ? null : body); }
     catch (e) {
       dirty.add(id);
-      if (e && e.status === 401){ dirty.clear(); S.mode = "auth"; render(); toast("Your session ended. Sign in again to keep saving."); return; }
+      if (e && e.status === 401){
+        if (session){ S.prevUid = session.uid; S.authEmail = session.email; storeSession(null); }
+        S.allowChecked = false; S.mode = "auth";
+        S.authMsg = "You were signed out. Sign in again with your password — your unsaved changes are kept on this screen and will be saved straight after.";
+        render(); return;
+      }
       if (e && (e.code === "quota_exceeded" || e.code === "23514")) { toast("That month holds too much data to save. Export and split it."); dirty.delete(id); }
       else if (e && (e.code === "invalid_argument" || e.code === "revoked")) { toast("Changes can't be saved with your current access."); dirty.clear(); }
       else toast("Couldn't save — retrying.");
@@ -525,8 +537,11 @@ async function doAuth(kind){
       if (!pw){ throw new Error("Enter your password, or use “E-mail me a sign-in link”."); }
       acceptSession(await supaAuth("token?grant_type=password", { email, password: pw }));
       S.authBusy = false; S.userName = email.split("@")[0]; S.mode = "loading"; render();
+      if (S.prevUid && S.prevUid === session.uid && dirty.size){ try { await flush(); } catch(_) {} }
+      else if (S.prevUid && S.prevUid !== session.uid){ dirty.clear(); S.meta = null; S.assign = {}; S.tx = {}; S.moves = []; invalidate(); }
+      S.prevUid = null; S.authMsg = "";
       try { await supaLoad(); } catch(e){ S.authBusy = false; S.mode = "auth"; render(); return; }
-      S.mode = "cloud"; render(); return;
+      S.mode = "cloud"; render(); if (!dirty.size) toast("Signed in · everything is saved"); return;
     }
     if (kind === "signup"){
       if (pw.length < 8) throw new Error("Choose a password of at least 8 characters.");
@@ -546,7 +561,7 @@ async function doAuth(kind){
 async function signOut(){
   if (BACKEND === "supabase"){
     if (dirty.size) await flush();
-    try { if (session) await fetch(SUPA.url + "/auth/v1/logout", { method: "POST", headers: { apikey: SUPA.key, Authorization: "Bearer " + session.access_token } }); } catch(_) {}
+    try { if (session) await fetch(SUPA.url + "/auth/v1/logout?scope=local", { method: "POST", headers: { apikey: SUPA.key, Authorization: "Bearer " + session.access_token } }); } catch(_) {}
     storeSession(null);
   }
   S.allowChecked = false; S.meta = null; S.assign = {}; S.tx = {}; S.moves = []; dirty.clear(); invalidate(); closeSheet(); S.mode = "auth"; render();
