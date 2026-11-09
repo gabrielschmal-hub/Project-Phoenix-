@@ -54,7 +54,11 @@
 :root[data-theme="dark"]{ color-scheme:dark; }
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px);-webkit-text-size-adjust:100%}
-html,body{margin:0;overflow-x:clip}
+html,body{margin:0}
+html{height:100%}
+body{min-height:100%;min-height:100dvh;display:flex;flex-direction:column}
+#app{flex:1 0 auto;width:100%;overflow-x:clip}
+#pxnav{overflow-x:clip}
 body{background:var(--bg);color:var(--ink);font:14.5px/1.55 "Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -735,7 +739,7 @@ const TABS = [["overview","Overview","Where this month stands"],["budget","Budge
 /* ---------------- routing (#hash, like Phoenix) ---------------- */
 function viewFromHash(){ const h = (location.hash || "").replace(/^#/, "").toLowerCase(); return TABS.some(t => t[0] === h) ? h : "overview"; }
 function go(v){ S.account = null; S.editCats = false; if (location.hash !== "#" + v) location.hash = v; else { S.view = v; render(); } window.scrollTo(0, 0); }
-window.addEventListener("hashchange", () => { S.view = viewFromHash(); S.account = null; S.editCats = false; render(); });
+window.addEventListener("hashchange", () => { S.view = viewFromHash(); S.account = null; S.editCats = false; window.scrollTo(0, 0); render(); window.scrollTo(0, 0); });
 S.view = viewFromHash();
 
 /* ---------------- rendering ---------------- */
