@@ -1,43 +1,43 @@
 {
  "trade_book": {
   "lane": "trade_book",
-  "ts": "2026-11-07T07:04:22.241981+00:00",
+  "ts": "2026-11-09T10:02:30.278374+00:00",
   "ok": true,
   "note": "50 rows \u00b7 aldemar closed:20 \u00b7 gabriel closed:29 \u00b7 gabriel open:1"
  },
  "house_ptr": {
   "lane": "house_ptr",
-  "ts": "2026-11-07T07:33:16.980518+00:00",
-  "ok": true,
-  "note": "1 PDFs \u00b7 3 rows \u00b7 3 tickers \u00b7 11 failures {'pdftotext empty': 11}"
+  "ts": "2026-11-09T10:30:13.631806+00:00",
+  "ok": false,
+  "note": "11 unseen filings \u00b7 0 PDFs parsed \u00b7 11 fetch/parse failures {'pdftotext empty': 11} \u00b7 0 rows"
  },
  "senate_efd": {
   "lane": "senate_efd",
-  "ts": "2026-11-07T07:33:17.898370+00:00",
+  "ts": "2026-11-09T10:30:14.399228+00:00",
   "ok": false,
   "note": "agreement HTTP 403"
  },
  "executive": {
   "lane": "executive",
-  "ts": "2026-11-07T07:33:19.554324+00:00",
+  "ts": "2026-11-09T10:30:16.207611+00:00",
   "ok": true,
   "note": "7866 rows \u00b7 merged 0 \u00b7 export 2026-10-29"
  },
  "insider": {
   "lane": "insider",
-  "ts": "2026-11-07T07:34:22.356371+00:00",
+  "ts": "2026-11-09T10:30:48.985369+00:00",
   "ok": true,
-  "note": "136 tickers \u00b7 165 new Form 4s \u00b7 478 rows \u00b7 334 new P/S \u00b7 4 no CIK \u00b7 0 failures"
+  "note": "137 tickers \u00b7 12 new Form 4s \u00b7 24 rows \u00b7 19 new P/S \u00b7 3 no CIK \u00b7 0 failures"
  },
  "iv_em": {
   "lane": "iv_em",
-  "ts": "2026-11-07T07:48:54.791500+00:00",
+  "ts": "2026-11-09T10:37:54.407953+00:00",
   "ok": true,
-  "note": "610 requested (160 tier A, S&P 500 refreshed) \u00b7 577 straddle \u00b7 0 iv-proxy \u00b7 20 no chain \u00b7 13 failures \u00b7 879 on file \u00b7 545s"
+  "note": "160 requested (160 tier A) \u00b7 129 straddle \u00b7 0 iv-proxy \u00b7 15 no chain \u00b7 16 failures \u00b7 879 on file \u00b7 131s"
  },
  "group_strength": {
   "lane": "group_strength",
-  "ts": "2026-11-07T07:33:08.197124+00:00",
+  "ts": "2026-11-09T10:30:04.024821+00:00",
   "ok": true,
   "note": "67/121 industries ok \u00b7 0/20 sectors ok"
  },
@@ -49,98 +49,98 @@
  },
  "context_backfill": {
   "lane": "context_backfill",
-  "ts": "2026-11-07T08:03:04.448035+00:00",
+  "ts": "2026-11-09T10:53:43.116656+00:00",
   "ok": true,
   "note": "165 rows over 6 days \u00b7 165 were missing context"
  },
  "gex_stocks": {
   "lane": "gex_stocks",
-  "ts": "2026-11-07T07:06:20.661316+00:00",
+  "ts": "2026-11-09T10:04:31.899475+00:00",
   "ok": true,
   "note": "27 written \u00b7 2 thin \u00b7 121 failed of 150 \u00b7 first names GOOG,AAPL,ALAB,AMD,AMZN,ARM,AVGO,CRWD,HOOD,IBIT,IBM,INTC \u00b7 files present 11/12 \u00b7 first failure: ALAB: degenerate_chain"
  },
  "group_backfill": {
   "lane": "group_backfill",
-  "ts": "2026-11-07T08:01:55.589640+00:00",
+  "ts": "2026-11-09T10:52:24.745684+00:00",
   "ok": false,
-  "note": "0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026-08-16 -> 2026-11-06 (56 sessions)"
+  "note": "0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026-08-16 -> 2026-11-09 (57 sessions)"
  },
  "mme_map": {
   "lane": "mme_map",
-  "ts": "2026-11-07T07:50:35.141729+00:00",
+  "ts": "2026-11-09T10:39:33.503003+00:00",
   "ok": true,
   "note": "27/27 \u00b7 0 from upload \u00b7 19 standouts \u00b7 missing 0"
  },
  "mme_chains": {
   "lane": "mme_chains",
-  "ts": "2026-11-07T07:50:32.547268+00:00",
+  "ts": "2026-11-09T10:39:30.919195+00:00",
   "ok": true,
-  "note": "101/120 names \u00b7 83848 contracts \u00b7 failed 19"
+  "note": "85/120 names \u00b7 74044 contracts \u00b7 failed 35"
  },
  "ic_screen": {
   "lane": "ic_screen",
-  "ts": "2026-11-07T07:50:40.659072+00:00",
+  "ts": "2026-11-09T10:39:39.097991+00:00",
   "ok": true,
-  "note": "101 names \u00b7 39 winners \u00b7 16 proposed \u00b7 62 skipped"
+  "note": "85 names \u00b7 35 winners \u00b7 16 proposed \u00b7 50 skipped"
  },
  "ic_record": {
   "lane": "ic_record",
-  "ts": "2026-11-07T07:51:31.611202+00:00",
+  "ts": "2026-11-09T10:40:41.639446+00:00",
   "ok": true,
-  "note": "marked 196 \u00b7 archived, vol 101, no opens (workflow_dispatch run \u2014 the forward test opens in the scheduled morning run only)"
+  "note": "marked 166 \u00b7 archived, vol 85, no opens (workflow_dispatch run \u2014 the forward test opens in the scheduled morning run only)"
  },
  "dossier": {
   "lane": "dossier",
-  "ts": "2026-11-07T07:55:25.826234+00:00",
+  "ts": "2026-11-09T10:44:21.818049+00:00",
   "ok": true,
-  "note": "101 names \u00b7 archived 101 \u00b7 missing earnings 1"
+  "note": "85 names \u00b7 archived 85 \u00b7 missing earnings 1"
  },
  "portfolios": {
   "lane": "portfolios",
-  "ts": "2026-11-07T07:55:26.777646+00:00",
+  "ts": "2026-11-09T10:44:22.857790+00:00",
   "ok": true,
   "note": "regime ENERGY_GRIND \u00b7 tactical 15 \u00b7 options 16 \u00b7 core 4"
  },
  "health": {
   "lane": "health",
-  "ts": "2026-11-07T08:03:06.031770+00:00",
+  "ts": "2026-11-09T10:53:44.834494+00:00",
   "ok": true,
-  "note": "32 pass \u00b7 4 warn \u00b7 0 fail"
+  "note": "31 pass \u00b7 5 warn \u00b7 0 fail"
  },
  "pf_track": {
   "lane": "pf_track",
-  "ts": "2026-11-07T07:55:27.593261+00:00",
+  "ts": "2026-11-09T10:44:23.677373+00:00",
   "ok": true,
   "note": "no active book \u00b7 0 option trades"
  },
  "news": {
   "lane": "news",
-  "ts": "2026-11-07T07:55:22.779607+00:00",
+  "ts": "2026-11-09T10:44:18.813962+00:00",
   "ok": true,
-  "note": "195 calls \u00b7 181/194 names with news \u00b7 0 failed"
+  "note": "180 calls \u00b7 152/179 names with news \u00b7 0 failed"
  },
  "ic_recap": {
   "lane": "ic_recap",
-  "ts": "2026-11-07T07:55:24.413856+00:00",
+  "ts": "2026-11-09T10:44:20.710422+00:00",
   "ok": true,
-  "note": "126 trades \u00b7 week -8916$ \u00b7 month -8916$"
+  "note": "126 trades \u00b7 week +0$ \u00b7 month -8916$"
  },
  "auto_brief": {
   "lane": "auto_brief",
-  "ts": "2026-11-07T07:55:27.860645+00:00",
+  "ts": "2026-11-09T10:44:24.242405+00:00",
   "ok": true,
   "note": "Nasdaq 100 +1.40%: semiconductors strongest at +3.62%"
  },
  "run_full": {
   "lane": "run_full",
-  "ts": "2026-11-07T08:03:06.241345+00:00",
+  "ts": "2026-11-09T10:53:45.060215+00:00",
   "ok": true,
-  "note": "finished in 58.8 min; every step ok"
+  "note": "finished in 51.3 min; every step ok"
  },
  "ic_screen_b": {
   "lane": "ic_screen_b",
-  "ts": "2026-11-07T07:50:42.345365+00:00",
+  "ts": "2026-11-09T10:39:42.162273+00:00",
   "ok": true,
-  "note": "101 names \u00b7 41 winners \u00b7 18 proposed \u00b7 60 skipped"
+  "note": "85 names \u00b7 37 winners \u00b7 19 proposed \u00b7 48 skipped"
  }
 }

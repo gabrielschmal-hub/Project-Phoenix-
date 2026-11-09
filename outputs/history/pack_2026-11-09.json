@@ -1,0 +1,589 @@
+{
+ "schema": "phoenix-fact-pack/1",
+ "date": "2026-11-09",
+ "asof": "2026-11-09 10:53 UTC",
+ "market": {
+  "regime": "ENERGY_GRIND",
+  "regime_held_weeks": 5,
+  "spx": {
+   "last": 7376.86,
+   "chg_1d_pct": 0.31,
+   "vs_50d_pct": -3.94,
+   "vs_200d_pct": 0.71
+  },
+  "vix": 25.64,
+  "dxy": null,
+  "us10y": null,
+  "gold": null,
+  "wti": null,
+  "gex": {
+   "net_B": -91.98,
+   "regime": "negative",
+   "flip": null,
+   "dist_to_flip_pct": 3.99,
+   "call_wall": null,
+   "put_wall": null,
+   "spot": 7376.86
+  }
+ },
+ "macro": {
+  "spx": {
+   "last": 7376.86,
+   "d1_pct": 0.31,
+   "w1_pct": -2.68,
+   "m1_pct": -5.0
+  },
+  "ndx": {
+   "last": 24579.43,
+   "d1_pct": 1.09,
+   "w1_pct": -3.37,
+   "m1_pct": -9.61
+  },
+  "dow": {
+   "last": 51285.73,
+   "d1_pct": -0.46,
+   "w1_pct": -0.94,
+   "m1_pct": 0.11
+  },
+  "rut": {
+   "last": 2754.11,
+   "d1_pct": 0.89,
+   "w1_pct": -2.05,
+   "m1_pct": -1.43
+  },
+  "gold": {
+   "last": 4074.9,
+   "d1_pct": -0.94,
+   "w1_pct": 4.51,
+   "m1_pct": -1.97
+  },
+  "wti": {
+   "last": 90.83,
+   "d1_pct": 0.34,
+   "w1_pct": -12.76,
+   "m1_pct": -0.72
+  },
+  "btc": {
+   "last": 75747.0,
+   "d1_pct": -0.26,
+   "w1_pct": -1.88,
+   "m1_pct": -7.26
+  },
+  "dxy": {
+   "last": 102.3,
+   "d1_pct": 0.74,
+   "w1_pct": 0.41,
+   "m1_pct": 0.16
+  },
+  "vix": {
+   "last": 25.64,
+   "d1_pct": -9.01,
+   "w1_pct": 32.03,
+   "m1_pct": 66.39
+  },
+  "usdjpy": {
+   "last": 157.5,
+   "d1_pct": -0.54,
+   "w1_pct": -0.19,
+   "m1_pct": -0.36
+  },
+  "tnx": {
+   "last": 4.86,
+   "d1_bp": 2,
+   "w1_bp": -7,
+   "m1_bp": -37
+  },
+  "us02": {
+   "last": 4.46,
+   "d1_bp": 0,
+   "w1_bp": -10,
+   "m1_bp": -29
+  },
+  "real10": {
+   "last": 2.6,
+   "d1_bp": 0,
+   "w1_bp": 0,
+   "m1_bp": -27
+  },
+  "hy": {
+   "last": 3.48,
+   "d1_bp": 0,
+   "w1_bp": 0,
+   "m1_bp": 0
+  },
+  "cpi_yoy": {
+   "last": 3.72,
+   "prev_print": 3.35
+  },
+  "curve_2s10s_bp": 40,
+  "curve_2s10s_chg_1m_bp": -8,
+  "absent": [],
+  "rows": 251
+ },
+ "regime_gates": {
+  "regime": "ENERGY_GRIND",
+  "held_weeks": 5,
+  "since": "2026-10-05",
+  "drivers": [
+   {
+    "key": "cpi_chg_3m",
+    "label": "CPI 3m change",
+    "value": 0.37,
+    "op": ">",
+    "threshold": 0.3,
+    "clear_by": 0.07,
+    "ok": true
+   },
+   {
+    "key": "wti_vs_2yr",
+    "label": "WTI vs 2yr",
+    "value": 22.74,
+    "op": ">",
+    "threshold": 0,
+    "clear_by": 22.74,
+    "ok": true
+   },
+   {
+    "key": "wti_12m",
+    "label": "WTI 12m",
+    "value": 52.02,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 27.02,
+    "ok": true
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI 3m change falls below 0.3",
+    "now": 0.37,
+    "threshold": 0.3,
+    "distance": 0.07,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI vs 2yr falls below 0",
+    "now": 22.74,
+    "threshold": 0,
+    "distance": 22.74,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI 12m falls below 25",
+    "now": 52.02,
+    "threshold": 25,
+    "distance": 27.02,
+    "then": "ENERGY_GRIND no longer qualifies"
+   }
+  ],
+  "runner_up": {
+   "regime": "ENERGY_SPIKE",
+   "score": null,
+   "gates_missing": 1,
+   "needs": [
+    {
+     "label": "WTI 3m",
+     "need": "> 25",
+     "now": 16.180610739958556
+    }
+   ]
+  }
+ },
+ "screener": {
+  "n_candidates": 376,
+  "top": [
+   {
+    "ticker": "FMX",
+    "industry": "Beverages: non-alcoholic",
+    "trade_score": 69,
+    "atr14_pct": 2.37,
+    "mcap_B": 25.21,
+    "breakout": true,
+    "days_on_list": 14,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 86,
+    "dollar_vol_M": 101.5,
+    "stop_pct_2_5atr": 5.93
+   },
+   {
+    "ticker": "ZYME",
+    "industry": "Pharmaceuticals: major",
+    "trade_score": 68,
+    "atr14_pct": 4.31,
+    "mcap_B": 1.71,
+    "breakout": true,
+    "days_on_list": 82,
+    "profitability": "unknown",
+    "pos_vs_high": 0.0,
+    "surge": 84,
+    "dollar_vol_M": 39.9,
+    "stop_pct_2_5atr": 10.77
+   },
+   {
+    "ticker": "KNSA",
+    "industry": "Pharmaceuticals: major",
+    "trade_score": 66,
+    "atr14_pct": 6.69,
+    "mcap_B": 4.4,
+    "breakout": true,
+    "days_on_list": 92,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 103,
+    "dollar_vol_M": 85.9,
+    "stop_pct_2_5atr": 16.73
+   },
+   {
+    "ticker": "BLCO",
+    "industry": "Medical specialties",
+    "trade_score": 65,
+    "atr14_pct": 3.81,
+    "mcap_B": 5.32,
+    "breakout": true,
+    "days_on_list": 12,
+    "profitability": "marginal",
+    "pos_vs_high": -0.4,
+    "surge": 222,
+    "dollar_vol_M": 20.9,
+    "stop_pct_2_5atr": 9.53
+   },
+   {
+    "ticker": "WCN",
+    "industry": "Environmental services",
+    "trade_score": 65,
+    "atr14_pct": 2.97,
+    "mcap_B": 38.98,
+    "breakout": false,
+    "days_on_list": 14,
+    "profitability": "profitable",
+    "pos_vs_high": -3.7,
+    "surge": 93,
+    "dollar_vol_M": 421.2,
+    "stop_pct_2_5atr": 7.43
+   },
+   {
+    "ticker": "KDP",
+    "industry": "Beverages: non-alcoholic",
+    "trade_score": 63,
+    "atr14_pct": 2.96,
+    "mcap_B": 42.0,
+    "breakout": false,
+    "days_on_list": 28,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 42,
+    "dollar_vol_M": 640.8,
+    "stop_pct_2_5atr": 7.4
+   },
+   {
+    "ticker": "HCSG",
+    "industry": "Miscellaneous commercial services",
+    "trade_score": 62,
+    "atr14_pct": 5.02,
+    "mcap_B": 1.55,
+    "breakout": false,
+    "days_on_list": 90,
+    "profitability": "unknown",
+    "pos_vs_high": -4.1,
+    "surge": 21,
+    "dollar_vol_M": 19.5,
+    "stop_pct_2_5atr": 12.55
+   },
+   {
+    "ticker": "EG",
+    "industry": "Property/Casualty insurance",
+    "trade_score": 61,
+    "atr14_pct": 2.82,
+    "mcap_B": 13.43,
+    "breakout": false,
+    "days_on_list": 92,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 23,
+    "dollar_vol_M": 180.6,
+    "stop_pct_2_5atr": 7.05
+   }
+  ],
+  "leaning": [],
+  "counts": {}
+ },
+ "smart_money": {
+  "quarter": "2026-06-30",
+  "accumulating": [],
+  "distributing": [],
+  "notable": [
+   {
+    "ticker": "GOOGL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 37764088383,
+    "sector": null
+   },
+   {
+    "ticker": "GE",
+    "manager": "TCI Fund (Hohn)",
+    "action": "TRIM",
+    "value_usd": 17725353519,
+    "sector": null
+   },
+   {
+    "ticker": "V",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 10462232091,
+    "sector": null
+   },
+   {
+    "ticker": "DVA",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "TRIM",
+    "value_usd": 6425268898,
+    "sector": null
+   },
+   {
+    "ticker": "SPGI",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 5735017808,
+    "sector": null
+   },
+   {
+    "ticker": "DAL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 5368591200,
+    "sector": null
+   },
+   {
+    "ticker": "IEP",
+    "manager": "Icahn Capital",
+    "action": "ADD",
+    "value_usd": 4458616003,
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 4389741007,
+    "sector": null
+   }
+  ],
+  "congress_recent": [
+   {
+    "ticker": "PG",
+    "member": "Maria Elvira Salazar",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-05",
+    "sector": null
+   },
+   {
+    "ticker": "NVDA",
+    "member": "Maria Elvira Salazar",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-05",
+    "sector": null
+   },
+   {
+    "ticker": "NVDA",
+    "member": "Daniel Meuser",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-05",
+    "sector": null
+   },
+   {
+    "ticker": "CSCO",
+    "member": "Maria Elvira Salazar",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-05",
+    "sector": null
+   },
+   {
+    "ticker": "TLK",
+    "member": "Josh Gottheimer",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-05",
+    "sector": null
+   },
+   {
+    "ticker": "AMAT",
+    "member": "Josh Gottheimer",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-05",
+    "sector": null
+   },
+   {
+    "ticker": "BHE",
+    "member": "Josh Gottheimer",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-05",
+    "sector": null
+   },
+   {
+    "ticker": "FMAO",
+    "member": "Robert E. Latta",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-03",
+    "sector": null
+   },
+   {
+    "ticker": "AVGO",
+    "member": "John J Mr McGuire",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-01",
+    "sector": null
+   },
+   {
+    "ticker": "MU",
+    "member": "John J Mr McGuire",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-01",
+    "sector": null
+   }
+  ],
+  "note": null,
+  "congress_status": {
+   "written": "2026-11-09",
+   "dropped_impossible_dates": 0,
+   "sources": {
+    "House Clerk PTR": {
+     "rows": 9823,
+     "last_30d": 31,
+     "newest_tx": "2026-10-27",
+     "newest_filed": "2026-11-05"
+    },
+    "OGE 278-T via Open Cabinet": {
+     "rows": 7828,
+     "last_30d": 0,
+     "newest_tx": "2026-08-31",
+     "newest_filed": "2026-08-12"
+    },
+    "Senate eFD": {
+     "rows": 1016,
+     "last_30d": 0,
+     "newest_tx": "2026-09-25",
+     "newest_filed": "2026-10-22"
+    }
+   },
+   "quiet": [
+    "OGE 278-T via Open Cabinet",
+    "Senate eFD"
+   ]
+  }
+ },
+ "portfolio": {
+  "open": [
+   {
+    "ticker": "GOOG",
+    "entry": 325.86,
+    "stop": 305.67,
+    "last": null,
+    "R": null,
+    "managed": true,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   }
+  ],
+  "heat_R": 1.01,
+  "cap_R": 3.0,
+  "unsized": 0,
+  "note": null,
+  "over_cap": false
+ },
+ "news": {
+  "date": "2026-11-06",
+  "asof": "2026-11-09 10:02 UTC",
+  "headline": "Payrolls nearly triple the forecast and chips bounce \u2014 but the S&P still loses 2.7% on the week",
+  "standfirst": "October payrolls rose 165,000 against about 59,000 expected and unemployment fell to 4.1%, pushing the two-year yield up and December hike odds back toward 78%. The Nasdaq rose 1.09% as chips won back part of Thursday's crash, with AMD up 11.04%, but the Dow fell 0.46% and most stocks fell. For the week the S&P lost 2.68% and the Nasdaq 3.37%, while WTI fell 13.23% and gold rose 5.02%. The book is flat; Q4 is +34.64 realised, heat 0R.",
+  "themes": [
+   {
+    "kicker": "What's next",
+    "right": "the week of 9 November",
+    "title": "After the election and the jobs report, the focus turns to December",
+    "items": [
+     {
+      "tone": "c-fomc",
+      "tag": "FOMC",
+      "html": "<b>December Fed meeting</b> \u2014 a hike priced near 78% on prediction markets",
+      "when": "Tue\u2013Wed \u00b7 2026-12-08",
+      "kind": "calendar"
+     }
+    ],
+    "note": "<b>The two big events are behind the market</b>: Congress has changed hands and the October jobs report is out. The next fixed point is the Fed on <b>8-9 December</b>, with the data before it now pointing toward a hike."
+   }
+  ],
+  "ondeck": "<b>The two big events are behind the market</b>: Congress has changed hands and the October jobs report is out. The next fixed point is the Fed on <b>8-9 December</b>, with the data before it now pointing toward a hike.",
+  "note": null
+ },
+ "provenance": {
+  "macro": {
+   "asof": "2026-11-09 10:02 UTC",
+   "age_min": null
+  },
+  "gex": {
+   "asof": "2026-11-09 10:02 UTC",
+   "age_min": null
+  },
+  "stocks": {
+   "asof": "2026-11-09 10:11 UTC",
+   "age_min": null
+  },
+  "institutional_holdings": {
+   "asof": "2026-11-09 10:31 UTC",
+   "quarter": "2026-06-30"
+  },
+  "congress_trades": {
+   "asof": "2026-11-09 10:30 UTC",
+   "status": {
+    "written": "2026-11-09",
+    "dropped_impossible_dates": 0,
+    "sources": {
+     "House Clerk PTR": {
+      "rows": 9823,
+      "last_30d": 31,
+      "newest_tx": "2026-10-27",
+      "newest_filed": "2026-11-05"
+     },
+     "OGE 278-T via Open Cabinet": {
+      "rows": 7828,
+      "last_30d": 0,
+      "newest_tx": "2026-08-31",
+      "newest_filed": "2026-08-12"
+     },
+     "Senate eFD": {
+      "rows": 1016,
+      "last_30d": 0,
+      "newest_tx": "2026-09-25",
+      "newest_filed": "2026-10-22"
+     }
+    },
+    "quiet": [
+     "OGE 278-T via Open Cabinet",
+     "Senate eFD"
+    ]
+   }
+  },
+  "wire": {
+   "asof": "2026-11-09 10:02 UTC"
+  }
+ },
+ "missing": [],
+ "changed": {
+  "first_pack": false,
+  "prev_date": "2026-11-07",
+  "changes": []
+ }
+}

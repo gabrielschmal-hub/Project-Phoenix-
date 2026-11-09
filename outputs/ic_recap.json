@@ -1,9 +1,9 @@
 {
- "asof": "2026-11-07 07:55 UTC",
- "date": "2026-11-07",
+ "asof": "2026-11-09 10:44 UTC",
+ "date": "2026-11-09",
  "trades": 126,
- "open": 125,
- "closed_planned": 0,
+ "open": 124,
+ "closed_planned": 3,
  "daily": [
   {
    "date": "2026-10-30",
@@ -76,13 +76,53 @@
    "n": 117,
    "risk": 124453.0,
    "cum": -13197.65
+  },
+  {
+   "date": "2026-11-09",
+   "mtm": -9760.25,
+   "chg": 0.0,
+   "n": 98,
+   "risk": 105502.0,
+   "cum": -13197.65
   }
  ],
  "periods": {
   "this_week": {
    "label": "this week",
+   "from": "2026-11-09",
+   "to": "2026-11-09",
+   "mtm_change": 0.0,
+   "days": 1,
+   "exits": 3,
+   "wins": 3,
+   "realised": 521.7,
+   "risk_closed": 4407.0,
+   "best": {
+    "t": "ORCL",
+    "pnl": 318.4,
+    "exit": 25
+   },
+   "worst": {
+    "t": "V",
+    "pnl": 51.65,
+    "exit": 18
+   },
+   "by_role": {
+    "proposed": 0,
+    "calibration": 521.7
+   },
+   "by_structure": {
+    "IC": 0,
+    "PCS": 203.3,
+    "CCS": 318.4
+   },
+   "open_at_end": 98,
+   "mtm_at_end": -9760.25
+  },
+  "last_week": {
+   "label": "last week",
    "from": "2026-11-02",
-   "to": "2026-11-07",
+   "to": "2026-11-08",
    "mtm_change": -8916.0,
    "days": 6,
    "exits": 0,
@@ -103,53 +143,37 @@
    "open_at_end": 117,
    "mtm_at_end": -11266.85
   },
-  "last_week": {
-   "label": "last week",
-   "from": "2026-10-26",
-   "to": "2026-11-01",
-   "mtm_change": -4281.65,
-   "days": 3,
-   "exits": 0,
-   "wins": 0,
-   "realised": 0,
-   "risk_closed": 0,
-   "best": null,
-   "worst": null,
-   "by_role": {
-    "proposed": 0,
-    "calibration": 0
-   },
-   "by_structure": {
-    "IC": 0,
-    "PCS": 0,
-    "CCS": 0
-   },
-   "open_at_end": 65,
-   "mtm_at_end": -4281.65
-  },
   "this_month": {
    "label": "November",
    "from": "2026-11-01",
-   "to": "2026-11-07",
+   "to": "2026-11-09",
    "mtm_change": -8916.0,
-   "days": 7,
-   "exits": 0,
-   "wins": 0,
-   "realised": 0,
-   "risk_closed": 0,
-   "best": null,
-   "worst": null,
+   "days": 8,
+   "exits": 3,
+   "wins": 3,
+   "realised": 521.7,
+   "risk_closed": 4407.0,
+   "best": {
+    "t": "ORCL",
+    "pnl": 318.4,
+    "exit": 25
+   },
+   "worst": {
+    "t": "V",
+    "pnl": 51.65,
+    "exit": 18
+   },
    "by_role": {
     "proposed": 0,
-    "calibration": 0
+    "calibration": 521.7
    },
    "by_structure": {
     "IC": 0,
-    "PCS": 0,
-    "CCS": 0
+    "PCS": 203.3,
+    "CCS": 318.4
    },
-   "open_at_end": 117,
-   "mtm_at_end": -11266.85
+   "open_at_end": 98,
+   "mtm_at_end": -9760.25
   },
   "last_month": {
    "label": "October",
@@ -176,60 +200,252 @@
    "mtm_at_end": -4281.65
   }
  },
- "edge": {},
- "exits": {},
+ "edge": {
+  "structure": {
+   "PCS": {
+    "n": 2,
+    "wins": 2,
+    "pnl": 203.3,
+    "risk": 2981.0,
+    "pred": -178.46,
+    "np": 2,
+    "win_rate": 1.0,
+    "avg": 101.65,
+    "ror": 0.0682,
+    "avg_pred": -89.23,
+    "confidence": "too few"
+   },
+   "CCS": {
+    "n": 1,
+    "wins": 1,
+    "pnl": 318.4,
+    "risk": 1426.0,
+    "pred": -13.48,
+    "np": 1,
+    "win_rate": 1.0,
+    "avg": 318.4,
+    "ror": 0.2233,
+    "avg_pred": -13.48,
+    "confidence": "too few"
+   }
+  },
+  "role": {
+   "calibration": {
+    "n": 3,
+    "wins": 3,
+    "pnl": 521.7,
+    "risk": 4407.0,
+    "pred": -191.94,
+    "np": 3,
+    "win_rate": 1.0,
+    "avg": 173.9,
+    "ror": 0.1184,
+    "avg_pred": -63.98,
+    "confidence": "too few"
+   }
+  },
+  "chart read": {
+   "bullish": {
+    "n": 2,
+    "wins": 2,
+    "pnl": 203.3,
+    "risk": 2981.0,
+    "pred": -178.46,
+    "np": 2,
+    "win_rate": 1.0,
+    "avg": 101.65,
+    "ror": 0.0682,
+    "avg_pred": -89.23,
+    "confidence": "too few"
+   },
+   "bearish": {
+    "n": 1,
+    "wins": 1,
+    "pnl": 318.4,
+    "risk": 1426.0,
+    "pred": -13.48,
+    "np": 1,
+    "win_rate": 1.0,
+    "avg": 318.4,
+    "ror": 0.2233,
+    "avg_pred": -13.48,
+    "confidence": "too few"
+   }
+  },
+  "expiry": {
+   "\u2014": {
+    "n": 3,
+    "wins": 3,
+    "pnl": 521.7,
+    "risk": 4407.0,
+    "pred": -191.94,
+    "np": 3,
+    "win_rate": 1.0,
+    "avg": 173.9,
+    "ror": 0.1184,
+    "avg_pred": -63.98,
+    "confidence": "too few"
+   }
+  },
+  "IV / HV": {
+   "< 1.0": {
+    "n": 3,
+    "wins": 3,
+    "pnl": 521.7,
+    "risk": 4407.0,
+    "pred": -191.94,
+    "np": 3,
+    "win_rate": 1.0,
+    "avg": 173.9,
+    "ror": 0.1184,
+    "avg_pred": -63.98,
+    "confidence": "too few"
+   }
+  },
+  "short delta": {
+   "38\u201345": {
+    "n": 3,
+    "wins": 3,
+    "pnl": 521.7,
+    "risk": 4407.0,
+    "pred": -191.94,
+    "np": 3,
+    "win_rate": 1.0,
+    "avg": 173.9,
+    "ror": 0.1184,
+    "avg_pred": -63.98,
+    "confidence": "too few"
+   }
+  },
+  "days at entry": {
+   "\u2264 35": {
+    "n": 3,
+    "wins": 3,
+    "pnl": 521.7,
+    "risk": 4407.0,
+    "pred": -191.94,
+    "np": 3,
+    "win_rate": 1.0,
+    "avg": 173.9,
+    "ror": 0.1184,
+    "avg_pred": -63.98,
+    "confidence": "too few"
+   }
+  },
+  "market dial": {
+   "\u2014": {
+    "n": 3,
+    "wins": 3,
+    "pnl": 521.7,
+    "risk": 4407.0,
+    "pred": -191.94,
+    "np": 3,
+    "win_rate": 1.0,
+    "avg": 173.9,
+    "ror": 0.1184,
+    "avg_pred": -63.98,
+    "confidence": "too few"
+   }
+  },
+  "SPX dealer gamma": {
+   "\u2014": {
+    "n": 3,
+    "wins": 3,
+    "pnl": 521.7,
+    "risk": 4407.0,
+    "pred": -191.94,
+    "np": 3,
+    "win_rate": 1.0,
+    "avg": 173.9,
+    "ror": 0.1184,
+    "avg_pred": -63.98,
+    "confidence": "too few"
+   }
+  },
+  "IV week-on-week": {
+   "\u2014": {
+    "n": 3,
+    "wins": 3,
+    "pnl": 521.7,
+    "risk": 4407.0,
+    "pred": -191.94,
+    "np": 3,
+    "win_rate": 1.0,
+    "avg": 173.9,
+    "ror": 0.1184,
+    "avg_pred": -63.98,
+    "confidence": "too few"
+   }
+  }
+ },
+ "exits": {
+  "18": {
+   "n": 10,
+   "pnl": -1105.95,
+   "wins": 3,
+   "avg": -110.59,
+   "win_rate": 0.3
+  },
+  "25": {
+   "n": 4,
+   "pnl": 484.0,
+   "wins": 3,
+   "avg": 121.0,
+   "win_rate": 0.75
+  }
+ },
  "compare": {
-  "proposed": {
-   "trades": 71,
-   "open": 70,
+  "coach": {
+   "trades": 2,
+   "open": 2,
    "closed": 0,
    "wins": 0,
    "pnl": 0.0,
    "risk": 0.0,
-   "mtm": -4275.5,
-   "risk_open": 79460.0,
+   "mtm": -20.15,
+   "risk_open": 721.4000000000001,
    "win_rate": null,
    "ror": null,
-   "mtm_pct": -0.0538
+   "mtm_pct": -0.0279
+  },
+  "proposed": {
+   "trades": 71,
+   "open": 69,
+   "closed": 0,
+   "wins": 0,
+   "pnl": 0.0,
+   "risk": 0.0,
+   "mtm": -4008.05,
+   "risk_open": 77505.0,
+   "win_rate": null,
+   "ror": null,
+   "mtm_pct": -0.0517
   },
   "calibration": {
    "trades": 55,
-   "open": 55,
-   "closed": 0,
-   "wins": 0,
-   "pnl": 0.0,
-   "risk": 0.0,
-   "mtm": -8922.15,
-   "risk_open": 56276.0,
-   "win_rate": null,
-   "ror": null,
-   "mtm_pct": -0.1585
+   "open": 52,
+   "closed": 3,
+   "wins": 3,
+   "pnl": 521.7,
+   "risk": 4407.0,
+   "mtm": -9443.85,
+   "risk_open": 51869.0,
+   "win_rate": 1.0,
+   "ror": 0.1184,
+   "mtm_pct": -0.1821
   },
   "rules_b": {
    "trades": 45,
-   "open": 44,
+   "open": 43,
    "closed": 0,
    "wins": 0,
    "pnl": 0.0,
    "risk": 0.0,
-   "mtm": 684.55,
-   "risk_open": 57119.0,
+   "mtm": 684.75,
+   "risk_open": 55387.0,
    "win_rate": null,
    "ror": null,
-   "mtm_pct": 0.012
-  },
-  "coach": {
-   "trades": 1,
-   "open": 1,
-   "closed": 0,
-   "wins": 0,
-   "pnl": 0.0,
-   "risk": 0.0,
-   "mtm": -14.2,
-   "risk_open": 590.2,
-   "win_rate": null,
-   "ror": null,
-   "mtm_pct": -0.0241
+   "mtm_pct": 0.0124
   },
   "mine": {
    "trades": 1,
