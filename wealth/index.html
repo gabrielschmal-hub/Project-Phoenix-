@@ -536,7 +536,11 @@ async function doAuth(kind){
     }
     if (kind === "link"){ await supaAuth("otp?redirect_to=" + encodeURIComponent(back), { email, create_user: true }); S.authNote = `We sent a sign-in link to ${email}. Open it on this device.`; }
     if (kind === "reset"){ await supaAuth("recover?redirect_to=" + encodeURIComponent(back), { email }); S.authNote = `If ${email} has an account, a reset link is on its way.`; }
-  } catch (e){ S.authMsg = /invalid login/i.test(e.message) ? "That e-mail and password don't match." : e.message; }
+  } catch (e){ S.authMsg = /invalid login/i.test(e.message) ? "That e-mail and password don't match."
+    : /rate limit/i.test(e.message) ? "Too many sign-in e-mails were sent in the last hour. Please wait a little and try again — if you already have an account, sign in with your password instead."
+    : /not confirmed/i.test(e.message) ? "Confirm your e-mail first: open the link we sent you, then sign in here."
+    : /already registered/i.test(e.message) ? "That e-mail already has an account. Sign in with your password, or use “Forgot password”."
+    : e.message; }
   S.authBusy = false; render();
 }
 async function signOut(){
@@ -1592,7 +1596,8 @@ async function commit(msg){
 function renderSaveState(){
   const b = $("#saveBtn"); if (!b) return;
   const pending = dirty.size + inflight.size;
-  b.hidden = !(S.meta && (S.mode === "cloud" || S.mode === "local"));
+  b.hidden = !(S.meta && (S.mode === "cloud" || S.mode === "local")) || S.mode === "auth";
+  const pr = document.querySelector(".pxprof"); if (pr) pr.hidden = S.mode === "auth";
   if (S.mode === "local"){ b.className = "savebtn off"; b.innerHTML = "Preview"; b.title = "Preview mode: nothing is saved"; return; }
   if (inflight.size){ b.className = "savebtn busy"; b.innerHTML = "Saving…"; return; }
   if (pending){ b.className = "savebtn due"; b.innerHTML = "Save"; b.title = "Save your changes now"; return; }
