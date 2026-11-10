@@ -1,7 +1,7 @@
 {
  "schema": "phoenix-fact-pack/1",
  "date": "2026-11-10",
- "asof": "2026-11-10 07:15 UTC",
+ "asof": "2026-11-10 13:56 UTC",
  "market": {
   "regime": "ENERGY_GRIND",
   "regime_held_weeks": 6,
@@ -11,16 +11,16 @@
    "vs_50d_pct": -1.64,
    "vs_200d_pct": 3.03
   },
-  "vix": 19.92,
+  "vix": 20.03,
   "dxy": null,
   "us10y": null,
   "gold": null,
   "wti": null,
   "gex": {
-   "net_B": -52.28,
+   "net_B": -49.43,
    "regime": "negative",
    "flip": null,
-   "dist_to_flip_pct": 1.06,
+   "dist_to_flip_pct": 1.37,
    "call_wall": null,
    "put_wall": null,
    "spot": 7549.94
@@ -64,10 +64,10 @@
    "m1_pct": -5.44
   },
   "btc": {
-   "last": 75747.0,
-   "d1_pct": -0.26,
-   "w1_pct": -1.88,
-   "m1_pct": -7.26
+   "last": 75223.0,
+   "d1_pct": -0.69,
+   "w1_pct": -1.9,
+   "m1_pct": -8.87
   },
   "dxy": {
    "last": 101.65,
@@ -137,19 +137,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 15.43,
+    "value": 14.58,
     "op": ">",
     "threshold": 0,
-    "clear_by": 15.43,
+    "clear_by": 14.58,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 42.5,
+    "value": 41.44,
     "op": ">",
     "threshold": 25,
-    "clear_by": 17.5,
+    "clear_by": 16.44,
     "ok": true
    }
   ],
@@ -163,16 +163,16 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 15.43,
+    "now": 14.58,
     "threshold": 0,
-    "distance": 15.43,
+    "distance": 14.58,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 42.5,
+    "now": 41.44,
     "threshold": 25,
-    "distance": 17.5,
+    "distance": 16.44,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
@@ -184,13 +184,13 @@
     {
      "label": "WTI 3m",
      "need": "> 25",
-     "now": 3.919897655007487
+     "now": 3.1431993809820424
     }
    ]
   }
  },
  "screener": {
-  "n_candidates": 549,
+  "n_candidates": 547,
   "top": [
    {
     "ticker": "HAS",
@@ -205,6 +205,20 @@
     "surge": 87,
     "dollar_vol_M": 306.9,
     "stop_pct_2_5atr": 6.9
+   },
+   {
+    "ticker": "KNSA",
+    "industry": "Pharmaceuticals: major",
+    "trade_score": 69,
+    "atr14_pct": 6.44,
+    "mcap_B": 4.4,
+    "breakout": true,
+    "days_on_list": 93,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 108,
+    "dollar_vol_M": 88.5,
+    "stop_pct_2_5atr": 16.1
    },
    {
     "ticker": "MGRC",
@@ -247,20 +261,6 @@
     "surge": 79,
     "dollar_vol_M": 15.8,
     "stop_pct_2_5atr": 14.92
-   },
-   {
-    "ticker": "KNSA",
-    "industry": "Pharmaceuticals: major",
-    "trade_score": 68,
-    "atr14_pct": 6.44,
-    "mcap_B": 4.4,
-    "breakout": true,
-    "days_on_list": 93,
-    "profitability": "profitable",
-    "pos_vs_high": 0.0,
-    "surge": 108,
-    "dollar_vol_M": 88.5,
-    "stop_pct_2_5atr": 16.1
    },
    {
     "ticker": "AMRX",
@@ -504,7 +504,7 @@
  },
  "news": {
   "date": "2026-11-09",
-  "asof": "2026-11-10 06:21 UTC",
+  "asof": "2026-11-10 13:14 UTC",
   "headline": "The S&P jumps 2.35% as Trump signals restraint on Iran \u2014 and oil falls to its lowest since early September",
   "standfirst": "The S&P rose 2.35%, the Nasdaq 2.74% and the Dow 2.15% after Trump said further attacks on Iran were highly unlikely while talks progress, and WTI fell 4.38% to $86.85. AMD rose 13.26% on an upgrade while Nvidia fell 4.27% on its board investigation. December hike odds rose to about 84% ahead of Tuesday's CPI. The book is flat; Q4 is +34.64 realised, heat 0R.",
   "themes": [
@@ -543,23 +543,23 @@
  },
  "provenance": {
   "macro": {
-   "asof": "2026-11-10 06:20 UTC",
+   "asof": "2026-11-10 13:14 UTC",
    "age_min": null
   },
   "gex": {
-   "asof": "2026-11-10 06:21 UTC",
+   "asof": "2026-11-10 13:14 UTC",
    "age_min": null
   },
   "stocks": {
-   "asof": "2026-11-10 06:31 UTC",
+   "asof": "2026-11-10 13:24 UTC",
    "age_min": null
   },
   "institutional_holdings": {
-   "asof": "2026-11-10 06:51 UTC",
+   "asof": "2026-11-10 13:36 UTC",
    "quarter": "2026-06-30"
   },
   "congress_trades": {
-   "asof": "2026-11-10 06:48 UTC",
+   "asof": "2026-11-10 13:35 UTC",
    "status": {
     "written": "2026-11-10",
     "dropped_impossible_dates": 0,
@@ -589,7 +589,7 @@
    }
   },
   "wire": {
-   "asof": "2026-11-10 06:21 UTC"
+   "asof": "2026-11-10 13:14 UTC"
   }
  },
  "missing": [],
@@ -601,7 +601,7 @@
     "kind": "market",
     "what": "vix",
     "was": 25.64,
-    "now": 19.92,
+    "now": 20.03,
     "why": "volatility repriced"
    },
    {

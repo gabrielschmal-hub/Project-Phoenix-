@@ -1,10 +1,10 @@
 {
- "asof": "2026-11-10 07:15 UTC",
+ "asof": "2026-11-10 13:56 UTC",
  "date": "2026-11-10",
  "summary": {
   "pass": 32,
-  "warn": 4,
-  "fail": 0
+  "warn": 3,
+  "fail": 1
  },
  "checks": [
   {
@@ -95,14 +95,14 @@
    "id": "chains.coverage",
    "area": "data",
    "status": "pass",
-   "detail": "93 of 103 names have an option chain on file",
+   "detail": "119 of 103 names have an option chain on file",
    "where": "step mme_chains (CBOE)"
   },
   {
    "id": "bars.coverage",
    "area": "data",
    "status": "pass",
-   "detail": "93 of 93 names have Yahoo bars (chart read, patterns, realised vol)",
+   "detail": "119 of 119 names have Yahoo bars (chart read, patterns, realised vol)",
    "where": "step ic_screen (_ic_hist, Yahoo)"
   },
   {
@@ -116,14 +116,14 @@
    "id": "screen.rules",
    "area": "options",
    "status": "pass",
-   "detail": "36 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
+   "detail": "41 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
    "where": "run_ic_screen (outputs/ic_screen.json)"
   },
   {
    "id": "screen.proposed",
    "area": "options",
    "status": "pass",
-   "detail": "14 proposed of 36 winners",
+   "detail": "15 proposed of 41 winners",
    "where": "run_ic_screen"
   },
   {
@@ -137,14 +137,14 @@
    "id": "dossier.sections",
    "area": "dossier",
    "status": "pass",
-   "detail": "missing: earnings 1",
+   "detail": "missing: dealer 2, earnings 1",
    "where": "run_dossier (names in outputs/dossier.json 'missing_names')"
   },
   {
    "id": "forward.marked",
    "area": "forward test",
-   "status": "warn",
-   "detail": "188 of 204 open trades marked for 2026-11-10 (0 opened today)",
+   "status": "fail",
+   "detail": "199 of 204 open trades marked for 2026-11-10 (19 opened today)",
    "where": "run_ic_record step 3a"
   },
   {
@@ -158,28 +158,28 @@
    "id": "forward.size",
    "area": "forward test",
    "status": "pass",
-   "detail": "highest trade id 217 (the app pages 1,000 at a time up to 20,000)",
+   "detail": "highest trade id 236 (the app pages 1,000 at a time up to 20,000)",
    "where": "app optRowsAll"
   },
   {
    "id": "decisions.logged",
    "area": "learning",
    "status": "pass",
-   "detail": "0 options decisions logged for 2026-11-10",
+   "detail": "119 options decisions logged for 2026-11-10",
    "where": "run_ic_record (decisions table)"
   },
   {
    "id": "forward.recap",
    "area": "forward test",
    "status": "pass",
-   "detail": "recap of 133 trades, 4 closed at their planned exit",
+   "detail": "recap of 144 trades, 4 closed at their planned exit",
    "where": "run_ic_recap"
   },
   {
    "id": "news",
    "area": "data",
    "status": "pass",
-   "detail": "266 Finnhub calls, 211/265 names with news, 0 failed",
+   "detail": "278 Finnhub calls, 230/277 names with news, 0 failed",
    "where": "run_news (Finnhub)"
   },
   {
@@ -193,7 +193,7 @@
    "id": "portfolios.inputs",
    "area": "portfolios",
    "status": "pass",
-   "detail": "core 4 (the builder's Long Term template (no saved portfolio found)), satellite 5, tactical 15, options 14",
+   "detail": "core 4 (the builder's Long Term template (no saved portfolio found)), satellite 5, tactical 15, options 15",
    "where": "run_portfolios (stocks.json trade/invest books, ic_screen proposed, Supabase portfolios)"
   },
   {
@@ -207,7 +207,7 @@
    "id": "portfolios.fx",
    "area": "portfolios",
    "status": "pass",
-   "detail": "EURUSD 1.1232 from yahoo",
+   "detail": "EURUSD 1.1193 from yahoo",
    "where": "_fx_usd_rates (Yahoo)"
   },
   {
@@ -256,7 +256,7 @@
    "id": "heartbeats",
    "area": "pipeline",
    "status": "warn",
-   "detail": "22 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | senate_efd: 14 PTRs parsed \u00b7 0 rows \u00b7 14 zero-row \u00b7 3 paper \u00b7 rejects {'no_ticker': 151, 'no_type': 1} \u00b7 no-ticker sampl",
+   "detail": "24 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | senate_efd: 14 PTRs parsed \u00b7 0 rows \u00b7 14 zero-row \u00b7 3 paper \u00b7 rejects {'no_ticker': 151, 'no_type': 1} \u00b7 no-ticker sampl | house_ptr: 12 unseen filings \u00b7 0 PDFs parsed \u00b7 12 fetch/parse failures {'pdftotext empty': 12} \u00b7 0 rows | signal_mark: marked 0 \u00b7 skipped 31 (no bars yet) \u00b7 failed 0 \u00b7 31 due \u00b7 3/9 tickers fetched",
    "where": "heartbeats table"
   }
  ]
