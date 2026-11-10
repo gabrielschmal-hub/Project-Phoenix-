@@ -1,33 +1,33 @@
 {
- "asof": "2026-11-09 13:36 UTC",
+ "asof": "2026-11-10 06:20 UTC",
  "regime": "ENERGY_GRIND",
- "confidence": 57.2,
+ "confidence": 49.6,
  "confidence_note": "regime score, not a calibrated probability (A4)",
  "scores": {
-  "ENERGY_GRIND": 57.2
+  "ENERGY_GRIND": 49.6
  },
  "secondary_tag": null,
  "inputs": {
-  "wti_12m": 52.02,
-  "wti_3m": 16.18,
-  "wti_vs_2yr": 22.74,
+  "wti_12m": 42.5,
+  "wti_3m": 3.92,
+  "wti_vs_2yr": 15.43,
   "cpi_yoy": 3.72,
   "cpi_chg_3m": 0.37,
-  "spx_3m": -4.91,
-  "spx_1m": -5.56,
-  "dd": -5.56,
-  "trail_dd": -5.56,
-  "spx_off_low": 0.0,
+  "spx_3m": -3.03,
+  "spx_1m": -1.43,
+  "dd": -3.35,
+  "trail_dd": -3.35,
+  "spx_off_low": 2.35,
   "fresh_high": false,
-  "us02_3m": 38.0,
-  "real_3m": 21.0,
-  "vix": 25.64,
-  "vix_3m_chg": 72.08,
-  "hy": 326.0
+  "us02_3m": 34.0,
+  "real_3m": 22.0,
+  "vix": 19.92,
+  "vix_3m_chg": 39.79,
+  "hy": 341.0
  },
  "explain": {
   "regime": "ENERGY_GRIND",
-  "held_weeks": 5,
+  "held_weeks": 6,
   "since": "2026-10-05",
   "drivers": [
    {
@@ -42,19 +42,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 22.74,
+    "value": 15.43,
     "op": ">",
     "threshold": 0,
-    "clear_by": 22.74,
+    "clear_by": 15.43,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 52.02,
+    "value": 42.5,
     "op": ">",
     "threshold": 25,
-    "clear_by": 27.02,
+    "clear_by": 17.5,
     "ok": true
    }
   ],
@@ -68,16 +68,16 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 22.74,
+    "now": 15.43,
     "threshold": 0,
-    "distance": 22.74,
+    "distance": 15.43,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 52.02,
+    "now": 42.5,
     "threshold": 25,
-    "distance": 27.02,
+    "distance": 17.5,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
@@ -89,7 +89,7 @@
     {
      "label": "WTI 3m",
      "need": "> 25",
-     "now": 16.180610739958556
+     "now": 3.919897655007487
     }
    ]
   }
