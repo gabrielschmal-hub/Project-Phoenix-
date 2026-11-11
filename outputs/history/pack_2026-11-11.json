@@ -1,7 +1,7 @@
 {
  "schema": "phoenix-fact-pack/1",
  "date": "2026-11-11",
- "asof": "2026-11-11 07:55 UTC",
+ "asof": "2026-11-11 13:03 UTC",
  "market": {
   "regime": "ENERGY_GRIND",
   "regime_held_weeks": 6,
@@ -11,16 +11,16 @@
    "vs_50d_pct": -1.98,
    "vs_200d_pct": 2.59
   },
-  "vix": 19.46,
+  "vix": 18.6,
   "dxy": null,
   "us10y": null,
   "gold": null,
   "wti": null,
   "gex": {
-   "net_B": -64.8,
+   "net_B": -63.57,
    "regime": "negative",
    "flip": null,
-   "dist_to_flip_pct": 1.33,
+   "dist_to_flip_pct": 1.56,
    "call_wall": null,
    "put_wall": null,
    "spot": 7520.93
@@ -64,10 +64,10 @@
    "m1_pct": -8.21
   },
   "btc": {
-   "last": 75223.0,
-   "d1_pct": -0.69,
-   "w1_pct": -1.9,
-   "m1_pct": -8.87
+   "last": 73720.0,
+   "d1_pct": -2.0,
+   "w1_pct": -4.69,
+   "m1_pct": -9.84
   },
   "dxy": {
    "last": 102.23,
@@ -137,19 +137,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 16.35,
+    "value": 17.57,
     "op": ">",
     "threshold": 0,
-    "clear_by": 16.35,
+    "clear_by": 17.57,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 43.65,
+    "value": 45.17,
     "op": ">",
     "threshold": 25,
-    "clear_by": 18.65,
+    "clear_by": 20.17,
     "ok": true
    }
   ],
@@ -163,16 +163,16 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 16.35,
+    "now": 17.57,
     "threshold": 0,
-    "distance": 16.35,
+    "distance": 17.57,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 43.65,
+    "now": 45.17,
     "threshold": 25,
-    "distance": 18.65,
+    "distance": 20.17,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
@@ -184,7 +184,7 @@
     {
      "label": "WTI 3m",
      "need": "> 25",
-     "now": 4.757279243149259
+     "now": 5.861652599044853
     }
    ]
   }
@@ -504,7 +504,7 @@
  },
  "news": {
   "date": "2026-11-09",
-  "asof": "2026-11-11 07:11 UTC",
+  "asof": "2026-11-11 12:25 UTC",
   "headline": "The S&P jumps 2.35% as Trump signals restraint on Iran \u2014 and oil falls to its lowest since early September",
   "standfirst": "The S&P rose 2.35%, the Nasdaq 2.74% and the Dow 2.15% after Trump said further attacks on Iran were highly unlikely while talks progress, and WTI fell 4.38% to $86.85. AMD rose 13.26% on an upgrade while Nvidia fell 4.27% on its board investigation. December hike odds rose to about 84% ahead of Tuesday's CPI. The book is flat; Q4 is +34.64 realised, heat 0R.",
   "themes": [
@@ -543,23 +543,23 @@
  },
  "provenance": {
   "macro": {
-   "asof": "2026-11-11 07:11 UTC",
+   "asof": "2026-11-11 12:25 UTC",
    "age_min": null
   },
   "gex": {
-   "asof": "2026-11-11 07:11 UTC",
+   "asof": "2026-11-11 12:25 UTC",
    "age_min": null
   },
   "stocks": {
-   "asof": "2026-11-11 07:20 UTC",
+   "asof": "2026-11-11 12:34 UTC",
    "age_min": null
   },
   "institutional_holdings": {
-   "asof": "2026-11-11 07:33 UTC",
+   "asof": "2026-11-11 12:46 UTC",
    "quarter": "2026-06-30"
   },
   "congress_trades": {
-   "asof": "2026-11-11 07:31 UTC",
+   "asof": "2026-11-11 12:44 UTC",
    "status": {
     "written": "2026-11-11",
     "dropped_impossible_dates": 0,
@@ -589,7 +589,7 @@
    }
   },
   "wire": {
-   "asof": "2026-11-11 07:11 UTC"
+   "asof": "2026-11-11 12:25 UTC"
   }
  },
  "missing": [],
