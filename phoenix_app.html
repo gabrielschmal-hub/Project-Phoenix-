@@ -1229,7 +1229,8 @@
   .opt-rc i{display:block;font-style:normal;font-family:var(--mono);font-size:11px;color:var(--inkFade);text-transform:uppercase} .opt-rc i small{text-transform:none}
   .opt-rc b{display:block;font-size:20px;font-family:var(--mono);margin:2px 0} .opt-rc small{font-size:11px;color:var(--inkFade);line-height:1.4}
   .icl-fill{width:84px;padding:4px 6px;border-radius:6px;border:1px solid var(--line2);background:var(--card);color:var(--ink);font-family:var(--mono)}
-  .opt-tbl.cmp .hd,.opt-tbl.cmp .r{grid-template-columns:150px 60px 70px 120px 64px 74px 100px;min-width:660px}
+  .opt-tbl.rg .hd,.opt-tbl.rg .r{grid-template-columns:80px 76px 52px 96px 96px 110px 96px 70px;min-width:676px}
+  .opt-tbl.cmp .hd,.opt-tbl.cmp .r{grid-template-columns:140px 54px 130px 92px 92px 170px 84px 84px;min-width:846px}
   .opt-tbl.eg .hd,.opt-tbl.eg .r{grid-template-columns:120px 64px 74px 84px 100px 84px 84px;min-width:640px}
   .opt-tbl.dd .hd,.opt-tbl.dd .r{grid-template-columns:96px 40px 64px 70px 52px 52px 62px 62px 64px 64px 62px 60px 66px 66px;min-width:980px;font-size:12px}
   .opt-tbl.dd .r.post{opacity:.7} .opt-trd-k{display:flex;flex-wrap:wrap;gap:8px 18px;margin:2px 0 8px} .opt-trd-k i{display:block;font-style:normal;font-size:10.5px;color:var(--inkFade);font-family:var(--mono)} .opt-trd-k b{font-family:var(--mono)}
@@ -11307,16 +11308,23 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var cm=document.getElementById("optCmp"), CP=R.compare||{};
       if(cm&&Object.keys(CP).length){ var lab={proposed:"Rules A \u00b7 proposed",calibration:"Rules A \u00b7 calibration",rules_b:"Rules B \u00b7 test",coach:"Coach",mine:"Mine (paper)"};
         cm.innerHTML='<div class="opt-sub3">Side by side <span>\u00b7 November: live rules (A) against the test rules (B) and the coach \u00b7 closed = at each trade\u2019s planned exit</span></div>'+
-          '<div class="opt-tbl cmp"><div class="hd"><span>Book</span><span>Trades</span><span>Open now</span><span>Open P&amp;L</span><span>Closed</span><span>Win rate</span><span>Return on risk</span></div>'+
+          '<div class="opt-tbl cmp"><div class="hd"><span>Book</span><span>Trades</span><span>Open P&amp;L</span><span>Avg / trade after costs</span><span>Avg / trade at mid</span><span>Unique bets: n \u00b7 after costs \u00b7 at mid</span><span>Closed \u00b7 win</span><span>Return on risk</span></div>'+
           ["proposed","rules_b","coach","mine","calibration"].filter(function(k){ return CP[k]; }).map(function(k){ var g=CP[k];
-            return '<div class="r"><span class="tk">'+lab[k]+'</span><span>'+g.trades+'</span><span>'+g.open+'</span><span class="'+(g.mtm>=0?'ev':'ev neg')+'">'+optM(g.mtm)+(g.mtm_pct!=null?' <i>'+optPct(g.mtm_pct,1)+'</i>':'')+'</span>'+
-              '<span>'+g.closed+'</span><span>'+(g.win_rate!=null?optPct(g.win_rate):'\u2014')+'</span><span class="'+((g.ror||0)>=0?'ev':'ev neg')+'">'+(g.ror!=null?optPct(g.ror,1):'\u2014')+'</span></div>'; }).join("")+'</div>'; }
+            var a3=g.all3||{}, u3=g.unique3||{}, pc=function(v){ return v==null?'\u2014':'<span class="'+(v>=0?'ev':'ev neg')+'">'+optPct(v,1)+'</span>'; };
+            return '<div class="r"><span class="tk">'+lab[k]+'</span><span>'+g.trades+'</span><span class="'+(g.mtm>=0?'ev':'ev neg')+'">'+optM(g.mtm)+(g.mtm_pct!=null?' <i>'+optPct(g.mtm_pct,1)+'</i>':'')+'</span>'+
+              '<span>'+pc(a3.avg_net)+'</span><span>'+pc(a3.avg_mid)+'</span><span>'+(u3.n?u3.n+' \u00b7 '+pc(u3.avg_net)+' \u00b7 '+pc(u3.avg_mid):'\u2014')+'</span>'+
+              '<span>'+g.closed+(g.win_rate!=null?' \u00b7 '+optPct(g.win_rate):'')+'</span><span class="'+((g.ror||0)>=0?'ev':'ev neg')+'">'+(g.ror!=null?optPct(g.ror,1):'\u2014')+'</span></div>'; }).join("")+'</div>'+
+          '<div class="ed-note">After costs = slippage (a quarter of each spread, in and out) and IBKR commissions. At mid = no costs, how the coach scores. Unique bets = the first trade per name and structure in each book. Averages are per trade, as a share of each trade\u2019s risk.</div>'; }
       var gw=document.getElementById("optGlWk"), gm=document.getElementById("optGlMo");
       if(gw&&P.this_week){ gw.textContent=optM(P.this_week.mtm_change); gw.className=P.this_week.mtm_change>=0?"ev":"ev neg"; }
       if(gm&&P.this_month){ gm.textContent=optM(P.this_month.mtm_change); gm.className=P.this_month.mtm_change>=0?"ev":"ev neg"; }
       el.innerHTML='<details class="opt-det slim"><summary>Week and month recap <span>\u00b7 last week '+optM((P.last_week||{}).mtm_change)+' \u00b7 last month '+optM((P.last_month||{}).mtm_change)+' \u00b7 daily chart</span></summary>'+
         '<div class="opt-rcs">'+card(P.this_week)+card(P.last_week)+card(P.this_month)+card(P.last_month)+'</div>'+
-        '<div id="optRecapC" class="icl-cone"></div></details>';
+        '<div id="optRecapC" class="icl-cone"></div>'+
+        ((R.regime||[]).length?'<div class="opt-sub3">Market regime by day <span>\u00b7 so results can be read by regime: calm, normal, stress</span></div><div class="opt-tbl rg"><div class="hd"><span>Day</span><span>SPX move</span><span>VIX</span><span>SPX realised 10d</span><span>Realised \u2212 VIX</span><span>Dial</span><span>Dealer gamma</span><span>Regime</span></div>'+
+          R.regime.slice(0,12).map(function(x){ return '<div class="r"><span>'+optDate(x.d)+'</span><span class="'+((x.spx_move_pct||0)>=0?'ev':'ev neg')+'">'+(x.spx_move_pct!=null?(x.spx_move_pct>0?'+':'')+x.spx_move_pct+'%':'\u2014')+'</span><span>'+(x.vix!=null?x.vix:'\u2014')+'</span>'+
+            '<span>'+(x.rv10!=null?x.rv10+'%':'\u2014')+'</span><span class="'+((x.rv_minus_vix||0)>0?'ev neg':'ev')+'">'+(x.rv_minus_vix!=null?(x.rv_minus_vix>0?'+':'')+x.rv_minus_vix:'\u2014')+'</span><span>'+(x.dial!=null?x.dial+' '+optEsc(x.dial_state||''):'\u2014')+'</span><span>'+optEsc(x.gex_regime||'\u2014')+'</span><span class="tk">'+optEsc(x.label||'')+'</span></div>'; }).join("")+'</div>':'')+
+        '</details>';
       var eg=document.getElementById("optEdge"); if(!eg) return;
       var best=null, worst=null; Object.keys(R.edge||{}).forEach(function(d){ Object.keys(R.edge[d]).forEach(function(k){ var g=R.edge[d][k]; if(g.n<15) return;
         if(!best||g.ror>best.ror) best={d:d,k:k,ror:g.ror,n:g.n}; if(!worst||g.ror<worst.ror) worst={d:d,k:k,ror:g.ror,n:g.n}; }); });
