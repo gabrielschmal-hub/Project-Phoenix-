@@ -1,16 +1,16 @@
 {
- "asof": "2026-11-12 06:05 UTC",
+ "asof": "2026-11-12 13:31 UTC",
  "regime": "ENERGY_GRIND",
- "confidence": 49.5,
+ "confidence": 52.1,
  "confidence_note": "regime score, not a calibrated probability (A4)",
  "scores": {
-  "ENERGY_GRIND": 49.5
+  "ENERGY_GRIND": 52.1
  },
  "secondary_tag": null,
  "inputs": {
-  "wti_12m": 42.42,
-  "wti_3m": 3.86,
-  "wti_vs_2yr": 15.37,
+  "wti_12m": 45.63,
+  "wti_3m": 6.2,
+  "wti_vs_2yr": 17.94,
   "cpi_yoy": 3.72,
   "cpi_chg_3m": 0.37,
   "spx_3m": -2.14,
@@ -21,8 +21,8 @@
   "fresh_high": false,
   "us02_3m": 34.0,
   "real_3m": 22.0,
-  "vix": 17.49,
-  "vix_3m_chg": 22.74,
+  "vix": 19.21,
+  "vix_3m_chg": 34.81,
   "hy": 341.0
  },
  "explain": {
@@ -42,19 +42,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 15.37,
+    "value": 17.94,
     "op": ">",
     "threshold": 0,
-    "clear_by": 15.37,
+    "clear_by": 17.94,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 42.42,
+    "value": 45.63,
     "op": ">",
     "threshold": 25,
-    "clear_by": 17.42,
+    "clear_by": 20.63,
     "ok": true
    }
   ],
@@ -68,16 +68,16 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 15.37,
+    "now": 17.94,
     "threshold": 0,
-    "distance": 15.37,
+    "distance": 17.94,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 42.42,
+    "now": 45.63,
     "threshold": 25,
-    "distance": 17.42,
+    "distance": 20.63,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
@@ -89,7 +89,7 @@
     {
      "label": "WTI 3m",
      "need": "> 25",
-     "now": 3.859223599864925
+     "now": 6.201456936559269
     }
    ]
   }

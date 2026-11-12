@@ -1,7 +1,7 @@
 {
  "schema": "phoenix-fact-pack/1",
  "date": "2026-11-12",
- "asof": "2026-11-12 06:45 UTC",
+ "asof": "2026-11-12 14:11 UTC",
  "market": {
   "regime": "ENERGY_GRIND",
   "regime_held_weeks": 6,
@@ -11,16 +11,16 @@
    "vs_50d_pct": -0.69,
    "vs_200d_pct": 3.89
   },
-  "vix": 17.49,
+  "vix": 19.21,
   "dxy": null,
   "us10y": null,
   "gold": null,
   "wti": null,
   "gex": {
-   "net_B": -9.13,
+   "net_B": -9.37,
    "regime": "negative",
    "flip": null,
-   "dist_to_flip_pct": -0.19,
+   "dist_to_flip_pct": 0.18,
    "call_wall": null,
    "put_wall": null,
    "spot": 7619.38
@@ -64,10 +64,10 @@
    "m1_pct": -8.08
   },
   "btc": {
-   "last": 73720.0,
-   "d1_pct": -2.0,
-   "w1_pct": -4.69,
-   "m1_pct": -9.84
+   "last": 73964.0,
+   "d1_pct": 0.33,
+   "w1_pct": -8.01,
+   "m1_pct": -10.99
   },
   "dxy": {
    "last": 102.91,
@@ -137,19 +137,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 15.37,
+    "value": 17.94,
     "op": ">",
     "threshold": 0,
-    "clear_by": 15.37,
+    "clear_by": 17.94,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 42.42,
+    "value": 45.63,
     "op": ">",
     "threshold": 25,
-    "clear_by": 17.42,
+    "clear_by": 20.63,
     "ok": true
    }
   ],
@@ -163,16 +163,16 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 15.37,
+    "now": 17.94,
     "threshold": 0,
-    "distance": 15.37,
+    "distance": 17.94,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 42.42,
+    "now": 45.63,
     "threshold": 25,
-    "distance": 17.42,
+    "distance": 20.63,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
@@ -184,7 +184,7 @@
     {
      "label": "WTI 3m",
      "need": "> 25",
-     "now": 3.859223599864925
+     "now": 6.201456936559269
     }
    ]
   }
@@ -504,7 +504,7 @@
  },
  "news": {
   "date": "2026-11-11",
-  "asof": "2026-11-12 06:05 UTC",
+  "asof": "2026-11-12 13:31 UTC",
   "headline": "Chips surge 5.7% on CoreWeave \u2014 then Nvidia falls 8% after hours on a report about its chief executive",
   "standfirst": "The S&P rose 1.31% and the Nasdaq 1.60% as the chip index jumped about 5.7%, led by CoreWeave's raised guidance. After the close Nvidia fell about 8% on a Wall Street Journal report that its board is preparing to remove Jensen Huang. Fed officials kept leaning toward hikes, and Iran said Hormuz stays shut until its demands are met. The book is flat; Q4 is +34.64 realised, heat 0R.",
   "themes": [
@@ -550,23 +550,23 @@
  },
  "provenance": {
   "macro": {
-   "asof": "2026-11-12 06:05 UTC",
+   "asof": "2026-11-12 13:31 UTC",
    "age_min": null
   },
   "gex": {
-   "asof": "2026-11-12 06:05 UTC",
+   "asof": "2026-11-12 13:31 UTC",
    "age_min": null
   },
   "stocks": {
-   "asof": "2026-11-12 06:14 UTC",
+   "asof": "2026-11-12 13:40 UTC",
    "age_min": null
   },
   "institutional_holdings": {
-   "asof": "2026-11-12 06:26 UTC",
+   "asof": "2026-11-12 13:53 UTC",
    "quarter": "2026-06-30"
   },
   "congress_trades": {
-   "asof": "2026-11-12 06:25 UTC",
+   "asof": "2026-11-12 13:51 UTC",
    "status": {
     "written": "2026-11-12",
     "dropped_impossible_dates": 0,
@@ -596,7 +596,7 @@
    }
   },
   "wire": {
-   "asof": "2026-11-12 06:05 UTC"
+   "asof": "2026-11-12 13:31 UTC"
   }
  },
  "missing": [],
