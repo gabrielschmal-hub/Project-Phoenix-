@@ -10623,8 +10623,16 @@ def _mme_compute_from_chains(ch):
         if len(contracts) < 20:
             continue
         try:
+            # ONE flip: the method the MME rules and the backtest were built on (strikes within +-35%, sweep 0.6-1.4x,
+            # 200 points). Unchanged.
             flip, net_B, meta = mme_flip_net(contracts, spot, scrape, lo_mult=0.6, hi_mult=1.4, n_pts=200, nearest=True)
             walls = mme_walls(contracts, spot, grid=_stock_grid(spot), prox_pct=0.15)
+            # No crossing in the sweep: net gamma has one sign across the range. Record which (11 Nov 2026), so the
+            # name is labelled by its real regime; this is not a second flip, only the side the flip lies beyond.
+            flip_side = flip_bound = None
+            if flip is None:
+                flip_side = "above" if (net_B or 0) < 0 else "below"
+                flip_bound = round(spot * 1.4, 2) if flip_side == "above" else round(spot * 0.6, 2)
         except Exception as e:
             print(f"[mmemap] {tk}: compute failed ({e})"); continue
         # expected move: ATM IV of the nearest expiry with >= 3 business days
@@ -10643,7 +10651,7 @@ def _mme_compute_from_chains(ch):
         opex = next((e for e in exps if e.weekday() == 4 and 15 <= e.day <= 21), None)
         roll_f = sum(dgex(c) for c in contracts if c["expiry"] == fri) / 1e9 if fri else None
         roll_o = sum(dgex(c) for c in contracts if c["expiry"] == opex) / 1e9 if opex else None
-        out[tk] = {"spot": spot, "flip": flip, "net_gex_B": net_B, "em": em,
+        out[tk] = {"spot": spot, "flip": flip, "net_gex_B": net_B, "em": em, "flip_side": flip_side, "flip_bound": flip_bound,
                    "resist": walls.get("call_wall"), "support": walls.get("put_wall"),
                    "resist_tiered": [x.get("strike") if isinstance(x, dict) else x for x in (walls.get("call_tiered") or [])][:3],
                    "support_tiered": [x.get("strike") if isinstance(x, dict) else x for x in (walls.get("put_tiered") or [])][:3],
@@ -10661,7 +10669,15 @@ def _mme_read(r):
     f = lambda v: f"{v:,.2f}" if v is not None else "\u2014"
     g = lambda v: f"{v:,.0f}" if v is not None and abs(v - round(v)) < 1e-6 else f(v)
     if flip is None:
-        return f"{tk} closed ${f(spot)}. No flip inside \u00b120% \u2014 the chain is one-sided, so the hedging has a single lean across the whole range."
+        side, bound = r.get("flip_side"), r.get("flip_bound")
+        ext_s = ""
+        if side == "above":
+            return (f"{tk} closed ${f(spot)}. Dealers are short gamma at every price within \u00b140%: no flip in range, "
+                    f"it would sit above ${f(bound)}. Treat it as negative gamma.{ext_s} Walls: support ${g(sup)}, resistance ${g(res)}.")
+        if side == "below":
+            return (f"{tk} closed ${f(spot)}. Dealers are long gamma at every price within \u00b140%: no flip in range, "
+                    f"it would sit below ${f(bound)}. Positive gamma throughout.{ext_s} Walls: support ${g(sup)}, resistance ${g(res)}.")
+        return f"{tk} closed ${f(spot)}. No flip in range \u2014 the chain is one-sided, so the hedging has a single lean across the whole range."
     if st == "ON FLIP":
         side = "above" if spot >= flip else "below"
         return (f"{tk} closed ${f(spot)}. Its flip sits at ${f(flip)}, so spot is {abs(spot/flip-1)*100:.1f}% {side} the line where net dealer gamma crosses zero. "
@@ -10856,9 +10872,14 @@ def run_mme_map():
             g = {"spot": c["spot"], "asof": chains_date,
                  "overview": {"gamma_flip": c["flip"], "net_gex_B": c["net_gex_B"]},
                  "levels": {"put_wall": {"strike": c["support"]}, "call_wall": {"strike": c["resist"]}}}
+            # No flip in range: the regime follows the sign of net gamma at spot. Before 11 Nov every such name was
+            # written "green, 99 EM from the flip" even when dealers were short gamma across the whole range.
+            neg = (c.get("net_gex_B") or 0) < 0
             r = _mme_row(tk, g, em, 0) if c["flip"] else {
                 "ticker": tk, "spot": round(c["spot"], 2), "support": c["support"], "flip": None, "resist": c["resist"],
-                "em": round(em, 2), "dist_flip_em": 99.0, "regime": "green", "status": "", "level": None, "stale_days": 0}
+                "flip_side": c.get("flip_side"), "flip_bound": c.get("flip_bound"),
+                "em": round(em, 2), "dist_flip_em": -99.0 if neg else 99.0, "regime": "red" if neg else "green",
+                "status": "NO FLIP \u00b7 " + ("NEGATIVE GAMMA ACROSS" if neg else "POSITIVE GAMMA ACROSS"), "level": None, "stale_days": 0}
             r.update({"src": "phoenix", "em_src": "atm_iv" if c["em"] else "1.5% stand-in", "net_gex_B": c["net_gex_B"],
                       "support_tiered": c["support_tiered"], "resist_tiered": c["resist_tiered"],
                       "rolloff_friday_B": c["rolloff_friday_B"], "rolloff_opex_B": c["rolloff_opex_B"],
@@ -12212,11 +12233,19 @@ def _ic_quotes(chain_rows, expiry):
     return out
 
 
+def _ic_legs(legs):
+    """[(cp, K, signed quantity)] for a row's legs: the four named legs of a condor or spread, or a free list
+    {"list": [{"cp": "C", "K": 190, "q": -2}, ...]} for butterflies and other multi-leg trades (credit < 0 = debit)."""
+    if (legs or {}).get("list"):
+        return [(str(x["cp"]).upper()[0], float(x["K"]), float(x["q"])) for x in legs["list"]]
+    return [(cp, float(legs[k]), sg) for k, cp, sg in (("long_put", "P", +1), ("short_put", "P", -1), ("short_call", "C", -1), ("long_call", "C", +1))
+            if (legs or {}).get(k) is not None]
+
+
 def _ic_mark(legs, credit, fees_1, quotes, spot, dte):
     """P&L per contract if closed now: buy back at mid plus a quarter of each spread, less fees.
     At or after expiry the legs settle at intrinsic value."""
-    L = [(cp, legs[k], sg) for k, cp, sg in (("long_put", "P", +1), ("short_put", "P", -1), ("short_call", "C", -1), ("long_call", "C", +1))
-         if legs.get(k) is not None]                           # a condor has four legs, a credit spread two
+    L = _ic_legs(legs)                                         # a condor has four legs, a spread two, a butterfly a list
     if dte <= 0:
         intr = lambda cp, K: max(0.0, K - spot) if cp == "P" else max(0.0, spot - K)
         cost = sum(-sg * intr(cp, K) for cp, K, sg in L)
@@ -12227,7 +12256,7 @@ def _ic_mark(legs, credit, fees_1, quotes, spot, dte):
         if not q or q[1] <= 0:
             return None                                        # a leg stopped quoting
         mid, spr = (q[0] + q[1]) / 2, q[1] - q[0]
-        cost += -sg * mid + IC["slip"] * spr                   # shorts are bought back, longs sold
+        cost += -sg * mid + IC["slip"] * spr * abs(sg)         # shorts are bought back, longs sold
     return round((credit - cost) * 100 - fees_1, 2)
 
 
@@ -13155,8 +13184,7 @@ def _ic_position_read(legs, credit, fees_1, quotes, spot, dte):
       be       today's breakevens: where closing now would make zero, on a price grid +-40% with the IVs held
       iv       the average IV of the short legs
     A leg with no quote this morning -> None (the mark itself is then missing too)."""
-    spec = (("long_put", "P", +1), ("short_put", "P", -1), ("short_call", "C", -1), ("long_call", "C", +1))
-    L = [(cp, float(legs[k]), sg) for k, cp, sg in spec if legs.get(k) is not None]
+    L = _ic_legs(legs)
     T = max(dte, 0) / 365.0
     q = {}
     for cp, K, sg in L:
@@ -13178,7 +13206,10 @@ def _ic_position_read(legs, credit, fees_1, quotes, spot, dte):
     cross = [xs[i] + (xs[i + 1] - xs[i]) * (0 - ys[i]) / (ys[i + 1] - ys[i]) for i in range(400) if (ys[i] < 0) != (ys[i + 1] < 0)]
     has_p = any(cp == "P" for cp, _, _ in L); has_c = any(cp == "C" for cp, _, _ in L)
     near = min(cross, key=lambda c: abs(c - spot)) if cross else None
-    if has_p and not has_c:            # bull put: one breakeven, the line it must stay above (today it can sit above spot)
+    if (legs or {}).get("list"):       # butterflies and other multi-leg trades: breakevens either side of the price
+        below = [c for c in cross if c <= spot]; above = [c for c in cross if c > spot]
+        lo_b = max(below) if below else None; hi_b = min(above) if above else None
+    elif has_p and not has_c:          # bull put: one breakeven, the line it must stay above (today it can sit above spot)
         lo_b, hi_b = near, None
     elif has_c and not has_p:          # bear call: the line it must stay below
         lo_b, hi_b = None, near
@@ -13209,8 +13240,7 @@ def _ic_mark_est(legs, credit, fees_1, quotes, spot, dte):
     strikes of the same type (interpolated), its value from Black-Scholes, and its spread from the neighbours'
     relative spread (min $0.05). Returns (pnl, n_estimated_legs) or (None, 0) when nothing on that expiry quotes.
     Replaces the old 'broken' rule, which dropped trades from the test after three missing marks (10 Nov 2026)."""
-    L = [(cp, float(legs[k]), sg) for k, cp, sg in (("long_put", "P", +1), ("short_put", "P", -1), ("short_call", "C", -1), ("long_call", "C", +1))
-         if legs.get(k) is not None]
+    L = _ic_legs(legs)
     if not spot:
         return None, 0
     if dte <= 0:
@@ -13237,7 +13267,7 @@ def _ic_mark_est(legs, credit, fees_1, quotes, spot, dte):
             rel = [(v[1] - v[0]) / ((v[0] + v[1]) / 2) for _, v in near if (v[0] + v[1]) > 0]
             spr = max(0.05, mid * (sum(rel) / len(rel) if rel else 0.1))
             est += 1
-        cost += -sg * mid + IC["slip"] * spr
+        cost += -sg * mid + IC["slip"] * spr * abs(sg)
     return round((credit - cost) * 100 - fees_1, 2), est
 
 
@@ -13290,7 +13320,7 @@ def run_ic_recap():
         rows = _sb_get("ic_forward", {"select": "id,opened,ticker,expiry,credit,max_loss_1,fees_1,entry_quotes,model,result,marks,status,role,structure,grp,iv_atm,hv"}, limit=20000) or []
     except Exception as e:
         print(f"[icrecap] cannot read ic_forward ({e})"); sb_heartbeat("ic_recap", False, str(e)); return None
-    all_rows = [r for r in rows if r.get("role") in ("proposed", "calibration", "rules_b", "coach", "mine")]
+    all_rows = [r for r in rows if r.get("role") in ("proposed", "calibration", "rules_b", "coach", "mine", "grenade")]
     rows = [r for r in all_rows if r.get("role") in ("proposed", "calibration")]
     # the daily regime row, stored beside the P&L (10 Nov 2026)
     regime_rows = []
@@ -13848,8 +13878,11 @@ def _ic_stop_results(row, marks, res):
       slcr   stop at a loss equal to the credit received
       tp50   take profit at +50% of the max profit (credit less fees), the first mark at or above it
       tp70   take profit at +70% of the max profit
-    Only exits that respect the minimum hold count."""
+    Only exits that respect the minimum hold count.
+    Debit trades (butterflies, credit < 0) are left out: their levels are defined on a credit."""
     out = {}
+    if float(row.get("credit") or 0) <= 0 or (row.get("legs") or {}).get("list"):
+        return out
     exit_at = {}
     vx = _ic_row_exits(row)
     for i, m in enumerate(marks):
