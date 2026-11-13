@@ -1,5 +1,5 @@
 {
- "asof": "2026-11-13 07:56 UTC",
+ "asof": "2026-11-13 13:35 UTC",
  "date": "2026-11-13",
  "rules": {
   "accounts_eur": [
@@ -99,14 +99,14 @@
    "regime": "ENERGY_GRIND",
    "regime_held_weeks": 6,
    "gex_regime": "negative",
-   "gex_net_B": -37.45,
+   "gex_net_B": -37.46,
    "gex_flip": 7648.47,
-   "gex_dist_to_flip_pct": 0.4,
+   "gex_dist_to_flip_pct": 0.74,
    "spx_close": 7592.4,
    "spx_vs_50d_pct": -1.03,
    "spx_vs_200d_pct": 3.48,
-   "vix": 18.7,
-   "dayscore": 63.1,
+   "vix": 18.24,
+   "dayscore": 63.0,
    "dayscore_verdict": "TRADE CAREFULLY"
   }
  },
@@ -246,14 +246,14 @@
   "FXI": "international"
  },
  "conditions": {
-  "dayscore": 63.1,
+  "dayscore": 63.0,
   "verdict": "TRADE CAREFULLY",
   "regime": "ENERGY_GRIND",
   "regime_held_weeks": 6,
   "stress": false,
   "dial_state": "risk-on",
   "dial_score": 75,
-  "eurusd": 1.1063,
+  "eurusd": 1.1071,
   "fx_src": "yahoo"
  },
  "split_auto": {
@@ -339,48 +339,31 @@
    "score": 72,
    "breakout": true,
    "entry": 121.48,
-   "stop": 111.86,
+   "stop": 118.8,
    "stop_atr": 111.86,
    "atr_pct": 2.64,
    "resistance": 119.09,
-   "chart": null,
-   "patterns": [],
+   "chart": "bullish",
+   "patterns": [
+    "bearish engulfing"
+   ],
    "sector": "Consumer durables",
    "industry_ok": true,
    "sector_ok": false,
    "gates": [],
    "notes": [
     "industry leading (rank 46/121, +9.1% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
+    "stop raised to 118.8, just under the put wall 120.0 (was 111.86)"
    ],
    "rank_score": 77.0,
    "size_mult": 1.0,
-   "dealer": null
-  },
-  {
-   "t": "AMRX",
-   "name": "Amneal Pharmaceuticals, Inc.",
-   "industry": "Pharmaceuticals: major",
-   "score": 71,
-   "breakout": true,
-   "entry": 21.7,
-   "stop": 19.01,
-   "stop_atr": 19.01,
-   "atr_pct": 4.13,
-   "resistance": 21.51,
-   "chart": null,
-   "patterns": [],
-   "sector": "Health technology",
-   "industry_ok": true,
-   "sector_ok": false,
-   "gates": [],
-   "notes": [
-    "industry leading (rank 13/121, +8.8% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
-   ],
-   "rank_score": 76.0,
-   "size_mult": 1.0,
-   "dealer": null
+   "dealer": {
+    "flip": 117.44,
+    "call_wall": 125.0,
+    "put_wall": 120.0,
+    "em": 2.92,
+    "regime": "green"
+   }
   },
   {
    "t": "KNSA",
@@ -389,11 +372,11 @@
    "score": 71,
    "breakout": true,
    "entry": 96.28,
-   "stop": 77.77,
+   "stop": 94.05,
    "stop_atr": 77.77,
    "atr_pct": 6.41,
    "resistance": 93.86,
-   "chart": null,
+   "chart": "bullish",
    "patterns": [],
    "sector": "Health technology",
    "industry_ok": true,
@@ -401,36 +384,17 @@
    "gates": [],
    "notes": [
     "industry leading (rank 13/121, +8.8% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
+    "stop raised to 94.05, just under the put wall 95.0 (was 77.77)"
    ],
    "rank_score": 76.0,
    "size_mult": 1.0,
-   "dealer": null
-  },
-  {
-   "t": "BLCO",
-   "name": "Bausch + Lomb Corporation",
-   "industry": "Medical specialties",
-   "score": 68,
-   "breakout": true,
-   "entry": 21.14,
-   "stop": 18.69,
-   "stop_atr": 18.69,
-   "atr_pct": 3.86,
-   "resistance": 20.0,
-   "chart": null,
-   "patterns": [],
-   "sector": "Health technology",
-   "industry_ok": true,
-   "sector_ok": false,
-   "gates": [],
-   "notes": [
-    "industry leading (rank 23/121, +5.8% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
-   ],
-   "rank_score": 73.0,
-   "size_mult": 1.0,
-   "dealer": null
+   "dealer": {
+    "flip": null,
+    "call_wall": 100.0,
+    "put_wall": 95.0,
+    "em": 3.9,
+    "regime": "green"
+   }
   },
   {
    "t": "NWE",
@@ -443,19 +407,24 @@
    "stop_atr": 80.39,
    "atr_pct": 2.03,
    "resistance": 82.73,
-   "chart": null,
+   "chart": "bullish",
    "patterns": [],
    "sector": "Utilities",
    "industry_ok": true,
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 52/121, +4.8% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
+    "industry leading (rank 52/121, +4.8% vs SPX over a month)"
    ],
    "rank_score": 71.0,
    "size_mult": 1.0,
-   "dealer": null
+   "dealer": {
+    "flip": null,
+    "call_wall": 90.0,
+    "put_wall": 80.0,
+    "em": 1.22,
+    "regime": "green"
+   }
   },
   {
    "t": "OGE",
@@ -464,11 +433,11 @@
    "score": 65,
    "breakout": false,
    "entry": 51.26,
-   "stop": 48.43,
+   "stop": 49.5,
    "stop_atr": 48.43,
    "atr_pct": 1.84,
    "resistance": 50.64,
-   "chart": null,
+   "chart": "neutral",
    "patterns": [],
    "sector": "Utilities",
    "industry_ok": true,
@@ -476,36 +445,17 @@
    "gates": [],
    "notes": [
     "industry leading (rank 52/121, +4.8% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
+    "stop raised to 49.5, just under the put wall 50.0 (was 48.43)"
    ],
    "rank_score": 70.0,
    "size_mult": 1.0,
-   "dealer": null
-  },
-  {
-   "t": "CRL",
-   "name": "Charles River Laboratories International, Inc.",
-   "industry": "Miscellaneous commercial services",
-   "score": 64,
-   "breakout": false,
-   "entry": 340.81,
-   "stop": 284.47,
-   "stop_atr": 284.47,
-   "atr_pct": 5.51,
-   "resistance": 359.41,
-   "chart": null,
-   "patterns": [],
-   "sector": "Commercial services",
-   "industry_ok": true,
-   "sector_ok": false,
-   "gates": [],
-   "notes": [
-    "industry leading (rank 34/121, +2.5% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
-   ],
-   "rank_score": 69.0,
-   "size_mult": 1.0,
-   "dealer": null
+   "dealer": {
+    "flip": 41.41,
+    "call_wall": 55.0,
+    "put_wall": 50.0,
+    "em": 1.6,
+    "regime": "green"
+   }
   },
   {
    "t": "EHC",
@@ -514,23 +464,32 @@
    "score": 64,
    "breakout": false,
    "entry": 140.83,
-   "stop": 127.44,
+   "stop": 138.6,
    "stop_atr": 127.44,
    "atr_pct": 3.17,
    "resistance": 137.54,
-   "chart": null,
-   "patterns": [],
+   "chart": "bullish",
+   "patterns": [
+    "bearish engulfing",
+    "bearish belt hold"
+   ],
    "sector": "Health services",
    "industry_ok": true,
    "sector_ok": false,
    "gates": [],
    "notes": [
     "industry leading (rank 25/121, +7.5% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
+    "stop raised to 138.6, just under the put wall 140.0 (was 127.44)"
    ],
    "rank_score": 69.0,
    "size_mult": 1.0,
-   "dealer": null
+   "dealer": {
+    "flip": 139.61,
+    "call_wall": 145.0,
+    "put_wall": 140.0,
+    "em": 2.5,
+    "regime": "amber"
+   }
   },
   {
    "t": "SIGI",
@@ -539,11 +498,11 @@
    "score": 64,
    "breakout": false,
    "entry": 103.36,
-   "stop": 95.48,
+   "stop": 99.0,
    "stop_atr": 95.48,
    "atr_pct": 2.54,
    "resistance": 99.69,
-   "chart": null,
+   "chart": "bullish",
    "patterns": [],
    "sector": "Finance",
    "industry_ok": true,
@@ -551,36 +510,17 @@
    "gates": [],
    "notes": [
     "industry leading (rank 21/121, +5.2% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
+    "stop raised to 99.0, just under the put wall 100.0 (was 95.48)"
    ],
    "rank_score": 69.0,
    "size_mult": 1.0,
-   "dealer": null
-  },
-  {
-   "t": "CROX",
-   "name": "Crocs, Inc.",
-   "industry": "Apparel/Footwear",
-   "score": 63,
-   "breakout": false,
-   "entry": 156.88,
-   "stop": 134.95,
-   "stop_atr": 134.95,
-   "atr_pct": 4.66,
-   "resistance": 151.86,
-   "chart": null,
-   "patterns": [],
-   "sector": "Consumer non-durables",
-   "industry_ok": true,
-   "sector_ok": false,
-   "gates": [],
-   "notes": [
-    "industry leading (rank 68/121, +4.4% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
-   ],
-   "rank_score": 68.0,
-   "size_mult": 1.0,
-   "dealer": null
+   "dealer": {
+    "flip": null,
+    "call_wall": 105.0,
+    "put_wall": 100.0,
+    "em": 1.44,
+    "regime": "green"
+   }
   },
   {
    "t": "PRCH",
@@ -589,11 +529,11 @@
    "score": 63,
    "breakout": true,
    "entry": 21.31,
-   "stop": 16.99,
+   "stop": 19.8,
    "stop_atr": 16.99,
    "atr_pct": 6.75,
    "resistance": 20.56,
-   "chart": null,
+   "chart": "bullish",
    "patterns": [],
    "sector": "Finance",
    "industry_ok": true,
@@ -601,11 +541,17 @@
    "gates": [],
    "notes": [
     "industry leading (rank 21/121, +5.2% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
+    "stop raised to 19.8, just under the put wall 20.0 (was 16.99)"
    ],
    "rank_score": 68.0,
    "size_mult": 1.0,
-   "dealer": null
+   "dealer": {
+    "flip": null,
+    "call_wall": 22.5,
+    "put_wall": 20.0,
+    "em": 1.13,
+    "regime": "green"
+   }
   },
   {
    "t": "WAT",
@@ -614,11 +560,11 @@
    "score": 63,
    "breakout": false,
    "entry": 462.2,
-   "stop": 412.84,
+   "stop": 425.7,
    "stop_atr": 412.84,
    "atr_pct": 3.56,
    "resistance": 462.72,
-   "chart": null,
+   "chart": "bullish",
    "patterns": [],
    "sector": "Health technology",
    "industry_ok": true,
@@ -626,36 +572,17 @@
    "gates": [],
    "notes": [
     "industry leading (rank 23/121, +5.8% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
+    "stop raised to 425.7, just under the put wall 430.0 (was 412.84)"
    ],
    "rank_score": 68.0,
    "size_mult": 1.0,
-   "dealer": null
-  },
-  {
-   "t": "WCN",
-   "name": "Waste Connections, Inc.",
-   "industry": "Environmental services",
-   "score": 63,
-   "breakout": false,
-   "entry": 193.92,
-   "stop": 180.13,
-   "stop_atr": 180.13,
-   "atr_pct": 2.37,
-   "resistance": 189.07,
-   "chart": null,
-   "patterns": [],
-   "sector": "Industrial services",
-   "industry_ok": true,
-   "sector_ok": false,
-   "gates": [],
-   "notes": [
-    "industry leading (rank 11/121, +8.5% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
-   ],
-   "rank_score": 68.0,
-   "size_mult": 1.0,
-   "dealer": null
+   "dealer": {
+    "flip": 449.77,
+    "call_wall": 480.0,
+    "put_wall": 430.0,
+    "em": 10.98,
+    "regime": "green"
+   }
   },
   {
    "t": "WST",
@@ -664,11 +591,11 @@
    "score": 63,
    "breakout": false,
    "entry": 411.3,
-   "stop": 373.54,
+   "stop": 405.9,
    "stop_atr": 373.54,
    "atr_pct": 3.06,
    "resistance": 412.36,
-   "chart": null,
+   "chart": "bullish",
    "patterns": [],
    "sector": "Health technology",
    "industry_ok": true,
@@ -676,11 +603,183 @@
    "gates": [],
    "notes": [
     "industry leading (rank 23/121, +5.8% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
+    "stop raised to 405.9, just under the put wall 410.0 (was 373.54)"
    ],
    "rank_score": 68.0,
    "size_mult": 1.0,
-   "dealer": null
+   "dealer": {
+    "flip": 334.56,
+    "call_wall": 420.0,
+    "put_wall": 410.0,
+    "em": 7.72,
+    "regime": "green"
+   }
+  },
+  {
+   "t": "AMRX",
+   "name": "Amneal Pharmaceuticals, Inc.",
+   "industry": "Pharmaceuticals: major",
+   "score": 71,
+   "breakout": true,
+   "entry": 21.7,
+   "stop": 19.8,
+   "stop_atr": 19.01,
+   "atr_pct": 4.13,
+   "resistance": 21.51,
+   "chart": "bullish",
+   "patterns": [
+    "double top"
+   ],
+   "sector": "Health technology",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 13/121, +8.8% vs SPX over a month)",
+    "below its gamma flip (21.72): half size \u2014 dealers amplify moves there",
+    "call wall 22.5 within one expected move above: capped upside",
+    "stop raised to 19.8, just under the put wall 20.0 (was 19.01)"
+   ],
+   "rank_score": 66.0,
+   "size_mult": 0.5,
+   "dealer": {
+    "flip": 21.72,
+    "call_wall": 22.5,
+    "put_wall": 20.0,
+    "em": 1.59,
+    "regime": "red"
+   }
+  },
+  {
+   "t": "BLCO",
+   "name": "Bausch + Lomb Corporation",
+   "industry": "Medical specialties",
+   "score": 68,
+   "breakout": true,
+   "entry": 21.14,
+   "stop": 20.79,
+   "stop_atr": 18.69,
+   "atr_pct": 3.86,
+   "resistance": 20.0,
+   "chart": "bullish",
+   "patterns": [
+    "three white soldiers",
+    "hanging man"
+   ],
+   "sector": "Health technology",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 23/121, +5.8% vs SPX over a month)",
+    "call wall 22.0 within one expected move above: capped upside",
+    "stop raised to 20.79, just under the put wall 21.0 (was 18.69)"
+   ],
+   "rank_score": 63.0,
+   "size_mult": 1.0,
+   "dealer": {
+    "flip": null,
+    "call_wall": 22.0,
+    "put_wall": 21.0,
+    "em": 0.92,
+    "regime": "green"
+   }
+  },
+  {
+   "t": "CRL",
+   "name": "Charles River Laboratories International, Inc.",
+   "industry": "Miscellaneous commercial services",
+   "score": 64,
+   "breakout": false,
+   "entry": 340.81,
+   "stop": 326.7,
+   "stop_atr": 284.47,
+   "atr_pct": 5.51,
+   "resistance": 359.41,
+   "chart": "bullish",
+   "patterns": [],
+   "sector": "Commercial services",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 34/121, +2.5% vs SPX over a month)",
+    "call wall 350.0 within one expected move above: capped upside",
+    "stop raised to 326.7, just under the put wall 330.0 (was 284.47)"
+   ],
+   "rank_score": 59.0,
+   "size_mult": 1.0,
+   "dealer": {
+    "flip": null,
+    "call_wall": 350.0,
+    "put_wall": 330.0,
+    "em": 10.94,
+    "regime": "green"
+   }
+  },
+  {
+   "t": "CROX",
+   "name": "Crocs, Inc.",
+   "industry": "Apparel/Footwear",
+   "score": 63,
+   "breakout": false,
+   "entry": 156.88,
+   "stop": 153.45,
+   "stop_atr": 134.95,
+   "atr_pct": 4.66,
+   "resistance": 151.86,
+   "chart": "bullish",
+   "patterns": [],
+   "sector": "Consumer non-durables",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 68/121, +4.4% vs SPX over a month)",
+    "call wall 160.0 within one expected move above: capped upside",
+    "stop raised to 153.45, just under the put wall 155.0 (was 134.95)"
+   ],
+   "rank_score": 58.0,
+   "size_mult": 1.0,
+   "dealer": {
+    "flip": 125.63,
+    "call_wall": 160.0,
+    "put_wall": 155.0,
+    "em": 3.86,
+    "regime": "green"
+   }
+  },
+  {
+   "t": "WCN",
+   "name": "Waste Connections, Inc.",
+   "industry": "Environmental services",
+   "score": 63,
+   "breakout": false,
+   "entry": 193.92,
+   "stop": 188.1,
+   "stop_atr": 180.13,
+   "atr_pct": 2.37,
+   "resistance": 189.07,
+   "chart": "neutral",
+   "patterns": [],
+   "sector": "Industrial services",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 11/121, +8.5% vs SPX over a month)",
+    "call wall 195.0 within one expected move above: capped upside",
+    "stop raised to 188.1, just under the put wall 190.0 (was 180.13)"
+   ],
+   "rank_score": 58.0,
+   "size_mult": 1.0,
+   "dealer": {
+    "flip": 189.15,
+    "call_wall": 195.0,
+    "put_wall": 190.0,
+    "em": 3.25,
+    "regime": "green"
+   }
   },
   {
    "t": "BKH",
@@ -693,7 +792,7 @@
    "stop_atr": 81.99,
    "atr_pct": 2.11,
    "resistance": 84.87,
-   "chart": null,
+   "chart": "bullish",
    "patterns": [],
    "sector": "Utilities",
    "industry_ok": true,
@@ -701,31 +800,37 @@
    "gates": [],
    "notes": [
     "industry leading (rank 49/121, +2.5% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
+    "call wall 90.0 within one expected move above: capped upside"
    ],
-   "rank_score": 67.0,
+   "rank_score": 57.0,
    "size_mult": 1.0,
-   "dealer": null
+   "dealer": {
+    "flip": 60.98,
+    "call_wall": 90.0,
+    "put_wall": 80.0,
+    "em": 2.76,
+    "regime": "green"
+   }
   }
  ],
  "options": [
   {
    "t": "GOOG",
-   "label": "IC Jan15 285/310 \u00b125 \u00b7 50%",
+   "label": "IC Jan15 285/310 \u00b130 \u00b7 46%",
    "structure": "IC",
    "expiry": "2027-01-15",
    "expiry_type": "monthly",
    "exit_date": "2027-01-05",
-   "max_loss_usd": 1253.0,
-   "credit": 12.53,
-   "ev_usd": 163.18,
-   "ev_pct": 0.1302,
-   "ev_cons_usd": 163.18,
-   "ev_cons_pct": 0.1302,
-   "ev_mkt_usd": -107.28,
-   "win": 0.651,
-   "net_delta": -0.4,
-   "spot": 297.24,
+   "max_loss_usd": 1618.0,
+   "credit": 13.87,
+   "ev_usd": 209.27,
+   "ev_pct": 0.1293,
+   "ev_cons_usd": 209.27,
+   "ev_cons_pct": 0.1293,
+   "ev_mkt_usd": -118.17,
+   "win": 0.67,
+   "net_delta": -1.4,
+   "spot": 298.53,
    "bias": "neutral",
    "cluster": "semis & tech",
    "events": [
@@ -735,23 +840,40 @@
    ],
    "sized": {
     "15000": {
-     "label": "IC Jan15 280/320 \u00b115 \u00b7 45%",
+     "label": "IC Dec11 290/310 \u00b115 \u00b7 46%",
      "structure": "IC",
-     "expiry": "2027-01-15",
-     "expiry_type": "monthly",
-     "exit_date": "2027-01-05",
-     "max_loss_usd": 824.0,
-     "credit": 6.81,
-     "ev_usd": 82.52,
-     "ev_pct": 0.1001,
-     "ev_cons_usd": 82.52,
-     "ev_cons_pct": 0.1001,
-     "ev_mkt_usd": -91.4,
-     "win": 0.655,
-     "net_delta": 0.7
+     "expiry": "2026-12-11",
+     "expiry_type": "weekly",
+     "exit_date": "2026-12-01",
+     "max_loss_usd": 816.0,
+     "credit": 6.89,
+     "ev_usd": 1.34,
+     "ev_pct": 0.0016,
+     "ev_cons_usd": 1.34,
+     "ev_cons_pct": 0.0016,
+     "ev_mkt_usd": -115.14,
+     "win": 0.636,
+     "net_delta": 1.2
     }
    },
-   "alts": []
+   "alts": [
+    {
+     "label": "IC Dec18 295/305 \u00b125 \u00b7 55%",
+     "structure": "IC",
+     "expiry": "2026-12-18",
+     "expiry_type": "monthly",
+     "exit_date": "2026-12-08",
+     "max_loss_usd": 1125.0,
+     "credit": 13.8,
+     "ev_usd": 142.72,
+     "ev_pct": 0.1269,
+     "ev_cons_usd": 142.72,
+     "ev_cons_pct": 0.1269,
+     "ev_mkt_usd": -74.04,
+     "win": 0.698,
+     "net_delta": 1.8
+    }
+   ]
   },
   {
    "t": "OXY",
@@ -762,14 +884,14 @@
    "exit_date": "2027-01-05",
    "max_loss_usd": 311.0,
    "credit": 1.95,
-   "ev_usd": 35.44,
+   "ev_usd": 35.45,
    "ev_pct": 0.114,
-   "ev_cons_usd": -17.44,
-   "ev_cons_pct": -0.0561,
-   "ev_mkt_usd": -33.98,
+   "ev_cons_usd": -17.43,
+   "ev_cons_pct": -0.056,
+   "ev_mkt_usd": -33.97,
    "win": 0.706,
-   "net_delta": -0.8,
-   "spot": 58.56,
+   "net_delta": -0.9,
+   "spot": 58.58,
    "bias": "neutral",
    "cluster": "energy",
    "events": [
@@ -786,56 +908,130 @@
      "exit_date": "2026-12-08",
      "max_loss_usd": 254.0,
      "credit": 2.51,
-     "ev_usd": 26.17,
-     "ev_pct": 0.103,
-     "ev_cons_usd": -11.1,
-     "ev_cons_pct": -0.0437,
-     "ev_mkt_usd": -24.8,
-     "win": 0.705,
-     "net_delta": 0.5
+     "ev_usd": 26.2,
+     "ev_pct": 0.1031,
+     "ev_cons_usd": -11.07,
+     "ev_cons_pct": -0.0436,
+     "ev_mkt_usd": -24.78,
+     "win": 0.711,
+     "net_delta": 0.4
     }
    },
    "alts": []
   },
   {
    "t": "QCOM",
-   "label": "IC Dec18 170/195 \u00b125 \u00b7 36%",
+   "label": "IC Dec18 170/185 \u00b125 \u00b7 45%",
    "structure": "IC",
    "expiry": "2026-12-18",
    "expiry_type": "monthly",
    "exit_date": "2026-12-08",
-   "max_loss_usd": 1596.0,
-   "credit": 9.1,
-   "ev_usd": 153.11,
-   "ev_pct": 0.0959,
-   "ev_cons_usd": 41.92,
-   "ev_cons_pct": 0.0263,
-   "ev_mkt_usd": -59.05,
-   "win": 0.718,
-   "net_delta": 4.5,
-   "spot": 178.64,
+   "max_loss_usd": 1385.0,
+   "credit": 11.2,
+   "ev_usd": 129.82,
+   "ev_pct": 0.0937,
+   "ev_cons_usd": 21.45,
+   "ev_cons_pct": 0.0155,
+   "ev_mkt_usd": -82.1,
+   "win": 0.694,
+   "net_delta": 0.3,
+   "spot": 176.4,
    "bias": "neutral",
    "cluster": "other: QCOM",
    "events": [
     "NFP 12-04"
    ],
-   "sized": {},
+   "sized": {
+    "15000": {
+     "label": "IC Jan15 160/200 \u00b110 \u00b7 44%",
+     "structure": "IC",
+     "expiry": "2027-01-15",
+     "expiry_type": "monthly",
+     "exit_date": "2027-01-05",
+     "max_loss_usd": 569.0,
+     "credit": 4.36,
+     "ev_usd": 2.73,
+     "ev_pct": 0.0048,
+     "ev_cons_usd": -57.94,
+     "ev_cons_pct": -0.1018,
+     "ev_mkt_usd": -100.2,
+     "win": 0.598,
+     "net_delta": 0.5
+    }
+   },
    "alts": [
     {
-     "label": "IC Dec18 175/185 \u00b125 \u00b7 51%",
+     "label": "IC Dec18 165/190 \u00b120 \u00b7 39%",
      "structure": "IC",
      "expiry": "2026-12-18",
      "expiry_type": "monthly",
      "exit_date": "2026-12-08",
-     "max_loss_usd": 1235.0,
-     "credit": 12.71,
-     "ev_usd": 111.65,
-     "ev_pct": 0.0904,
-     "ev_cons_usd": 8.37,
-     "ev_cons_pct": 0.0068,
-     "ev_mkt_usd": -81.48,
-     "win": 0.681,
-     "net_delta": 0.9
+     "max_loss_usd": 1234.0,
+     "credit": 7.71,
+     "ev_usd": 108.65,
+     "ev_pct": 0.088,
+     "ev_cons_usd": 16.52,
+     "ev_cons_pct": 0.0134,
+     "ev_mkt_usd": -72.55,
+     "win": 0.705,
+     "net_delta": 0.2
+    }
+   ]
+  },
+  {
+   "t": "CSCO",
+   "label": "Dec11 \u2212102C +115C \u00b7 4.05",
+   "structure": "CCS",
+   "expiry": "2026-12-11",
+   "expiry_type": "weekly",
+   "exit_date": "2026-12-01",
+   "max_loss_usd": 898.0,
+   "credit": 4.05,
+   "ev_usd": 79.26,
+   "ev_pct": 0.0883,
+   "ev_cons_usd": 79.26,
+   "ev_cons_pct": 0.0883,
+   "ev_mkt_usd": 60.62,
+   "win": 0.687,
+   "net_delta": -30.0,
+   "spot": 99.2,
+   "bias": "bearish",
+   "cluster": "semis & tech",
+   "events": [],
+   "sized": {
+    "15000": {
+     "label": "Dec18 \u2212105C +115C \u00b7 2.84",
+     "structure": "CCS",
+     "expiry": "2026-12-18",
+     "expiry_type": "monthly",
+     "exit_date": "2026-12-08",
+     "max_loss_usd": 719.0,
+     "credit": 2.84,
+     "ev_usd": 50.5,
+     "ev_pct": 0.0702,
+     "ev_cons_usd": 50.5,
+     "ev_cons_pct": 0.0702,
+     "ev_mkt_usd": 40.64,
+     "win": 0.705,
+     "net_delta": -21.1
+    }
+   },
+   "alts": [
+    {
+     "label": "Dec18 \u2212105C +115C \u00b7 2.84",
+     "structure": "CCS",
+     "expiry": "2026-12-18",
+     "expiry_type": "monthly",
+     "exit_date": "2026-12-08",
+     "max_loss_usd": 719.0,
+     "credit": 2.84,
+     "ev_usd": 50.5,
+     "ev_pct": 0.0702,
+     "ev_cons_usd": 50.5,
+     "ev_cons_pct": 0.0702,
+     "ev_mkt_usd": 40.64,
+     "win": 0.705,
+     "net_delta": -21.1
     }
    ]
   },
@@ -848,14 +1044,14 @@
    "exit_date": "2027-01-05",
    "max_loss_usd": 753.0,
    "credit": 2.5,
-   "ev_usd": 61.61,
-   "ev_pct": 0.0818,
-   "ev_cons_usd": 18.73,
-   "ev_cons_pct": 0.0249,
-   "ev_mkt_usd": 3.5,
+   "ev_usd": 57.24,
+   "ev_pct": 0.076,
+   "ev_cons_usd": 14.68,
+   "ev_cons_pct": 0.0195,
+   "ev_mkt_usd": -0.39,
    "win": 0.738,
-   "net_delta": -21.6,
-   "spot": 124.31,
+   "net_delta": -21.8,
+   "spot": 124.5,
    "bias": "bearish",
    "cluster": "financials",
    "events": [
@@ -865,20 +1061,78 @@
    ],
    "sized": {
     "10000": {
-     "label": "Dec11 \u2212126C +133C \u00b7 2.19",
+     "label": "Dec11 \u2212127C +133C \u00b7 1.73",
      "structure": "CCS",
      "expiry": "2026-12-11",
      "expiry_type": "weekly",
      "exit_date": "2026-12-01",
-     "max_loss_usd": 484.0,
-     "credit": 2.19,
-     "ev_usd": 9.59,
-     "ev_pct": 0.0198,
-     "ev_cons_usd": -8.32,
-     "ev_cons_pct": -0.0172,
-     "ev_mkt_usd": -12.78,
+     "max_loss_usd": 430.0,
+     "credit": 1.73,
+     "ev_usd": 1.87,
+     "ev_pct": 0.0043,
+     "ev_cons_usd": -14.71,
+     "ev_cons_pct": -0.0342,
+     "ev_mkt_usd": -18.85,
      "win": 0.613,
-     "net_delta": -27.0
+     "net_delta": -23.0
+    }
+   },
+   "alts": []
+  },
+  {
+   "t": "USO",
+   "label": "IC Dec18 140/150 \u00b125 \u00b7 41%",
+   "structure": "IC",
+   "expiry": "2026-12-18",
+   "expiry_type": "monthly",
+   "exit_date": "2026-12-08",
+   "max_loss_usd": 1470.0,
+   "credit": 10.35,
+   "ev_usd": 108.15,
+   "ev_pct": 0.0736,
+   "ev_cons_usd": -8.45,
+   "ev_cons_pct": -0.0057,
+   "ev_mkt_usd": -64.98,
+   "win": 0.695,
+   "net_delta": 2.4,
+   "spot": 145.03,
+   "bias": "neutral",
+   "cluster": "energy",
+   "events": [
+    "NFP 12-04"
+   ],
+   "sized": {
+    "10000": {
+     "label": "IC Dec18 133/162 \u00b18 \u00b7 34%",
+     "structure": "IC",
+     "expiry": "2026-12-18",
+     "expiry_type": "monthly",
+     "exit_date": "2026-12-08",
+     "max_loss_usd": 530.0,
+     "credit": 2.75,
+     "ev_usd": -9.24,
+     "ev_pct": -0.0174,
+     "ev_cons_usd": -52.35,
+     "ev_cons_pct": -0.0988,
+     "ev_mkt_usd": -73.06,
+     "win": 0.616,
+     "net_delta": 3.5
+    },
+    "15000": {
+     "label": "IC Dec18 140/155 \u00b115 \u00b7 47%",
+     "structure": "IC",
+     "expiry": "2026-12-18",
+     "expiry_type": "monthly",
+     "exit_date": "2026-12-08",
+     "max_loss_usd": 802.0,
+     "credit": 7.03,
+     "ev_usd": 46.36,
+     "ev_pct": 0.0578,
+     "ev_cons_usd": -27.14,
+     "ev_cons_pct": -0.0338,
+     "ev_mkt_usd": -61.77,
+     "win": 0.652,
+     "net_delta": 5.9
     }
    },
    "alts": []
@@ -892,14 +1146,14 @@
    "exit_date": "2027-01-05",
    "max_loss_usd": 1124.0,
    "credit": 3.78,
-   "ev_usd": 75.44,
-   "ev_pct": 0.0671,
-   "ev_cons_usd": 57.45,
-   "ev_cons_pct": 0.0511,
-   "ev_mkt_usd": -2.47,
-   "win": 0.722,
-   "net_delta": -21.1,
-   "spot": 171.89,
+   "ev_usd": 68.28,
+   "ev_pct": 0.0607,
+   "ev_cons_usd": 50.43,
+   "ev_cons_pct": 0.0449,
+   "ev_mkt_usd": -8.8,
+   "win": 0.713,
+   "net_delta": -21.2,
+   "spot": 172.2,
    "bias": "bearish",
    "cluster": "industrials",
    "events": [
@@ -908,22 +1162,138 @@
     "CPI 12-10"
    ],
    "sized": {},
+   "alts": []
+  },
+  {
+   "t": "HOOD",
+   "label": "Dec18 \u221285C +100C \u00b7 3.77",
+   "structure": "CCS",
+   "expiry": "2026-12-18",
+   "expiry_type": "monthly",
+   "exit_date": "2026-12-08",
+   "max_loss_usd": 1126.0,
+   "credit": 3.77,
+   "ev_usd": 66.62,
+   "ev_pct": 0.0592,
+   "ev_cons_usd": 56.68,
+   "ev_cons_pct": 0.0503,
+   "ev_mkt_usd": 53.17,
+   "win": 0.705,
+   "net_delta": -26.8,
+   "spot": 79.76,
+   "bias": "bearish",
+   "cluster": "other: HOOD",
+   "events": [
+    "NFP 12-04"
+   ],
+   "sized": {
+    "15000": {
+     "label": "Dec11 \u221285C +95C \u00b7 2.70",
+     "structure": "CCS",
+     "expiry": "2026-12-11",
+     "expiry_type": "weekly",
+     "exit_date": "2026-12-01",
+     "max_loss_usd": 732.0,
+     "credit": 2.7,
+     "ev_usd": 21.32,
+     "ev_pct": 0.0291,
+     "ev_cons_usd": 15.5,
+     "ev_cons_pct": 0.0212,
+     "ev_mkt_usd": 18.33,
+     "win": 0.66,
+     "net_delta": -21.6
+    }
+   },
    "alts": [
     {
-     "label": "Dec18 \u2212175C +190C \u00b7 3.92",
+     "label": "Dec11 \u221284C +96C \u00b7 3.16",
+     "structure": "CCS",
+     "expiry": "2026-12-11",
+     "expiry_type": "weekly",
+     "exit_date": "2026-12-01",
+     "max_loss_usd": 887.0,
+     "credit": 3.16,
+     "ev_usd": 25.76,
+     "ev_pct": 0.029,
+     "ev_cons_usd": 18.88,
+     "ev_cons_pct": 0.0213,
+     "ev_mkt_usd": 22.24,
+     "win": 0.66,
+     "net_delta": -25.0
+    },
+    {
+     "label": "Dec11 \u221285C +95C \u00b7 2.70",
+     "structure": "CCS",
+     "expiry": "2026-12-11",
+     "expiry_type": "weekly",
+     "exit_date": "2026-12-01",
+     "max_loss_usd": 732.0,
+     "credit": 2.7,
+     "ev_usd": 21.32,
+     "ev_pct": 0.0291,
+     "ev_cons_usd": 15.5,
+     "ev_cons_pct": 0.0212,
+     "ev_mkt_usd": 18.33,
+     "win": 0.66,
+     "net_delta": -21.6
+    }
+   ]
+  },
+  {
+   "t": "QQQ",
+   "label": "Dec18 \u2212702C +730C \u00b7 9.81",
+   "structure": "CCS",
+   "expiry": "2026-12-18",
+   "expiry_type": "monthly",
+   "exit_date": "2026-12-08",
+   "max_loss_usd": 1821.0,
+   "credit": 9.81,
+   "ev_usd": 107.12,
+   "ev_pct": 0.0588,
+   "ev_cons_usd": 107.12,
+   "ev_cons_pct": 0.0588,
+   "ev_mkt_usd": 104.34,
+   "win": 0.642,
+   "net_delta": -21.3,
+   "spot": 688.91,
+   "bias": "bearish",
+   "cluster": "us index",
+   "events": [
+    "NFP 12-04"
+   ],
+   "sized": {},
+   "alts": [
+    {
+     "label": "Dec11 \u2212702C +727C \u00b7 8.39",
+     "structure": "CCS",
+     "expiry": "2026-12-11",
+     "expiry_type": "weekly",
+     "exit_date": "2026-12-01",
+     "max_loss_usd": 1664.0,
+     "credit": 8.39,
+     "ev_usd": 74.28,
+     "ev_pct": 0.0446,
+     "ev_cons_usd": 74.28,
+     "ev_cons_pct": 0.0446,
+     "ev_mkt_usd": 69.55,
+     "win": 0.632,
+     "net_delta": -20.6
+    },
+    {
+     "label": "Dec18 \u2212709C +730C \u00b7 6.67",
      "structure": "CCS",
      "expiry": "2026-12-18",
      "expiry_type": "monthly",
      "exit_date": "2026-12-08",
-     "max_loss_usd": 1111.0,
-     "credit": 3.92,
-     "ev_usd": 44.86,
-     "ev_pct": 0.0404,
-     "ev_cons_usd": 31.76,
-     "ev_cons_pct": 0.0286,
-     "ev_mkt_usd": -14.85,
-     "win": 0.66,
-     "net_delta": -28.6
+     "max_loss_usd": 1435.0,
+     "credit": 6.67,
+     "ev_usd": 60.73,
+     "ev_pct": 0.0423,
+     "ev_cons_usd": 60.73,
+     "ev_cons_pct": 0.0423,
+     "ev_mkt_usd": 58.35,
+     "win": 0.651,
+     "net_delta": -15.6
     }
    ]
   },
@@ -936,14 +1306,14 @@
    "exit_date": "2026-12-08",
    "max_loss_usd": 337.0,
    "credit": 1.66,
-   "ev_usd": 17.39,
-   "ev_pct": 0.0516,
-   "ev_cons_usd": 17.39,
-   "ev_cons_pct": 0.0516,
-   "ev_mkt_usd": 0.5,
+   "ev_usd": 17.96,
+   "ev_pct": 0.0533,
+   "ev_cons_usd": 17.96,
+   "ev_cons_pct": 0.0533,
+   "ev_mkt_usd": 0.84,
    "win": 0.632,
-   "net_delta": 31.7,
-   "spot": 37.8,
+   "net_delta": 31.6,
+   "spot": 37.82,
    "bias": "bullish",
    "cluster": "consumer",
    "events": [
@@ -958,13 +1328,13 @@
      "exit_date": "2026-12-01",
      "max_loss_usd": 203.0,
      "credit": 0.99,
-     "ev_usd": 5.14,
-     "ev_pct": 0.0253,
-     "ev_cons_usd": 5.14,
-     "ev_cons_pct": 0.0253,
-     "ev_mkt_usd": -0.92,
+     "ev_usd": 5.62,
+     "ev_pct": 0.0277,
+     "ev_cons_usd": 5.62,
+     "ev_cons_pct": 0.0277,
+     "ev_mkt_usd": -0.49,
      "win": 0.613,
-     "net_delta": 23.9
+     "net_delta": 23.8
     }
    },
    "alts": [
@@ -976,13 +1346,13 @@
      "exit_date": "2026-12-01",
      "max_loss_usd": 286.0,
      "credit": 1.17,
-     "ev_usd": 8.78,
-     "ev_pct": 0.0307,
-     "ev_cons_usd": 8.78,
-     "ev_cons_pct": 0.0307,
-     "ev_mkt_usd": 0.17,
+     "ev_usd": 9.36,
+     "ev_pct": 0.0327,
+     "ev_cons_usd": 9.36,
+     "ev_cons_pct": 0.0327,
+     "ev_mkt_usd": 0.68,
      "win": 0.632,
-     "net_delta": 29.4
+     "net_delta": 29.3
     },
     {
      "label": "Dec11 \u221237P +34P \u00b7 0.99",
@@ -992,13 +1362,29 @@
      "exit_date": "2026-12-01",
      "max_loss_usd": 203.0,
      "credit": 0.99,
-     "ev_usd": 5.14,
-     "ev_pct": 0.0253,
-     "ev_cons_usd": 5.14,
-     "ev_cons_pct": 0.0253,
-     "ev_mkt_usd": -0.92,
+     "ev_usd": 5.62,
+     "ev_pct": 0.0277,
+     "ev_cons_usd": 5.62,
+     "ev_cons_pct": 0.0277,
+     "ev_mkt_usd": -0.49,
      "win": 0.613,
-     "net_delta": 23.9
+     "net_delta": 23.8
+    },
+    {
+     "label": "Dec11 \u221236P +34P \u00b7 0.56",
+     "structure": "PCS",
+     "expiry": "2026-12-11",
+     "expiry_type": "weekly",
+     "exit_date": "2026-12-01",
+     "max_loss_usd": 147.0,
+     "credit": 0.56,
+     "ev_usd": 0.12,
+     "ev_pct": 0.0008,
+     "ev_cons_usd": 0.12,
+     "ev_cons_pct": 0.0008,
+     "ev_mkt_usd": -4.56,
+     "win": 0.623,
+     "net_delta": 15.0
     }
    ]
   },
@@ -1011,14 +1397,14 @@
    "exit_date": "2026-12-08",
    "max_loss_usd": 1806.0,
    "credit": 6.96,
-   "ev_usd": 36.67,
-   "ev_pct": 0.0203,
-   "ev_cons_usd": 12.31,
-   "ev_cons_pct": 0.0068,
-   "ev_mkt_usd": -85.4,
-   "win": 0.623,
-   "net_delta": 22.4,
-   "spot": 238.64,
+   "ev_usd": 58.72,
+   "ev_pct": 0.0325,
+   "ev_cons_usd": 33.96,
+   "ev_cons_pct": 0.0188,
+   "ev_mkt_usd": -65.63,
+   "win": 0.642,
+   "net_delta": 22.0,
+   "spot": 239.51,
    "bias": "bullish",
    "cluster": "semis & tech",
    "events": [
@@ -1033,13 +1419,13 @@
      "exit_date": "2026-12-08",
      "max_loss_usd": 750.0,
      "credit": 2.53,
-     "ev_usd": -4.66,
-     "ev_pct": -0.0062,
-     "ev_cons_usd": -15.4,
-     "ev_cons_pct": -0.0205,
-     "ev_mkt_usd": -58.28,
-     "win": 0.623,
-     "net_delta": 9.1
+     "ev_usd": 3.9,
+     "ev_pct": 0.0052,
+     "ev_cons_usd": -6.96,
+     "ev_cons_pct": -0.0093,
+     "ev_mkt_usd": -50.48,
+     "win": 0.642,
+     "net_delta": 9.0
     }
    },
    "alts": [
@@ -1051,13 +1437,13 @@
      "exit_date": "2026-12-01",
      "max_loss_usd": 1414.0,
      "credit": 5.89,
-     "ev_usd": 23.61,
-     "ev_pct": 0.0167,
-     "ev_cons_usd": 7.73,
-     "ev_cons_pct": 0.0055,
-     "ev_mkt_usd": -62.66,
-     "win": 0.604,
-     "net_delta": 20.1
+     "ev_usd": 43.26,
+     "ev_pct": 0.0306,
+     "ev_cons_usd": 27.04,
+     "ev_cons_pct": 0.0191,
+     "ev_mkt_usd": -45.05,
+     "win": 0.623,
+     "net_delta": 19.8
     },
     {
      "label": "Dec18 \u2212225P +205P \u00b7 5.25",
@@ -1067,39 +1453,113 @@
      "exit_date": "2026-12-08",
      "max_loss_usd": 1478.0,
      "credit": 5.25,
-     "ev_usd": 24.39,
-     "ev_pct": 0.0165,
-     "ev_cons_usd": 3.97,
-     "ev_cons_pct": 0.0027,
-     "ev_mkt_usd": -78.5,
-     "win": 0.642,
-     "net_delta": 17.5
+     "ev_usd": 41.16,
+     "ev_pct": 0.0278,
+     "ev_cons_usd": 20.5,
+     "ev_cons_pct": 0.0139,
+     "ev_mkt_usd": -63.18,
+     "win": 0.651,
+     "net_delta": 17.2
+    },
+    {
+     "label": "Dec18 \u2212235P +210P \u00b7 8.29",
+     "structure": "PCS",
+     "expiry": "2026-12-18",
+     "expiry_type": "monthly",
+     "exit_date": "2026-12-08",
+     "max_loss_usd": 1674.0,
+     "credit": 8.29,
+     "ev_usd": 39.55,
+     "ev_pct": 0.0236,
+     "ev_cons_usd": 17.75,
+     "ev_cons_pct": 0.0106,
+     "ev_mkt_usd": -68.34,
+     "win": 0.604,
+     "net_delta": 24.2
+    },
+    {
+     "label": "Dec18 \u2212230P +210P \u00b7 6.09",
+     "structure": "PCS",
+     "expiry": "2026-12-18",
+     "expiry_type": "monthly",
+     "exit_date": "2026-12-08",
+     "max_loss_usd": 1394.0,
+     "credit": 6.09,
+     "ev_usd": 32.49,
+     "ev_pct": 0.0233,
+     "ev_cons_usd": 13.21,
+     "ev_cons_pct": 0.0095,
+     "ev_mkt_usd": -63.07,
+     "win": 0.623,
+     "net_delta": 18.9
     }
    ]
   },
   {
+   "t": "JPM",
+   "label": "Dec18 \u2212340P +320P \u00b7 5.06",
+   "structure": "PCS",
+   "expiry": "2026-12-18",
+   "expiry_type": "monthly",
+   "exit_date": "2026-12-08",
+   "max_loss_usd": 1497.0,
+   "credit": 5.06,
+   "ev_usd": 34.48,
+   "ev_pct": 0.023,
+   "ev_cons_usd": 13.16,
+   "ev_cons_pct": 0.0088,
+   "ev_mkt_usd": -58.22,
+   "win": 0.642,
+   "net_delta": 25.3,
+   "spot": 344.6,
+   "bias": "bullish",
+   "cluster": "financials",
+   "events": [
+    "NFP 12-04"
+   ],
+   "sized": {},
+   "alts": []
+  },
+  {
    "t": "TLT",
-   "label": "IC Dec18 79/81 \u00b14 \u00b7 36%",
+   "label": "IC Dec18 78/81 \u00b14 \u00b7 28%",
    "structure": "IC",
    "expiry": "2026-12-18",
    "expiry_type": "monthly",
    "exit_date": "2026-12-08",
-   "max_loss_usd": 260.0,
-   "credit": 1.45,
-   "ev_usd": 3.56,
-   "ev_pct": 0.0137,
-   "ev_cons_usd": 3.56,
-   "ev_cons_pct": 0.0137,
-   "ev_mkt_usd": -3.41,
-   "win": 0.633,
-   "net_delta": 6.1,
-   "spot": 79.62,
+   "max_loss_usd": 291.0,
+   "credit": 1.14,
+   "ev_usd": 3.75,
+   "ev_pct": 0.0129,
+   "ev_cons_usd": 3.75,
+   "ev_cons_pct": 0.0129,
+   "ev_mkt_usd": -3.19,
+   "win": 0.651,
+   "net_delta": -2.1,
+   "spot": 79.57,
    "bias": "neutral",
    "cluster": "rates & credit",
    "events": [
     "NFP 12-04"
    ],
-   "sized": {},
+   "sized": {
+    "5000": {
+     "label": "IC Dec18 78/81 \u00b13 \u00b7 34%",
+     "structure": "IC",
+     "expiry": "2026-12-18",
+     "expiry_type": "monthly",
+     "exit_date": "2026-12-08",
+     "max_loss_usd": 203.0,
+     "credit": 1.02,
+     "ev_usd": 0.75,
+     "ev_pct": 0.0037,
+     "ev_cons_usd": 0.75,
+     "ev_cons_pct": 0.0037,
+     "ev_mkt_usd": -4.87,
+     "win": 0.625,
+     "net_delta": -1.5
+    }
+   },
    "alts": [
     {
      "label": "IC Dec18 78/81 \u00b13 \u00b7 34%",
@@ -1109,40 +1569,15 @@
      "exit_date": "2026-12-08",
      "max_loss_usd": 203.0,
      "credit": 1.02,
-     "ev_usd": 0.66,
-     "ev_pct": 0.0033,
-     "ev_cons_usd": 0.66,
-     "ev_cons_pct": 0.0033,
-     "ev_mkt_usd": -4.95,
+     "ev_usd": 0.75,
+     "ev_pct": 0.0037,
+     "ev_cons_usd": 0.75,
+     "ev_cons_pct": 0.0037,
+     "ev_mkt_usd": -4.87,
      "win": 0.625,
-     "net_delta": -2.1
+     "net_delta": -1.5
     }
    ]
-  },
-  {
-   "t": "TSLA",
-   "label": "IC Dec18 370/430 \u00b130 \u00b7 40%",
-   "structure": "IC",
-   "expiry": "2026-12-18",
-   "expiry_type": "monthly",
-   "exit_date": "2026-12-08",
-   "max_loss_usd": 1820.0,
-   "credit": 11.85,
-   "ev_usd": 3.34,
-   "ev_pct": 0.0018,
-   "ev_cons_usd": -37.25,
-   "ev_cons_pct": -0.0205,
-   "ev_mkt_usd": -110.73,
-   "win": 0.611,
-   "net_delta": -1.1,
-   "spot": 399.36,
-   "bias": "neutral",
-   "cluster": "consumer",
-   "events": [
-    "NFP 12-04"
-   ],
-   "sized": {},
-   "alts": []
   },
   {
    "t": "IBM",
@@ -1153,16 +1588,41 @@
    "exit_date": "2026-12-08",
    "max_loss_usd": 1484.0,
    "credit": 5.19,
-   "ev_usd": 2.0,
-   "ev_pct": 0.0013,
-   "ev_cons_usd": -38.17,
-   "ev_cons_pct": -0.0257,
-   "ev_mkt_usd": -79.55,
-   "win": 0.613,
-   "net_delta": 24.8,
-   "spot": 245.17,
+   "ev_usd": 11.31,
+   "ev_pct": 0.0076,
+   "ev_cons_usd": -29.24,
+   "ev_cons_pct": -0.0197,
+   "ev_mkt_usd": -71.07,
+   "win": 0.623,
+   "net_delta": 24.6,
+   "spot": 245.5,
    "bias": "bullish",
    "cluster": "semis & tech",
+   "events": [
+    "NFP 12-04"
+   ],
+   "sized": {},
+   "alts": []
+  },
+  {
+   "t": "TSLA",
+   "label": "IC Dec18 370/430 \u00b130 \u00b7 40%",
+   "structure": "IC",
+   "expiry": "2026-12-18",
+   "expiry_type": "monthly",
+   "exit_date": "2026-12-08",
+   "max_loss_usd": 1820.0,
+   "credit": 11.85,
+   "ev_usd": 3.25,
+   "ev_pct": 0.0018,
+   "ev_cons_usd": -37.28,
+   "ev_cons_pct": -0.0205,
+   "ev_mkt_usd": -109.61,
+   "win": 0.612,
+   "net_delta": -1.4,
+   "spot": 400.05,
+   "bias": "neutral",
+   "cluster": "consumer",
    "events": [
     "NFP 12-04"
    ],
@@ -1174,6 +1634,6 @@
   "core": 4,
   "satellite": 5,
   "tactical": 15,
-  "options": 10
+  "options": 15
  }
 }

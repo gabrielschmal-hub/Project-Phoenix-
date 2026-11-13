@@ -1,7 +1,7 @@
 {
  "schema": "phoenix-fact-pack/1",
  "date": "2026-11-13",
- "asof": "2026-11-13 08:07 UTC",
+ "asof": "2026-11-13 13:40 UTC",
  "market": {
   "regime": "ENERGY_GRIND",
   "regime_held_weeks": 6,
@@ -11,16 +11,16 @@
    "vs_50d_pct": -1.03,
    "vs_200d_pct": 3.48
   },
-  "vix": 18.7,
+  "vix": 18.24,
   "dxy": null,
   "us10y": null,
   "gold": null,
   "wti": null,
   "gex": {
-   "net_B": -37.45,
+   "net_B": -37.46,
    "regime": "negative",
    "flip": null,
-   "dist_to_flip_pct": 0.4,
+   "dist_to_flip_pct": 0.74,
    "call_wall": null,
    "put_wall": null,
    "spot": 7592.4
@@ -64,10 +64,10 @@
    "m1_pct": -6.68
   },
   "btc": {
-   "last": 73964.0,
-   "d1_pct": 0.33,
-   "w1_pct": -8.01,
-   "m1_pct": -10.99
+   "last": 71343.0,
+   "d1_pct": -3.54,
+   "w1_pct": -6.06,
+   "m1_pct": -12.53
   },
   "dxy": {
    "last": 103.17,
@@ -137,19 +137,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 19.82,
+    "value": 19.49,
     "op": ">",
     "threshold": 0,
-    "clear_by": 19.82,
+    "clear_by": 19.49,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 47.98,
+    "value": 47.56,
     "op": ">",
     "threshold": 25,
-    "clear_by": 22.98,
+    "clear_by": 22.56,
     "ok": true
    }
   ],
@@ -163,16 +163,16 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 19.82,
+    "now": 19.49,
     "threshold": 0,
-    "distance": 19.82,
+    "distance": 19.49,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 47.98,
+    "now": 47.56,
     "threshold": 25,
-    "distance": 22.98,
+    "distance": 22.56,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
@@ -184,7 +184,7 @@
     {
      "label": "WTI 3m",
      "need": "> 25",
-     "now": 7.912617138749334
+     "now": 7.609219086115204
     }
    ]
   }
@@ -504,7 +504,7 @@
  },
  "news": {
   "date": "2026-11-12",
-  "asof": "2026-11-13 07:12 UTC",
+  "asof": "2026-11-13 12:51 UTC",
   "headline": "Jensen Huang resigns as Nvidia's CEO \u2014 and the ten-year yield goes back above 5%",
   "standfirst": "Nvidia said Jensen Huang had resigned as chief executive, with CFO Colette Kress as interim CEO; the shares fell as much as 14% and closed 4.34% lower. As bonds reopened, the two-year rose about 15bp to 4.88% and the ten-year to 5.10%. The S&P slipped 0.35%, but the Russell fell 1.66% and gold 2.79%, while WTI rose 2.55% on attacks on Saudi oil sites. The book is flat; Q4 is +34.64 realised, heat 0R.",
   "themes": [
@@ -543,23 +543,23 @@
  },
  "provenance": {
   "macro": {
-   "asof": "2026-11-13 07:12 UTC",
+   "asof": "2026-11-13 12:51 UTC",
    "age_min": null
   },
   "gex": {
-   "asof": "2026-11-13 07:12 UTC",
+   "asof": "2026-11-13 12:51 UTC",
    "age_min": null
   },
   "stocks": {
-   "asof": "2026-11-13 07:22 UTC",
+   "asof": "2026-11-13 13:00 UTC",
    "age_min": null
   },
   "institutional_holdings": {
-   "asof": "2026-11-13 07:42 UTC",
+   "asof": "2026-11-13 13:20 UTC",
    "quarter": "2026-06-30"
   },
   "congress_trades": {
-   "asof": "2026-11-13 07:40 UTC",
+   "asof": "2026-11-13 13:19 UTC",
    "status": {
     "written": "2026-11-13",
     "dropped_impossible_dates": 0,
@@ -589,7 +589,7 @@
    }
   },
   "wire": {
-   "asof": "2026-11-13 07:12 UTC"
+   "asof": "2026-11-13 12:51 UTC"
   }
  },
  "missing": [],
