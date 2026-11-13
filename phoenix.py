@@ -11000,6 +11000,12 @@ def run_mme_chains(max_dte=180, band=0.35):
         extra += [r["ticker"] for r in _sb_option_trades("open")]
     except Exception:
         pass
+    # every name with an open or pending forward-test trade (coach board, earnings grenade...) must be fetched,
+    # or the trade is never marked (13 Nov 2026)
+    try:
+        extra += [r["ticker"] for r in (_sb_get("ic_forward", {"status": "in.(open,pending)", "select": "ticker"}, limit=5000) or [])]
+    except Exception:
+        pass
     for t in extra:
         if t and "." not in t and t not in names:
             names.append(t); uni.setdefault(t, "stock")
@@ -13320,7 +13326,7 @@ def run_ic_recap():
         rows = _sb_get("ic_forward", {"select": "id,opened,ticker,expiry,credit,max_loss_1,fees_1,entry_quotes,model,result,marks,status,role,structure,grp,iv_atm,hv"}, limit=20000) or []
     except Exception as e:
         print(f"[icrecap] cannot read ic_forward ({e})"); sb_heartbeat("ic_recap", False, str(e)); return None
-    all_rows = [r for r in rows if r.get("role") in ("proposed", "calibration", "rules_b", "coach", "mine", "grenade")]
+    all_rows = [r for r in rows if r.get("role") in ("proposed", "calibration", "rules_b", "coach", "mine", "grenade", "coach_board")]
     rows = [r for r in all_rows if r.get("role") in ("proposed", "calibration")]
     # the daily regime row, stored beside the P&L (10 Nov 2026)
     regime_rows = []
@@ -13970,6 +13976,35 @@ def run_ic_record():
         mmrows = {r_["ticker"]: r_ for g in (mm.get("groups") or {}).values() for r_ in g}; mmrows.update(mm.get("etf_rows") or {})
     except Exception:
         mmrows = {}
+    # PENDING trades (13 Nov 2026): trades recorded from a published board without a price (the coach's Daily Doze
+    # board) are filled here at the MID of this morning's chain, as the coach scores them. The fill date and the
+    # board date are both kept on the row; nothing else about the trade is changed.
+    try:
+        for row in _sb_get("ic_forward", {"status": "eq.pending", "select": "*"}, limit=500) or []:
+            c = (ch.get("names") or {}).get(row["ticker"])
+            if not c:
+                continue
+            exp = str(row["expiry"])[:10]
+            q_ = _ic_quotes(c.get("rows"), exp)
+            L = _ic_legs(row["legs"])
+            mids = [((q_.get((cp, K)) or (None, None))[0], (q_.get((cp, K)) or (None, None))[1]) for cp, K, sg in L]
+            if any(b is None or a is None or a <= 0 for b, a in mids):
+                print(f"[icrec] pending {row['ticker']} {exp}: a leg has no quote yet; stays pending"); continue
+            credit = round(sum(-sg * (b + a) / 2 for (cp, K, sg), (b, a) in zip(L, mids)), 2)
+            lg = row["legs"]
+            width = max(abs(float(lg.get("short_put", 0)) - float(lg.get("long_put", 0))) if lg.get("short_put") is not None else 0,
+                        abs(float(lg.get("long_call", 0)) - float(lg.get("short_call", 0))) if lg.get("short_call") is not None else 0)
+            fees = _ic_fees_real(lg)
+            if credit <= 0 or credit >= width:
+                print(f"[icrec] pending {row['ticker']} {exp}: mid credit {credit} not usable; stays pending"); continue
+            model = dict(row.get("model") or {}, filled_at_mid=d, fill_spot=c.get("spot"))
+            _sb_write("PATCH", "ic_forward", {"status": "open", "opened": d, "credit": credit, "fees_1": fees,
+                                               "max_loss_1": round((width - credit) * 100 + fees, 2), "spot_entry": c.get("spot"),
+                                               "entry_quotes": {f"{cp}{K:g}": {"bid": b, "ask": a} for (cp, K, sg), (b, a) in zip(L, mids)},
+                                               "model": model}, params={"id": f"eq.{row['id']}"})
+            print(f"[icrec] pending {row['ticker']} {exp} filled at the mid: credit {credit}, max loss {round((width - credit) * 100 + fees, 2)}")
+    except Exception as e:
+        print(f"[icrec] pending fills skipped ({e})")
     try:
         live = (_sb_get("ic_forward", {"status": "eq.open", "select": "*"}, limit=5000) or []) + \
                (_sb_get("ic_forward", {"status": "eq.closed", "expiry": f"gte.{d}", "select": "*"}, limit=5000) or [])

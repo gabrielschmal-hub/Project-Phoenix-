@@ -11230,7 +11230,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         return '<div class="r'+(on?' on':'')+'" data-fo="'+r.id+'"><span class="tk">'+r.ticker+'</span><span class="tr">'+optEsc(lab)+(function(){ var mp=(+r.credit||0)*100-(+r.fees_1||0); if(!l||!(mp>0)||l.pnl_1<0.5*mp) return '';
             return ' <i class="xt" style="color:var(--green);border-color:var(--green)">'+Math.round(l.pnl_1/mp*100)+'% of max profit'+(l.pnl_1>=0.7*mp?' \u00b7 take-profit level':'')+'</i>'; })()+'</span><span>'+optDate(r.opened)+'</span>'+
           '<span>'+(l?l.dte:'\u2014')+'</span><span class="ev'+(l&&l.pnl_1>0?'':' neg')+'">'+(l?optM(l.pnl_1):'\u2014')+'</span><span>'+(l&&r.max_loss_1?optPct(l.pnl_1/r.max_loss_1,1):'\u2014')+'</span>'+
-          '<span>'+(r.role==="proposed"?'\u2605 proposed':(r.role==="winner"?'old rules':(r.role==="rules_b"?'rules B':(r.role==="coach"?'coach':(r.role==="mine"?'mine':'calib.')))))+(r.status!=="open"?' \u00b7 '+r.status:'')+'</span></div>'+
+          '<span>'+(r.role==="proposed"?'\u2605 proposed':(r.role==="winner"?'old rules':(r.role==="rules_b"?'rules B':(r.role==="coach"?'coach':(r.role==="mine"?'mine':(r.role==="grenade"?'grenade':(r.role==="coach_board"?'coach board':'calib.')))))))+(r.status!=="open"?' \u00b7 '+r.status:'')+'</span></div>'+
           (on?'<div class="opt-why" id="optTrDet"><i>Loading the day-by-day\u2026</i></div>':''); }).join("")+
       '</div>'+(rows.length>10?'<a href="#" class="opt-go" id="optTrMore">'+(OPT_TR_ALL?'Show the first 10':'Show all '+rows.length)+'</a>':'');
     optBindSort(el,"tr",optTradesList);
@@ -11306,10 +11306,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var dims=Object.keys(R.edge||{}); if(dims.indexOf(OPT_EDGE_DIM)<0) OPT_EDGE_DIM=dims[0];
       var E=(R.edge||{})[OPT_EDGE_DIM]||{};
       var cm=document.getElementById("optCmp"), CP=R.compare||{};
-      if(cm&&Object.keys(CP).length){ var lab={proposed:"Rules A \u00b7 proposed",calibration:"Rules A \u00b7 calibration",rules_b:"Rules B \u00b7 test",coach:"Coach",mine:"Mine (paper)"};
+      if(cm&&Object.keys(CP).length){ var lab={proposed:"Rules A \u00b7 proposed",calibration:"Rules A \u00b7 calibration",rules_b:"Rules B \u00b7 test",coach:"Coach",mine:"Mine (paper)",grenade:"Earnings grenade",coach_board:"Coach board"};
         cm.innerHTML='<div class="opt-sub3">Side by side <span>\u00b7 November: live rules (A) against the test rules (B) and the coach \u00b7 closed = at each trade\u2019s planned exit</span></div>'+
           '<div class="opt-tbl cmp"><div class="hd"><span>Book</span><span>Trades</span><span>Open P&amp;L</span><span>Avg / trade after costs</span><span>Avg / trade at mid</span><span>Unique bets: n \u00b7 after costs \u00b7 at mid</span><span>Closed \u00b7 win</span><span>Return on risk</span></div>'+
-          ["proposed","rules_b","coach","mine","calibration"].filter(function(k){ return CP[k]; }).map(function(k){ var g=CP[k];
+          ["proposed","rules_b","coach","coach_board","grenade","mine","calibration"].filter(function(k){ return CP[k]; }).map(function(k){ var g=CP[k];
             var a3=g.all3||{}, u3=g.unique3||{}, pc=function(v){ return v==null?'\u2014':'<span class="'+(v>=0?'ev':'ev neg')+'">'+optPct(v,1)+'</span>'; };
             return '<div class="r"><span class="tk">'+lab[k]+'</span><span>'+g.trades+'</span><span class="'+(g.mtm>=0?'ev':'ev neg')+'">'+optM(g.mtm)+(g.mtm_pct!=null?' <i>'+optPct(g.mtm_pct,1)+'</i>':'')+'</span>'+
               '<span>'+pc(a3.avg_net)+'</span><span>'+pc(a3.avg_mid)+'</span><span>'+(u3.n?u3.n+' \u00b7 '+pc(u3.avg_net)+' \u00b7 '+pc(u3.avg_mid):'\u2014')+'</span>'+
@@ -11483,6 +11483,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       var roles=[["proposed","Proposed \u2014 the trades Phoenix put on the list"],["calibration","Calibration \u2014 every other name\u2019s best trade"],
                  ["rules_b","Rules B (November test) \u2014 leaning condors and a softer flip gate, its proposed list"],["coach","Coach \u2014 the trades from his emails, his strikes, credit and exit day"],
                  ["mine","Mine \u2014 your own trades (paper), your fill and your exit day"],
+                 ["grenade","Earnings grenade \u2014 short-dated trades held through an earnings report, to collect the volatility crush"],
+                 ["coach_board","Coach board \u2014 the iron condors on the coach's Daily Doze board, filled at the mid, his exit days"],
                  ["winner","Old rules \u2014 opened 27\u201330 Oct before equal wings, the chart read and the new universe; kept apart, not in the totals"]];
       var cur=rows.filter(function(r){ return r.role==="proposed"||r.role==="calibration"; });   // the live rules (A); B and the coach are compared side by side
       var open=rows.filter(function(r){ return r.status==="open"; }), closed=rows.filter(function(r){ return r.status!=="open"; });
@@ -12043,7 +12045,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
               (by.res?'<i class="m res" style="left:'+p(by.res.v).toFixed(1)+'%">'+lab(by.res)+'</i>':'')+
               '<i class="spot" style="left:'+p(r.spot).toFixed(1)+'%">'+lab(by.spot)+'</i>'+
             '</div>'+
-            '<span class="st">'+(r.status?r.status.replace("NEARING ","NEAR "):(r.flip==null?"NO FLIP":""))+'</span></div>';
+            '<span class="st">'+(r.status?r.status.replace("NEARING ","NEAR "):(r.flip==null?(r.flip_side==="above"?"NO FLIP \u00b7 NEG. GAMMA":(r.flip_side==="below"?"NO FLIP \u00b7 POS. GAMMA":"NO FLIP")):""))+'</span></div>';
         }).join("");
         var ln=document.getElementById("mmeLiveNote");
         var nLive=Object.keys(MME_LIVE).length;
