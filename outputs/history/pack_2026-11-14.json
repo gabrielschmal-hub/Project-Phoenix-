@@ -1,0 +1,609 @@
+{
+ "schema": "phoenix-fact-pack/1",
+ "date": "2026-11-14",
+ "asof": "2026-11-14 08:17 UTC",
+ "market": {
+  "regime": "ENERGY_GRIND",
+  "regime_held_weeks": 6,
+  "spx": {
+   "last": 7561.67,
+   "chg_1d_pct": -0.4,
+   "vs_50d_pct": -1.38,
+   "vs_200d_pct": 3.02
+  },
+  "vix": 19.3,
+  "dxy": null,
+  "us10y": null,
+  "gold": null,
+  "wti": null,
+  "gex": {
+   "net_B": -56.23,
+   "regime": "negative",
+   "flip": null,
+   "dist_to_flip_pct": 0.7,
+   "call_wall": null,
+   "put_wall": null,
+   "spot": 7561.67
+  }
+ },
+ "macro": {
+  "spx": {
+   "last": 7561.67,
+   "d1_pct": -0.4,
+   "w1_pct": 2.51,
+   "m1_pct": -2.36
+  },
+  "ndx": {
+   "last": 25136.27,
+   "d1_pct": -0.91,
+   "w1_pct": 2.27,
+   "m1_pct": -5.9
+  },
+  "dow": {
+   "last": 52347.55,
+   "d1_pct": 0.1,
+   "w1_pct": 2.07,
+   "m1_pct": 0.33
+  },
+  "rut": {
+   "last": 2790.49,
+   "d1_pct": -0.31,
+   "w1_pct": 1.32,
+   "m1_pct": 0.84
+  },
+  "gold": {
+   "last": 3886.3,
+   "d1_pct": 0.03,
+   "w1_pct": -4.63,
+   "m1_pct": -6.81
+  },
+  "wti": {
+   "last": 88.56,
+   "d1_pct": -0.2,
+   "w1_pct": -2.5,
+   "m1_pct": -9.6
+  },
+  "btc": {
+   "last": 68249.0,
+   "d1_pct": -4.34,
+   "w1_pct": -9.9,
+   "m1_pct": -16.91
+  },
+  "dxy": {
+   "last": 103.41,
+   "d1_pct": 0.23,
+   "w1_pct": 1.09,
+   "m1_pct": 1.38
+  },
+  "vix": {
+   "last": 19.3,
+   "d1_pct": 3.21,
+   "w1_pct": -24.73,
+   "m1_pct": 17.25
+  },
+  "usdjpy": {
+   "last": 159.88,
+   "d1_pct": 0.09,
+   "w1_pct": 1.51,
+   "m1_pct": 1.21
+  },
+  "tnx": {
+   "last": 5.15,
+   "d1_bp": 5,
+   "w1_bp": 29,
+   "m1_bp": 6
+  },
+  "us02": {
+   "last": 4.86,
+   "d1_bp": 0,
+   "w1_bp": 35,
+   "m1_bp": 9
+  },
+  "real10": {
+   "last": 2.86,
+   "d1_bp": 0,
+   "w1_bp": 23,
+   "m1_bp": 8
+  },
+  "hy": {
+   "last": 3.2,
+   "d1_bp": 0,
+   "w1_bp": 0,
+   "m1_bp": 0
+  },
+  "cpi_yoy": {
+   "last": 3.72,
+   "prev_print": 3.35
+  },
+  "curve_2s10s_bp": 29,
+  "curve_2s10s_chg_1m_bp": -3,
+  "absent": [],
+  "rows": 251
+ },
+ "regime_gates": {
+  "regime": "ENERGY_GRIND",
+  "held_weeks": 6,
+  "since": "2026-10-05",
+  "drivers": [
+   {
+    "key": "cpi_chg_3m",
+    "label": "CPI 3m change",
+    "value": 0.37,
+    "op": ">",
+    "threshold": 0.3,
+    "clear_by": 0.07,
+    "ok": true
+   },
+   {
+    "key": "wti_vs_2yr",
+    "label": "WTI vs 2yr",
+    "value": 19.34,
+    "op": ">",
+    "threshold": 0,
+    "clear_by": 19.34,
+    "ok": true
+   },
+   {
+    "key": "wti_12m",
+    "label": "WTI 12m",
+    "value": 47.38,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 22.38,
+    "ok": true
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI 3m change falls below 0.3",
+    "now": 0.37,
+    "threshold": 0.3,
+    "distance": 0.07,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI vs 2yr falls below 0",
+    "now": 19.34,
+    "threshold": 0,
+    "distance": 19.34,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI 12m falls below 25",
+    "now": 47.38,
+    "threshold": 25,
+    "distance": 22.38,
+    "then": "ENERGY_GRIND no longer qualifies"
+   }
+  ],
+  "runner_up": {
+   "regime": "ENERGY_SPIKE",
+   "score": null,
+   "gates_missing": 1,
+   "needs": [
+    {
+     "label": "WTI 3m",
+     "need": "> 25",
+     "now": 7.475723202238305
+    }
+   ]
+  }
+ },
+ "screener": {
+  "n_candidates": 483,
+  "top": [
+   {
+    "ticker": "HAS",
+    "industry": "Recreational products",
+    "trade_score": 72,
+    "atr14_pct": 2.68,
+    "mcap_B": 11.94,
+    "breakout": true,
+    "days_on_list": 5,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 87,
+    "dollar_vol_M": 318.3,
+    "stop_pct_2_5atr": 6.7
+   },
+   {
+    "ticker": "AMRX",
+    "industry": "Pharmaceuticals: major",
+    "trade_score": 71,
+    "atr14_pct": 4.08,
+    "mcap_B": 5.14,
+    "breakout": true,
+    "days_on_list": 97,
+    "profitability": "profitable",
+    "pos_vs_high": -0.6,
+    "surge": 81,
+    "dollar_vol_M": 84.1,
+    "stop_pct_2_5atr": 10.2
+   },
+   {
+    "ticker": "KNSA",
+    "industry": "Pharmaceuticals: major",
+    "trade_score": 70,
+    "atr14_pct": 6.12,
+    "mcap_B": 4.4,
+    "breakout": true,
+    "days_on_list": 97,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 108,
+    "dollar_vol_M": 85.7,
+    "stop_pct_2_5atr": 15.3
+   },
+   {
+    "ticker": "BLCO",
+    "industry": "Medical specialties",
+    "trade_score": 68,
+    "atr14_pct": 3.83,
+    "mcap_B": 5.32,
+    "breakout": true,
+    "days_on_list": 17,
+    "profitability": "marginal",
+    "pos_vs_high": 0.0,
+    "surge": 149,
+    "dollar_vol_M": 20.9,
+    "stop_pct_2_5atr": 9.57
+   },
+   {
+    "ticker": "NWE",
+    "industry": "Electric utilities",
+    "trade_score": 65,
+    "atr14_pct": 2.07,
+    "mcap_B": 4.3,
+    "breakout": false,
+    "days_on_list": 5,
+    "profitability": "investing",
+    "pos_vs_high": 0.0,
+    "surge": 50,
+    "dollar_vol_M": 60.5,
+    "stop_pct_2_5atr": 5.17
+   },
+   {
+    "ticker": "OGE",
+    "industry": "Electric utilities",
+    "trade_score": 65,
+    "atr14_pct": 1.84,
+    "mcap_B": 9.84,
+    "breakout": false,
+    "days_on_list": 5,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 41,
+    "dollar_vol_M": 115.2,
+    "stop_pct_2_5atr": 4.6
+   },
+   {
+    "ticker": "CRL",
+    "industry": "Miscellaneous commercial services",
+    "trade_score": 64,
+    "atr14_pct": 5.5,
+    "mcap_B": 8.75,
+    "breakout": false,
+    "days_on_list": 97,
+    "profitability": "marginal",
+    "pos_vs_high": -6.0,
+    "surge": 53,
+    "dollar_vol_M": 446.6,
+    "stop_pct_2_5atr": 13.75
+   },
+   {
+    "ticker": "EHC",
+    "industry": "Medical/Nursing services",
+    "trade_score": 64,
+    "atr14_pct": 3.13,
+    "mcap_B": 9.79,
+    "breakout": false,
+    "days_on_list": 97,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 50,
+    "dollar_vol_M": 160.3,
+    "stop_pct_2_5atr": 7.82
+   }
+  ],
+  "leaning": [],
+  "counts": {}
+ },
+ "smart_money": {
+  "quarter": "2026-09-30",
+  "accumulating": [],
+  "distributing": [],
+  "notable": [
+   {
+    "ticker": "IEP",
+    "manager": "Icahn Capital",
+    "action": "ADD",
+    "value_usd": 4447740626,
+    "sector": null
+   },
+   {
+    "ticker": "SOLV",
+    "manager": "Independent Franchise Partners",
+    "action": "TRIM",
+    "value_usd": 1381503460,
+    "sector": null
+   },
+   {
+    "ticker": "BMY",
+    "manager": "Independent Franchise Partners",
+    "action": "TRIM",
+    "value_usd": 1344010761,
+    "sector": null
+   },
+   {
+    "ticker": "CRM",
+    "manager": "Independent Franchise Partners",
+    "action": "TRIM",
+    "value_usd": 1321830772,
+    "sector": null
+   },
+   {
+    "ticker": "TSLA",
+    "manager": "ARK (Wood)",
+    "action": "ADD",
+    "value_usd": 1196306136,
+    "sector": null
+   },
+   {
+    "ticker": "NWSA",
+    "manager": "Independent Franchise Partners",
+    "action": "TRIM",
+    "value_usd": 1191663086,
+    "sector": null
+   },
+   {
+    "ticker": "SPCX",
+    "manager": "ARK (Wood)",
+    "action": "ADD",
+    "value_usd": 1017764417,
+    "sector": null
+   },
+   {
+    "ticker": "ICE",
+    "manager": "Independent Franchise Partners",
+    "action": "ADD",
+    "value_usd": 993860245,
+    "sector": null
+   }
+  ],
+  "congress_recent": [
+   {
+    "ticker": "AMGN",
+    "member": "David J. Taylor",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-12",
+    "sector": null
+   },
+   {
+    "ticker": "PG",
+    "member": "David J. Taylor",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-12",
+    "sector": null
+   },
+   {
+    "ticker": "AVGO",
+    "member": "David J. Taylor",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-12",
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "member": "David J. Taylor",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-12",
+    "sector": null
+   },
+   {
+    "ticker": "LLY",
+    "member": "David J. Taylor",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-12",
+    "sector": null
+   },
+   {
+    "ticker": "HD",
+    "member": "David J. Taylor",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-12",
+    "sector": null
+   },
+   {
+    "ticker": "ETN",
+    "member": "David J. Taylor",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-12",
+    "sector": null
+   },
+   {
+    "ticker": "V",
+    "member": "David J. Taylor",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-12",
+    "sector": null
+   },
+   {
+    "ticker": "IBP",
+    "member": "David J. Taylor",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-12",
+    "sector": null
+   },
+   {
+    "ticker": "LRCX",
+    "member": "David J. Taylor",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-12",
+    "sector": null
+   }
+  ],
+  "note": null,
+  "congress_status": {
+   "written": "2026-11-14",
+   "dropped_impossible_dates": 0,
+   "sources": {
+    "House Clerk PTR": {
+     "rows": 9898,
+     "last_30d": 78,
+     "newest_tx": "2026-11-05",
+     "newest_filed": "2026-11-12"
+    },
+    "OGE 278-T via Open Cabinet": {
+     "rows": 7828,
+     "last_30d": 0,
+     "newest_tx": "2026-08-31",
+     "newest_filed": "2026-08-12"
+    },
+    "Senate eFD": {
+     "rows": 1027,
+     "last_30d": 6,
+     "newest_tx": "2026-10-21",
+     "newest_filed": "2026-11-04"
+    }
+   },
+   "quiet": [
+    "OGE 278-T via Open Cabinet"
+   ]
+  }
+ },
+ "portfolio": {
+  "open": [
+   {
+    "ticker": "GOOG",
+    "entry": 325.86,
+    "stop": 305.67,
+    "last": null,
+    "R": null,
+    "managed": true,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   }
+  ],
+  "heat_R": 1.01,
+  "cap_R": 3.0,
+  "unsized": 0,
+  "note": null,
+  "over_cap": false
+ },
+ "news": {
+  "date": "2026-11-12",
+  "asof": "2026-11-14 07:31 UTC",
+  "headline": "Jensen Huang resigns as Nvidia's CEO \u2014 and the ten-year yield goes back above 5%",
+  "standfirst": "Nvidia said Jensen Huang had resigned as chief executive, with CFO Colette Kress as interim CEO; the shares fell as much as 14% and closed 4.34% lower. As bonds reopened, the two-year rose about 15bp to 4.88% and the ten-year to 5.10%. The S&P slipped 0.35%, but the Russell fell 1.66% and gold 2.79%, while WTI rose 2.55% on attacks on Saudi oil sites. The book is flat; Q4 is +34.64 realised, heat 0R.",
+  "themes": [
+   {
+    "kicker": "What's next",
+    "right": "Friday: PPI and five Fed speakers",
+    "title": "PPI on Friday, Nvidia on Tuesday",
+    "items": [
+     {
+      "tone": "c-cb",
+      "tag": "PPI",
+      "html": "<b>October producer prices</b>, and five Fed speakers including Logan and Daly",
+      "when": "Fri \u00b7 2026-11-13",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "EARNINGS",
+      "html": "<b>Nvidia Q3</b> \u2014 the first results under an interim CEO",
+      "when": "Tue \u00b7 2026-11-17",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-fomc",
+      "tag": "FOMC",
+      "html": "<b>December Fed meeting</b> \u2014 a hike close to fully priced",
+      "when": "Tue\u2013Wed \u00b7 2026-12-08",
+      "kind": "calendar"
+     }
+    ],
+    "note": "<b>Friday brings October PPI</b> and five Fed speakers: Collins, Logan, Bowman, Daly and Jefferson. After Thursday's close <b>Cisco</b> rose about 0.5-3% after hours on revenue up 24% and a raised outlook, <b>Applied Materials</b> traded choppily after record revenue of $10.41bn, and <b>Cerebras</b> rose about 18%. <b>Nvidia</b> reports on 17 November."
+   }
+  ],
+  "ondeck": "<b>Friday brings October PPI</b> and five Fed speakers: Collins, Logan, Bowman, Daly and Jefferson. After Thursday's close <b>Cisco</b> rose about 0.5-3% after hours on revenue up 24% and a raised outlook, <b>Applied Materials</b> traded choppily after record revenue of $10.41bn, and <b>Cerebras</b> rose about 18%. <b>Nvidia</b> reports on 17 November.",
+  "note": null
+ },
+ "provenance": {
+  "macro": {
+   "asof": "2026-11-14 07:31 UTC",
+   "age_min": null
+  },
+  "gex": {
+   "asof": "2026-11-14 07:31 UTC",
+   "age_min": null
+  },
+  "stocks": {
+   "asof": "2026-11-14 07:38 UTC",
+   "age_min": null
+  },
+  "institutional_holdings": {
+   "asof": "2026-11-14 07:49 UTC",
+   "quarter": "2026-09-30"
+  },
+  "congress_trades": {
+   "asof": "2026-11-14 07:48 UTC",
+   "status": {
+    "written": "2026-11-14",
+    "dropped_impossible_dates": 0,
+    "sources": {
+     "House Clerk PTR": {
+      "rows": 9898,
+      "last_30d": 78,
+      "newest_tx": "2026-11-05",
+      "newest_filed": "2026-11-12"
+     },
+     "OGE 278-T via Open Cabinet": {
+      "rows": 7828,
+      "last_30d": 0,
+      "newest_tx": "2026-08-31",
+      "newest_filed": "2026-08-12"
+     },
+     "Senate eFD": {
+      "rows": 1027,
+      "last_30d": 6,
+      "newest_tx": "2026-10-21",
+      "newest_filed": "2026-11-04"
+     }
+    },
+    "quiet": [
+     "OGE 278-T via Open Cabinet"
+    ]
+   }
+  },
+  "wire": {
+   "asof": "2026-11-14 07:31 UTC"
+  }
+ },
+ "missing": [],
+ "changed": {
+  "first_pack": false,
+  "prev_date": "2026-11-13",
+  "changes": [
+   {
+    "kind": "screener",
+    "what": "new in the top setups",
+    "was": null,
+    "now": "CRL",
+    "why": "names the engine ranked highest that were not there yesterday"
+   }
+  ]
+ }
+}

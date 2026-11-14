@@ -1,5 +1,5 @@
 {
- "asof": "2026-11-13 20:02 UTC",
+ "asof": "2026-11-14 07:49 UTC",
  "source": "SEC Form 13F-HR (quarterly institutional holdings)",
  "note": "Rolling ~5-quarter history of position changes incl. HOLD. Rebuilt when the roster or rules change (roster_hash); otherwise extended incrementally.",
  "roster_hash": "87c6ea9623c8",
@@ -34,7 +34,7 @@
     "2025-06-30",
     "2025-03-31"
    ],
-   "status": "STALE: newest 13F-HR is 2026-03-31, 227 days old \u2014 this manager has stopped filing",
+   "status": "STALE: newest 13F-HR is 2026-03-31, 228 days old \u2014 this manager has stopped filing",
    "positions": 50,
    "mapped": 31,
    "latest_in": false
@@ -90,18 +90,18 @@
   "Baupost (Klarman)": {
    "cik": 1061768,
    "edgar_name": "BAUPOST GROUP LLC/MA",
-   "latest_13f": "2026-06-30",
+   "latest_13f": "2026-09-30",
    "quarters": [
+    "2026-09-30",
     "2026-06-30",
     "2026-03-31",
     "2025-12-31",
-    "2025-09-30",
-    "2025-06-30"
+    "2025-09-30"
    ],
    "status": "ok",
-   "positions": 106,
-   "mapped": 70,
-   "latest_in": false
+   "positions": 107,
+   "mapped": 72,
+   "latest_in": true
   },
   "Tiger Global (Coleman)": {
    "cik": 1167483,
@@ -170,18 +170,18 @@
   "Soros Fund Management": {
    "cik": 1029160,
    "edgar_name": "SOROS FUND MANAGEMENT LLC",
-   "latest_13f": "2026-06-30",
+   "latest_13f": "2026-09-30",
    "quarters": [
+    "2026-09-30",
     "2026-06-30",
     "2026-03-31",
     "2025-12-31",
-    "2025-09-30",
-    "2025-06-30"
+    "2025-09-30"
    ],
    "status": "ok",
-   "positions": 1080,
-   "mapped": 759,
-   "latest_in": false
+   "positions": 1152,
+   "mapped": 842,
+   "latest_in": true
   },
   "Coatue (Laffont)": {
    "cik": 1135730,
@@ -218,18 +218,18 @@
   "Icahn Capital": {
    "cik": 921669,
    "edgar_name": "ICAHN CARL C",
-   "latest_13f": "2026-06-30",
+   "latest_13f": "2026-09-30",
    "quarters": [
+    "2026-09-30",
     "2026-06-30",
     "2026-03-31",
     "2025-12-31",
-    "2025-09-30",
-    "2025-06-30"
+    "2025-09-30"
    ],
    "status": "ok",
-   "positions": 62,
-   "mapped": 52,
-   "latest_in": false
+   "positions": 60,
+   "mapped": 50,
+   "latest_in": true
   },
   "Greenlight (Einhorn)": {
    "cik": 1489933,
@@ -258,7 +258,7 @@
     "2024-12-31",
     "2024-09-30"
    ],
-   "status": "STALE: newest 13F-HR is 2025-09-30, 409 days old \u2014 this manager has stopped filing",
+   "status": "STALE: newest 13F-HR is 2025-09-30, 410 days old \u2014 this manager has stopped filing",
    "positions": 47,
    "mapped": 35,
    "latest_in": false
@@ -287,11 +287,12 @@
     "2026-06-30",
     "2026-03-31",
     "2025-12-31",
-    "2025-09-30"
+    "2025-09-30",
+    "2025-06-30"
    ],
    "status": "ok",
-   "positions": 260,
-   "mapped": 163,
+   "positions": 330,
+   "mapped": 198,
    "latest_in": false
   },
   "ARK (Wood)": {
@@ -328,8 +329,8 @@
   }
  },
  "quarters_span": 5,
- "ticker_count": 738,
- "change_count": 3678,
+ "ticker_count": 756,
+ "change_count": 3929,
  "_done": [
   [
    "ARK (Wood)",
@@ -384,6 +385,10 @@
    "2026-06-30"
   ],
   [
+   "Baupost (Klarman)",
+   "2026-09-30"
+  ],
+  [
    "Berkshire Hathaway (Buffett)",
    "2025-09-30"
   ],
@@ -490,6 +495,10 @@
   [
    "Icahn Capital",
    "2026-06-30"
+  ],
+  [
+   "Icahn Capital",
+   "2026-09-30"
   ],
   [
    "Independent Franchise Partners",
@@ -592,6 +601,10 @@
    "2026-06-30"
   ],
   [
+   "Soros Fund Management",
+   "2026-09-30"
+  ],
+  [
    "TCI Fund (Hohn)",
    "2025-09-30"
   ],
@@ -665,6 +678,24 @@
     "value_usd": 348585617,
     "shares_delta": -160432,
     "pct_change": -13.6,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Baupost (Klarman)",
+    "action": "TRIM",
+    "shares": 949931,
+    "value_usd": 323679,
+    "shares_delta": -422000,
+    "pct_change": -30.8,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 601105,
+    "value_usd": 206827140,
+    "shares_delta": -1195181,
+    "pct_change": -66.5,
     "quarter": "2026-09-30"
    },
    {
@@ -1161,6 +1192,15 @@
   ],
   "AAPL": [
    {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 393680,
+    "value_usd": 131103314,
+    "shares_delta": -135858,
+    "pct_change": -25.7,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Appaloosa (Tepper)",
     "action": "NEW",
     "shares": 835000,
@@ -1319,6 +1359,15 @@
    }
   ],
   "KO": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 150643,
+    "value_usd": 12967349,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Berkshire Hathaway (Buffett)",
     "action": "HOLD",
@@ -2119,6 +2168,15 @@
   ],
   "CB": [
    {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 22890,
+    "value_usd": 7444973,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Berkshire Hathaway (Buffett)",
     "action": "HOLD",
     "shares": 34249183,
@@ -2247,6 +2305,24 @@
     "value_usd": 422994246,
     "shares_delta": 106572,
     "pct_change": 6.7,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Baupost (Klarman)",
+    "action": "HOLD",
+    "shares": 3743854,
+    "value_usd": 932781,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 1055346,
+    "value_usd": 262939456,
+    "shares_delta": -127183,
+    "pct_change": -10.8,
     "quarter": "2026-09-30"
    },
    {
@@ -2958,6 +3034,15 @@
     "manager": "Soros Fund Management",
     "action": "HOLD",
     "shares": 30452,
+    "value_usd": 16793364,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 30452,
     "value_usd": 15640147,
     "shares_delta": 0,
     "pct_change": 0.0,
@@ -3060,6 +3145,15 @@
    }
   ],
   "UNH": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 1774,
+    "value_usd": 651200,
+    "shares_delta": -2111,
+    "pct_change": -54.3,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Tiger Global (Coleman)",
     "action": "TRIM",
@@ -3283,6 +3377,15 @@
    }
   ],
   "V": [
+   {
+    "manager": "Baupost (Klarman)",
+    "action": "HOLD",
+    "shares": 701355,
+    "value_usd": 252018,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Tiger Global (Coleman)",
     "action": "NEW",
@@ -3523,6 +3626,15 @@
     "value_usd": 941700238,
     "shares_delta": 755522,
     "pct_change": 28.5,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Baupost (Klarman)",
+    "action": "TRIM",
+    "shares": 674779,
+    "value_usd": 186759,
+    "shares_delta": -12221,
+    "pct_change": -1.8,
     "quarter": "2026-09-30"
    },
    {
@@ -3822,6 +3934,15 @@
     "value_usd": 355295103,
     "shares_delta": 250968,
     "pct_change": 105.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 151505,
+    "value_usd": 109868396,
+    "shares_delta": 129729,
+    "pct_change": 595.7,
     "quarter": "2026-09-30"
    },
    {
@@ -4167,6 +4288,15 @@
     "quarter": "2026-09-30"
    },
    {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 122166,
+    "value_usd": 62658941,
+    "shares_delta": -67805,
+    "pct_change": -35.7,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Coatue (Laffont)",
     "action": "ADD",
     "shares": 2936409,
@@ -4508,6 +4638,16 @@
   ],
   "UBER": [
    {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 6518718,
+    "prior_value_usd": 6518718,
+    "shares_delta": -90337,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Appaloosa (Tepper)",
     "action": "ADD",
     "shares": 7694071,
@@ -4817,6 +4957,15 @@
     "quarter": "2026-09-30"
    },
    {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 44631,
+    "value_usd": 27303461,
+    "shares_delta": -6126,
+    "pct_change": -12.1,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Duquesne Family Office (Druckenmiller)",
     "action": "NEW",
     "shares": 72900,
@@ -5012,6 +5161,15 @@
   ],
   "BRK-B": [
    {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 99314,
+    "value_usd": 49453406,
+    "shares_delta": -33963,
+    "pct_change": -25.5,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Appaloosa (Tepper)",
     "action": "NEW",
     "shares": 25000,
@@ -5130,6 +5288,15 @@
     "value_usd": 274672400,
     "shares_delta": 374917,
     "pct_change": 92.1,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 163343,
+    "value_usd": 57364428,
+    "shares_delta": -1903,
+    "pct_change": -1.2,
     "quarter": "2026-09-30"
    },
    {
@@ -5362,6 +5529,15 @@
     "value_usd": 366812897,
     "shares_delta": 1553241,
     "pct_change": 58.5,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 1161700,
+    "value_usd": 101207304,
+    "shares_delta": 211700,
+    "pct_change": 22.3,
     "quarter": "2026-09-30"
    },
    {
@@ -5691,6 +5867,15 @@
   ],
   "MU": [
    {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 35618,
+    "value_usd": 37937088,
+    "shares_delta": 13196,
+    "pct_change": 58.9,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Pentwater",
     "action": "NEW",
     "shares": 151000,
@@ -5875,6 +6060,15 @@
     "value_usd": 584932116,
     "shares_delta": 1179976,
     "pct_change": 85.4,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 1208822,
+    "value_usd": 276070768,
+    "shares_delta": -255813,
+    "pct_change": -17.5,
     "quarter": "2026-09-30"
    },
    {
@@ -6191,6 +6385,15 @@
   ],
   "QCOM": [
    {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 11385,
+    "value_usd": 2095295,
+    "shares_delta": 11385,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Viking Global (Halvorsen)",
     "action": "NEW",
     "shares": 1514185,
@@ -6300,6 +6503,15 @@
     "value_usd": 242997815,
     "shares_delta": 50382,
     "pct_change": 10.4,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 648915,
+    "value_usd": 296028534,
+    "shares_delta": -43243,
+    "pct_change": -6.2,
     "quarter": "2026-09-30"
    },
    {
@@ -6493,6 +6705,15 @@
    }
   ],
   "VST": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 1453,
+    "value_usd": 201023,
+    "shares_delta": -2770,
+    "pct_change": -65.6,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Appaloosa (Tepper)",
     "action": "ADD",
@@ -6787,6 +7008,15 @@
    }
   ],
   "JD": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 74000000,
+    "value_usd": 72569151,
+    "shares_delta": -26000000,
+    "pct_change": -26.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Tiger Global (Coleman)",
     "action": "TRIM",
@@ -7615,6 +7845,25 @@
   ],
   "CZR": [
    {
+    "manager": "Icahn Capital",
+    "action": "HOLD",
+    "shares": 2440109,
+    "value_usd": 72349232,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 14938798,
+    "prior_value_usd": 14938798,
+    "shares_delta": -494990,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 494990,
@@ -7841,6 +8090,15 @@
   "INTC": [
    {
     "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 2830000,
+    "value_usd": 340250900,
+    "shares_delta": 2730000,
+    "pct_change": 2730.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 100000,
     "value_usd": 13963000,
@@ -7953,6 +8211,16 @@
    }
   ],
   "ORCL": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 33138996,
+    "prior_value_usd": 33138996,
+    "shares_delta": -738395,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -8173,6 +8441,15 @@
   ],
   "AA": [
    {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 38923,
+    "value_usd": 1634766,
+    "shares_delta": 38923,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Castle Hook",
     "action": "NEW",
     "shares": 311506,
@@ -8316,6 +8593,15 @@
    }
   ],
   "AUR": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 1000000,
+    "value_usd": 5540000,
+    "shares_delta": 1000000,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "ARK (Wood)",
     "action": "TRIM",
@@ -8843,6 +9129,15 @@
   ],
   "CPNG": [
    {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 15396,
+    "value_usd": 213543,
+    "shares_delta": -10758,
+    "pct_change": -41.1,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Tiger Global (Coleman)",
     "action": "ADD",
     "shares": 36467972,
@@ -8962,6 +9257,16 @@
    }
   ],
   "CRH": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 13261794,
+    "prior_value_usd": 13261794,
+    "shares_delta": -123942,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Duquesne Family Office (Druckenmiller)",
     "action": "ADD",
@@ -9268,6 +9573,15 @@
     "value_usd": 124776742,
     "shares_delta": 30584,
     "pct_change": 39.6,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 22199,
+    "value_usd": 25686019,
+    "shares_delta": 0,
+    "pct_change": 0.0,
     "quarter": "2026-09-30"
    },
    {
@@ -9859,6 +10173,15 @@
   ],
   "IREN": [
    {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 29786,
+    "value_usd": 1217652,
+    "shares_delta": 29786,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Duquesne Family Office (Druckenmiller)",
     "action": "NEW",
     "shares": 87100,
@@ -9889,6 +10212,15 @@
    }
   ],
   "LIN": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 77633,
+    "value_usd": 36848503,
+    "shares_delta": -189716,
+    "pct_change": -71.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Lone Pine (Mandel)",
     "action": "NEW",
@@ -10509,6 +10841,16 @@
   ],
   "RDDT": [
    {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 1909901,
+    "prior_value_usd": 1909901,
+    "shares_delta": -11003,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Duquesne Family Office (Druckenmiller)",
     "action": "NEW",
     "shares": 56550,
@@ -11019,6 +11361,16 @@
   "STM": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 1372135,
+    "prior_value_usd": 1372135,
+    "shares_delta": -18322,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 18322,
     "value_usd": 1372135,
@@ -11062,6 +11414,15 @@
     "value_usd": 1196306136,
     "shares_delta": 611881,
     "pct_change": 22.2,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 86267,
+    "value_usd": 30608394,
+    "shares_delta": -579,
+    "pct_change": -0.7,
     "quarter": "2026-09-30"
    },
    {
@@ -11498,6 +11859,16 @@
   ],
   "WWD": [
    {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 10573886,
+    "prior_value_usd": 10573886,
+    "shares_delta": -24854,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Duquesne Family Office (Druckenmiller)",
     "action": "TRIM",
     "shares": 67194,
@@ -11671,6 +12042,15 @@
   ],
   "CLS": [
    {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 125000,
+    "value_usd": 45178750,
+    "shares_delta": 125000,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Duquesne Family Office (Druckenmiller)",
     "action": "EXIT",
     "shares": 0,
@@ -11735,6 +12115,16 @@
     "value_usd": 195576483,
     "shares_delta": 387444,
     "pct_change": 220.5,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 1095666,
+    "prior_value_usd": 1095666,
+    "shares_delta": -4467,
+    "pct_change": -100.0,
     "quarter": "2026-09-30"
    },
    {
@@ -11850,6 +12240,15 @@
    }
   ],
   "HUM": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 40990,
+    "value_usd": 15640554,
+    "shares_delta": 7762,
+    "pct_change": 23.4,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Pentwater",
     "action": "NEW",
@@ -12447,6 +12846,15 @@
    },
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 246996,
+    "value_usd": 45336116,
+    "shares_delta": -2901,
+    "pct_change": -1.2,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "ADD",
     "shares": 249897,
     "value_usd": 46113493,
@@ -12699,6 +13107,15 @@
    }
   ],
   "ON": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 16594,
+    "value_usd": 1275581,
+    "shares_delta": -211428,
+    "pct_change": -92.7,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -13011,6 +13428,16 @@
     "value_usd": 57545,
     "shares_delta": -30,
     "pct_change": -16.9,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 2657347,
+    "prior_value_usd": 2657347,
+    "shares_delta": -4308,
+    "pct_change": -100.0,
     "quarter": "2026-09-30"
    },
    {
@@ -13452,6 +13879,15 @@
    {
     "manager": "Baupost (Klarman)",
     "action": "ADD",
+    "shares": 3097978,
+    "value_usd": 389540,
+    "shares_delta": 281800,
+    "pct_change": 10.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Baupost (Klarman)",
+    "action": "ADD",
     "shares": 2816178,
     "value_usd": 332253,
     "shares_delta": 1325830,
@@ -13574,6 +14010,15 @@
    }
   ],
   "PCG": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 224000000,
+    "value_usd": 237087746,
+    "shares_delta": 49000000,
+    "pct_change": 28.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "HOLD",
@@ -14048,6 +14493,15 @@
   "FCX": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 20215,
+    "value_usd": 1415050,
+    "shares_delta": -42079,
+    "pct_change": -67.5,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 62294,
     "value_usd": 3917670,
@@ -14322,6 +14776,15 @@
   ],
   "WBD": [
    {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 2103400,
+    "value_usd": 65100230,
+    "shares_delta": 614710,
+    "pct_change": 41.3,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Independent Franchise Partners",
     "action": "TRIM",
     "shares": 5706869,
@@ -14586,6 +15049,16 @@
   ],
   "ARES": [
    {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 6013634,
+    "prior_value_usd": 6013634,
+    "shares_delta": -54026,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Third Point (Loeb)",
     "action": "NEW",
     "shares": 375000,
@@ -14633,6 +15106,15 @@
    }
   ],
   "CORZ": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 2248356,
+    "value_usd": 20954229,
+    "shares_delta": -21791,
+    "pct_change": -1.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Third Point (Loeb)",
     "action": "NEW",
@@ -14891,6 +15373,15 @@
   "MTZ": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 2781,
+    "value_usd": 594077,
+    "shares_delta": -5494,
+    "pct_change": -66.4,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "ADD",
     "shares": 8275,
     "value_usd": 3442897,
@@ -15029,6 +15520,16 @@
   ],
   "SGI": [
    {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 1061693,
+    "prior_value_usd": 1061693,
+    "shares_delta": -13542,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Third Point (Loeb)",
     "action": "ADD",
     "shares": 2570769,
@@ -15131,6 +15632,15 @@
   ],
   "SYY": [
    {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 502698,
+    "value_usd": 39190336,
+    "shares_delta": 502698,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Third Point (Loeb)",
     "action": "NEW",
     "shares": 580000,
@@ -15188,6 +15698,15 @@
    }
   ],
   "TTMI": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 10788,
+    "value_usd": 1325198,
+    "shares_delta": 10788,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Third Point (Loeb)",
     "action": "NEW",
@@ -15295,6 +15814,15 @@
    }
   ],
   "CEG": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 905,
+    "value_usd": 229888,
+    "shares_delta": -2354,
+    "pct_change": -72.2,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -15535,6 +16063,15 @@
   ],
   "KVUE": [
    {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 3793186,
+    "value_usd": 66987665,
+    "shares_delta": 1046550,
+    "pct_change": 38.1,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Independent Franchise Partners",
     "action": "TRIM",
     "shares": 30330560,
@@ -15672,6 +16209,15 @@
    }
   ],
   "PGR": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 9472,
+    "value_usd": 1963640,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "HOLD",
@@ -15925,6 +16471,15 @@
     "quarter": "2026-09-30"
    },
    {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 30000,
+    "value_usd": 2163900,
+    "shares_delta": -5000,
+    "pct_change": -14.3,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "ARK (Wood)",
     "action": "ADD",
     "shares": 32312,
@@ -16009,6 +16564,16 @@
    }
   ],
   "J": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 262332,
+    "prior_value_usd": 262332,
+    "shares_delta": -2082,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -16116,6 +16681,15 @@
    }
   ],
   "TLN": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 2474,
+    "value_usd": 773595,
+    "shares_delta": 641,
+    "pct_change": 35.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -16632,6 +17206,15 @@
   ],
   "WDAY": [
    {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 500000,
+    "value_usd": 95230000,
+    "shares_delta": 500000,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Tiger Global (Coleman)",
     "action": "EXIT",
     "shares": 0,
@@ -16673,6 +17256,15 @@
   "COLD": [
    {
     "manager": "Baupost (Klarman)",
+    "action": "HOLD",
+    "shares": 6830230,
+    "value_usd": 95487,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Baupost (Klarman)",
     "action": "TRIM",
     "shares": 6830230,
     "value_usd": 107371,
@@ -16709,6 +17301,24 @@
    }
   ],
   "CME": [
+   {
+    "manager": "Baupost (Klarman)",
+    "action": "ADD",
+    "shares": 685435,
+    "value_usd": 179570,
+    "shares_delta": 66435,
+    "pct_change": 10.7,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 30028,
+    "value_usd": 7866735,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Baupost (Klarman)",
     "action": "NEW",
@@ -16779,6 +17389,15 @@
     "manager": "Baupost (Klarman)",
     "action": "HOLD",
     "shares": 1275154,
+    "value_usd": 495805,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Baupost (Klarman)",
+    "action": "HOLD",
+    "shares": 1275154,
     "value_usd": 493140,
     "shares_delta": 0,
     "pct_change": 0.0,
@@ -16813,6 +17432,15 @@
    }
   ],
   "FERG": [
+   {
+    "manager": "Baupost (Klarman)",
+    "action": "ADD",
+    "shares": 1571594,
+    "value_usd": 349868,
+    "shares_delta": 121000,
+    "pct_change": 8.3,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Baupost (Klarman)",
     "action": "ADD",
@@ -16851,6 +17479,15 @@
    }
   ],
   "AERO": [
+   {
+    "manager": "Baupost (Klarman)",
+    "action": "HOLD",
+    "shares": 4880188,
+    "value_usd": 77058,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Baupost (Klarman)",
     "action": "HOLD",
@@ -16901,6 +17538,15 @@
   "HLF": [
    {
     "manager": "Baupost (Klarman)",
+    "action": "ADD",
+    "shares": 10259844,
+    "value_usd": 124452,
+    "shares_delta": 1000000,
+    "pct_change": 10.8,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Baupost (Klarman)",
     "action": "HOLD",
     "shares": 9259844,
     "value_usd": 121767,
@@ -16937,6 +17583,16 @@
    }
   ],
   "LBTYA": [
+   {
+    "manager": "Baupost (Klarman)",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 93975,
+    "prior_value_usd": 93975,
+    "shares_delta": -8543161,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Greenlight (Einhorn)",
     "action": "HOLD",
@@ -17013,6 +17669,15 @@
   "MOH": [
    {
     "manager": "Baupost (Klarman)",
+    "action": "TRIM",
+    "shares": 449609,
+    "value_usd": 85021,
+    "shares_delta": -184000,
+    "pct_change": -29.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Baupost (Klarman)",
     "action": "HOLD",
     "shares": 633609,
     "value_usd": 144906,
@@ -17080,6 +17745,15 @@
   "PS": [
    {
     "manager": "Baupost (Klarman)",
+    "action": "HOLD",
+    "shares": 392000,
+    "value_usd": 21928,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Baupost (Klarman)",
     "action": "NEW",
     "shares": 392000,
     "value_usd": 12881,
@@ -17089,6 +17763,16 @@
    }
   ],
   "TFX": [
+   {
+    "manager": "Baupost (Klarman)",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 178605,
+    "prior_value_usd": 178605,
+    "shares_delta": -1409000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Baupost (Klarman)",
     "action": "TRIM",
@@ -17346,6 +18030,16 @@
     "quarter": "2026-09-30"
    },
    {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 33150000,
+    "prior_value_usd": 33150000,
+    "shares_delta": -150000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Tiger Global (Coleman)",
     "action": "NEW",
     "shares": 2999000,
@@ -17460,6 +18154,15 @@
     "quarter": "2026-09-30"
    },
    {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 565326,
+    "value_usd": 3697232,
+    "shares_delta": 262531,
+    "pct_change": 86.7,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "ARK (Wood)",
     "action": "ADD",
     "shares": 2212454,
@@ -17569,6 +18272,16 @@
    }
   ],
   "NOW": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 4822030,
+    "prior_value_usd": 4822030,
+    "shares_delta": -48570,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Tiger Global (Coleman)",
     "action": "TRIM",
@@ -18151,6 +18864,15 @@
     "quarter": "2026-09-30"
    },
    {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 11931,
+    "value_usd": 830159,
+    "shares_delta": -34520,
+    "pct_change": -74.3,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "ARK (Wood)",
     "action": "ADD",
     "shares": 224871,
@@ -18415,6 +19137,15 @@
   ],
   "ZS": [
    {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 188480000,
+    "value_usd": 178164060,
+    "shares_delta": 188480000,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Tiger Global (Coleman)",
     "action": "EXIT",
     "shares": 0,
@@ -18565,6 +19296,15 @@
    }
   ],
   "ESTC": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 997720,
+    "value_usd": 91490924,
+    "shares_delta": 20,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -18833,6 +19573,15 @@
   ],
   "MDLN": [
    {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 1003364,
+    "value_usd": 34816731,
+    "shares_delta": -634880,
+    "pct_change": -38.8,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Lone Pine (Mandel)",
     "action": "ADD",
     "shares": 20968367,
@@ -18934,6 +19683,16 @@
   ],
   "NBIS": [
    {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 85612700,
+    "prior_value_usd": 85612700,
+    "shares_delta": -310000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Lone Pine (Mandel)",
     "action": "NEW",
     "shares": 4258008,
@@ -18953,6 +19712,16 @@
    }
   ],
   "SHAZ": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 6158846,
+    "prior_value_usd": 6158846,
+    "shares_delta": -72748,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Lone Pine (Mandel)",
     "action": "NEW",
@@ -19352,6 +20121,16 @@
   "KKR": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 8142263,
+    "prior_value_usd": 8142263,
+    "shares_delta": -88715,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "TRIM",
     "shares": 88715,
     "value_usd": 8142263,
@@ -19562,6 +20341,15 @@
   ],
   "ETSY": [
    {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 421033,
+    "value_usd": 30099649,
+    "shares_delta": 124033,
+    "pct_change": 41.8,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Elliott (Singer)",
     "action": "HOLD",
     "shares": 5000000,
@@ -19675,6 +20463,15 @@
    }
   ],
   "CRM": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 65193,
+    "value_usd": 14966357,
+    "shares_delta": 65193,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Independent Franchise Partners",
     "action": "TRIM",
@@ -19901,6 +20698,16 @@
   ],
   "AS": [
    {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 430140,
+    "prior_value_usd": 430140,
+    "shares_delta": -12711,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Viking Global (Halvorsen)",
     "action": "TRIM",
     "shares": 5954351,
@@ -19993,6 +20800,15 @@
     "value_usd": 84094,
     "shares_delta": -43,
     "pct_change": -8.8,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 16082,
+    "value_usd": 3045931,
+    "shares_delta": -57257,
+    "pct_change": -78.1,
     "quarter": "2026-09-30"
    },
    {
@@ -20345,6 +21161,15 @@
   ],
   "FRVO": [
    {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 812627,
+    "value_usd": 11043601,
+    "shares_delta": 143277,
+    "pct_change": 21.4,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Viking Global (Halvorsen)",
     "action": "NEW",
     "shares": 750000,
@@ -20434,6 +21259,15 @@
   ],
   "JPM": [
    {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 118358,
+    "value_usd": 39156377,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Viking Global (Halvorsen)",
     "action": "ADD",
     "shares": 2899386,
@@ -20502,6 +21336,15 @@
     "manager": "Soros Fund Management",
     "action": "HOLD",
     "shares": 123562,
+    "value_usd": 28535408,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 123562,
     "value_usd": 33400044,
     "shares_delta": 0,
     "pct_change": 0.0,
@@ -20554,6 +21397,15 @@
    }
   ],
   "MS": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 19096,
+    "value_usd": 3591576,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Viking Global (Halvorsen)",
     "action": "NEW",
@@ -20662,6 +21514,15 @@
   ],
   "QNT": [
    {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 266000,
+    "value_usd": 12783960,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Viking Global (Halvorsen)",
     "action": "NEW",
     "shares": 306123,
@@ -20690,6 +21551,15 @@
    }
   ],
   "RRX": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 7236,
+    "value_usd": 1122376,
+    "shares_delta": 7236,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Viking Global (Halvorsen)",
     "action": "TRIM",
@@ -20866,6 +21736,15 @@
     "value_usd": 24173127,
     "shares_delta": -198349,
     "pct_change": -73.6,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 15900,
+    "value_usd": 5399004,
+    "shares_delta": -120668,
+    "pct_change": -88.4,
     "quarter": "2026-09-30"
    },
    {
@@ -21149,6 +22028,15 @@
     "quarter": "2026-09-30"
    },
    {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 1636925,
+    "value_usd": 23211597,
+    "shares_delta": -608529,
+    "pct_change": -27.1,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Viking Global (Halvorsen)",
     "action": "NEW",
     "shares": 714286,
@@ -21217,6 +22105,15 @@
    }
   ],
   "FPS": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 402568,
+    "value_usd": 15072146,
+    "shares_delta": -226538,
+    "pct_change": -36.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Coatue (Laffont)",
     "action": "NEW",
@@ -21378,6 +22275,16 @@
    }
   ],
   "STLA": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 762433,
+    "prior_value_usd": 762433,
+    "shares_delta": -132828,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -22129,6 +23036,15 @@
   ],
   "SPGI": [
    {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 6804,
+    "value_usd": 2683974,
+    "shares_delta": -94030,
+    "pct_change": -93.3,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "TCI Fund (Hohn)",
     "action": "ADD",
     "shares": 14081957,
@@ -22207,6 +23123,15 @@
     "manager": "Soros Fund Management",
     "action": "HOLD",
     "shares": 44750,
+    "value_usd": 4422643,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 44750,
     "value_usd": 4060615,
     "shares_delta": 0,
     "pct_change": 0.0,
@@ -22242,6 +23167,15 @@
    }
   ],
   "AAMI": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 583928,
+    "value_usd": 53552037,
+    "shares_delta": -26320,
+    "pct_change": -4.3,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -22282,6 +23216,16 @@
   "ADEA": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 365095,
+    "prior_value_usd": 365095,
+    "shares_delta": -11087,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "TRIM",
     "shares": 11087,
     "value_usd": 365095,
@@ -22300,6 +23244,15 @@
    }
   ],
   "ADBE": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 4927,
+    "value_usd": 1182184,
+    "shares_delta": -18492,
+    "pct_change": -79.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -22342,6 +23295,16 @@
   "AKTS": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 3223000,
+    "prior_value_usd": 3223000,
+    "shares_delta": -100000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "HOLD",
     "shares": 100000,
     "value_usd": 3223000,
@@ -22360,6 +23323,16 @@
    }
   ],
   "AMTM": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 2444765,
+    "prior_value_usd": 2444765,
+    "shares_delta": -118276,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -22391,6 +23364,16 @@
   "AHR": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 22353055,
+    "prior_value_usd": 22353055,
+    "shares_delta": -428630,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 428630,
     "value_usd": 22353055,
@@ -22400,6 +23383,15 @@
    }
   ],
   "ANDG": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 50000,
+    "value_usd": 2720000,
+    "shares_delta": -22600,
+    "pct_change": -31.1,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -22431,6 +23423,16 @@
   "APGE": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 74926085,
+    "prior_value_usd": 74926085,
+    "shares_delta": -564500,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 564500,
     "value_usd": 74926085,
@@ -22451,6 +23453,16 @@
   "AADX": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 2278000,
+    "prior_value_usd": 2278000,
+    "shares_delta": -100000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 100000,
     "value_usd": 2278000,
@@ -22462,6 +23474,15 @@
   "ADM": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 10118,
+    "value_usd": 803167,
+    "shares_delta": -35953,
+    "pct_change": -78.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 46071,
     "value_usd": 3519824,
@@ -22471,6 +23492,15 @@
    }
   ],
   "ACA": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 545938,
+    "value_usd": 79788839,
+    "shares_delta": 390938,
+    "pct_change": 252.2,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -22493,6 +23523,15 @@
   "ARXS": [
    {
     "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 175000,
+    "value_usd": 8643250,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 175000,
     "value_usd": 8074500,
@@ -22502,6 +23541,15 @@
    }
   ],
   "TEAM": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 154627,
+    "value_usd": 27723075,
+    "shares_delta": -304523,
+    "pct_change": -66.3,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -22542,6 +23590,16 @@
   "BKU": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 540944,
+    "prior_value_usd": 540944,
+    "shares_delta": -11165,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "TRIM",
     "shares": 11165,
     "value_usd": 540944,
@@ -22569,6 +23627,15 @@
    }
   ],
   "BGC": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 3759170,
+    "value_usd": 43343230,
+    "shares_delta": 277279,
+    "pct_change": 8.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -22607,6 +23674,15 @@
    }
   ],
   "BILL": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 210000000,
+    "value_usd": 177979507,
+    "shares_delta": 295338,
+    "pct_change": 0.1,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -22685,6 +23761,16 @@
   "TECH": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 37826010,
+    "prior_value_usd": 37826010,
+    "shares_delta": -535400,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 535400,
     "value_usd": 37826010,
@@ -22703,6 +23789,15 @@
    }
   ],
   "BL": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 92500000,
+    "value_usd": 82884728,
+    "shares_delta": -8500000,
+    "pct_change": -8.4,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "HOLD",
@@ -22744,6 +23839,16 @@
   "BX": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 6010584,
+    "prior_value_usd": 6010584,
+    "shares_delta": -51080,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "TRIM",
     "shares": 51080,
     "value_usd": 6010584,
@@ -22764,6 +23869,15 @@
   "OBDC": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 2344234,
+    "value_usd": 24591015,
+    "shares_delta": -106902,
+    "pct_change": -4.4,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "HOLD",
     "shares": 2451136,
     "value_usd": 26643848,
@@ -22782,6 +23896,15 @@
    }
   ],
   "OWL": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 30000,
+    "value_usd": 272700,
+    "shares_delta": -943500,
+    "pct_change": -96.9,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -22832,6 +23955,15 @@
   "BWA": [
    {
     "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 31540,
+    "value_usd": 1895869,
+    "shares_delta": 12140,
+    "pct_change": 62.6,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 19400,
     "value_usd": 1288160,
@@ -22850,6 +23982,15 @@
    }
   ],
   "BG": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 7845,
+    "value_usd": 839023,
+    "shares_delta": -25209,
+    "pct_change": -76.3,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -22879,6 +24020,15 @@
    }
   ],
   "CCJ": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 26558,
+    "value_usd": 2301782,
+    "shares_delta": 19487,
+    "pct_change": 275.6,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "ARK (Wood)",
     "action": "TRIM",
@@ -22974,6 +24124,16 @@
   "CTRE": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 13126662,
+    "prior_value_usd": 13126662,
+    "shares_delta": -325320,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 325320,
     "value_usd": 13126662,
@@ -23004,6 +24164,15 @@
   "CG": [
    {
     "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 238535,
+    "value_usd": 9460298,
+    "shares_delta": 11768,
+    "pct_change": 5.2,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "TRIM",
     "shares": 226767,
     "value_usd": 9549158,
@@ -23024,6 +24193,16 @@
   "CPRX": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 10830558,
+    "prior_value_usd": 10830558,
+    "shares_delta": -344593,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 344593,
     "value_usd": 10830558,
@@ -23033,6 +24212,15 @@
    }
   ],
   "CMS": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 407418,
+    "value_usd": 25699927,
+    "shares_delta": -562944,
+    "pct_change": -58.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -23071,6 +24259,16 @@
    }
   ],
   "CNM": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 11407796,
+    "prior_value_usd": 11407796,
+    "shares_delta": -236431,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -23126,6 +24324,15 @@
     "value_usd": 58953059,
     "shares_delta": 5127,
     "pct_change": 2.4,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 258747,
+    "value_usd": 70857866,
+    "shares_delta": 249085,
+    "pct_change": 2578.0,
     "quarter": "2026-09-30"
    },
    {
@@ -23204,6 +24411,16 @@
   "DXCM": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 63521812,
+    "prior_value_usd": 63521812,
+    "shares_delta": -67977000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "ADD",
     "shares": 67977000,
     "value_usd": 63521812,
@@ -23258,6 +24475,16 @@
    }
   ],
   "DBRG": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 64994554,
+    "prior_value_usd": 64994554,
+    "shares_delta": -4118793,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -23317,6 +24544,15 @@
   "D": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 146196,
+    "value_usd": 8847782,
+    "shares_delta": -19148,
+    "pct_change": -11.6,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 165344,
     "value_usd": 11291342,
@@ -23356,6 +24592,16 @@
   "DBX": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 104610636,
+    "prior_value_usd": 104610636,
+    "shares_delta": -103500000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "HOLD",
     "shares": 103500000,
     "value_usd": 104610636,
@@ -23392,6 +24638,16 @@
    }
   ],
   "EA": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 199091790,
+    "prior_value_usd": 199091790,
+    "shares_delta": -970990,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -23487,6 +24743,16 @@
   "EME": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 214939,
+    "prior_value_usd": 214939,
+    "shares_delta": -259,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "TRIM",
     "shares": 259,
     "value_usd": 214939,
@@ -23514,6 +24780,15 @@
    }
   ],
   "ETR": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 1065756,
+    "value_usd": 105786941,
+    "shares_delta": 151844,
+    "pct_change": 16.6,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -23554,6 +24829,15 @@
   "ES": [
    {
     "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 14890,
+    "value_usd": 955342,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "TRIM",
     "shares": 14890,
     "value_usd": 1076100,
@@ -23585,6 +24869,15 @@
     "manager": "Soros Fund Management",
     "action": "HOLD",
     "shares": 20946,
+    "value_usd": 907590,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 20946,
     "value_usd": 995773,
     "shares_delta": 0,
     "pct_change": 0.0,
@@ -23603,6 +24896,15 @@
   "FLG": [
    {
     "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 781685,
+    "value_usd": 9122264,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 781685,
     "value_usd": 11678374,
@@ -23612,6 +24914,15 @@
    }
   ],
   "GLXY": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 991829,
+    "value_usd": 22554191,
+    "shares_delta": 787351,
+    "pct_change": 385.1,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -23671,6 +24982,16 @@
   "GFL": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 341669,
+    "prior_value_usd": 341669,
+    "shares_delta": -9287,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "TRIM",
     "shares": 9287,
     "value_usd": 341669,
@@ -23709,6 +25030,16 @@
   "GBTG": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 31427015,
+    "prior_value_usd": 31427015,
+    "shares_delta": -3346860,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 3346860,
     "value_usd": 31427015,
@@ -23718,6 +25049,15 @@
    }
   ],
   "HTO": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 222241,
+    "value_usd": 13696713,
+    "shares_delta": -1032127,
+    "pct_change": -82.3,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -23740,6 +25080,16 @@
   "HAWK": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 2351182,
+    "prior_value_usd": 2351182,
+    "shares_delta": -116280,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 116280,
     "value_usd": 2351182,
@@ -23751,6 +25101,15 @@
   "HUBG": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 7523,
+    "value_usd": 222530,
+    "shares_delta": -19526,
+    "pct_change": -72.2,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 27049,
     "value_usd": 1184476,
@@ -23760,6 +25119,15 @@
    }
   ],
   "HUN": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 56759,
+    "value_usd": 476776,
+    "shares_delta": -1000000,
+    "pct_change": -94.6,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -23789,6 +25157,15 @@
    }
   ],
   "IDA": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 510249,
+    "value_usd": 66704852,
+    "shares_delta": -35836,
+    "pct_change": -6.6,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -23829,6 +25206,16 @@
   "PI": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 304937,
+    "prior_value_usd": 304937,
+    "shares_delta": -2129,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "TRIM",
     "shares": 2129,
     "value_usd": 304937,
@@ -23849,6 +25236,15 @@
   "INIO": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 836002,
+    "value_usd": 15156716,
+    "shares_delta": -100262,
+    "pct_change": -10.7,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 936264,
     "value_usd": 37029241,
@@ -23858,6 +25254,15 @@
    }
   ],
   "ITRI": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 910078,
+    "value_usd": 78576135,
+    "shares_delta": -227775,
+    "pct_change": -20.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -23889,6 +25294,15 @@
   "ITT": [
    {
     "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 142126,
+    "value_usd": 28683869,
+    "shares_delta": 57386,
+    "pct_change": 67.7,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "TRIM",
     "shares": 84740,
     "value_usd": 16758182,
@@ -23918,6 +25332,15 @@
   "JAN": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 225003,
+    "value_usd": 6666839,
+    "shares_delta": -101317,
+    "pct_change": -31.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "ADD",
     "shares": 326320,
     "value_usd": 9378437,
@@ -23936,6 +25359,15 @@
    }
   ],
   "JNJ": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 34019,
+    "value_usd": 9006190,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Independent Franchise Partners",
     "action": "TRIM",
@@ -24003,6 +25435,16 @@
   "KLRA": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 440600,
+    "prior_value_usd": 440600,
+    "shares_delta": -20000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 20000,
     "value_usd": 440600,
@@ -24014,6 +25456,16 @@
   "KEEL": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 869036,
+    "prior_value_usd": 869036,
+    "shares_delta": -151400,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 151400,
     "value_usd": 869036,
@@ -24023,6 +25475,16 @@
    }
   ],
   "KRG": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 2412300,
+    "prior_value_usd": 2412300,
+    "shares_delta": -85000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -24041,6 +25503,15 @@
     "value_usd": 10561261,
     "shares_delta": 350430,
     "pct_change": 6.8,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 4099558,
+    "value_usd": 7871151,
+    "shares_delta": -5667479,
+    "pct_change": -58.0,
     "quarter": "2026-09-30"
    },
    {
@@ -24119,6 +25590,16 @@
   "LGN": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 27955440,
+    "prior_value_usd": 27955440,
+    "shares_delta": -328000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "ADD",
     "shares": 328000,
     "value_usd": 27955440,
@@ -24157,6 +25638,16 @@
   "LFTO": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 2569660,
+    "prior_value_usd": 2569660,
+    "shares_delta": -106980,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 106980,
     "value_usd": 2569660,
@@ -24175,6 +25666,16 @@
    }
   ],
   "LCID": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 1374594,
+    "prior_value_usd": 1374594,
+    "shares_delta": -205470,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -24224,6 +25725,15 @@
   "MAC": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 986900,
+    "value_usd": 22067084,
+    "shares_delta": -951606,
+    "pct_change": -49.1,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 1938506,
     "value_usd": 48830966,
@@ -24233,6 +25743,15 @@
    }
   ],
   "MRVL": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 53962,
+    "value_usd": 14257300,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -24263,6 +25782,15 @@
    }
   ],
   "MTRN": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 1437,
+    "value_usd": 387401,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "ARK (Wood)",
     "action": "TRIM",
@@ -24330,6 +25858,16 @@
   "MGEE": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 8709532,
+    "prior_value_usd": 8709532,
+    "shares_delta": -106813,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 106813,
     "value_usd": 8709532,
@@ -24341,6 +25879,15 @@
   "MGM": [
    {
     "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 96961,
+    "value_usd": 3010639,
+    "shares_delta": 58209,
+    "pct_change": 150.2,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 38752,
     "value_usd": 1852733,
@@ -24350,6 +25897,15 @@
    }
   ],
   "MCHP": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 360000,
+    "value_usd": 27997200,
+    "shares_delta": 132200,
+    "pct_change": 58.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -24372,6 +25928,16 @@
   "MIDD": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 21329240,
+    "prior_value_usd": 21329240,
+    "shares_delta": -124000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 124000,
     "value_usd": 21329240,
@@ -24381,6 +25947,15 @@
    }
   ],
   "NATL": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 1556196,
+    "value_usd": 70308935,
+    "shares_delta": 522634,
+    "pct_change": 50.6,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -24403,6 +25978,15 @@
   "NEE": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 1554928,
+    "value_usd": 66691752,
+    "shares_delta": -72650,
+    "pct_change": -4.5,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "ADD",
     "shares": 1627578,
     "value_usd": 77944001,
@@ -24421,6 +26005,15 @@
    }
   ],
   "NOC": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 9660,
+    "value_usd": 4670417,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "HOLD",
@@ -24453,6 +26046,15 @@
   "NOVT": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 239040,
+    "value_usd": 14491747,
+    "shares_delta": -10960,
+    "pct_change": -4.4,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 250000,
     "value_usd": 17070992,
@@ -24483,6 +26085,16 @@
   "NUVL": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 37052100,
+    "prior_value_usd": 37052100,
+    "shares_delta": -300017,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 300017,
     "value_usd": 37052100,
@@ -24501,6 +26113,16 @@
    }
   ],
   "OPEN": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 9751,
+    "prior_value_usd": 9751,
+    "shares_delta": -20171,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "HOLD",
@@ -24532,6 +26154,15 @@
   "PAYO": [
    {
     "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 5394360,
+    "value_usd": 38515730,
+    "shares_delta": 2194360,
+    "pct_change": 68.6,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 3200000,
     "value_usd": 22784000,
@@ -24552,6 +26183,15 @@
   "PPL": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 397254,
+    "value_usd": 13065684,
+    "shares_delta": -210052,
+    "pct_change": -34.6,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "ADD",
     "shares": 607306,
     "value_usd": 22075573,
@@ -24570,6 +26210,15 @@
    }
   ],
   "QXO": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 800000,
+    "value_usd": 9352000,
+    "shares_delta": 750165,
+    "pct_change": 1505.3,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -24600,6 +26249,16 @@
    }
   ],
   "RDNT": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 7189982,
+    "prior_value_usd": 7189982,
+    "shares_delta": -116588,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -24640,6 +26299,16 @@
   "RBC": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 4257237,
+    "prior_value_usd": 4257237,
+    "shares_delta": -6610,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "ADD",
     "shares": 6610,
     "value_usd": 4257237,
@@ -24658,6 +26327,15 @@
    }
   ],
   "RIVN": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 119478000,
+    "value_usd": 132051809,
+    "shares_delta": -12837000,
+    "pct_change": -9.7,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -24698,6 +26376,16 @@
   "RUSHA": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 333833,
+    "prior_value_usd": 333833,
+    "shares_delta": -4574,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "TRIM",
     "shares": 4574,
     "value_usd": 333833,
@@ -24718,6 +26406,16 @@
   "RSI": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 6741463,
+    "prior_value_usd": 6741463,
+    "shares_delta": -226680,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 226680,
     "value_usd": 6741463,
@@ -24727,6 +26425,15 @@
    }
   ],
   "SRE": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 144668,
+    "value_usd": 11278317,
+    "shares_delta": -296446,
+    "pct_change": -67.2,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -24767,6 +26474,16 @@
   "SILA": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 15414318,
+    "prior_value_usd": 15414318,
+    "shares_delta": -507718,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 507718,
     "value_usd": 15414318,
@@ -24778,6 +26495,16 @@
   "SITM": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 5218920,
+    "prior_value_usd": 5218920,
+    "shares_delta": -7000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 7000,
     "value_usd": 5218920,
@@ -24787,6 +26514,15 @@
    }
   ],
   "SW": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 819885,
+    "value_usd": 36156929,
+    "shares_delta": -692913,
+    "pct_change": -45.8,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -24827,6 +26563,15 @@
   "SNAP": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 94061000,
+    "value_usd": 79419183,
+    "shares_delta": -3939000,
+    "pct_change": -4.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "HOLD",
     "shares": 98000000,
     "value_usd": 81196420,
@@ -24865,6 +26610,15 @@
   "MWH": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 15403,
+    "value_usd": 369980,
+    "shares_delta": -421261,
+    "pct_change": -96.5,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "ADD",
     "shares": 436664,
     "value_usd": 14868409,
@@ -24883,6 +26637,16 @@
    }
   ],
   "SO": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 65774926,
+    "prior_value_usd": 65774926,
+    "shares_delta": -65000000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -24913,6 +26677,16 @@
    }
   ],
   "SARO": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 15745820,
+    "prior_value_usd": 15745820,
+    "shares_delta": -526440,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -24953,6 +26727,15 @@
   "SUNB": [
    {
     "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 958737,
+    "value_usd": 70189136,
+    "shares_delta": 442703,
+    "pct_change": 85.8,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "TRIM",
     "shares": 516034,
     "value_usd": 38604504,
@@ -24971,6 +26754,15 @@
    }
   ],
   "RUN": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 3714217,
+    "value_usd": 28859466,
+    "shares_delta": 3114217,
+    "pct_change": 519.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -25011,6 +26803,16 @@
   "SMCI": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 111471398,
+    "prior_value_usd": 111471398,
+    "shares_delta": -2175408,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 2175408,
     "value_usd": 111471398,
@@ -25020,6 +26822,15 @@
    }
   ],
   "TE": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 263268,
+    "value_usd": 1016214,
+    "shares_delta": 217286,
+    "pct_change": 472.5,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -25040,6 +26851,16 @@
    }
   ],
   "TMHC": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 51905540,
+    "prior_value_usd": 51905540,
+    "shares_delta": -723523,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -25063,6 +26884,15 @@
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
+    "shares": 3676,
+    "value_usd": 247101,
+    "shares_delta": -4864,
+    "pct_change": -57.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
     "shares": 8540,
     "value_usd": 747592,
     "shares_delta": -17472,
@@ -25082,6 +26912,16 @@
   "TEX": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 32069349,
+    "prior_value_usd": 32069349,
+    "shares_delta": -443008,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 443008,
     "value_usd": 32069349,
@@ -25091,6 +26931,15 @@
    }
   ],
   "TKR": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 11215,
+    "value_usd": 1309351,
+    "shares_delta": -58785,
+    "pct_change": -84.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -25109,6 +26958,15 @@
     "value_usd": 74831274,
     "shares_delta": -12715,
     "pct_change": -3.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 489487,
+    "value_usd": 87970604,
+    "shares_delta": -88670,
+    "pct_change": -15.3,
     "quarter": "2026-09-30"
    },
    {
@@ -25187,6 +27045,16 @@
   "BLD": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 21307805,
+    "prior_value_usd": 21307805,
+    "shares_delta": -50000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 50000,
     "value_usd": 21307805,
@@ -25196,6 +27064,15 @@
    }
   ],
   "TPG": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 249682,
+    "value_usd": 11018467,
+    "shares_delta": 45194,
+    "pct_change": 22.1,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -25235,6 +27112,16 @@
    }
   ],
   "ULS": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 34017166,
+    "prior_value_usd": 34017166,
+    "shares_delta": -333960,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -25284,6 +27171,15 @@
    },
    {
     "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 53455,
+    "value_usd": 8972422,
+    "shares_delta": 20188,
+    "pct_change": 60.7,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "TRIM",
     "shares": 33267,
     "value_usd": 5972425,
@@ -25306,6 +27202,15 @@
     "manager": "Soros Fund Management",
     "action": "HOLD",
     "shares": 43292,
+    "value_usd": 1985804,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 43292,
     "value_usd": 1832983,
     "shares_delta": 0,
     "pct_change": 0.0,
@@ -25322,6 +27227,15 @@
    }
   ],
   "VGNT": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 7895,
+    "value_usd": 354801,
+    "shares_delta": -575771,
+    "pct_change": -98.6,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -25344,6 +27258,16 @@
   "VSH": [
    {
     "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 5378000,
+    "prior_value_usd": 5378000,
+    "shares_delta": -100000,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 100000,
     "value_usd": 5378000,
@@ -25353,6 +27277,15 @@
    }
   ],
   "VSEC": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 13818,
+    "value_usd": 953375,
+    "shares_delta": -106509,
+    "pct_change": -88.5,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "TRIM",
@@ -25382,6 +27315,15 @@
    }
   ],
   "WMT": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 63099,
+    "value_usd": 6557248,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "HOLD",
@@ -25449,6 +27391,15 @@
   "WEC": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 417002,
+    "value_usd": 42025462,
+    "shares_delta": -111367,
+    "pct_change": -21.1,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "ADD",
     "shares": 528369,
     "value_usd": 61697648,
@@ -25476,6 +27427,15 @@
    }
   ],
   "XEL": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "ADD",
+    "shares": 637427,
+    "value_usd": 44925855,
+    "shares_delta": 104103,
+    "pct_change": 19.5,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "ADD",
@@ -25507,6 +27467,15 @@
   "YSWY": [
    {
     "manager": "Soros Fund Management",
+    "action": "HOLD",
+    "shares": 50000,
+    "value_usd": 1008000,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 50000,
     "value_usd": 1015000,
@@ -25516,6 +27485,16 @@
    }
   ],
   "YSS": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 276852,
+    "prior_value_usd": 276852,
+    "shares_delta": -11245,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -25529,6 +27508,15 @@
   "ZETA": [
    {
     "manager": "Soros Fund Management",
+    "action": "TRIM",
+    "shares": 10674,
+    "value_usd": 336978,
+    "shares_delta": -35993,
+    "pct_change": -77.1,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "NEW",
     "shares": 46667,
     "value_usd": 918407,
@@ -25538,6 +27526,16 @@
    }
   ],
   "ZTS": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 1998283,
+    "prior_value_usd": 1998283,
+    "shares_delta": -27808,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "NEW",
@@ -25665,6 +27663,15 @@
   ],
   "AES": [
    {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 3627986,
+    "value_usd": 54056991,
+    "shares_delta": 3627986,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Pentwater",
     "action": "HOLD",
     "shares": 500000,
@@ -25703,6 +27710,15 @@
    }
   ],
   "LNT": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 37850,
+    "value_usd": 2395905,
+    "shares_delta": 37850,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "EXIT",
@@ -25945,6 +27961,15 @@
   "DTE": [
    {
     "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 15984,
+    "value_usd": 1946851,
+    "shares_delta": 15984,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "EXIT",
     "shares": 0,
     "value_usd": 646877,
@@ -26082,6 +28107,15 @@
    }
   ],
   "EXC": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 6067,
+    "value_usd": 245107,
+    "shares_delta": 6067,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "EXIT",
@@ -27173,6 +29207,15 @@
   "ORA": [
    {
     "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 78345,
+    "value_usd": 7167784,
+    "shares_delta": 78345,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "EXIT",
     "shares": 0,
     "value_usd": 7532949,
@@ -27456,6 +29499,15 @@
   ],
   "SHOP": [
    {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 222745,
+    "value_usd": 33033084,
+    "shares_delta": 222745,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "ARK (Wood)",
     "action": "TRIM",
     "shares": 3145496,
@@ -27681,6 +29733,15 @@
   "ADT": [
    {
     "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 11209,
+    "value_usd": 68151,
+    "shares_delta": 11209,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Soros Fund Management",
     "action": "EXIT",
     "shares": 0,
     "value_usd": 10645554,
@@ -27742,6 +29803,15 @@
    }
   ],
   "ALNY": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 99000000,
+    "value_usd": 90690917,
+    "shares_delta": 99000000,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "EXIT",
@@ -27988,6 +30058,15 @@
    }
   ],
   "HGTY": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 376980,
+    "value_usd": 5074151,
+    "shares_delta": 376980,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Soros Fund Management",
     "action": "EXIT",
@@ -28264,6 +30343,15 @@
    }
   ],
   "CTRI": [
+   {
+    "manager": "Icahn Capital",
+    "action": "HOLD",
+    "shares": 14336044,
+    "value_usd": 287294322,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Icahn Capital",
     "action": "HOLD",
@@ -29193,6 +31281,15 @@
   ],
   "HPE": [
    {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 35579,
+    "value_usd": 2273142,
+    "shares_delta": 35579,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Elliott (Singer)",
     "action": "ADD",
     "shares": 32271985,
@@ -29626,6 +31723,16 @@
   "AEP": [
    {
     "manager": "Icahn Capital",
+    "action": "EXIT",
+    "shares": 0,
+    "value_usd": 59472675,
+    "prior_value_usd": 59472675,
+    "shares_delta": -434710,
+    "pct_change": -100.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Icahn Capital",
     "action": "TRIM",
     "shares": 434710,
     "value_usd": 59472675,
@@ -29662,6 +31769,15 @@
    }
   ],
   "CVI": [
+   {
+    "manager": "Icahn Capital",
+    "action": "HOLD",
+    "shares": 71201875,
+    "value_usd": 3630583606,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Icahn Capital",
     "action": "HOLD",
@@ -29704,6 +31820,15 @@
     "manager": "Icahn Capital",
     "action": "HOLD",
     "shares": 4164274,
+    "value_usd": 515453836,
+    "shares_delta": 0,
+    "pct_change": 0.0,
+    "quarter": "2026-09-30"
+   },
+   {
+    "manager": "Icahn Capital",
+    "action": "HOLD",
+    "shares": 4164274,
     "value_usd": 464233266,
     "shares_delta": 0,
     "pct_change": 0.0,
@@ -29738,6 +31863,15 @@
    }
   ],
   "SATS": [
+   {
+    "manager": "Icahn Capital",
+    "action": "TRIM",
+    "shares": 500000,
+    "value_usd": 44705000,
+    "shares_delta": -904542,
+    "pct_change": -64.4,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Icahn Capital",
     "action": "HOLD",
@@ -29776,6 +31910,15 @@
    }
   ],
   "IEP": [
+   {
+    "manager": "Icahn Capital",
+    "action": "ADD",
+    "shares": 658924537,
+    "value_usd": 4447740626,
+    "shares_delta": 40531194,
+    "pct_change": 6.6,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Icahn Capital",
     "action": "ADD",
@@ -30181,6 +32324,15 @@
    }
   ],
   "FBIN": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 20459,
+    "value_usd": 778465,
+    "shares_delta": 20459,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Greenlight (Einhorn)",
     "action": "NEW",
@@ -31746,6 +33898,15 @@
   ],
   "OGN": [
    {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 2953681,
+    "value_usd": 40465430,
+    "shares_delta": 2953681,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
+   {
     "manager": "Pentwater",
     "action": "NEW",
     "shares": 18100000,
@@ -31825,6 +33986,15 @@
    }
   ],
   "SYNA": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 181115,
+    "value_usd": 18364155,
+    "shares_delta": 181115,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "Pentwater",
     "action": "NEW",
@@ -32828,6 +34998,15 @@
    }
   ],
   "PSNL": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 250000,
+    "value_usd": 4070000,
+    "shares_delta": 250000,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   },
    {
     "manager": "ARK (Wood)",
     "action": "TRIM",
@@ -35837,6 +38016,204 @@
     "shares": 800862,
     "value_usd": 136731169,
     "shares_delta": 800862,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "SITE": [
+   {
+    "manager": "Baupost (Klarman)",
+    "action": "NEW",
+    "shares": 1245000,
+    "value_usd": 112436,
+    "shares_delta": 1245000,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "ABCL": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 150000,
+    "value_usd": 2188500,
+    "shares_delta": 150000,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "ACVA": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 3693247,
+    "value_usd": 38520566,
+    "shares_delta": 3693247,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "AEE": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 11048,
+    "value_usd": 1097950,
+    "shares_delta": 11048,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "BLFS": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 671025,
+    "value_usd": 26069321,
+    "shares_delta": 671025,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "BXMT": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 365000,
+    "value_usd": 4179250,
+    "shares_delta": 365000,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "CX": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 39077,
+    "value_usd": 371622,
+    "shares_delta": 39077,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "DAN": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 200000,
+    "value_usd": 5462000,
+    "shares_delta": 200000,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "DT": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 617814,
+    "value_usd": 35672580,
+    "shares_delta": 617814,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "DYN": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 20000,
+    "value_usd": 322200,
+    "shares_delta": 20000,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "ERAS": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 52001,
+    "value_usd": 762335,
+    "shares_delta": 52001,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "EXPE": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 725843,
+    "value_usd": 191158012,
+    "shares_delta": 725843,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "HALO": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 64118,
+    "value_usd": 7078627,
+    "shares_delta": 64118,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "HWM": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 35950,
+    "value_usd": 8131171,
+    "shares_delta": 35950,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "NOK": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 74310,
+    "value_usd": 753503,
+    "shares_delta": 74310,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "OGE": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 1000569,
+    "value_usd": 45445844,
+    "shares_delta": 1000569,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "PH": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 1411,
+    "value_usd": 1348098,
+    "shares_delta": 1411,
+    "pct_change": null,
+    "quarter": "2026-09-30"
+   }
+  ],
+  "SONO": [
+   {
+    "manager": "Soros Fund Management",
+    "action": "NEW",
+    "shares": 126941,
+    "value_usd": 2270974,
+    "shares_delta": 126941,
     "pct_change": null,
     "quarter": "2026-09-30"
    }
