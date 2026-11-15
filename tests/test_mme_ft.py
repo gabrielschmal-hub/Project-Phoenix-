@@ -144,3 +144,34 @@ def test_decide_then_morning_cycle(tmp_path, monkeypatch):
     a2 = [t for t in F.trs if t["arm"] == "A" and t["acct"] == 2000][0]
     assert a2["status"] == "closed" and a2["r"] < -0.95
     assert F.dayrows[(d2 + timedelta(days=1), "morning")]["equity"]["A"]["2000"]["n_closed"] == 1
+
+
+def test_push_messages_group_by_name(tmp_path, monkeypatch):
+    monkeypatch.setattr(M, "OUT", str(tmp_path))
+    sent = []
+    monkeypatch.setattr(M, "notify", lambda *a, **k: sent.append(a) or True)
+    d1, d2 = date(2026, 11, 23), date(2026, 11, 24)
+    rows = {"AAA": {"ticker": "AAA", "em": 4.0, "em_src": "atm_iv", "flip": 190.0, "support": 200.0, "resist": 206.0,
+                    "support_tiered": [200.0, 192.0], "stale_days": 0}}
+    S = {d1.isoformat(): {"SPX": [(_ts(d1, 15, 0), 7600.0)], "VIX": [(_ts(d1, 15, 0), 16.0)], "AAA": [(_ts(d1, 15, 0), 200.8)]},
+         d2.isoformat(): {"AAA": [(_ts(d2, 14, 30), 199.0), (_ts(d2, 17, 0), 195.9)]}}
+    F = Fake(d1, S, rows)
+    M.decide(d1, R, F)
+    title, lines = sent[0][0], sent[0][1]
+    assert "1 new order" in title and lines[0].startswith("AAA") and "arms A B C D G H" in lines[0]   # one line, not 12
+    F.T = d2
+    M.morning(d2 + timedelta(days=1), R, F)
+    title, lines = sent[1][0], sent[1][1]
+    assert "1 closed" in title and "stopped out" in lines[0] and "R (" in lines[0]
+
+
+def test_notify_queues_web_push(monkeypatch):
+    import requests
+    calls = []
+    class R: status_code = 201; text = ""
+    monkeypatch.setattr(requests, "post", lambda u, **k: calls.append((u, k)) or R())
+    monkeypatch.setenv("SUPABASE_URL", "https://x.supabase.co"); monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "k")
+    monkeypatch.delenv("MME_NTFY_TOPIC", raising=False); monkeypatch.delenv("NTFY_TOPIC", raising=False)
+    assert M.notify("MME test · 1 new order", ["AAA · bought 200.80"]) is True
+    assert len(calls) == 1 and calls[0][0].endswith("/rest/v1/push_outbox")
+    assert calls[0][1]["json"]["url"] == "/?pane=mmetest#mission" and "AAA" in calls[0][1]["json"]["body"]
