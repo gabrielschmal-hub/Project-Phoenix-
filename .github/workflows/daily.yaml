@@ -45,6 +45,8 @@ jobs:
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          MME_NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}   # MME test push: fills and closed trades (Phoenix's other alerts stay off)
+          MME_EMAIL: ${{ secrets.MME_EMAIL }}         # optional: the same message by email
           SEC_IDENTITY: "Phoenix Research gabriel@example.com"
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then

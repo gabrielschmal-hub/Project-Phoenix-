@@ -38,6 +38,8 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          MME_NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}   # push for new MME test orders (ntfy app)
+          MME_EMAIL: ${{ secrets.MME_EMAIL }}         # optional: the same message by email
         run: |
           if [ "${{ github.event.inputs.force }}" = "true" ]; then
             python -m trading.mme_ft decide --force
