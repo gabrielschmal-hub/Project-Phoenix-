@@ -17852,6 +17852,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       '<h4>Switch book</h4><p>Both admins can open either book. Positions, heat and history are separate.</p>'+
       '<button class="opt" data-p="G"><i>G</i><b>Gabriel</b></button>'+
       '<button class="opt" data-p="A"><i>A</i><b>Aldemar</b></button>'+
+      '<div class="pxpop-th"><span>Appearance</span><div class="thsw"><b data-th="light">Light</b><b data-th="dark">Dark</b></div></div>'+
       '<div class="auth" id="pxAuthBox"></div>'+
       '<button class="cx">Cancel</button></div>';
     document.body.appendChild(pop);
@@ -17863,6 +17864,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       Array.prototype.forEach.call(pop.querySelectorAll(".opt[data-p]"),function(b){
         b.classList.toggle("on", b.getAttribute("data-p")===p);
       });
+      var lt=document.documentElement.classList.contains("light");
+      Array.prototype.forEach.call(pop.querySelectorAll("[data-th]"),function(b){
+        b.className=((b.getAttribute("data-th")==="light")===lt)?"on":"";
+      });
       pxAuthPaint();
     }
     function close(){ pop.classList.remove("on"); }
@@ -17872,6 +17877,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     pop.addEventListener("click",function(e){
       var a=e.target.closest&&e.target.closest("[data-auth]");
       if(a){ close(); if(a.getAttribute("data-auth")==="out"){ pxAuthSignOut(); } else { pxAuthModal(); } return; }
+      // Light / Dark: the rail's switch is hidden on a phone, so the profile sheet carries it (drives the same buttons)
+      var th=e.target.closest&&e.target.closest("[data-th]");
+      if(th){ var tb=document.getElementById(th.getAttribute("data-th")==="light"?"thLight":"thDark"); if(tb) tb.click(); setTimeout(paint,80); return; }
       var o=e.target.closest&&e.target.closest(".opt[data-p]");
       if(o){ var t=document.getElementById("px"+o.getAttribute("data-p")); if(t) t.click(); close(); setTimeout(paint,400); return; }
       if(e.target===pop||(e.target.classList&&e.target.classList.contains("cx"))) close();
@@ -18435,6 +18443,27 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   /* ---- bottom banners/toasts ride above the tab bar, never under it ---- */
   #trBanner,.toast,[id$="Toast"],[class*="toast"]{bottom:calc(66px + env(safe-area-inset-bottom))!important}
 }
+
+/* ---- phone fit (15 Nov 2026): nothing may be wider than the screen ----
+   The System checks rows have a 680px minimum (they scroll sideways inside their box), but a later .mch{display:flex}
+   rule made the box grow to fit them, so iPhone widened the whole page to ~490px and shrank it to fit: a dead strip on
+   the right and a short bottom bar. Mission Control's tabs now scroll sideways instead of pushing the page out. */
+.mc-health .mch{display:block!important;min-width:0;max-width:100%}
+.mch-l{max-width:100%;min-width:0}
+.mc-top{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;max-width:100%}
+.mc-top::-webkit-scrollbar{display:none}
+.mc-top .mc-tab{flex:none}
+/* phones: the 70px top padding was room for the old top bar; the bar sits at the bottom now, so it was dead space under the title */
+@media (max-width:600px){ .page{padding-top:14px!important} }
+/* Home Screen app: the page starts below the clock and battery, and a strip behind them keeps scrolled text off them */
+@media (display-mode: standalone){
+  body{padding-top:env(safe-area-inset-top)}
+  body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:var(--bg);z-index:400;pointer-events:none}
+}
+#pxProfPop .pxpop-th{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 4px;padding-top:12px;border-top:1px solid var(--line)}
+#pxProfPop .pxpop-th span{font-size:13px;opacity:.8}
+#pxProfPop .pxpop-th .thsw{flex:0 0 160px;flex-direction:row}
+#pxProfPop .pxpop-th .thsw b{font-size:12px;padding:7px 4px}
 </style>
 </body>
 </html>
