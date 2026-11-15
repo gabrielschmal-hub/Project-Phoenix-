@@ -1,0 +1,46 @@
+name: MME Forward Test (10:00 ET)
+
+# Phoenix 2.0, Trading module: the 10:00 ET decision of the MME forward test (FT-1.3).
+# Two UTC times so one of them is 10:xx ET in both winter (15:05 UTC) and summer (14:05 UTC) time; the engine itself
+# only acts between 10:00 and 11:30 ET and only once a day. It reads the morning run's committed outputs and the live
+# 5-minute prices in Supabase, and writes only to Supabase: no commit, so it never races the daily run's push.
+on:
+  schedule:
+    - cron: '5 14 * * 1-5'
+    - cron: '5 15 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Run the decision now, outside the 10:00-11:30 ET window (testing only)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: mme-test
+  cancel-in-progress: false
+
+jobs:
+  decide:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install requests
+      - name: Decide (10:00 ET)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            python -m trading.mme_ft decide --force
+          else
+            python -m trading.mme_ft decide
+          fi
