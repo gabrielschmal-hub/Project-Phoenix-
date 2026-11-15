@@ -652,6 +652,7 @@ async function doAuth(kind){
     if (kind === "reset"){ await supaAuth("recover?redirect_to=" + encodeURIComponent(back), { email }); S.authNote = `If ${email} has an account, a reset link is on its way.`; }
   } catch (e){ S.authMsg = /invalid login/i.test(e.message) ? "That e-mail and password don't match."
     : /rate limit/i.test(e.message) ? "Too many sign-in e-mails were sent in the last hour. Please wait a little and try again — if you already have an account, sign in with your password instead."
+    : /database error saving new user|signups_closed/i.test(e.message) ? "Phoenix Wealth is invite-only while we test it. If you already have an account, sign in with your password."
     : /not confirmed/i.test(e.message) ? "Confirm your e-mail first: open the link we sent you, then sign in here."
     : /already registered/i.test(e.message) ? "That e-mail already has an account. Sign in with your password, or use “Forgot password”."
     : e.message; }
