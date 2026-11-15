@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Phoenix">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/phoenix-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/phoenix-192.png">
 <title>Phoenix</title>
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 <script>
@@ -1247,6 +1250,16 @@
   @media(max-width:700px){.opt-hero .opt-h{font-size:18px}.opt-kpi{grid-template-columns:repeat(2,1fr)}.opt-skip{columns:1}}
   /* ---- MME Test tab ---- */
   #mcPaneMt{max-width:100%;overflow-x:hidden}
+  .px-push{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 14px;margin:0 0 12px}
+  .px-push .t{flex:1 1 220px;min-width:0;font-size:13px;line-height:1.4}
+  .px-push .t b{display:block;font-size:13.5px}
+  .px-push .t span{opacity:.75}
+  .px-push .b{display:flex;gap:8px;flex-wrap:wrap}
+  .px-push button{font:inherit;font-size:12.5px;padding:7px 12px;border-radius:8px;border:1px solid var(--line2);background:var(--card2);color:inherit;cursor:pointer}
+  .px-push button.go{background:#D6621F;border-color:#D6621F;color:#fff}
+  .px-push button:disabled{opacity:.5;cursor:default}
+  .px-push .dot{width:9px;height:9px;border-radius:50%;flex:none;background:#8a8a8a}
+  .px-push .dot.on{background:#3FB37F}
   .mt-today{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:6px 0 4px}
   .mt-today>div{padding:9px 12px;border-right:1px solid var(--line);font-size:12.5px;color:var(--inkFade)} .mt-today>div:last-child{border-right:0}
   .mt-today span{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
@@ -11937,6 +11950,68 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function mtUsd(v,sign){ if(v==null||isNaN(v)) return "—"; var s=Math.abs(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); return (v<0?"−$":(sign&&v>0?"+$":"$"))+s; }
   function mtCls(v){ return v>0?"pos":(v<0?"neg":""); }
   function mtD(d){ if(!d) return "—"; var t=new Date(String(d).slice(0,10)+"T12:00:00Z"); return t.toLocaleDateString("en-GB",{day:"numeric",month:"short"}); }
+  // ---------------- Web push: phone notifications for the MME test (and anything else Phoenix queues) ----------------
+  // The engine writes a row to push_outbox; Supabase's push function sends it to every device registered here.
+  // iPhone: push only works once Phoenix is added to the Home Screen and opened from that icon (iOS 16.4+).
+  var PX_VAPID="BOs2sO195s9ra32U4LMH8CU6m3QM5SKLwtmPPDFddKtb_j-rHSsvm3CW3IslbCANAMxj3qSTJNfBIbogfxhtStc";
+  var pxSwReg=null;
+  if("serviceWorker" in navigator){
+    window.addEventListener("load",function(){
+      navigator.serviceWorker.register("/sw.js",{scope:"/"}).then(function(r){ pxSwReg=r; }).catch(function(){});
+      navigator.serviceWorker.addEventListener("message",function(e){ if(e.data&&e.data.px==="open"&&e.data.url) location.href=e.data.url; });
+    });
+  }
+  function pxB64(s){ s=(s+"===".slice((s.length+3)%4)).replace(/-/g,"+").replace(/_/g,"/"); var r=atob(s), a=new Uint8Array(r.length); for(var i=0;i<r.length;i++) a[i]=r.charCodeAt(i); return a; }
+  function pxIsIOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1); }
+  function pxStandalone(){ return (window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true; }
+  function pxDeviceLabel(){ var u=navigator.userAgent; return (/iPhone/.test(u)?"iPhone":/iPad/.test(u)?"iPad":/Android/.test(u)?"Android":/Mac/.test(u)?"Mac":/Windows/.test(u)?"Windows":"Device")+(pxStandalone()?" app":" browser"); }
+  function pxRpc(fn,args){
+    return pxAuthReady().then(function(){
+      return fetch(SUPA.url+"/rest/v1/rpc/"+fn,{method:"POST",headers:Object.assign({"Content-Type":"application/json"},pxReadHeaders()),body:JSON.stringify(args||{})});
+    }).then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t||("HTTP "+r.status)); }); return true; });
+  }
+  function pxSwReady(){ return pxSwReg?Promise.resolve(pxSwReg):navigator.serviceWorker.register("/sw.js",{scope:"/"}).then(function(r){ pxSwReg=r; return navigator.serviceWorker.ready; }); }
+  function pxPushCard(msg){
+    var el=document.getElementById("mtPush"); if(!el) return;
+    function card(on,title,sub,buttons){
+      el.innerHTML='<div class="px-push"><span class="dot'+(on?' on':'')+'"></span><div class="t"><b>'+title+'</b><span>'+sub+'</span></div><div class="b">'+(buttons||"")+'</div></div>';
+      el.querySelectorAll("button[data-a]").forEach(function(b){ b.onclick=function(){ pxPushAct(this.dataset.a,this); }; });
+    }
+    var hasPush=("serviceWorker" in navigator)&&("PushManager" in window)&&("Notification" in window);
+    if(!hasPush){
+      if(pxIsIOS()&&!pxStandalone()) return card(false,"Phone notifications","On iPhone: tap Share → <i>Add to Home Screen</i>, open Phoenix from that icon, sign in, and turn them on here.");
+      return card(false,"Phone notifications","This browser cannot receive push notifications.");
+    }
+    if(!pxAuthEmail()) return card(false,"Phone notifications","Sign in to turn on notifications for this device.");
+    if(Notification.permission==="denied") return card(false,"Notifications blocked","Allow notifications for Phoenix in this device's settings, then reopen the app.");
+    pxSwReady().then(function(r){ return r.pushManager.getSubscription(); }).then(function(sub){
+      if(sub) card(true,"Notifications on · "+pxDeviceLabel(), msg||"You get a push when the MME test places an order, gets filled, cuts on SPX or closes a trade.",
+        '<button data-a="test">Send test</button><button data-a="off">Turn off</button>');
+      else card(false,"Phone notifications", msg||"Get a push on this device when the MME test opens or closes a trade.",
+        '<button class="go" data-a="on">Turn on</button>');
+    }).catch(function(e){ card(false,"Phone notifications","Could not start the notification service ("+mtE(e&&e.message)+").",'<button class="go" data-a="on">Try again</button>'); });
+  }
+  function pxPushAct(a,btn){
+    if(btn) btn.disabled=true;
+    var fail=function(e){ pxPushCard("That did not work: "+mtE((e&&e.message||"").slice(0,160))); };
+    if(a==="on"){
+      Notification.requestPermission().then(function(p){
+        if(p!=="granted") throw new Error("permission "+p);
+        return pxSwReady();
+      }).then(function(r){
+        return r.pushManager.getSubscription().then(function(s){ return s||r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:pxB64(PX_VAPID)}); });
+      }).then(function(sub){ return pxRpc("px_push_subscribe",{p_sub:sub.toJSON(),p_label:pxDeviceLabel()}); })
+        .then(function(){ pxPushCard("Turned on. Tap Send test to check it arrives."); }).catch(fail);
+    } else if(a==="off"){
+      pxSwReady().then(function(r){ return r.pushManager.getSubscription(); }).then(function(sub){
+        if(!sub) return;
+        var ep=sub.endpoint;
+        return sub.unsubscribe().then(function(){ return pxRpc("px_push_unsubscribe",{p_endpoint:ep}); });
+      }).then(function(){ pxPushCard("Turned off for this device."); }).catch(fail);
+    } else if(a==="test"){
+      pxRpc("px_push_test",{}).then(function(){ pxPushCard("Test sent to every device that has notifications on. It should arrive within a few seconds."); }).catch(fail);
+    }
+  }
   function mtFill(){
     var host=document.getElementById("mtPane"); if(!host) return;
     host.innerHTML='<div class="ed-note">Loading the MME forward test…</div>';
@@ -12080,7 +12155,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
                    '<div id="mcHealth" class="mc-health"></div>'+
                    '<div id="mcPaneBrief">'+briefHtml+'</div><div id="mcPaneMme" style="display:none">'+mmeHtml+'</div>'+
                    '<div id="mcPaneOpt" style="display:none"><div id="optPane"></div></div>'+
-                   '<div id="mcPaneMt" style="display:none"><div id="mtPane"></div></div>'+
+                   '<div id="mcPaneMt" style="display:none"><div id="mtPush"></div><div id="mtPane"></div></div>'+
                    '<div id="mcPanePf" style="display:none"><div id="pfPane"></div></div>'+
                    '<div id="mcPaneAuto" style="display:none"><div id="abPane"></div></div>';
     var optDone=false;
@@ -12096,12 +12171,14 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       try{ localStorage.setItem("phoenix.mc.pane", p); }catch(e){}
       if(p==="mme") mcbNamesFill();
       if(p==="options"&&!optDone){ optDone=true; optFill(); }
-      if(p==="mmetest") mtFill();
+      if(p==="mmetest"){ mtFill(); pxPushCard(); }
       if(p==="portfolios") pfFill();
       if(p==="auto") abFill();
     }
     host.querySelectorAll(".mc-tab").forEach(function(b){ b.onclick=function(){ show(this.dataset.pane); }; });
     var want="brief"; try{ want=localStorage.getItem("phoenix.mc.pane")||"brief"; }catch(e){}
+    try{ var qp=new URLSearchParams(location.search).get("pane");                  // a tapped notification opens its pane
+      if(qp){ want=qp; history.replaceState(null,"",location.pathname+location.hash); } }catch(e){}
     show(want);
     mcHealthFill();
   }
