@@ -5551,6 +5551,13 @@ def check_earnings_updates(quarterly, priority=None, limit=None):
     # advance the cursor for next run
     if rest:
         state["cursor"] = (cursor + max(0, len(batch) - len(head))) % len(rest)
+    # never let a stale Yahoo answer (a date already past) overwrite an upcoming date the Finnhub
+    # calendar already found: Yahoo keeps showing the last report for days after it happens
+    _known = state.get("next_dates", {}) or {}
+    for _tk in list(next_dates):
+        _new, _old = str(next_dates[_tk])[:10], str(_known.get(_tk) or "")[:10]
+        if _new < today_s and _old >= today_s:
+            del next_dates[_tk]
     state.setdefault("next_dates", {}).update(next_dates)
     _save_earnings_state(state)
 
@@ -10115,6 +10122,97 @@ def _fetch_quarters_direct(tk, have):
                                      "Total Current Liabilities"),
         })
     return rows, ("ok" if rows else "already up to date")
+
+
+def run_earnings_calendar(days_back=14, days_ahead=105):
+    """
+    Next earnings dates for the whole market from Finnhub's earnings calendar, one call per week of dates.
+
+    Why: the per-ticker Yahoo check (check_earnings_updates) is rate-limited on GitHub's runners and comes back
+    empty, so known dates sat in the past after the company reported (AMZN still showed 29 Oct on 15 Nov). Every
+    rule that reads earnings_state.json then saw "date already past" and blocked the name, the MME forward test's
+    R05 among them. The calendar answers the whole market in ~17 calls, under the free tier's 60 a minute.
+
+    Writes earnings_state.json: next_dates[tk] = the first date on or after today, for every name Phoenix already
+    tracks plus the MME/IC universe; last_reported[tk] = the latest date in the last days_back days; next_src[tk] =
+    "finnhub"; calendar_asof. A name Finnhub has nothing upcoming for keeps what it had.
+    """
+    import os, json, time
+    from datetime import date, timedelta
+    key = os.environ.get("FINNHUB_API_KEY") or os.environ.get("FINNHUB_KEY") or os.environ.get("FINNHUB_TOKEN")
+    if not key:
+        print("[earn_cal] FINNHUB_API_KEY not set - earnings dates not refreshed")
+        sb_heartbeat("earnings_calendar", False, "FINNHUB_API_KEY missing")
+        return None
+    import requests
+    today = date.today()
+    upcoming, reported, hours, calls, fails = {}, {}, {}, 0, []
+    d0 = today - timedelta(days=days_back)
+    while d0 <= today + timedelta(days=days_ahead):
+        d1 = d0 + timedelta(days=6)
+        for attempt in (1, 2):
+            calls += 1
+            try:
+                r = requests.get("https://finnhub.io/api/v1/calendar/earnings", timeout=30,
+                                 params={"from": d0.isoformat(), "to": d1.isoformat(), "token": key})
+                if r.status_code == 429 and attempt == 1:
+                    print("[earn_cal] rate limit - waiting 60 s"); time.sleep(61); continue
+                r.raise_for_status()
+                rows = (r.json() or {}).get("earningsCalendar") or []
+                for e in rows:
+                    tk, ds = (e.get("symbol") or "").upper().strip(), str(e.get("date") or "")[:10]
+                    if not tk or len(ds) != 10:
+                        continue
+                    if ds >= today.isoformat():
+                        if tk not in upcoming or ds < upcoming[tk]:
+                            upcoming[tk], hours[tk] = ds, e.get("hour") or ""
+                    elif tk not in reported or ds > reported[tk]:
+                        reported[tk] = ds
+            except Exception as ex:
+                fails.append(f"{d0}: {ex}")
+            break
+        time.sleep(1.1)
+        d0 = d1 + timedelta(days=1)
+
+    state = _load_earnings_state()
+    nd = state.setdefault("next_dates", {})
+    want = set(nd)
+    for f in ("mme_map.json", "ic_universe.json"):
+        try:
+            j = json.load(open(os.path.join(OUTPUTS_DIR, f)))
+            if f == "mme_map.json":
+                want |= {r.get("ticker") for g in (j.get("groups") or {}).values() for r in g if r.get("ticker")}
+            else:
+                want |= set((j.get("names") or {}).keys())
+        except Exception:
+            pass
+    src, lastrep, hr = state.setdefault("next_src", {}), state.setdefault("last_reported", {}), state.setdefault("next_hour", {})
+    fixed, set_new = [], 0
+    for tk in want:
+        k = tk.replace("-", ".")                              # Finnhub writes share classes with a dot (BRK.B)
+        if k in reported:
+            lastrep[tk] = reported[k]
+        if k not in upcoming:
+            continue
+        old = str(nd.get(tk) or "")[:10]
+        if old != upcoming[k]:
+            if old and old < today.isoformat():
+                fixed.append(f"{tk} {old}->{upcoming[k]}")
+            set_new += 1
+        nd[tk], src[tk], hr[tk] = upcoming[k], "finnhub", hours.get(k, "")
+    state["calendar_asof"] = today.isoformat()
+    _save_earnings_state(state)
+    stale = sorted(tk for tk in want if str(nd.get(tk) or "9999")[:10] < today.isoformat())
+    note = (f"{calls} calls, {len(upcoming)} upcoming in the market, {set_new} dates changed, "
+            f"{len(fixed)} past dates replaced, {len(stale)} tracked names still without an upcoming date"
+            + (f", {len(fails)} windows failed" if fails else ""))
+    print("[earn_cal] " + note)
+    if fixed:
+        print("[earn_cal] replaced: " + ", ".join(sorted(fixed)[:40]) + (" ..." if len(fixed) > 40 else ""))
+    if fails:
+        print("[earn_cal] failed: " + "; ".join(fails[:5]))
+    sb_heartbeat("earnings_calendar", not fails and bool(upcoming), note[:200])
+    return {"upcoming": len(upcoming), "changed": set_new, "fixed": len(fixed), "stale": len(stale)}
 
 
 def run_earnings_refresh():
@@ -17225,6 +17323,7 @@ def run_full():
     step("institutional_13f", run_institutional_13f)
 
     # --- earnings + fundamentals -------------------------------------------
+    step("earnings_calendar", run_earnings_calendar, optional=True)   # Finnhub calendar: next dates for every name, before anything reads them
     step("earnings_refresh", run_earnings_refresh)
     step("iv_em",          run_iv_em,         optional=True)   # implied vol + expected move, two-tier
     step("mme_chains",     run_mme_chains,    optional=True)   # raw CBOE chains for the universe, one file, for the MME task
@@ -17290,6 +17389,8 @@ def run_engine(name):
         run_universe_gaps()
     elif name == "mme_test":
         run_mme_test()
+    elif name in ("earnings_calendar", "earncal"):
+        run_earnings_calendar()
     elif name == "mme_decide":
         from trading import mme_ft
         mme_ft.run_decide(force=True)
