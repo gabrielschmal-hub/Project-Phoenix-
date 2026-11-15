@@ -31,14 +31,18 @@ except Exception:                                      # pragma: no cover
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 RULES_PATH = os.path.join(ROOT, "controls", "mme_rules_v1.4.3.json")
+RULES_ALT = os.path.join(ROOT, "controls", "mme_rules_v1_4_3.json")      # the same file after an upload that renames dots
 OUT = os.environ.get("PHOENIX_OUTPUTS", os.path.join(ROOT, "outputs"))
 SCHEMA = 1
 
 
 # ============================================================ rules (pure functions, unit-tested)
 
-def load_rules(path=RULES_PATH):
-    return json.load(open(path))
+def load_rules(path=None):
+    for p in ([path] if path else [RULES_PATH, RULES_ALT]):
+        if p and os.path.exists(p):
+            return json.load(open(p))
+    raise FileNotFoundError("MME rule set not found in controls/ (mme_rules_v1.4.3.json or mme_rules_v1_4_3.json)")
 
 
 def floor_step(x, step=0.1):
@@ -365,6 +369,100 @@ class Data:
             raise RuntimeError(f"state HTTP {r.status_code}: {r.text[:200]}")
 
 
+# ============================================================ notifications (ntfy push, optional email)
+
+def notify(title, lines, priority="default", tags="chart_with_upwards_trend"):
+    """One message per event. Main channel: the Phoenix app's own web push. The row goes to push_outbox in Supabase
+    and the push function sends it to every phone/computer that turned notifications on in MME Test.
+    Optional extras: ntfy (MME_NTFY_TOPIC or NTFY_TOPIC) and email through ntfy (MME_EMAIL, commas for several)."""
+    if not lines:
+        return False
+    import requests
+    ok = False
+    url = (os.environ.get("SUPABASE_URL") or "").rstrip("/")
+    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("SUPABASE_SERVICE_KEY") or ""
+    if url and key:                        # the web app push
+        try:
+            r = requests.post(url + "/rest/v1/push_outbox", timeout=15,
+                              headers={"apikey": key, "Authorization": "Bearer " + key, "Content-Type": "application/json",
+                                       "Prefer": "return=minimal"},
+                              json={"title": title, "body": "\n".join(lines)[:1800], "url": "/?pane=mmetest#mission",
+                                    "source": "mme_test"})
+            ok = r.status_code < 300
+            if not ok:
+                print(f"[mme_ft] web push queue failed: {r.status_code} {r.text[:200]}")
+        except Exception as e:
+            print(f"[mme_ft] web push queue failed: {e}")
+    topic = os.environ.get("MME_NTFY_TOPIC") or os.environ.get("NTFY_TOPIC") or ""
+    if topic:
+        body = "\n".join(lines).encode("utf-8")
+        h = {"Title": title, "Priority": priority, "Tags": tags}
+        try:                               # the ntfy app, if a topic is set
+            requests.post("https://ntfy.sh/" + topic, data=body, headers=h, timeout=15); ok = True
+        except Exception as e:
+            print(f"[mme_ft] ntfy failed: {e}")
+        for addr in [a.strip() for a in (os.environ.get("MME_EMAIL") or "").split(",") if a.strip()]:
+            try:                           # email: ntfy takes one address per message
+                requests.post("https://ntfy.sh/" + topic, data=body, headers=dict(h, Email=addr), timeout=15)
+            except Exception as e:
+                print(f"[mme_ft] email failed: {e}")
+    return ok
+
+
+def _arms(rows):
+    return " ".join(sorted({r["arm"] for r in rows}))
+
+
+def decide_message(day, R):
+    """The push after the 10:00 ET decision: new orders grouped by name ($2,000 account shown), cuts, data failure."""
+    lines, n = [], 0
+    rows = day.get("_new") or []
+    by = {}
+    for r in rows:
+        if int(r["acct"]) == R["accounts"][0]:
+            by.setdefault(r["ticker"], []).append(r)
+    for tk, rs in sorted(by.items(), key=lambda kv: (-len(kv[1]), kv[0])):
+        r = next((x for x in rs if x["arm"] == "B"), rs[0]); e = r["entry"]
+        what = f"bought {r['fill']:.2f}" if r["status"] == "open" else f"limit {e['limit']:.2f} (band top, today only)"
+        tag = " \u00b7 random-dip benchmark" if e.get("kind") == "random" else ""
+        lines.append(f"{tk} \u00b7 {what} \u00b7 stop {r['stop']:.2f} \u00b7 {e['tier_pct']}% risk \u00b7 arms {_arms(rs)}{tag}")
+        n += 1
+    for c in day.get("cuts") or []:
+        lines.append("Cut: " + c)
+    spx = day.get("spx") or {}
+    if lines:
+        lines.append(f"SPX {spx.get('colour')} {spx.get('dist')} EM from its flip \u00b7 VIX {spx.get('vix')}")
+    if not day.get("data_ok"):
+        return ("MME test \u00b7 data check FAILED", [f"No setups today: map {day.get('map_date')}, SPX {spx.get('colour')}. See Health."], "high", "warning")
+    if not lines:
+        return None
+    title = f"MME test \u00b7 {n} new order{'s' if n != 1 else ''}" if n else "MME test \u00b7 regime cut"
+    return (("[dry run] " if day.get("dry") else "") + title, lines, "default", "chart_with_upwards_trend")
+
+
+def morning_message(ev, R, dry):
+    """The push after the morning review: limit fills and closed trades ($2,000 account), grouped by name."""
+    acct = R["accounts"][0]
+    fills, exits = {}, {}
+    for e in ev:
+        if int(e["acct"]) != acct:
+            continue
+        (fills if e["kind"] == "fill" else exits).setdefault((e["ticker"], e.get("why", "")), []).append(e)
+    lines = []
+    for (tk, _), es in sorted(fills.items()):
+        lines.append(f"{tk} \u00b7 limit filled {es[0]['px']:.2f} \u00b7 arms {_arms(es)}")
+    for (tk, why), es in sorted(exits.items()):
+        e = next((x for x in es if x["arm"] == "B"), es[0])
+        usd = ("\u2212" if e["pnl"] < 0 else "+") + f"${abs(e['pnl']):.2f}"
+        lines.append(f"{tk} \u00b7 {why} {e['px']:.2f} \u00b7 {e['r']:+.2f}R ({usd} on $2,000) \u00b7 arms {_arms(es)}")
+    if not lines:
+        return None
+    t = []
+    if fills: t.append(f"{len(fills)} filled")
+    if exits: t.append(f"{len(exits)} closed")
+    return (("[dry run] " if dry else "") + "MME test \u00b7 " + ", ".join(t), lines, "default", "white_check_mark")
+
+
 # ============================================================ helpers
 
 def et_10(day):
@@ -495,6 +593,7 @@ def morning(today, R=None, data=None, write=True):
     tks = sorted({t["ticker"] for t in trades})
     snaps = data.snaps(tks, prev) if tks else {}
     log = {"settled": [], "raised": [], "stops": [], "fills": [], "deviations": []}
+    ev = []                                                                       # for the push
     for t in trades:
         t["entry"] = t.get("entry") or {}; t["exits"] = t.get("exits") or []; t["stop_hist"] = t.get("stop_hist") or []
         t["marks"] = t.get("marks") or []; t["emlog"] = t.get("emlog") or []
@@ -511,6 +610,7 @@ def morning(today, R=None, data=None, write=True):
                     t["entry"]["filled_at"] = hit[0].isoformat()
                     patch.update({"status": "open", "fill": t["fill"], "entry": t["entry"]})
                     log["fills"].append(f"{t['arm']}/{t['acct']} {tk} limit filled at {t['fill']}")
+                    ev.append({"kind": "fill", "arm": t["arm"], "acct": t["acct"], "ticker": tk, "px": float(t["fill"])})
                     dec_t = hit[0]
                 else:
                     patch.update({"status": "cancelled", "exit_reason": "limit not reached (cancelled at the close)", "d_close": prev.isoformat()})
@@ -538,6 +638,8 @@ def morning(today, R=None, data=None, write=True):
             patch.update({"status": "closed", "exits": t["exits"], "pnl": pnl, "r": rr, "d_close": prev.isoformat(),
                           "exit_reason": f"{x['reason']} \u00b7 {level}"})
             log["stops"].append(f"{t['arm']}/{t['acct']} {tk} {x['reason']} at {x['px']}: {pnl:+.2f} ({rr}R)")
+            ev.append({"kind": "exit", "arm": t["arm"], "acct": t["acct"], "ticker": tk, "px": x["px"], "pnl": pnl, "r": rr or 0.0,
+                       "why": "gapped through the stop, sold" if "gap" in x["reason"] else f"stopped out ({level})"})
             if write:
                 data.update_trade(t["id"], patch)
             continue
@@ -576,6 +678,10 @@ def morning(today, R=None, data=None, write=True):
     if write:
         data.put_day(today, "morning", day, dry)
         write_contract(data, R, today, dry)
+        m = morning_message(ev, R, dry)
+        if m:
+            notify(*m)
+    day["_events"] = ev
     return day
 
 
@@ -760,6 +866,11 @@ def decide(today, R=None, data=None, write=True, now=None):
            "funnel": [{k: v for k, v in e.items() if k != "walls"} for e in funnel], "dry": dry}
     if write:
         data.put_day(today, "decide", day, dry)
+    day["_new"] = new_rows
+    if write:
+        m = decide_message(day, R)
+        if m:
+            notify(*m)
     return day
 
 
