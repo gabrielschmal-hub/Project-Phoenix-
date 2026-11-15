@@ -8830,6 +8830,8 @@ GEX_UNIVERSE = {
              "HOOD", "IBIT", "IBM", "INTC", "LRCX", "META", "DELL", "MRVL",
              "MSFT", "MU", "NVDA", "ORCL", "PLTR", "QCOM", "SNDK", "SNOW",
              "SOFI", "TSLA", "SPCX",
+             # QQQ sits on Elliott's map as a name (12 Nov 2026), so it is mapped too (Gabriel, 15 Nov)
+             "QQQ",
              "SPY"],
     "seed_source": "GEX Daily Briefing 2026-07-02 .. 2026-08-13 (22 briefings, 26 tickers each)",
     # kept as a ceiling only; the list above is 26 and there is no fill
@@ -10494,15 +10496,52 @@ def parse_gex_briefing(path):
     }
 
 
+# CBOE delayed quotes: ONE paced fetcher for every step (15 Nov 2026). gex_stocks sends ~150 requests a few steps
+# before mme_chains sends ~150 more; on 14 Nov CBOE answered 35 of them with HTTP 429 and forward-test trades went
+# unmarked. Every request now waits for the previous one (CBOE_MIN_GAP seconds, all steps together), and a 429, a
+# 5xx or a network error is retried after a growing pause (Retry-After when CBOE sends one).
+_CBOE_STATE = {"last": 0.0, "session": None, "n": 0, "n429": 0}
+
+
+def _cboe_get(symbol):
+    import os, time, requests
+    gap = float(os.environ.get("CBOE_MIN_GAP", "1.0"))
+    if _CBOE_STATE["session"] is None:
+        _CBOE_STATE["session"] = requests.Session()
+    url = f"https://cdn.cboe.com/api/global/delayed_quotes/options/{symbol}.json"
+    code, note = 0, ""
+    for wait in (20, 60, 120, None):
+        dt = time.time() - _CBOE_STATE["last"]
+        if dt < gap:
+            time.sleep(gap - dt)
+        try:
+            r = _CBOE_STATE["session"].get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=60)
+            code = r.status_code
+        except Exception as e:
+            r, code, note = None, 0, f"{type(e).__name__}"
+        _CBOE_STATE["last"] = time.time(); _CBOE_STATE["n"] += 1
+        if code == 200:
+            try:
+                return r.json(), "ok"
+            except Exception:
+                code, note = 0, "bad JSON"
+        if code == 429:
+            _CBOE_STATE["n429"] += 1
+        if wait is None or not (code in (0, 429) or code >= 500):
+            break
+        try:
+            ra = int((r.headers.get("Retry-After") if r is not None else 0) or 0)
+        except Exception:
+            ra = 0
+        time.sleep(max(wait, min(ra, 300)))
+    return None, (f"HTTP {code}" if code else (note or "no response"))
+
+
 def _cboe_chain(symbol):
     """Fetch and normalise one CBOE delayed option chain. Returns (spot, rows)."""
-    import requests, re
-    from datetime import datetime, date
-    url = f"https://cdn.cboe.com/api/global/delayed_quotes/options/{symbol}.json"
-    r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=60)
-    if r.status_code != 200:
-        return None, [], f"HTTP {r.status_code}"
-    j = r.json()
+    j, note = _cboe_get(symbol)
+    if j is None:
+        return None, [], note
     data = j.get("data") or {}
     chain = data.get("options") or []
     try:
@@ -10627,12 +10666,29 @@ def _mme_compute_from_chains(ch):
             # 200 points). Unchanged.
             flip, net_B, meta = mme_flip_net(contracts, spot, scrape, lo_mult=0.6, hi_mult=1.4, n_pts=200, nearest=True)
             walls = mme_walls(contracts, spot, grid=_stock_grid(spot), prox_pct=0.15)
+            # 15 Nov 2026: no crossing inside the standard window. Before declaring "no flip", run the same function on
+            # the whole stored chain (strikes to +-60%, all expiries, as in Elliott's spec: no DTE cap) with the sweep
+            # widened to match. SNDK and DELL lost Thursday's flips on Friday only because a 10% fall pulled the +-35%
+            # strike cut below the calls that made them. Names with a flip in the standard window never get here.
+            flip_wide = False
+            if flip is None and v.get("rows_x"):
+                cx = list(contracts)
+                for r in v["rows_x"]:
+                    try:
+                        cx.append({"expiry": datetime.strptime(r[0], "%Y-%m-%d").date(), "cp": r[1], "K": float(r[2]),
+                                   "oi": float(r[3]), "iv": float(r[4]), "gamma_vendor": float(r[5])})
+                    except Exception:
+                        continue
+                fx, _nx, _mx = mme_flip_net(cx, spot, scrape, lo_mult=0.4, hi_mult=1.6, n_pts=300, nearest=True)
+                if fx is not None:
+                    flip, flip_wide = fx, True
             # No crossing in the sweep: net gamma has one sign across the range. Record which (11 Nov 2026), so the
             # name is labelled by its real regime; this is not a second flip, only the side the flip lies beyond.
             flip_side = flip_bound = None
             if flip is None:
                 flip_side = "above" if (net_B or 0) < 0 else "below"
-                flip_bound = round(spot * 1.4, 2) if flip_side == "above" else round(spot * 0.6, 2)
+                wide_x = bool(v.get("rows_x"))
+                flip_bound = round(spot * (1.6 if wide_x else 1.4), 2) if flip_side == "above" else round(spot * (0.4 if wide_x else 0.6), 2)
         except Exception as e:
             print(f"[mmemap] {tk}: compute failed ({e})"); continue
         # expected move: ATM IV of the nearest expiry with >= 3 business days
@@ -10652,6 +10708,7 @@ def _mme_compute_from_chains(ch):
         roll_f = sum(dgex(c) for c in contracts if c["expiry"] == fri) / 1e9 if fri else None
         roll_o = sum(dgex(c) for c in contracts if c["expiry"] == opex) / 1e9 if opex else None
         out[tk] = {"spot": spot, "flip": flip, "net_gex_B": net_B, "em": em, "flip_side": flip_side, "flip_bound": flip_bound,
+                   "flip_wide": flip_wide,
                    "resist": walls.get("call_wall"), "support": walls.get("put_wall"),
                    "resist_tiered": [x.get("strike") if isinstance(x, dict) else x for x in (walls.get("call_tiered") or [])][:3],
                    "support_tiered": [x.get("strike") if isinstance(x, dict) else x for x in (walls.get("put_tiered") or [])][:3],
@@ -10672,10 +10729,10 @@ def _mme_read(r):
         side, bound = r.get("flip_side"), r.get("flip_bound")
         ext_s = ""
         if side == "above":
-            return (f"{tk} closed ${f(spot)}. Dealers are short gamma at every price within \u00b140%: no flip in range, "
+            return (f"{tk} closed ${f(spot)}. Dealers are short gamma at every price up to ${f(bound)}: no flip in range, "
                     f"it would sit above ${f(bound)}. Treat it as negative gamma.{ext_s} Walls: support ${g(sup)}, resistance ${g(res)}.")
         if side == "below":
-            return (f"{tk} closed ${f(spot)}. Dealers are long gamma at every price within \u00b140%: no flip in range, "
+            return (f"{tk} closed ${f(spot)}. Dealers are long gamma at every price down to ${f(bound)}: no flip in range, "
                     f"it would sit below ${f(bound)}. Positive gamma throughout.{ext_s} Walls: support ${g(sup)}, resistance ${g(res)}.")
         return f"{tk} closed ${f(spot)}. No flip in range \u2014 the chain is one-sided, so the hedging has a single lean across the whole range."
     if st == "ON FLIP":
@@ -10845,7 +10902,7 @@ def run_mme_map():
         names += [str(t.get("ticker")).upper() for t in _load_trades() if t.get("status") in ("open", "plan")]
     except Exception:
         pass
-    names = [t for t in dict.fromkeys(names) if t and t not in ("SPY", "QQQ", "IWM")]
+    names = [t for t in dict.fromkeys(names) if t and t not in ("SPY", "IWM")]   # QQQ is on Elliott's map (15 Nov 2026)
     up_rows, up_meta = _mme_uploaded()
     today = datetime.now(timezone.utc).date()
     up_fresh = False
@@ -10860,6 +10917,15 @@ def run_mme_map():
     try:
         ch = _ic_load_chains() or json.load(open(os.path.join(OUTPUTS_DIR, "mme_chains.json")))
         chains_date = ch.get("close_of") or ch.get("date")
+        # the flip fallback rows (rows_x) live in mme_chains.json only; attach them for the same day's chain
+        try:
+            _mc = json.load(open(os.path.join(OUTPUTS_DIR, "mme_chains.json")))
+            if str(_mc.get("close_of") or _mc.get("date")) == str(chains_date):
+                for _t, _v in (_mc.get("names") or {}).items():
+                    if _v.get("rows_x") and _t in (ch.get("names") or {}):
+                        ch["names"][_t]["rows_x"] = _v["rows_x"]
+        except Exception as _e:
+            print(f"[mmemap] wide rows not attached ({_e})")
         computed = _mme_compute_from_chains(ch)
     except Exception as e:
         print(f"[mmemap] no chain file to compute from ({e})")
@@ -10883,8 +10949,11 @@ def run_mme_map():
             r.update({"src": "phoenix", "em_src": "atm_iv" if c["em"] else "1.5% stand-in", "net_gex_B": c["net_gex_B"],
                       "support_tiered": c["support_tiered"], "resist_tiered": c["resist_tiered"],
                       "rolloff_friday_B": c["rolloff_friday_B"], "rolloff_opex_B": c["rolloff_opex_B"],
-                      "contracts": c["contracts"], "profile": c["profile"]})
+                      "contracts": c["contracts"], "profile": c["profile"], "flip_wide": bool(c.get("flip_wide"))})
             r["read"] = _mme_read(r)
+            if c.get("flip_wide"):
+                r["read"] += (" The flip comes from the wider window (strikes within \u00b160%, all expiries): the standard "
+                              "\u00b135% window has no crossing for this name today.")
             if tk not in names:
                 # index ETFs and the options screen's extra names: priced for the screen, kept off Elliott's map.
                 # Only the index ETFs keep their gamma profile — the rest would add a megabyte nobody draws.
@@ -10939,8 +11008,9 @@ def run_mme_map():
     write_json("mme_map", {
         "asof": _now(), "date": (up_meta or {}).get("date") if up_fresh else (chains_date or str(today)),
         "source": ((up_meta or {}).get("source") if up_fresh else None) or (
-            f"Phoenix, computed on the {chains_date} chain: CBOE delayed, all expiries to 180d, strikes within \u00b115%, "
-            "business-day T/262, sticky-strike BS gamma, dealers long calls / short puts, 120-pt 0.8-1.2x flip sweep, "
+            f"Phoenix, computed on the {chains_date} chain: CBOE delayed, all expiries to 180d, strikes within \u00b135%, "
+            "business-day T/262, sticky-strike BS gamma, dealers long calls / short puts, 200-pt 0.6-1.4x flip sweep "
+            "(crossing nearest spot; if none, strikes within \u00b160% and all expiries, 0.4-1.6x), "
             "walls = closest round strike at >=25% of side max (vendor gamma), EM from ATM IV of nearest expiry >=3bd"
             if computed else "Phoenix per-ticker dealer reads (CBOE chain)"),
         "source_file": (up_meta or {}).get("path") if up_fresh else None,
@@ -11002,8 +11072,10 @@ def run_mme_chains(max_dte=180, band=0.35):
         pass
     # every name with an open or pending forward-test trade (coach board, earnings grenade...) must be fetched,
     # or the trade is never marked (13 Nov 2026)
+    fwd = []
     try:
-        extra += [r["ticker"] for r in (_sb_get("ic_forward", {"status": "in.(open,pending)", "select": "ticker"}, limit=5000) or [])]
+        fwd = [r["ticker"] for r in (_sb_get("ic_forward", {"status": "in.(open,pending)", "select": "ticker"}, limit=5000) or [])]
+        extra += fwd
     except Exception:
         pass
     for t in extra:
@@ -11011,35 +11083,60 @@ def run_mme_chains(max_dte=180, band=0.35):
             names.append(t); uni.setdefault(t, "stock")
     today = datetime.now(timezone.utc).date()
     out, fails = {}, []
+    wide = {}            # MME names only: strikes from 35% to 60% away and expiries past 180 days (flip fallback)
     t0 = time.time()
-    for tk in names:
+    # the names the forward tests stand on go first: open/pending option trades, then the MME map, then the rest
+    prio = set(fwd) | mme_set
+    queue = [t for t in names if t in set(fwd)] + [t for t in names if t in mme_set and t not in set(fwd)] + \
+            [t for t in names if t not in prio]
+    retry, fail_note = [], {}
+    def _fetch(tk):
         try:
-            spot, chain, note = _cboe_chain(tk)
+            return _cboe_chain(tk)
         except Exception as e:
-            spot, chain, note = None, [], f"{type(e).__name__}: {e}"
-        if not spot or not chain:
-            fails.append(f"{tk}: {note}"); time.sleep(0.5); continue
-        rows, skipped = [], 0
-        for c in chain:
-            m = _OSI.search((c.get("option") or c.get("symbol") or "").replace(" ", ""))
-            if not m:
-                skipped += 1; continue
-            try:
-                expiry = datetime.strptime(m.group(2), "%y%m%d").date()
-                K = int(m.group(4)) / 1000.0
-                oi = float(c.get("open_interest") or 0)
-                iv = float(c.get("iv") or 0)
-                gm = float(c.get("gamma") or 0)
-                bid = float(c.get("bid") or 0); ask = float(c.get("ask") or 0)
-            except Exception:
-                skipped += 1; continue
-            dte = (expiry - today).days
-            if dte <= 0 or dte > max_dte or abs(K / spot - 1) > band or oi <= 0:
-                skipped += 1; continue
-            rows.append([str(expiry), m.group(3), K, int(oi), round(iv, 4), round(gm, 6), round(bid, 2), round(ask, 2)])
-        out[tk] = {"spot": round(spot, 2), "contracts": len(rows), "skipped": skipped,
-                   "expiries": sorted({r[0] for r in rows}), "rows": rows}
-        time.sleep(0.4)
+            return None, [], f"{type(e).__name__}: {e}"
+    for _pass in (1, 2):
+        todo = queue if _pass == 1 else retry
+        if _pass == 2:
+            if not retry:
+                break
+            print(f"[chains] second pass for {len(retry)} names after a 90s pause: {','.join(retry[:12])}")
+            time.sleep(90)
+            retry = []
+        for tk in todo:
+          spot, chain, note = _fetch(tk)
+          if not spot or not chain:
+            if _pass == 1 and (note.startswith("HTTP 429") or note.startswith("HTTP 5") or note in ("no response", "bad JSON")
+                               or "Error" in note or "Timeout" in note):
+                retry.append(tk)
+            fail_note[tk] = note
+            continue
+          fail_note.pop(tk, None)
+          rows, skipped, rows_x = [], 0, []
+          for c in chain:
+              m = _OSI.search((c.get("option") or c.get("symbol") or "").replace(" ", ""))
+              if not m:
+                  skipped += 1; continue
+              try:
+                  expiry = datetime.strptime(m.group(2), "%y%m%d").date()
+                  K = int(m.group(4)) / 1000.0
+                  oi = float(c.get("open_interest") or 0)
+                  iv = float(c.get("iv") or 0)
+                  gm = float(c.get("gamma") or 0)
+                  bid = float(c.get("bid") or 0); ask = float(c.get("ask") or 0)
+              except Exception:
+                  skipped += 1; continue
+              dte = (expiry - today).days
+              if dte <= 0 or dte > max_dte or abs(K / spot - 1) > band or oi <= 0:
+                  if tk in mme_set and dte > 0 and oi > 0 and abs(K / spot - 1) <= 0.60:
+                      rows_x.append([str(expiry), m.group(3), K, int(oi), round(iv, 4), round(gm, 6)])
+                  skipped += 1; continue
+              rows.append([str(expiry), m.group(3), K, int(oi), round(iv, 4), round(gm, 6), round(bid, 2), round(ask, 2)])
+          out[tk] = {"spot": round(spot, 2), "contracts": len(rows), "skipped": skipped,
+                     "expiries": sorted({r[0] for r in rows}), "rows": rows}
+          if rows_x:
+              wide[tk] = rows_x
+    fails = [f"{t}: {n}" for t, n in fail_note.items()]
     groups = {t: ("etf" if t in IC.get("extra", []) else uni.get(t, "mme")) for t in out}
     # 1. the full set for the options screen, record and dealer map — this run only, not committed
     try:
@@ -11068,12 +11165,13 @@ def run_mme_chains(max_dte=180, band=0.35):
     except Exception as e:
         print(f"[chains] lab chain files not written: {e}")
     out_all = out
-    out = {t: v for t, v in out.items() if t in mme_set}               # mme_chains.json stays the MME set
+    out = {t: (dict(v, rows_x=wide[t]) if t in wide else v) for t, v in out.items() if t in mme_set}   # mme_chains.json stays the MME set
     write_json("mme_chains", {
         "asof": _now(), "date": str(today), "close_of": str(today),
         "source": "CBOE delayed quotes (cdn.cboe.com), one request per name",
         "row": ["expiry", "cp", "strike", "open_interest", "iv", "gamma_vendor", "bid", "ask"],
-        "filters": {"max_dte": max_dte, "strike_band": band, "oi_min": 1},
+        "filters": {"max_dte": max_dte, "strike_band": band, "oi_min": 1,
+                    "rows_x": "flip fallback only: strikes 35-60% away and expiries past max_dte, used when rows give no flip"},
         "method_note": "Compute with the MME method: business-day T/262, sticky-strike BS gamma, dealers long calls / "
                        "short puts, 120-pt 0.8-1.2x flip sweep; walls from gamma_vendor aggregated by strike at spot, "
                        "closest strike at or above 25% of the side maximum.",
@@ -11081,7 +11179,12 @@ def run_mme_chains(max_dte=180, band=0.35):
     n_ok = len(out_all); n_rows = sum(v["contracts"] for v in out_all.values())
     print(f"[chains] {n_ok}/{len(names)} names, {n_rows} contracts, {len(fails)} failed in {int(time.time()-t0)}s"
           + (f" — {'; '.join(fails[:4])}" if fails else ""))
-    sb_heartbeat("mme_chains", n_ok >= max(5, len(names) // 2), f"{n_ok}/{len(names)} names · {n_rows} contracts · failed {len(fails)}")
+    miss_fwd = sorted({t for t in fwd if t not in out_all})
+    print(f"[chains] CBOE requests this run {_CBOE_STATE['n']}, HTTP 429 answers {_CBOE_STATE['n429']}"
+          + (f" · forward-test names still missing: {','.join(miss_fwd)}" if miss_fwd else " · every forward-test name fetched"))
+    sb_heartbeat("mme_chains", n_ok >= max(5, len(names) // 2) and not miss_fwd,
+                 f"{n_ok}/{len(names)} names · {n_rows} contracts · failed {len(fails)} · 429s {_CBOE_STATE['n429']}"
+                 + (f" · TEST NAMES MISSING {','.join(miss_fwd)}" if miss_fwd else ""))
     return out
 
 
