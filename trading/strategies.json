@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "about": "Phoenix 2.0 strategy registry (Trading module): every strategy as a named, versioned thing with its rules file and status.",
+  "strategies": [
+    {"name": "MME walls (long only)", "key": "mme", "version": "1.4.3", "protocol": "FT-1.3",
+     "rules": "controls/mme_rules_v1.4.3.json", "engine": "trading/mme_ft.py",
+     "status": "forward test FT-1.3, approved 15 Nov 2026, live from 2026-11-16", "store": "Supabase mme_ft_trades, mme_ft_days, mme_ft_state"},
+    {"name": "Iron condor tournament", "key": "ic", "version": "Rules A / Rules B", "rules": "in phoenix.py (IC dict, run_ic_screen)",
+     "engine": "phoenix.py run_ic_*", "status": "forward test, frozen until the December readout", "store": "Supabase ic_forward"}
+  ]
+}
