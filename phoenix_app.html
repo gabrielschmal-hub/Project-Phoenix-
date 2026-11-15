@@ -12009,7 +12009,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         return sub.unsubscribe().then(function(){ return pxRpc("px_push_unsubscribe",{p_endpoint:ep}); });
       }).then(function(){ pxPushCard("Turned off for this device."); }).catch(fail);
     } else if(a==="test"){
-      pxRpc("px_push_test",{}).then(function(){ pxPushCard("Test sent to every device that has notifications on. It should arrive within a few seconds."); }).catch(fail);
+      pxSwReady().then(function(r){ return r.pushManager.getSubscription(); }).then(function(sub){
+        return pxRpc("px_push_test",{p_endpoint:sub?sub.endpoint:null});
+      }).then(function(){ pxPushCard("Test sent to this device only. It should arrive within a few seconds."); }).catch(fail);
     }
   }
   function mtFill(){
