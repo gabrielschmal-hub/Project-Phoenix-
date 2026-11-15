@@ -1245,6 +1245,29 @@
   .opt-det summary span{font-weight:400;text-transform:none;letter-spacing:0;color:var(--inkFade)}
   .opt-skip{font-size:12.5px;line-height:1.6;margin-top:8px;columns:2} .opt-skip b{font-family:var(--mono)}
   @media(max-width:700px){.opt-hero .opt-h{font-size:18px}.opt-kpi{grid-template-columns:repeat(2,1fr)}.opt-skip{columns:1}}
+  /* ---- MME Test tab ---- */
+  #mcPaneMt{max-width:100%;overflow-x:hidden}
+  .mt-today{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:6px 0 4px}
+  .mt-today>div{padding:9px 12px;border-right:1px solid var(--line);font-size:12.5px;color:var(--inkFade)} .mt-today>div:last-child{border-right:0}
+  .mt-today span{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+  .mt-today b{color:var(--ink);font-size:15px;margin-right:4px} .mt-today b.pos,.mt .pos{color:var(--green)} .mt-today b.neg,.mt .neg{color:var(--red)} .mt-today b.amb{color:#E0B341}
+  .mt-arms{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+  .mt-arm{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card)} .mt-arm.key{border-color:var(--gold);box-shadow:inset 3px 0 0 var(--gold)}
+  .mt-ak{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink);font-weight:700} .mt-ak i,.mt-leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:0}
+  .mt-av{font-size:20px;font-weight:700;margin-top:4px;font-family:var(--mono)} .mt-av small{font-size:11px;color:var(--inkFade);font-weight:400}
+  .mt-am{font-size:12px;color:var(--ink);margin-top:2px} .mt-ar{font-size:11px;color:var(--inkFade);margin-top:2px}
+  .mt-n{display:inline-block;background:var(--card2);border:1px solid var(--line2);border-radius:999px;padding:0 8px;color:var(--ink);font-size:11px}
+  .mt-svg{width:100%;height:auto;display:block;margin:6px 0 2px} .mt-svg text{fill:var(--inkFade);font-size:10.5px;font-family:var(--mono)}
+  .mt-leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-family:var(--mono);font-size:11.5px;color:var(--ink);margin:2px 2px 8px}
+  .mt .opt-tbl .r{cursor:default} .mt .opt-tbl .r[data-mt]{cursor:pointer}
+  .opt-tbl.mt-op .hd,.opt-tbl.mt-op .r{grid-template-columns:76px 64px 88px 52px 96px 70px minmax(260px,2fr);min-width:760px}
+  .opt-tbl.mt-cl .hd,.opt-tbl.mt-cl .r{grid-template-columns:76px 120px 96px 70px minmax(240px,2fr);min-width:640px}
+  .opt-tbl.mt-fn .hd,.opt-tbl.mt-fn .r{grid-template-columns:62px 72px 64px 72px 64px minmax(170px,1.4fr) minmax(150px,1.2fr) 140px;min-width:860px}
+  .opt-tbl.mt-em .hd,.opt-tbl.mt-em .r{grid-template-columns:70px 70px 44px 90px 100px 90px;min-width:480px}
+  .opt-tbl.mt-pr .hd,.opt-tbl.mt-pr .r{grid-template-columns:110px repeat(7,minmax(78px,1fr));min-width:680px}
+  .opt-tbl .why{font-family:var(--sans,inherit);font-size:12px;color:var(--inkFade);white-space:normal;line-height:1.35}
+  .mt-x{font-size:12.5px;line-height:1.55;color:var(--ink);background:var(--card2);border-left:3px solid var(--gold);padding:8px 12px;margin:0 0 6px}
+  @media(max-width:700px){.mt-today{grid-template-columns:repeat(2,1fr)}.mt-today>div{border-bottom:1px solid var(--line)}.mt-arms{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.mt-arm{padding:9px 10px}.mt-av{font-size:16px}.mt-av small{display:block}.mt-am,.mt-ar{font-size:11px}}
   .ic-det{padding:10px 14px 14px;background:var(--card2);border-bottom:1px solid var(--line)}
   .ic-facts{font-size:12.5px;line-height:1.6;margin-bottom:8px} .ic-sub{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--inkFade);margin:10px 0 4px}
   .ic-lad .lr{display:grid;grid-template-columns:70px minmax(220px,1.6fr) 80px 120px 80px;gap:8px;padding:5px 4px;border-bottom:1px dashed var(--line2);font-size:12.5px;min-width:600px}
@@ -11903,28 +11926,177 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       host.querySelectorAll("[data-tk]").forEach(function(n){ n.style.cursor="pointer"; n.onclick=function(){ if(typeof trOpenTicker==="function") trOpenTicker(this.dataset.tk); }; });
     }).catch(function(){ host.innerHTML='<div class="ed-note">The auto brief could not be loaded.</div>'; });
   }
+  // ---- MME Test tab (Phoenix 2.0, Trading module): the MME forward test FT-1.3, read from Supabase mme_ft_* ----
+  // Engine trading/mme_ft.py, rules controls/mme_rules_v1.4.3.json. This tab only reads; nothing here decides.
+  var MT={acct:"2000", per:"day", data:null};
+  var MT_ARMS=[["A","Rules as written","Primary control · Q1"],["B","Trailing exit","Primary test, live intent · Q2"],
+               ["C","SPX any colour","Shadow · Q3"],["D","Earnings rule off","Shadow · Q4"],["E","Random dip","Benchmark · Q5"],
+               ["G","Min risk $10","Shadow · Q6"],["H","Hold through RED","Shadow · Q8"]];
+  var MT_COL={A:"#9AA7B4",B:"#D37736",C:"#4A86D0",D:"#B07CD8",E:"#6C7A89",G:"#3FBF77",H:"#E0B341",SPY:"#E7EEF6",QQQ:"#7FA7C9"};
+  function mtE(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function mtUsd(v,sign){ if(v==null||isNaN(v)) return "—"; var s=Math.abs(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); return (v<0?"−$":(sign&&v>0?"+$":"$"))+s; }
+  function mtCls(v){ return v>0?"pos":(v<0?"neg":""); }
+  function mtD(d){ if(!d) return "—"; var t=new Date(String(d).slice(0,10)+"T12:00:00Z"); return t.toLocaleDateString("en-GB",{day:"numeric",month:"short"}); }
+  function mtFill(){
+    var host=document.getElementById("mtPane"); if(!host) return;
+    host.innerHTML='<div class="ed-note">Loading the MME forward test…</div>';
+    Promise.all([optRowsAll("/rest/v1/mme_ft_trades?select=*&order=id.asc"),
+                 optRowsAll("/rest/v1/mme_ft_days?select=d,kind,dry,data&order=d.asc"),
+                 getJSON("mme_ft").catch(function(){ return null; })]).then(function(res){
+      var trades=res[0]||[], days=res[1]||[], live=trades.some(function(t){ return !t.dry; })||days.some(function(d){ return !d.dry; });
+      var use=function(r){ return live?!r.dry:true; };
+      MT.data={trades:trades.filter(use), days:days.filter(use), live:live, contract:res[2]};
+      mtRender();
+    }).catch(function(e){ host.innerHTML='<div class="ed-note">The MME test tables could not be read ('+mtE(e&&e.message)+'). Sign in, or the test has not run yet.</div>'; });
+  }
+  function mtEquitySeries(days){
+    return days.filter(function(d){ return d.kind==="morning"&&d.data&&d.data.equity; }).map(function(d){ return {d:d.d, eq:d.data.equity, bench:d.data.bench||{}}; });
+  }
+  function mtRender(){
+    var host=document.getElementById("mtPane"), D=MT.data, A=MT.acct, acct=+A;
+    var dec=D.days.filter(function(d){ return d.kind==="decide"; }), last=dec.length?dec[dec.length-1]:null, L=last&&last.data||{};
+    var mor=D.days.filter(function(d){ return d.kind==="morning"; }), lastM=mor.length?mor[mor.length-1]:null;
+    var ser=mtEquitySeries(D.days), cur=ser.length?ser[ser.length-1].eq:{};
+    var start=(MT.data.contract&&MT.data.contract.start)||"2026-11-16", nDays=dec.filter(function(d){ return d.d>=start&&!d.dry; }).length;
+    var spx=L.spx||{}, col=spx.colour||"—";
+    var status=D.live?('<b>Live</b> · trading day '+nDays+' of at least 60 (and 30 closed Arm B trades)')
+                     :('<b>Not started</b> · the test starts Mon 16 Nov 2026 with the first 10:00 ET decision; rows written before then are dry runs and never count.');
+    // arm cards
+    var cards=MT_ARMS.map(function(a){
+      var e=(cur[a[0]]||{})[A]||{equity:acct,realised:0,open:0,n_open:0,n_closed:0,sum_r:0,wins:0};
+      var net=e.equity-acct;
+      return '<div class="mt-arm'+(a[0]==="B"?" key":"")+'"><div class="mt-ak"><i style="background:'+MT_COL[a[0]]+'"></i>'+a[0]+' · '+mtE(a[1])+'</div>'+
+        '<div class="mt-av '+mtCls(net)+'">'+mtUsd(net,true)+' <small>'+(net/acct*100).toFixed(2)+'%</small></div>'+
+        '<div class="mt-am">'+e.n_open+' open · '+e.n_closed+' closed'+(e.n_closed?' · '+e.wins+' won · '+(e.sum_r>0?"+":"")+e.sum_r+'R':'')+'</div><div class="mt-ar">'+mtE(a[2])+'</div></div>';
+    }).join("");
+    // today strip
+    var today='<div class="mt-today">'+
+      '<div><span>SPX at 10:00 ET</span><b class="mt-c '+(col==="GREEN"?"pos":(col==="RED"?"neg":"amb"))+'">'+mtE(col)+'</b>'+(spx.dist!=null?' '+spx.dist+' EM from its flip':'')+'</div>'+
+      '<div><span>Last decision</span><b>'+mtD(last&&last.d)+'</b>'+(L.decided_at?'':'')+'</div>'+
+      '<div><span>Data check</span><b class="'+(L.data_ok===false?"neg":"pos")+'">'+(last?(L.data_ok?"OK":"FAILED"):"—")+'</b>'+(L.map_date?' map '+mtD(L.map_date):'')+'</div>'+
+      '<div><span>Orders placed</span><b>'+((L.placed||[]).length)+'</b>'+(L.r06_blocked?' · R06 expiry week':'')+'</div>'+
+      '<div><span>Regime cuts</span><b>'+((L.cuts||[]).length)+'</b></div></div>';
+    // P&L chart
+    var chart=mtChart(ser,A);
+    // period table
+    var per=mtPeriods(ser,A,MT.per);
+    // trades
+    var mine=D.trades.filter(function(t){ return String(t.acct)===A; });
+    var open=mine.filter(function(t){ return t.status==="open"||t.status==="pending"; });
+    var closed=mine.filter(function(t){ return t.status==="closed"; }).sort(function(a,b){ return String(b.d_close).localeCompare(String(a.d_close)); });
+    var oRows=open.map(function(t){ var e=t.entry||{}, m=(t.marks||[]).slice(-1)[0], q=+t.qty, rps=(+t.fill||e.limit)-e.stop0;
+        var rnow=(m&&rps)?((m.close-(+t.fill))/rps):null, sh=(t.stop_hist||[]).slice(-1)[0];
+        return '<div class="r" data-mt="'+t.id+'"><span class="tk">'+mtE(t.ticker)+'<i>arm '+t.arm+'</i></span><span>'+mtD(t.d_open)+'</span>'+
+          '<span>'+(t.status==="pending"?'limit '+e.limit:(+t.fill).toFixed(2))+'</span><span>'+q+'</span>'+
+          '<span>'+(+t.stop).toFixed(2)+(sh?' <i>'+sh.rule+'</i>':'')+'</span><span class="'+mtCls(rnow)+'">'+(rnow==null?'—':(rnow>0?'+':'')+rnow.toFixed(2)+'R')+'</span>'+
+          '<span class="why">'+mtE(e.why||"")+'</span></div>'; }).join("");
+    var cRows=closed.map(function(t){
+        return '<div class="r" data-mt="'+t.id+'"><span class="tk">'+mtE(t.ticker)+'<i>arm '+t.arm+'</i></span><span>'+mtD(t.d_open)+' → '+mtD(t.d_close)+'</span>'+
+          '<span class="'+mtCls(+t.pnl)+'">'+mtUsd(+t.pnl,true)+'</span><span class="'+mtCls(+t.r)+'">'+(t.r==null?'—':((+t.r>0?'+':'')+(+t.r).toFixed(2)+'R'))+'</span>'+
+          '<span class="why">'+mtE(t.exit_reason||"")+'</span></div>'; }).join("");
+    // funnel
+    var F=(L.funnel||[]), passN=F.filter(function(e){ return e.blocked==null&&e.checks; }).length;
+    var fRows=F.map(function(e){ var c=e.checks||{};
+        var blk=e.blocked||"", cls=blk?"neg":"pos";
+        return '<div class="r"><span class="tk">'+mtE(e.ticker)+'</span><span>'+(e.price!=null?(+e.price).toFixed(2):'—')+'</span><span>'+(e.dist_em!=null?e.dist_em:'—')+'</span>'+
+          '<span>'+(e.spacing_em!=null?e.spacing_em:'—')+'</span><span>'+mtE(e.wall||"—")+'</span><span>'+mtE(e.band||e.note||"")+'</span>'+
+          '<span>'+mtE(e.earnings||"")+'</span><span class="'+cls+'">'+(blk?'blocked: '+blk:'passes')+(e.blocked_c==null&&blk?' <i>(C passes)</i>':'')+'</span></div>'; }).join("");
+    // EM log + deviations
+    var emRows=[]; D.trades.filter(function(t){ return String(t.acct)===A; }).forEach(function(t){ (t.emlog||[]).forEach(function(x){ emRows.push([x.d,t.ticker,t.arm,x.widen_pct,x.em_pct_price,x.em_src]); }); });
+    emRows.sort(function(a,b){ return String(b[0]).localeCompare(String(a[0])); });
+    var devs=[]; mor.forEach(function(m){ ((m.data&&m.data.log&&m.data.log.deviations)||[]).forEach(function(x){ devs.push(mtD(m.d)+': '+x); }); });
+    dec.forEach(function(d){ if(d.data&&d.data.data_ok===false) devs.push(mtD(d.d)+': data check failed (map '+mtE(d.data.map_date)+'); no setups that day'); });
+    host.innerHTML='<div class="opt mt">'+
+      '<div class="opt-hero"><div class="opt-k">MME forward test · FT-1.3 · rules v1.4.3</div>'+
+        '<div class="opt-h">Buying the heaviest support wall, measured before any money is risked</div>'+
+        '<div class="opt-sub">'+status+'</div></div>'+
+      '<div class="opt-meta">Seven arms on the same daily Phoenix snapshot · decisions at 10:00 ET from Phoenix’s 5-minute prices · stops reviewed each morning with that day’s walls and EM</div>'+
+      today+
+      '<div class="opt-grp" id="mtAcct"><button data-a="2000"'+(A==="2000"?' class="on"':'')+'>$2,000 account</button><button data-a="10000"'+(A==="10000"?' class="on"':'')+'>$10,000 account</button></div>'+
+      '<div class="opt-sec"><div class="opt-sk"><b>1</b> The arms</div><div class="mt-arms">'+cards+'</div></div>'+
+      '<div class="opt-sec"><div class="opt-sk"><b>2</b> P&amp;L by day, week and month</div>'+chart+
+        '<div class="opt-grp" id="mtPer"><button data-p="day"'+(MT.per==="day"?' class="on"':'')+'>Day</button><button data-p="week"'+(MT.per==="week"?' class="on"':'')+'>Week</button><button data-p="month"'+(MT.per==="month"?' class="on"':'')+'>Month</button></div>'+per+'</div>'+
+      '<div class="opt-sec"><div class="opt-sk"><b>3</b> Open trades <span class="mt-n">'+open.length+'</span></div>'+
+        (open.length?'<div class="opt-tbl mt-op"><div class="hd"><span>Name</span><span>Opened</span><span>Fill</span><span>Qty</span><span>Stop</span><span>Now</span><span>Why it was bought</span></div>'+oRows+'</div>'
+                    :'<div class="ed-note">No open trades'+(L.spx&&L.spx.colour&&L.spx.colour!=="GREEN"?' — SPX is '+mtE(L.spx.colour)+', so only Arm C can enter.':'.')+'</div>')+'</div>'+
+      '<div class="opt-sec"><div class="opt-sk"><b>4</b> Closed trades <span class="mt-n">'+closed.length+'</span></div>'+
+        (closed.length?'<div class="opt-tbl mt-cl"><div class="hd"><span>Name</span><span>Held</span><span>P&amp;L</span><span>R</span><span>Exit</span></div>'+cRows+'</div>':'<div class="ed-note">No closed trades yet.</div>')+'</div>'+
+      '<details class="opt-det"><summary>Today’s funnel <span>· '+F.length+' names checked at 10:00 ET · '+passN+' pass every rule</span></summary>'+
+        (F.length?'<div class="opt-tbl mt-fn"><div class="hd"><span>Name</span><span>10:00</span><span>Flip EM</span><span>Walls EM</span><span>Wall</span><span>Band</span><span>Earnings</span><span>Result</span></div>'+fRows+'</div>':'<div class="ed-note">No decision recorded yet.</div>')+
+        '<div class="opt-legend"><b>Flip EM:</b> distance above the flip in expected moves (R03 needs more than 1) · <b>Walls EM:</b> the smallest gap between the 3 walls nearest the price (R04 needs 1) · <b>Wall:</b> the heaviest support wall, the R07 entry level · R00 data, R01 SPX, R05 earnings, R06 expiry week</div></details>'+
+      '<details class="opt-det"><summary>EM log (R12, log only) <span>· '+emRows.length+' rows</span></summary>'+
+        (emRows.length?'<div class="opt-tbl mt-em"><div class="hd"><span>Day</span><span>Name</span><span>Arm</span><span>EM vs entry</span><span>EM % of price</span><span>Source</span></div>'+
+          emRows.slice(0,200).map(function(x){ return '<div class="r"><span>'+mtD(x[0])+'</span><span class="tk">'+mtE(x[1])+'</span><span>'+x[2]+'</span><span class="'+(x[3]>=25?"neg":"")+'">'+(x[3]>0?"+":"")+x[3]+'%</span><span>'+x[4]+'%</span><span>'+mtE(x[5])+'</span></div>'; }).join("")+'</div>'
+          :'<div class="ed-note">Rows appear once trades are open.</div>')+'</details>'+
+      '<details class="opt-det"><summary>Deviations and data days <span>· '+devs.length+'</span></summary><div class="opt-legend">'+(devs.length?devs.slice(-60).reverse().map(mtE).join("<br>"):"None so far.")+'</div></details>'+
+      '<div class="opt-meta">Source: Supabase mme_ft_trades and mme_ft_days, written by trading/mme_ft.py'+(MT.data.contract&&MT.data.contract.asof?' · contract file '+mtE(MT.data.contract.asof):'')+' · every price and level comes from Phoenix (CBOE chains, 5-minute prices, daily bars)</div>'+
+      '</div>';
+    host.querySelectorAll("#mtAcct button").forEach(function(b){ b.onclick=function(){ MT.acct=this.dataset.a; mtRender(); }; });
+    host.querySelectorAll("#mtPer button").forEach(function(b){ b.onclick=function(){ MT.per=this.dataset.p; mtRender(); }; });
+    host.querySelectorAll("[data-mt]").forEach(function(r){ r.onclick=function(){ var id=+this.dataset.mt, t=D.trades.filter(function(x){ return x.id===id; })[0]; if(!t) return;
+      var nx=this.nextElementSibling; if(nx&&nx.classList.contains("mt-x")){ nx.remove(); return; }
+      var e=t.entry||{}, d=document.createElement("div"); d.className="mt-x";
+      d.innerHTML='<b>Entry:</b> '+mtE(e.why||"")+'<br><b>Levels:</b> wall '+mtE(e.wall)+' · band top '+mtE(e.band_hi)+' · first stop '+mtE(e.stop0)+' · EM '+mtE(e.em)+' ('+mtE(e.em_src)+') · '+mtE(e.tier_pct)+'% risk = '+mtUsd(e.risk_usd)+' · cost '+mtUsd(e.cost)+
+        '<br><b>Data:</b> map '+mtE(e.map_date)+' · chains '+mtE(e.chain_date)+' · commit '+mtE(e.commit||"—")+' · earnings: '+mtE(e.earnings||"")+
+        ((t.stop_hist||[]).length?'<br><b>Stop:</b> '+(t.stop_hist||[]).map(function(s){ return mtD(s.d)+' '+s.rule+' '+(+s.from).toFixed(2)+'→'+(+s.to).toFixed(2); }).join(" · "):'')+
+        ((t.exits||[]).length?'<br><b>Exits:</b> '+(t.exits||[]).map(function(x){ return mtD(x.d)+' '+x.qty+' @ '+x.px+' ('+mtE(x.reason)+')'; }).join(" · "):'');
+      this.parentNode.insertBefore(d,this.nextSibling); }; });
+  }
+  function mtChart(ser,A){
+    if(ser.length<2) return '<div class="ed-note">The equity chart starts after two mornings of data.</div>';
+    var W=760,H=220,pl=48,pr=8,pt=10,pb=24, acct=+A, lines=[], lo=Infinity, hi=-Infinity;
+    MT_ARMS.forEach(function(a){ var ys=ser.map(function(s){ var e=(s.eq[a[0]]||{})[A]; return e?(e.equity-acct)/acct*100:0; }); lines.push([a[0],ys]); });
+    ["SPY","QQQ"].forEach(function(b){ var b0=null, ys=ser.map(function(s){ var x=s.bench[b]; if(!x) return null; if(b0==null) b0=x.c; return (x.c/b0-1)*100; }); if(ys.some(function(v){ return v!=null; })) lines.push([b,ys]); });
+    lines.forEach(function(l){ l[1].forEach(function(v){ if(v!=null){ lo=Math.min(lo,v); hi=Math.max(hi,v); } }); });
+    if(lo===hi){ lo-=1; hi+=1; } var pad=(hi-lo)*0.1; lo-=pad; hi+=pad;
+    var x=function(i){ return pl+i*(W-pl-pr)/(ser.length-1); }, y=function(v){ return pt+(hi-v)/(hi-lo)*(H-pt-pb); };
+    var g='<svg viewBox="0 0 '+W+' '+H+'" class="mt-svg" role="img" aria-label="Return per arm, % of the account">';
+    [lo+pad, (lo+hi)/2, hi-pad].forEach(function(v){ g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)"/><text x="'+(pl-6)+'" y="'+(y(v)+4)+'" text-anchor="end">'+v.toFixed(1)+'%</text>'; });
+    if(lo<0&&hi>0) g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(0)+'" y2="'+y(0)+'" stroke="var(--inkFade)"/>';
+    lines.forEach(function(l){ var pts=l[1].map(function(v,i){ return v==null?null:x(i).toFixed(1)+","+y(v).toFixed(1); }).filter(Boolean).join(" ");
+      g+='<polyline fill="none" stroke="'+MT_COL[l[0]]+'" stroke-width="'+(l[0]==="B"?2.6:1.5)+'"'+(l[0]==="SPY"||l[0]==="QQQ"?' stroke-dasharray="4 3"':'')+' points="'+pts+'"/>'; });
+    [0,ser.length-1].forEach(function(i){ g+='<text x="'+x(i)+'" y="'+(H-6)+'" text-anchor="'+(i?"end":"start")+'">'+mtD(ser[i].d)+'</text>'; });
+    g+='</svg><div class="mt-leg">'+lines.map(function(l){ var v=l[1][l[1].length-1]; return '<span><i style="background:'+MT_COL[l[0]]+'"></i>'+l[0]+(v!=null?' '+(v>0?'+':'')+v.toFixed(2)+'%':'')+'</span>'; }).join("")+'</div>';
+    return g;
+  }
+  function mtPeriods(ser,A,per){
+    if(ser.length<2) return '';
+    var key=function(d){ var t=new Date(String(d).slice(0,10)+"T12:00:00Z");
+      if(per==="month") return String(d).slice(0,7);
+      if(per==="week"){ var w=t.getUTCDay(); t.setUTCDate(t.getUTCDate()-((w+6)%7)); return "wk "+t.toISOString().slice(0,10); }
+      return String(d).slice(0,10); };
+    var groups=[], idx={};
+    ser.forEach(function(s,i){ if(!i) return; var k=key(s.d); if(!(k in idx)){ idx[k]=groups.length; groups.push({k:k,from:ser[i-1],to:s}); } else groups[idx[k]].to=s; });
+    var arms=MT_ARMS.map(function(a){ return a[0]; });
+    var rows=groups.slice(-30).reverse().map(function(g){ return '<div class="r"><span>'+(per==="day"?mtD(g.k):(per==="week"?mtE(g.k.replace("wk ","from ")):mtE(g.k)))+'</span>'+
+      arms.map(function(a){ var e1=(g.to.eq[a]||{})[A], e0=(g.from.eq[a]||{})[A]; var v=(e1&&e0)?e1.equity-e0.equity:null; return '<span class="'+mtCls(v)+'">'+(v==null?'—':mtUsd(v,true))+'</span>'; }).join("")+'</div>'; }).join("");
+    return '<div class="opt-tbl mt-pr"><div class="hd"><span>'+(per==="day"?"Day":(per==="week"?"Week":"Month"))+'</span>'+arms.map(function(a){ return '<span>'+a+'</span>'; }).join("")+'</div>'+rows+'</div>';
+  }
   // Mission Control's tabs: the Daily Brief, MME (the dealer map) and Options (iron condors and credit spreads,
   // its own section since 28 Oct 2026). The last one opened is remembered.
   function mcPanes(host, briefHtml, mmeHtml){
-    host.innerHTML='<div class="mc-top"><button class="mc-tab" data-pane="brief">Daily Brief</button><button class="mc-tab" data-pane="mme">MME</button>'+
+    host.innerHTML='<div class="mc-top"><button class="mc-tab" data-pane="brief">Daily Brief</button><button class="mc-tab" data-pane="mme">MME</button><button class="mc-tab" data-pane="mmetest">MME Test</button>'+
                    '<button class="mc-tab" data-pane="options">Options</button><button class="mc-tab" data-pane="portfolios">Portfolios</button><button class="mc-tab" data-pane="auto">Auto brief</button></div>'+
                    '<div id="mcHealth" class="mc-health"></div>'+
                    '<div id="mcPaneBrief">'+briefHtml+'</div><div id="mcPaneMme" style="display:none">'+mmeHtml+'</div>'+
                    '<div id="mcPaneOpt" style="display:none"><div id="optPane"></div></div>'+
+                   '<div id="mcPaneMt" style="display:none"><div id="mtPane"></div></div>'+
                    '<div id="mcPanePf" style="display:none"><div id="pfPane"></div></div>'+
                    '<div id="mcPaneAuto" style="display:none"><div id="abPane"></div></div>';
     var optDone=false;
     function show(p){
-      if(["brief","mme","options","portfolios","auto"].indexOf(p)<0) p="brief";
+      if(["brief","mme","mmetest","options","portfolios","auto"].indexOf(p)<0) p="brief";
       document.getElementById("mcPaneBrief").style.display=p==="brief"?"":"none";
       document.getElementById("mcPaneMme").style.display=p==="mme"?"":"none";
       document.getElementById("mcPaneOpt").style.display=p==="options"?"":"none";
+      document.getElementById("mcPaneMt").style.display=p==="mmetest"?"":"none";
       document.getElementById("mcPanePf").style.display=p==="portfolios"?"":"none";
       document.getElementById("mcPaneAuto").style.display=p==="auto"?"":"none";
       host.querySelectorAll(".mc-tab").forEach(function(b){ b.classList.toggle("on", b.dataset.pane===p); });
       try{ localStorage.setItem("phoenix.mc.pane", p); }catch(e){}
       if(p==="mme") mcbNamesFill();
       if(p==="options"&&!optDone){ optDone=true; optFill(); }
+      if(p==="mmetest") mtFill();
       if(p==="portfolios") pfFill();
       if(p==="auto") abFill();
     }

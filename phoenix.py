@@ -17121,6 +17121,17 @@ def run_oge_disclosures():
     return merged
 
 
+def run_mme_test():
+    """Phoenix 2.0, Trading module: the MME forward test (rules v1.4.3, protocol FT-1.3). The engine is
+    trading/mme_ft.py and the rules are the Controls rule set controls/mme_rules_v1.4.3.json; this is only the hook
+    that runs its morning review inside the daily run (after mme_map, so it sees today's walls, flip and EM). The 10:00 ET
+    decision runs in its own workflow (.github/workflows/mme-test.yaml)."""
+    import sys, os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from trading import mme_ft
+    return mme_ft.run_morning()
+
+
 def run_full():
     """
     ONE job, every step. Each step is non-fatal and independently timed, and
@@ -17218,6 +17229,7 @@ def run_full():
     step("iv_em",          run_iv_em,         optional=True)   # implied vol + expected move, two-tier
     step("mme_chains",     run_mme_chains,    optional=True)   # raw CBOE chains for the universe, one file, for the MME task
     step("mme_map",        run_mme_map,       optional=True)   # the dealer map: every name vs its walls and flip
+    step("mme_test",       run_mme_test,      optional=True)   # Phoenix 2.0 Trading module: the MME forward test (FT-1.3) morning review
     step("ic_screen",      run_ic_screen,     optional=True)   # iron condor tournament
     step("ic_screen_b",    lambda: run_ic_screen("B"), optional=True)   # rule set B side by side (November test)
     step("ic_record",      run_ic_record,     optional=True)   # archive chains + vol, forward-test the winners, mark open ones
@@ -17276,6 +17288,11 @@ def run_engine(name):
         run_research_library()
     elif name == "unigaps":
         run_universe_gaps()
+    elif name == "mme_test":
+        run_mme_test()
+    elif name == "mme_decide":
+        from trading import mme_ft
+        mme_ft.run_decide(force=True)
     elif name == "gexsweep":
         run_gex_sweep()
     elif name == "gexverify":
