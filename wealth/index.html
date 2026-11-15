@@ -300,6 +300,11 @@ footer.pxfoot{text-align:center;color:var(--faint);font-size:12px;padding:34px 0
 .tchoice input{margin-top:4px;accent-color:var(--gold)}
 .tchoice b{display:block;font-size:14px}
 @media (max-width:1060px){ .savebtn{padding:6px 11px} }
+.fcgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:600px){ .fcgrid{grid-template-columns:1fr 1fr 1fr;gap:8px} .fctile{padding:12px} .fctile .big{font-size:18px !important} .fcrange{display:none} }
+.fccard:hover{border-color:var(--line2)}
+.seg{overflow-x:auto}
+.seg button{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -428,24 +433,108 @@ async function amAllowed(){
 }
 async function supaLoad(){
   if (!S.allowChecked){ const ok = await amAllowed(); if (!ok){ const em = session?.email; storeSession(null); S.authMsg = `${em || "This account"} isn't on the Phoenix Wealth access list yet.`; throw Object.assign(new Error("not allowed"), { status: 401 }); } S.allowChecked = true; }
-  const rows = await rest("GET", "?select=doc_id,body");
-  applyDocs((rows || []).map(r => ({ id: r.doc_id, data: r.body })), true);
+  const rows = await rest("GET", "?select=doc_id,body,rev");
+  applyDocs((rows || []).map(r => ({ id: r.doc_id, data: r.body, rev: r.rev })), true);
+}
+
+/* ---------------- safe sync: never overwrite another device's changes ----------------
+   Each stored document has a version number. A save only goes through if nobody changed the
+   document since this device last saw it. If someone did, the two versions are merged item by
+   item (transaction, category, account, assigned amount) against the last version both devices
+   agreed on, and the merged result is saved. When both devices changed the very same item,
+   this device's edit wins; nothing either device added is ever dropped. */
+let REV = {}, BASE = {};
+function resetSync(){ REV = {}; BASE = {}; }
+const J = x => x === undefined ? undefined : JSON.stringify(x);
+const clone = x => x === undefined || x === null ? x : JSON.parse(JSON.stringify(x));
+function pick3(b, l, r){
+  const bb = J(b), ll = J(l), rr = J(r);
+  if (ll === rr) return l;
+  if (ll === bb) return r;                         // only the other device changed it
+  if (rr === bb) return l;                         // only this device changed it
+  return l !== undefined ? l : r;                  // both changed: keep this device's version, never lose an edit to a deletion
+}
+function keyOf(id, el){ return id === "moves" ? [el.ts, el.m, el.c, el.d, el.why, el.o].join("|") : el.id; }
+function mergeList(id, b, l, r){
+  b = b || []; l = l || []; r = r || [];
+  const K = e => keyOf(id, e);
+  const B = new Map(b.map(e => [K(e), e])), L = new Map(l.map(e => [K(e), e])), R = new Map(r.map(e => [K(e), e]));
+  const ord = (arr, other) => arr.filter(e => other.has(K(e))).map(K).join("\u0001");
+  const localReordered = ord(l, B) !== ord(b, L);
+  const primary = localReordered ? l : r, secondary = localReordered ? r : l;
+  const out = [], seen = new Set();
+  for (const e of [...primary, ...secondary, ...b]){ const k = K(e); if (seen.has(k)) continue; seen.add(k); const v = pick3(B.get(k), L.get(k), R.get(k)); if (v !== undefined) out.push(v); }
+  return out;
+}
+function mergeMap(b, l, r){
+  b = b || {}; l = l || {}; r = r || {};
+  const out = {};
+  for (const k of new Set([...Object.keys(b), ...Object.keys(l), ...Object.keys(r)])){ const v = pick3(b[k], l[k], r[k]); if (v !== undefined) out[k] = v; }
+  return out;
+}
+function merge3(id, base, local, remote){
+  if (!remote) return local;
+  if (!local) return remote;
+  base = base || {};
+  if (id === "meta"){
+    const out = {};
+    for (const f of new Set([...Object.keys(base), ...Object.keys(local), ...Object.keys(remote)])){
+      if (f === "accounts" || f === "groups" || f === "cats") out[f] = mergeList(id, base[f], local[f], remote[f]);
+      else { const v = pick3(base[f], local[f], remote[f]); if (v !== undefined) out[f] = v; }
+    }
+    return out;
+  }
+  if (id === "assign"){
+    const flat = o => { const f = {}; for (const m in (o && o.months) || {}) for (const c in o.months[m]) f[m + "|" + c] = o.months[m][c]; return f; };
+    const fl = mergeMap(flat(base), flat(local), flat(remote)), months = {};
+    for (const k in fl){ const [m, c] = k.split("|"); (months[m] = months[m] || {})[c] = fl[k]; }
+    return { months };
+  }
+  return { list: mergeList(id, base.list, local.list, remote.list) };   // tx-YYYY-MM and moves
+}
+function setDoc(id, v){
+  if (!v) return;
+  if (id === "meta"){ const {v: _v, ...rest} = v; S.meta = clone(rest); }
+  else if (id === "assign") S.assign = clone(v.months || {});
+  else if (id === "moves") S.moves = clone(v.list || []);
+  else if (id.startsWith("tx-")) S.tx[id.slice(3)] = clone(v.list || []);
+}
+async function rpc(fn, args){
+  const t = await freshToken();
+  const r = await fetch(SUPA.url + "/rest/v1/rpc/" + fn, { method: "POST", headers: { apikey: SUPA.key, Authorization: "Bearer " + t, "Content-Type": "application/json" }, body: JSON.stringify(args) });
+  if (r.status === 401){ throw Object.assign(new Error("signed out"), { status: 401 }); }
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(j.message || ("HTTP " + r.status)), { status: r.status, code: j.code });
+  return j;
+}
+async function supaSave(id){
+  for (let attempt = 0; attempt < 6; attempt++){
+    const body = docBody(id);
+    const res = await rpc("wealth_save", { p_doc: id, p_body: body, p_rev: REV[id] || 0 });
+    if (res.ok){ REV[id] = res.rev; BASE[id] = clone(body); return; }
+    // someone else saved first: merge their version with ours, then try again on top of theirs
+    const merged = merge3(id, BASE[id], docBody(id), res.body);
+    REV[id] = res.rev; BASE[id] = clone(res.body);
+    setDoc(id, merged); invalidate(); S.mergedFromOther = true;
+  }
+  throw new Error("Too many changes at once — retrying.");
 }
 
 /* ---- one write path for both homes ---- */
 async function writeDoc(id, body){
-  if (BACKEND === "claude"){ const ref = col().doc(id); return body ? ref.set(body) : ref.delete(); }
-  if (BACKEND === "supabase"){
-    if (body) return rest("POST", "?on_conflict=user_id,doc_id", [{ user_id: session.uid, doc_id: id, body }], { Prefer: "resolution=merge-duplicates,return=minimal" });
-    return rest("DELETE", "?doc_id=eq." + encodeURIComponent(id), null, { Prefer: "return=minimal" });
+  if (BACKEND === "claude"){
+    const ref = col().doc(id);
+    if (id.startsWith("tx-") && !body.list.length) await ref.delete(); else await ref.set(body);
+    BASE[id] = clone(body); return;
   }
+  if (BACKEND === "supabase") return supaSave(id);
 }
 async function flush(){
   for (const id of [...dirty]){
     if (inflight.has(id)) continue;
     dirty.delete(id); inflight.add(id); renderSaveState();
     const body = docBody(id);
-    try { await writeDoc(id, id.startsWith("tx-") && !body.list.length ? null : body); }
+    try { await writeDoc(id, body); }
     catch (e) {
       dirty.add(id);
       if (e && e.status === 401){
@@ -460,14 +549,20 @@ async function flush(){
     } finally { inflight.delete(id); }
   }
   if (dirty.size) { clearTimeout(flushTimer); flushTimer = setTimeout(flush, 1500); }
+  if (S.mergedFromOther){ S.mergedFromOther = false; render(); toast("Combined with changes from your other device"); }
   renderSaveState();
 }
 function applyDocs(docs, definitive){
   const seen = new Set();
   docs.forEach(d => {
     seen.add(d.id);
-    if (dirty.has(d.id) || inflight.has(d.id)) return;
     const v = d.data; if (!v) return;
+    if (dirty.has(d.id) || inflight.has(d.id)){
+      if (BACKEND === "claude" && J(v) !== J(BASE[d.id])){ setDoc(d.id, merge3(d.id, BASE[d.id], docBody(d.id), v)); BASE[d.id] = clone(v); dirty.add(d.id); }
+      return;
+    }
+    if (d.rev != null) REV[d.id] = d.rev;
+    BASE[d.id] = clone(v);
     if (d.id === "meta"){ const {v: _v, ...rest} = v; S.meta = JSON.parse(JSON.stringify(rest)); }
     else if (d.id === "assign") S.assign = JSON.parse(JSON.stringify(v.months || {}));
     else if (d.id === "moves") S.moves = JSON.parse(JSON.stringify(v.list || []));
@@ -475,12 +570,14 @@ function applyDocs(docs, definitive){
   });
   if (definitive){
     Object.keys(S.tx).forEach(m => { const id = "tx-" + m; if (!seen.has(id) && !dirty.has(id) && !inflight.has(id)) delete S.tx[m]; });
+    Object.keys(REV).forEach(id => { if (!seen.has(id) && !dirty.has(id) && !inflight.has(id)){ delete REV[id]; delete BASE[id]; } });
     if (!seen.has("meta") && !dirty.has("meta") && !inflight.has("meta")) S.meta = null;
   }
   invalidate(); render();
 }
 async function wipeAll(){
   const ids = ["meta", "assign", "moves", ...Object.keys(S.tx).map(m => "tx-" + m)];
+  resetSync();
   if (BACKEND === "supabase") return rest("DELETE", "?user_id=eq." + encodeURIComponent(session.uid), null, { Prefer: "return=minimal" });
   if (BACKEND === "claude") return Promise.all(ids.map(id => col().doc(id).delete()));
 }
@@ -521,8 +618,10 @@ async function bootSupabase(){
   try { await supaLoad(); S.mode = "cloud"; render(); if (recovery) openNewPasswordSheet(); }
   catch (e){ if (e.status === 401 || !session){ S.mode = "auth"; } else S.mode = S.meta ? "cloud" : "unreachable"; render(); }
 }
+setInterval(() => { if (document.visibilityState === "visible" && BACKEND === "supabase" && S.mode === "cloud" && !dirty.size && !inflight.size && !document.querySelector(".sheet,.ctxmenu") && !(document.activeElement && /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName))) supaLoad().catch(() => {}); }, 60000);
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible" && BACKEND === "supabase" && S.mode === "cloud" && !dirty.size && !inflight.size) supaLoad().catch(() => {});
+  if (document.visibilityState === "visible" && BACKEND === "supabase" && dirty.size) flush();
   if (document.visibilityState === "hidden" && dirty.size) flush();
 });
 
@@ -538,7 +637,7 @@ async function doAuth(kind){
       acceptSession(await supaAuth("token?grant_type=password", { email, password: pw }));
       S.authBusy = false; S.userName = email.split("@")[0]; S.mode = "loading"; render();
       if (S.prevUid && S.prevUid === session.uid && dirty.size){ try { await flush(); } catch(_) {} }
-      else if (S.prevUid && S.prevUid !== session.uid){ dirty.clear(); S.meta = null; S.assign = {}; S.tx = {}; S.moves = []; invalidate(); }
+      else if (S.prevUid && S.prevUid !== session.uid){ resetSync(); dirty.clear(); S.meta = null; S.assign = {}; S.tx = {}; S.moves = []; invalidate(); }
       S.prevUid = null; S.authMsg = "";
       try { await supaLoad(); } catch(e){ S.authBusy = false; S.mode = "auth"; render(); return; }
       S.mode = "cloud"; render(); if (!dirty.size) toast("Signed in · everything is saved"); return;
@@ -564,7 +663,7 @@ async function signOut(){
     try { if (session) await fetch(SUPA.url + "/auth/v1/logout?scope=local", { method: "POST", headers: { apikey: SUPA.key, Authorization: "Bearer " + session.access_token } }); } catch(_) {}
     storeSession(null);
   }
-  S.allowChecked = false; S.meta = null; S.assign = {}; S.tx = {}; S.moves = []; dirty.clear(); invalidate(); closeSheet(); S.mode = "auth"; render();
+  resetSync(); S.allowChecked = false; S.meta = null; S.assign = {}; S.tx = {}; S.moves = []; dirty.clear(); invalidate(); closeSheet(); S.mode = "auth"; render();
 }
 function openNewPasswordSheet(){
   openSheet(`<h2>Set a new password</h2><label class="f">New password<input id="np" type="password" autocomplete="new-password" minlength="8"></label>
@@ -855,6 +954,7 @@ function overviewView(){
     <div class="card"><span class="clabel">Underfunded</span><div class="big" style="font-size:21px;color:${B.underfunded ? "var(--amber)" : "inherit"}">${money(B.underfunded)}</div></div>
     <div class="card"><span class="clabel">Overspent</span><div class="big" style="font-size:21px;color:${B.overspent.length ? "var(--red)" : "inherit"}">${B.overspent.length ? money(B.overspent.reduce((s,c)=>s - B.rows[c.id].available, 0)) : "None"}</div></div>
   </div>
+  ${forecastCard()}
   ${B.overspent.length ? `<div class="sect"><span class="clabel">Overspent — cover from another category</span></div><div class="list">${B.overspent.map(c => `<button class="li" data-act="cover" data-id="${c.id}">${emo(c)}<span class="grow1"><span class="t">${esc(c.name)}</span><span class="s">Tap to cover it</span></span><span class="chip neg">${money(B.rows[c.id].available)}</span></button>`).join("")}</div>` : ""}
   <div class="sect"><span class="clabel">Top spending this month</span><a class="btn ghost sm" href="#reports">All reports</a></div>
   <div class="panel">${spent.length ? catBars(spent.slice(0, 6), spentTotal) : `<p class="muted" style="margin:0">No spending recorded this month yet.</p>`}</div>
@@ -1002,8 +1102,97 @@ function spendingByCat(months){
   for (const m of months){ const b = E.byMonth[m]; if (!b) continue; for (const k in b.act){ const c = cat(k); if (!c || c.ccAccount) continue; sums[k] = (sums[k]||0) + b.act[k]; } }
   return Object.entries(sums).map(([k, v]) => ({id: k, name: cat(k).name, v: -v})).filter(x => x.v > 0).sort((a, b) => b.v - a.v);
 }
+/* ---------------- forecast: "if you carry on like this" ---------------- */
+function moneyR(c){ const cur = S.meta?.settings?.currency || "EUR"; return new Intl.NumberFormat(locale(), {style:"currency", currency:cur, maximumFractionDigits:0}).format(Math.round((c||0)/100)); }
+S.fc = S.fc || { look: 3, adj: 0, extra: 0 };
+function monthFlows(m){
+  // real money in and out of budget accounts in month m: no starting balances, no moves between your own budget accounts
+  let inn = 0, out = 0;
+  for (const t of S.tx[m] || []){
+    if (t.start) continue;
+    const a = acct(t.account), x = t.xfer ? acct(t.xfer) : null;
+    let v = 0;
+    if (!x){ if (a && a.onBudget) v = t.amount; }
+    else if (a && x && a.onBudget !== x.onBudget) v = a.onBudget ? t.amount : -t.amount;
+    if (v > 0) inn += v; else out -= v;
+  }
+  return { inn, out, net: inn - out };
+}
+function forecast(){
+  const now = curMonth(), F = S.fc, E = engine();
+  let months = [], partial = false;
+  for (let k = 1; k <= 24 && months.length < F.look; k++){ const m = addMonths(now, -k); if (m < E.first) break; const f = monthFlows(m); if (f.inn || f.out) months.push({ m, ...f }); }
+  if (!months.length){ const f = monthFlows(now); if (f.inn || f.out){ months = [{ m: now, ...f }]; partial = true; } }
+  const n = months.length;
+  const inc = n ? months.reduce((s, x) => s + x.inn, 0) / n : 0;
+  const spendBase = n ? months.reduce((s, x) => s + x.out, 0) / n : 0;
+  const spend = spendBase * (1 + F.adj / 100);
+  const net = Math.round(inc - spend + F.extra);
+  const cash = accts().filter(a => a.onBudget && !a.closed).reduce((s, a) => s + (E.bal[a.id] || 0), 0);
+  const other = accts().filter(a => !a.onBudget).reduce((s, a) => s + (E.bal[a.id] || 0), 0);
+  // range: worst and best real month in the window, with the same adjustments
+  const nets = months.map(x => x.inn - x.out * (1 + F.adj / 100) + F.extra);
+  const lo = n > 1 ? Math.min(...nets) : net - Math.round(spend * 0.15), hi = n > 1 ? Math.max(...nets) : net + Math.round(spend * 0.15);
+  const at = k => ({ base: cash + net * k, lo: cash + Math.round(lo) * k, hi: cash + Math.round(hi) * k });
+  const goals = cats().filter(c => !c.hidden && c.target && (c.target.type === "balance" || c.target.type === "bydate"))
+    .map(c => ({ c, left: Math.max(0, c.target.amount - Math.max(0, budgetFor(now).rows[c.id].available)) })).filter(g => g.left > 0);
+  return { months, n, partial, inc: Math.round(inc), spend: Math.round(spend), spendBase: Math.round(spendBase), net, cash, other, at, lo: Math.round(lo), hi: Math.round(hi), goals,
+    runway: net < 0 && cash > 0 ? Math.floor(cash / -net) : null, rate: inc > 0 ? Math.round((inc - spend + F.extra) / inc * 100) : null };
+}
+function fcChart(f){
+  const W = Math.round(Math.min(900, Math.max(320, (document.getElementById("app").clientWidth || 640) - 40))), H = 230, L = 52, R = 14, T = 14, B = 28;
+  const pts = Array.from({ length: 13 }, (_, k) => f.at(k));
+  const vals = pts.flatMap(p => [p.lo, p.hi, p.base]).concat(0);
+  let max = Math.max(...vals), min = Math.min(...vals); const pad = (max - min) * 0.08 || 10000; max += pad; min = Math.min(0, min - pad);
+  const x = k => L + (W - L - R) * k / 12, y = v => T + (max - v) / (max - min) * (H - T - B);
+  let g = "";
+  for (let k = 0; k <= 4; k++){ const v = min + (max - min) * k / 4, yy = y(v); g += `<line x1="${L}" x2="${W-R}" y1="${yy.toFixed(1)}" y2="${yy.toFixed(1)}" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${L-6}" y="${(yy+4).toFixed(1)}" text-anchor="end">${esc(compact(v))}</text>`; }
+  if (min < 0) g += `<line x1="${L}" x2="${W-R}" y1="${y(0).toFixed(1)}" y2="${y(0).toFixed(1)}" stroke="var(--red)" stroke-opacity=".5"/>`;
+  g += `<path d="M${pts.map((p, k) => `${x(k).toFixed(1)},${y(p.hi).toFixed(1)}`).join("L")}L${pts.map((p, k) => [x(12-k), y(pts[12-k].lo)]).map(([a,b]) => `${a.toFixed(1)},${b.toFixed(1)}`).join("L")}Z" fill="var(--gold)" fill-opacity=".13"/>`;
+  g += `<polyline points="${pts.map((p, k) => `${x(k).toFixed(1)},${y(p.base).toFixed(1)}`).join(" ")}" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linejoin="round"/>`;
+  [0, 3, 6, 12].forEach(k => { g += `<circle cx="${x(k).toFixed(1)}" cy="${y(pts[k].base).toFixed(1)}" r="${k ? 4.5 : 3.5}" fill="${k ? "var(--gold)" : "var(--ink)"}"><title>${k ? `In ${k} months` : "Today"}: ${esc(moneyR(pts[k].base))}</title></circle>`; });
+  for (let k = 0; k <= 12; k += 3) g += `<text x="${x(k).toFixed(1)}" y="${H-8}" text-anchor="middle">${k ? esc(monthLabel(addMonths(curMonth(), k), true)) : "Today"}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block" role="img" aria-label="Projected balance over the next 12 months">${g}</svg>`;
+}
+function forecastView(){
+  const f = forecast(), F = S.fc;
+  if (!f.n) return `<div class="panel empty"><h2>Not enough history yet</h2><p>Record a month of income and spending — or import your bank history — and Phoenix Wealth projects where your balance is heading.</p><button class="btn" data-act="import">Import history</button></div>`;
+  const tile = k => { const p = f.at(k), d = p.base - f.cash; return `<div class="card fctile"><span class="clabel">${k} months</span><div class="big" style="font-size:24px;${p.base < 0 ? "color:var(--red)" : ""}">${moneyR(p.base)}</div>
+    <div class="delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "▲" : "▼"} ${moneyR(Math.abs(d))}</div><div class="muted small fcrange" style="margin-top:2px">${moneyR(p.lo)} – ${moneyR(p.hi)}</div></div>`; };
+  const basis = f.partial ? `this month so far — an early estimate` : `your last ${f.n} month${f.n === 1 ? "" : "s"} (${esc(monthLabel(f.months[f.n-1].m, true))}–${esc(monthLabel(f.months[0].m, true))})`;
+  const goalsLeft = f.goals.reduce((s, g) => s + g.left, 0);
+  return `<div class="panel">
+      <span class="clabel">Money in your budget accounts today</span><div class="big">${money(f.cash)}</div>
+      <p class="muted small" style="margin:6px 0 14px">If you keep earning about <b style="color:var(--ink)">${money(f.inc)}</b> and spending about <b style="color:var(--ink)">${money(f.spend)}</b> a month, you ${f.net >= 0 ? "add" : "lose"} <b class="${f.net >= 0 ? "up" : "down"}">${money(Math.abs(f.net))}</b> a month. Based on ${basis}.</p>
+      ${fcChart(f)}
+      <div class="legend"><span><i style="background:var(--gold)"></i>Expected</span><span><i style="background:var(--gold);opacity:.35"></i>Range: your worst to best month</span></div>
+    </div>
+    <div class="grid fcgrid">${tile(3)}${tile(6)}${tile(12)}</div>
+    ${f.runway !== null ? `<div class="overbar" style="margin-top:14px"><span class="cnt">!</span><span class="grow1" style="white-space:normal"><b>At this pace your budget accounts run out in about ${f.runway} month${f.runway === 1 ? "" : "s"}.</b> <span class="muted small">Cutting spending by ${money(-f.net)} a month would hold your balance steady.</span></span></div>` : ""}
+    ${f.goals.length && f.net > 0 ? `<div class="banner gold" style="margin-top:14px">Your savings goals still need <b>${money(goalsLeft)}</b>. At ${money(f.net)} a month that's about <b>${Math.ceil(goalsLeft / f.net)} month${Math.ceil(goalsLeft / f.net) === 1 ? "" : "s"}</b> of saving.</div>` : ""}
+    <div class="sect"><span class="clabel">What if…</span>${F.adj || F.extra || F.look !== 3 ? `<button class="btn ghost sm" data-act="fcReset">Reset</button>` : ""}</div>
+    <div class="panel">
+      <div class="f2">
+        <label class="f">Base it on<select data-fc="look"><option value="3" ${F.look===3?"selected":""}>Last 3 months</option><option value="6" ${F.look===6?"selected":""}>Last 6 months</option><option value="12" ${F.look===12?"selected":""}>Last 12 months</option></select></label>
+        <label class="f">Extra income or saving each month<input data-fc="extra" inputmode="decimal" value="${F.extra ? plain(F.extra) : ""}" placeholder="0.00"></label>
+      </div>
+      <label class="f">Spending ${F.adj === 0 ? "as it is" : F.adj < 0 ? `${-F.adj}% lower` : `${F.adj}% higher`} · ${money(f.spend)} a month
+        <input type="range" min="-50" max="50" step="5" value="${F.adj}" data-fc="adj" style="padding:0;accent-color:var(--gold);background:none;border:0;margin-top:10px"></label>
+      ${f.rate !== null ? `<p class="muted small" style="margin:0">Savings rate: <b style="color:var(--ink)">${f.rate}%</b> of income.${f.other ? ` Tracking accounts (${money(f.other)}) are kept as they are.` : ""}</p>` : ""}
+    </div>
+    <p class="muted small">A projection from your own history, not a promise: one-off costs, raises or investment returns aren't included.</p>`;
+}
+function forecastCard(){
+  const f = forecast(); if (!f.n) return "";
+  const p = f.at(12);
+  return `<a class="card fccard" href="#reports" data-act="openForecast" style="display:block;text-decoration:none;color:inherit;margin-top:12px">
+    <div class="row between" style="flex-wrap:wrap;gap:8px"><span class="clabel">If you carry on like this</span><span class="muted small">Forecast ›</span></div>
+    <div class="row" style="gap:18px;flex-wrap:wrap;margin-top:8px">${[3, 6, 12].map(k => { const v = f.at(k).base; return `<div><span class="muted small">${k} months</span><div style="font-weight:800;font-size:19px;letter-spacing:-.02em;${v < 0 ? "color:var(--red)" : ""}">${moneyR(v)}</div></div>`; }).join("")}
+    <div style="margin-left:auto;align-self:flex-end" class="delta ${f.net >= 0 ? "up" : "down"}">${f.net >= 0 ? "▲" : "▼"} ${moneyR(Math.abs(f.net))}/month</div></div></a>`;
+}
+
 function reportsView(){
-  const tabs = [["spending","Spending"],["iv","Income vs spending"],["nw","Net worth"]];
+  const tabs = [["spending","Spending"],["iv","Cash flow"],["nw","Net worth"],["fc","Forecast"]];
   let body = "";
   if (S.report === "spending"){
     const months = periodMonths(S.period), items = spendingByCat(months), total = items.reduce((s, x) => s + x.v, 0);
@@ -1026,6 +1215,8 @@ function reportsView(){
       ${barChart(months.map(m => monthLabel(m, true)), [{v: inc, c:"--green", n:"Income"}, {v: sp, c:"--gold", n:"Spending"}])}
       <div class="legend"><span><i style="background:var(--green)"></i>Income</span><span><i style="background:var(--gold)"></i>Spending</span></div></div>
       <div class="list">${months.slice().reverse().map((m, i) => { const k = 5 - i; return `<div class="li"><span class="grow1 t">${esc(monthLabel(m))}</span><span class="small muted">in ${money(inc[k])} · out ${money(sp[k])}</span><b class="${inc[k]-sp[k] < 0 ? "down" : "up"}">${money(inc[k]-sp[k])}</b></div>`; }).join("")}</div>`;
+  } else if (S.report === "fc"){
+    body = forecastView();
   } else {
     const months = monthsBetween(addMonths(curMonth(), -11), curMonth());
     const end = {}; for (const m of months) end[m] = {a:0, d:0};
@@ -1041,7 +1232,7 @@ function reportsView(){
       <div class="legend"><span><i style="background:var(--c3)"></i>Assets ${money(last.a)}</span><span><i style="background:var(--red)"></i>Debts ${money(last.d)}</span><span><i style="background:var(--gold)"></i>Net worth</span></div></div>`;
   }
   return pageHead("Reports", "Where your money went, and where you stand.") +
-  `<div class="seg" role="group" aria-label="Report" style="max-width:520px">${tabs.map(([k,l]) => `<button data-act="report" data-v="${k}" aria-pressed="${S.report===k}">${l}</button>`).join("")}</div>${body}`;
+  `<div class="seg" role="group" aria-label="Report" style="max-width:640px">${tabs.map(([k,l]) => `<button data-act="report" data-v="${k}" aria-pressed="${S.report===k}">${l}</button>`).join("")}</div>${body}`;
 }
 function barChart(labels, series, opts = {}){
   const W = Math.round(Math.min(900, Math.max(320, (document.getElementById("app").clientWidth || 640) - 40)));
@@ -1919,6 +2110,8 @@ document.addEventListener("click", e => {
     }
     case "addCat": promptSheet("New category", "Category name", "", n => { S.meta.cats.push({id: newId(), group: id, name: n, emoji: guessEmoji(n)}); save("meta"); invalidate(); render(); }); break;
     case "report": S.report = v; render(); break;
+    case "openForecast": e.preventDefault(); S.report = "fc"; go("reports"); break;
+    case "fcReset": S.fc = { look: 3, adj: 0, extra: 0 }; render(); break;
     case "saveSettings": { S.meta.settings.currency = $("#s-cur").value; const th = $("#s-theme").value; if (th) setTheme(th); else { try { localStorage.removeItem(PHX.themeKey); } catch(_) {} applyTheme(null); } save("meta"); closeSheet(); render(); break; }
     case "export": offerDownload("phoenix-wealth.json", JSON.stringify({meta: S.meta, assign: S.assign, tx: S.tx, moves: S.moves || []}, null, 2)); break;
     case "exportCsv": {
@@ -1944,6 +2137,7 @@ document.addEventListener("change", e => {
     return;
   }
   const act = el.dataset.act;
+  if (el.dataset.fc){ const k = el.dataset.fc; S.fc[k] = k === "extra" ? parseAmount(el.value) : Number(el.value); render(); return; }
   if (act === "period"){ S.period = el.value; render(); }
   else if (act === "repMonth"){ S.repMonth = el.value; render(); }
   else if (act === "txRefresh") refreshTx();
