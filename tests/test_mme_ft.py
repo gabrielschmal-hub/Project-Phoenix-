@@ -175,3 +175,29 @@ def test_notify_queues_web_push(monkeypatch):
     assert M.notify("MME test · 1 new order", ["AAA · bought 200.80"]) is True
     assert len(calls) == 1 and calls[0][0].endswith("/rest/v1/push_outbox")
     assert calls[0][1]["json"]["url"] == "/?pane=mmetest#mission" and "AAA" in calls[0][1]["json"]["body"]
+
+
+def test_index_rows_are_not_tradeable(tmp_path, monkeypatch):
+    import json
+    m = {"date": "2026-11-16", "groups": {"green": [{"ticker": "AAA"}, {"ticker": "SPX", "index": True}], "amber": [], "red": []}}
+    monkeypatch.setattr(M, "_j", lambda name: m if name == "mme_map.json" else None)
+    rows, d, _ = M.Data().map()
+    assert "AAA" in rows and "SPX" not in rows
+
+
+def test_second_morning_run_leaves_todays_orders_alone(tmp_path, monkeypatch):
+    monkeypatch.setattr(M, "OUT", str(tmp_path))
+    d1, d2 = date(2026, 11, 23), date(2026, 11, 24)
+    rows = {"AAA": {"ticker": "AAA", "em": 4.0, "em_src": "atm_iv", "flip": 190.0, "support": 200.0, "resist": 206.0,
+                    "support_tiered": [200.0, 192.0], "stale_days": 0}}
+    S = {d1.isoformat(): {"SPX": [(_ts(d1, 15, 0), 7600.0)], "VIX": [(_ts(d1, 15, 0), 16.0)], "AAA": [(_ts(d1, 15, 0), 201.5)]}}
+    F = Fake(d1, S, rows)
+    M.morning(d1, R, F)                                  # the 06:00 review
+    M.decide(d1, R, F)                                   # 10:00 ET: limit orders placed today
+    pend = [t for t in F.trs if t["status"] == "pending"]
+    assert pend
+    out = M.morning(d1, R, F)                            # Phoenix run again in the evening
+    assert out.get("skipped")
+    F.st.pop("morning_done")                             # even without the guard, today's orders are not touched
+    M.morning(d1, R, F)
+    assert all(t["status"] == "pending" for t in F.trs if t["id"] in {p["id"] for p in pend})
