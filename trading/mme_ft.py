@@ -237,7 +237,8 @@ class Data:
     def map(self):
         if self._map is None:
             m = _j("mme_map.json") or {}
-            rows = {r["ticker"]: r for g in (m.get("groups") or {}).values() for r in g}
+            # index rows (SPX) are on the map for reading only: the test trades the stock universe, never the index
+            rows = {r["ticker"]: r for g in (m.get("groups") or {}).values() for r in g if not r.get("index")}
             self._map = (rows, str(m.get("date") or "")[:10], m.get("asof"))
         return self._map
 
@@ -585,11 +586,15 @@ def morning(today, R=None, data=None, write=True):
         return {"skipped": "not a trading day"}
     if today < date.fromisoformat(R.get("dry_run_from", R["start"])):
         return {"skipped": "before the dry run"}
+    # once a day: a second Phoenix run (manual, or a late scheduler) must not settle the previous session again, and
+    # must never touch orders decided today (they belong to tomorrow's review)
+    if write and data.state("morning_done") == today.isoformat():
+        return {"skipped": "morning review already done today"}
     dry = not is_live(today, R)
     prev = prev_trading_day(today, R)
     rows, map_date, _ = data.map()
     chains, _cd = data.chains()
-    trades = data.trades(("open", "pending"))
+    trades = [t for t in data.trades(("open", "pending")) if str(t["d_open"]) < today.isoformat()]
     tks = sorted({t["ticker"] for t in trades})
     snaps = data.snaps(tks, prev) if tks else {}
     log = {"settled": [], "raised": [], "stops": [], "fills": [], "deviations": []}
@@ -677,6 +682,7 @@ def morning(today, R=None, data=None, write=True):
     day = {"prev_session": prev.isoformat(), "map_date": map_date, "log": log, "equity": eq, "bench": bench(data, R)}
     if write:
         data.put_day(today, "morning", day, dry)
+        data.set_state("morning_done", today.isoformat())
         write_contract(data, R, today, dry)
         m = morning_message(ev, R, dry)
         if m:
