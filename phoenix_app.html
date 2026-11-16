@@ -12232,10 +12232,23 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         (n.events||[]).forEach(function(e){ var k=kindOf(e.what);
           if(k==="earn"&&n.earnings) return;
           if(/^\d{4}-\d{2}-\d{2}$/.test(String(e.date||""))) cal.push({d:e.date,tk:t,k:k,w:e.what,est:/unconfirm|reported|reportedly|estimat/i.test(e.what||"")}); }); });
+      // Phoenix's own feed (mme_map.events): every map name's next earnings from the Finnhub calendar, the same date the MME
+      // test's earnings rule reads, plus the market calendar (FOMC, CPI, payrolls, PCE, GDP, OPEX, closed days). Where the
+      // commentary and Phoenix both date a name's earnings, Phoenix's wins so the page and the test never disagree.
+      var pxEarn={};
+      (d.events||[]).forEach(function(e){
+        if(e.kind==="earnings"&&e.ticker){ pxEarn[e.ticker]=1; }
+      });
+      cal=cal.filter(function(x){ return !(x.k==="earn"&&pxEarn[x.tk]); });
+      (d.events||[]).forEach(function(e){
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(String(e.date||""))) return;
+        if(e.kind==="earnings") cal.push({d:e.date,tk:e.ticker,k:"earn",w:"Earnings"+(e.detail?" \u00b7 "+e.detail:""),r05:!!e.r05,hr:e.detail||""});
+        else cal.push({d:e.date,tk:"",k:(e.type==="Closed"||e.type==="Early close")?"mkt":"macro",w:e.label||e.type,hi:e.importance==="high",det:e.detail||""});
+      });
       cal=cal.filter(function(x){ return x.d>=today; }).sort(function(a,b){ return a.d<b.d?-1:a.d>b.d?1:(a.k==="earn"?-1:1); });
       var months=[]; cal.forEach(function(x){ var m=x.d.slice(0,7); if(months.indexOf(m)<0) months.push(m); });
       if(typeof MME_CALM==="undefined"||(MME_CALM!=="all"&&months.indexOf(MME_CALM)<0)) MME_CALM=months[0]||"all";
-      var KN={earn:"Earnings",div:"Dividend",prod:"Product",conf:"Event",legal:"Legal",other:"News"};
+      var KN={earn:"Earnings",macro:"Macro",mkt:"Market hours",div:"Dividend",prod:"Product",conf:"Event",legal:"Legal",other:"News"};
       function calHTML(){
         if(!cal.length) return "";
         var mlab=function(m){ return new Date(m+"-15T12:00:00Z").toLocaleDateString(undefined,{month:"short",year:"2-digit"}); };
@@ -12243,7 +12256,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
         rows0.forEach(function(x){                       // one row per day for earnings: "IBM · LRCX · TSLA"
           if(x.k!=="earn"){ rows.push(x); return; }
           var key=x.d; if(ei[key]==null){ ei[key]=rows.length; rows.push({d:x.d,k:"earn",tks:[],w:""}); }
-          rows[ei[key]].tks.push({tk:x.tk,est:x.est}); });
+          rows[ei[key]].tks.push({tk:x.tk,est:x.est,r05:x.r05,hr:x.hr}); });
         var kinds={}; cal.forEach(function(x){ kinds[x.k]=1; });
         return '<div class="mcal"><div class="mcal-hd"><span class="mme-sk">The calendar</span>'+
           '<div class="mcal-f">'+months.map(function(m){ return '<button data-m="'+m+'"'+(MME_CALM===m?' class="on"':'')+'>'+mlab(m)+'</button>'; }).join("")+
@@ -12252,7 +12265,8 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           '<div class="mcal-l">'+rows.map(function(x){ var dd=new Date(x.d+"T12:00:00Z");
             var soon=(Date.parse(x.d)-Date.parse(today))/864e5<=7;
             return '<div class="mcal-r k-'+x.k+(x.est?' est':'')+(soon?' soon':'')+'"><span class="dt">'+dd.toLocaleDateString(undefined,{weekday:"short"})+' '+dd.getUTCDate()+'</span>'+
-              (x.tks?'<span class="kd">'+KN.earn+'</span><span class="wh tks">'+x.tks.map(function(t){ return '<span class="tk'+(t.est?' est':'')+'" data-open="'+t.tk+'">'+t.tk+(t.est?'<i>est</i>':'')+'</span>'; }).join("")+'</span>'
+              (x.tks?'<span class="kd">'+KN.earn+'</span><span class="wh tks">'+x.tks.map(function(t){ return '<span class="tk'+(t.est?' est':'')+(t.r05?' r05':'')+'" data-open="'+t.tk+'" title="'+esc((t.hr?t.hr+". ":"")+(t.r05?"Inside the MME test's 5-day earnings block: no new entry.":""))+'">'+t.tk+(t.hr==="after the close"?'<i>AMC</i>':(t.hr==="before the open"?'<i>BMO</i>':''))+(t.est?'<i>est</i>':'')+(t.r05?'<i class="blk">MME blocked</i>':'')+'</span>'; }).join("")+'</span>'
+                     :!x.tk?'<span class="kd">'+KN[x.k]+'</span><span class="wh'+(x.hi?' hi':'')+'" title="'+esc(x.det)+'">'+esc(x.w)+'</span>'
                      :'<span class="kd">'+KN[x.k]+(x.est?' \u00b7 est':'')+'</span><span class="wh" title="'+esc(x.w)+'"><span class="tk" data-open="'+x.tk+'">'+x.tk+'</span> '+esc(x.w)+'</span>')+'</div>'; }).join("")+'</div></div>';
       }
       body.innerHTML=
@@ -18466,6 +18480,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
 #pxProfPop .pxpop-th span{font-size:13px;opacity:.8}
 #pxProfPop .pxpop-th .thsw{flex:0 0 160px;flex-direction:row}
 #pxProfPop .pxpop-th .thsw b{font-size:12px;padding:7px 4px}
+.k-macro{--kc:#d2691e} .k-mkt{--kc:#6b7280}
+.mcal-r .wh.hi{font-weight:700}
+.mcal-r .tk.r05{color:#e0604f} .mcal-r .tk.r05 i.blk{opacity:1;color:#e0604f}
+.mcal-r .tk i{font-style:normal;font-size:9px;opacity:.7;margin-left:3px}
 </style>
 </body>
 </html>

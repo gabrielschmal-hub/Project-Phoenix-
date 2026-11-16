@@ -7083,6 +7083,31 @@ ECB_2026 = ["2026-10-29", "2026-12-17"]
 BOJ_2026 = ["2026-10-30", "2026-12-18"]
 OTHER_EVENTS_2026 = [("2026-11-01", "OPEC+", "OPEC+ meeting"), ("2026-11-03", "Election", "US midterm elections")]
 
+# 2027 and the rest of 2026, checked 15 Nov 2026 against the publishers: federalreserve.gov/monetarypolicy/fomccalendars.htm,
+# bls.gov/schedule/news_release/cpi.htm and empSit.htm, bea.gov/news/schedule. Minutes are three weeks after each decision
+# (the Fed's own rule); they are "expected" until the Fed posts the exact day.
+FOMC_2026 = FOMC_2026 + ["2027-01-27", "2027-03-17", "2027-04-28", "2027-06-09", "2027-07-28", "2027-09-15",
+                         "2027-10-27", "2027-11-17"]
+CPI_2026 = CPI_2026 + ["2027-01-13", "2027-02-11", "2027-03-10", "2027-04-13", "2027-05-12", "2027-06-10", "2027-07-14",
+                       "2027-08-11", "2027-09-14", "2027-10-14", "2027-11-10", "2027-12-10"]
+NFP_2026 = NFP_2026 + ["2027-01-08", "2027-02-05", "2027-03-05", "2027-04-02", "2027-05-07", "2027-06-04", "2027-07-02",
+                       "2027-08-06", "2027-09-03", "2027-10-08", "2027-11-05", "2027-12-03"]
+FOMC_MINUTES_2026 = FOMC_MINUTES_2026 + ["2027-02-17", "2027-04-07", "2027-05-19", "2027-06-30", "2027-08-18",
+                                         "2027-10-06", "2027-11-17", "2027-12-08"]
+PCE_DATES = ["2026-11-25", "2026-12-23", "2027-01-28", "2027-02-25", "2027-03-31", "2027-04-29", "2027-05-27",
+             "2027-06-25", "2027-07-29", "2027-08-25", "2027-09-30", "2027-10-28", "2027-11-24", "2027-12-22"]
+GDP_DATES = [("2026-11-25", "GDP Q3 (second)"), ("2026-12-23", "GDP Q3 (third)"), ("2027-01-28", "GDP Q4 (advance)"),
+             ("2027-02-25", "GDP Q4 (second)"), ("2027-03-31", "GDP Q4 (third)"), ("2027-04-29", "GDP Q1 (advance)"),
+             ("2027-05-27", "GDP Q1 (second)"), ("2027-06-25", "GDP Q1 (third)"), ("2027-07-29", "GDP Q2 (advance)"),
+             ("2027-08-25", "GDP Q2 (second)"), ("2027-09-30", "GDP Q2 (third)"), ("2027-10-28", "GDP Q3 (advance)"),
+             ("2027-11-24", "GDP Q3 (second)"), ("2027-12-22", "GDP Q3 (third)")]
+# NYSE: closed days and 13:00 ET early closes
+MARKET_CLOSED = [("2026-11-26", "Thanksgiving"), ("2026-12-25", "Christmas"), ("2027-01-01", "New Year's Day"),
+                 ("2027-01-18", "Martin Luther King Jr. Day"), ("2027-02-15", "Presidents' Day"), ("2027-03-26", "Good Friday"),
+                 ("2027-05-31", "Memorial Day"), ("2027-06-18", "Juneteenth (observed)"), ("2027-07-05", "Independence Day (observed)"),
+                 ("2027-09-06", "Labor Day"), ("2027-11-25", "Thanksgiving"), ("2027-12-24", "Christmas (observed)")]
+MARKET_EARLY = [("2026-11-27", "Day after Thanksgiving"), ("2026-12-24", "Christmas Eve"), ("2027-11-26", "Day after Thanksgiving")]
+
 
 def _third_friday(year, month):
     from datetime import date, timedelta
@@ -7679,6 +7704,16 @@ def run_calendar():
             out.append({"date": d, "type": typ, "label": lab, "detail": det, "importance": "medium"})
     for d, typ, lab in OTHER_EVENTS_2026:
         out.append({"date": d, "type": typ, "label": lab, "detail": lab, "importance": "medium"})
+    for d in PCE_DATES:
+        out.append({"date": d, "type": "PCE", "label": "PCE inflation", "detail": "08:30 ET. The Fed's preferred inflation gauge (personal income and outlays).",
+                    "importance": "high"})
+    for d, lab in GDP_DATES:
+        out.append({"date": d, "type": "GDP", "label": lab, "detail": "08:30 ET. BEA.", "importance": "medium"})
+    for d, lab in MARKET_CLOSED:
+        out.append({"date": d, "type": "Closed", "label": "Market closed · " + lab, "detail": "NYSE and Nasdaq closed.", "importance": "high"})
+    for d, lab in MARKET_EARLY:
+        out.append({"date": d, "type": "Early close", "label": "Early close 13:00 ET · " + lab, "detail": "Stocks close at 13:00 ET.",
+                    "importance": "medium"})
 
     for yr in (today.year, today.year + 1):
         for mo in range(1, 13):
@@ -10983,6 +11018,44 @@ def _mme_commentary():
     return {}, None
 
 
+def _mme_events(names, days=30):
+    """What is coming for the dealer map's names: the macro calendar (outputs/calendar.json, written earlier in the run)
+    plus each map name's next earnings (earnings_state.json, Finnhub calendar), the next `days` days, oldest first.
+    Each earnings row says whether it falls inside the MME test's 5-trading-day earnings block (R05)."""
+    import json, os
+    from datetime import date, timedelta
+    today = date.today(); end = (today + timedelta(days=days)).isoformat()
+    ev = []
+    try:
+        for e in (json.load(open(os.path.join(OUTPUTS_DIR, "calendar.json"))).get("events") or []):
+            if today.isoformat() <= e.get("date", "") <= end:
+                ev.append({"date": e["date"], "kind": "macro", "type": e.get("type"), "label": e.get("label"),
+                           "detail": e.get("detail"), "importance": e.get("importance")})
+    except Exception as ex:
+        print(f"[mmemap] calendar unreadable: {ex}")
+    st = _load_earnings_state() or {}
+    nd, hr = st.get("next_dates") or {}, st.get("next_hour") or {}
+    # 5 trading days, weekends only (holidays make the window a day longer at most; the engine has the exact rule)
+    d, n = today, 0
+    while n < 5:
+        d += timedelta(days=1)
+        if d.weekday() < 5:
+            n += 1
+    lim = d.isoformat()
+    earn = {}
+    for tk in names:
+        ds = str(nd.get(tk) or "")[:10]
+        if len(ds) != 10:
+            continue
+        earn[tk] = {"date": ds, "hour": hr.get(tk) or "", "past": ds < today.isoformat()}
+        if today.isoformat() <= ds <= end:
+            h = {"bmo": "before the open", "amc": "after the close"}.get(hr.get(tk) or "", "")
+            ev.append({"date": ds, "kind": "earnings", "ticker": tk, "label": f"{tk} earnings", "detail": h,
+                       "importance": "high", "r05": ds <= lim})
+    ev.sort(key=lambda e: (e["date"], 0 if e["kind"] == "macro" else 1, e.get("ticker") or ""))
+    return ev, earn
+
+
 def run_mme_map():
     """
     The dealer map. Source of truth, in order: the file uploaded to wire/ (one file, by hand —
@@ -11090,6 +11163,37 @@ def run_mme_map():
             r["src"] = "phoenix"; rows[tk] = r
         else:
             missing.append(tk)
+    # SPX on the map: the same row the stocks get, from Phoenix's SPX gamma read (gex.json, CBOE chain) with the MME
+    # rule's own SPX expected move (SPX x VIX/100 / 16 x 0.71). Flagged index=True: shown on the page, never traded by
+    # the MME forward test (its engine skips index rows).
+    try:
+        _g = json.load(open(os.path.join(OUTPUTS_DIR, "gex.json")))
+        _ov, _lv = _g.get("overview") or {}, _g.get("levels") or {}
+        _spot = _ov.get("spx_spot")
+        try:
+            _vix = float((json.load(open(os.path.join(OUTPUTS_DIR, "vix_term.json"))) or {}).get("spot"))
+        except Exception:
+            _vix = None
+        _em = (_spot * _vix / 100.0 / 16.0 * 0.71) if (_spot and _vix) else None
+        try:
+            _st = (today - datetime.strptime(str(_g.get("asof", ""))[:10], "%Y-%m-%d").date()).days
+        except Exception:
+            _st = None
+        _w = lambda v: v if isinstance(v, dict) or v is None else {"strike": v}      # SPX's walls are bare numbers
+        _gn = dict(_g, levels=dict(_lv, put_wall=_w(_lv.get("put_wall")), call_wall=_w(_lv.get("call_wall"))))
+        _r = _mme_row("SPX", _gn, _em, _st)
+        if _r:
+            _ks = lambda key: sorted({x.get("strike") for x in (_lv.get(key) or []) if x.get("strike")})
+            _r.update({"src": "phoenix", "index": True, "em_src": ("VIX (MME rule: SPX x VIX/16 x 0.71)" if _em else "1.5% stand-in"),
+                       "support_tiered": [k for k in sorted(_ks("supports"), reverse=True) if k < _spot],
+                       "resist_tiered": [k for k in _ks("resistances") if k > _spot],
+                       "profile": _g.get("profile"), "vix": _vix})
+            _r["read"] = _mme_read(_r)
+            rows["SPX"] = _r
+        else:
+            print("[mmemap] SPX not added: gex.json has no spot or flip")
+    except Exception as e:
+        print(f"[mmemap] SPX not added: {e}")
     out = sorted(rows.values(), key=lambda r: -r["dist_flip_em"])
     try:
         _notes, _notes_meta = _mme_commentary()
@@ -11098,6 +11202,13 @@ def run_mme_map():
     _unmatched = sorted(set(_notes) - {r["ticker"] for r in out})
     if _unmatched:
         print(f"[mmemap] commentary for names not on the map: {','.join(_unmatched)}")
+    try:
+        _events, _earn = _mme_events([r["ticker"] for r in out])
+    except Exception as e:
+        print(f"[mmemap] events not built: {e}"); _events, _earn = [], {}
+    for r in out:
+        if r["ticker"] in _earn:
+            r["earn"] = _earn[r["ticker"]]
     groups = {k: [r for r in out if r["regime"] == k] for k in ("green", "amber", "red")}
     stand = [r for r in out if r["status"]]
     stand.sort(key=lambda r: {"ON FLIP": 0, "AT WALL": 1, "NEAR FLIP": 2, "NEARING WALL": 3}.get(r["status"], 9))
@@ -11121,7 +11232,7 @@ def run_mme_map():
                 "red = below the flip. Status: AT WALL within 0.25 moves of a wall, NEARING within one, ON FLIP within 0.15, "
                 "NEAR FLIP within one.",
         "groups": groups, "standouts": stand,
-        "notes": _notes, "notes_meta": _notes_meta, "etf_rows": etf_rows})
+        "notes": _notes, "notes_meta": _notes_meta, "etf_rows": etf_rows, "events": _events})
     print(f"[mmemap] {len(out)}/{len(names)} names ({n_up} from upload, {len(out)-n_up} from Phoenix) · green {len(groups['green'])} "
           f"amber {len(groups['amber'])} red {len(groups['red'])} · standouts {len(stand)} · missing {','.join(missing) or 'none'}")
     sb_heartbeat("mme_map", len(out) >= max(5, len(names) // 2),
