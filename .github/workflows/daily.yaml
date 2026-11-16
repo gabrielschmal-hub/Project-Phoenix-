@@ -1,8 +1,8 @@
 name: Phoenix Daily Run
 
 on:
-  schedule:
-    - cron: '0 5 * * 1-5'
+  # No GitHub cron: GitHub skipped or delayed it (13 and 16 Nov 2026). Supabase pg_cron starts this run at 05:00 UTC
+  # through the gh_dispatch function (job phoenix-sched-daily); workflow_dispatch below is that entry point.
   workflow_dispatch:
   # Dropping the morning wire files IS the publish: any commit touching
   # wire/** triggers a fast wire-only run, live on the dashboard in ~2 min.
