@@ -1,5 +1,5 @@
 {
- "asof": "2026-11-16 07:58 UTC",
+ "asof": "2026-11-16 13:57 UTC",
  "date": "2026-11-16",
  "summary": {
   "pass": 33,
@@ -116,14 +116,14 @@
    "id": "screen.rules",
    "area": "options",
    "status": "pass",
-   "detail": "34 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
+   "detail": "38 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
    "where": "run_ic_screen (outputs/ic_screen.json)"
   },
   {
    "id": "screen.proposed",
    "area": "options",
    "status": "pass",
-   "detail": "8 proposed of 34 winners",
+   "detail": "11 proposed of 38 winners",
    "where": "run_ic_screen"
   },
   {
@@ -144,7 +144,7 @@
    "id": "forward.marked",
    "area": "forward test",
    "status": "pass",
-   "detail": "285 of 285 open trades marked for 2026-11-16 (0 opened today)",
+   "detail": "285 of 285 open trades marked for 2026-11-16 (16 opened today)",
    "where": "run_ic_record step 3a"
   },
   {
@@ -158,28 +158,28 @@
    "id": "forward.size",
    "area": "forward test",
    "status": "pass",
-   "detail": "highest trade id 288 (the app pages 1,000 at a time up to 20,000)",
+   "detail": "highest trade id 304 (the app pages 1,000 at a time up to 20,000)",
    "where": "app optRowsAll"
   },
   {
    "id": "decisions.logged",
    "area": "learning",
    "status": "pass",
-   "detail": "0 options decisions logged for 2026-11-16",
+   "detail": "133 options decisions logged for 2026-11-16",
    "where": "run_ic_record (decisions table)"
   },
   {
    "id": "forward.recap",
    "area": "forward test",
    "status": "pass",
-   "detail": "recap of 164 trades, 9 closed at their planned exit",
+   "detail": "recap of 176 trades, 9 closed at their planned exit",
    "where": "run_ic_recap"
   },
   {
    "id": "news",
    "area": "data",
    "status": "pass",
-   "detail": "251 Finnhub calls, 192/250 names with news, 0 failed",
+   "detail": "251 Finnhub calls, 193/250 names with news, 0 failed",
    "where": "run_news (Finnhub)"
   },
   {
@@ -193,7 +193,7 @@
    "id": "portfolios.inputs",
    "area": "portfolios",
    "status": "pass",
-   "detail": "core 4 (the builder's Long Term template (no saved portfolio found)), satellite 5, tactical 15, options 8",
+   "detail": "core 4 (the builder's Long Term template (no saved portfolio found)), satellite 5, tactical 15, options 11",
    "where": "run_portfolios (stocks.json trade/invest books, ic_screen proposed, Supabase portfolios)"
   },
   {
@@ -207,7 +207,7 @@
    "id": "portfolios.fx",
    "area": "portfolios",
    "status": "pass",
-   "detail": "EURUSD 1.1022 from yahoo",
+   "detail": "EURUSD 1.1013 from yahoo",
    "where": "_fx_usd_rates (Yahoo)"
   },
   {
@@ -256,7 +256,7 @@
    "id": "heartbeats",
    "area": "pipeline",
    "status": "warn",
-   "detail": "24 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | senate_efd: agreement HTTP 503 | house_ptr: 13 unseen filings \u00b7 0 PDFs parsed \u00b7 13 fetch/parse failures {'pdftotext empty': 13} \u00b7 0 rows",
+   "detail": "25 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | senate_efd: agreement HTTP 503 | house_ptr: 13 unseen filings \u00b7 0 PDFs parsed \u00b7 13 fetch/parse failures {'pdftotext empty': 13} \u00b7 0 rows",
    "where": "heartbeats table"
   }
  ]
