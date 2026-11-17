@@ -436,12 +436,13 @@ def decide_message(day, R):
     if not day.get("data_ok"):
         return ("MME test \u00b7 data check FAILED", [f"No setups today: map {day.get('map_date')}, SPX {spx.get('colour')}. See Health."], "high", "warning")
     if not lines:
-        return None
+        # 17 Nov 2026: a quiet day is pushed too, as one short line; the reasons are in the MME Test tab
+        return (("[dry run] " if day.get("dry") else "") + "MME test", ["No orders today"], "low", "zzz")
     title = f"MME test \u00b7 {n} new order{'s' if n != 1 else ''}" if n else "MME test \u00b7 regime cut"
     return (("[dry run] " if day.get("dry") else "") + title, lines, "default", "chart_with_upwards_trend")
 
 
-def morning_message(ev, R, dry):
+def morning_message(ev, R, dry, n_open=0, n_expired=0):
     """The push after the morning review: limit fills and closed trades ($2,000 account), grouped by name."""
     acct = R["accounts"][0]
     fills, exits = {}, {}
@@ -457,7 +458,8 @@ def morning_message(ev, R, dry):
         usd = ("\u2212" if e["pnl"] < 0 else "+") + f"${abs(e['pnl']):.2f}"
         lines.append(f"{tk} \u00b7 {why} {e['px']:.2f} \u00b7 {e['r']:+.2f}R ({usd} on $2,000) \u00b7 arms {_arms(es)}")
     if not lines:
-        return None
+        # 17 Nov 2026: the quiet morning is pushed too, as one short line
+        return (("[dry run] " if dry else "") + "MME test", ["No fills, stops or exits"], "low", "zzz")
     t = []
     if fills: t.append(f"{len(fills)} filled")
     if exits: t.append(f"{len(exits)} closed")
@@ -620,8 +622,10 @@ def morning(today, R=None, data=None, write=True):
                 else:
                     patch.update({"status": "cancelled", "exit_reason": "limit not reached (cancelled at the close)", "d_close": prev.isoformat()})
                     t["status"] = "cancelled"
+                    log.setdefault("expired", []).append(tk)
             else:
                 patch.update({"status": "cancelled", "exit_reason": "stale pending order"}); t["status"] = "cancelled"
+                log.setdefault("expired", []).append(tk)
         if t["status"] != "open":
             if write and patch:
                 data.update_trade(t["id"], patch)
@@ -684,7 +688,9 @@ def morning(today, R=None, data=None, write=True):
         data.put_day(today, "morning", day, dry)
         data.set_state("morning_done", today.isoformat())
         write_contract(data, R, today, dry)
-        m = morning_message(ev, R, dry)
+        _open = len({(t["ticker"], t["arm"]) for t in data.trades(("open",)) if int(t["acct"]) == R["accounts"][0]})
+        _exp = len(set(log.get("expired") or []))
+        m = morning_message(ev, R, dry, _open, _exp)
         if m:
             notify(*m)
     day["_events"] = ev
@@ -925,6 +931,100 @@ def run_morning():
     return out
 
 
+def last_at_or_before(series, t):
+    out = (None, None)
+    for ts, px in series or []:
+        if ts <= t:
+            out = (ts, px)
+        else:
+            break
+    return out
+
+
+def shadow(today, R=None, data=None, at=None, write=True):
+    """Record-only check, hourly 11:00-15:00 ET (added 17 Nov 2026, not part of rules v1.4.3): which names WOULD qualify
+    for an entry at this hour, with the same rules and the morning's map, priced at the latest 5-minute snapshot.
+    Places no orders and sends no push. It exists so the 14 Dec review can measure whether a second decision in the day
+    would have added winners. Names already held or ordered today are listed separately."""
+    R = R or load_rules(); data = data or Data()
+    if not is_trading_day(today, R) or not is_live(today, R):
+        return {"skipped": "not a live trading day"}
+    at = at or datetime.now(timezone.utc)
+    hh = at.astimezone(ET).hour if ET else at.hour - 5
+    rows, map_date, _ = data.map()
+    chains, _cd = data.chains()
+    prev = prev_trading_day(today, R)
+    data_ok = bool(map_date) and prev.isoformat() < map_date <= today.isoformat()
+    names = sorted(rows)
+    snaps = data.snaps(names + ["SPX", "VIX"], today)
+    px = {tk: last_at_or_before(snaps.get(tk), at)[1] for tk in names}
+    spx_px = last_at_or_before(snaps.get("SPX"), at)[1]
+    vix = last_at_or_before(snaps.get("VIX"), at)[1]
+    flip, flip_d = data.spx_flip()
+    sem = spx_em(spx_px, vix, R) if (spx_px and vix) else None
+    colour, sdist = spx_colour(spx_px, flip, sem, R)
+    spx = {"price": spx_px, "vix": vix, "flip": flip, "em": round(sem, 2) if sem else None,
+           "dist": round(sdist, 2) if sdist is not None else None, "colour": colour}
+    if colour is None:
+        data_ok = False
+    funnel = []
+    for tk in names:
+        if px.get(tk) is None:
+            continue
+        funnel.append(evaluate(tk, rows[tk], px[tk], chains.get(tk, []), spx, R, data.earnings(tk), today, data_ok))
+    held = {(t["arm"], t["ticker"]) for t in data.trades(("open", "pending"))}
+    would, already = [], []
+    for arm, cfg in R["arms"].items():
+        if cfg.get("random"):
+            continue
+        key = "blocked_c" if cfg.get("spx_any") else ("blocked_d" if cfg.get("r05_off") else "blocked")
+        for e in funnel:
+            if "checks" not in e or e.get(key) is not None:
+                continue
+            entry = e["price"] if str(e.get("band", "")).startswith("in the band") else e.get("band_hi")
+            up = [w for w in (e.get("walls") or []) if entry is not None and w > entry]
+            rec = {"arm": arm, "ticker": e["ticker"], "price": e["price"], "band": e.get("band"), "band_hi": e.get("band_hi"),
+                   "stop": e.get("stop"), "points": e.get("points"), "em": e.get("em"), "entry": entry,
+                   "next_wall": min(up) if up else None}
+            (already if (arm, e["ticker"]) in held else would).append(rec)
+    out = {"at": at.isoformat(), "hour_et": hh, "spx": spx, "data_ok": data_ok, "would_enter": would, "already_held": already,
+           "funnel": [{k: v for k, v in e.items() if k in ("ticker", "price", "blocked", "blocked_c", "blocked_d", "band", "band_hi", "stop")}
+                      for e in funnel]}
+    if write:
+        data.put_day(today, f"shadow_{hh:02d}", out, False)
+        # 17 Nov 2026 (Gabriel): push a name the first time it qualifies after the 10:00 decision, so he can see it even
+        # though it is not on the official register; nothing new, no push
+        seen = str(data.state("shadow_pushed") or "")
+        seen = set(seen.split(":", 1)[1].split(",")) - {""} if seen.startswith(today.isoformat() + ":") else set()
+        title, lines, new = shadow_message(would, seen, hh, spx)
+        if lines and notify(title, lines, "default", "eyes"):
+            data.set_state("shadow_pushed", today.isoformat() + ":" + ",".join(sorted(seen | new)))
+        out["pushed"] = sorted(new) if lines else []
+        data.heartbeat("mme_test_shadow", True, f"{hh:02d}:00 ET · SPX {colour} · would enter {len(would)} (arms x names) · "
+                                               f"already held {len(already)} · record only")
+    return out
+
+
+def shadow_message(would, seen, hh, spx):
+    """The hourly check's push: names that qualify now and were not pushed earlier today. Not a test order.
+    v1.4.3 has no fixed take-profit (exits are stops that trail), so the push shows the two levels that act as targets:
+    the next wall above the entry and +1R, where the trailing stop starts (T1)."""
+    by = {}
+    for w in would:
+        if w["ticker"] not in seen and w.get("entry") and w.get("stop"):
+            by.setdefault(w["ticker"], []).append(w)
+    lines = []
+    for tk, ws in sorted(by.items()):
+        w = next((x for x in ws if x["arm"] == "B"), ws[0])
+        e, sl = float(w["entry"]), float(w["stop"])
+        tp = f"TP next wall {w['next_wall']:.2f}" if w.get("next_wall") else "TP no wall above"
+        lines.append(f"{tk} \u00b7 entry {e:.2f} \u00b7 SL {sl:.2f} \u00b7 {tp} \u00b7 +1R {e + (e - sl):.2f} \u00b7 arms {_arms(ws)}")
+    if lines:
+        lines.append(f"{hh:02d}:00 New York check \u00b7 not placed, not in the test register \u00b7 SPX {spx.get('colour')}")
+    n = len(by)
+    return (f"MME after 10:00 \u00b7 {n} setup{'s' if n != 1 else ''}", lines, set(by))
+
+
 def run_decide(force=False):
     """The 10:00 ET job. Runs only between 10:00 and 11:30 ET (the workflow fires at two UTC times to cover DST)."""
     R = load_rules(); d = Data()
@@ -932,6 +1032,14 @@ def run_decide(force=False):
         print("[mme_ft] no Supabase credentials — skipped"); return None
     day, now = today_et()
     et = now.astimezone(ET) if ET else now
+    decided = bool(d.get_day(day, "decide"))
+    if not force and 11 <= et.hour <= 15 and (decided or et.hour > 11 or et.minute > 30):
+        # after the decision: the hourly record-only check (no orders, no push)
+        at = now.replace(minute=0, second=0, microsecond=0) if et.minute < 30 else now
+        out = shadow(day, R, d, at=at)
+        print(f"[mme_ft] shadow {day} {et:%H:%M} ET: " + (f"SPX {out['spx'].get('colour')} · would enter {len(out['would_enter'])} · "
+              f"already held {len(out['already_held'])}" if "spx" in out else str(out)))
+        return out
     if not force and not (et.hour == 10 or (et.hour == 11 and et.minute <= 30)):
         print(f"[mme_ft] {et:%H:%M} ET is outside the 10:00-11:30 ET window — nothing to do"); return None
     try:
