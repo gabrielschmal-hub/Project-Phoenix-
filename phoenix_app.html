@@ -1069,7 +1069,8 @@
   .mme-row{display:grid;grid-template-columns:58px 1fr 76px;align-items:center;gap:8px;padding:20px 6px 20px 8px;cursor:pointer;border-left:3px solid var(--line2);border-bottom:1px solid var(--line2)}
   .mme-row:hover{background:var(--card2)} .mme-row.sel{background:var(--card2);box-shadow:inset 0 0 0 1px var(--gold)}
   .mme-row.reg-green{border-left-color:#2fae66} .mme-row.reg-amber{border-left-color:#d79a2b} .mme-row.reg-red{border-left-color:#d0574a}
-  .mme-row .tk{font-weight:800;font-size:15px;letter-spacing:.02em} .mme-row .tk:hover,.gh .tk:hover{color:var(--gold)}
+  .mme-row .tk{font-weight:800;font-size:15px;letter-spacing:.02em}
+  .mme-row .tk .wch{display:block;font-style:normal;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);opacity:.55;margin-top:3px} .mme-row .tk:hover,.gh .tk:hover{color:var(--gold)}
   .mme-row .st{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--amber);text-align:right;font-weight:700;line-height:1.2}
   .mme-row .track{position:relative;height:3px;background:var(--line2);border-radius:2px;margin:0 6px}
   .mme-row .m{position:absolute;top:-4px;width:2px;height:11px;transform:translateX(-50%)}
@@ -2446,7 +2447,7 @@ canvas.mk-cv{width:100%;height:100%;display:block;touch-action:none;cursor:cross
 .spx-hint{position:absolute;right:10px;bottom:3px;font-family:var(--mono);font-size:9.5px;
   letter-spacing:.6px;color:var(--inkGhost);pointer-events:none}
 /* cards */
-#spxCards{display:none;grid-template-columns:repeat(3,1fr);grid-auto-rows:152px;gap:11px}
+#spxCards{display:none;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:152px;gap:11px}
 /* Chart mode keeps the tile at its fixed height; Cards mode lets it grow so
    every instrument gets a readable sparkline instead of a 40px sliver. */
 .mkt-grid .tile.a-spx .tbody.mk-cards-on,.a-spx .tbody.mk-cards-on,
@@ -2471,10 +2472,26 @@ canvas.mk-cv{width:100%;height:100%;display:block;touch-action:none;cursor:cross
 .spx-mcard .mc-empty{font-family:var(--mono);font-size:10.5px;color:var(--inkFade);
   margin:auto 0;line-height:1.5}
 @media(max-width:900px){
-  #spxCards{grid-template-columns:repeat(2,1fr);grid-auto-rows:146px}
+  #spxCards{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:146px}
   .spx-ohlc{margin-left:0;width:100%}
   .spx-ohlc .oh-cell{min-width:62px;padding:0 8px}
   .mk-view{margin-left:0}
+}
+/* phone (17 Nov 2026): two cards a row that fit the screen. The name gets its own line, the LIVE and ticker
+   chips sit under it, and nothing can push a card wider than its column. */
+@media(max-width:600px){
+  #spxCards{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:auto;gap:8px}
+  .spx-mcard{padding:9px 9px 7px;min-width:0;overflow:hidden}
+  .spx-mcard .h{flex-wrap:wrap;gap:4px 5px}
+  .spx-mcard .t{flex:1 1 100%;font-size:14px;line-height:1.15}
+  .spx-mcard .chip{font-size:8.5px;letter-spacing:.4px;padding:2px 4px}
+  .spx-mcard .m{flex-wrap:wrap;gap:1px 7px;margin:4px 0 5px}
+  .spx-mcard .px{font-size:15px}
+  .spx-mcard .pc{font-size:12px}
+  .spx-mcard canvas{flex:none;height:56px}
+  .spx-mcard .f{font-size:8.5px;gap:4px}
+  .spx-mcard .f span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .spx-mcard .f .o{white-space:nowrap;flex:none}
 }
 /* ---------- rotation navigator ---------- */
 .dp-groups{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -3881,7 +3898,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var out = [];
     for(var k in PX_WATCH){
       var b = PX_WATCH[k];
-      if(b === "position" || b === "macro" || b === "index_proxy" || b === "watch") out.push(k);
+      // 17 Nov 2026: the index ETF proxies (SPY, QQQ...) left the 5-minute lane; the strip shows the real
+      // indices (SPX, Nasdaq, VIX..., from Yahoo) next to positions, TLT and starred names
+      if(b === "position" || b === "macro" || b === "macro_index" || b === "index_proxy" || b === "watch") out.push(k);
     }
     return out;
   }
@@ -3916,7 +3935,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var keys = Object.keys(PX_LIVE);
     if(!keys.length){ var old = document.getElementById("pxLive");
       if(old && old.parentNode) old.parentNode.removeChild(old); return; }
-    var order = { position: 0, macro: 1, index_proxy: 2, watch: 3 };
+    var order = { macro_index: 0, position: 1, macro: 2, index_proxy: 3, watch: 4, watch_eu: 5 };
     keys.sort(function(a, b){
       var oa = order[(PX_WATCH && PX_WATCH[a]) || "watch"],
           ob = order[(PX_WATCH && PX_WATCH[b]) || "watch"];
@@ -3927,7 +3946,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     keys.forEach(function(tk){
       var q = PX_LIVE[tk];
       var bk = (PX_WATCH && PX_WATCH[tk]) || "watch";
-      if(bk === "sector" || bk === "sp50") return;  // those feed rotation + heat, not the tape
+      // the tape: indices, positions, TLT and starred names. MME names have their own page, and a ticker
+      // that left the 5-minute lane (no active bucket) would only show a stale price (17 Nov 2026)
+      if(!PX_WATCH || order[PX_WATCH[tk]] == null) return;
       var up = q.chg_pct != null && q.chg_pct >= 0;
       // fixed palette, not theme tokens: the tape is dark glass in both themes
       var col = q.chg_pct == null ? "#8A95A1" : up ? "#3FBF77" : "#D9534F";
@@ -4096,7 +4117,12 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       if(page === "trades"   && touched && typeof trRender === "function") trRender();
       if(page === "launch"   && touched && typeof lcRender === "function") lcRender();
       if(page === "portfolio"&& touched && typeof pfRender === "function") pfRender();
-      if(page === "markets"){ pxMarquee(); pxPatchCards(); }
+      if(page === "markets"){ pxMarquee(); pxPatchCards();
+        // the GEX histogram's spot line follows the live SPX price (walls and bars stay the morning's)
+        var sq = PX_LIVE.SPX;
+        if(sq && sq.last != null && window.__mktGexData && window.__drawMktGex && window.__mktGexSpot !== +sq.last){
+          window.__mktGexSpot = +sq.last; window.__drawMktGex(window.__mktGexData, "", true); }
+      }
       if(page === "screeners" && typeof scrApplyLive === "function") scrApplyLive();
       pxPatchDetail();
     }catch(e){ /* a paint error must never kill the poll loop */ }
@@ -8598,8 +8624,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   // ---- SPX GEX HISTOGRAM -------------------------------------------------
   // exposed so the render path can be exercised without a live gex.json
   window.__drawMktGex = drawMktGex;
-  function drawMktGex(g,sfx){
+  function drawMktGex(g,sfx,live){
     sfx=sfx||"";
+    if(!sfx) window.__mktGexData=g;
     var host=document.getElementById("mGexPlot"+sfx);
     var htile=document.querySelector(sfx?".ed-gexh":".a-gexh");
     var hrow=document.getElementById("gexhRow"+sfx);
@@ -8614,7 +8641,11 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     host.style.display="block";
 
     var ov=g.overview||{}, L=g.levels||{};
-    var spot=ov.spx_spot||ov.spot, flip=ov.gamma_flip;
+    // Spot is live (17 Nov 2026): the walls, flip and bars come from the morning chain and stay put; only the
+    // spot line follows the 5-minute SPX price, when it is fresher than 30 minutes.
+    var lq=(typeof PX_LIVE==="object"&&PX_LIVE)?PX_LIVE.SPX:null, liveSpot=null;
+    try{ if(lq&&lq.last!=null&&Date.now()-new Date(lq.updated_at).getTime()<30*60*1000) liveSpot=+lq.last; }catch(e){}
+    var spot=liveSpot||ov.spx_spot||ov.spot, flip=ov.gamma_flip;
     function lv(x){ return (x&&x.strike!=null)?x.strike:(typeof x==="number"?x:null); }
     function oiOf(x,side){
       if(!x||typeof x!=="object") return null;
@@ -8687,7 +8718,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
 
     function fmt(v){ return v==null?null:Math.round(v).toLocaleString(); }
     var marks=[
-      {v:spot, c:C.spot, t:"SPX Spot",      w:3.4, d:"solid"},
+      {v:spot, c:C.spot, t:liveSpot?"SPX Spot \u00b7 live":"SPX Spot", w:3.4, d:"solid"},
       {v:flip, c:C.flip, t:"G-Flip",        w:3.2, d:"dash"},   // null = none in range
       {v:putW, c:C.put,  t:"OI Support",    w:2.6, d:"dot",
        oi:oiOf(L.put_wall,"put")},
@@ -8754,7 +8785,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     // start the scroll centred on spot, not pinned to the far-left strike -
     // that is why the chart opened on 7,300 with spot at 7,601 off-screen
     var sc=host.parentNode;
-    if(sc&&sc.classList&&sc.classList.contains("gexh-scroll")){
+    if(!live&&sc&&sc.classList&&sc.classList.contains("gexh-scroll")){
       requestAnimationFrame(function(){
         var over=sc.scrollWidth-sc.clientWidth;
         if(over>0&&xr&&spot){
@@ -12303,7 +12334,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
           function lab(m){ return m.side?'<b class="'+m.side+'">'+m.t+'</b>':''; }
           var by={}; marks.forEach(function(m){ by[m.k]=m; });
           return '<div class="mme-row reg-'+r.regime+(MME_SEL===r.ticker?' sel':'')+'" data-sel="'+r.ticker+'">'+
-            '<span class="tk" data-open="'+r.ticker+'">'+r.ticker+'</span>'+
+            '<span class="tk" data-open="'+r.ticker+'">'+r.ticker+(r.watch?'<i class="wch" title="Sector Top 5: on the map for reading only, not in the MME test yet ('+((r.trial&&r.trial.clean_streak)||0)+' of '+((r.trial&&r.trial.needs)||3)+' clean maps in a row; can join from '+((r.trial&&r.trial.join_from)||"")+')">watch</i>':'')+'</span>'+
             '<div class="track">'+
               (by.sup?'<i class="m sup" style="left:'+p(by.sup.v).toFixed(1)+'%">'+lab(by.sup)+'</i>':'')+
               (by.flip?'<i class="m flip" style="left:'+p(by.flip.v).toFixed(1)+'%">'+lab(by.flip)+'</i>':'')+
@@ -12378,6 +12409,16 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
             if(gn) gn.innerHTML="Dealer gamma by strike, $M per 1% move \u00b7 calls up, puts down"+
               (fri?" \u00b7 "+(totAll?Math.round(totF/totAll*100):0)+"% of the gamma in view expires "+friLbl:"")+
               " \u00b7 "+(ch.date||"")+" chain";
+          } else if(r.profile&&r.profile.length){
+            // SPX (17 Nov 2026): no stock chain, but its map row carries Phoenix's SPX gamma profile (gex.json,
+            // CBOE chain, all expiries). $B per 1% move -> $M, the same scale as the stocks. No Friday split here.
+            var pk=r.profile.filter(function(p){ return p.strike>=lo&&p.strike<=hi; }).sort(function(a,b){ return a.strike-b.strike; });
+            traces.push({type:"bar",x:pk.map(function(p){ return p.strike; }),y:pk.map(function(p){ return (p.call_gex_B||0)*1000; }),
+              marker:{color:"#6f8fd8",line:{width:0}},hovertemplate:"%{x}: %{y:,.0f}M<extra>calls</extra>"});
+            traces.push({type:"bar",x:pk.map(function(p){ return p.strike; }),y:pk.map(function(p){ return -Math.abs((p.put_gex_B||0)*1000); }),
+              marker:{color:"#e39b2f",line:{width:0}},hovertemplate:"%{x}: %{y:,.0f}M<extra>puts</extra>"});
+            if(gn) gn.innerHTML="Dealer gamma by strike, $M per 1% move \u00b7 calls up, puts down \u00b7 all expiries \u00b7 "+
+              esc(String(r.asof||"").slice(0,10))+" SPX chain";
           } else {
             traces.push({type:"scatter",x:[lo,hi],y:[0,0],mode:"lines",line:{color:line,width:1},hoverinfo:"skip"});
             if(gn) gn.textContent="Levels only \u2014 no chain file on hand yet.";
