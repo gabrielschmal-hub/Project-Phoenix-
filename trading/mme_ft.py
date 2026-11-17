@@ -237,8 +237,10 @@ class Data:
     def map(self):
         if self._map is None:
             m = _j("mme_map.json") or {}
-            # index rows (SPX) are on the map for reading only: the test trades the stock universe, never the index
-            rows = {r["ticker"]: r for g in (m.get("groups") or {}).values() for r in g if not r.get("index")}
+            # index rows (SPX) are on the map for reading only: the test trades the stock universe, never the index.
+            # WATCH rows (Sector Top 5, 17 Nov 2026) are display-only until the map says they joined the test.
+            rows = {r["ticker"]: r for g in (m.get("groups") or {}).values() for r in g
+                    if not r.get("index") and not r.get("watch")}
             self._map = (rows, str(m.get("date") or "")[:10], m.get("asof"))
         return self._map
 
