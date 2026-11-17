@@ -179,10 +179,13 @@ def test_notify_queues_web_push(monkeypatch):
 
 def test_index_rows_are_not_tradeable(tmp_path, monkeypatch):
     import json
-    m = {"date": "2026-11-16", "groups": {"green": [{"ticker": "AAA"}, {"ticker": "SPX", "index": True}], "amber": [], "red": []}}
+    m = {"date": "2026-11-16", "groups": {"green": [{"ticker": "AAA"}, {"ticker": "SPX", "index": True},
+                                                    {"ticker": "JPM", "watch": True}, {"ticker": "XOM", "watch": False}],
+                                          "amber": [], "red": []}}
     monkeypatch.setattr(M, "_j", lambda name: m if name == "mme_map.json" else None)
     rows, d, _ = M.Data().map()
     assert "AAA" in rows and "SPX" not in rows
+    assert "JPM" not in rows and "XOM" in rows            # Sector Top 5: watch rows stay out until they join
 
 
 def test_second_morning_run_leaves_todays_orders_alone(tmp_path, monkeypatch):
