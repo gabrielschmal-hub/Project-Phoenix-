@@ -1,7 +1,7 @@
 {
  "schema": "phoenix-fact-pack/1",
  "date": "2026-11-17",
- "asof": "2026-11-17 05:42 UTC",
+ "asof": "2026-11-17 06:43 UTC",
  "market": {
   "regime": "ENERGY_GRIND",
   "regime_held_weeks": 7,
@@ -20,7 +20,7 @@
    "net_B": -98.52,
    "regime": "negative",
    "flip": null,
-   "dist_to_flip_pct": 2.96,
+   "dist_to_flip_pct": 2.86,
    "call_wall": null,
    "put_wall": null,
    "spot": 7416.59
@@ -137,19 +137,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 15.3,
+    "value": 14.25,
     "op": ">",
     "threshold": 0,
-    "clear_by": 15.3,
+    "clear_by": 14.25,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 47.64,
+    "value": 46.28,
     "op": ">",
     "threshold": 25,
-    "clear_by": 22.64,
+    "clear_by": 21.28,
     "ok": true
    }
   ],
@@ -163,23 +163,23 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 15.3,
+    "now": 14.25,
     "threshold": 0,
-    "distance": 15.3,
+    "distance": 14.25,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 47.64,
+    "now": 46.28,
     "threshold": 25,
-    "distance": 22.64,
+    "distance": 21.28,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
   "runner_up": {
    "regime": "POLICY_TIGHTENING",
    "score": 48.6,
-   "behind_by": 5.1
+   "behind_by": 4.0
   }
  },
  "screener": {
@@ -497,7 +497,7 @@
  },
  "news": {
   "date": "2026-11-12",
-  "asof": "2026-11-17 05:01 UTC",
+  "asof": "2026-11-17 06:03 UTC",
   "headline": "Jensen Huang resigns as Nvidia's CEO \u2014 and the ten-year yield goes back above 5%",
   "standfirst": "Nvidia said Jensen Huang had resigned as chief executive, with CFO Colette Kress as interim CEO; the shares fell as much as 14% and closed 4.34% lower. As bonds reopened, the two-year rose about 15bp to 4.88% and the ten-year to 5.10%. The S&P slipped 0.35%, but the Russell fell 1.66% and gold 2.79%, while WTI rose 2.55% on attacks on Saudi oil sites. The book is flat; Q4 is +34.64 realised, heat 0R.",
   "themes": [
@@ -536,23 +536,23 @@
  },
  "provenance": {
   "macro": {
-   "asof": "2026-11-17 05:01 UTC",
+   "asof": "2026-11-17 06:03 UTC",
    "age_min": null
   },
   "gex": {
-   "asof": "2026-11-17 05:01 UTC",
+   "asof": "2026-11-17 06:03 UTC",
    "age_min": null
   },
   "stocks": {
-   "asof": "2026-11-17 05:12 UTC",
+   "asof": "2026-11-17 06:12 UTC",
    "age_min": null
   },
   "institutional_holdings": {
-   "asof": "2026-11-17 05:18 UTC",
+   "asof": "2026-11-17 06:19 UTC",
    "quarter": "2026-09-30"
   },
   "congress_trades": {
-   "asof": "2026-11-17 05:16 UTC",
+   "asof": "2026-11-17 06:18 UTC",
    "status": {
     "written": "2026-11-17",
     "dropped_impossible_dates": 0,
@@ -582,7 +582,7 @@
    }
   },
   "wire": {
-   "asof": "2026-11-17 05:01 UTC"
+   "asof": "2026-11-17 06:03 UTC"
   }
  },
  "missing": [],
