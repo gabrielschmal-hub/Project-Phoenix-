@@ -36,9 +36,19 @@ function marketOpen(): { open: boolean; stamp: string } {
   return { open, stamp };
 }
 
+// Second lane (17 Nov 2026): the Sector Top 5 names added to the MME map live in bucket "sector5" and are
+// fetched by their own call at minute 4 of each 5 (pg_cron body {"bucket":"sector5"}), after the main lane
+// (~100s from minute 0) and the screener lane (~60s from minute 2). One list of ~110 names would not fit
+// Finnhub's 60 calls/min inside the free plan's 150s function window.
+// That call goes to a COPY of this file deployed as "quotes_s5", never to "quotes" itself: a worker lives
+// 150s from boot and serves every request to its function in that time, so a sector call at minute 4 kept
+// its worker alive into minute 5 and the main lane was killed mid-run (17 Nov, 15:30 and 15:35 ET).
+const LANES: Record<string, string> = { sector5: "fast_sector5" };
+let LANE = "fast";
+
 async function beat(ok: boolean, note: string) {
   await SB.from("heartbeats").upsert({
-    lane: "fast", ts: new Date().toISOString(), ok, note,
+    lane: LANE, ts: new Date().toISOString(), ok, note,
   });
 }
 
@@ -48,8 +58,13 @@ Deno.serve(async (req: Request) => {
       status, headers: { "Content-Type": "application/json" },
     });
 
-  let force = false;
-  try { force = (await req.json())?.force === true; } catch { /* empty body */ }
+  let force = false, bucket = "";
+  try {
+    const b = await req.json();
+    force = b?.force === true;
+    bucket = typeof b?.bucket === "string" && LANES[b.bucket] ? b.bucket : "";
+  } catch { /* empty body */ }
+  LANE = bucket ? LANES[bucket] : "fast";
 
   // gate 1 — freeze. force does NOT bypass this one.
   const { data: st } = await SB.from("system_state")
@@ -67,7 +82,7 @@ Deno.serve(async (req: Request) => {
   // gate 3 — debounce
   if (!force) {
     const { data: hb } = await SB.from("heartbeats")
-      .select("ts").eq("lane", "fast").maybeSingle();
+      .select("ts").eq("lane", LANE).maybeSingle();
     if (hb && Date.now() - new Date(hb.ts).getTime() < 3 * 60 * 1000) {
       return out({ skip: "debounce", last: hb.ts });
     }
@@ -79,9 +94,11 @@ Deno.serve(async (req: Request) => {
     return out({ error: "FINNHUB_API_KEY not set" }, 500);
   }
 
-  const { data: watch, error: werr } = await SB.from("watch_tickers")
-    .select("ticker,bucket,ysym,px_scale").eq("active", true)
-    .neq("bucket", "screener");  // screener has its own staggered lane
+  let wq = SB.from("watch_tickers")
+    .select("ticker,bucket,ysym,px_scale").eq("active", true);
+  // screener and sector5 have their own staggered lanes
+  wq = bucket ? wq.eq("bucket", bucket) : wq.neq("bucket", "screener").neq("bucket", "sector5");
+  const { data: watch, error: werr } = await wq;
   if (werr || !watch?.length) {
     await beat(false, `watch list: ${werr?.message ?? "empty"}`);
     return out({ error: "watch list unavailable" }, 500);
@@ -108,14 +125,27 @@ Deno.serve(async (req: Request) => {
     try {
       const r = await fetch(
         "https://query1.finance.yahoo.com/v8/finance/chart/" +
-          encodeURIComponent(w.ysym) + "?interval=1d&range=2d",
+          encodeURIComponent(w.ysym) + "?interval=1d&range=5d",
         { headers: { "User-Agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" } });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const j = await r.json();
       const meta = j?.chart?.result?.[0]?.meta;
       const px = meta?.regularMarketPrice;
-      const pc = meta?.chartPreviousClose ?? meta?.previousClose ?? null;
+      // Previous close = the last daily close from a session BEFORE today's. Until 17 Nov 2026 this read
+      // chartPreviousClose with range=2d, which is the close before the 2-day window: two sessions back, so
+      // SPX showed -3.18% on a -1.16% day.
+      const res = j?.chart?.result?.[0];
+      const ts: number[] = res?.timestamp ?? [];
+      const cl: (number | null)[] = res?.indicators?.quote?.[0]?.close ?? [];
+      const off = Number(meta?.gmtoffset) || 0;
+      const dayOf = (t: number) => new Date((t + off) * 1000).toISOString().slice(0, 10);
+      const today = meta?.regularMarketTime ? dayOf(meta.regularMarketTime) : null;
+      let pc: number | null = null;
+      for (let k = ts.length - 1; k >= 0; k--) {
+        if (today && dayOf(ts[k]) < today && typeof cl[k] === "number") { pc = cl[k] as number; break; }
+      }
+      if (pc == null) pc = meta?.previousClose ?? meta?.chartPreviousClose ?? null;
       if (typeof px !== "number") throw new Error("no price in chart meta");
       const sc = Number(w.px_scale) || 1;
       rows.push({
