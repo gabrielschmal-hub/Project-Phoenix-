@@ -8890,6 +8890,62 @@ GEX_UNIVERSE = {
 }
 
 
+# SECTOR TOP 5 ON THE MME MAP (Gabriel, 17 Nov 2026). The top five S&P 500 names by market cap of each Select Sector
+# SPDR (his "Sector Top 5 - Market Cap and Volume" sheet), minus the ones Elliott's list already carries (NVDA AAPL
+# MSFT AVGO MU META AMZN TSLA, GOOGL via GOOG). They get the same chain, dealer map and GEX as the seed names, but
+# start as WATCH rows: shown on the MME page, never traded by the forward test. From MME_SECTOR5_JOIN a name joins
+# the test once its map row has been clean (today's chain, an options-implied EM, both walls) on the last
+# MME_SECTOR5_STREAK maps in a row; it then stays in. outputs/mme_watch.json keeps the record.
+MME_SECTOR5 = ["NFLX", "TMUS", "VZ",                       # XLC
+               "HD", "MCD", "TJX",                         # XLY
+               "BRK.B", "JPM", "V", "MA", "BAC",           # XLF
+               "LLY", "JNJ", "ABBV", "UNH", "MRK",         # XLV
+               "WMT", "COST", "KO", "PG", "PM",            # XLP
+               "XOM", "CVX", "COP", "WMB", "SLB",          # XLE
+               "CAT", "GE", "GEV", "RTX", "BA",            # XLI
+               "LIN", "NEM", "FCX", "SHW", "ECL",          # XLB
+               "NEE", "SO", "CEG", "DUK", "AEP",           # XLU
+               "WELL", "PLD", "EQIX", "AMT", "SPG"]        # XLRE
+MME_SECTOR5_JOIN = "2026-11-23"
+MME_SECTOR5_STREAK = 3
+
+
+def _mme_sector5_trial(rows, map_date, today):
+    """Mark each Sector Top 5 row WATCH (display only) or in the test, and record today's map in mme_watch.json."""
+    import os, json
+    fp = os.path.join(OUTPUTS_DIR, "mme_watch.json")
+    try:
+        st = json.load(open(fp))
+    except Exception:
+        st = {}
+    names = st.setdefault("names", {})
+    day = str(map_date or today)[:10]
+    for tk in MME_SECTOR5:
+        r = rows.get(tk)
+        clean = bool(r and (r.get("stale_days") or 0) == 0 and r.get("em_src") in ("atm_iv", "options")
+                     and r.get("support") is not None and r.get("resist") is not None)
+        n = names.setdefault(tk, {"days": {}})
+        n["days"][day] = clean
+        n["days"] = dict(sorted(n["days"].items())[-15:])
+        last = [v for _, v in sorted(n["days"].items())][-MME_SECTOR5_STREAK:]
+        if not n.get("joined") and str(today) >= MME_SECTOR5_JOIN and len(last) == MME_SECTOR5_STREAK and all(last):
+            n["joined"] = str(today)
+        if r:
+            streak = 0
+            for _, v in sorted(n["days"].items(), reverse=True):
+                if not v:
+                    break
+                streak += 1
+            r["sector5"] = True
+            r["watch"] = not n.get("joined")
+            r["trial"] = {"joined": n.get("joined"), "clean_streak": streak, "join_from": MME_SECTOR5_JOIN,
+                          "needs": MME_SECTOR5_STREAK}
+    st.update({"asof": _now(), "join_from": MME_SECTOR5_JOIN, "streak_needed": MME_SECTOR5_STREAK,
+               "rule": "A Sector Top 5 name joins the MME test from the join date once its map row was clean "
+                       "(today's chain, options-implied EM, both walls) on the last N maps in a row."})
+    write_json("mme_watch", st)
+    return st
+
 
 def _gex_candidates(cfg=None):
     """
@@ -11071,6 +11127,7 @@ def run_mme_map():
         names += list(GEX_UNIVERSE.get("seed") or [])
     except Exception:
         pass
+    names += MME_SECTOR5                                   # Sector Top 5 (17 Nov 2026): WATCH rows until they join
     try:
         names += [str(t.get("ticker")).upper() for t in _load_trades() if t.get("status") in ("open", "plan")]
     except Exception:
@@ -11165,6 +11222,10 @@ def run_mme_map():
             r["src"] = "phoenix"; rows[tk] = r
         else:
             missing.append(tk)
+    try:
+        _mme_sector5_trial(rows, chains_date if (computed and not use_upload) else None, today)
+    except Exception as e:
+        print(f"[mmemap] sector top 5 trial not recorded: {e}")
     # SPX on the map: the same row the stocks get, from Phoenix's SPX gamma read (gex.json, CBOE chain) with the MME
     # rule's own SPX expected move (SPX x VIX/100 / 16 x 0.71). Flagged index=True: shown on the page, never traded by
     # the MME forward test (its engine skips index rows).
@@ -11257,6 +11318,7 @@ def run_mme_chains(max_dte=180, band=0.35):
         names += list(GEX_UNIVERSE.get("seed") or [])
     except Exception:
         pass
+    names += MME_SECTOR5                                   # Sector Top 5 on the MME map (17 Nov 2026)
     try:
         names += [str(t.get("ticker")).upper() for t in _load_trades() if t.get("status") in ("open", "plan")]
     except Exception:
@@ -14552,6 +14614,7 @@ def run_gex_stocks_cboe(tickers=None, limit=None):
             tickers += list(GEX_UNIVERSE.get("seed") or [])
         except Exception:
             pass
+        tickers += MME_SECTOR5                             # Sector Top 5 on the MME map (17 Nov 2026)
         try:
             tickers += [t for t in (_held_and_planned_tickers() or [])]
         except Exception:
