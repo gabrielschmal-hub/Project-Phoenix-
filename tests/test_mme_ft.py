@@ -201,3 +201,45 @@ def test_second_morning_run_leaves_todays_orders_alone(tmp_path, monkeypatch):
     F.st.pop("morning_done")                             # even without the guard, today's orders are not touched
     M.morning(d1, R, F)
     assert all(t["status"] == "pending" for t in F.trs if t["id"] in {p["id"] for p in pend})
+
+
+def test_quiet_days_are_pushed(tmp_path, monkeypatch):
+    monkeypatch.setattr(M, "OUT", str(tmp_path))
+    sent = []
+    monkeypatch.setattr(M, "notify", lambda *a, **k: sent.append(a) or True)
+    d1, d2 = date(2026, 11, 23), date(2026, 11, 24)
+    S = {d1.isoformat(): {"SPX": [(_ts(d1, 15, 0), 7600.0)], "VIX": [(_ts(d1, 15, 0), 16.0)]}}
+    F = Fake(d1, S, {})                                             # nothing on the map qualifies
+    M.decide(d1, R, F)
+    assert sent[0][0] == "MME test" and sent[0][1] == ["No orders today"]
+    F.T = d2
+    M.morning(d2 + timedelta(days=1), R, F)
+    assert sent[1][0] == "MME test" and sent[1][1] == ["No fills, stops or exits"]
+
+
+def test_hourly_shadow_records_without_trading(tmp_path, monkeypatch):
+    monkeypatch.setattr(M, "OUT", str(tmp_path))
+    sent = []
+    monkeypatch.setattr(M, "notify", lambda *a, **k: sent.append(a) or True)
+    d1 = date(2026, 11, 23)
+    rows = {"AAA": {"ticker": "AAA", "em": 4.0, "em_src": "atm_iv", "flip": 190.0, "support": 200.0, "resist": 206.0,
+                    "support_tiered": [200.0, 192.0], "stale_days": 0}}
+    S = {d1.isoformat(): {"SPX": [(_ts(d1, 15, 0), 7300.0), (_ts(d1, 17, 0), 7600.0)], "VIX": [(_ts(d1, 15, 0), 16.0)],
+                          "AAA": [(_ts(d1, 15, 0), 197.0), (_ts(d1, 17, 0), 200.8)]}}
+    F = Fake(d1, S, rows)
+    out = M.shadow(d1, R, F, at=_ts(d1, 17, 0))                    # 12:00 ET: SPX back to GREEN, AAA in its band
+    assert out["spx"]["colour"] == "GREEN" and {w["arm"] for w in out["would_enter"] if w["ticker"] == "AAA"} >= {"A", "B"}
+    assert F.trs == [] and (d1, "shadow_12") in F.dayrows                     # recorded, no test order
+    assert len(sent) == 1 and sent[0][0].startswith("MME after 10:00") and sent[0][1][0].startswith("AAA \u00b7 entry")
+    M.shadow(d1, R, F, at=_ts(d1, 17, 0))                                    # same name next hour: no second push
+    assert len(sent) == 1
+
+
+def test_hourly_shadow_quiet_when_nothing_qualifies(tmp_path, monkeypatch):
+    monkeypatch.setattr(M, "OUT", str(tmp_path))
+    sent = []
+    monkeypatch.setattr(M, "notify", lambda *a, **k: sent.append(a) or True)
+    d1 = date(2026, 11, 23)
+    S = {d1.isoformat(): {"SPX": [(_ts(d1, 17, 0), 7600.0)], "VIX": [(_ts(d1, 17, 0), 16.0)]}}
+    M.shadow(d1, R, Fake(d1, S, {}), at=_ts(d1, 17, 0))
+    assert sent == []
