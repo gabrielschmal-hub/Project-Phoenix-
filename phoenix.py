@@ -2172,7 +2172,9 @@ def run_wire():
         return
     best, best_wk, skipped = {}, {}, []
     for p in sorted(files):
-        m = _re.search(r"phoenix[-_](wire|weekly)[-_]([a-z0-9]+)[-_]"
+        # 17 Nov 2026: files saved from the phone arrived as "phoenix wire gabriel 2026-11-16.html" (spaces)
+        # and were skipped, so the app kept showing the 12 Nov brief. Spaces are accepted too now.
+        m = _re.search(r"phoenix[-_ ]+(wire|weekly)[-_ ]+([a-z0-9]+)[-_ ]+"
                        r"(\d{4}-\d{2}-\d{2})\.html$", _os.path.basename(p), _re.I)
         if not m:
             skipped.append(p)
