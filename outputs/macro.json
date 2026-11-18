@@ -1,91 +1,100 @@
 {
- "asof": "2026-11-18 05:01 UTC",
- "regime": "ENERGY_GRIND",
- "confidence": 52.3,
+ "asof": "2026-11-18 19:20 UTC",
+ "regime": "POLICY_TIGHTENING",
+ "confidence": 48.6,
  "confidence_note": "regime score, not a calibrated probability (A4)",
  "scores": {
-  "ENERGY_GRIND": 52.3,
+  "ENERGY_GRIND": 48.5,
   "POLICY_TIGHTENING": 48.6
  },
- "secondary_tag": null,
+ "secondary_tag": "INFLATIONARY",
  "inputs": {
-  "wti_12m": 45.99,
-  "wti_3m": -2.64,
-  "wti_vs_2yr": 14.02,
+  "wti_12m": 41.15,
+  "wti_3m": -5.87,
+  "wti_vs_2yr": 10.28,
   "cpi_yoy": 3.72,
   "cpi_chg_3m": 0.37,
-  "spx_3m": -4.35,
-  "spx_1m": -3.71,
-  "dd": -6.03,
-  "trail_dd": -6.03,
+  "spx_3m": -4.56,
+  "spx_1m": -3.93,
+  "dd": -6.24,
+  "trail_dd": -6.24,
   "spx_off_low": 0.0,
   "fresh_high": false,
   "us02_3m": 56.0,
   "real_3m": 38.0,
-  "vix": 25.46,
-  "vix_3m_chg": 68.27,
+  "vix": 24.1,
+  "vix_3m_chg": 59.29,
   "hy": 327.0
  },
  "explain": {
-  "regime": "ENERGY_GRIND",
-  "held_weeks": 7,
-  "since": "2026-10-05",
+  "regime": "POLICY_TIGHTENING",
+  "held_weeks": 1,
+  "since": "2026-11-16",
   "drivers": [
    {
-    "key": "cpi_chg_3m",
-    "label": "CPI 3m change",
-    "value": 0.37,
+    "key": "cpi_yoy",
+    "label": "CPI y/y",
+    "value": 3.72,
     "op": ">",
-    "threshold": 0.3,
-    "clear_by": 0.07,
+    "threshold": 2.5,
+    "clear_by": 1.22,
     "ok": true
    },
    {
-    "key": "wti_vs_2yr",
-    "label": "WTI vs 2yr",
-    "value": 14.02,
+    "key": "dd",
+    "label": "Drawdown",
+    "value": -6.24,
     "op": ">",
-    "threshold": 0,
-    "clear_by": 14.02,
+    "threshold": -12,
+    "clear_by": 5.76,
     "ok": true
    },
    {
-    "key": "wti_12m",
-    "label": "WTI 12m",
-    "value": 45.99,
+    "key": "real_3m",
+    "label": "Real 10Y 3m change (bp)",
+    "value": 38.0,
     "op": ">",
     "threshold": 25,
-    "clear_by": 20.99,
+    "clear_by": 13.0,
+    "ok": true
+   },
+   {
+    "key": "us02_3m",
+    "label": "2Y yield 3m change (bp)",
+    "value": 56.0,
+    "op": ">",
+    "threshold": 40,
+    "clear_by": 16.0,
     "ok": true
    }
   ],
   "watch": [
    {
-    "if": "CPI 3m change falls below 0.3",
-    "now": 0.37,
-    "threshold": 0.3,
-    "distance": 0.07,
-    "then": "ENERGY_GRIND no longer qualifies"
+    "if": "CPI y/y falls below 2.5",
+    "now": 3.72,
+    "threshold": 2.5,
+    "distance": 1.22,
+    "then": "POLICY_TIGHTENING no longer qualifies"
    },
    {
-    "if": "WTI vs 2yr falls below 0",
-    "now": 14.02,
-    "threshold": 0,
-    "distance": 14.02,
-    "then": "ENERGY_GRIND no longer qualifies"
+    "if": "Drawdown falls below -12",
+    "now": -6.24,
+    "threshold": -12,
+    "distance": 5.76,
+    "then": "POLICY_TIGHTENING no longer qualifies"
    },
    {
-    "if": "WTI 12m falls below 25",
-    "now": 45.99,
+    "if": "Real 10Y 3m change (bp) falls below 25",
+    "now": 38.0,
     "threshold": 25,
-    "distance": 20.99,
-    "then": "ENERGY_GRIND no longer qualifies"
+    "distance": 13.0,
+    "then": "POLICY_TIGHTENING no longer qualifies"
    }
   ],
   "runner_up": {
-   "regime": "POLICY_TIGHTENING",
-   "score": 48.6,
-   "behind_by": 3.7
+   "regime": "ENERGY_GRIND",
+   "score": 48.5,
+   "behind_by": 0.1
   }
  }
 }
