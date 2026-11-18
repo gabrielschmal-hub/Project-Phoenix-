@@ -12863,7 +12863,7 @@ def run_health():
         d_ = str(scr.get("date") or today)
         older = [r for r in rows if str(r.get("opened") or "")[:10] != d_]          # trades opened today get their first mark tomorrow
         unmarked = [r.get("id") for r in older if not any((m or {}).get("date") == d_ for m in (r.get("marks") or []))]
-        sched = os.environ.get("GITHUB_EVENT_NAME") in (None, "schedule")
+        sched = os.environ.get("GITHUB_EVENT_NAME") in (None, "schedule") or bool(os.environ.get("PHOENIX_FORWARD"))
         add("forward.marked", "forward test", "pass" if not unmarked else ("warn" if not sched else "fail"),
             f"{len(older) - len(unmarked)} of {len(older)} open trades marked for {d_} ({len(rows) - len(older)} opened today)", "run_ic_record step 3a")
         broken = [r.get("id") for r in rows if r.get("role") in ("proposed", "calibration") and (r.get("structure") or "IC") == "IC"
@@ -14288,6 +14288,9 @@ def _ic_stop_results(row, marks, res):
     return out
 
 
+IC_FORWARD_LAST_OPEN = "2026-11-30"   # last morning run that opens options forward-test trades (Gabriel, 18 Nov 2026)
+
+
 def run_ic_record():
     import os, json, gzip
     from datetime import datetime, date
@@ -14446,7 +14449,7 @@ def run_ic_record():
     ev_name = os.environ.get("GITHUB_EVENT_NAME")
     if ev_name and ev_name != "schedule" and not os.environ.get("PHOENIX_FORWARD"):
         # a manual run mid-day would open trades at intraday quotes and a second batch on the same date
-        notes.append(f"no opens ({ev_name} run — the forward test opens in the scheduled morning run only)")
+        notes.append(f"no opens ({ev_name} run without scheduled=true — the forward test opens in the morning run only)")
         print(f"[icrec] {d}: {', '.join(notes)} · marked {marked} · closed {closed} · broken {broken}")
         sb_heartbeat("ic_record", not any("failed" in n for n in notes), f"marked {marked} · {', '.join(notes)}")
         return
@@ -14472,6 +14475,14 @@ def run_ic_record():
         notes.append(f"decisions {_log_decisions('options', d, dec)}")
     except Exception as e:
         notes.append(f"decisions failed: {e}")
+    # 18 Nov 2026 (Gabriel): the forward test takes no new trades after the 30 Nov morning run. Open trades keep
+    # being marked and close at their planned exit (DTE), and the decision log above keeps recording what the rules
+    # would have done, so December can be reviewed and the rules adjusted before anything new is opened.
+    if datetime.utcnow().date().isoformat() > IC_FORWARD_LAST_OPEN:
+        notes.append(f"no opens (test closed to new trades after {IC_FORWARD_LAST_OPEN}; open trades run to their exit)")
+        print(f"[icrec] {d}: {', '.join(notes)} · marked {marked} · closed {closed} · broken {broken}")
+        sb_heartbeat("ic_record", not any("failed" in n for n in notes), f"marked {marked} · closed {closed} · {', '.join(notes)}")
+        return
     try:
         held_rows = _sb_get("ic_forward", {"status": "eq.open", "select": "ticker,expiry,role"}, limit=5000) or []
         held = {(r["ticker"], str(r["expiry"])[:10]) for r in held_rows if r.get("role") in ("proposed", "calibration")}
