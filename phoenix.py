@@ -8905,7 +8905,8 @@ MME_SECTOR5 = ["NFLX", "TMUS", "VZ",                       # XLC
                "CAT", "GE", "GEV", "RTX", "BA",            # XLI
                "LIN", "NEM", "FCX", "SHW", "ECL",          # XLB
                "NEE", "SO", "CEG", "DUK", "AEP",           # XLU
-               "WELL", "PLD", "EQIX", "AMT", "SPG"]        # XLRE
+               "WELL", "PLD", "EQIX", "AMT", "SPG",        # XLRE
+               "OKTA"]                                     # added 18 Nov 2026 (Gabriel): traded before; same watch trial
 MME_SECTOR5_JOIN = "2026-11-23"
 MME_SECTOR5_STREAK = 3
 
