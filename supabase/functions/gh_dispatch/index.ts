@@ -11,7 +11,7 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const REPO = "gabrielschmal-hub/Project-Phoenix-";
 const ALLOWED: Record<string, Record<string, string>> = {
-  "daily.yaml": {},
+  "daily.yaml": { scheduled: "true" },   // the morning run: opens the options forward test (18 Nov 2026)
   "mme-test.yaml": { force: "false" },
 };
 
