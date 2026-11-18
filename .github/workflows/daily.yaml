@@ -4,6 +4,13 @@ on:
   # No GitHub cron: GitHub skipped or delayed it (13 and 16 Nov 2026). Supabase pg_cron starts this run at 05:00 UTC
   # through the gh_dispatch function (job phoenix-sched-daily); workflow_dispatch below is that entry point.
   workflow_dispatch:
+    inputs:
+      scheduled:
+        # 18 Nov 2026: the scheduler sends true. Without it a dispatched run counts as a manual one and the options
+        # forward test opens nothing (17 and 18 Nov opened no trades). Tick it by hand only for a missed morning run.
+        description: "This is the morning run (opens the options forward test)"
+        type: boolean
+        default: false
   # Dropping the morning wire files IS the publish: any commit touching
   # wire/** triggers a fast wire-only run, live on the dashboard in ~2 min.
   push:
@@ -47,6 +54,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           MME_NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}   # MME test push: fills and closed trades (Phoenix's other alerts stay off)
           MME_EMAIL: ${{ secrets.MME_EMAIL }}         # optional: the same message by email
+          PHOENIX_FORWARD: ${{ (github.event_name == 'workflow_dispatch' && inputs.scheduled) && '1' || '' }}
           SEC_IDENTITY: "Phoenix Research gabriel@example.com"
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
