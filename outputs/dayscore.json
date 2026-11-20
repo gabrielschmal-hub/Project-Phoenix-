@@ -1,18 +1,20 @@
 {
- "asof": "2026-11-19 05:01 UTC",
- "date": "2026-11-19",
- "score": 58.3,
+ "asof": "2026-11-20 05:01 UTC",
+ "date": "2026-11-20",
+ "score": 45.0,
  "verdict": "TRADE CAREFULLY",
- "capped": null,
+ "capped": "gamma data is from 2026-11-19 \u2014 score capped at 45",
  "flags": [
-  "negative gamma"
+  "negative gamma",
+  "vix backwardation",
+  "stale gamma"
  ],
  "components": [
   {
    "name": "Regime",
-   "pts": 17.3,
+   "pts": 17.5,
    "max": 25,
-   "why": "ENERGY_GRIND, confidence 49/100"
+   "why": "ENERGY_GRIND, confidence 50/100"
   },
   {
    "name": "Gamma",
@@ -22,9 +24,9 @@
   },
   {
    "name": "Volatility",
-   "pts": 13.0,
+   "pts": 0.0,
    "max": 20,
-   "why": "VIX 24.6, contango 23.9->24.8"
+   "why": "VIX 28.4, BACKWARDATION 29.3->26.9"
   },
   {
    "name": "Book",
