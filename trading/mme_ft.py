@@ -1,22 +1,24 @@
 """
-MME forward test (FT-1.3) — Phoenix 2.0, Trading module.
+MME forward test (FT-1.4) — Phoenix 2.0, Trading module.
 
-The strategy "MME walls, long only" under MME Trading Rules v1.4.3, run as a forward test with seven arms
+The strategy "MME walls, long only" under MME Trading Rules v1.5.0 (v1.4.3 until 19 Nov 2026), run as a forward test with seven arms
 (A, B, C, D, E, G, H) on two simulated accounts ($2,000 and $10,000). Everything comes from Phoenix:
   * levels (walls, flip, EM): outputs/mme_map.json and outputs/mme_chains.json (CBOE delayed chains), the
     morning run's commit
   * SPX flip: outputs/gex.json;  SPX, VIX and every name at 10:00 ET and every 5 minutes: Supabase prices_intraday
   * daily bars: outputs/charts/<TK>.json;  earnings: outputs/earnings_state.json, outputs/financials_all.json
-The rules are not in this file: they are the Controls rule set controls/mme_rules_v1.4.3.json. This file only
-applies them. Results go to Supabase (mme_ft_trades, mme_ft_days, mme_ft_state) and a contract file
+The rules are not in this file: they are the Controls rule set controls/mme_rules_v1.5.0.json (falls back to v1.4.3).
+This file only applies them. Results go to Supabase (mme_ft_trades, mme_ft_days, mme_ft_state) and a contract file
 outputs/mme_ft.json (schema_version, asof, source).
 
-Two entry points:
+Three entry points:
   morning(today)  — in the daily run, after mme_map: settle the previous session (limit fills, stop touches from
                     the 5-minute snapshots), then R10, R11, T1 with today's walls and today's EM, the EM log, marks,
                     equity per arm and account.
   decide(today)   — the 10:00 ET job: data check, SPX colour, R01 cuts on open trades, every rule for every name
                     (the funnel), entries for every arm.
+  check(today)    — v1.5.0 R02: the hourly entry checks 11:00-15:00 ET. Same rules with that hour's price; only names
+                    not signaled today; cash of today's signals stays reserved (R15); SPX warning (R01).
 Until the rule set says approved=true, and before its start date, every row is written with dry=true.
 """
 import json, math, os, random
@@ -30,8 +32,10 @@ except Exception:                                      # pragma: no cover
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-RULES_PATH = os.path.join(ROOT, "controls", "mme_rules_v1.4.3.json")
-RULES_ALT = os.path.join(ROOT, "controls", "mme_rules_v1_4_3.json")      # the same file after an upload that renames dots
+# newest approved rule set first; the underscore names are the same files after an upload that renames dots
+RULES_FILES = [os.path.join(ROOT, "controls", n) for n in
+               ("mme_rules_v1.5.0.json", "mme_rules_v1_5_0.json", "mme_rules_v1.4.3.json", "mme_rules_v1_4_3.json")]
+RULES_PATH, RULES_ALT = RULES_FILES[0], RULES_FILES[1]
 OUT = os.environ.get("PHOENIX_OUTPUTS", os.path.join(ROOT, "outputs"))
 SCHEMA = 1
 
@@ -39,10 +43,21 @@ SCHEMA = 1
 # ============================================================ rules (pure functions, unit-tested)
 
 def load_rules(path=None):
-    for p in ([path] if path else [RULES_PATH, RULES_ALT]):
+    for p in ([path] if path else RULES_FILES):
         if p and os.path.exists(p):
             return json.load(open(p))
-    raise FileNotFoundError("MME rule set not found in controls/ (mme_rules_v1.4.3.json or mme_rules_v1_4_3.json)")
+    raise FileNotFoundError("MME rule set not found in controls/ (mme_rules_v1_5_0.json or mme_rules_v1_4_3.json)")
+
+
+def recheck_above_band(R):
+    """v1.5.0 R07: above the band = no order, rechecked at the next check (v1.4.3: a limit at the band top)."""
+    return (R.get("entry") or {}).get("above_band") == "recheck"
+
+
+def hourly_checks(R):
+    """v1.5.0 R02: the ET hours of the checks after 10:00 (empty under v1.4.3)."""
+    w = R.get("entry_window_et") or {}
+    return [h for h in (w.get("checks_et") or []) if h > 10]
 
 
 def floor_step(x, step=0.1):
@@ -416,20 +431,31 @@ def _arms(rows):
     return " ".join(sorted({r["arm"] for r in rows}))
 
 
-def decide_message(day, R):
-    """The push after the 10:00 ET decision: new orders grouped by name ($2,000 account shown), cuts, data failure."""
-    lines, n = [], 0
-    rows = day.get("_new") or []
+def order_lines(rows, R):
+    """One line per name ($2,000 account shown): entry, SL, TP (next wall above the entry) and +1R, tier, arms.
+    v1.5.0 has no fixed take-profit (exits are stops that climb), so TP is the next wall, the level where the stop
+    starts to climb (R10), and +1R is where the trailing arms start (T1)."""
     by = {}
-    for r in rows:
+    for r in rows or []:
         if int(r["acct"]) == R["accounts"][0]:
             by.setdefault(r["ticker"], []).append(r)
+    lines = []
     for tk, rs in sorted(by.items(), key=lambda kv: (-len(kv[1]), kv[0])):
         r = next((x for x in rs if x["arm"] == "B"), rs[0]); e = r["entry"]
-        what = f"bought {r['fill']:.2f}" if r["status"] == "open" else f"limit {e['limit']:.2f} (band top, today only)"
+        px = float(r["fill"]) if r["status"] == "open" else float(e["limit"])
+        what = f"entry {px:.2f}" if r["status"] == "open" else f"limit {px:.2f} (band top, today only)"
+        sl = float(r["stop"])
+        tp = f"TP next wall {e['next_wall']:.2f}" if e.get("next_wall") else "TP no wall above"
         tag = " \u00b7 random-dip benchmark" if e.get("kind") == "random" else ""
-        lines.append(f"{tk} \u00b7 {what} \u00b7 stop {r['stop']:.2f} \u00b7 {e['tier_pct']}% risk \u00b7 arms {_arms(rs)}{tag}")
-        n += 1
+        lines.append(f"{tk} \u00b7 {what} \u00b7 SL {sl:.2f} \u00b7 {tp} \u00b7 +1R {px + (px - sl):.2f} \u00b7 "
+                     f"{e['tier_pct']}% risk \u00b7 arms {_arms(rs)}{tag}")
+    return lines
+
+
+def decide_message(day, R):
+    """The push after the 10:00 ET decision: new orders grouped by name ($2,000 account shown), cuts, data failure."""
+    lines = order_lines(day.get("_new"), R)
+    n = len(lines)
     for c in day.get("cuts") or []:
         lines.append("Cut: " + c)
     spx = day.get("spx") or {}
@@ -534,6 +560,8 @@ def evaluate(tk, row, price, chain_rows, spx, R, earn, today, data_ok):
         band, chk["R07"] = "below the wall: no setup", False
     elif price <= band_hi:
         band, chk["R07"] = "in the band: buy now", True
+    elif recheck_above_band(R):
+        band, chk["R07"] = "above the band: wait, rechecked next hour", False
     else:
         band, chk["R07"] = "above the band: limit at the band top", True
     stop = (wall - ent["stop_em"] * em) if (wall and em) else None
@@ -794,17 +822,48 @@ def decide(today, R=None, data=None, write=True, now=None):
             if write:
                 data.update_trade(t["id"], patch)
         cut_state[arm] = colour if colour in ("AMBER", "RED") else None
-    # ---- the funnel
+    held = held_today(data, today, trades)
+    funnel, new_rows, placed, skipped = _entries(today, t10, R, data, rows, chains, px, spx, data_ok, trades, held, dry,
+                                                 map_date, map_asof, chain_date, "10:00 ET")
+    if write:
+        for r in new_rows:
+            data.insert_trade(r)
+        data.set_state("cuts", cut_state)
+    day = {"decided_at": t10.isoformat(), "data_ok": data_ok, "map_date": map_date, "chain_date": chain_date, "spx": spx,
+           "r06_blocked": r06_blocked(today, R), "cuts": actions, "placed": placed, "skipped": skipped,
+           "funnel": [{k: v for k, v in e.items() if k != "walls"} for e in funnel], "dry": dry, "rules": R["version"]}
+    if write:
+        data.put_day(today, "decide", day, dry)
+    day["_new"] = new_rows
+    if write:
+        m = decide_message(day, R)
+        if m:
+            notify(*m)
+    return day
+
+
+def held_today(data, today, trades=None):
+    """(arm, ticker) pairs that cannot get a new entry: open or working orders, and anything signaled today in any
+    status (v1.5.0: a signal stays in force until the US close; no repeat the same day)."""
+    held = {(t["arm"], t["ticker"]) for t in (trades or []) if t["status"] in ("open", "pending")}
+    try:
+        allt = data.all_trades()
+    except Exception:
+        allt = []
+    held |= {(t["arm"], t["ticker"]) for t in allt if t["status"] in ("open", "pending") or str(t.get("d_open")) == today.isoformat()}
+    return held
+
+
+def _entries(today, at, R, data, rows, chains, px, spx, data_ok, trades, held, dry, map_date, map_asof, chain_date, label):
+    """The funnel and the entries for every arm at one check (10:00 ET or an hourly check). Same candidate list for
+    every arm; only the variable under test changes. Returns (funnel, new_rows, placed, skipped)."""
     funnel = []
-    for tk in names:
+    for tk in sorted(rows):
         p = px.get(tk)
         if p is None:
-            funnel.append({"ticker": tk, "blocked": "R00", "note": "no 10:00 ET price"}); continue
-        ev = evaluate(tk, rows[tk], p, chains.get(tk, []), spx, R, data.earnings(tk), today, data_ok)
-        funnel.append(ev)
+            funnel.append({"ticker": tk, "blocked": "R00", "note": f"no {label} price"}); continue
+        funnel.append(evaluate(tk, rows[tk], p, chains.get(tk, []), spx, R, data.earnings(tk), today, data_ok))
     ok = {e["ticker"]: e for e in funnel if "checks" in e}
-    held = {(t["arm"], t["ticker"]) for t in trades if t["status"] in ("open", "pending")}
-    # ---- entries per arm (same candidate list; only the variable under test changes)
     plan = {}
     for arm, cfg in R["arms"].items():
         if cfg.get("random"):
@@ -829,7 +888,9 @@ def decide(today, R=None, data=None, write=True, now=None):
         sz = size_position(fill, stop, e["em"], acct, pts, R, cost_open, risk_floor)
         if not sz["qty"]:
             return None, sz["why"]
-        entry = {"kind": kind, "decided_at": t10.isoformat(), "price_10": e["price"], "wall": e.get("wall"), "band_hi": e.get("band_hi"),
+        up = [w for w in (e.get("walls") or []) if w > fill]
+        entry = {"kind": kind, "decided_at": at.isoformat(), "check": label, "price_10": e["price"], "wall": e.get("wall"), "band_hi": e.get("band_hi"),
+                 "next_wall": min(up) if up else None,
                  "limit": limit, "stop0": round(stop, 4), "em": e["em"], "em_src": e.get("em_src"), "flip": e.get("flip"), "dist_em": e.get("dist_em"),
                  "spacing_em": e.get("spacing_em"), "walls": e.get("walls"), "points": pts, "tier_pct": sz["tier_pct"], "risk_usd": sz["risk_usd"],
                  "cost": sz["cost"], "spx": spx, "earnings": e.get("earnings"), "map_date": map_date, "map_asof": map_asof,
@@ -871,21 +932,7 @@ def decide(today, R=None, data=None, write=True, now=None):
             for acct in R["accounts"]:
                 row, why = open_trade("E", pick, acct, pick["price"] - pick["em"], None, None, be["points"], kind="random")
                 (placed if row else skipped).append(f"E/{acct} {pick['ticker']} (for {be['ticker']})" + ("" if row else f": {why}"))
-    if write:
-        for r in new_rows:
-            data.insert_trade(r)
-        data.set_state("cuts", cut_state)
-    day = {"decided_at": t10.isoformat(), "data_ok": data_ok, "map_date": map_date, "chain_date": chain_date, "spx": spx,
-           "r06_blocked": r06_blocked(today, R), "cuts": actions, "placed": placed, "skipped": skipped,
-           "funnel": [{k: v for k, v in e.items() if k != "walls"} for e in funnel], "dry": dry}
-    if write:
-        data.put_day(today, "decide", day, dry)
-    day["_new"] = new_rows
-    if write:
-        m = decide_message(day, R)
-        if m:
-            notify(*m)
-    return day
+    return funnel, new_rows, placed, skipped
 
 
 # ============================================================ contract output (Phoenix 2.0 envelope)
@@ -943,107 +990,114 @@ def last_at_or_before(series, t):
     return out
 
 
-def shadow(today, R=None, data=None, at=None, write=True):
-    """Record-only check, hourly 11:00-15:00 ET (added 17 Nov 2026, not part of rules v1.4.3): which names WOULD qualify
-    for an entry at this hour, with the same rules and the morning's map, priced at the latest 5-minute snapshot.
-    Places no orders and sends no push. It exists so the 14 Dec review can measure whether a second decision in the day
-    would have added winners. Names already held or ordered today are listed separately."""
+def check(today, R=None, data=None, at=None, write=True):
+    """v1.5.0 R02: an hourly entry check (11:00 to 15:00 ET; 10:00 is decide). The same rules as the 10:00 decision
+    with the latest 5-minute price at the hour and the morning's levels. A name is a new setup only if it passes every
+    rule, its price is inside its band (R07) and it has no signal today for that arm. The cash of today's signals and
+    open trades stays reserved (R15, via book_cost). No R01 cuts here: they belong to the 10:00 decision. If SPX is
+    AMBER or RED and signals were sent today, one warning per change of status (R01). Silent when nothing is new."""
     R = R or load_rules(); data = data or Data()
-    if not is_trading_day(today, R) or not is_live(today, R):
-        return {"skipped": "not a live trading day"}
+    if not is_trading_day(today, R):
+        return {"skipped": "not a trading day"}
+    if today < date.fromisoformat(R.get("dry_run_from", R["start"])):
+        return {"skipped": "before the dry run"}
     at = at or datetime.now(timezone.utc)
     hh = at.astimezone(ET).hour if ET else at.hour - 5
-    rows, map_date, _ = data.map()
-    chains, _cd = data.chains()
+    if hh not in hourly_checks(R):
+        return {"skipped": f"{hh:02d}:00 ET is not an entry check under rules {R['version']}"}
+    kind = f"check_{hh:02d}"
+    if write and data.get_day(today, kind):
+        return {"skipped": f"{hh:02d}:00 ET check already done"}
+    dry = not is_live(today, R)
+    rows, map_date, map_asof = data.map()
+    chains, chain_date = data.chains()
     prev = prev_trading_day(today, R)
     data_ok = bool(map_date) and prev.isoformat() < map_date <= today.isoformat()
-    names = sorted(rows)
-    snaps = data.snaps(names + ["SPX", "VIX"], today)
-    px = {tk: last_at_or_before(snaps.get(tk), at)[1] for tk in names}
+    snaps = data.snaps(sorted(rows) + ["SPX", "VIX"], today)
+    px = {tk: last_at_or_before(snaps.get(tk), at)[1] for tk in rows}
     spx_px = last_at_or_before(snaps.get("SPX"), at)[1]
     vix = last_at_or_before(snaps.get("VIX"), at)[1]
     flip, flip_d = data.spx_flip()
     sem = spx_em(spx_px, vix, R) if (spx_px and vix) else None
     colour, sdist = spx_colour(spx_px, flip, sem, R)
-    spx = {"price": spx_px, "vix": vix, "flip": flip, "em": round(sem, 2) if sem else None,
+    spx = {"price": spx_px, "vix": vix, "flip": flip, "flip_asof": flip_d, "em": round(sem, 2) if sem else None,
            "dist": round(sdist, 2) if sdist is not None else None, "colour": colour}
     if colour is None:
         data_ok = False
-    funnel = []
-    for tk in names:
-        if px.get(tk) is None:
-            continue
-        funnel.append(evaluate(tk, rows[tk], px[tk], chains.get(tk, []), spx, R, data.earnings(tk), today, data_ok))
-    held = {(t["arm"], t["ticker"]) for t in data.trades(("open", "pending"))}
-    would, already = [], []
-    for arm, cfg in R["arms"].items():
-        if cfg.get("random"):
-            continue
-        key = "blocked_c" if cfg.get("spx_any") else ("blocked_d" if cfg.get("r05_off") else "blocked")
-        for e in funnel:
-            if "checks" not in e or e.get(key) is not None:
-                continue
-            entry = e["price"] if str(e.get("band", "")).startswith("in the band") else e.get("band_hi")
-            up = [w for w in (e.get("walls") or []) if entry is not None and w > entry]
-            rec = {"arm": arm, "ticker": e["ticker"], "price": e["price"], "band": e.get("band"), "band_hi": e.get("band_hi"),
-                   "stop": e.get("stop"), "points": e.get("points"), "em": e.get("em"), "entry": entry,
-                   "next_wall": min(up) if up else None}
-            (already if (arm, e["ticker"]) in held else would).append(rec)
-    out = {"at": at.isoformat(), "hour_et": hh, "spx": spx, "data_ok": data_ok, "would_enter": would, "already_held": already,
-           "funnel": [{k: v for k, v in e.items() if k in ("ticker", "price", "blocked", "blocked_c", "blocked_d", "band", "band_hi", "stop")}
-                      for e in funnel]}
+    trades = data.trades(("open", "pending"))
+    held = held_today(data, today, trades)
+    label = f"{hh:02d}:00 ET"
+    funnel, new_rows, placed, skipped = _entries(today, at, R, data, rows, chains, px, spx, data_ok, trades, held, dry,
+                                                 map_date, map_asof, chain_date, label)
+    # R01 warning: signals sent today that the broker order may still be working
+    warn = None
+    if R.get("r01_warn_unfilled"):
+        try:
+            sig = [t for t in data.all_trades() if str(t.get("d_open")) == today.isoformat() and int(t["acct"]) == R["accounts"][0]]
+        except Exception:
+            sig = []
+        last = str(data.state("spx_warned") or "") if write else ""
+        last = last.split(":", 1)[1] if last.startswith(today.isoformat() + ":") else ""
+        if colour in ("AMBER", "RED") and sig and colour != last:
+            warn = {"colour": colour, "dist": spx["dist"], "tickers": sorted({t["ticker"] for t in sig})}
+        new_state = colour if colour in ("AMBER", "RED") and (sig or last) else ""
+    out = {"at": at.isoformat(), "check": label, "data_ok": data_ok, "map_date": map_date, "spx": spx, "placed": placed,
+           "skipped": skipped, "warning": warn, "dry": dry, "rules": R["version"],
+           "funnel": [{k: v for k, v in e.items() if k != "walls"} for e in funnel]}
     if write:
-        data.put_day(today, f"shadow_{hh:02d}", out, False)
-        # 17 Nov 2026 (Gabriel): push a name the first time it qualifies after the 10:00 decision, so he can see it even
-        # though it is not on the official register; nothing new, no push
-        seen = str(data.state("shadow_pushed") or "")
-        seen = set(seen.split(":", 1)[1].split(",")) - {""} if seen.startswith(today.isoformat() + ":") else set()
-        title, lines, new = shadow_message(would, seen, hh, spx)
-        if lines and notify(title, lines, "default", "eyes"):
-            data.set_state("shadow_pushed", today.isoformat() + ":" + ",".join(sorted(seen | new)))
-        out["pushed"] = sorted(new) if lines else []
-        data.heartbeat("mme_test_shadow", True, f"{hh:02d}:00 ET · SPX {colour} · would enter {len(would)} (arms x names) · "
-                                               f"already held {len(already)} · record only")
+        for r in new_rows:
+            data.insert_trade(r)
+        data.put_day(today, kind, out, dry)
+        if R.get("r01_warn_unfilled"):
+            data.set_state("spx_warned", today.isoformat() + ":" + new_state)
+        m = check_message(new_rows, warn, label, spx, R, dry, data_ok)
+        if m:
+            notify(*m)
+        data.heartbeat("mme_test_check", bool(data_ok), f"{label} · SPX {colour} · placed {len(placed)}"
+                       + (f" · warning {warn['colour']}" if warn else "") + ("" if data_ok else " · DATA CHECK FAILED"))
+    out["_new"] = new_rows
     return out
 
 
-def shadow_message(would, seen, hh, spx):
-    """The hourly check's push: names that qualify now and were not pushed earlier today. Not a test order.
-    v1.4.3 has no fixed take-profit (exits are stops that trail), so the push shows the two levels that act as targets:
-    the next wall above the entry and +1R, where the trailing stop starts (T1)."""
-    by = {}
-    for w in would:
-        if w["ticker"] not in seen and w.get("entry") and w.get("stop"):
-            by.setdefault(w["ticker"], []).append(w)
-    lines = []
-    for tk, ws in sorted(by.items()):
-        w = next((x for x in ws if x["arm"] == "B"), ws[0])
-        e, sl = float(w["entry"]), float(w["stop"])
-        tp = f"TP next wall {w['next_wall']:.2f}" if w.get("next_wall") else "TP no wall above"
-        lines.append(f"{tk} \u00b7 entry {e:.2f} \u00b7 SL {sl:.2f} \u00b7 {tp} \u00b7 +1R {e + (e - sl):.2f} \u00b7 arms {_arms(ws)}")
-    if lines:
-        lines.append(f"{hh:02d}:00 New York check \u00b7 not placed, not in the test register \u00b7 SPX {spx.get('colour')}")
-    n = len(by)
-    return (f"MME after 10:00 \u00b7 {n} setup{'s' if n != 1 else ''}", lines, set(by))
+def check_message(new_rows, warn, label, spx, R, dry, data_ok=True):
+    """The hourly check's push: only new setups and the SPX warning. Nothing new: no push (MME Automatic Trading v1.1)."""
+    lines = order_lines(new_rows, R) if data_ok else []
+    if warn:
+        lines.append(f"SPX turned {warn['colour']} ({warn['dist']} EM from its flip): signals today {', '.join(warn['tickers'])} "
+                     f"\u00b7 if your order is still unfilled, review or cancel it")
+    if not lines:
+        return None
+    n = len(order_lines(new_rows, R)) if data_ok else 0
+    if n:
+        lines.append(f"{label} check \u00b7 SPX {spx.get('colour')} {spx.get('dist')} EM from its flip \u00b7 VIX {spx.get('vix')}")
+    title = (f"MME {label} \u00b7 {n} new order{'s' if n != 1 else ''}" if n else f"MME {label} \u00b7 SPX {warn['colour']} warning")
+    return (("[dry run] " if dry else "") + title, lines, "high" if (warn and not n) else "default",
+            "warning" if (warn and not n) else "chart_with_upwards_trend")
 
 
 def run_decide(force=False):
-    """The 10:00 ET job. Runs only between 10:00 and 11:30 ET (the workflow fires at two UTC times to cover DST)."""
+    """The MME job, fired by Supabase at :05 past 10:00-15:00 ET (several UTC times to cover DST). 10:00 to 11:30 ET
+    before the decision exists: the 10:00 decision. 11:00 to 15:30 ET after it: that hour's entry check (v1.5.0 R02).
+    Anything else: nothing. Each step runs once per day (decide) or once per hour (check)."""
     R = load_rules(); d = Data()
     if not d.ok():
         print("[mme_ft] no Supabase credentials — skipped"); return None
     day, now = today_et()
     et = now.astimezone(ET) if ET else now
     decided = bool(d.get_day(day, "decide"))
-    if not force and 11 <= et.hour <= 15 and (decided or et.hour > 11 or et.minute > 30):
-        # after the decision: the hourly record-only check (no orders, no push)
-        at = now.replace(minute=0, second=0, microsecond=0) if et.minute < 30 else now
-        out = shadow(day, R, d, at=at)
-        print(f"[mme_ft] shadow {day} {et:%H:%M} ET: " + (f"SPX {out['spx'].get('colour')} · would enter {len(out['would_enter'])} · "
-              f"already held {len(out['already_held'])}" if "spx" in out else str(out)))
-        return out
-    if not force and not (et.hour == 10 or (et.hour == 11 and et.minute <= 30)):
-        print(f"[mme_ft] {et:%H:%M} ET is outside the 10:00-11:30 ET window — nothing to do"); return None
+    in_decide = et.hour == 10 or (et.hour == 11 and et.minute <= 30)
+    if not force and (decided or not in_decide):
+        hrs = hourly_checks(R)
+        lastm = (R.get("entry_window_et") or {}).get("last_check_minute_max", 30)
+        if et.hour in hrs and (et.hour < max(hrs) or et.minute <= lastm):
+            if not decided:
+                print("[mme_ft] note: no 10:00 ET decision today; the hourly check runs on its own")
+            out = check(day, R, d, at=now)
+            print(f"[mme_ft] check {day} {et:%H:%M} ET: " + (f"SPX {out['spx'].get('colour')} · placed {len(out.get('placed', []))}"
+                  + (f" · warning {out['warning']['colour']}" if out.get("warning") else "") if "spx" in out else str(out)))
+            return out
+        print(f"[mme_ft] {et:%H:%M} ET: " + ("already decided" if decided and in_decide else "outside the 10:00-15:00 ET checks")
+              + " — nothing to do"); return None
     try:
         out = decide(day, R, d)
     except Exception as e:
@@ -1061,7 +1115,10 @@ if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     if cmd == "decide":
         run_decide(force="--force" in sys.argv)
+    elif cmd == "check":                     # testing: run this hour's entry check now
+        R_ = load_rules(); d_ = Data(); day_, now_ = today_et()
+        print(json.dumps({k: v for k, v in check(day_, R_, d_, at=now_).items() if k not in ("funnel", "_new")}, default=str)[:2000])
     elif cmd == "morning":
         run_morning()
     else:
-        print("usage: python -m trading.mme_ft decide|morning [--force]")
+        print("usage: python -m trading.mme_ft decide|check|morning [--force]")
