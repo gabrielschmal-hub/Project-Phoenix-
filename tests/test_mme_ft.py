@@ -1,11 +1,17 @@
-"""MME forward test engine: the rule functions against the worked examples in MME Trading Rules v1.4.3, and one
-decide -> morning cycle on fake Phoenix data. Run: python -m pytest tests/test_mme_ft.py -q"""
+"""MME forward test engine: the rule functions against the worked examples in MME Trading Rules v1.4.3/v1.5.0, one
+decide -> morning cycle on fake Phoenix data, and the v1.5.0 hourly entry checks. Run: python -m pytest tests/test_mme_ft.py -q"""
 import os, sys
 from datetime import date, datetime, timedelta, timezone
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from trading import mme_ft as M
 
 R = M.load_rules()
+R143 = M.load_rules(os.path.join(M.ROOT, "controls", "mme_rules_v1_4_3.json"))
+
+
+def test_loads_v150_first():
+    assert R["version"] == "1.5.0" and R["approved"] and M.recheck_above_band(R) and M.hourly_checks(R) == [11, 12, 13, 14, 15]
+    assert R143["version"] == "1.4.3" and not M.recheck_above_band(R143) and M.hourly_checks(R143) == []
 
 
 def test_spx_em_example():                       # v1.4.3 section 5: SPX 7,619, VIX 17.5 -> about 59 points
@@ -195,14 +201,14 @@ def test_second_morning_run_leaves_todays_orders_alone(tmp_path, monkeypatch):
                     "support_tiered": [200.0, 192.0], "stale_days": 0}}
     S = {d1.isoformat(): {"SPX": [(_ts(d1, 15, 0), 7600.0)], "VIX": [(_ts(d1, 15, 0), 16.0)], "AAA": [(_ts(d1, 15, 0), 201.5)]}}
     F = Fake(d1, S, rows)
-    M.morning(d1, R, F)                                  # the 06:00 review
-    M.decide(d1, R, F)                                   # 10:00 ET: limit orders placed today
+    M.morning(d1, R143, F)                                  # the 06:00 review
+    M.decide(d1, R143, F)                                   # 10:00 ET: limit orders placed today (v1.4.3 only)
     pend = [t for t in F.trs if t["status"] == "pending"]
     assert pend
-    out = M.morning(d1, R, F)                            # Phoenix run again in the evening
+    out = M.morning(d1, R143, F)                            # Phoenix run again in the evening
     assert out.get("skipped")
     F.st.pop("morning_done")                             # even without the guard, today's orders are not touched
-    M.morning(d1, R, F)
+    M.morning(d1, R143, F)
     assert all(t["status"] == "pending" for t in F.trs if t["id"] in {p["id"] for p in pend})
 
 
@@ -220,29 +226,96 @@ def test_quiet_days_are_pushed(tmp_path, monkeypatch):
     assert sent[1][0] == "MME test" and sent[1][1] == ["No fills, stops or exits"]
 
 
-def test_hourly_shadow_records_without_trading(tmp_path, monkeypatch):
+ROWS = {"AAA": {"ticker": "AAA", "em": 4.0, "em_src": "atm_iv", "flip": 190.0, "support": 200.0, "resist": 206.0,
+                "support_tiered": [200.0, 192.0], "stale_days": 0}}
+
+
+def test_v150_above_band_waits_then_hourly_check_enters(tmp_path, monkeypatch):
     monkeypatch.setattr(M, "OUT", str(tmp_path))
     sent = []
     monkeypatch.setattr(M, "notify", lambda *a, **k: sent.append(a) or True)
     d1 = date(2026, 11, 23)
-    rows = {"AAA": {"ticker": "AAA", "em": 4.0, "em_src": "atm_iv", "flip": 190.0, "support": 200.0, "resist": 206.0,
-                    "support_tiered": [200.0, 192.0], "stale_days": 0}}
-    S = {d1.isoformat(): {"SPX": [(_ts(d1, 15, 0), 7300.0), (_ts(d1, 17, 0), 7600.0)], "VIX": [(_ts(d1, 15, 0), 16.0)],
-                          "AAA": [(_ts(d1, 15, 0), 197.0), (_ts(d1, 17, 0), 200.8)]}}
-    F = Fake(d1, S, rows)
-    out = M.shadow(d1, R, F, at=_ts(d1, 17, 0))                    # 12:00 ET: SPX back to GREEN, AAA in its band
-    assert out["spx"]["colour"] == "GREEN" and {w["arm"] for w in out["would_enter"] if w["ticker"] == "AAA"} >= {"A", "B"}
-    assert F.trs == [] and (d1, "shadow_12") in F.dayrows                     # recorded, no test order
-    assert len(sent) == 1 and sent[0][0].startswith("MME after 10:00") and sent[0][1][0].startswith("AAA \u00b7 entry")
-    M.shadow(d1, R, F, at=_ts(d1, 17, 0))                                    # same name next hour: no second push
-    assert len(sent) == 1
+    S = {d1.isoformat(): {"SPX": [(_ts(d1, 15, 0), 7600.0)], "VIX": [(_ts(d1, 15, 0), 16.0)],
+                          "AAA": [(_ts(d1, 15, 0), 201.5), (_ts(d1, 16, 0), 200.6), (_ts(d1, 17, 0), 200.4)]}}
+    F = Fake(d1, S, ROWS)
+    out = M.decide(d1, R, F)                                    # 10:00 ET: 201.5 is above the 200-201 band
+    f = {e["ticker"]: e for e in out["funnel"]}
+    assert f["AAA"]["blocked"] == "R07" and f["AAA"]["band"].startswith("above the band: wait") and F.trs == []
+    assert sent[-1][1] == ["No orders today"]
+    out = M.check(d1, R, F, at=_ts(d1, 16, 5))                 # 11:05 ET: back inside the band -> a new setup
+    assert sorted({t["arm"] for t in F.trs}) == ["A", "B", "C", "D", "G", "H"] and all(t["status"] == "open" for t in F.trs)
+    a2 = [t for t in F.trs if t["arm"] == "A" and t["acct"] == 2000][0]
+    assert a2["fill"] == round(200.6 * 1.0005, 4) and a2["stop"] == 196.0 and a2["entry"]["check"] == "11:00 ET"
+    assert a2["entry"]["next_wall"] == 206.0
+    title, lines = sent[-1][0], sent[-1][1]
+    assert "11:00 ET" in title and "1 new order" in title
+    assert lines[0].startswith("AAA \u00b7 entry 200.70 \u00b7 SL 196.00 \u00b7 TP next wall 206.00 \u00b7 +1R 205.40")
+    n = len(F.trs); k = len(sent)
+    M.check(d1, R, F, at=_ts(d1, 17, 5))                       # 12:05 ET: still in the band, signal in force: no repeat
+    assert len(F.trs) == n and len(sent) == k
+    assert M.check(d1, R, F, at=_ts(d1, 17, 6)).get("skipped")   # the same hour twice: once only
 
 
-def test_hourly_shadow_quiet_when_nothing_qualifies(tmp_path, monkeypatch):
+def test_v150_checks_only_inside_the_window(tmp_path, monkeypatch):
+    monkeypatch.setattr(M, "OUT", str(tmp_path))
+    d1 = date(2026, 11, 23)
+    F = Fake(d1, {}, {})
+    assert M.check(d1, R, F, at=_ts(d1, 15, 5)).get("skipped")   # 10:05 ET belongs to decide
+    assert M.check(d1, R, F, at=_ts(d1, 21, 5)).get("skipped")   # 16:05 ET: after the last check
+    assert M.check(d1, R143, F, at=_ts(d1, 17, 5)).get("skipped")  # v1.4.3 has no hourly entries
+
+
+def test_v150_r15_reserves_cash_of_todays_signals(tmp_path, monkeypatch):
+    monkeypatch.setattr(M, "OUT", str(tmp_path))
+    monkeypatch.setattr(M, "notify", lambda *a, **k: True)
+    d1 = date(2026, 11, 23)
+    rows = dict(ROWS)
+    rows["CCC"] = dict(ROWS["AAA"], ticker="CCC")
+    S = {d1.isoformat(): {"SPX": [(_ts(d1, 15, 0), 7600.0)], "VIX": [(_ts(d1, 15, 0), 16.0)],
+                          "AAA": [(_ts(d1, 15, 0), 200.6)], "CCC": [(_ts(d1, 15, 0), 203.0), (_ts(d1, 17, 0), 200.6)],
+                          "DDD": []}}
+    rows["DDD"] = dict(ROWS["AAA"], ticker="DDD")
+    S[d1.isoformat()]["DDD"] = [(_ts(d1, 15, 0), 203.0), (_ts(d1, 18, 0), 200.6)]
+    class F3(Fake):
+        def chains(self):
+            ch, x = Fake.chains(self)
+            ch["CCC"] = ch["DDD"] = ch["AAA"]
+            return ch, x
+    F = F3(d1, S, rows)
+    M.decide(d1, R, F)                                          # AAA at 10:00: $683 of $2,000 in arm A
+    M.check(d1, R, F, at=_ts(d1, 17, 5))                       # CCC at 12:00: another $683
+    M.check(d1, R, F, at=_ts(d1, 18, 5))                       # DDD at 13:00: 35% cap would be $700, room is ~$633
+    a = {t["ticker"]: t for t in F.trs if t["arm"] == "A" and t["acct"] == 2000}
+    used = sum(t["qty"] * t["fill"] for t in a.values())
+    assert set(a) == {"AAA", "CCC", "DDD"} and a["DDD"]["qty"] < a["AAA"]["qty"] and used <= 2000
+
+
+def test_v150_spx_warning_once_per_change(tmp_path, monkeypatch):
+    monkeypatch.setattr(M, "OUT", str(tmp_path))
+    sent = []
+    monkeypatch.setattr(M, "notify", lambda *a, **k: sent.append(a) or True)
+    d1 = date(2026, 11, 23)
+    S = {d1.isoformat(): {"SPX": [(_ts(d1, 15, 0), 7600.0), (_ts(d1, 16, 0), 7420.0), (_ts(d1, 17, 0), 7425.0),
+                                  (_ts(d1, 18, 0), 7380.0), (_ts(d1, 19, 0), 7600.0)],
+                          "VIX": [(_ts(d1, 15, 0), 16.0)], "AAA": [(_ts(d1, 15, 0), 200.6), (_ts(d1, 16, 0), 230.0)]}}
+    F = Fake(d1, S, ROWS)
+    M.decide(d1, R, F); k = len(sent)
+    M.check(d1, R, F, at=_ts(d1, 16, 5))                       # 11:00: SPX 7420, flip 7400, EM ~53 -> AMBER
+    assert len(sent) == k + 1 and "AMBER warning" in sent[-1][0] and "AAA" in sent[-1][1][0]
+    M.check(d1, R, F, at=_ts(d1, 17, 5))                       # 12:00: still AMBER: no repeat
+    assert len(sent) == k + 1
+    M.check(d1, R, F, at=_ts(d1, 18, 5))                       # 13:00: RED is a new warning
+    assert len(sent) == k + 2 and "RED warning" in sent[-1][0]
+    M.check(d1, R, F, at=_ts(d1, 19, 5))                       # 14:00: GREEN again: silent, record cleared
+    assert len(sent) == k + 2 and F.st["spx_warned"] == d1.isoformat() + ":"
+
+
+def test_v150_quiet_check_sends_nothing(tmp_path, monkeypatch):
     monkeypatch.setattr(M, "OUT", str(tmp_path))
     sent = []
     monkeypatch.setattr(M, "notify", lambda *a, **k: sent.append(a) or True)
     d1 = date(2026, 11, 23)
     S = {d1.isoformat(): {"SPX": [(_ts(d1, 17, 0), 7600.0)], "VIX": [(_ts(d1, 17, 0), 16.0)]}}
-    M.shadow(d1, R, Fake(d1, S, {}), at=_ts(d1, 17, 0))
-    assert sent == []
+    F = Fake(d1, S, {})
+    M.check(d1, R, F, at=_ts(d1, 17, 5))
+    assert sent == [] and (d1, "check_12") in F.dayrows
