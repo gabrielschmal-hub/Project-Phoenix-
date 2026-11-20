@@ -11971,7 +11971,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     }).catch(function(){ host.innerHTML='<div class="ed-note">The auto brief could not be loaded.</div>'; });
   }
   // ---- MME Test tab (Phoenix 2.0, Trading module): the MME forward test FT-1.3, read from Supabase mme_ft_* ----
-  // Engine trading/mme_ft.py, rules controls/mme_rules_v1.4.3.json. This tab only reads; nothing here decides.
+  // Engine trading/mme_ft.py, rules controls/mme_rules_v1.5.0.json (v1.4.3 until 19 Nov 2026). This tab only reads; nothing here decides.
   var MT={acct:"2000", per:"day", data:null};
   var MT_ARMS=[["A","Rules as written","Primary control · Q1"],["B","Trailing exit","Primary test, live intent · Q2"],
                ["C","SPX any colour","Shadow · Q3"],["D","Earnings rule off","Shadow · Q4"],["E","Random dip","Benchmark · Q5"],
@@ -12063,6 +12063,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   function mtRender(){
     var host=document.getElementById("mtPane"), D=MT.data, A=MT.acct, acct=+A;
     var dec=D.days.filter(function(d){ return d.kind==="decide"; }), last=dec.length?dec[dec.length-1]:null, L=last&&last.data||{};
+    // v1.5.0 R02: the hourly entry checks of the same day (rows check_11 ... check_15)
+    var chk=D.days.filter(function(d){ return /^check_/.test(d.kind)&&last&&d.d===last.d; });
+    var chkPlaced=chk.reduce(function(a,d){ return a+(((d.data||{}).placed)||[]).length; },0);
     var mor=D.days.filter(function(d){ return d.kind==="morning"; }), lastM=mor.length?mor[mor.length-1]:null;
     var ser=mtEquitySeries(D.days), cur=ser.length?ser[ser.length-1].eq:{};
     var start=(MT.data.contract&&MT.data.contract.start)||"2026-11-16", nDays=dec.filter(function(d){ return d.d>=start&&!d.dry; }).length;
@@ -12082,7 +12085,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       '<div><span>SPX at 10:00 ET</span><b class="mt-c '+(col==="GREEN"?"pos":(col==="RED"?"neg":"amb"))+'">'+mtE(col)+'</b>'+(spx.dist!=null?' '+spx.dist+' EM from its flip':'')+'</div>'+
       '<div><span>Last decision</span><b>'+mtD(last&&last.d)+'</b>'+(L.decided_at?'':'')+'</div>'+
       '<div><span>Data check</span><b class="'+(L.data_ok===false?"neg":"pos")+'">'+(last?(L.data_ok?"OK":"FAILED"):"—")+'</b>'+(L.map_date?' map '+mtD(L.map_date):'')+'</div>'+
-      '<div><span>Orders placed</span><b>'+((L.placed||[]).length)+'</b>'+(L.r06_blocked?' · R06 expiry week':'')+'</div>'+
+      '<div><span>Orders placed</span><b>'+((L.placed||[]).length+chkPlaced)+'</b>'+(chk.length?' · '+chk.length+' hourly check'+(chk.length>1?'s':'')+(chkPlaced?' ('+chkPlaced+' after 10:00)':''):'')+(L.r06_blocked?' · R06 expiry week':'')+'</div>'+
       '<div><span>Regime cuts</span><b>'+((L.cuts||[]).length)+'</b></div></div>';
     // P&L chart
     var chart=mtChart(ser,A);
@@ -12115,10 +12118,10 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var devs=[]; mor.forEach(function(m){ ((m.data&&m.data.log&&m.data.log.deviations)||[]).forEach(function(x){ devs.push(mtD(m.d)+': '+x); }); });
     dec.forEach(function(d){ if(d.data&&d.data.data_ok===false) devs.push(mtD(d.d)+': data check failed (map '+mtE(d.data.map_date)+'); no setups that day'); });
     host.innerHTML='<div class="opt mt">'+
-      '<div class="opt-hero"><div class="opt-k">MME forward test · FT-1.3 · rules v1.4.3</div>'+
+      '<div class="opt-hero"><div class="opt-k">MME forward test · FT-1.4 · rules '+mtE(L.rules||"1.5.0")+'</div>'+
         '<div class="opt-h">Buying the heaviest support wall, measured before any money is risked</div>'+
         '<div class="opt-sub">'+status+'</div></div>'+
-      '<div class="opt-meta">Seven arms on the same daily Phoenix snapshot · decisions at 10:00 ET from Phoenix’s 5-minute prices · stops reviewed each morning with that day’s walls and EM</div>'+
+      '<div class="opt-meta">Seven arms on the same daily Phoenix snapshot · decision at 10:00 ET, then an entry check every hour to 15:00 ET (rules v1.5.0), from Phoenix’s 5-minute prices · stops reviewed each morning with that day’s walls and EM</div>'+
       today+
       '<div class="opt-grp" id="mtAcct"><button data-a="2000"'+(A==="2000"?' class="on"':'')+'>$2,000 account</button><button data-a="10000"'+(A==="10000"?' class="on"':'')+'>$10,000 account</button></div>'+
       '<div class="opt-sec"><div class="opt-sk"><b>1</b> The arms</div><div class="mt-arms">'+cards+'</div></div>'+
