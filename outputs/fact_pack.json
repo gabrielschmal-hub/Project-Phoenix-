@@ -1,17 +1,17 @@
 {
  "schema": "phoenix-fact-pack/1",
  "date": "2026-11-20",
- "asof": "2026-11-20 05:44 UTC",
+ "asof": "2026-11-20 13:53 UTC",
  "market": {
-  "regime": "ENERGY_GRIND",
-  "regime_held_weeks": 7,
+  "regime": "POLICY_TIGHTENING",
+  "regime_held_weeks": 1,
   "spx": {
    "last": 7175.83,
    "chg_1d_pct": -2.02,
    "vs_50d_pct": -6.08,
    "vs_200d_pct": -2.34
   },
-  "vix": 28.44,
+  "vix": 30.82,
   "dxy": null,
   "us10y": null,
   "gold": null,
@@ -64,10 +64,10 @@
    "m1_pct": -14.35
   },
   "btc": {
-   "last": 62987.0,
-   "d1_pct": -2.94,
-   "w1_pct": -14.84,
-   "m1_pct": -24.06
+   "last": 61902.0,
+   "d1_pct": -1.72,
+   "w1_pct": -13.23,
+   "m1_pct": -26.32
   },
   "dxy": {
    "last": 103.9,
@@ -121,111 +121,106 @@
   "rows": 251
  },
  "regime_gates": {
-  "regime": "ENERGY_GRIND",
-  "held_weeks": 7,
-  "since": "2026-10-05",
+  "regime": "POLICY_TIGHTENING",
+  "held_weeks": 1,
+  "since": "2026-11-16",
   "drivers": [
    {
-    "key": "cpi_chg_3m",
-    "label": "CPI 3m change",
-    "value": 0.37,
+    "key": "cpi_yoy",
+    "label": "CPI y/y",
+    "value": 3.72,
     "op": ">",
-    "threshold": 0.3,
-    "clear_by": 0.07,
+    "threshold": 2.5,
+    "clear_by": 1.22,
     "ok": true
    },
    {
-    "key": "wti_vs_2yr",
-    "label": "WTI vs 2yr",
-    "value": 11.76,
+    "key": "dd",
+    "label": "Drawdown",
+    "value": -8.14,
     "op": ">",
-    "threshold": 0,
-    "clear_by": 11.76,
+    "threshold": -12,
+    "clear_by": 3.86,
     "ok": true
    },
    {
-    "key": "wti_12m",
-    "label": "WTI 12m",
-    "value": 43.06,
+    "key": "real_3m",
+    "label": "Real 10Y 3m change (bp)",
+    "value": 38.0,
     "op": ">",
     "threshold": 25,
-    "clear_by": 18.06,
+    "clear_by": 13.0,
+    "ok": true
+   },
+   {
+    "key": "us02_3m",
+    "label": "2Y yield 3m change (bp)",
+    "value": 56.0,
+    "op": ">",
+    "threshold": 40,
+    "clear_by": 16.0,
     "ok": true
    }
   ],
   "watch": [
    {
-    "if": "CPI 3m change falls below 0.3",
-    "now": 0.37,
-    "threshold": 0.3,
-    "distance": 0.07,
-    "then": "ENERGY_GRIND no longer qualifies"
+    "if": "CPI y/y falls below 2.5",
+    "now": 3.72,
+    "threshold": 2.5,
+    "distance": 1.22,
+    "then": "POLICY_TIGHTENING no longer qualifies"
    },
    {
-    "if": "WTI vs 2yr falls below 0",
-    "now": 11.76,
-    "threshold": 0,
-    "distance": 11.76,
-    "then": "ENERGY_GRIND no longer qualifies"
+    "if": "Drawdown falls below -12",
+    "now": -8.14,
+    "threshold": -12,
+    "distance": 3.86,
+    "then": "POLICY_TIGHTENING no longer qualifies"
    },
    {
-    "if": "WTI 12m falls below 25",
-    "now": 43.06,
+    "if": "Real 10Y 3m change (bp) falls below 25",
+    "now": 38.0,
     "threshold": 25,
-    "distance": 18.06,
-    "then": "ENERGY_GRIND no longer qualifies"
+    "distance": 13.0,
+    "then": "POLICY_TIGHTENING no longer qualifies"
    }
   ],
   "runner_up": {
-   "regime": "POLICY_TIGHTENING",
-   "score": 48.6,
-   "behind_by": 1.4
+   "regime": "ENERGY_GRIND",
+   "score": 48.5,
+   "behind_by": 0.1
   }
  },
  "screener": {
-  "n_candidates": 407,
+  "n_candidates": 373,
   "top": [
    {
     "ticker": "BLCO",
     "industry": "Medical specialties",
-    "trade_score": 76,
-    "atr14_pct": 2.9,
+    "trade_score": 72,
+    "atr14_pct": 2.76,
     "mcap_B": 5.32,
-    "breakout": true,
+    "breakout": false,
     "days_on_list": 23,
     "profitability": "marginal",
-    "pos_vs_high": -0.7,
+    "pos_vs_high": -1.9,
     "surge": 173,
-    "dollar_vol_M": 21.7,
-    "stop_pct_2_5atr": 7.25
+    "dollar_vol_M": 21.8,
+    "stop_pct_2_5atr": 6.9
    },
    {
-    "ticker": "ADT",
-    "industry": "Miscellaneous commercial services",
-    "trade_score": 71,
-    "atr14_pct": 0.46,
-    "mcap_B": 4.84,
-    "breakout": true,
-    "days_on_list": 3,
-    "profitability": "profitable",
-    "pos_vs_high": -0.2,
-    "surge": 331,
-    "dollar_vol_M": 256.3,
-    "stop_pct_2_5atr": 1.15
-   },
-   {
-    "ticker": "PRCH",
-    "industry": "Property/Casualty insurance",
-    "trade_score": 70,
-    "atr14_pct": 5.31,
-    "mcap_B": 1.34,
+    "ticker": "VNT",
+    "industry": "Other transportation",
+    "trade_score": 67,
+    "atr14_pct": 4.06,
+    "mcap_B": 4.29,
     "breakout": false,
-    "days_on_list": 78,
-    "profitability": "unknown",
-    "pos_vs_high": -1.4,
-    "surge": 61,
-    "dollar_vol_M": 41.4,
-    "stop_pct_2_5atr": 13.27
+    "days_on_list": 10,
+    "profitability": "profitable",
+    "pos_vs_high": -0.0,
+    "surge": 53,
+    "dollar_vol_M": 73.4,
+    "stop_pct_2_5atr": 10.15
    },
    {
     "ticker": "CROX",
@@ -242,32 +237,18 @@
     "stop_pct_2_5atr": 9.5
    },
    {
-    "ticker": "VNT",
-    "industry": "Other transportation",
-    "trade_score": 66,
-    "atr14_pct": 3.9,
-    "mcap_B": 4.29,
-    "breakout": false,
-    "days_on_list": 10,
-    "profitability": "profitable",
-    "pos_vs_high": 0.0,
-    "surge": 53,
-    "dollar_vol_M": 72.0,
-    "stop_pct_2_5atr": 9.75
-   },
-   {
-    "ticker": "TBBB",
-    "industry": "Food retail",
+    "ticker": "PRCH",
+    "industry": "Property/Casualty insurance",
     "trade_score": 65,
-    "atr14_pct": 3.14,
-    "mcap_B": 5.03,
+    "atr14_pct": 5.51,
+    "mcap_B": 1.34,
     "breakout": false,
-    "days_on_list": 60,
-    "profitability": "marginal",
-    "pos_vs_high": -2.7,
-    "surge": 44,
-    "dollar_vol_M": 74.3,
-    "stop_pct_2_5atr": 7.85
+    "days_on_list": 78,
+    "profitability": "unknown",
+    "pos_vs_high": -5.2,
+    "surge": 61,
+    "dollar_vol_M": 41.2,
+    "stop_pct_2_5atr": 13.77
    },
    {
     "ticker": "TNL",
@@ -286,7 +267,7 @@
    {
     "ticker": "OGE",
     "industry": "Electric utilities",
-    "trade_score": 63,
+    "trade_score": 64,
     "atr14_pct": 1.83,
     "mcap_B": 9.84,
     "breakout": false,
@@ -296,6 +277,34 @@
     "surge": 40,
     "dollar_vol_M": 118.3,
     "stop_pct_2_5atr": 4.58
+   },
+   {
+    "ticker": "EG",
+    "industry": "Property/Casualty insurance",
+    "trade_score": 63,
+    "atr14_pct": 2.33,
+    "mcap_B": 13.43,
+    "breakout": false,
+    "days_on_list": 103,
+    "profitability": "profitable",
+    "pos_vs_high": -1.2,
+    "surge": 42,
+    "dollar_vol_M": 198.2,
+    "stop_pct_2_5atr": 5.83
+   },
+   {
+    "ticker": "GKOS",
+    "industry": "Medical specialties",
+    "trade_score": 63,
+    "atr14_pct": 5.16,
+    "mcap_B": 7.71,
+    "breakout": false,
+    "days_on_list": 103,
+    "profitability": "lossmaking",
+    "pos_vs_high": -3.1,
+    "surge": 169,
+    "dollar_vol_M": 436.9,
+    "stop_pct_2_5atr": 12.9
    }
   ],
   "leaning": [],
@@ -496,47 +505,40 @@
   "over_cap": false
  },
  "news": {
-  "date": "2026-11-18",
-  "asof": "2026-11-20 05:01 UTC",
-  "headline": "Nvidia's beat fades into a 2.9% loss \u2014 and the Fed minutes lean toward bigger hikes",
-  "standfirst": "Nvidia opened higher after its results, then fell 2.89%. The Fed minutes showed almost all officials expect more hikes, and Waller said a half-point is probably needed in December. The S&P fell 0.23% for a fifth straight day and the Dow 1.11%, while the Nasdaq rose 0.42%. Gold and oil each fell more than 3%. The book is flat; Q4 is +34.64 realised, heat 0R.",
+  "date": "2026-11-19",
+  "asof": "2026-11-20 13:15 UTC",
+  "headline": "Stocks fall 2% for a sixth straight loss \u2014 and the S&P is now 8% below its record",
+  "standfirst": "The S&P fell 2.02%, the Nasdaq 2.25% and the Dow 2.19%, below 50,000, as morning gains in Nvidia and other AI names turned into losses. Walmart beat and fell, the Philly Fed index dropped to 6.3, and Trump, Xi and Putin pledged more fuel supply in Shenzhen. Gold fell 2.67% and WTI was flat. The book is flat; Q4 is +34.64 realised, heat 0R.",
   "themes": [
    {
     "kicker": "What's next",
-    "right": "Thursday: Walmart and a Shenzhen summit",
-    "title": "A summit, retail results and an oil contract expiry",
+    "right": "Friday: Waller, Cook, and the oil expiry",
+    "title": "Two Fed governors and the weekly close",
     "items": [
      {
-      "tone": "c-cb",
-      "tag": "SUMMIT",
-      "html": "<b>Trump meets Xi and Putin</b> in Shenzhen; Walmart before the open; Intuit, Ross and Gap after",
-      "when": "Thu \u00b7 2026-11-19",
-      "kind": "calendar"
-     },
-     {
-      "tone": "c-cb",
-      "tag": "WTI",
-      "html": "<b>December WTI expires</b>; the briefs switch to January",
+      "tone": "c-fomc",
+      "tag": "FED",
+      "html": "<b>Waller and Cook speak</b>; final Michigan sentiment; December WTI expires",
       "when": "Fri \u00b7 2026-11-20",
       "kind": "calendar"
      },
      {
       "tone": "c-fomc",
       "tag": "FOMC",
-      "html": "<b>December Fed meeting</b> \u2014 a hike about 91% priced, a half-point openly discussed",
+      "html": "<b>December Fed meeting</b> \u2014 a hike close to fully priced",
       "when": "Tue\u2013Wed \u00b7 2026-12-08",
       "kind": "calendar"
      }
     ],
-    "note": "<b>Thursday brings Walmart's results</b> before the open and Trump's meeting with Xi and Putin in Shenzhen. <b>Intuit</b>, <b>Ross</b> and <b>Gap</b> report after the close, and the December WTI contract expires on Friday."
+    "note": "<b>Friday brings Waller at 8:25am ET and Cook at 12:15pm</b>, with the final Michigan sentiment reading at 10am. The December WTI contract expires, and the week ends with the S&P down 5.1% so far."
    }
   ],
-  "ondeck": "<b>Thursday brings Walmart's results</b> before the open and Trump's meeting with Xi and Putin in Shenzhen. <b>Intuit</b>, <b>Ross</b> and <b>Gap</b> report after the close, and the December WTI contract expires on Friday.",
+  "ondeck": "<b>Friday brings Waller at 8:25am ET and Cook at 12:15pm</b>, with the final Michigan sentiment reading at 10am. The December WTI contract expires, and the week ends with the S&P down 5.1% so far.",
   "note": null
  },
  "provenance": {
   "macro": {
-   "asof": "2026-11-20 05:00 UTC",
+   "asof": "2026-11-20 13:15 UTC",
    "age_min": null
   },
   "gex": {
@@ -544,15 +546,15 @@
    "age_min": null
   },
   "stocks": {
-   "asof": "2026-11-20 05:11 UTC",
+   "asof": "2026-11-20 13:27 UTC",
    "age_min": null
   },
   "institutional_holdings": {
-   "asof": "2026-11-20 05:21 UTC",
+   "asof": "2026-11-20 13:32 UTC",
    "quarter": "2026-09-30"
   },
   "congress_trades": {
-   "asof": "2026-11-20 05:17 UTC",
+   "asof": "2026-11-20 13:30 UTC",
    "status": {
     "written": "2026-11-20",
     "dropped_impossible_dates": 0,
@@ -582,7 +584,7 @@
    }
   },
   "wire": {
-   "asof": "2026-11-20 05:01 UTC"
+   "asof": "2026-11-20 13:15 UTC"
   }
  },
  "missing": [],
@@ -591,17 +593,24 @@
   "prev_date": "2026-11-19",
   "changes": [
    {
+    "kind": "regime",
+    "what": "engine regime",
+    "was": "ENERGY_GRIND",
+    "now": "POLICY_TIGHTENING",
+    "why": "the regime label drives which setups the engine favours"
+   },
+   {
     "kind": "market",
     "what": "vix",
     "was": 24.56,
-    "now": 28.44,
+    "now": 30.82,
     "why": "volatility repriced"
    },
    {
     "kind": "screener",
     "what": "new in the top setups",
     "was": null,
-    "now": "TBBB, TNL, OGE",
+    "now": "TNL, OGE, EG, GKOS",
     "why": "names the engine ranked highest that were not there yesterday"
    }
   ]

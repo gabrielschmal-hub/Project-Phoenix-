@@ -1,11 +1,11 @@
 {
- "asof": "2026-11-20 05:28 UTC",
+ "asof": "2026-11-20 13:37 UTC",
  "date": "2026-11-20",
  "source": "Yahoo option chains; expected move from the ATM straddle mid, IV x S x sqrt(T) when quotes are unusable (method on every row)",
  "note": "Rows carry the spot they were computed against and the earnings date known then. A row is stale by age, and INVALID once earnings have passed or spot has moved far from the quote \u2014 the app decides which.",
  "tier_a": 160,
  "tier_b_refreshed": false,
- "ticker_count": 937,
+ "ticker_count": 939,
  "tickers": {
   "GOOG": {
    "asof": "2026-11-20",
@@ -36,7 +36,8 @@
     "dte": 6,
     "pct": 5.04
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "BETA": {
    "asof": "2026-11-20",
@@ -63,7 +64,8 @@
    "stop_floor_pct": 10.96,
    "next_earnings": "2027-03-08",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "EPD": {
    "asof": "2026-11-20",
@@ -90,13 +92,14 @@
    "stop_floor_pct": 2.24,
    "next_earnings": "2027-02-01",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "MNST": {
    "asof": "2026-11-20",
    "tier": "A",
    "coverage": "failed",
-   "reason": "ValueError: cannot convert float NaN to integer"
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "IBM": {
    "asof": "2026-11-20",
@@ -123,7 +126,8 @@
    "stop_floor_pct": 3.0,
    "next_earnings": "2027-01-26",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "IONQ": {
    "asof": "2026-11-20",
@@ -150,7 +154,8 @@
    "stop_floor_pct": 13.13,
    "next_earnings": "2027-02-23",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "TENB": {
    "asof": "2026-11-20",
@@ -177,7 +182,8 @@
    "stop_floor_pct": 7.25,
    "next_earnings": "2027-02-02",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "TXG": {
    "asof": "2026-11-20",
@@ -204,7 +210,8 @@
    "stop_floor_pct": 11.57,
    "next_earnings": "2027-02-10",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "CVS": {
    "asof": "2026-11-20",
@@ -231,7 +238,8 @@
    "stop_floor_pct": 4.93,
    "next_earnings": "2027-02-08",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "SLS": {
    "asof": "2026-11-20",
@@ -262,7 +270,8 @@
     "dte": 6,
     "pct": 14.33
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "INFQ": {
    "asof": "2026-11-20",
@@ -293,7 +302,8 @@
     "dte": 6,
     "pct": 8.54
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "SVM": {
    "asof": "2026-11-20",
@@ -324,7 +334,8 @@
     "dte": 27,
     "pct": 16.1
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "MDA": {
    "asof": "2026-11-20",
@@ -355,7 +366,8 @@
     "dte": 27,
     "pct": 14.42
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "TSM": {
    "asof": "2026-11-20",
@@ -382,7 +394,8 @@
    "stop_floor_pct": 5.83,
    "next_earnings": "2027-01-14",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "TEN": {
    "asof": "2026-11-01",
@@ -507,8 +520,8 @@
   "STEL": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": null
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "VEON": {
    "asof": "2026-11-09",
@@ -544,8 +557,8 @@
   "EA": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": null
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "NAT": {
    "asof": "2026-11-01",
@@ -940,7 +953,8 @@
    "stop_floor_pct": 8.41,
    "next_earnings": "2027-02-22",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "CLMT": {
    "asof": "2026-10-21",
@@ -1088,7 +1102,8 @@
     "dte": 27,
     "pct": 5.95
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "DK": {
    "asof": "2026-10-24",
@@ -1156,7 +1171,8 @@
     "dte": 13,
     "pct": 12.11
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "DAC": {
    "asof": "2026-11-01",
@@ -1363,8 +1379,8 @@
   "MGRT": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 133.8300018310547
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "PVLA": {
    "asof": "2026-11-16",
@@ -1609,7 +1625,8 @@
     "dte": 27,
     "pct": 13.27
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "ATAI": {
    "asof": "2026-10-11",
@@ -2531,7 +2548,8 @@
     "dte": 27,
     "pct": 9.5
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "DAR": {
    "asof": "2026-09-21",
@@ -2788,7 +2806,8 @@
    "stop_floor_pct": 6.26,
    "next_earnings": "2027-02-22",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "OPY": {
    "asof": "2026-09-16",
@@ -2859,8 +2878,8 @@
   "CPAC": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 12.829999923706055
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "IX": {
    "asof": "2026-09-18",
@@ -2893,7 +2912,8 @@
    "stop_floor_pct": 4.69,
    "next_earnings": "2027-02-22",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "SCSC": {
    "asof": "2026-10-14",
@@ -3102,7 +3122,8 @@
    "stop_floor_pct": 2.79,
    "next_earnings": "2027-02-22",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "VOYA": {
    "asof": "2026-11-18",
@@ -3229,8 +3250,8 @@
   "WBS": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": null
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "BNS": {
    "asof": "2026-09-15",
@@ -3262,8 +3283,8 @@
   "CNTA": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": null
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "CRGY": {
    "asof": "2026-11-01",
@@ -3380,7 +3401,8 @@
    "stop_floor_pct": 3.14,
    "next_earnings": "2027-03-09",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "ZD": {
    "asof": "2026-10-01",
@@ -3439,8 +3461,8 @@
   "CPRX": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": null
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "RVTY": {
    "asof": "2026-11-20",
@@ -3467,7 +3489,8 @@
    "stop_floor_pct": 5.51,
    "next_earnings": "2027-02-01",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "NUE": {
    "asof": "2026-11-15",
@@ -4062,7 +4085,8 @@
    "stop_floor_pct": 6.85,
    "next_earnings": "2027-02-03",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "ABCL": {
    "asof": "2026-11-11",
@@ -4240,7 +4264,8 @@
     "dte": 30,
     "pct": 2.17
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "VTRS": {
    "asof": "2026-11-20",
@@ -4267,7 +4292,8 @@
    "stop_floor_pct": 3.02,
    "next_earnings": "2027-02-24",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "EBAY": {
    "asof": "2026-11-20",
@@ -4294,7 +4320,8 @@
    "stop_floor_pct": 3.28,
    "next_earnings": "2027-02-16",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "TWST": {
    "asof": "2026-10-31",
@@ -4331,8 +4358,8 @@
   "MSGE": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 80.62
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "ROIV": {
    "asof": "2026-11-20",
@@ -4359,7 +4386,8 @@
    "stop_floor_pct": 5.06,
    "next_earnings": "2027-02-04",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "AAMI": {
    "asof": "2026-11-16",
@@ -4691,7 +4719,8 @@
    "stop_floor_pct": 7.88,
    "next_earnings": "2027-01-20",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "NVDA": {
    "asof": "2026-11-20",
@@ -4718,7 +4747,8 @@
    "stop_floor_pct": 8.15,
    "next_earnings": "2027-02-23",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "DBX": {
    "asof": "2026-09-18",
@@ -4843,8 +4873,8 @@
   "WSR": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": null
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "KEYS": {
    "asof": "2026-11-15",
@@ -4929,7 +4959,8 @@
    "stop_floor_pct": 4.35,
    "next_earnings": "2027-02-03",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "RCAT": {
    "asof": "2026-11-20",
@@ -4960,7 +4991,8 @@
     "dte": 6,
     "pct": 32.0
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "BAC": {
    "asof": "2026-11-20",
@@ -4987,7 +5019,8 @@
    "stop_floor_pct": 2.49,
    "next_earnings": "2027-01-15",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "FTNT": {
    "asof": "2026-11-20",
@@ -5014,7 +5047,8 @@
    "stop_floor_pct": 4.97,
    "next_earnings": "2027-02-03",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "SFL": {
    "asof": "2026-11-01",
@@ -5246,7 +5280,8 @@
     "dte": 13,
     "pct": 19.21
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "GE": {
    "asof": "2026-11-20",
@@ -5273,7 +5308,8 @@
    "stop_floor_pct": 3.47,
    "next_earnings": "2027-01-20",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "ORCL": {
    "asof": "2026-11-20",
@@ -5300,7 +5336,8 @@
    "stop_floor_pct": 7.42,
    "next_earnings": "2026-12-14",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "SNOW": {
    "asof": "2026-11-20",
@@ -5331,7 +5368,8 @@
     "dte": 13,
     "pct": 15.31
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "WBD": {
    "asof": "2026-10-07",
@@ -5597,7 +5635,8 @@
    "stop_floor_pct": 4.11,
    "next_earnings": "2027-02-25",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "NET": {
    "asof": "2026-10-08",
@@ -6133,7 +6172,8 @@
    "stop_floor_pct": 8.72,
    "next_earnings": "2027-02-25",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "TMO": {
    "asof": "2026-11-15",
@@ -6251,7 +6291,8 @@
    "stop_floor_pct": 6.26,
    "next_earnings": "2027-02-01",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "AAPL": {
    "asof": "2026-11-20",
@@ -6278,7 +6319,8 @@
    "stop_floor_pct": 2.58,
    "next_earnings": "2027-01-27",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "DELL": {
    "asof": "2026-11-15",
@@ -6601,7 +6643,8 @@
    "stop_floor_pct": 4.82,
    "next_earnings": "2027-02-16",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "RUSHB": {
    "asof": "2026-11-18",
@@ -6728,13 +6771,14 @@
    "stop_floor_pct": 4.12,
    "next_earnings": "2027-02-03",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "DBRG": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": null
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "DOCN": {
    "asof": "2026-09-24",
@@ -6858,7 +6902,8 @@
    "stop_floor_pct": 28.29,
    "next_earnings": "2026-11-05",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "CORT": {
    "asof": "2026-10-01",
@@ -6922,7 +6967,8 @@
    "stop_floor_pct": 3.79,
    "next_earnings": "2027-02-09",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "STX": {
    "asof": "2026-11-15",
@@ -7061,7 +7107,8 @@
    "stop_floor_pct": 3.24,
    "next_earnings": "2027-02-24",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "MRVI": {
    "asof": "2026-11-09",
@@ -7336,7 +7383,8 @@
    "stop_floor_pct": 2.85,
    "next_earnings": "2027-02-10",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "LQDA": {
    "asof": "2026-09-29",
@@ -7512,7 +7560,8 @@
    "stop_floor_pct": 5.2,
    "next_earnings": "2027-03-01",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "LIND": {
    "asof": "2026-11-16",
@@ -8221,7 +8270,8 @@
    "stop_floor_pct": 4.41,
    "next_earnings": "2027-02-10",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "MTSI": {
    "asof": "2026-10-13",
@@ -8399,7 +8449,8 @@
     "dte": 27,
     "pct": 14.34
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "ELPC": {
    "asof": "2026-10-24",
@@ -8432,7 +8483,8 @@
    "stop_floor_pct": 3.97,
    "next_earnings": "2027-02-22",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "SPY": {
    "asof": "2026-10-08",
@@ -8552,7 +8604,8 @@
    "stop_floor_pct": 4.54,
    "next_earnings": "2027-02-10",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "ABT": {
    "asof": "2026-11-15",
@@ -8772,7 +8825,8 @@
    "stop_floor_pct": 2.3,
    "next_earnings": "2027-02-08",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "AJG": {
    "asof": "2026-11-15",
@@ -10403,7 +10457,8 @@
    "stop_floor_pct": 2.46,
    "next_earnings": "2027-02-08",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "DHI": {
    "asof": "2026-11-15",
@@ -10731,7 +10786,8 @@
    "stop_floor_pct": 2.33,
    "next_earnings": "2027-02-02",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "EIX": {
    "asof": "2026-11-15",
@@ -11082,7 +11138,8 @@
    "stop_floor_pct": 3.34,
    "next_earnings": "2027-02-08",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "EXR": {
    "asof": "2026-11-15",
@@ -11723,7 +11780,8 @@
    "stop_floor_pct": 2.68,
    "next_earnings": "2027-02-02",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "HAL": {
    "asof": "2026-11-15",
@@ -12363,10 +12421,10 @@
    "quality": "quoted"
   },
   "JNJ": {
-   "asof": "2026-11-19",
+   "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 272.70001220703125
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "KEY": {
    "asof": "2026-11-15",
@@ -12613,7 +12671,8 @@
    "stop_floor_pct": 3.23,
    "next_earnings": "2027-02-15",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "LHX": {
    "asof": "2026-11-15",
@@ -12721,7 +12780,8 @@
    "stop_floor_pct": 3.25,
    "next_earnings": "2027-02-02",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "LMT": {
    "asof": "2026-11-15",
@@ -13181,7 +13241,8 @@
    "stop_floor_pct": 2.59,
    "next_earnings": "2027-02-09",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "MTB": {
    "asof": "2026-11-15",
@@ -14127,7 +14188,8 @@
    "stop_floor_pct": 3.65,
    "next_earnings": "2027-01-28",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "RF": {
    "asof": "2026-11-15",
@@ -14729,7 +14791,8 @@
    "stop_floor_pct": 4.74,
    "next_earnings": "2027-02-02",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "SWKS": {
    "asof": "2026-11-15",
@@ -15466,7 +15529,8 @@
    "stop_floor_pct": 2.93,
    "next_earnings": "2027-02-01",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "VMC": {
    "asof": "2026-11-15",
@@ -15547,7 +15611,8 @@
    "stop_floor_pct": 2.83,
    "next_earnings": "2027-02-03",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "VRT": {
    "asof": "2026-11-15",
@@ -16517,7 +16582,8 @@
    "stop_floor_pct": 2.38,
    "next_earnings": "2027-02-08",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "BEN": {
    "asof": "2026-11-15",
@@ -16685,7 +16751,8 @@
    "stop_floor_pct": 2.6,
    "next_earnings": "2027-02-03",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "CARR": {
    "asof": "2026-11-15",
@@ -17067,7 +17134,8 @@
    "stop_floor_pct": 3.75,
    "next_earnings": "2027-02-08",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "CVNA": {
    "asof": "2026-10-24",
@@ -17707,7 +17775,8 @@
    "stop_floor_pct": 2.9,
    "next_earnings": "2027-02-08",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "GLW": {
    "asof": "2026-11-15",
@@ -17987,7 +18056,7 @@
    "asof": "2026-11-20",
    "tier": "A",
    "coverage": "failed",
-   "reason": "ValueError: cannot convert float NaN to integer"
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "HSY": {
    "asof": "2026-11-15",
@@ -18230,7 +18299,8 @@
    "stop_floor_pct": 4.33,
    "next_earnings": "2027-02-22",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "KHC": {
    "asof": "2026-11-15",
@@ -18338,7 +18408,8 @@
    "stop_floor_pct": 1.96,
    "next_earnings": "2027-02-08",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "KR": {
    "asof": "2026-11-15",
@@ -18589,7 +18660,8 @@
    "stop_floor_pct": 2.78,
    "next_earnings": "2027-02-08",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "MDLZ": {
    "asof": "2026-11-15",
@@ -19641,7 +19713,8 @@
    "stop_floor_pct": 3.69,
    "next_earnings": "2027-03-03",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "TJX": {
    "asof": "2026-11-15",
@@ -20205,7 +20278,8 @@
    "stop_floor_pct": 8.97,
    "next_earnings": "2027-02-10",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "PRCH": {
    "asof": "2026-11-20",
@@ -20232,7 +20306,8 @@
    "stop_floor_pct": 5.31,
    "next_earnings": "2027-02-09",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "LGND": {
    "asof": "2026-11-13",
@@ -20486,7 +20561,8 @@
     "dte": 27,
     "pct": 12.77
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "EFXT": {
    "asof": "2026-10-14",
@@ -20572,7 +20648,8 @@
     "dte": 27,
     "pct": 5.9
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "ANF": {
    "asof": "2026-11-06",
@@ -20639,8 +20716,8 @@
   "RLJ": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 12.58
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "SHOO": {
    "asof": "2026-10-16",
@@ -20698,7 +20775,8 @@
    "stop_floor_pct": 6.61,
    "next_earnings": "2027-02-24",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "EXEL": {
    "asof": "2026-11-20",
@@ -20725,7 +20803,8 @@
    "stop_floor_pct": 3.8,
    "next_earnings": "2027-02-08",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "RGA": {
    "asof": "2026-11-20",
@@ -20752,7 +20831,8 @@
    "stop_floor_pct": 2.4,
    "next_earnings": "2027-02-03",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "SHEL": {
    "asof": "2026-10-17",
@@ -20819,8 +20899,8 @@
   "CRNX": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": null
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "APPN": {
    "asof": "2026-11-09",
@@ -20878,7 +20958,8 @@
    "stop_floor_pct": 2.38,
    "next_earnings": "2027-02-09",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "KSS": {
    "asof": "2026-11-16",
@@ -20932,7 +21013,8 @@
    "stop_floor_pct": 2.96,
    "next_earnings": "2027-02-23",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "VAC": {
    "asof": "2026-10-16",
@@ -21468,10 +21550,10 @@
    "quality": "quoted"
   },
   "SHO": {
-   "asof": "2026-11-19",
+   "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 13.170000076293945
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "AMAL": {
    "asof": "2026-11-16",
@@ -21504,7 +21586,7 @@
    "asof": "2026-11-20",
    "tier": "A",
    "coverage": "failed",
-   "reason": "ValueError: cannot convert float NaN to integer"
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "SAIC": {
    "asof": "2026-11-20",
@@ -21794,7 +21876,8 @@
    "stop_floor_pct": 5.73,
    "next_earnings": "2027-02-22",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "AR": {
    "asof": "2026-11-01",
@@ -21852,7 +21935,8 @@
    "stop_floor_pct": 2.79,
    "next_earnings": "2027-02-22",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "SDRL": {
    "asof": "2026-11-01",
@@ -21914,7 +21998,8 @@
     "dte": 27,
     "pct": 11.46
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "VSTS": {
    "asof": "2026-11-16",
@@ -22115,7 +22200,8 @@
     "dte": 55,
     "pct": 16.37
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "TAK": {
    "asof": "2026-11-20",
@@ -22142,7 +22228,8 @@
    "stop_floor_pct": 3.61,
    "next_earnings": "2027-01-28",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "AXGN": {
    "asof": "2026-11-09",
@@ -22268,7 +22355,8 @@
    "stop_floor_pct": 5.07,
    "next_earnings": "2027-02-25",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "THG": {
    "asof": "2026-11-16",
@@ -22413,7 +22501,8 @@
    "stop_floor_pct": 4.04,
    "next_earnings": "2027-02-08",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "CROX": {
    "asof": "2026-11-20",
@@ -22440,7 +22529,8 @@
    "stop_floor_pct": 3.8,
    "next_earnings": "2027-02-10",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "RHP": {
    "asof": "2026-11-19",
@@ -22473,7 +22563,8 @@
    "stop_floor_pct": 3.63,
    "next_earnings": "2027-02-16",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "DCOM": {
    "asof": "2026-11-09",
@@ -22505,8 +22596,8 @@
   "PLGO": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 27.56999969482422
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "BRZE": {
    "asof": "2026-11-16",
@@ -22574,7 +22665,7 @@
    "asof": "2026-11-20",
    "tier": "A",
    "coverage": "failed",
-   "reason": "ValueError: cannot convert float NaN to integer"
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "KMTS": {
    "asof": "2026-11-12",
@@ -22638,7 +22729,8 @@
    "stop_floor_pct": 4.71,
    "next_earnings": "2027-02-23",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "AVPT": {
    "asof": "2026-11-10",
@@ -22696,7 +22788,8 @@
    "stop_floor_pct": 5.46,
    "next_earnings": "2027-02-24",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "LTH": {
    "asof": "2026-11-20",
@@ -22723,7 +22816,8 @@
    "stop_floor_pct": 3.99,
    "next_earnings": "2027-02-22",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "THC": {
    "asof": "2026-11-18",
@@ -22753,10 +22847,10 @@
    "quality": "quoted"
   },
   "SBH": {
-   "asof": "2026-11-19",
+   "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 19.09000015258789
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "OPK": {
    "asof": "2026-11-09",
@@ -22870,13 +22964,14 @@
    "stop_floor_pct": 6.73,
    "next_earnings": "2027-02-23",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "LILAK": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 9.82
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "PGNY": {
    "asof": "2026-11-20",
@@ -22903,13 +22998,14 @@
    "stop_floor_pct": 3.8,
    "next_earnings": "2027-02-24",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "IHG": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 174.1300048828125
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "MHK": {
    "asof": "2026-11-19",
@@ -22942,7 +23038,8 @@
    "stop_floor_pct": 1.47,
    "next_earnings": "2027-02-25",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "SIGI": {
    "asof": "2026-11-06",
@@ -23091,7 +23188,8 @@
    "stop_floor_pct": 2.66,
    "next_earnings": "2027-02-04",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "LION": {
    "asof": "2026-11-09",
@@ -23145,7 +23243,8 @@
    "stop_floor_pct": 3.59,
    "next_earnings": null,
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "VCEL": {
    "asof": "2026-11-20",
@@ -23172,7 +23271,8 @@
    "stop_floor_pct": 5.09,
    "next_earnings": "2027-02-24",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "MGNI": {
    "asof": "2026-11-20",
@@ -23226,7 +23326,8 @@
    "stop_floor_pct": 1.82,
    "next_earnings": "2027-03-01",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "WRBY": {
    "asof": "2026-11-20",
@@ -23280,7 +23381,8 @@
    "stop_floor_pct": 3.9,
    "next_earnings": "2027-02-10",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "ACEL": {
    "asof": "2026-11-20",
@@ -23307,7 +23409,8 @@
    "stop_floor_pct": 3.93,
    "next_earnings": "2027-03-01",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "CLOV": {
    "asof": "2026-11-18",
@@ -23361,13 +23464,14 @@
    "stop_floor_pct": 5.94,
    "next_earnings": "2027-02-22",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "LILA": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 9.87
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "FA": {
    "asof": "2026-11-10",
@@ -23425,7 +23529,8 @@
    "stop_floor_pct": 3.25,
    "next_earnings": "2027-02-03",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "U": {
    "asof": "2026-11-20",
@@ -23494,8 +23599,8 @@
   "NWE": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": null
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "SPNT": {
    "asof": "2026-11-20",
@@ -23522,7 +23627,8 @@
    "stop_floor_pct": 2.98,
    "next_earnings": "2027-02-16",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "GRDN": {
    "asof": "2026-11-20",
@@ -23549,7 +23655,8 @@
    "stop_floor_pct": 4.45,
    "next_earnings": "2027-03-09",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "BLLN": {
    "asof": "2026-11-13",
@@ -23607,7 +23714,8 @@
    "stop_floor_pct": 5.41,
    "next_earnings": null,
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "AZTA": {
    "asof": "2026-11-20",
@@ -23634,7 +23742,8 @@
    "stop_floor_pct": 7.05,
    "next_earnings": null,
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "TDC": {
    "asof": "2026-11-20",
@@ -23661,7 +23770,8 @@
    "stop_floor_pct": 4.52,
    "next_earnings": "2027-02-09",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "OSW": {
    "asof": "2026-11-20",
@@ -23688,7 +23798,8 @@
    "stop_floor_pct": 3.36,
    "next_earnings": "2027-02-16",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "SMA": {
    "asof": "2026-11-20",
@@ -23715,7 +23826,8 @@
    "stop_floor_pct": 3.36,
    "next_earnings": "2027-02-23",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "AGL": {
    "asof": "2026-11-18",
@@ -23820,7 +23932,8 @@
    "stop_floor_pct": 8.36,
    "next_earnings": "2027-02-09",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "MOH": {
    "asof": "2026-11-18",
@@ -23885,8 +23998,8 @@
   "CBC": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 38.1
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "HTHT": {
    "asof": "2026-11-18",
@@ -23922,14 +24035,14 @@
   "SILA": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": null
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "SKWD": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 63.53
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "COTY": {
    "asof": "2026-11-20",
@@ -23956,7 +24069,8 @@
    "stop_floor_pct": 5.9,
    "next_earnings": null,
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "YOU": {
    "asof": "2026-11-18",
@@ -23983,7 +24097,8 @@
    "stop_floor_pct": 6.75,
    "next_earnings": "2027-02-23",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "ENR": {
    "asof": "2026-11-20",
@@ -24010,7 +24125,8 @@
    "stop_floor_pct": 4.43,
    "next_earnings": "2027-02-03",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "RYTM": {
    "asof": "2026-11-20",
@@ -24037,7 +24153,8 @@
    "stop_floor_pct": 6.81,
    "next_earnings": "2027-02-24",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "LUXE": {
    "asof": "2026-11-20",
@@ -24064,7 +24181,8 @@
    "stop_floor_pct": 4.67,
    "next_earnings": "2027-02-08",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "GFF": {
    "asof": "2026-11-20",
@@ -24091,7 +24209,8 @@
    "stop_floor_pct": 4.57,
    "next_earnings": "2027-02-03",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "TFX": {
    "asof": "2026-11-20",
@@ -24118,13 +24237,14 @@
    "stop_floor_pct": 3.26,
    "next_earnings": "2027-02-24",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "WTBFB": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": 463.0
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "OGN": {
    "asof": "2026-11-20",
@@ -24151,7 +24271,8 @@
    "stop_floor_pct": 0.31,
    "next_earnings": "2027-02-10",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "AFG": {
    "asof": "2026-11-20",
@@ -24178,7 +24299,8 @@
    "stop_floor_pct": 2.04,
    "next_earnings": "2027-02-01",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "ASO": {
    "asof": "2026-11-20",
@@ -24209,7 +24331,8 @@
     "dte": 20,
     "pct": 11.69
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "COLM": {
    "asof": "2026-11-20",
@@ -24236,7 +24359,8 @@
    "stop_floor_pct": 3.47,
    "next_earnings": "2027-02-01",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "TPC": {
    "asof": "2026-11-19",
@@ -24281,7 +24405,8 @@
    "stop_floor_pct": 1.22,
    "next_earnings": "2027-02-24",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "GME": {
    "asof": "2026-11-20",
@@ -24312,13 +24437,14 @@
     "dte": 20,
     "pct": 14.18
    },
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "OLPX": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": null
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "VIK": {
    "asof": "2026-11-20",
@@ -24372,19 +24498,32 @@
    "stop_floor_pct": 6.05,
    "next_earnings": "2027-02-02",
    "em_to_earnings": null,
-   "quality": "quoted"
+   "quality": "quoted",
+   "refresh_failed": "2026-11-20"
   },
   "JHG": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": null
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   },
   "GBTG": {
    "asof": "2026-11-20",
    "tier": "A",
-   "coverage": "no_chain",
-   "spot": null
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+  },
+  "CPA": {
+   "asof": "2026-11-20",
+   "tier": "A",
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
+  },
+  "IBN": {
+   "asof": "2026-11-20",
+   "tier": "A",
+   "coverage": "failed",
+   "reason": "YFRateLimitError: Too Many Requests. Rate limited. Try after a while."
   }
  }
 }

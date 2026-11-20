@@ -1,15 +1,15 @@
 {
- "asof": "2026-11-20 05:34 UTC",
+ "asof": "2026-11-20 13:46 UTC",
  "date": "2026-11-20",
  "parser": "phoenix-auto",
- "headline": "Market dial 20/100, stress",
- "standfirst": "The market dial reads 20/100 (stress): SPX dealer gamma negative: dealers amplify moves; VIX 28.44 \u2014 elevated; VIX curve near-term fear above long-term: stress; SPX vs 200-day below its 200-day: a downtrend; SPX vs 50-day below its 50-day. No position needs action today.",
+ "headline": "Market dial 0/100, stress",
+ "standfirst": "The market dial reads 0/100 (stress): macro regime a stress regime; SPX dealer gamma negative: dealers amplify moves; VIX 28.44 \u2014 elevated; VIX curve near-term fear above long-term: stress; SPX vs 200-day below its 200-day: a downtrend; SPX vs 50-day below its 50-day. No position needs action today.",
  "recap": {
   "note": "<b>1 stock position</b> and <b>0 option trades</b> open; stock heat <b>0.0R</b> of 3R. Nothing to act on.",
   "items": [
    {
     "tag": "1",
-    "html": "<b>What the market news was about:</b> War & geopolitics (28 stories), Tech & AI (14 stories), Oil & energy (10 stories), Earnings season (5 stories).",
+    "html": "<b>What the market news was about:</b> War & geopolitics (27 stories), Tech & AI (14 stories), Oil & energy (11 stories), China & trade (5 stories).",
     "tone": "",
     "when": ""
    }
@@ -27,7 +27,7 @@
  },
  "macro": {
   "kicker": "The macro",
-  "note": "Regime ENERGY_GRIND; SPX -6.1% vs its 50-day and -2.3% vs its 200-day; SPX dealer gamma negative; VIX 28.44."
+  "note": "Regime POLICY_TIGHTENING; SPX -6.1% vs its 50-day and -2.3% vs its 200-day; SPX dealer gamma negative; VIX 30.82."
  },
  "screener": {
   "kicker": "The screener",
@@ -35,21 +35,21 @@
    {
     "tag": "TAC",
     "ticker": "BLCO",
-    "html": "<b>BLCO</b> rank 81.0 \u2014 industry leading (rank 27/121, +7.3% vs SPX over a month); no dealer levels (no option chain on file); news: results missed estimates",
-    "tone": "",
-    "when": ""
-   },
-   {
-    "tag": "TAC",
-    "ticker": "PRCH",
-    "html": "<b>PRCH</b> rank 75.0 \u2014 industry leading (rank 11/121, +8.8% vs SPX over a month); no dealer levels (no option chain on file)",
+    "html": "<b>BLCO</b> rank 77.0 \u2014 industry leading (rank 23/121, +7.3% vs SPX over a month); no dealer levels (no option chain on file); news: results missed estimates",
     "tone": "",
     "when": ""
    },
    {
     "tag": "TAC",
     "ticker": "VNT",
-    "html": "<b>VNT</b> rank 71.0 \u2014 industry leading (rank 8/121, +18.7% vs SPX over a month); no dealer levels (no option chain on file)",
+    "html": "<b>VNT</b> rank 72.0 \u2014 industry leading (rank 9/121, +17.4% vs SPX over a month); no dealer levels (no option chain on file)",
+    "tone": "",
+    "when": ""
+   },
+   {
+    "tag": "TAC",
+    "ticker": "PRCH",
+    "html": "<b>PRCH</b> rank 70.0 \u2014 industry leading (rank 8/121, +8.8% vs SPX over a month); no dealer levels (no option chain on file)",
     "tone": "",
     "when": ""
    }
@@ -62,7 +62,7 @@
    {
     "tag": "GOOG",
     "ticker": "GOOG",
-    "html": "1 initiation",
+    "html": "no change of note",
     "tone": "",
     "when": ""
    }
@@ -70,20 +70,14 @@
  },
  "world": {
   "kicker": "The world",
-  "note": "Most-covered themes in today's market news: War & geopolitics (28), Tech & AI (14), Oil & energy (10), Earnings season (5), China & trade (5), Fed & rates (3)."
+  "note": "Most-covered themes in today's market news: War & geopolitics (27), Tech & AI (14), Oil & energy (11), China & trade (5), Earnings season (4), Fed & rates (3)."
  },
  "changed": {
   "kicker": "What changed",
   "items": [
    {
     "tag": "DIAL",
-    "html": "Market dial 45 \u2192 <b>20</b> (stress)",
-    "tone": "",
-    "when": ""
-   },
-   {
-    "tag": "OFF",
-    "html": "Off the options list: BHP, C, IEF, PFE, SPY, TSLA, UBER",
+    "html": "Market dial 20 \u2192 <b>0</b> (stress)",
     "tone": "",
     "when": ""
    },
@@ -102,11 +96,11 @@
  "ondeck": "Wed 25 Nov PCE inflation; Wed 25 Nov GDP Q3 (second); Thu 26 Nov Market closed \u00b7 Thanksgiving; Fri 27 Nov Early close 13:00 ET \u00b7 Day after Thanksgiving",
  "sources": {
   "prices": "Yahoo daily bars (Phoenix)",
-  "news": "Finnhub (free tier), 114 names with news, condensed by rules",
+  "news": "Finnhub (free tier), 104 names with news, condensed by rules",
   "data": "dossier, market dial, ledger, locked book, options screen, forward-test recap"
  },
  "_state": {
-  "dial": 20,
+  "dial": 0,
   "proposed": []
  }
 }

@@ -1,5 +1,5 @@
 {
- "asof": "2026-11-20 05:34 UTC",
+ "asof": "2026-11-20 13:46 UTC",
  "date": "2026-11-20",
  "rules": {
   "accounts_eur": [
@@ -55,14 +55,14 @@
   "drift_band": 0.05
  },
  "dial": {
-  "score": 20,
+  "score": 0,
   "state": "stress",
   "parts": [
    {
     "k": "macro regime",
-    "value": "ENERGY_GRIND",
-    "pts": 0,
-    "why": "not a stress regime"
+    "value": "POLICY_TIGHTENING",
+    "pts": -35,
+    "why": "a stress regime"
    },
    {
     "k": "SPX dealer gamma",
@@ -96,8 +96,8 @@
    }
   ],
   "context": {
-   "regime": "ENERGY_GRIND",
-   "regime_held_weeks": 7,
+   "regime": "POLICY_TIGHTENING",
+   "regime_held_weeks": 1,
    "gex_regime": "negative",
    "gex_net_B": -102.91,
    "gex_flip": 7571.17,
@@ -105,7 +105,7 @@
    "spx_close": 7175.83,
    "spx_vs_50d_pct": -6.08,
    "spx_vs_200d_pct": -2.34,
-   "vix": 28.44,
+   "vix": 30.82,
    "dayscore": 45.0,
    "dayscore_verdict": "TRADE CAREFULLY"
   }
@@ -248,12 +248,12 @@
  "conditions": {
   "dayscore": 45.0,
   "verdict": "TRADE CAREFULLY",
-  "regime": "ENERGY_GRIND",
-  "regime_held_weeks": 7,
+  "regime": "POLICY_TIGHTENING",
+  "regime_held_weeks": 1,
   "stress": true,
   "dial_state": "stress",
-  "dial_score": 20,
-  "eurusd": 1.0979,
+  "dial_score": 0,
+  "eurusd": 1.0993,
   "fx_src": "yahoo"
  },
  "split_auto": {
@@ -263,7 +263,7 @@
   "cash": 0.25
  },
  "split_reasons": [
-  "Market dial 20/100 \u2014 stress: SPX dealer gamma negative: dealers amplify moves (-20); VIX 28.44 \u2014 elevated (-20); VIX curve near-term fear above long-term: stress (-15); SPX vs 200-day below its 200-day: a downtrend (-20); SPX vs 50-day below its 50-day (-5).",
+  "Market dial 0/100 \u2014 stress: macro regime a stress regime (-35); SPX dealer gamma negative: dealers amplify moves (-20); VIX 28.44 \u2014 elevated (-20); VIX curve near-term fear above long-term: stress (-15); SPX vs 200-day below its 200-day: a downtrend (-20); SPX vs 50-day below its 50-day (-5).",
   "Stress split: tactical 10%, risky 5%, cash 25%; names below their gamma flip are excluded.",
   "The split is set when the book is locked or reviewed; between reviews a move into stress is an exception that asks you to cut the trading parts."
  ],
@@ -295,12 +295,12 @@
     "score": 85,
     "industry": "Marine shipping",
     "sector": "Transportation",
-    "price": 82.78
+    "price": 83.02
    },
    {
     "t": "FRO",
     "name": "Frontline Plc",
-    "score": 74,
+    "score": 75,
     "industry": "Marine shipping",
     "sector": "Transportation",
     "price": 44.75
@@ -311,7 +311,7 @@
     "score": 74,
     "industry": "Packaged software",
     "sector": "Technology services",
-    "price": 114.53
+    "price": 108.1
    },
    {
     "t": "CON",
@@ -319,7 +319,7 @@
     "score": 72,
     "industry": "Medical/Nursing services",
     "sector": "Health services",
-    "price": 41.98
+    "price": 41.45
    },
    {
     "t": "RPRX",
@@ -327,7 +327,7 @@
     "score": 72,
     "industry": "Pharmaceuticals: major",
     "sector": "Health technology",
-    "price": 68.67
+    "price": 67.72
    }
   ]
  },
@@ -336,12 +336,12 @@
    "t": "BLCO",
    "name": "Bausch + Lomb Corporation",
    "industry": "Medical specialties",
-   "score": 76,
-   "breakout": true,
-   "entry": 20.95,
-   "stop": 19.13,
-   "stop_atr": 19.13,
-   "atr_pct": 2.9,
+   "score": 72,
+   "breakout": false,
+   "entry": 20.69,
+   "stop": 18.98,
+   "stop_atr": 18.98,
+   "atr_pct": 2.76,
    "resistance": 21.09,
    "chart": null,
    "patterns": [],
@@ -350,10 +350,35 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 27/121, +7.3% vs SPX over a month)",
+    "industry leading (rank 23/121, +7.3% vs SPX over a month)",
     "no dealer levels (no option chain on file)"
    ],
-   "rank_score": 81.0,
+   "rank_score": 77.0,
+   "size_mult": 1.0,
+   "dealer": null
+  },
+  {
+   "t": "VNT",
+   "name": "Vontier Corporation",
+   "industry": "Other transportation",
+   "score": 67,
+   "breakout": false,
+   "entry": 43.62,
+   "stop": 38.31,
+   "stop_atr": 38.31,
+   "atr_pct": 4.06,
+   "resistance": 43.62,
+   "chart": null,
+   "patterns": [],
+   "sector": "Transportation",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 9/121, +17.4% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 72.0,
    "size_mult": 1.0,
    "dealer": null
   },
@@ -361,12 +386,12 @@
    "t": "PRCH",
    "name": "Porch Group, Inc.",
    "industry": "Property/Casualty insurance",
-   "score": 70,
+   "score": 65,
    "breakout": false,
-   "entry": 20.76,
-   "stop": 17.45,
-   "stop_atr": 17.45,
-   "atr_pct": 5.31,
+   "entry": 19.96,
+   "stop": 16.66,
+   "stop_atr": 16.66,
+   "atr_pct": 5.51,
    "resistance": 21.05,
    "chart": null,
    "patterns": [],
@@ -375,57 +400,7 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 11/121, +8.8% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
-   ],
-   "rank_score": 75.0,
-   "size_mult": 1.0,
-   "dealer": null
-  },
-  {
-   "t": "VNT",
-   "name": "Vontier Corporation",
-   "industry": "Other transportation",
-   "score": 66,
-   "breakout": false,
-   "entry": 43.96,
-   "stop": 38.82,
-   "stop_atr": 38.82,
-   "atr_pct": 3.9,
-   "resistance": 43.64,
-   "chart": null,
-   "patterns": [],
-   "sector": "Transportation",
-   "industry_ok": true,
-   "sector_ok": false,
-   "gates": [],
-   "notes": [
-    "industry leading (rank 8/121, +18.7% vs SPX over a month)",
-    "no dealer levels (no option chain on file)"
-   ],
-   "rank_score": 71.0,
-   "size_mult": 1.0,
-   "dealer": null
-  },
-  {
-   "t": "TBBB",
-   "name": "BBB Foods Inc.",
-   "industry": "Food retail",
-   "score": 65,
-   "breakout": false,
-   "entry": 68.15,
-   "stop": 61.73,
-   "stop_atr": 61.73,
-   "atr_pct": 3.14,
-   "resistance": 70.02,
-   "chart": null,
-   "patterns": [],
-   "sector": "Retail trade",
-   "industry_ok": true,
-   "sector_ok": false,
-   "gates": [],
-   "notes": [
-    "industry leading (rank 16/121, +4.2% vs SPX over a month)",
+    "industry leading (rank 8/121, +8.8% vs SPX over a month)",
     "no dealer levels (no option chain on file)"
    ],
    "rank_score": 70.0,
@@ -450,7 +425,7 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 9/121, +15.6% vs SPX over a month)",
+    "industry leading (rank 11/121, +13.8% vs SPX over a month)",
     "no dealer levels (no option chain on file)"
    ],
    "rank_score": 70.0,
@@ -461,7 +436,7 @@
    "t": "OGE",
    "name": "OGE Energy Corp",
    "industry": "Electric utilities",
-   "score": 63,
+   "score": 64,
    "breakout": false,
    "entry": 50.83,
    "stop": 48.04,
@@ -475,10 +450,10 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 31/121, +8.4% vs SPX over a month)",
+    "industry leading (rank 30/121, +8.1% vs SPX over a month)",
     "no dealer levels (no option chain on file)"
    ],
-   "rank_score": 68.0,
+   "rank_score": 69.0,
    "size_mult": 1.0,
    "dealer": null
   },
@@ -486,7 +461,7 @@
    "t": "EG",
    "name": "Everest Group, Ltd.",
    "industry": "Property/Casualty insurance",
-   "score": 62,
+   "score": 63,
    "breakout": false,
    "entry": 421.96,
    "stop": 392.46,
@@ -500,10 +475,10 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 11/121, +8.8% vs SPX over a month)",
+    "industry leading (rank 8/121, +8.8% vs SPX over a month)",
     "no dealer levels (no option chain on file)"
    ],
-   "rank_score": 67.0,
+   "rank_score": 68.0,
    "size_mult": 1.0,
    "dealer": null
   },
@@ -511,12 +486,12 @@
    "t": "GKOS",
    "name": "Glaukos Corporation",
    "industry": "Medical specialties",
-   "score": 62,
+   "score": 63,
    "breakout": false,
-   "entry": 233.08,
-   "stop": 195.32,
-   "stop_atr": 195.32,
-   "atr_pct": 5.4,
+   "entry": 238.1,
+   "stop": 201.24,
+   "stop_atr": 201.24,
+   "atr_pct": 5.16,
    "resistance": 245.72,
    "chart": null,
    "patterns": [],
@@ -525,7 +500,57 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 27/121, +7.3% vs SPX over a month)",
+    "industry leading (rank 23/121, +7.3% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 68.0,
+   "size_mult": 1.0,
+   "dealer": null
+  },
+  {
+   "t": "TBBB",
+   "name": "BBB Foods Inc.",
+   "industry": "Food retail",
+   "score": 63,
+   "breakout": false,
+   "entry": 66.84,
+   "stop": 60.1,
+   "stop_atr": 60.1,
+   "atr_pct": 3.36,
+   "resistance": 70.02,
+   "chart": null,
+   "patterns": [],
+   "sector": "Retail trade",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 17/121, +3.3% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 68.0,
+   "size_mult": 1.0,
+   "dealer": null
+  },
+  {
+   "t": "FTS",
+   "name": "Fortis Inc.",
+   "industry": "Electric utilities",
+   "score": 62,
+   "breakout": false,
+   "entry": 58.8,
+   "stop": 56.01,
+   "stop_atr": 56.01,
+   "atr_pct": 1.58,
+   "resistance": 59.63,
+   "chart": null,
+   "patterns": [],
+   "sector": "Utilities",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 30/121, +8.1% vs SPX over a month)",
     "no dealer levels (no option chain on file)"
    ],
    "rank_score": 67.0,
@@ -538,10 +563,10 @@
    "industry": "Medical specialties",
    "score": 62,
    "breakout": false,
-   "entry": 94.54,
-   "stop": 81.18,
-   "stop_atr": 81.18,
-   "atr_pct": 4.71,
+   "entry": 92.07,
+   "stop": 78.95,
+   "stop_atr": 78.95,
+   "atr_pct": 4.75,
    "resistance": 91.32,
    "chart": null,
    "patterns": [],
@@ -550,7 +575,7 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 27/121, +7.3% vs SPX over a month)",
+    "industry leading (rank 23/121, +7.3% vs SPX over a month)",
     "no dealer levels (no option chain on file)"
    ],
    "rank_score": 67.0,
@@ -600,35 +625,10 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 20/121, +13.5% vs SPX over a month)",
+    "industry leading (rank 28/121, +11.5% vs SPX over a month)",
     "no dealer levels (no option chain on file)"
    ],
    "rank_score": 67.0,
-   "size_mult": 1.0,
-   "dealer": null
-  },
-  {
-   "t": "ADT",
-   "name": "ADT Inc.",
-   "industry": "Miscellaneous commercial services",
-   "score": 71,
-   "breakout": true,
-   "entry": 9.88,
-   "stop": 9.74,
-   "stop_atr": 9.74,
-   "atr_pct": 0.46,
-   "resistance": 9.9,
-   "chart": null,
-   "patterns": [],
-   "sector": "Commercial services",
-   "industry_ok": false,
-   "sector_ok": false,
-   "gates": [],
-   "notes": [
-    "industry not leading (rank 36/121)",
-    "no dealer levels (no option chain on file)"
-   ],
-   "rank_score": 66.0,
    "size_mult": 1.0,
    "dealer": null
   },
@@ -650,7 +650,32 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 27/121, +7.3% vs SPX over a month)",
+    "industry leading (rank 23/121, +7.3% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 66.0,
+   "size_mult": 1.0,
+   "dealer": null
+  },
+  {
+   "t": "WAT",
+   "name": "Waters Corporation",
+   "industry": "Medical specialties",
+   "score": 61,
+   "breakout": false,
+   "entry": 456.48,
+   "stop": 410.33,
+   "stop_atr": 410.33,
+   "atr_pct": 3.37,
+   "resistance": 462.72,
+   "chart": null,
+   "patterns": [],
+   "sector": "Health technology",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 23/121, +7.3% vs SPX over a month)",
     "no dealer levels (no option chain on file)"
    ],
    "rank_score": 66.0,
@@ -675,35 +700,10 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry not leading (rank 71/121)",
+    "industry not leading (rank 69/121)",
     "no dealer levels (no option chain on file)"
    ],
    "rank_score": 61.0,
-   "size_mult": 1.0,
-   "dealer": null
-  },
-  {
-   "t": "FCN",
-   "name": "FTI Consulting, Inc.",
-   "industry": "Miscellaneous commercial services",
-   "score": 61,
-   "breakout": false,
-   "entry": 203.52,
-   "stop": 183.01,
-   "stop_atr": 183.01,
-   "atr_pct": 3.36,
-   "resistance": 202.81,
-   "chart": null,
-   "patterns": [],
-   "sector": "Commercial services",
-   "industry_ok": false,
-   "sector_ok": false,
-   "gates": [],
-   "notes": [
-    "industry not leading (rank 36/121)",
-    "no dealer levels (no option chain on file)"
-   ],
-   "rank_score": 56.0,
    "size_mult": 1.0,
    "dealer": null
   }
