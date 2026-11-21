@@ -1,108 +1,108 @@
 {
- "asof": "2026-11-20 13:53 UTC",
- "date": "2026-11-20",
+ "asof": "2026-11-21 19:35 UTC",
+ "date": "2026-11-21",
  "summary": {
-  "pass": 29,
-  "warn": 4,
-  "fail": 3
+  "pass": 33,
+  "warn": 3,
+  "fail": 0
  },
  "checks": [
   {
    "id": "file.ic_screen",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/ic_screen.json as of 2026-11-20",
+   "detail": "outputs/ic_screen.json as of 2026-11-21",
    "where": "step ic_screen"
   },
   {
    "id": "file.ic_universe",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/ic_universe.json as of 2026-11-20",
+   "detail": "outputs/ic_universe.json as of 2026-11-21",
    "where": "step mme_chains"
   },
   {
    "id": "file.ic_hist",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/ic_hist.json as of 2026-11-20",
+   "detail": "outputs/ic_hist.json as of 2026-11-21",
    "where": "step ic_screen (_ic_hist)"
   },
   {
    "id": "file.dossier",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/dossier.json as of 2026-11-20",
+   "detail": "outputs/dossier.json as of 2026-11-21",
    "where": "step dossier"
   },
   {
    "id": "file.calendar",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/calendar.json as of 2026-11-20",
+   "detail": "outputs/calendar.json as of 2026-11-21",
    "where": "step calendar"
   },
   {
    "id": "file.mme_map",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/mme_map.json as of 2026-11-20",
+   "detail": "outputs/mme_map.json as of 2026-11-21",
    "where": "step mme_map"
   },
   {
    "id": "file.ic_screen_b",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/ic_screen_b.json as of 2026-11-20",
+   "detail": "outputs/ic_screen_b.json as of 2026-11-21",
    "where": "step ic_screen_b"
   },
   {
    "id": "file.iv_em",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/iv_em.json as of 2026-11-20",
+   "detail": "outputs/iv_em.json as of 2026-11-21",
    "where": "step iv_em"
   },
   {
    "id": "file.macro",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/macro.json as of 2026-11-20",
+   "detail": "outputs/macro.json as of 2026-11-21",
    "where": "step macro"
   },
   {
    "id": "file.gex",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/gex.json as of 2026-11-19 (1 days old)",
+   "detail": "outputs/gex.json as of 2026-11-21",
    "where": "step gex"
   },
   {
    "id": "file.dayscore",
    "area": "files",
    "status": "pass",
-   "detail": "outputs/dayscore.json as of 2026-11-20",
+   "detail": "outputs/dayscore.json as of 2026-11-21",
    "where": "step dayscore"
   },
   {
    "id": "mme_map.chains",
    "area": "data",
    "status": "pass",
-   "detail": "dealer map computed on the 2026-11-20 option chains (0 days old)",
+   "detail": "dealer map computed on the 2026-11-21 option chains (0 days old)",
    "where": "steps mme_chains \u2192 mme_map (a run that never committed leaves the map on old chains)"
   },
   {
    "id": "chains.coverage",
    "area": "data",
-   "status": "fail",
-   "detail": "0 of 103 names have an option chain on file",
+   "status": "pass",
+   "detail": "161 of 103 names have an option chain on file",
    "where": "step mme_chains (CBOE)"
   },
   {
    "id": "bars.coverage",
    "area": "data",
-   "status": "fail",
-   "detail": "0 of 0 names have Yahoo bars (chart read, patterns, realised vol)",
+   "status": "pass",
+   "detail": "160 of 161 names have Yahoo bars (chart read, patterns, realised vol)",
    "where": "step ic_screen (_ic_hist, Yahoo)"
   },
   {
@@ -115,15 +115,15 @@
   {
    "id": "screen.rules",
    "area": "options",
-   "status": "warn",
-   "detail": "0 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
+   "status": "pass",
+   "detail": "26 picks re-checked: equal wings, delta bands, credit < width, chart \u2194 structure, earnings gate",
    "where": "run_ic_screen (outputs/ic_screen.json)"
   },
   {
    "id": "screen.proposed",
    "area": "options",
    "status": "pass",
-   "detail": "0 proposed of 0 winners",
+   "detail": "12 proposed of 26 winners",
    "where": "run_ic_screen"
   },
   {
@@ -136,15 +136,15 @@
   {
    "id": "dossier.sections",
    "area": "dossier",
-   "status": "pass",
-   "detail": "missing: nothing",
+   "status": "warn",
+   "detail": "missing: earnings 4, chart 1, dealer 3",
    "where": "run_dossier (names in outputs/dossier.json 'missing_names')"
   },
   {
    "id": "forward.marked",
    "area": "forward test",
-   "status": "fail",
-   "detail": "0 of 276 open trades marked for 2026-11-20 (0 opened today)",
+   "status": "pass",
+   "detail": "276 of 276 open trades marked for 2026-11-21 (0 opened today)",
    "where": "run_ic_record step 3a"
   },
   {
@@ -164,8 +164,8 @@
   {
    "id": "decisions.logged",
    "area": "learning",
-   "status": "warn",
-   "detail": "0 options decisions logged for 2026-11-20",
+   "status": "pass",
+   "detail": "0 options decisions logged for 2026-11-21",
    "where": "run_ic_record (decisions table)"
   },
   {
@@ -179,21 +179,21 @@
    "id": "news",
    "area": "data",
    "status": "pass",
-   "detail": "117 Finnhub calls, 104/116 names with news, 0 failed",
+   "detail": "194 Finnhub calls, 183/193 names with news, 0 failed",
    "where": "run_news (Finnhub)"
   },
   {
    "id": "auto_brief",
    "area": "brief",
    "status": "pass",
-   "detail": "auto brief for 2026-11-20",
+   "detail": "auto brief for 2026-11-21",
    "where": "run_auto_brief"
   },
   {
    "id": "portfolios.inputs",
    "area": "portfolios",
    "status": "pass",
-   "detail": "core 4 (the builder's Long Term template (no saved portfolio found)), satellite 5, tactical 15, options 0",
+   "detail": "core 4 (the builder's Long Term template (no saved portfolio found)), satellite 5, tactical 15, options 12",
    "where": "run_portfolios (stocks.json trade/invest books, ic_screen proposed, Supabase portfolios)"
   },
   {
@@ -207,7 +207,7 @@
    "id": "portfolios.fx",
    "area": "portfolios",
    "status": "pass",
-   "detail": "EURUSD 1.0993 from yahoo",
+   "detail": "EURUSD 1.097 from yahoo",
    "where": "_fx_usd_rates (Yahoo)"
   },
   {
@@ -242,7 +242,7 @@
    "id": "dial",
    "area": "market",
    "status": "pass",
-   "detail": "market dial 0/100 stress; inputs missing: ",
+   "detail": "market dial 10/100 stress; inputs missing: ",
    "where": "_market_dial (macro, gex, vix_term, spx_daily)"
   },
   {
@@ -256,7 +256,7 @@
    "id": "heartbeats",
    "area": "pipeline",
    "status": "warn",
-   "detail": "29 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | dossier: 0 names \u00b7 archived 0 \u00b7 missing nothing | ic_screen_b: 0 names \u00b7 0 winners \u00b7 0 proposed \u00b7 0 skipped | ic_screen: 0 names \u00b7 0 winners \u00b7 0 proposed \u00b7 0 skipped | mme_chains: 0/163 names \u00b7 0 contracts \u00b7 failed 163 \u00b7 429s 0 \u00b7 TEST NAMES MISSING AAPL,ABBV,ABNB,ADBE,AMD,AMZN,ARKK,ARM,A | iv_em: 160 requested (160 tier A) \u00b7 0 straddle \u00b7 0 iv-proxy \u00b7 0 no chain \u00b7 160 failures \u00b7 939 on file \u00b7 138s",
+   "detail": "26 steps reported today; not ok: group_backfill: 0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026- | iv_em: 618 requested (160 tier A, S&P 500 refreshed) \u00b7 0 straddle \u00b7 0 iv-proxy \u00b7 0 no chain \u00b7 618 failures \u00b7 946 on file | house_ptr: 13 unseen filings \u00b7 0 PDFs parsed \u00b7 13 fetch/parse failures {'pdftotext empty': 13} \u00b7 0 rows | signal_mark: marked 0 \u00b7 skipped 31 (no bars yet) \u00b7 failed 0 \u00b7 31 due \u00b7 3/9 tickers fetched",
    "where": "heartbeats table"
   }
  ]
