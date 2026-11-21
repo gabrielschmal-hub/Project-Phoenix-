@@ -10693,6 +10693,16 @@ def parse_gex_briefing(path):
 # unmarked. Every request now waits for the previous one (CBOE_MIN_GAP seconds, all steps together), and a 429, a
 # 5xx or a network error is retried after a growing pause (Retry-After when CBOE sends one).
 _CBOE_STATE = {"last": 0.0, "session": None, "n": 0, "n429": 0}
+# Since 20 Nov 2026 CBOE answers 403 to a bare "Mozilla/5.0" (tested 21 Nov from Supabase: a full browser
+# User-Agent alone is still 403; with Accept + Referer + Origin from www.cboe.com it is 200). Send what its own
+# website sends.
+_CBOE_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36",
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Referer": "https://www.cboe.com/",
+    "Origin": "https://www.cboe.com",
+}
 
 
 def _cboe_get(symbol):
@@ -10707,7 +10717,7 @@ def _cboe_get(symbol):
         if dt < gap:
             time.sleep(gap - dt)
         try:
-            r = _CBOE_STATE["session"].get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=60)
+            r = _CBOE_STATE["session"].get(url, headers=_CBOE_HEADERS, timeout=60)
             code = r.status_code
         except Exception as e:
             r, code, note = None, 0, f"{type(e).__name__}"
