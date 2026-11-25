@@ -20,6 +20,11 @@ Three entry points:
   check(today)    — v1.5.0 R02: the hourly entry checks 11:00-15:00 ET. Same rules with that hour's price; only names
                     not signaled today; cash of today's signals stays reserved (R15); SPX warning (R01).
 Until the rule set says approved=true, and before its start date, every row is written with dry=true.
+
+S5 v1.0 (frozen 24 Nov 2026, controls/s5_rules_v1_0.json) runs as one more arm, "S5", on both accounts: the same
+candidates and fill as arm B, stop = wall - 2 x ATR(14), a 2R take-profit, R10 only to walls above the entry wall and
+R11 at 2 x ATR, no R01 cuts, no position cap, account size in $1,000 steps of realised S5 P&L (only when flat). It has
+its own start date (30 Nov 2026, dry run from 25 Nov). The MME v1.5.0 rule file and arms A-H are unchanged.
 """
 import json, math, os, random
 from datetime import date, datetime, timedelta, timezone
@@ -42,11 +47,91 @@ SCHEMA = 1
 
 # ============================================================ rules (pure functions, unit-tested)
 
-def load_rules(path=None):
+S5_FILES = [os.path.join(ROOT, "controls", n) for n in ("s5_rules_v1.0.json", "s5_rules_v1_0.json")]
+
+
+def load_rules(path=None, s5=True):
     for p in ([path] if path else RULES_FILES):
         if p and os.path.exists(p):
-            return json.load(open(p))
+            R = json.load(open(p))
+            if s5 and not path:
+                add_s5(R)
+            return R
     raise FileNotFoundError("MME rule set not found in controls/ (mme_rules_v1_5_0.json or mme_rules_v1_4_3.json)")
+
+
+def add_s5(R, path=None):
+    """S5 v1.0 (frozen 24 Nov 2026) runs as one more arm on the same candidates as arm B, with its own rule file,
+    start date and approval. The MME v1.5.0 rule file is not touched."""
+    for p in ([path] if path else S5_FILES):
+        if p and os.path.exists(p):
+            S = json.load(open(p))
+            a = dict(S["arm"]); a.update({"s5": True, "trail": False, "version": S["version"], "start": S["start"],
+                                          "dry_run_from": S.get("dry_run_from", S["start"]), "approved": bool(S.get("approved"))})
+            R["arms"][a.pop("id")] = a
+            R["regime_cuts"] = dict(R["regime_cuts"], exempt_arms=sorted(set(R["regime_cuts"]["exempt_arms"]) | {k for k, v in R["arms"].items() if v.get("s5")}))
+            R["s5"] = {"version": S["version"], "start": S["start"], "approved": bool(S.get("approved")), "review": S.get("review")}
+            return R
+    return R
+
+
+def is_s5(R, arm):
+    return bool((R["arms"].get(arm) or {}).get("s5"))
+
+
+def arm_live(d, R, arm):
+    """An arm with its own start date (S5) is live from that date once approved; the others follow the rule set."""
+    cfg = R["arms"].get(arm) or {}
+    if cfg.get("start"):
+        return bool(cfg.get("approved")) and d >= date.fromisoformat(cfg["start"])
+    return is_live(d, R)
+
+
+def wilder_atr(bars, upto, n=14):
+    """Wilder ATR(n) on daily bars {date: {o,h,l,c}} up to and including `upto` (ISO date). None if too short, or if
+    the bars stop before `upto` (a stale chart file must not size a trade)."""
+    ds = sorted(d for d in bars if d <= upto)
+    if len(ds) < n + 1 or ds[-1] != upto:
+        return None
+    a, pc = None, None
+    for d in ds:
+        b = bars[d]
+        try:
+            h, l, c = float(b["h"]), float(b["l"]), float(b["c"])
+        except Exception:
+            continue
+        tr = (h - l) if pc is None else max(h - l, abs(h - pc), abs(l - pc))
+        a = tr if a is None else a + (tr - a) / n
+        pc = c
+    return a
+
+
+def s5_stop(walls, entry_wall, prev_close, prev_high, em, atr, cfg, R):
+    """S5 morning review: R10 only to walls above the entry wall (wall - 2 ATR), R11 (previous high - 2 ATR); the
+    candidate must stay below the previous close. Returns (stop, rule) or (None, None)."""
+    k = cfg.get("trail_atr", 2.0) * atr
+    cands = []
+    held = [w for w in walls if prev_close >= w + R["manage"]["r10_hold_em"] * em and w > entry_wall + 1e-9]
+    if held:
+        cands.append((max(held) - k, "R10"))
+    if cfg.get("r11", True):
+        below = [w for w in walls if w <= prev_close]; above = [w for w in walls if w > prev_close]
+        if below and above and min(above) - max(below) > R["manage"]["r11_gap_em"] * em:
+            cands.append((prev_high - k, "R11"))
+    cands = [c for c in cands if c[0] < prev_close]
+    return max(cands, key=lambda x: x[0]) if cands else (None, None)
+
+
+def s5_account(trades, arm, acct, cfg, dry):
+    """S5 sizing: the base account plus realised S5 P&L in $1,000 steps, recalculated only when flat. While a position
+    is open, the size stamped on the open trades holds."""
+    mine = [t for t in trades if t["arm"] == arm and int(t["acct"]) == int(acct) and bool(t.get("dry")) == bool(dry)]
+    live = [float((t.get("entry") or {}).get("acct_size") or 0) for t in mine if t["status"] in ("open", "pending")]
+    if live and max(live) > 0:
+        return max(live)
+    real = sum(float(t.get("pnl") or 0) for t in mine if t["status"] == "closed")
+    step = float(cfg.get("account_step_usd") or 0)
+    return float(acct) + (math.floor(real / step) * step if step else 0.0)
 
 
 def recheck_above_band(R):
@@ -435,10 +520,13 @@ def order_lines(rows, R):
     """One line per name ($2,000 account shown): entry, SL, TP (next wall above the entry) and +1R, tier, arms.
     v1.5.0 has no fixed take-profit (exits are stops that climb), so TP is the next wall, the level where the stop
     starts to climb (R10), and +1R is where the trailing arms start (T1)."""
-    by = {}
+    by, s5 = {}, []
     for r in rows or []:
         if int(r["acct"]) == R["accounts"][0]:
-            by.setdefault(r["ticker"], []).append(r)
+            if (r.get("entry") or {}).get("kind") == "s5":
+                s5.append(r)
+            else:
+                by.setdefault(r["ticker"], []).append(r)
     lines = []
     for tk, rs in sorted(by.items(), key=lambda kv: (-len(kv[1]), kv[0])):
         r = next((x for x in rs if x["arm"] == "B"), rs[0]); e = r["entry"]
@@ -449,6 +537,10 @@ def order_lines(rows, R):
         tag = " \u00b7 random-dip benchmark" if e.get("kind") == "random" else ""
         lines.append(f"{tk} \u00b7 {what} \u00b7 SL {sl:.2f} \u00b7 {tp} \u00b7 +1R {px + (px - sl):.2f} \u00b7 "
                      f"{e['tier_pct']}% risk \u00b7 arms {_arms(rs)}{tag}")
+    for r in sorted(s5, key=lambda x: x["ticker"]):       # S5 v1.0: its own stop and a real take-profit
+        e = r["entry"]; px = float(r["fill"]) if r["status"] == "open" else float(e["limit"])
+        lines.append(f"S5 \u00b7 {r['ticker']} \u00b7 entry {px:.2f} \u00b7 SL {float(r['stop']):.2f} (wall \u2212 2\u00d7ATR) \u00b7 "
+                     f"TP 2R {float(e['tp']):.2f} \u00b7 {e['tier_pct']}% of ${float(e['acct_size']):,.0f}")
     return lines
 
 
@@ -589,9 +681,9 @@ def evaluate(tk, row, price, chain_rows, spx, R, earn, today, data_ok):
 
 # ============================================================ trade lifecycle
 
-def _exit(t, px, qty, reason, d, R, gap=False):
-    """Close qty shares of trade t at px (slippage applied) — returns the exit record."""
-    slip = R["costs"]["slip_gap"] if gap else R["costs"]["slip"]
+def _exit(t, px, qty, reason, d, R, gap=False, slip=None):
+    """Close qty shares of trade t at px (slippage applied; a limit order passes slip=0) — returns the exit record."""
+    slip = slip if slip is not None else (R["costs"]["slip_gap"] if gap else R["costs"]["slip"])
     xp = round(px * (1 - slip), 4)
     com = commission(qty, "sell", R)
     pnl = round((xp - float(t["fill"])) * qty - com, 2)
@@ -658,6 +750,66 @@ def morning(today, R=None, data=None, write=True):
                 log.setdefault("expired", []).append(tk)
         if t["status"] != "open":
             if write and patch:
+                data.update_trade(t["id"], patch)
+            continue
+        cfg = R["arms"].get(t["arm"]) or {}
+        if cfg.get("s5"):
+            # S5 v1.0: stop and 2R take-profit from the 5-minute prices in time order, then the S5 stop review
+            stop, tp = float(t["stop"]), float(t["entry"].get("tp") or 0)
+            first_day = str(t["d_open"]) == prev.isoformat()
+            after = [(ts, px) for ts, px in s if ts >= dec_t]
+            x, kind = None, None
+            if s and not first_day and s[0][1] < stop:
+                x, kind = _exit(t, s[0][1], remaining(t), "stop (gap through at the open)", prev, R, gap=True), "stop"
+            elif s and not first_day and tp and s[0][1] >= tp:
+                x, kind = _exit(t, s[0][1], remaining(t), "take-profit 2R (opened above the target)", prev, R), "tp"
+            else:
+                for ts, px_ in after:
+                    if px_ <= stop:
+                        x, kind = _exit(t, stop, remaining(t), "stop hit", prev, R), "stop"; break
+                    if tp and px_ >= tp:
+                        x, kind = _exit(t, tp, remaining(t), "take-profit 2R", prev, R, slip=0.0), "tp"; break
+            if x is None and bar:
+                if bar["l"] <= stop:
+                    log["deviations"].append(f"{t['arm']}/{t['acct']} {tk}: the daily low {bar['l']} touched the stop {stop:.2f} between snapshots; snapshots decide")
+                if tp and bar["h"] >= tp:
+                    log["deviations"].append(f"{t['arm']}/{t['acct']} {tk}: the daily high {bar['h']} touched the target {tp:.2f} between snapshots; snapshots decide")
+            if x:
+                t["exits"].append(x)
+                pnl, rr = _finalise(t, R)
+                level = ("" if kind == "tp" else " \u00b7 " + ((t["stop_hist"][-1]["rule"] + " stop") if t["stop_hist"] else "initial stop"))
+                patch.update({"status": "closed", "exits": t["exits"], "pnl": pnl, "r": rr, "d_close": prev.isoformat(),
+                              "exit_reason": x["reason"] + level})
+                log["stops"].append(f"{t['arm']}/{t['acct']} {tk} {x['reason']} at {x['px']}: {pnl:+.2f} ({rr}R)")
+                ev.append({"kind": "exit", "arm": t["arm"], "acct": t["acct"], "ticker": tk, "px": x["px"], "pnl": pnl, "r": rr or 0.0,
+                           "why": ("take-profit 2R" if kind == "tp" else ("gapped through the stop, sold" if "gap" in x["reason"] else "stopped out" + level))})
+                if write:
+                    data.update_trade(t["id"], patch)
+                continue
+            row = rows.get(tk) or {}
+            em = row.get("em"); em_ok = bool(em) and row.get("em_src") == "atm_iv"
+            close = bar["c"] if bar else (s[-1][1] if s else None)
+            high = bar["h"] if bar else (max(px_ for _, px_ in s) if s else None)
+            atr = wilder_atr(bars, prev.isoformat(), int(cfg.get("atr_n", 14)))
+            if em_ok and close is not None and high is not None and atr:
+                walls = major_walls(chains.get(tk, []), close, row.get("support"), row.get("resist"), R)
+                new, rule = s5_stop(walls, float(t["entry"].get("wall") or 0), close, high, em, atr, cfg, R)
+                if rule and new > stop + 1e-9:
+                    t["stop_hist"].append({"d": today.isoformat(), "from": stop, "to": round(new, 4), "rule": rule, "em": em, "atr": round(atr, 4)})
+                    patch.update({"stop": round(new, 4), "stop_hist": t["stop_hist"]})
+                    log["raised"].append(f"{t['arm']}/{t['acct']} {tk} {rule}: {stop:.2f} -> {new:.2f}")
+            elif not em_ok:
+                log["deviations"].append(f"{t['arm']}/{t['acct']} {tk}: EM estimated or missing today, stop not reviewed")
+            elif not atr:
+                log["deviations"].append(f"{t['arm']}/{t['acct']} {tk}: no ATR from the daily bars, stop not reviewed")
+            em0 = float(t["entry"].get("em") or 0)
+            if em and em0 and close:
+                t["emlog"].append({"d": today.isoformat(), "em": em, "em_src": row.get("em_src"), "widen_pct": round((em / em0 - 1) * 100, 1),
+                                   "em_pct_price": round(em / close * 100, 2), "close": close, "stop": float(patch.get("stop", stop))})
+            if close:
+                t["marks"].append({"d": prev.isoformat(), "close": close, "open_pnl": round((close - float(t["fill"])) * remaining(t), 2)})
+            patch.update({"entry": t["entry"], "emlog": t["emlog"], "marks": t["marks"]})
+            if write:
                 data.update_trade(t["id"], patch)
             continue
         # 2. stop touches during the previous session (R13): first snapshot at or below the stop
@@ -875,17 +1027,20 @@ def _entries(today, at, R, data, rows, chains, px, spx, data_ok, trades, held, d
         else:
             cands = [e for e in ok.values() if e["blocked"] is None]
         cands.sort(key=lambda e: (-e["points"], -(e["dist_em"] or 0)))                  # ranking: tier, then flip distance
+        if cfg.get("s5") and today < date.fromisoformat(cfg.get("dry_run_from") or cfg["start"]):
+            continue                                                                       # S5 not started yet
         plan[arm] = [e for e in cands if (arm, e["ticker"]) not in held]
     new_rows = []
 
-    def open_trade(arm, e, acct, stop, limit=None, risk_floor=None, tier_from=None, kind="wall"):
+    def open_trade(arm, e, acct, stop, limit=None, risk_floor=None, tier_from=None, kind="wall", acct_size=None, Rs=None,
+                   extra=None, dry_=None):
         mkt = limit is None
         fill = round(e["price"] * (1 + R["costs"]["slip"]), 4) if mkt else limit
         if not (stop < fill):
             return None, "stop not below the fill"
         cost_open = book_cost(trades + new_rows, arm, acct)
         pts = e["points"] if tier_from is None else tier_from
-        sz = size_position(fill, stop, e["em"], acct, pts, R, cost_open, risk_floor)
+        sz = size_position(fill, stop, e["em"], acct_size or acct, pts, Rs or R, cost_open, risk_floor)
         if not sz["qty"]:
             return None, sz["why"]
         up = [w for w in (e.get("walls") or []) if w > fill]
@@ -898,11 +1053,33 @@ def _entries(today, at, R, data, rows, chains, px, spx, data_ok, trades, held, d
                  "why": (f"{e['ticker']} {e['dist_em']} EM above its flip; heaviest support wall {e.get('wall')}; {e['band']}; "
                          f"{pts} point(s) -> {sz['tier_pct']}% risk; SPX {spx['colour']} ({spx['dist']} EM)") if kind == "wall" else
                         (f"random dip benchmark: {e['ticker']} {e['dist_em']} EM above its flip, not in a wall band; stop 1 EM")}
+        if extra:
+            entry.update(extra)
+            if kind == "s5":
+                entry["tp"] = round(fill + extra["tp_r"] * (fill - stop), 4)
+                entry["why"] = (f"S5 v1.0: {e['ticker']} {e['dist_em']} EM above its flip; heaviest support wall {e.get('wall')}; {e['band']}; "
+                                f"stop wall - {extra['stop_atr']:g} x ATR {extra['atr']:.2f} = {stop:.2f}; take-profit 2R {entry['tp']:.2f}; "
+                                f"{pts} point(s) -> {sz['tier_pct']}% of ${extra['acct_size']:,.0f}; SPX {spx['colour']} ({spx['dist']} EM)")
         row = {"arm": arm, "acct": acct, "ticker": e["ticker"], "d_open": today.isoformat(), "status": "open" if mkt else "pending",
-               "dry": dry, "entry": entry, "qty": sz["qty"], "fill": fill if mkt else None, "stop": round(stop, 4),
+               "dry": dry if dry_ is None else dry_, "entry": entry, "qty": sz["qty"], "fill": fill if mkt else None, "stop": round(stop, 4),
                "stop_hist": [], "exits": [], "marks": [], "emlog": []}
         new_rows.append(row)
         return row, None
+
+    def open_s5(arm, e, acct, limit, cfg):
+        """S5 v1.0: the arm-B candidate with stop = wall - 2 ATR(14), a 2R take-profit, no position cap and the
+        account size in $1,000 steps (recalculated only when flat)."""
+        prevd = prev_trading_day(today, R).isoformat()
+        atr = wilder_atr(data.bars(e["ticker"]), prevd, int(cfg.get("atr_n", 14)))
+        if not atr or not e.get("wall"):
+            return None, "no ATR(14): daily bars missing or not updated to the previous close"
+        stop = e["wall"] - cfg["stop_atr"] * atr
+        d5 = not arm_live(today, R, arm)
+        size = s5_account(trades + new_rows, arm, acct, cfg, d5)
+        Rs = dict(R, risk=dict(R["risk"], position_cap_pct=cfg.get("position_cap_pct", 100), total_cap_pct=100))
+        return open_trade(arm, e, acct, stop, limit, None, None, "s5", size, Rs,
+                          {"atr": round(atr, 4), "atr_asof": prevd, "stop_atr": cfg["stop_atr"], "tp_r": cfg["tp_r"],
+                           "acct_size": size, "rules": "S5 v" + cfg.get("version", "1.0")}, d5)
 
     placed, skipped = [], []
     for arm, cands in plan.items():
@@ -910,7 +1087,10 @@ def _entries(today, at, R, data, rows, chains, px, spx, data_ok, trades, held, d
         for e in cands:
             limit = e["band_hi"] if e["band"].startswith("above") else None
             for acct in R["accounts"]:
-                row, why = open_trade(arm, e, acct, e["stop"], limit, cfg.get("min_risk"))
+                if cfg.get("s5"):
+                    row, why = open_s5(arm, e, acct, limit, cfg)
+                else:
+                    row, why = open_trade(arm, e, acct, e["stop"], limit, cfg.get("min_risk"))
                 (placed if row else skipped).append(f"{arm}/{acct} {e['ticker']}" + ("" if row else f": {why}"))
     # ---- arm E: one random dip entry per arm-B entry, same day, another name
     E = R["arms"].get("E")
