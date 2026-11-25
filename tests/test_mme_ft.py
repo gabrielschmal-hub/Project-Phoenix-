@@ -319,3 +319,112 @@ def test_v150_quiet_check_sends_nothing(tmp_path, monkeypatch):
     F = Fake(d1, S, {})
     M.check(d1, R, F, at=_ts(d1, 17, 5))
     assert sent == [] and (d1, "check_12") in F.dayrows
+
+
+# ------------------------------------------------------------------ S5 v1.0 (frozen 24 Nov 2026), its own arm
+
+def _bars(upto, n=30, extra=None):
+    """n flat daily bars before `upto` (high - low = 1, so ATR(14) = 1.0), plus optional {iso: bar} overrides."""
+    out, d = {}, upto
+    while len(out) < n:
+        d -= timedelta(days=1)
+        if d.weekday() < 5 and d.isoformat() != "2026-11-26":
+            out[d.isoformat()] = {"o": 200.0, "h": 200.5, "l": 199.5, "c": 200.0}
+    out.update(extra or {})
+    return out
+
+
+class FakeS5(Fake):
+    def __init__(self, today, snaps, rows, bars):
+        Fake.__init__(self, today, snaps, rows); self.B = bars
+    def bars(self, tk): return self.B
+
+
+def test_s5_loads_as_its_own_arm():
+    assert "S5" in R["arms"] and R["arms"]["S5"]["s5"] and R["arms"]["S5"]["start"] == "2026-11-30"
+    assert "S5" in R["regime_cuts"]["exempt_arms"] and R["s5"]["version"] == "1.0"
+    assert "S5" not in R143["arms"]                                  # an explicit rule file stays as written
+    assert M.arm_live(date(2026, 11, 27), R, "S5") is False and M.arm_live(date(2026, 11, 30), R, "S5") is True
+
+
+def test_s5_wilder_atr_and_stop_review():
+    b = _bars(date(2026, 11, 30))
+    assert abs(M.wilder_atr(b, "2026-11-27") - 1.0) < 1e-9
+    assert M.wilder_atr({}, "2026-11-27") is None
+    assert M.wilder_atr(b, "2026-11-30") is None                                  # bars stop on 27 Nov: stale, no ATR
+    cfg = R["arms"]["S5"]; W = [192, 200, 206, 210, 224]
+    assert M.s5_stop(W, 200, 201.5, 202, 4, 1.0, cfg, R) == (None, None)        # only 200 held: that is the entry wall
+    assert M.s5_stop(W, 200, 207.5, 208, 4, 1.0, cfg, R) == (204.0, "R10")      # 206 held: 206 - 2 ATR
+    assert M.s5_stop(W, 200, 212.0, 213, 4, 1.0, cfg, R) == (211.0, "R11")      # 210-224 gap 3.5 EM: high 213 - 2 ATR
+
+
+def test_s5_account_steps_only_when_flat():
+    cfg = R["arms"]["S5"]
+    closed = [{"arm": "S5", "acct": 2000, "status": "closed", "pnl": 1500.0, "dry": False}]
+    assert M.s5_account(closed, "S5", 2000, cfg, False) == 3000.0
+    assert M.s5_account(closed + [{"arm": "S5", "acct": 2000, "status": "closed", "pnl": -800.0, "dry": False}], "S5", 2000, cfg, False) == 2000.0
+    opn = [{"arm": "S5", "acct": 2000, "status": "open", "dry": False, "entry": {"acct_size": 2000.0}}]
+    assert M.s5_account(closed + opn, "S5", 2000, cfg, False) == 2000.0          # not flat: the size stamped at entry holds
+
+
+def _s5_setup(d1):
+    S = {d1.isoformat(): {"SPX": [(_ts(d1, 15, 0), 7600.0)], "VIX": [(_ts(d1, 15, 0), 16.0)], "AAA": [(_ts(d1, 15, 0), 200.8)]}}
+    return S, FakeS5(d1, S, dict(ROWS), _bars(d1))
+
+
+def test_s5_entry_stop_and_target(tmp_path, monkeypatch):
+    monkeypatch.setattr(M, "OUT", str(tmp_path))
+    sent = []
+    monkeypatch.setattr(M, "notify", lambda *a, **k: sent.append(a) or True)
+    d1 = date(2026, 11, 30)
+    S, F = _s5_setup(d1)
+    M.decide(d1, R, F)
+    s5 = [t for t in F.trs if t["arm"] == "S5"]
+    assert sorted(t["acct"] for t in s5) == [2000, 10000] and all(t["dry"] is False for t in s5)
+    t = [x for x in s5 if x["acct"] == 2000][0]; fill = round(200.8 * 1.0005, 4)
+    assert t["fill"] == fill and t["stop"] == 198.0 and t["entry"]["tp"] == round(fill + 2 * (fill - 198.0), 4)
+    assert t["entry"]["acct_size"] == 2000.0 and t["entry"]["atr"] == 1.0
+    a = [x for x in F.trs if x["arm"] == "A" and x["acct"] == 2000][0]
+    assert a["stop"] == 196.0                                         # the MME arms are unchanged
+    assert any(l.startswith("S5 · AAA · entry 200.90 · SL 198.00") and "TP 2R 206.70" in l for l in sent[-1][1])
+
+
+def test_s5_take_profit_then_no_regime_cut(tmp_path, monkeypatch):
+    monkeypatch.setattr(M, "OUT", str(tmp_path))
+    sent = []
+    monkeypatch.setattr(M, "notify", lambda *a, **k: sent.append(a) or True)
+    d1, d2, d3 = date(2026, 11, 30), date(2026, 12, 1), date(2026, 12, 2)
+    S, F = _s5_setup(d1)
+    M.decide(d1, R, F)
+    # 1 Dec: SPX turns RED at 10:00 ET: arm A is closed (R01), S5 holds; then AAA trades through the 2R target
+    S[d2.isoformat()] = {"SPX": [(_ts(d2, 15, 0), 7300.0)], "VIX": [(_ts(d2, 15, 0), 20.0)],
+                         "AAA": [(_ts(d2, 14, 30), 203.0), (_ts(d2, 15, 0), 203.5), (_ts(d2, 17, 0), 207.0), (_ts(d2, 18, 0), 196.0)]}
+    F.T = d2
+    M.morning(d2, R, F)                                               # reviews 30 Nov: nothing hit
+    out = M.decide(d2, R, F)
+    assert out["spx"]["colour"] == "RED" and not any(c.startswith("S5/") for c in out["cuts"])
+    assert [x for x in F.trs if x["arm"] == "A" and x["acct"] == 2000][0]["status"] == "closed"
+    F.B = _bars(d3, extra={d2.isoformat(): {"o": 203.0, "h": 207.0, "l": 196.0, "c": 197.0}})
+    F.T = d3
+    M.morning(d3, R, F)                                               # 1 Dec: 207 reached the target before 196
+    t = [x for x in F.trs if x["arm"] == "S5" and x["acct"] == 2000][0]
+    assert t["status"] == "closed" and t["exits"][0]["px"] == t["entry"]["tp"] and t["exit_reason"].startswith("take-profit 2R")
+    assert 1.85 < t["r"] < 2.0                                        # 2R less commissions
+    assert any("take-profit 2R" in l and "arms S5" in l for l in sent[-1][1])
+    eq = F.dayrows[(d3, "morning")]["equity"]["S5"]["2000"]
+    assert eq["n_closed"] == 1 and eq["realised"] > 0
+
+
+def test_s5_not_before_its_dry_run(tmp_path, monkeypatch):
+    monkeypatch.setattr(M, "OUT", str(tmp_path))
+    monkeypatch.setattr(M, "notify", lambda *a, **k: True)
+    d0 = date(2026, 11, 24)
+    S = {d0.isoformat(): {"SPX": [(_ts(d0, 15, 0), 7600.0)], "VIX": [(_ts(d0, 15, 0), 16.0)], "AAA": [(_ts(d0, 15, 0), 200.8)]}}
+    F = FakeS5(d0, S, dict(ROWS), _bars(d0))
+    M.decide(d0, R, F)
+    assert not [t for t in F.trs if t["arm"] == "S5"] and [t for t in F.trs if t["arm"] == "B"]
+    d1 = date(2026, 11, 25)                                           # dry run from 25 Nov: rows written, marked dry
+    S = {d1.isoformat(): {"SPX": [(_ts(d1, 15, 0), 7600.0)], "VIX": [(_ts(d1, 15, 0), 16.0)], "AAA": [(_ts(d1, 15, 0), 200.8)]}}
+    F = FakeS5(d1, S, dict(ROWS), _bars(d1))
+    M.decide(d1, R, F)
+    assert all(t["dry"] for t in F.trs if t["arm"] == "S5") and [t for t in F.trs if t["arm"] == "S5"]
