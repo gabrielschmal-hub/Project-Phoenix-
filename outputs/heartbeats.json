@@ -1,45 +1,45 @@
 {
  "trade_book": {
   "lane": "trade_book",
-  "ts": "2026-11-24T05:02:11.888496+00:00",
+  "ts": "2026-11-25T05:01:18.403040+00:00",
   "ok": true,
   "note": "50 rows \u00b7 aldemar closed:20 \u00b7 gabriel closed:29 \u00b7 gabriel open:1"
  },
  "house_ptr": {
   "lane": "house_ptr",
-  "ts": "2026-11-24T05:16:23.113372+00:00",
+  "ts": "2026-11-25T05:15:27.543064+00:00",
   "ok": true,
-  "note": "2 PDFs \u00b7 2 rows \u00b7 2 tickers \u00b7 13 failures {'pdftotext empty': 13}"
+  "note": "1 PDFs \u00b7 169 rows \u00b7 97 tickers \u00b7 14 failures {'HTTP 404': 1, 'pdftotext empty': 13}"
  },
  "senate_efd": {
   "lane": "senate_efd",
-  "ts": "2026-11-24T05:16:29.420005+00:00",
-  "ok": false,
-  "note": "14 PTRs parsed \u00b7 0 rows \u00b7 14 zero-row \u00b7 2 paper \u00b7 rejects {'no_ticker': 172, 'no_type': 1} \u00b7 no-ticker sample: Other: MH Built to Last LLC Company: MH Built t x22; Stock: GS Managed Structured Note Strategy MSCI x11; Stock: GS Managed Structured Note Strategy S&am x11; Other: Not Fade Away LLC Company: Not Fade Away x8"
+  "ts": "2026-11-25T05:15:34.032728+00:00",
+  "ok": true,
+  "note": "15 PTRs parsed \u00b7 1 rows \u00b7 14 zero-row \u00b7 2 paper \u00b7 rejects {'no_ticker': 204, 'no_type': 1} \u00b7 no-ticker sample: Other: MH Built to Last LLC Company: MH Built t x30; Other: MH Four Winds LLC Company: MH Four Winds x24; Stock: GS Managed Structured Note Strategy MSCI x11; Stock: GS Managed Structured Note Strategy S&am x11 \u00b7 merged 1"
  },
  "executive": {
   "lane": "executive",
-  "ts": "2026-11-24T05:16:31.025301+00:00",
+  "ts": "2026-11-25T05:15:35.640818+00:00",
   "ok": true,
   "note": "7866 rows \u00b7 merged 0 \u00b7 export 2026-10-29"
  },
  "insider": {
   "lane": "insider",
-  "ts": "2026-11-24T05:17:59.323253+00:00",
+  "ts": "2026-11-25T05:16:25.740955+00:00",
   "ok": true,
-  "note": "132 tickers \u00b7 219 new Form 4s \u00b7 363 rows \u00b7 144 new P/S \u00b7 8 no CIK \u00b7 0 failures"
+  "note": "133 tickers \u00b7 49 new Form 4s \u00b7 249 rows \u00b7 166 new P/S \u00b7 7 no CIK \u00b7 0 failures"
  },
  "iv_em": {
   "lane": "iv_em",
-  "ts": "2026-11-24T05:24:57.467740+00:00",
+  "ts": "2026-11-25T05:23:29.391405+00:00",
   "ok": true,
-  "note": "160 requested (160 tier A) \u00b7 130 straddle \u00b7 0 iv-proxy \u00b7 27 no chain \u00b7 3 failures \u00b7 951 on file \u00b7 107s"
+  "note": "160 requested (160 tier A) \u00b7 130 straddle \u00b7 0 iv-proxy \u00b7 22 no chain \u00b7 8 failures \u00b7 953 on file \u00b7 110s"
  },
  "group_strength": {
   "lane": "group_strength",
-  "ts": "2026-11-24T05:16:14.354719+00:00",
+  "ts": "2026-11-25T05:15:17.647022+00:00",
   "ok": true,
-  "note": "51/121 industries ok \u00b7 0/20 sectors ok"
+  "note": "57/121 industries ok \u00b7 0/20 sectors ok"
  },
  "signal_log": {
   "lane": "signal_log",
@@ -49,105 +49,105 @@
  },
  "context_backfill": {
   "lane": "context_backfill",
-  "ts": "2026-11-24T05:49:24.856388+00:00",
+  "ts": "2026-11-25T05:48:40.896070+00:00",
   "ok": true,
   "note": "165 rows over 6 days \u00b7 165 were missing context"
  },
  "gex_stocks": {
   "lane": "gex_stocks",
-  "ts": "2026-11-24T05:06:20.418023+00:00",
+  "ts": "2026-11-25T05:05:27.074068+00:00",
   "ok": true,
-  "note": "53 written \u00b7 2 thin \u00b7 95 failed of 150 \u00b7 first names GOOG,AAPL,ALAB,AMD,AMZN,ARM,AVGO,CRWD,HOOD,IBIT,IBM,INTC \u00b7 files present 11/12 \u00b7 first failure: ALAB: degenerate_chain"
+  "note": "52 written \u00b7 2 thin \u00b7 96 failed of 150 \u00b7 first names GOOG,AAPL,ALAB,AMD,AMZN,ARM,AVGO,CRWD,HOOD,IBIT,IBM,INTC \u00b7 files present 11/12 \u00b7 first failure: ALAB: degenerate_chain"
  },
  "group_backfill": {
   "lane": "group_backfill",
-  "ts": "2026-11-24T05:47:58.735131+00:00",
+  "ts": "2026-11-25T05:47:07.150582+00:00",
   "ok": false,
-  "note": "0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026-08-16 -> 2026-11-24 (68 sessions)"
+  "note": "0 rows over 0 days rebuilt from daily group returns \u00b7 257 rows lacked 22 sessions of history \u00b7 log 2026-08-16 -> 2026-11-25 (69 sessions)"
  },
  "mme_map": {
   "lane": "mme_map",
-  "ts": "2026-11-24T05:55:01.765474+00:00",
+  "ts": "2026-11-25T05:30:46.399973+00:00",
   "ok": true,
-  "note": "76/75 \u00b7 0 from upload \u00b7 67 standouts \u00b7 missing 0"
+  "note": "76/75 \u00b7 0 from upload \u00b7 69 standouts \u00b7 missing 0"
  },
  "mme_chains": {
   "lane": "mme_chains",
-  "ts": "2026-11-24T05:32:10.266884+00:00",
+  "ts": "2026-11-25T05:30:43.214262+00:00",
   "ok": true,
-  "note": "161/162 names \u00b7 94698 contracts \u00b7 failed 1 \u00b7 429s 0"
+  "note": "162/163 names \u00b7 95398 contracts \u00b7 failed 1 \u00b7 429s 0"
  },
  "ic_screen": {
   "lane": "ic_screen",
-  "ts": "2026-11-24T05:32:27.020331+00:00",
+  "ts": "2026-11-25T05:31:00.088683+00:00",
   "ok": true,
-  "note": "161 names \u00b7 35 winners \u00b7 4 proposed \u00b7 126 skipped"
+  "note": "162 names \u00b7 42 winners \u00b7 6 proposed \u00b7 120 skipped"
  },
  "ic_record": {
   "lane": "ic_record",
-  "ts": "2026-11-24T05:34:27.715152+00:00",
+  "ts": "2026-11-25T05:33:07.939509+00:00",
   "ok": true,
-  "note": "opened 17 \u00b7 marked 327 \u00b7 closed 29 \u00b7 broken 0 \u00b7 archived, vol 161, decisions 161"
+  "note": "opened 10 \u00b7 marked 345 \u00b7 closed 0 \u00b7 broken 0 \u00b7 archived, vol 162, decisions 162"
  },
  "dossier": {
   "lane": "dossier",
-  "ts": "2026-11-24T05:40:40.533706+00:00",
+  "ts": "2026-11-25T05:39:49.586592+00:00",
   "ok": true,
-  "note": "161 names \u00b7 archived 161 \u00b7 missing chart 3, vol 2, dealer 2, earnings 5"
+  "note": "162 names \u00b7 archived 162 \u00b7 missing earnings 5, chart 2, vol 1, dealer 1"
  },
  "portfolios": {
   "lane": "portfolios",
-  "ts": "2026-11-24T05:40:41.551263+00:00",
+  "ts": "2026-11-25T05:39:50.541058+00:00",
   "ok": true,
-  "note": "regime POLICY_TIGHTENING \u00b7 tactical 15 \u00b7 options 4 \u00b7 core 4"
+  "note": "regime POLICY_TIGHTENING \u00b7 tactical 15 \u00b7 options 6 \u00b7 core 4"
  },
  "health": {
   "lane": "health",
-  "ts": "2026-11-24T05:49:26.845487+00:00",
+  "ts": "2026-11-25T05:48:42.939417+00:00",
   "ok": true,
   "note": "33 pass \u00b7 3 warn \u00b7 0 fail"
  },
  "pf_track": {
   "lane": "pf_track",
-  "ts": "2026-11-24T05:40:42.779154+00:00",
+  "ts": "2026-11-25T05:39:51.387472+00:00",
   "ok": true,
   "note": "no active book \u00b7 0 option trades"
  },
  "news": {
   "lane": "news",
-  "ts": "2026-11-24T05:40:35.461060+00:00",
+  "ts": "2026-11-25T05:39:44.579003+00:00",
   "ok": true,
-  "note": "291 calls \u00b7 217/290 names with news \u00b7 0 failed"
+  "note": "322 calls \u00b7 262/321 names with news \u00b7 0 failed"
  },
  "ic_recap": {
   "lane": "ic_recap",
-  "ts": "2026-11-24T05:40:38.376179+00:00",
+  "ts": "2026-11-25T05:39:47.483549+00:00",
   "ok": true,
-  "note": "207 trades \u00b7 week +10046$ \u00b7 month -12758$"
+  "note": "214 trades \u00b7 week +12292$ \u00b7 month -10511$"
  },
  "auto_brief": {
   "lane": "auto_brief",
-  "ts": "2026-11-24T05:40:43.076401+00:00",
+  "ts": "2026-11-25T05:39:51.683008+00:00",
   "ok": true,
-  "note": "Nasdaq 100 +7.00%: semiconductors strongest at +15.03%"
+  "note": "Nasdaq 100 -1.99%: semiconductors weakest at -7.26%"
  },
  "run_full": {
   "lane": "run_full",
-  "ts": "2026-11-24T05:49:27.081145+00:00",
+  "ts": "2026-11-25T05:48:43.168896+00:00",
   "ok": true,
-  "note": "finished in 47.3 min; every step ok"
+  "note": "finished in 47.4 min; every step ok"
  },
  "ic_screen_b": {
   "lane": "ic_screen_b",
-  "ts": "2026-11-24T05:32:34.806393+00:00",
+  "ts": "2026-11-25T05:31:08.010998+00:00",
   "ok": true,
-  "note": "161 names \u00b7 39 winners \u00b7 4 proposed \u00b7 122 skipped"
+  "note": "162 names \u00b7 44 winners \u00b7 7 proposed \u00b7 118 skipped"
  },
  "earnings_calendar": {
   "lane": "earnings_calendar",
-  "ts": "2026-11-24T05:19:02.442666+00:00",
+  "ts": "2026-11-25T05:17:35.335204+00:00",
   "ok": true,
-  "note": "18 calls, 4180 upcoming in the market, 27 dates changed, 23 past dates replaced, 308 tracked names still without an upcoming date"
+  "note": "18 calls, 4189 upcoming in the market, 18 dates changed, 17 past dates replaced, 311 tracked names still without an upcoming date"
  },
  "step:gex": {
   "lane": "step:gex",
