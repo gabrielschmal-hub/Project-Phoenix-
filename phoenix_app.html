@@ -1278,7 +1278,7 @@
   .opt-tbl.mt-cl .hd,.opt-tbl.mt-cl .r{grid-template-columns:76px 120px 96px 70px minmax(240px,2fr);min-width:640px}
   .opt-tbl.mt-fn .hd,.opt-tbl.mt-fn .r{grid-template-columns:62px 72px 64px 72px 64px minmax(170px,1.4fr) minmax(150px,1.2fr) 140px;min-width:860px}
   .opt-tbl.mt-em .hd,.opt-tbl.mt-em .r{grid-template-columns:70px 70px 44px 90px 100px 90px;min-width:480px}
-  .opt-tbl.mt-pr .hd,.opt-tbl.mt-pr .r{grid-template-columns:110px repeat(7,minmax(78px,1fr));min-width:680px}
+  .opt-tbl.mt-pr .hd,.opt-tbl.mt-pr .r{grid-template-columns:110px repeat(8,minmax(74px,1fr));min-width:720px}
   .opt-tbl .why{font-family:var(--sans,inherit);font-size:12px;color:var(--inkFade);white-space:normal;line-height:1.35}
   .mt-x{font-size:12.5px;line-height:1.55;color:var(--ink);background:var(--card2);border-left:3px solid var(--gold);padding:8px 12px;margin:0 0 6px}
   @media(max-width:700px){.mt-today{grid-template-columns:repeat(2,1fr)}.mt-today>div{border-bottom:1px solid var(--line)}.mt-arms{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.mt-arm{padding:9px 10px}.mt-av{font-size:16px}.mt-av small{display:block}.mt-am,.mt-ar{font-size:11px}}
@@ -11975,8 +11975,9 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
   var MT={acct:"2000", per:"day", data:null};
   var MT_ARMS=[["A","Rules as written","Primary control · Q1"],["B","Trailing exit","Primary test, live intent · Q2"],
                ["C","SPX any colour","Shadow · Q3"],["D","Earnings rule off","Shadow · Q4"],["E","Random dip","Benchmark · Q5"],
-               ["G","Min risk $10","Shadow · Q6"],["H","Hold through RED","Shadow · Q8"]];
-  var MT_COL={A:"#9AA7B4",B:"#D37736",C:"#4A86D0",D:"#B07CD8",E:"#6C7A89",G:"#3FBF77",H:"#E0B341",SPY:"#E7EEF6",QQQ:"#7FA7C9"};
+               ["G","Min risk $10","Shadow · Q6"],["H","Hold through RED","Shadow · Q8"],
+               ["S5","S5 v1.0 · 2×ATR stop, 2R target","Frozen backtest winner · live from 30 Nov"]];
+  var MT_COL={A:"#9AA7B4",B:"#D37736",C:"#4A86D0",D:"#B07CD8",E:"#6C7A89",G:"#3FBF77",H:"#E0B341",S5:"#2962FF",SPY:"#E7EEF6",QQQ:"#7FA7C9"};
   function mtE(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
   function mtUsd(v,sign){ if(v==null||isNaN(v)) return "—"; var s=Math.abs(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); return (v<0?"−$":(sign&&v>0?"+$":"$"))+s; }
   function mtCls(v){ return v>0?"pos":(v<0?"neg":""); }
@@ -12076,7 +12077,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     var cards=MT_ARMS.map(function(a){
       var e=(cur[a[0]]||{})[A]||{equity:acct,realised:0,open:0,n_open:0,n_closed:0,sum_r:0,wins:0};
       var net=e.equity-acct;
-      return '<div class="mt-arm'+(a[0]==="B"?" key":"")+'"><div class="mt-ak"><i style="background:'+MT_COL[a[0]]+'"></i>'+a[0]+' · '+mtE(a[1])+'</div>'+
+      return '<div class="mt-arm'+(a[0]==="B"||a[0]==="S5"?" key":"")+'"><div class="mt-ak"><i style="background:'+MT_COL[a[0]]+'"></i>'+a[0]+' · '+mtE(a[1])+'</div>'+
         '<div class="mt-av '+mtCls(net)+'">'+mtUsd(net,true)+' <small>'+(net/acct*100).toFixed(2)+'%</small></div>'+
         '<div class="mt-am">'+e.n_open+' open · '+e.n_closed+' closed'+(e.n_closed?' · '+e.wins+' won · '+(e.sum_r>0?"+":"")+e.sum_r+'R':'')+'</div><div class="mt-ar">'+mtE(a[2])+'</div></div>';
     }).join("");
@@ -12121,7 +12122,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
       '<div class="opt-hero"><div class="opt-k">MME forward test · FT-1.4 · rules '+mtE(L.rules||"1.5.0")+'</div>'+
         '<div class="opt-h">Buying the heaviest support wall, measured before any money is risked</div>'+
         '<div class="opt-sub">'+status+'</div></div>'+
-      '<div class="opt-meta">Seven arms on the same daily Phoenix snapshot · decision at 10:00 ET, then an entry check every hour to 15:00 ET (rules v1.5.0), from Phoenix’s 5-minute prices · stops reviewed each morning with that day’s walls and EM</div>'+
+      '<div class="opt-meta">Seven MME v1.5.0 arms plus S5 v1.0 (same entries as arm B; stop wall − 2×ATR, take-profit 2R, holds through AMBER/RED, no position cap) on the same daily Phoenix snapshot · decision at 10:00 ET, then an entry check every hour to 15:00 ET (rules v1.5.0), from Phoenix’s 5-minute prices · stops reviewed each morning with that day’s walls and EM</div>'+
       today+
       '<div class="opt-grp" id="mtAcct"><button data-a="2000"'+(A==="2000"?' class="on"':'')+'>$2,000 account</button><button data-a="10000"'+(A==="10000"?' class="on"':'')+'>$10,000 account</button></div>'+
       '<div class="opt-sec"><div class="opt-sk"><b>1</b> The arms</div><div class="mt-arms">'+cards+'</div></div>'+
@@ -12147,7 +12148,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     host.querySelectorAll("[data-mt]").forEach(function(r){ r.onclick=function(){ var id=+this.dataset.mt, t=D.trades.filter(function(x){ return x.id===id; })[0]; if(!t) return;
       var nx=this.nextElementSibling; if(nx&&nx.classList.contains("mt-x")){ nx.remove(); return; }
       var e=t.entry||{}, d=document.createElement("div"); d.className="mt-x";
-      d.innerHTML='<b>Entry:</b> '+mtE(e.why||"")+'<br><b>Levels:</b> wall '+mtE(e.wall)+' · band top '+mtE(e.band_hi)+' · first stop '+mtE(e.stop0)+' · EM '+mtE(e.em)+' ('+mtE(e.em_src)+') · '+mtE(e.tier_pct)+'% risk = '+mtUsd(e.risk_usd)+' · cost '+mtUsd(e.cost)+
+      d.innerHTML='<b>Entry:</b> '+mtE(e.why||"")+'<br><b>Levels:</b> wall '+mtE(e.wall)+' · band top '+mtE(e.band_hi)+' · first stop '+mtE(e.stop0)+' · EM '+mtE(e.em)+' ('+mtE(e.em_src)+') · '+mtE(e.tier_pct)+'% risk = '+mtUsd(e.risk_usd)+' · cost '+mtUsd(e.cost)+(e.tp?' · <b>take-profit 2R '+mtE(e.tp)+'</b> · ATR '+mtE(e.atr)+' · account size '+mtUsd(+e.acct_size):'')+
         '<br><b>Data:</b> map '+mtE(e.map_date)+' · chains '+mtE(e.chain_date)+' · commit '+mtE(e.commit||"—")+' · earnings: '+mtE(e.earnings||"")+
         ((t.stop_hist||[]).length?'<br><b>Stop:</b> '+(t.stop_hist||[]).map(function(s){ return mtD(s.d)+' '+s.rule+' '+(+s.from).toFixed(2)+'→'+(+s.to).toFixed(2); }).join(" · "):'')+
         ((t.exits||[]).length?'<br><b>Exits:</b> '+(t.exits||[]).map(function(x){ return mtD(x.d)+' '+x.qty+' @ '+x.px+' ('+mtE(x.reason)+')'; }).join(" · "):'');
@@ -12165,7 +12166,7 @@ html.light #page-research .rs-btn:not(.ghost){color:#FFFDF9}
     [lo+pad, (lo+hi)/2, hi-pad].forEach(function(v){ g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)"/><text x="'+(pl-6)+'" y="'+(y(v)+4)+'" text-anchor="end">'+v.toFixed(1)+'%</text>'; });
     if(lo<0&&hi>0) g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(0)+'" y2="'+y(0)+'" stroke="var(--inkFade)"/>';
     lines.forEach(function(l){ var pts=l[1].map(function(v,i){ return v==null?null:x(i).toFixed(1)+","+y(v).toFixed(1); }).filter(Boolean).join(" ");
-      g+='<polyline fill="none" stroke="'+MT_COL[l[0]]+'" stroke-width="'+(l[0]==="B"?2.6:1.5)+'"'+(l[0]==="SPY"||l[0]==="QQQ"?' stroke-dasharray="4 3"':'')+' points="'+pts+'"/>'; });
+      g+='<polyline fill="none" stroke="'+MT_COL[l[0]]+'" stroke-width="'+(l[0]==="B"||l[0]==="S5"?2.6:1.5)+'"'+(l[0]==="SPY"||l[0]==="QQQ"?' stroke-dasharray="4 3"':'')+' points="'+pts+'"/>'; });
     [0,ser.length-1].forEach(function(i){ g+='<text x="'+x(i)+'" y="'+(H-6)+'" text-anchor="'+(i?"end":"start")+'">'+mtD(ser[i].d)+'</text>'; });
     g+='</svg><div class="mt-leg">'+lines.map(function(l){ var v=l[1][l[1].length-1]; return '<span><i style="background:'+MT_COL[l[0]]+'"></i>'+l[0]+(v!=null?' '+(v>0?'+':'')+v.toFixed(2)+'%':'')+'</span>'; }).join("")+'</div>';
     return g;

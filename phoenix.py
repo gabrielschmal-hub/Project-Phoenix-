@@ -5120,6 +5120,17 @@ EARNINGS_GRACE_DAYS = 10
 FUND_CSV = "macroflow_fundamentals_quarterly.csv"
 
 
+def _mme_map_tickers():
+    """Every stock on the MME map (the forward test universe). Their daily bars feed the MME test's morning review and
+    S5 v1.0's ATR(14) stop, so their chart files must be rewritten every run, candidate or not."""
+    import json, os
+    try:
+        m = json.load(open(os.path.join(OUTPUTS_DIR, "mme_map.json")))
+        return {r["ticker"] for g in (m.get("groups") or {}).values() for r in g if r.get("ticker") and not r.get("index")}
+    except Exception:
+        return set()
+
+
 def _gex_universe_tickers():
     """Tickers in the GEX universe (eligible or not) — they get charted so their
     detail pages always show a price chart, not just the GEX histogram."""
@@ -8319,6 +8330,7 @@ def run_stocks(auto_pull=True):
             keep = {c["ticker"] for c in result.get("stocks", [])}
             keep |= _pinned_tickers()
             keep |= _gex_universe_tickers()   # every Phoenix ticker gets a chart
+            keep |= _mme_map_tickers()        # MME test names: S5 needs fresh daily bars for ATR(14)
             _all_ohlcv, _all_uni = dict(ohlcv), dict(universe)
             if ext and ohlcv_ext:
                 # EU / ETF candidates get their chart from the ext pull
