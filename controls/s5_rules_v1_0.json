@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "rule_set": "s5",
+  "version": "1.0",
+  "base": "mme 1.5.0",
+  "source": "S5 v1.0, frozen 24 Nov 2026 after the 2 Mar - 9 Nov 2026 backtest (53 trades, +29.0%, Sharpe 2.49, max drawdown -10.0%). MME Trading Rules v1.5.0 entries; S5 stops, take-profit, regime handling and sizing.",
+  "approved": true,
+  "approved_note": "Gabriel asked on 24 Nov 2026 (chat) to freeze S5 v1.0 with no further optimisation and to forward test it alongside the MME forward test.",
+  "start": "2026-11-30",
+  "dry_run_from": "2026-11-25",
+  "review": "after 50 closed S5 trades on the $10,000 account or on 2027-05-31, whichever comes first",
+  "arm": {
+    "id": "S5",
+    "name": "S5 v1.0 · 2×ATR stop, 2R target",
+    "role": "frozen backtest winner, forward test",
+    "entries": "the same candidates as arm B (every v1.5.0 entry rule, including R01 SPX GREEN at entry), same fill",
+    "stop_atr": 2.0,
+    "atr_n": 14,
+    "tp_r": 2.0,
+    "trail_atr": 2.0,
+    "r10_above_entry_wall": true,
+    "r11": true,
+    "t1": false,
+    "regime_cuts": false,
+    "position_cap_pct": 100,
+    "account_step_usd": 1000,
+    "account_step_when_flat": true
+  },
+  "rules_text": [
+    "Entry: every MME v1.5.0 entry rule unchanged (R00-R09, R15). The candidate list and the fill are those of arm B.",
+    "Initial stop: entry wall - 2 x ATR(14). ATR is Wilder's, on Phoenix daily bars up to the previous close.",
+    "Take-profit: fill + 2 x (fill - initial stop). A limit sell: filled at the target when a 5-minute price reaches it; at the opening price if the stock opens above it.",
+    "R10: the stop climbs only to walls above the entry wall that the previous close holds (close >= wall + 0.25 EM): stop = wall - 2 x ATR.",
+    "R11: if the nearest wall at/below the close and the nearest above are more than 2 EM apart, stop = previous session high - 2 x ATR.",
+    "The stop only rises (R14) and must stay below the previous close. No T1 trailing.",
+    "SPX AMBER or RED after entry: hold. Only the stop or the take-profit ends a trade (no R01 cuts).",
+    "No position cap: cash only (open positions and today's signals count against the account).",
+    "Risk tiers as in v1.5.0 (1% / 1.5% / 2% by points; 1% if EM is more than 4% of the price).",
+    "Account size: starts at $2,000 / $10,000; moves in $1,000 steps of realised S5 P&L, recalculated only when S5 has no open position.",
+    "Costs: as in the MME test (IBKR $1 buy / $1.02 sell, 0.05% slippage on market fills, 0.1% on gaps); the take-profit limit has no slippage."
+  ]
+}
