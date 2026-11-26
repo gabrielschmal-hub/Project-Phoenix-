@@ -106,6 +106,35 @@ def wilder_atr(bars, upto, n=14):
     return a
 
 
+def bars_upto(data, tk, upto, R, max_days=10):
+    """Daily bars up to `upto` (ISO date). When the chart file stops early (a failed price pull, or a split the price
+    source has not caught up with: SNDK 8-for-1 on 20 Nov 2026), the missing sessions are built from Phoenix's own
+    5-minute prices (open = first, high/low = extremes, close = last). A first rebuilt open more than 1.8x or under
+    0.55x the last chart close means an unadjusted split: nothing is filled and the bars stay short (no ATR)."""
+    b = dict(data.bars(tk) or {})
+    if not b or max(b) >= upto:
+        return b
+    last = max(b)
+    d, days = date.fromisoformat(last) + timedelta(days=1), []
+    while d <= date.fromisoformat(upto):
+        if is_trading_day(d, R):
+            days.append(d)
+        d += timedelta(days=1)
+    if len(days) > max_days:
+        return b
+    add = {}
+    for i, d in enumerate(days):
+        s = (data.snaps([tk], d) or {}).get(tk) or []
+        if not s:
+            return b
+        px = [p for _, p in s]
+        if i == 0 and not (0.55 <= px[0] / float(b[last]["c"]) <= 1.8):
+            return b
+        add[d.isoformat()] = {"o": px[0], "h": max(px), "l": min(px), "c": px[-1], "src": "5-minute prices"}
+    b.update(add)
+    return b
+
+
 def s5_stop(walls, entry_wall, prev_close, prev_high, em, atr, cfg, R):
     """S5 morning review: R10 only to walls above the entry wall (wall - 2 ATR), R11 (previous high - 2 ATR); the
     candidate must stay below the previous close. Returns (stop, rule) or (None, None)."""
@@ -230,6 +259,8 @@ def size_position(fill, stop, em, acct, points, R, cost_open=0.0, risk_floor=Non
 def commission(qty, side, R):
     c = R["costs"]
     base = c["buy"] if side == "buy" else c["sell"]
+    if not c.get("per_share_above_200"):
+        return round(base, 2)                     # flat: $1 per round trip since 26 Nov 2026
     return round(max(base, qty * c["per_share_above_200"] + (base - 1.0)) if qty > 200 else base, 2)
 
 
@@ -362,7 +393,8 @@ class Data:
         return e.get("next_date"), bool(e.get("estimated"))
 
     def bars(self, tk):
-        d = ((_j(os.path.join("charts", tk + ".json")) or {}).get("chart") or {}).get("daily") or {}
+        c = _j(os.path.join("charts", tk + ".json")) or (_j(os.path.join("charts", tk.replace(".", "-") + ".json")) if "." in tk else None) or {}
+        d = (c.get("chart") or {}).get("daily") or {}
         out = {}
         for i, dd in enumerate(d.get("d") or []):
             try:
@@ -790,7 +822,7 @@ def morning(today, R=None, data=None, write=True):
             em = row.get("em"); em_ok = bool(em) and row.get("em_src") == "atm_iv"
             close = bar["c"] if bar else (s[-1][1] if s else None)
             high = bar["h"] if bar else (max(px_ for _, px_ in s) if s else None)
-            atr = wilder_atr(bars, prev.isoformat(), int(cfg.get("atr_n", 14)))
+            atr = wilder_atr(bars_upto(data, tk, prev.isoformat(), R), prev.isoformat(), int(cfg.get("atr_n", 14)))
             if em_ok and close is not None and high is not None and atr:
                 walls = major_walls(chains.get(tk, []), close, row.get("support"), row.get("resist"), R)
                 new, rule = s5_stop(walls, float(t["entry"].get("wall") or 0), close, high, em, atr, cfg, R)
@@ -1070,7 +1102,7 @@ def _entries(today, at, R, data, rows, chains, px, spx, data_ok, trades, held, d
         """S5 v1.0: the arm-B candidate with stop = wall - 2 ATR(14), a 2R take-profit, no position cap and the
         account size in $1,000 steps (recalculated only when flat)."""
         prevd = prev_trading_day(today, R).isoformat()
-        atr = wilder_atr(data.bars(e["ticker"]), prevd, int(cfg.get("atr_n", 14)))
+        atr = wilder_atr(bars_upto(data, e["ticker"], prevd, R), prevd, int(cfg.get("atr_n", 14)))
         if not atr or not e.get("wall"):
             return None, "no ATR(14): daily bars missing or not updated to the previous close"
         stop = e["wall"] - cfg["stop_atr"] * atr
