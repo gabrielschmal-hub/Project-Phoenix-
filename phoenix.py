@@ -5126,7 +5126,9 @@ def _mme_map_tickers():
     import json, os
     try:
         m = json.load(open(os.path.join(OUTPUTS_DIR, "mme_map.json")))
-        return {r["ticker"] for g in (m.get("groups") or {}).values() for r in g if r.get("ticker") and not r.get("index")}
+        tks = {r["ticker"] for g in (m.get("groups") or {}).values() for r in g if r.get("ticker") and not r.get("index")}
+        return tks | {t.replace(".", "-") for t in tks}     # BRK.B on the map is BRK-B in the price pull
+
     except Exception:
         return set()
 
@@ -11155,7 +11157,8 @@ def run_mme_map():
         names += [str(t.get("ticker")).upper() for t in _load_trades() if t.get("status") in ("open", "plan")]
     except Exception:
         pass
-    names = [t for t in dict.fromkeys(names) if t and t not in ("SPY", "IWM")]   # QQQ is on Elliott's map (15 Nov 2026)
+    # QQQ is on Elliott's map (15 Nov 2026); SPY joins it as a tradeable name (Gabriel, 26 Nov 2026: tradeable at IBKR)
+    names = [t for t in dict.fromkeys(names) if t and t not in ("IWM",)]
     up_rows, up_meta = _mme_uploaded()
     today = datetime.now(timezone.utc).date()
     up_fresh = False
@@ -11321,9 +11324,46 @@ def run_mme_map():
         "notes": _notes, "notes_meta": _notes_meta, "etf_rows": etf_rows, "events": _events})
     print(f"[mmemap] {len(out)}/{len(names)} names ({n_up} from upload, {len(out)-n_up} from Phoenix) · green {len(groups['green'])} "
           f"amber {len(groups['amber'])} red {len(groups['red'])} · standouts {len(stand)} · missing {','.join(missing) or 'none'}")
+    try:
+        _mme_archive((up_meta or {}).get("date") if up_fresh else (chains_date or str(today)), out)
+    except Exception as e:
+        print(f"[mmemap] archive FAILED (non-fatal): {e}")
     sb_heartbeat("mme_map", len(out) >= max(5, len(names) // 2),
                  f"{len(out)}/{len(names)} · {n_up} from upload · {len(stand)} standouts · missing {len(missing)}")
     return out
+
+
+MME_ARCHIVE_KEYS = ("ticker", "spot", "flip", "em", "em_src", "dist_flip_em", "regime", "status", "support", "resist",
+                    "net_gex_B", "stale_days", "src", "flip_wide", "watch", "index", "sector5", "earn")
+
+
+def _mme_archive_row(r):
+    x = {k: r.get(k) for k in MME_ARCHIVE_KEYS if r.get(k) is not None}
+    for k in ("support_tiered", "resist_tiered"):
+        if r.get(k):
+            x[k] = list(r[k])[:6]
+    return x
+
+
+def _mme_archive(map_date, rows, when=None):
+    """The prospective record of the real MME levels (Gabriel, 26 Nov 2026): one line per map date in
+    outputs/history/mme_levels_<year>.jsonl with every name's spot, flip, EM, walls (top 6 each side) and regime.
+    The FIRST map of a date is kept (the morning run the forward test trades on); later reruns never overwrite it."""
+    import os, json
+    d = str(map_date or "")[:10]
+    if len(d) != 10:
+        return False
+    fp = os.path.join(OUTPUTS_DIR, "history", f"mme_levels_{d[:4]}.jsonl")
+    os.makedirs(os.path.dirname(fp), exist_ok=True)
+    if os.path.exists(fp):
+        for line in open(fp):
+            if line.startswith('{"d": "' + d + '"'):
+                return False
+    rec = {"d": d, "asof": when or _now(), "n": len(rows), "rows": [_mme_archive_row(r) for r in rows]}
+    with open(fp, "a") as f:
+        f.write(json.dumps(rec, separators=(",", ":")).replace('{"d":', '{"d": ', 1) + "\n")
+    print(f"[mmemap] archived {len(rows)} names for {d} -> {os.path.relpath(fp, OUTPUTS_DIR)}")
+    return True
 
 
 # ============================================================
