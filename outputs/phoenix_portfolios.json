@@ -1,6 +1,6 @@
 {
- "asof": "2026-11-25 06:32 UTC",
- "date": "2026-11-25",
+ "asof": "2026-11-26 05:37 UTC",
+ "date": "2026-11-26",
  "rules": {
   "accounts_eur": [
    5000,
@@ -55,14 +55,14 @@
   "drift_band": 0.05
  },
  "dial": {
-  "score": 0,
+  "score": 20,
   "state": "stress",
   "parts": [
    {
     "k": "macro regime",
-    "value": "POLICY_TIGHTENING",
-    "pts": -35,
-    "why": "a stress regime"
+    "value": "ENERGY_GRIND",
+    "pts": 0,
+    "why": "not a stress regime"
    },
    {
     "k": "SPX dealer gamma",
@@ -72,9 +72,9 @@
    },
    {
     "k": "VIX",
-    "value": 26.36,
+    "value": 28.29,
     "pts": -20,
-    "why": "26.36 \u2014 elevated"
+    "why": "28.29 \u2014 elevated"
    },
    {
     "k": "VIX curve",
@@ -84,29 +84,29 @@
    },
    {
     "k": "SPX vs 200-day",
-    "value": -2.04,
+    "value": -2.31,
     "pts": -20,
     "why": "below its 200-day: a downtrend"
    },
    {
     "k": "SPX vs 50-day",
-    "value": -5.37,
+    "value": -5.52,
     "pts": -5,
     "why": "below its 50-day"
    }
   ],
   "context": {
-   "regime": "POLICY_TIGHTENING",
-   "regime_held_weeks": 1,
+   "regime": "ENERGY_GRIND",
+   "regime_held_weeks": 8,
    "gex_regime": "negative",
-   "gex_net_B": -68.19,
-   "gex_flip": 7472.36,
-   "gex_dist_to_flip_pct": 3.77,
-   "spx_close": 7201.09,
-   "spx_vs_50d_pct": -5.37,
-   "spx_vs_200d_pct": -2.04,
-   "vix": 26.36,
-   "dayscore": 45.3,
+   "gex_net_B": -74.1,
+   "gex_flip": 7476.15,
+   "gex_dist_to_flip_pct": 5.68,
+   "spx_close": 7182.78,
+   "spx_vs_50d_pct": -5.52,
+   "spx_vs_200d_pct": -2.31,
+   "vix": 28.29,
+   "dayscore": 45.6,
    "dayscore_verdict": "TRADE CAREFULLY"
   }
  },
@@ -246,14 +246,14 @@
   "FXI": "international"
  },
  "conditions": {
-  "dayscore": 45.3,
+  "dayscore": 45.6,
   "verdict": "TRADE CAREFULLY",
-  "regime": "POLICY_TIGHTENING",
-  "regime_held_weeks": 1,
+  "regime": "ENERGY_GRIND",
+  "regime_held_weeks": 8,
   "stress": true,
   "dial_state": "stress",
-  "dial_score": 0,
-  "eurusd": 1.0941,
+  "dial_score": 20,
+  "eurusd": 1.0964,
   "fx_src": "yahoo"
  },
  "split_auto": {
@@ -263,7 +263,7 @@
   "cash": 0.25
  },
  "split_reasons": [
-  "Market dial 0/100 \u2014 stress: macro regime a stress regime (-35); SPX dealer gamma negative: dealers amplify moves (-20); VIX 26.36 \u2014 elevated (-20); VIX curve near-term fear above long-term: stress (-15); SPX vs 200-day below its 200-day: a downtrend (-20); SPX vs 50-day below its 50-day (-5).",
+  "Market dial 20/100 \u2014 stress: SPX dealer gamma negative: dealers amplify moves (-20); VIX 28.29 \u2014 elevated (-20); VIX curve near-term fear above long-term: stress (-15); SPX vs 200-day below its 200-day: a downtrend (-20); SPX vs 50-day below its 50-day (-5).",
   "Stress split: tactical 10%, risky 5%, cash 25%; names below their gamma flip are excluded.",
   "The split is set when the book is locked or reviewed; between reviews a move into stress is an exception that asks you to cut the trading parts."
  ],
@@ -292,10 +292,10 @@
    {
     "t": "ECO",
     "name": "Okeanis Eco Tankers Corp.",
-    "score": 84,
+    "score": 85,
     "industry": "Marine shipping",
     "sector": "Transportation",
-    "price": 80.21
+    "price": 81.59
    },
    {
     "t": "FRO",
@@ -303,7 +303,7 @@
     "score": 76,
     "industry": "Marine shipping",
     "sector": "Transportation",
-    "price": 47.53
+    "price": 47.65
    },
    {
     "t": "CON",
@@ -311,7 +311,7 @@
     "score": 72,
     "industry": "Medical/Nursing services",
     "sector": "Health services",
-    "price": 43.25
+    "price": 43.06
    },
    {
     "t": "HNGE",
@@ -319,45 +319,68 @@
     "score": 72,
     "industry": "Packaged software",
     "sector": "Technology services",
-    "price": 109.03
+    "price": 109.06
    },
    {
-    "t": "RPRX",
-    "name": "Royalty Pharma plc",
-    "score": 72,
+    "t": "KNSA",
+    "name": "Kiniksa Pharmaceuticals International, plc",
+    "score": 71,
     "industry": "Pharmaceuticals: major",
     "sector": "Health technology",
-    "price": 71.31
+    "price": 100.98
    }
   ]
  },
  "tactical": [
   {
+   "t": "ACA",
+   "name": "Arcosa, Inc.",
+   "industry": "Construction materials",
+   "score": 72,
+   "breakout": true,
+   "entry": 149.15,
+   "stop": 148.3,
+   "stop_atr": 148.3,
+   "atr_pct": 0.19,
+   "resistance": 145.38,
+   "chart": null,
+   "patterns": [],
+   "sector": "Non-energy minerals",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 50/121, +9.6% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 77.0,
+   "size_mult": 1.0,
+   "dealer": null
+  },
+  {
    "t": "TBBB",
    "name": "BBB Foods Inc.",
    "industry": "Food retail",
-   "score": 68,
+   "score": 69,
    "breakout": false,
-   "entry": 65.65,
-   "stop": 59.56,
-   "stop_atr": 59.56,
-   "atr_pct": 3.09,
+   "entry": 65.58,
+   "stop": 59.68,
+   "stop_atr": 59.68,
+   "atr_pct": 3.0,
    "resistance": 70.02,
    "chart": "neutral",
-   "patterns": [
-    "three outside down"
-   ],
+   "patterns": [],
    "sector": "Retail trade",
    "industry_ok": true,
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 11/121, +11.3% vs SPX over a month)"
+    "industry leading (rank 16/121, +11.8% vs SPX over a month)"
    ],
-   "rank_score": 73.0,
+   "rank_score": 74.0,
    "size_mult": 1.0,
    "dealer": {
-    "flip": 43.7,
+    "flip": 44.04,
     "call_wall": 70.0,
     "put_wall": 60.0,
     "em": 1.82,
@@ -365,46 +388,15 @@
    }
   },
   {
-   "t": "VNT",
-   "name": "Vontier Corporation",
-   "industry": "Other transportation",
-   "score": 68,
-   "breakout": false,
-   "entry": 44.41,
-   "stop": 39.6,
-   "stop_atr": 39.05,
-   "atr_pct": 4.02,
-   "resistance": 43.62,
-   "chart": "bullish",
-   "patterns": [],
-   "sector": "Transportation",
-   "industry_ok": true,
-   "sector_ok": false,
-   "gates": [],
-   "notes": [
-    "industry leading (rank 8/121, +14.2% vs SPX over a month)",
-    "stop raised to 39.6, just under the put wall 40.0 (was 39.05)"
-   ],
-   "rank_score": 73.0,
-   "size_mult": 1.0,
-   "dealer": {
-    "flip": null,
-    "call_wall": 45.0,
-    "put_wall": 40.0,
-    "em": 0.8,
-    "regime": "green"
-   }
-  },
-  {
    "t": "BIP",
    "name": "Brookfield Infrastructure Partners LP Limited Partnership",
    "industry": "Alternative power generation",
-   "score": 67,
+   "score": 68,
    "breakout": true,
-   "entry": 45.52,
-   "stop": 40.64,
-   "stop_atr": 40.64,
-   "atr_pct": 3.57,
+   "entry": 44.62,
+   "stop": 39.6,
+   "stop_atr": 39.6,
+   "atr_pct": 3.75,
    "resistance": 42.81,
    "chart": "bullish",
    "patterns": [
@@ -415,12 +407,12 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 25/121, +8.9% vs SPX over a month)"
+    "industry leading (rank 26/121, +10.2% vs SPX over a month)"
    ],
-   "rank_score": 72.0,
+   "rank_score": 73.0,
    "size_mult": 1.0,
    "dealer": {
-    "flip": 40.04,
+    "flip": 40.11,
     "call_wall": 45.0,
     "put_wall": 40.0,
     "em": 0.7,
@@ -433,10 +425,10 @@
    "industry": "Medical specialties",
    "score": 67,
    "breakout": false,
-   "entry": 712.08,
+   "entry": 709.46,
    "stop": 663.3,
-   "stop_atr": 643.08,
-   "atr_pct": 3.23,
+   "stop_atr": 644.76,
+   "atr_pct": 3.04,
    "resistance": 704.23,
    "chart": "neutral",
    "patterns": [],
@@ -445,13 +437,13 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 19/121, +8.6% vs SPX over a month)",
-    "stop raised to 663.3, just under the put wall 670.0 (was 643.08)"
+    "industry leading (rank 23/121, +9.3% vs SPX over a month)",
+    "stop raised to 663.3, just under the put wall 670.0 (was 644.76)"
    ],
    "rank_score": 72.0,
    "size_mult": 1.0,
    "dealer": {
-    "flip": 473.14,
+    "flip": 476.13,
     "call_wall": 700.0,
     "put_wall": 670.0,
     "em": 15.09,
@@ -476,7 +468,7 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 56/121, +6.5% vs SPX over a month)",
+    "industry leading (rank 59/121, +8.0% vs SPX over a month)",
     "no dealer levels (no option chain on file)"
    ],
    "rank_score": 72.0,
@@ -487,7 +479,7 @@
    "t": "SILA",
    "name": "Sila Realty Trust, Inc.",
    "industry": "Real estate investment trusts",
-   "score": 67,
+   "score": 66,
    "breakout": false,
    "entry": 30.36,
    "stop": 30.27,
@@ -501,12 +493,67 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 56/121, +6.5% vs SPX over a month)",
+    "industry leading (rank 59/121, +8.0% vs SPX over a month)",
     "no dealer levels (no option chain on file)"
    ],
-   "rank_score": 72.0,
+   "rank_score": 71.0,
    "size_mult": 1.0,
    "dealer": null
+  },
+  {
+   "t": "SMA",
+   "name": "SmartStop Self Storage REIT, Inc.",
+   "industry": "Real estate investment trusts",
+   "score": 66,
+   "breakout": true,
+   "entry": 40.32,
+   "stop": 36.44,
+   "stop_atr": 36.44,
+   "atr_pct": 3.21,
+   "resistance": 39.86,
+   "chart": "neutral",
+   "patterns": [],
+   "sector": "Finance",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 59/121, +8.0% vs SPX over a month)",
+    "no dealer levels (no option chain on file)"
+   ],
+   "rank_score": 71.0,
+   "size_mult": 1.0,
+   "dealer": null
+  },
+  {
+   "t": "VNT",
+   "name": "Vontier Corporation",
+   "industry": "Other transportation",
+   "score": 66,
+   "breakout": false,
+   "entry": 45.51,
+   "stop": 40.79,
+   "stop_atr": 40.79,
+   "atr_pct": 3.46,
+   "resistance": 43.62,
+   "chart": "bullish",
+   "patterns": [],
+   "sector": "Transportation",
+   "industry_ok": true,
+   "sector_ok": false,
+   "gates": [],
+   "notes": [
+    "industry leading (rank 7/121, +16.8% vs SPX over a month)"
+   ],
+   "rank_score": 71.0,
+   "size_mult": 1.0,
+   "dealer": {
+    "flip": null,
+    "call_wall": 45.0,
+    "put_wall": 40.0,
+    "em": 0.8,
+    "regime": "green"
+   }
   },
   {
    "t": "BDX",
@@ -514,10 +561,10 @@
    "industry": "Medical specialties",
    "score": 64,
    "breakout": false,
-   "entry": 220.0,
+   "entry": 221.24,
    "stop": 207.9,
-   "stop_atr": 204.69,
-   "atr_pct": 2.32,
+   "stop_atr": 206.84,
+   "atr_pct": 2.17,
    "resistance": 218.03,
    "chart": "bullish",
    "patterns": [],
@@ -526,13 +573,13 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 19/121, +8.6% vs SPX over a month)",
-    "stop raised to 207.9, just under the put wall 210.0 (was 204.69)"
+    "industry leading (rank 23/121, +9.3% vs SPX over a month)",
+    "stop raised to 207.9, just under the put wall 210.0 (was 206.84)"
    ],
    "rank_score": 69.0,
    "size_mult": 1.0,
    "dealer": {
-    "flip": 165.27,
+    "flip": 165.51,
     "call_wall": 220.0,
     "put_wall": 210.0,
     "em": 3.33,
@@ -545,91 +592,29 @@
    "industry": "Movies/Entertainment",
    "score": 64,
    "breakout": false,
-   "entry": 122.51,
-   "stop": 113.85,
-   "stop_atr": 112.48,
-   "atr_pct": 2.73,
+   "entry": 125.6,
+   "stop": 115.28,
+   "stop_atr": 115.28,
+   "atr_pct": 2.74,
    "resistance": 118.97,
    "chart": "bullish",
-   "patterns": [],
+   "patterns": [
+    "three white soldiers"
+   ],
    "sector": "Consumer services",
    "industry_ok": true,
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 20/121, +12.1% vs SPX over a month)",
-    "stop raised to 113.85, just under the put wall 115.0 (was 112.48)"
+    "industry leading (rank 14/121, +14.8% vs SPX over a month)"
    ],
    "rank_score": 69.0,
    "size_mult": 1.0,
    "dealer": {
-    "flip": 107.06,
+    "flip": 107.04,
     "call_wall": 125.0,
     "put_wall": 115.0,
     "em": 2.18,
-    "regime": "green"
-   }
-  },
-  {
-   "t": "LIVN",
-   "name": "LivaNova PLC",
-   "industry": "Medical specialties",
-   "score": 64,
-   "breakout": false,
-   "entry": 93.93,
-   "stop": 84.21,
-   "stop_atr": 84.21,
-   "atr_pct": 3.45,
-   "resistance": 91.32,
-   "chart": "neutral",
-   "patterns": [
-    "double top"
-   ],
-   "sector": "Health technology",
-   "industry_ok": true,
-   "sector_ok": false,
-   "gates": [],
-   "notes": [
-    "industry leading (rank 19/121, +8.6% vs SPX over a month)"
-   ],
-   "rank_score": 69.0,
-   "size_mult": 1.0,
-   "dealer": {
-    "flip": null,
-    "call_wall": 95.0,
-    "put_wall": 85.0,
-    "em": 1.73,
-    "regime": "green"
-   }
-  },
-  {
-   "t": "ZBH",
-   "name": "Zimmer Biomet Holdings, Inc.",
-   "industry": "Medical specialties",
-   "score": 64,
-   "breakout": false,
-   "entry": 108.99,
-   "stop": 99.0,
-   "stop_atr": 98.17,
-   "atr_pct": 3.31,
-   "resistance": 105.59,
-   "chart": "bullish",
-   "patterns": [],
-   "sector": "Health technology",
-   "industry_ok": true,
-   "sector_ok": false,
-   "gates": [],
-   "notes": [
-    "industry leading (rank 19/121, +8.6% vs SPX over a month)",
-    "stop raised to 99.0, just under the put wall 100.0 (was 98.17)"
-   ],
-   "rank_score": 69.0,
-   "size_mult": 1.0,
-   "dealer": {
-    "flip": 85.21,
-    "call_wall": 105.0,
-    "put_wall": 100.0,
-    "em": 2.06,
     "regime": "green"
    }
   },
@@ -639,19 +624,21 @@
    "industry": "Pharmaceuticals: major",
    "score": 71,
    "breakout": true,
-   "entry": 119.13,
-   "stop": 99.55,
-   "stop_atr": 99.55,
-   "atr_pct": 5.48,
+   "entry": 119.36,
+   "stop": 100.31,
+   "stop_atr": 100.31,
+   "atr_pct": 5.32,
    "resistance": 115.63,
    "chart": "neutral",
-   "patterns": [],
+   "patterns": [
+    "hanging man"
+   ],
    "sector": "Health technology",
    "industry_ok": true,
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 17/121, +6.5% vs SPX over a month)",
+    "industry leading (rank 22/121, +7.0% vs SPX over a month)",
     "call wall 115.0 within one expected move above: capped upside"
    ],
    "rank_score": 66.0,
@@ -668,14 +655,14 @@
    "t": "LFST",
    "name": "LifeStance Health Group, Inc.",
    "industry": "Medical/Nursing services",
-   "score": 65,
+   "score": 67,
    "breakout": true,
-   "entry": 14.16,
+   "entry": 14.48,
    "stop": 13.86,
-   "stop_atr": 11.63,
-   "atr_pct": 5.96,
+   "stop_atr": 12.23,
+   "atr_pct": 5.19,
    "resistance": 14.08,
-   "chart": "bullish",
+   "chart": "neutral",
    "patterns": [
     "three outside up"
    ],
@@ -684,10 +671,10 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry not leading (rank 50/121)",
-    "stop raised to 13.86, just under the put wall 14.0 (was 11.63)"
+    "industry not leading (rank 56/121)",
+    "stop raised to 13.86, just under the put wall 14.0 (was 12.23)"
    ],
-   "rank_score": 60.0,
+   "rank_score": 62.0,
    "size_mult": 1.0,
    "dealer": {
     "flip": null,
@@ -703,10 +690,10 @@
    "industry": "Pharmaceuticals: major",
    "score": 65,
    "breakout": false,
-   "entry": 70.13,
+   "entry": 68.37,
    "stop": 59.4,
-   "stop_atr": 58.56,
-   "atr_pct": 5.5,
+   "stop_atr": 56.86,
+   "atr_pct": 5.61,
    "resistance": 64.51,
    "chart": "bullish",
    "patterns": [],
@@ -715,9 +702,9 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 17/121, +6.5% vs SPX over a month)",
+    "industry leading (rank 22/121, +7.0% vs SPX over a month)",
     "call wall 65.0 within one expected move above: capped upside",
-    "stop raised to 59.4, just under the put wall 60.0 (was 58.56)"
+    "stop raised to 59.4, just under the put wall 60.0 (was 56.86)"
    ],
    "rank_score": 60.0,
    "size_mult": 1.0,
@@ -730,36 +717,34 @@
    }
   },
   {
-   "t": "BOBS",
-   "name": "Bob's Discount Furniture, Inc.",
-   "industry": "Specialty stores",
+   "t": "CGON",
+   "name": "CG Oncology, Inc.",
+   "industry": "Biotechnology",
    "score": 64,
-   "breakout": false,
-   "entry": 20.55,
-   "stop": 17.32,
-   "stop_atr": 17.29,
-   "atr_pct": 5.28,
-   "resistance": 20.53,
-   "chart": "bullish",
-   "patterns": [
-    "hanging man"
-   ],
-   "sector": "Retail trade",
+   "breakout": true,
+   "entry": 84.71,
+   "stop": 74.25,
+   "stop_atr": 63.13,
+   "atr_pct": 8.49,
+   "resistance": 79.81,
+   "chart": "neutral",
+   "patterns": [],
+   "sector": "Health technology",
    "industry_ok": true,
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 2/121, +12.5% vs SPX over a month)",
-    "call wall 20.0 within one expected move above: capped upside",
-    "stop raised to 17.32, just under the put wall 17.5 (was 17.29)"
+    "industry leading (rank 39/121, +6.1% vs SPX over a month)",
+    "call wall 80.0 within one expected move above: capped upside",
+    "stop raised to 74.25, just under the put wall 75.0 (was 63.13)"
    ],
    "rank_score": 59.0,
    "size_mult": 1.0,
    "dealer": {
     "flip": null,
-    "call_wall": 20.0,
-    "put_wall": 17.5,
-    "em": 0.85,
+    "call_wall": 80.0,
+    "put_wall": 75.0,
+    "em": 3.29,
     "regime": "green"
    }
   },
@@ -769,10 +754,10 @@
    "industry": "Airlines",
    "score": 64,
    "breakout": false,
-   "entry": 147.04,
-   "stop": 128.91,
-   "stop_atr": 128.91,
-   "atr_pct": 4.11,
+   "entry": 148.7,
+   "stop": 131.08,
+   "stop_atr": 131.08,
+   "atr_pct": 3.95,
    "resistance": 155.11,
    "chart": "bullish",
    "patterns": [],
@@ -781,13 +766,13 @@
    "sector_ok": false,
    "gates": [],
    "notes": [
-    "industry leading (rank 30/121, +12.3% vs SPX over a month)",
+    "industry leading (rank 46/121, +11.6% vs SPX over a month)",
     "call wall 140.0 within one expected move above: capped upside"
    ],
    "rank_score": 59.0,
    "size_mult": 1.0,
    "dealer": {
-    "flip": 134.21,
+    "flip": 134.06,
     "call_wall": 140.0,
     "put_wall": 130.0,
     "em": 3.7,
@@ -797,147 +782,6 @@
  ],
  "options": [
   {
-   "t": "BA",
-   "label": "Jan15 \u2212170C +185C \u00b7 4.12",
-   "structure": "CCS",
-   "expiry": "2027-01-15",
-   "expiry_type": "monthly",
-   "exit_date": "2027-01-05",
-   "max_loss_usd": 1090.0,
-   "credit": 4.12,
-   "ev_usd": 57.15,
-   "ev_pct": 0.0524,
-   "ev_cons_usd": 57.15,
-   "ev_cons_pct": 0.0524,
-   "ev_mkt_usd": 19.79,
-   "win": 0.696,
-   "net_delta": -23.6,
-   "spot": 163.18,
-   "bias": "bearish",
-   "cluster": "industrials",
-   "events": [
-    "NFP 12-04",
-    "FOMC 12-09",
-    "CPI 12-10"
-   ],
-   "sized": {},
-   "alts": []
-  },
-  {
-   "t": "NVDA",
-   "label": "Jan15 \u2212165C +190C \u00b7 6.51",
-   "structure": "CCS",
-   "expiry": "2027-01-15",
-   "expiry_type": "monthly",
-   "exit_date": "2027-01-05",
-   "max_loss_usd": 1851.0,
-   "credit": 6.51,
-   "ev_usd": 87.71,
-   "ev_pct": 0.0474,
-   "ev_cons_usd": 87.71,
-   "ev_cons_pct": 0.0474,
-   "ev_mkt_usd": 86.02,
-   "win": 0.705,
-   "net_delta": -22.2,
-   "spot": 151.87,
-   "bias": "bearish",
-   "cluster": "semis & tech",
-   "events": [
-    "NFP 12-04",
-    "FOMC 12-09",
-    "CPI 12-10"
-   ],
-   "sized": {},
-   "alts": []
-  },
-  {
-   "t": "GOOG",
-   "label": "Jan15 \u2212285C +310C \u00b7 7.64",
-   "structure": "CCS",
-   "expiry": "2027-01-15",
-   "expiry_type": "monthly",
-   "exit_date": "2027-01-05",
-   "max_loss_usd": 1739.0,
-   "credit": 7.64,
-   "ev_usd": 68.52,
-   "ev_pct": 0.0394,
-   "ev_cons_usd": 68.52,
-   "ev_cons_pct": 0.0394,
-   "ev_mkt_usd": 33.01,
-   "win": 0.66,
-   "net_delta": -24.0,
-   "spot": 276.68,
-   "bias": "bearish",
-   "cluster": "semis & tech",
-   "events": [
-    "NFP 12-04",
-    "FOMC 12-09",
-    "CPI 12-10"
-   ],
-   "sized": {},
-   "alts": [
-    {
-     "label": "Jan15 \u2212290C +310C \u00b7 5.51",
-     "structure": "CCS",
-     "expiry": "2027-01-15",
-     "expiry_type": "monthly",
-     "exit_date": "2027-01-05",
-     "max_loss_usd": 1451.0,
-     "credit": 5.51,
-     "ev_usd": 35.3,
-     "ev_pct": 0.0243,
-     "ev_cons_usd": 35.3,
-     "ev_cons_pct": 0.0243,
-     "ev_mkt_usd": 3.47,
-     "win": 0.669,
-     "net_delta": -18.7
-    },
-    {
-     "label": "Jan15 \u2212295C +310C \u00b7 3.83",
-     "structure": "CCS",
-     "expiry": "2027-01-15",
-     "expiry_type": "monthly",
-     "exit_date": "2027-01-05",
-     "max_loss_usd": 1120.0,
-     "credit": 3.83,
-     "ev_usd": 23.87,
-     "ev_pct": 0.0213,
-     "ev_cons_usd": 23.87,
-     "ev_cons_pct": 0.0213,
-     "ev_mkt_usd": -2.01,
-     "win": 0.687,
-     "net_delta": -13.6
-    }
-   ]
-  },
-  {
-   "t": "HOOD",
-   "label": "Jan15 \u221270C +85C \u00b7 3.80",
-   "structure": "CCS",
-   "expiry": "2027-01-15",
-   "expiry_type": "monthly",
-   "exit_date": "2027-01-05",
-   "max_loss_usd": 1123.0,
-   "credit": 3.8,
-   "ev_usd": 35.9,
-   "ev_pct": 0.032,
-   "ev_cons_usd": 35.9,
-   "ev_cons_pct": 0.032,
-   "ev_mkt_usd": 34.64,
-   "win": 0.696,
-   "net_delta": -27.3,
-   "spot": 64.85,
-   "bias": "bearish",
-   "cluster": "other: HOOD",
-   "events": [
-    "NFP 12-04",
-    "FOMC 12-09",
-    "CPI 12-10"
-   ],
-   "sized": {},
-   "alts": []
-  },
-  {
    "t": "C",
    "label": "Jan15 \u2212120C +125C \u00b7 1.41",
    "structure": "CCS",
@@ -946,13 +790,13 @@
    "exit_date": "2027-01-05",
    "max_loss_usd": 362.0,
    "credit": 1.41,
-   "ev_usd": 9.47,
-   "ev_pct": 0.0262,
-   "ev_cons_usd": 9.47,
-   "ev_cons_pct": 0.0262,
-   "ev_mkt_usd": 4.98,
+   "ev_usd": 11.28,
+   "ev_pct": 0.0312,
+   "ev_cons_usd": 11.28,
+   "ev_cons_pct": 0.0312,
+   "ev_mkt_usd": 5.89,
    "win": 0.687,
-   "net_delta": -13.0,
+   "net_delta": -13.1,
    "spot": 113.22,
    "bias": "bearish",
    "cluster": "financials",
@@ -965,24 +809,122 @@
    "alts": []
   },
   {
-   "t": "ABBV",
-   "label": "IC Jan15 280/300 \u00b130 \u00b7 40%",
-   "structure": "IC",
+   "t": "GLD",
+   "label": "Jan15 \u2212335C +360C \u00b7 7.55",
+   "structure": "CCS",
    "expiry": "2027-01-15",
    "expiry_type": "monthly",
    "exit_date": "2027-01-05",
-   "max_loss_usd": 1809.0,
-   "credit": 11.96,
-   "ev_usd": 38.22,
-   "ev_pct": 0.0211,
-   "ev_cons_usd": 38.22,
-   "ev_cons_pct": 0.0211,
-   "ev_mkt_usd": -52.2,
-   "win": 0.611,
-   "net_delta": -1.4,
-   "spot": 289.01,
-   "bias": "neutral",
-   "cluster": "health",
+   "max_loss_usd": 1748.0,
+   "credit": 7.55,
+   "ev_usd": 52.51,
+   "ev_pct": 0.03,
+   "ev_cons_usd": 52.51,
+   "ev_cons_pct": 0.03,
+   "ev_mkt_usd": 42.96,
+   "win": 0.651,
+   "net_delta": -23.3,
+   "spot": 326.51,
+   "bias": "bearish",
+   "cluster": "metals",
+   "events": [
+    "NFP 12-04",
+    "FOMC 12-09",
+    "CPI 12-10"
+   ],
+   "sized": {},
+   "alts": [
+    {
+     "label": "Jan15 \u2212340C +360C \u00b7 5.54",
+     "structure": "CCS",
+     "expiry": "2027-01-15",
+     "expiry_type": "monthly",
+     "exit_date": "2027-01-05",
+     "max_loss_usd": 1449.0,
+     "credit": 5.54,
+     "ev_usd": 28.86,
+     "ev_pct": 0.0199,
+     "ev_cons_usd": 28.86,
+     "ev_cons_pct": 0.0199,
+     "ev_mkt_usd": 20.39,
+     "win": 0.669,
+     "net_delta": -18.0
+    }
+   ]
+  },
+  {
+   "t": "GOOG",
+   "label": "Jan15 \u2212285C +310C \u00b7 6.54",
+   "structure": "CCS",
+   "expiry": "2027-01-15",
+   "expiry_type": "monthly",
+   "exit_date": "2027-01-05",
+   "max_loss_usd": 1849.0,
+   "credit": 6.54,
+   "ev_usd": 51.22,
+   "ev_pct": 0.0277,
+   "ev_cons_usd": 51.22,
+   "ev_cons_pct": 0.0277,
+   "ev_mkt_usd": 3.14,
+   "win": 0.678,
+   "net_delta": -22.2,
+   "spot": 272.74,
+   "bias": "bearish",
+   "cluster": "semis & tech",
+   "events": [
+    "NFP 12-04",
+    "FOMC 12-09",
+    "CPI 12-10"
+   ],
+   "sized": {},
+   "alts": []
+  },
+  {
+   "t": "NFLX",
+   "label": "Jan15 \u221262C +69C \u00b7 1.75",
+   "structure": "CCS",
+   "expiry": "2027-01-15",
+   "expiry_type": "monthly",
+   "exit_date": "2027-01-05",
+   "max_loss_usd": 527.0,
+   "credit": 1.75,
+   "ev_usd": 14.21,
+   "ev_pct": 0.027,
+   "ev_cons_usd": 14.21,
+   "ev_cons_pct": 0.027,
+   "ev_mkt_usd": 6.64,
+   "win": 0.687,
+   "net_delta": -25.6,
+   "spot": 59.25,
+   "bias": "bearish",
+   "cluster": "consumer",
+   "events": [
+    "NFP 12-04",
+    "FOMC 12-09",
+    "CPI 12-10"
+   ],
+   "sized": {},
+   "alts": []
+  },
+  {
+   "t": "BA",
+   "label": "Jan15 \u2212170C +185C \u00b7 4.23",
+   "structure": "CCS",
+   "expiry": "2027-01-15",
+   "expiry_type": "monthly",
+   "exit_date": "2027-01-05",
+   "max_loss_usd": 1080.0,
+   "credit": 4.23,
+   "ev_usd": 26.67,
+   "ev_pct": 0.0247,
+   "ev_cons_usd": 26.67,
+   "ev_cons_pct": 0.0247,
+   "ev_mkt_usd": -11.48,
+   "win": 0.66,
+   "net_delta": -24.9,
+   "spot": 165.0,
+   "bias": "bearish",
+   "cluster": "industrials",
    "events": [
     "NFP 12-04",
     "FOMC 12-09",
@@ -996,6 +938,6 @@
   "core": 4,
   "satellite": 5,
   "tactical": 15,
-  "options": 6
+  "options": 5
  }
 }
