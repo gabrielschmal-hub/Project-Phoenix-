@@ -63,8 +63,10 @@ def test_calendar_r06_and_holidays():
 
 
 def test_commission():
-    assert M.commission(3.4, "buy", R) == 1.00 and M.commission(3.4, "sell", R) == 1.02
-    assert M.commission(400, "buy", R) == 2.00
+    # $1 per round trip, flat (26 Nov 2026): $0.50 in, $0.50 out, whatever the share count
+    assert M.commission(3.4, "buy", R) == 0.50 and M.commission(3.4, "sell", R) == 0.50
+    assert M.commission(400, "buy", R) + M.commission(400, "sell", R) == 1.00
+    assert M.commission(3.4, "buy", R143) == 1.00 and M.commission(400, "buy", R143) == 2.00   # the old v1.4.3 file is untouched
 
 
 def test_major_walls():
@@ -428,3 +430,21 @@ def test_s5_not_before_its_dry_run(tmp_path, monkeypatch):
     F = FakeS5(d1, S, dict(ROWS), _bars(d1))
     M.decide(d1, R, F)
     assert all(t["dry"] for t in F.trs if t["arm"] == "S5") and [t for t in F.trs if t["arm"] == "S5"]
+
+
+def test_bars_filled_from_5min_prices_and_split_guard():
+    # chart file stops on 25 Nov; 27 Nov (Thanksgiving week) is rebuilt from the 5-minute prices
+    b = _bars(date(2026, 11, 27))                                     # bars up to 25 Nov
+    d = date(2026, 11, 27)
+    S = {d.isoformat(): {"AAA": [(_ts(d, 14, 30), 201.0), (_ts(d, 16, 0), 203.0), (_ts(d, 17, 0), 199.0), (_ts(d, 18, 0), 202.0)]}}
+    F = FakeS5(d, S, dict(ROWS), b)
+    out = M.bars_upto(F, "AAA", "2026-11-27", R)
+    assert out["2026-11-27"] == {"o": 201.0, "h": 203.0, "l": 199.0, "c": 202.0, "src": "5-minute prices"}
+    assert M.wilder_atr(out, "2026-11-27") is not None
+    # an unadjusted 8-for-1 split (first rebuilt price 1/8 of the last close): nothing filled, no ATR
+    S2 = {d.isoformat(): {"AAA": [(_ts(d, 14, 30), 25.0), (_ts(d, 18, 0), 25.5)]}}
+    F2 = FakeS5(d, S2, dict(ROWS), b)
+    assert "2026-11-27" not in M.bars_upto(F2, "AAA", "2026-11-27", R)
+    # no 5-minute prices for a missing session: stays short
+    F3 = FakeS5(d, {}, dict(ROWS), b)
+    assert M.wilder_atr(M.bars_upto(F3, "AAA", "2026-11-27", R), "2026-11-27") is None
