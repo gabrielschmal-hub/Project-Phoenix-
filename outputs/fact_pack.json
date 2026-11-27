@@ -1,7 +1,7 @@
 {
  "schema": "phoenix-fact-pack/1",
- "date": "2026-11-26",
- "asof": "2026-11-26 05:46 UTC",
+ "date": "2026-11-27",
+ "asof": "2026-11-27 05:46 UTC",
  "market": {
   "regime": "ENERGY_GRIND",
   "regime_held_weeks": 8,
@@ -11,16 +11,16 @@
    "vs_50d_pct": -5.52,
    "vs_200d_pct": -2.31
   },
-  "vix": 28.29,
+  "vix": 26.8,
   "dxy": null,
   "us10y": null,
   "gold": null,
   "wti": null,
   "gex": {
-   "net_B": -74.1,
+   "net_B": -71.03,
    "regime": "negative",
    "flip": null,
-   "dist_to_flip_pct": 5.68,
+   "dist_to_flip_pct": 6.61,
    "call_wall": null,
    "put_wall": null,
    "spot": 7182.78
@@ -52,28 +52,28 @@
    "m1_pct": -4.07
   },
   "gold": {
-   "last": 3623.7,
-   "d1_pct": 1.74,
-   "w1_pct": -3.16,
-   "m1_pct": -11.07
+   "last": 3535.8,
+   "d1_pct": -0.73,
+   "w1_pct": -5.51,
+   "m1_pct": -13.22
   },
   "wti": {
-   "last": 84.43,
-   "d1_pct": 2.9,
-   "w1_pct": 1.41,
-   "m1_pct": -15.49
+   "last": 83.68,
+   "d1_pct": 1.99,
+   "w1_pct": 0.5,
+   "m1_pct": -16.24
   },
   "btc": {
-   "last": 59748.0,
-   "d1_pct": -2.39,
-   "w1_pct": -7.93,
-   "m1_pct": -25.32
+   "last": 60378.0,
+   "d1_pct": 1.06,
+   "w1_pct": -4.14,
+   "m1_pct": -25.28
   },
   "dxy": {
-   "last": 103.8,
-   "d1_pct": -0.01,
-   "w1_pct": -0.06,
-   "m1_pct": 1.44
+   "last": 103.67,
+   "d1_pct": -0.13,
+   "w1_pct": -0.18,
+   "m1_pct": 1.32
   },
   "vix": {
    "last": 28.29,
@@ -137,19 +137,19 @@
    {
     "key": "wti_vs_2yr",
     "label": "WTI vs 2yr",
-    "value": 13.35,
+    "value": 15.15,
     "op": ">",
     "threshold": 0,
-    "clear_by": 13.35,
+    "clear_by": 15.15,
     "ok": true
    },
    {
     "key": "wti_12m",
     "label": "WTI 12m",
-    "value": 44.2,
+    "value": 46.52,
     "op": ">",
     "threshold": 25,
-    "clear_by": 19.2,
+    "clear_by": 21.52,
     "ok": true
    }
   ],
@@ -163,23 +163,23 @@
    },
    {
     "if": "WTI vs 2yr falls below 0",
-    "now": 13.35,
+    "now": 15.15,
     "threshold": 0,
-    "distance": 13.35,
+    "distance": 15.15,
     "then": "ENERGY_GRIND no longer qualifies"
    },
    {
     "if": "WTI 12m falls below 25",
-    "now": 44.2,
+    "now": 46.52,
     "threshold": 25,
-    "distance": 19.2,
+    "distance": 21.52,
     "then": "ENERGY_GRIND no longer qualifies"
    }
   ],
   "runner_up": {
    "regime": "POLICY_TIGHTENING",
    "score": 48.6,
-   "behind_by": 2.3
+   "behind_by": 4.2
   }
  },
  "screener": {
@@ -192,7 +192,7 @@
     "atr14_pct": 0.19,
     "mcap_B": 7.11,
     "breakout": true,
-    "days_on_list": 3,
+    "days_on_list": 4,
     "profitability": "profitable",
     "pos_vs_high": 0.0,
     "surge": 353,
@@ -206,7 +206,7 @@
     "atr14_pct": 5.32,
     "mcap_B": 6.95,
     "breakout": true,
-    "days_on_list": 108,
+    "days_on_list": 109,
     "profitability": "lossmaking",
     "pos_vs_high": 0.0,
     "surge": 311,
@@ -220,7 +220,7 @@
     "atr14_pct": 3.0,
     "mcap_B": 5.03,
     "breakout": false,
-    "days_on_list": 66,
+    "days_on_list": 67,
     "profitability": "marginal",
     "pos_vs_high": -6.3,
     "surge": 83,
@@ -234,7 +234,7 @@
     "atr14_pct": 3.75,
     "mcap_B": 16.75,
     "breakout": true,
-    "days_on_list": 3,
+    "days_on_list": 4,
     "profitability": "marginal",
     "pos_vs_high": 0.0,
     "surge": 167,
@@ -248,7 +248,7 @@
     "atr14_pct": 3.04,
     "mcap_B": 43.05,
     "breakout": false,
-    "days_on_list": 16,
+    "days_on_list": 17,
     "profitability": "profitable",
     "pos_vs_high": -5.8,
     "surge": 41,
@@ -262,7 +262,7 @@
     "atr14_pct": 5.19,
     "mcap_B": 3.57,
     "breakout": true,
-    "days_on_list": 109,
+    "days_on_list": 110,
     "profitability": "profitable",
     "pos_vs_high": 0.0,
     "surge": 97,
@@ -276,7 +276,7 @@
     "atr14_pct": 0.0,
     "mcap_B": 3.17,
     "breakout": false,
-    "days_on_list": 109,
+    "days_on_list": 110,
     "profitability": "profitable",
     "pos_vs_high": 0.0,
     "surge": 20,
@@ -288,7 +288,7 @@
     "trade_score": 66,
     "mcap_B": 1.68,
     "breakout": false,
-    "days_on_list": 109,
+    "days_on_list": 110,
     "profitability": "profitable",
     "pos_vs_high": 0.0,
     "surge": 15,
@@ -444,12 +444,12 @@
   ],
   "note": null,
   "congress_status": {
-   "written": "2026-11-26",
+   "written": "2026-11-27",
    "dropped_impossible_dates": 0,
    "sources": {
     "House Clerk PTR": {
      "rows": 10099,
-     "last_30d": 56,
+     "last_30d": 44,
      "newest_tx": "2026-11-19",
      "newest_filed": "2026-11-24"
     },
@@ -493,23 +493,16 @@
   "over_cap": false
  },
  "news": {
-  "date": "2026-11-24",
-  "asof": "2026-11-26 05:01 UTC",
-  "headline": "Chips fall 8% as the AI rebound fades \u2014 while the Dow closes back above 50,000",
-  "standfirst": "The semiconductor index fell 7.88% and Nvidia 5.86%, giving back much of Monday's jump. The Nasdaq fell 1.48% and the S&P 0.50%, but the Dow rose 0.85% to 50,018.70 as health care and retailers gained. Consumer confidence jumped to 103.3 and gold fell 2.15%. The book is flat; Q4 is +34.64 realised, heat 0R.",
+  "date": "2026-11-25",
+  "asof": "2026-11-27 05:03 UTC",
+  "headline": "Hot inflation and tariffs knock stocks down \u2014 and a late rally pulls them most of the way back",
+  "standfirst": "Core PCE rose 3.3%, above forecast, GDP was revised up to 4.3%, and new tariffs of up to 20% were proposed. The Nasdaq was down as much as 4.6% before closing 0.62% lower; the S&P fell 0.25% and the Dow rose 0.33%. Nvidia fell 3.91% and WTI rose about 2%. The book is flat; Q4 is +34.64 realised, heat 0R.",
   "themes": [
    {
     "kicker": "What's next",
-    "right": "PCE on Wednesday, then Thanksgiving",
-    "title": "One session before the holiday",
+    "right": "Thanksgiving, then a half-day",
+    "title": "A holiday, a half-day and OPEC+",
     "items": [
-     {
-      "tone": "c-cb",
-      "tag": "DATA",
-      "html": "<b>PCE inflation</b> and the second Q3 GDP estimate",
-      "when": "Wed \u00b7 2026-11-25",
-      "kind": "calendar"
-     },
      {
       "tone": "c-cb",
       "tag": "HOLIDAY",
@@ -525,45 +518,52 @@
       "kind": "calendar"
      },
      {
+      "tone": "c-cb",
+      "tag": "OPEC+",
+      "html": "<b>OPEC+ meeting</b> on 2027 output",
+      "when": "Sun \u00b7 2026-11-29",
+      "kind": "calendar"
+     },
+     {
       "tone": "c-fomc",
       "tag": "FOMC",
-      "html": "<b>December Fed meeting</b> \u2014 a hike close to fully priced",
+      "html": "<b>December Fed meeting</b> \u2014 a hike about 97% priced",
       "when": "Tue\u2013Wed \u00b7 2026-12-08",
       "kind": "calendar"
      }
     ],
-    "note": "<b>Wednesday brings PCE inflation and the second Q3 GDP estimate</b>, plus a seven-year Treasury sale. Markets are closed on Thursday for Thanksgiving, and Friday is a half-day."
+    "note": "<b>Markets are closed on Thursday for Thanksgiving.</b> Friday is a half-day, with stocks closing at 1pm ET. OPEC+ meets on Sunday, and the Fed meets on <b>8-9 December</b>."
    }
   ],
-  "ondeck": "<b>Wednesday brings PCE inflation and the second Q3 GDP estimate</b>, plus a seven-year Treasury sale. Markets are closed on Thursday for Thanksgiving, and Friday is a half-day.",
+  "ondeck": "<b>Markets are closed on Thursday for Thanksgiving.</b> Friday is a half-day, with stocks closing at 1pm ET. OPEC+ meets on Sunday, and the Fed meets on <b>8-9 December</b>.",
   "note": null
  },
  "provenance": {
   "macro": {
-   "asof": "2026-11-26 05:01 UTC",
+   "asof": "2026-11-27 05:01 UTC",
    "age_min": null
   },
   "gex": {
-   "asof": "2026-11-26 05:01 UTC",
+   "asof": "2026-11-27 05:03 UTC",
    "age_min": null
   },
   "stocks": {
-   "asof": "2026-11-26 05:10 UTC",
+   "asof": "2026-11-27 05:11 UTC",
    "age_min": null
   },
   "institutional_holdings": {
-   "asof": "2026-11-26 05:17 UTC",
+   "asof": "2026-11-27 05:16 UTC",
    "quarter": "2026-09-30"
   },
   "congress_trades": {
-   "asof": "2026-11-26 05:16 UTC",
+   "asof": "2026-11-27 05:15 UTC",
    "status": {
-    "written": "2026-11-26",
+    "written": "2026-11-27",
     "dropped_impossible_dates": 0,
     "sources": {
      "House Clerk PTR": {
       "rows": 10099,
-      "last_30d": 56,
+      "last_30d": 44,
       "newest_tx": "2026-11-19",
       "newest_filed": "2026-11-24"
      },
@@ -586,28 +586,13 @@
    }
   },
   "wire": {
-   "asof": "2026-11-26 05:01 UTC"
+   "asof": "2026-11-27 05:03 UTC"
   }
  },
  "missing": [],
  "changed": {
   "first_pack": false,
-  "prev_date": "2026-11-25",
-  "changes": [
-   {
-    "kind": "regime",
-    "what": "engine regime",
-    "was": "POLICY_TIGHTENING",
-    "now": "ENERGY_GRIND",
-    "why": "the regime label drives which setups the engine favours"
-   },
-   {
-    "kind": "screener",
-    "what": "new in the top setups",
-    "was": null,
-    "now": "ACA",
-    "why": "names the engine ranked highest that were not there yesterday"
-   }
-  ]
+  "prev_date": "2026-11-26",
+  "changes": []
  }
 }

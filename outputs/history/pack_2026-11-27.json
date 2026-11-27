@@ -1,0 +1,598 @@
+{
+ "schema": "phoenix-fact-pack/1",
+ "date": "2026-11-27",
+ "asof": "2026-11-27 05:46 UTC",
+ "market": {
+  "regime": "ENERGY_GRIND",
+  "regime_held_weeks": 8,
+  "spx": {
+   "last": 7182.78,
+   "chg_1d_pct": -0.25,
+   "vs_50d_pct": -5.52,
+   "vs_200d_pct": -2.31
+  },
+  "vix": 26.8,
+  "dxy": null,
+  "us10y": null,
+  "gold": null,
+  "wti": null,
+  "gex": {
+   "net_B": -71.03,
+   "regime": "negative",
+   "flip": null,
+   "dist_to_flip_pct": 6.61,
+   "call_wall": null,
+   "put_wall": null,
+   "spot": 7182.78
+  }
+ },
+ "macro": {
+  "spx": {
+   "last": 7182.78,
+   "d1_pct": -0.25,
+   "w1_pct": -1.92,
+   "m1_pct": -6.99
+  },
+  "ndx": {
+   "last": 23585.8,
+   "d1_pct": -0.62,
+   "w1_pct": -3.46,
+   "m1_pct": -10.92
+  },
+  "dow": {
+   "last": 50182.95,
+   "d1_pct": 0.33,
+   "w1_pct": -0.03,
+   "m1_pct": -4.19
+  },
+  "rut": {
+   "last": 2704.06,
+   "d1_pct": 0.71,
+   "w1_pct": -0.38,
+   "m1_pct": -4.07
+  },
+  "gold": {
+   "last": 3535.8,
+   "d1_pct": -0.73,
+   "w1_pct": -5.51,
+   "m1_pct": -13.22
+  },
+  "wti": {
+   "last": 83.68,
+   "d1_pct": 1.99,
+   "w1_pct": 0.5,
+   "m1_pct": -16.24
+  },
+  "btc": {
+   "last": 60378.0,
+   "d1_pct": 1.06,
+   "w1_pct": -4.14,
+   "m1_pct": -25.28
+  },
+  "dxy": {
+   "last": 103.67,
+   "d1_pct": -0.13,
+   "w1_pct": -0.18,
+   "m1_pct": 1.32
+  },
+  "vix": {
+   "last": 28.29,
+   "d1_pct": 7.32,
+   "w1_pct": 15.19,
+   "m1_pct": 61.47
+  },
+  "usdjpy": {
+   "last": 159.26,
+   "d1_pct": 0.16,
+   "w1_pct": -0.15,
+   "m1_pct": 1.1
+  },
+  "tnx": {
+   "last": 4.85,
+   "d1_bp": -6,
+   "w1_bp": -22,
+   "m1_bp": -15
+  },
+  "us02": {
+   "last": 4.63,
+   "d1_bp": 0,
+   "w1_bp": -17,
+   "m1_bp": -7
+  },
+  "real10": {
+   "last": 2.79,
+   "d1_bp": 0,
+   "w1_bp": -9,
+   "m1_bp": 15
+  },
+  "hy": {
+   "last": 3.72,
+   "d1_bp": 0,
+   "w1_bp": 0,
+   "m1_bp": 1
+  },
+  "cpi_yoy": {
+   "last": 3.72,
+   "prev_print": 3.35
+  },
+  "curve_2s10s_bp": 22,
+  "curve_2s10s_chg_1m_bp": -8,
+  "absent": [],
+  "rows": 251
+ },
+ "regime_gates": {
+  "regime": "ENERGY_GRIND",
+  "held_weeks": 8,
+  "since": "2026-10-05",
+  "drivers": [
+   {
+    "key": "cpi_chg_3m",
+    "label": "CPI 3m change",
+    "value": 0.37,
+    "op": ">",
+    "threshold": 0.3,
+    "clear_by": 0.07,
+    "ok": true
+   },
+   {
+    "key": "wti_vs_2yr",
+    "label": "WTI vs 2yr",
+    "value": 15.15,
+    "op": ">",
+    "threshold": 0,
+    "clear_by": 15.15,
+    "ok": true
+   },
+   {
+    "key": "wti_12m",
+    "label": "WTI 12m",
+    "value": 46.52,
+    "op": ">",
+    "threshold": 25,
+    "clear_by": 21.52,
+    "ok": true
+   }
+  ],
+  "watch": [
+   {
+    "if": "CPI 3m change falls below 0.3",
+    "now": 0.37,
+    "threshold": 0.3,
+    "distance": 0.07,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI vs 2yr falls below 0",
+    "now": 15.15,
+    "threshold": 0,
+    "distance": 15.15,
+    "then": "ENERGY_GRIND no longer qualifies"
+   },
+   {
+    "if": "WTI 12m falls below 25",
+    "now": 46.52,
+    "threshold": 25,
+    "distance": 21.52,
+    "then": "ENERGY_GRIND no longer qualifies"
+   }
+  ],
+  "runner_up": {
+   "regime": "POLICY_TIGHTENING",
+   "score": 48.6,
+   "behind_by": 4.2
+  }
+ },
+ "screener": {
+  "n_candidates": 531,
+  "top": [
+   {
+    "ticker": "ACA",
+    "industry": "Construction materials",
+    "trade_score": 72,
+    "atr14_pct": 0.19,
+    "mcap_B": 7.11,
+    "breakout": true,
+    "days_on_list": 4,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 353,
+    "dollar_vol_M": 130.5,
+    "stop_pct_2_5atr": 0.47
+   },
+   {
+    "ticker": "RYTM",
+    "industry": "Pharmaceuticals: major",
+    "trade_score": 71,
+    "atr14_pct": 5.32,
+    "mcap_B": 6.95,
+    "breakout": true,
+    "days_on_list": 109,
+    "profitability": "lossmaking",
+    "pos_vs_high": 0.0,
+    "surge": 311,
+    "dollar_vol_M": 236.0,
+    "stop_pct_2_5atr": 13.3
+   },
+   {
+    "ticker": "TBBB",
+    "industry": "Food retail",
+    "trade_score": 69,
+    "atr14_pct": 3.0,
+    "mcap_B": 5.03,
+    "breakout": false,
+    "days_on_list": 67,
+    "profitability": "marginal",
+    "pos_vs_high": -6.3,
+    "surge": 83,
+    "dollar_vol_M": 85.0,
+    "stop_pct_2_5atr": 7.5
+   },
+   {
+    "ticker": "BIP",
+    "industry": "Alternative power generation",
+    "trade_score": 68,
+    "atr14_pct": 3.75,
+    "mcap_B": 16.75,
+    "breakout": true,
+    "days_on_list": 4,
+    "profitability": "marginal",
+    "pos_vs_high": 0.0,
+    "surge": 167,
+    "dollar_vol_M": 115.7,
+    "stop_pct_2_5atr": 9.38
+   },
+   {
+    "ticker": "IDXX",
+    "industry": "Medical specialties",
+    "trade_score": 67,
+    "atr14_pct": 3.04,
+    "mcap_B": 43.05,
+    "breakout": false,
+    "days_on_list": 17,
+    "profitability": "profitable",
+    "pos_vs_high": -5.8,
+    "surge": 41,
+    "dollar_vol_M": 476.8,
+    "stop_pct_2_5atr": 7.6
+   },
+   {
+    "ticker": "LFST",
+    "industry": "Medical/Nursing services",
+    "trade_score": 67,
+    "atr14_pct": 5.19,
+    "mcap_B": 3.57,
+    "breakout": true,
+    "days_on_list": 110,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 97,
+    "dollar_vol_M": 105.0,
+    "stop_pct_2_5atr": 12.98
+   },
+   {
+    "ticker": "LXP",
+    "industry": "Real estate investment trusts",
+    "trade_score": 67,
+    "atr14_pct": 0.0,
+    "mcap_B": 3.17,
+    "breakout": false,
+    "days_on_list": 110,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 20,
+    "dollar_vol_M": 31.3
+   },
+   {
+    "ticker": "SILA",
+    "industry": "Real estate investment trusts",
+    "trade_score": 66,
+    "mcap_B": 1.68,
+    "breakout": false,
+    "days_on_list": 110,
+    "profitability": "profitable",
+    "pos_vs_high": 0.0,
+    "surge": 15,
+    "dollar_vol_M": 26.2
+   }
+  ],
+  "leaning": [],
+  "counts": {}
+ },
+ "smart_money": {
+  "quarter": "2026-09-30",
+  "accumulating": [],
+  "distributing": [],
+  "notable": [
+   {
+    "ticker": "GE",
+    "manager": "TCI Fund (Hohn)",
+    "action": "TRIM",
+    "value_usd": 14792625484,
+    "sector": null
+   },
+   {
+    "ticker": "V",
+    "manager": "TCI Fund (Hohn)",
+    "action": "TRIM",
+    "value_usd": 10917930511,
+    "sector": null
+   },
+   {
+    "ticker": "MCO",
+    "manager": "TCI Fund (Hohn)",
+    "action": "TRIM",
+    "value_usd": 6484531807,
+    "sector": null
+   },
+   {
+    "ticker": "DAL",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "ADD",
+    "value_usd": 5378997000,
+    "sector": null
+   },
+   {
+    "ticker": "DVA",
+    "manager": "Berkshire Hathaway (Buffett)",
+    "action": "TRIM",
+    "value_usd": 5019719296,
+    "sector": null
+   },
+   {
+    "ticker": "IEP",
+    "manager": "Icahn Capital",
+    "action": "ADD",
+    "value_usd": 4447740626,
+    "sector": null
+   },
+   {
+    "ticker": "TSM",
+    "manager": "Coatue (Laffont)",
+    "action": "ADD",
+    "value_usd": 4305233363,
+    "sector": null
+   },
+   {
+    "ticker": "GOOGL",
+    "manager": "TCI Fund (Hohn)",
+    "action": "ADD",
+    "value_usd": 4242816725,
+    "sector": null
+   }
+  ],
+  "congress_recent": [
+   {
+    "ticker": "NVDA",
+    "member": "Rand Paul",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-25",
+    "sector": null
+   },
+   {
+    "ticker": "NVDA",
+    "member": "Rand Paul",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-25",
+    "sector": null
+   },
+   {
+    "ticker": "NVDA",
+    "member": "Rand Paul",
+    "side": "buy",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-25",
+    "sector": null
+   },
+   {
+    "ticker": "PG",
+    "member": "Robert For Onder",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-11-24",
+    "sector": null
+   },
+   {
+    "ticker": "INTC",
+    "member": "Kevin Hern",
+    "side": "sell",
+    "amount": "$15,001 - $50,000",
+    "filed": "2026-11-24",
+    "sector": null
+   },
+   {
+    "ticker": "NVDA",
+    "member": "Daniel Meuser",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-24",
+    "sector": null
+   },
+   {
+    "ticker": "HPQ",
+    "member": "Robert For Onder",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-24",
+    "sector": null
+   },
+   {
+    "ticker": "MDT",
+    "member": "Robert For Onder",
+    "side": "sell",
+    "amount": "$1,001 - $15,000",
+    "filed": "2026-11-24",
+    "sector": null
+   },
+   {
+    "ticker": "ROK",
+    "member": "Kevin Hern",
+    "side": "sell",
+    "amount": "$50,001 - $100,000",
+    "filed": "2026-11-24",
+    "sector": null
+   },
+   {
+    "ticker": "ROK",
+    "member": "Kevin Hern",
+    "side": "sell",
+    "amount": "$100,001 - $250,000",
+    "filed": "2026-11-24",
+    "sector": null
+   }
+  ],
+  "note": null,
+  "congress_status": {
+   "written": "2026-11-27",
+   "dropped_impossible_dates": 0,
+   "sources": {
+    "House Clerk PTR": {
+     "rows": 10099,
+     "last_30d": 44,
+     "newest_tx": "2026-11-19",
+     "newest_filed": "2026-11-24"
+    },
+    "OGE 278-T via Open Cabinet": {
+     "rows": 7828,
+     "last_30d": 0,
+     "newest_tx": "2026-08-31",
+     "newest_filed": "2026-08-12"
+    },
+    "Senate eFD": {
+     "rows": 1036,
+     "last_30d": 5,
+     "newest_tx": "2026-11-11",
+     "newest_filed": "2026-11-25"
+    }
+   },
+   "quiet": [
+    "OGE 278-T via Open Cabinet"
+   ]
+  }
+ },
+ "portfolio": {
+  "open": [
+   {
+    "ticker": "GOOG",
+    "entry": 325.86,
+    "stop": 305.67,
+    "last": null,
+    "R": null,
+    "managed": true,
+    "unsized": false,
+    "dist_stop_pct": null,
+    "sector": null,
+    "event_in_days": null
+   }
+  ],
+  "heat_R": 1.01,
+  "cap_R": 3.0,
+  "unsized": 0,
+  "note": null,
+  "over_cap": false
+ },
+ "news": {
+  "date": "2026-11-25",
+  "asof": "2026-11-27 05:03 UTC",
+  "headline": "Hot inflation and tariffs knock stocks down \u2014 and a late rally pulls them most of the way back",
+  "standfirst": "Core PCE rose 3.3%, above forecast, GDP was revised up to 4.3%, and new tariffs of up to 20% were proposed. The Nasdaq was down as much as 4.6% before closing 0.62% lower; the S&P fell 0.25% and the Dow rose 0.33%. Nvidia fell 3.91% and WTI rose about 2%. The book is flat; Q4 is +34.64 realised, heat 0R.",
+  "themes": [
+   {
+    "kicker": "What's next",
+    "right": "Thanksgiving, then a half-day",
+    "title": "A holiday, a half-day and OPEC+",
+    "items": [
+     {
+      "tone": "c-cb",
+      "tag": "HOLIDAY",
+      "html": "<b>Thanksgiving</b> \u2014 US markets closed",
+      "when": "Thu \u00b7 2026-11-26",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "HALF",
+      "html": "<b>Half-day session</b>, stocks close at 1pm ET",
+      "when": "Fri \u00b7 2026-11-27",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-cb",
+      "tag": "OPEC+",
+      "html": "<b>OPEC+ meeting</b> on 2027 output",
+      "when": "Sun \u00b7 2026-11-29",
+      "kind": "calendar"
+     },
+     {
+      "tone": "c-fomc",
+      "tag": "FOMC",
+      "html": "<b>December Fed meeting</b> \u2014 a hike about 97% priced",
+      "when": "Tue\u2013Wed \u00b7 2026-12-08",
+      "kind": "calendar"
+     }
+    ],
+    "note": "<b>Markets are closed on Thursday for Thanksgiving.</b> Friday is a half-day, with stocks closing at 1pm ET. OPEC+ meets on Sunday, and the Fed meets on <b>8-9 December</b>."
+   }
+  ],
+  "ondeck": "<b>Markets are closed on Thursday for Thanksgiving.</b> Friday is a half-day, with stocks closing at 1pm ET. OPEC+ meets on Sunday, and the Fed meets on <b>8-9 December</b>.",
+  "note": null
+ },
+ "provenance": {
+  "macro": {
+   "asof": "2026-11-27 05:01 UTC",
+   "age_min": null
+  },
+  "gex": {
+   "asof": "2026-11-27 05:03 UTC",
+   "age_min": null
+  },
+  "stocks": {
+   "asof": "2026-11-27 05:11 UTC",
+   "age_min": null
+  },
+  "institutional_holdings": {
+   "asof": "2026-11-27 05:16 UTC",
+   "quarter": "2026-09-30"
+  },
+  "congress_trades": {
+   "asof": "2026-11-27 05:15 UTC",
+   "status": {
+    "written": "2026-11-27",
+    "dropped_impossible_dates": 0,
+    "sources": {
+     "House Clerk PTR": {
+      "rows": 10099,
+      "last_30d": 44,
+      "newest_tx": "2026-11-19",
+      "newest_filed": "2026-11-24"
+     },
+     "OGE 278-T via Open Cabinet": {
+      "rows": 7828,
+      "last_30d": 0,
+      "newest_tx": "2026-08-31",
+      "newest_filed": "2026-08-12"
+     },
+     "Senate eFD": {
+      "rows": 1036,
+      "last_30d": 5,
+      "newest_tx": "2026-11-11",
+      "newest_filed": "2026-11-25"
+     }
+    },
+    "quiet": [
+     "OGE 278-T via Open Cabinet"
+    ]
+   }
+  },
+  "wire": {
+   "asof": "2026-11-27 05:03 UTC"
+  }
+ },
+ "missing": [],
+ "changed": {
+  "first_pack": false,
+  "prev_date": "2026-11-26",
+  "changes": []
+ }
+}
